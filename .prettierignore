@@ -1,0 +1,13 @@
+# Logs
+logs
+_.log
+npm-debug.log_
+
+# Dependency Directories
+node_modules
+
+# Compiled Output
+dist
+tmp
+out-tsc
+

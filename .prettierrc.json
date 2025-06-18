@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json.schemastore.org/prettierrc",
+  "semi": true,
+  "singleQuote": true,
+  "quoteProps": "consistent",
+  "trailingComma": "none",
+  "bracketSpacing": true,
+  "bracketSameLine": true,
+  "singleAttributePerLine": true,
+  "arrowParens": "always",
+  "overrides": [
+    {
+      "files": "*.html",
+      "options": {
+        "plugins": ["prettier-plugin-organize-attributes"],
+        "attributeGroups": [
+          "$ANGULAR_STRUCTURAL_DIRECTIVE",
+          "$DEFAULT",
+          "^(id|name)$",
+          "^class$",
+          "^aria-",
+          "$ANGULAR_INPUT",
+          "$ANGULAR_TWO_WAY_BINDING",
+          "$ANGULAR_OUTPUT"
+        ]
+      }
+    }
+  ]
+}

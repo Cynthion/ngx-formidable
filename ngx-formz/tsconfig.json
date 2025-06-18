@@ -1,0 +1,60 @@
+/* For all CompilerOptions see: https://www.typescriptlang.org/tsconfig */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    /* Modules */
+    "baseUrl": "./",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+
+    /* Emit */
+    "declaration": false,
+    "declarationMap": false,
+    "downlevelIteration": true,
+    "emitDeclarationOnly": false,
+    "importHelpers": true,
+    "inlineSources": false,
+    "outDir": "./dist/out-tsc",
+    "removeComments": true,
+    "sourceMap": true,
+
+    /* JavaScript Support */
+    "allowJs": false,
+
+    /* Interop Constraints */
+    "forceConsistentCasingInFileNames": true,
+
+    /* Language and Environment */
+    "experimentalDecorators": true,
+    "lib": ["ES2022", "dom"],
+    "target": "ES2022",
+    "useDefineForClassFields": false,
+
+    /* Type Checking */
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "alwaysStrict": true,
+    "esModuleInterop": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}
