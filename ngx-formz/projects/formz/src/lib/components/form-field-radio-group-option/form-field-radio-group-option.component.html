@@ -1,0 +1,18 @@
+<label
+  tabindex="0"
+  class="radio-button"
+  [class.checked]="isChecked"
+  (focus)="onFocus()"
+  (blur)="onBlur()">
+  <input
+    type="radio"
+    hidden
+    [attr.name]="radioGroup.name"
+    [value]="value"
+    [checked]="isChecked"
+    (change)="onChange()"
+    (focus)="onFocus()"
+    (blur)="onBlur()" />
+  <span class="control"></span>
+  <ng-content></ng-content>
+</label>

@@ -1,0 +1,20 @@
+<div
+  class="dropdown"
+  [class.open]="isOpen">
+  <div
+    class="dropdown-trigger"
+    (click)="toggleDropdown()">
+    {{ selectedLabel || placeholder }}
+    <span
+      class="caret"
+      [class.rotated]="isOpen"
+      >▼</span
+    >
+  </div>
+
+  <div
+    *ngIf="isOpen"
+    class="dropdown-panel">
+    <ng-content></ng-content>
+  </div>
+</div>

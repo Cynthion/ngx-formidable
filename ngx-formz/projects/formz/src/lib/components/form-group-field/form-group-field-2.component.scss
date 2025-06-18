@@ -1,0 +1,38 @@
+@use '../../../../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.decorators {
+  @include group-field-decorators;
+}
+
+.label-wrapper {
+  @include group-field-label;
+}
+
+.tooltip-wrapper {
+  @include group-field-tooltip;
+}
+
+.container {
+  position: relative;
+}
+
+.prefix-wrapper {
+  @include group-field-prefix;
+}
+
+// set by FormGroupFieldDirective
+.group-field {
+  @include group-field;
+}
+
+.suffix-wrapper {
+  @include group-field-suffix;
+}
+
+.hidden {
+  display: none;
+}

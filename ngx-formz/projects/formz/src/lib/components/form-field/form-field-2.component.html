@@ -1,0 +1,41 @@
+<!-- Decorators -->
+<div
+  class="decorators"
+  [class.hidden]="!hasLabel && !hasTooltip">
+  <!-- Label -->
+  <label
+    class="label-wrapper"
+    [class.hidden]="!hasLabel"
+    [class.floating]="isLabelFloating"
+    [attr.for]="fieldId">
+    <ng-content select="[cmpUiFormFieldLabel]"></ng-content>
+  </label>
+
+  <!-- Tooltip -->
+  <div
+    class="tooltip-wrapper"
+    [class.hidden]="!hasTooltip">
+    <ng-content select="[cmpUiFormFieldTooltip]"></ng-content>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Prefix -->
+  <div
+    #prefixWrapperRef
+    class="prefix-wrapper"
+    [class.hidden]="!hasPrefix">
+    <ng-content select="[cmpUiFormFieldPrefix]"></ng-content>
+  </div>
+
+  <!-- Content -->
+  <ng-content select="[cmpUiFormField]"></ng-content>
+
+  <!-- Suffix -->
+  <div
+    #suffixWrapperRef
+    class="suffix-wrapper"
+    [class.hidden]="!hasSuffix">
+    <ng-content select="[cmpUiFormFieldSuffix]"></ng-content>
+  </div>
+</div>

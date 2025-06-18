@@ -1,0 +1,148 @@
+<form
+  cmpUiForm
+  class="form"
+  [cmpUiValidateRootForm]="true"
+  [formValue]="formValue()"
+  [formShape]="formShape"
+  [suite]="suite"
+  [validationOptions]="validationOptions"
+  (dirtyChange$)="isDirty.set($event)"
+  (validChange$)="isValid.set($event)"
+  (errorsChange$)="errors.set($event)"
+  (formValueChange$)="setFormValue($event)"
+  (ngSubmit)="onSubmit()">
+  <fieldset class="fieldset">
+    <!-- First Name -->
+    <cmp-ui-form-field-2>
+      <input
+        cmpUiFormField
+        cmpUiFormFieldErrors
+        placeholder="Your first name"
+        autocomplete="given-name"
+        maxlength="1000"
+        type="text"
+        name="firstName"
+        [ngModel]="vm.formValue.firstName" />
+      <div
+        cmpUiFormFieldLabel
+        [isFloating]="true">
+        Label
+      </div>
+      <div cmpUiFormFieldTooltip>(Tooltip)</div>
+      <!-- <div cmpUiFormFieldPrefix>Prefix</div> -->
+      <div cmpUiFormFieldSuffix>Suffix</div>
+    </cmp-ui-form-field-2>
+
+    <!-- Gender -->
+    <cmp-ui-form-field-2>
+      <select
+        cmpUiFormField
+        cmpUiFormFieldErrors
+        autocomplete="sex"
+        name="gender"
+        [ngModel]="vm.formValue.gender">
+        <!-- 'value' will be seen in the FormModel, 'content' is what is presented -->
+        <!-- if 'value' is set in the FormModel, it is pre-filled -->
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+      <div
+        cmpUiFormFieldLabel
+        [isFloating]="true">
+        Label
+      </div>
+      <div cmpUiFormFieldTooltip>(Tooltip)</div>
+      <div cmpUiFormFieldPrefix>Prefix</div>
+      <div cmpUiFormFieldSuffix>Suffix</div>
+    </cmp-ui-form-field-2>
+
+    <!-- Nationality -->
+    <cmp-ui-form-field-2>
+      <cmp-ui-form-field-dropdown
+        cmpUiFormField
+        cmpUiFormFieldErrors
+        placeholder="Select..."
+        name="nationality"
+        [ngModel]="vm.formValue.nationality">
+        <cmp-ui-form-field-dropdown-option value="de">🇩🇪 Germany</cmp-ui-form-field-dropdown-option>
+        <cmp-ui-form-field-dropdown-option value="fr">🇫🇷 France</cmp-ui-form-field-dropdown-option>
+        <cmp-ui-form-field-dropdown-option value="jp">🇯🇵 Japan</cmp-ui-form-field-dropdown-option>
+      </cmp-ui-form-field-dropdown>
+      <div
+        cmpUiFormFieldLabel
+        [isFloating]="true">
+        Label
+      </div>
+      <div cmpUiFormFieldTooltip>(Tooltip)</div>
+    </cmp-ui-form-field-2>
+
+    <!-- Religion -->
+    <cmp-ui-form-field-2>
+      <cmp-ui-form-field-radio-group
+        cmpUiFormField
+        cmpUiFormFieldErrors
+        name="religion"
+        [fieldType]="'option'"
+        [ngModel]="vm.formValue.religion">
+        <cmp-ui-form-field-radio-group-option value="christian">Christian</cmp-ui-form-field-radio-group-option>
+        <cmp-ui-form-field-radio-group-option value="islam">Islam</cmp-ui-form-field-radio-group-option>
+        <cmp-ui-form-field-radio-group-option value="hindu">Hindu</cmp-ui-form-field-radio-group-option>
+        <cmp-ui-form-field-radio-group-option value="buddhism">Buddhism</cmp-ui-form-field-radio-group-option>
+      </cmp-ui-form-field-radio-group>
+      <div
+        cmpUiFormFieldLabel
+        [isFloating]="true">
+        Label
+      </div>
+      <div cmpUiFormFieldTooltip>(Tooltip)</div>
+      <div cmpUiFormFieldPrefix>Prefix</div>
+      <div cmpUiFormFieldSuffix>Suffix</div>
+    </cmp-ui-form-field-2>
+
+    <!-- Passwords Group -->
+    <!-- <div
+      cmpUiValidationErrors
+      ngModelGroup="passwords">
+      <div cmpUiValidationErrors>
+        <label>
+          <span>Password</span>
+          <input
+            placeholder="Type password"
+            autocomplete="new-password"
+            type="password"
+            name="password"
+            [ngModel]="vm.formValue.passwords?.password" />
+        </label>
+      </div>
+
+      <div cmpUiValidationErrors>
+        <label>
+          <span>Confirm</span>
+          <input
+            placeholder="Confirm password"
+            autocomplete="new-password"
+            type="password"
+            name="confirmPassword"
+            [ngModel]="vm.formValue.passwords?.confirmPassword" />
+        </label>
+      </div>
+    </div> -->
+
+    <div class="footer">
+      <!-- Submit -->
+      <!-- <cmp-ui-form-submit
+        [submitLabel]="'Submit'"
+        [cancelLabel]="'Cancel'"
+        [isSubmitDisabled]="!vm.isValid">
+      </cmp-ui-form-submit> -->
+    </div>
+  </fieldset>
+
+  <!-- Show Debugging Data -->
+  <div style="margin-top: 20px">
+    <pre>{{ vm.formValue | json }}</pre>
+    <pre>{{ vm.isDirty }}</pre>
+    <pre>{{ vm.isValid }}</pre>
+    <pre>{{ vm.errors | json }}</pre>
+  </div>
+</form>

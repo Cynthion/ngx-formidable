@@ -1,0 +1,42 @@
+@use '../../../../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.decorators {
+  @include field-decorators;
+}
+
+.label-wrapper {
+  @include field-label;
+
+  &.floating {
+    @include field-label-floating;
+  }
+}
+
+.tooltip-wrapper {
+  @include field-tooltip-2;
+}
+
+.container {
+  position: relative;
+}
+
+.prefix-wrapper {
+  @include field-prefix;
+}
+
+// set by FormFieldDirective on element projected into Content
+.field {
+  @include field-2;
+}
+
+.suffix-wrapper {
+  @include field-suffix;
+}
+
+.hidden {
+  display: none;
+}
