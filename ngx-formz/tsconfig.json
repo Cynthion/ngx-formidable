@@ -17,6 +17,11 @@
     "outDir": "./dist/out-tsc",
     "removeComments": true,
     "sourceMap": true,
+    "paths": {
+      "formz": [
+        "./dist/formz"
+      ]
+    },
 
     /* JavaScript Support */
     "allowJs": false,
