@@ -1,0 +1,8 @@
+@mixin theme-measurements-default {
+  // Border Radius
+  --cmp-border-radius-xs: 2px;
+  --cmp-border-radius-s: 4px;
+  --cmp-border-radius-m: 8px;
+  --cmp-border-radius-l: 12px;
+  --cmp-border-radius-xl: 16px;
+}

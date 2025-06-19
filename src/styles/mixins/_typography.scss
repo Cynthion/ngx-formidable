@@ -1,6 +1,5 @@
 @use 'sass:math';
-
-// TODO remove file
+@use 'mediaqueries' as mq;
 
 @mixin font-normal {
   font-weight: normal;
@@ -15,6 +14,11 @@
 
   font-size: 32px;
   line-height: math.div(38.4, 32);
+
+  @include mq.above-mobile {
+    font-size: 52px;
+    line-height: math.div(62.4, 52);
+  }
 }
 
 @mixin font-xxxl-bold {
@@ -27,6 +31,11 @@
 
   font-size: 28px;
   line-height: math.div(39.2, 28);
+
+  @include mq.above-mobile {
+    font-size: 32px;
+    line-height: math.div(44.8, 32);
+  }
 }
 
 @mixin font-xxl-bold {
@@ -39,6 +48,11 @@
 
   font-size: 22px;
   line-height: math.div(30.8, 22);
+
+  @include mq.above-mobile {
+    font-size: 24px;
+    line-height: math.div(33.6, 24);
+  }
 }
 
 @mixin font-xl-bold {
@@ -51,6 +65,10 @@
 
   font-size: 18px;
   line-height: math.div(25.2, 18);
+
+  @include mq.above-mobile {
+    line-height: math.div(28.8, 18);
+  }
 }
 
 @mixin font-l-bold {
@@ -63,6 +81,10 @@
 
   font-size: 16px;
   line-height: math.div(25.6, 16);
+
+  @include mq.above-mobile {
+    line-height: math.div(22.4, 16);
+  }
 }
 
 @mixin font-m-bold {
@@ -103,6 +125,10 @@
 
   font-size: 14px;
   line-height: math.div(22.4, 14);
+
+  @include mq.above-mobile {
+    line-height: math.div(19.6, 14);
+  }
 }
 
 @mixin font-s-narrow {
@@ -127,6 +153,10 @@
 
   font-size: 12px;
   line-height: math.div(19.2, 12);
+
+  @include mq.above-mobile {
+    line-height: math.div(16.8, 12);
+  }
 }
 
 @mixin font-xs-narrow {
@@ -168,4 +198,18 @@
 @mixin font-xxs-narrow-bold {
   @include font-xxs-narrow;
   @include font-bold;
+}
+
+@mixin overflow-ellipsis($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  } @else {
+    overflow: hidden;
+    hyphens: none; // In Firefox, hyphens lead to visual glitches
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $lines;
+  }
 }

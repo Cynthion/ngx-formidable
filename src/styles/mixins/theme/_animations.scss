@@ -1,0 +1,17 @@
+@mixin theme-animations-default {
+  // Hover-Animations
+  --cmp-hover-duration-long: 0.5s;
+  --cmp-hover-duration: 0.25s;
+  --cmp-hover-duration-short: 0.15s;
+  --cmp-hover-easing: cubic-bezier(0.39, 0.575, 0.565, 1);
+  --cmp-hover-offset: -8px;
+  --cmp-hover-offset-top: 8px;
+
+  @media (prefers-reduced-motion) {
+    --cmp-hover-duration-long: 0s;
+    --cmp-hover-duration: 0s;
+    --cmp-hover-duration-short: 0s;
+    --cmp-hover-offset: 0px;
+    --cmp-hover-offset-top: 0px;
+  }
+}

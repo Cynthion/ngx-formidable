@@ -1,0 +1,78 @@
+@use 'sass:color';
+
+@mixin theme-colors-default {
+  --cmp-color-black: #000000;
+  --cmp-color-black-0: rgb(0 0 0 / 0%);
+  --cmp-color-black-5: rgb(0 0 0 / 5%);
+  --cmp-color-black-10: rgb(0 0 0 / 10%);
+  --cmp-color-black-25: rgb(0 0 0 / 25%);
+  --cmp-color-black-50: rgb(0 0 0 / 50%);
+
+  // Neutrals
+  --cmp-color-neutral-100: #f5f5f5;
+  --cmp-color-neutral-200: #dddddd;
+  --cmp-color-neutral-300: #c5c5c5;
+  --cmp-color-neutral-400: #acacac;
+  --cmp-color-neutral-500: #949494;
+  --cmp-color-neutral-600: #7c7c7c;
+  --cmp-color-neutral-700: #646464;
+  --cmp-color-neutral-800: #4b4b4b;
+  --cmp-color-neutral-900: #333333;
+
+  // Primary
+  --cmp-color-primary: var(--cmp-color-primary-500);
+  --cmp-color-primary-100: #f2fffa;
+  --cmp-color-primary-200: #b5edd9;
+  --cmp-color-primary-300: #84dabb;
+  --cmp-color-primary-400: #5ec7a0;
+  --cmp-color-primary-500: #3eb489;
+  --cmp-color-primary-600: #279e73;
+  --cmp-color-primary-700: #15885e;
+  --cmp-color-primary-800: #08714b;
+  --cmp-color-primary-900: #005b3a;
+
+  // Secondary
+  --cmp-color-secondary: var(--cmp-color-secondary-500);
+  --cmp-color-secondary-100: #f2faff;
+  --cmp-color-secondary-200: #c7d7e2;
+  --cmp-color-secondary-300: #9fb7c7;
+  --cmp-color-secondary-400: #7b99af;
+  --cmp-color-secondary-500: #5b7f99;
+  --cmp-color-secondary-600: #3e6988;
+  --cmp-color-secondary-700: #255476;
+  --cmp-color-secondary-800: #114367;
+  --cmp-color-secondary-900: #00345a;
+
+  // Accent 1
+  --cmp-color-accent-one: #ff7f50;
+
+  // Accent 2
+  --cmp-color-accent-two: #ffdb58;
+
+  // Systen - Success
+  --cmp-color-accent-system-success: #9bc995;
+
+  // System - Warning
+  --cmp-color-accent-system-warning: #ffcc80;
+
+  // System - Information
+  --cmp-color-accent-system-info: #add8e6;
+
+  // System - Danger
+  --cmp-color-accent-system-danger: #ffa5a5;
+
+  // Backgrounds
+  --cmp-color-background: var(--cmp-color-neutral-100);
+
+  // Borders
+  --cmp-color-border: var(--cmp-color-neutral-100);
+
+  // Shadows
+  --cmp-box-shadow-s: 0 8px 24px -12px rgb(0 0 0 / 8%);
+  --cmp-box-shadow-l: 0 12px 24px -8px rgb(0 0 0 / 8%);
+  --cmp-box-shadow-xl: 0 12px 48px -8px rgb(0 0 0 / 12%);
+  --cmp-box-shadow-xl-up: 0 12px 48px 8px rgb(0 0 0 / 12%);
+
+  // Hover
+  --cmp-color-black-hover: rgb(0 0 0 / 3%);
+}

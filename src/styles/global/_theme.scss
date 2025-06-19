@@ -1,0 +1,17 @@
+@use '../mixins/theme/animations' as animations;
+@use '../mixins/theme/colors' as colors;
+@use '../mixins/theme/measurements' as measurements;
+@use '../mixins/typography' as typo;
+
+:root {
+  @include animations.theme-animations-default;
+  @include colors.theme-colors-default;
+  @include measurements.theme-measurements-default;
+}
+
+html {
+  @include typo.font-base;
+
+  font-family: Mulish, Arial, sans-serif; // fallback fonts
+  letter-spacing: 0;
+}

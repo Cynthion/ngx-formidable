@@ -6,7 +6,28 @@
 // relative to the angular.json stylePreprocessorOptions
 @use 'styles/styles.scss';
 
+// TODO use app theme variables
 // Lib Overrides
-:root {
-  --cmp-color-accent-system-danger: orange;
-}
+// :root {
+  // --formz-color-validation-error: #{$formz-color-validation-error};
+  // --formz-color-field-placeholder: #{$formz-color-field-placeholder};
+  // --formz-color-field-selection: #{$formz-color-field-selection};
+  // --formz-color-field-border: #{$formz-color-field-border};
+  // --formz-color-field-border-focus: #{$formz-color-field-border-focus};
+  // --formz-color-field-background: #{$formz-color-field-background};
+  // --formz-color-field-hover: #{$formz-color-field-hover};
+  // --formz-color-field-label-floating: #{$formz-color-field-label-floating};
+
+  // --formz-field-height: #{$formz-field-height};
+  // --formz-field-label-floating-offset: #{$formz-field-label-floating-offset};
+
+  // --formz-field-border-radius: #{$formz-field-border-radius};
+
+  // --formz-dropdown-panel-background: #{$formz-dropdown-panel-background};
+  // --formz-dropdown-panel-box-shadow: #{$formz-dropdown-panel-box-shadow};
+
+  // --formz-hover-duration-short: #{$formz-hover-duration-short};
+  // --formz-hover-easing: #{$formz-hover-easing};
+
+  // --formz-flyout-z-index: #{$formz-flyout-z-index};
+// }
