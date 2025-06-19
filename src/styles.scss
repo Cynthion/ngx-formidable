@@ -3,5 +3,10 @@
 /* Only works if loaded from node_modules */
 // @use 'formz/styles/style';
 
-/* For local usage */
-@use 'styles/styles';
+// relative to the angular.json stylePreprocessorOptions
+@use 'styles/styles.scss';
+
+// Lib Overrides
+:root {
+  --cmp-color-accent-system-danger: orange;
+}

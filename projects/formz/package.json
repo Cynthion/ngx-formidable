@@ -19,13 +19,13 @@
     "lint": "ng lint formz"
   },
   "dependencies": {
+    "tslib": "^2.3.0"
   },
   "peerDependencies": {
     "@angular/common": "^18.2.0",
     "@angular/core": "^18.2.0",
     "@types/uuid": "^10.0.0",
     "uuid": "^10.0.0",
-    "tslib": "^2.3.0",
     "vest": "^5.4.6"
   },
   "sideEffects": false

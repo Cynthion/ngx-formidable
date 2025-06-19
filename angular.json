@@ -36,7 +36,7 @@
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
-                "dist/formz"
+                "projects/formz/dist/formz"
               ]
             },
             "scripts": []

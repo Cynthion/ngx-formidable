@@ -19,7 +19,7 @@
     "sourceMap": true,
     "paths": {
       "formz": [
-        "./dist/formz"
+        "projects/formz/dist/formz"
       ]
     },
 

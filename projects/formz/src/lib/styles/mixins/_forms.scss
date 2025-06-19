@@ -2,8 +2,18 @@
 @use 'typography' as typo;
 @use 'spacings' as sp;
 
+$cmp-color-accent-system-danger: red;
+
 $cmp-fields-field-height-2: 66px;
 $cmp-field-label-floating-offset: 35px;
+
+// CSS variables with fallback values
+:root {
+  --cmp-color-accent-system-danger: #{$cmp-color-accent-system-danger};
+
+  --cmp-fields-field-height-2: #{$cmp-fields-field-height-2};
+  --cmp-field-label-floating-offset: #{$cmp-field-label-floating-offset};
+}
 
 @mixin input-reset {
   outline: 0;
@@ -144,7 +154,7 @@ $cmp-field-label-floating-offset: 35px;
 
 @mixin field-prefix {
   position: absolute;
-  top: math.div($cmp-fields-field-height-2, 2);
+  top: math.div(var(--cmp-fields-field-height-2), 2);
   left: 0;
   padding-left: sp.cmp_space(16);
   padding-right: sp.cmp_space(16);
@@ -181,7 +191,7 @@ $cmp-field-label-floating-offset: 35px;
   @include typo.font-xs;
 
   display: block;
-  color: var(--cmp-color-accent-system-danger);
+  color: var(--cmp-color-accent-system-danger, #{$cmp-color-accent-system-danger});
 }
 
 @mixin field-dropdown {

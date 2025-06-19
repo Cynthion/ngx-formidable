@@ -1,5 +1,3 @@
-@use '../../../projects/formz/src/lib/styles/variables' as *;
-
 :host {
   display: block;
 }
@@ -24,8 +22,4 @@
   &:empty {
     display: none;
   }
-}
-
-.field {
-  @include field;
 }
