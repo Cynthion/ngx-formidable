@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { FormField2Component } from "./components/form-field/form-field-2.component";
+import { FormFieldComponent } from "./components/form-field/form-field.component";
 import { FormDirective } from "./directives/form.directive";
 import { FormModelDirective } from "./directives/form-model.directive";
 import { FormModelGroupDirective } from "./directives/form-model-group.directive";
@@ -19,8 +19,8 @@ import { FormFieldRadioGroupComponent } from "./components/form-field-radio-grou
 import { FormFieldRadioGroupOptionComponent } from "./components/form-field-radio-group-option/form-field-radio-group-option.component";
 
 const components = [
-  FormField2Component,
-  // FormGroupField2Component,
+  FormFieldComponent,
+  // FormGroupFieldComponent,
   // Ngx Vest Forms inspired
   FormDirective,
   FormModelDirective,

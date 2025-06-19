@@ -11,12 +11,12 @@ import { FormFieldDirective } from '../../directives/form-field.directive';
 import { AbstractFormFieldComponent } from '../abstract-form-field.component';
 
 @Component({
-  selector: 'cmp-ui-form-field-2',
-  templateUrl: './form-field-2.component.html',
-  styleUrls: ['./form-field-2.component.scss'],
+  selector: 'cmp-ui-form-field',
+  templateUrl: './form-field.component.html',
+  styleUrls: ['./form-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FormField2Component extends AbstractFormFieldComponent implements AfterViewInit, AfterContentInit {
+export class FormFieldComponent extends AbstractFormFieldComponent implements AfterViewInit, AfterContentInit {
   @ContentChild(FormFieldDirective) projectedField?: FormFieldDirective;
 
   protected isFieldFocused = false;

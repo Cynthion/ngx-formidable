@@ -179,12 +179,12 @@ $formz-flyout-z-index: 9999;
   transform: translateY($formz-field-label-floating-offset) scale(1);
 }
 
-@mixin field-tooltip-2 {
+@mixin field-tooltip {
   // tbd
 }
 
 @mixin group-field-tooltip {
-  @include field-tooltip-2;
+  @include field-tooltip;
 }
 
 @mixin field-prefix {
