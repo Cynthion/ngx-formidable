@@ -1,0 +1,31 @@
+@use '../../../projects/formz/src/lib/styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+// from form.component.scss
+.form {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.fieldset {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+}
+
+// TODO implement footer to be sticky at the bottom of the form
+.footer {
+  margin-top: auto;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.field {
+  @include field;
+}

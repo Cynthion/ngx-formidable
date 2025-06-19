@@ -1,0 +1,28 @@
+@use '../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.wrapper {
+  display: flex;
+
+  // @include navigation-mobile {
+  //   flex-direction: column-reverse;
+  // }
+}
+
+// TODO
+// .button {
+//   // @include navigation-mobile {
+//   //   & + & {
+//   //     margin-bottom: cmp_space(8);
+//   //   }
+//   // }
+
+//   // @include navigation-desktop {
+//   //   &.button-submit {
+//   //     margin-left: auto;
+//   //   }
+//   // }
+// }

@@ -1,0 +1,247 @@
+@use 'sass:math';
+@use 'typography' as typo;
+@use 'spacings' as sp;
+
+$cmp-fields-field-height-2: 66px;
+$cmp-field-label-floating-offset: 35px;
+
+@mixin input-reset {
+  outline: 0;
+  hyphens: none;
+  appearance: none;
+
+  &:focus {
+    outline: 0;
+  }
+}
+
+@mixin field-disabled-2 {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/**
+ * Styling for input and textarea elements.
+ */
+@mixin field {
+  @include input-reset;
+  @include typo.font-m-bold;
+
+  position: relative;
+  width: 100%;
+  height: $cmp-fields-field-height-2;
+  padding: 0 sp.cmp_space(16); // horizontal padding only
+  border: 1px solid var(--cmp-color-primary-800);
+  border-radius: var(--cmp-border-radius-s);
+  background: var(--cmp-color-white);
+  transition:
+    box-shadow var(--cmp-hover-duration-short) var(--cmp-hover-easing),
+    border-color var(--cmp-hover-duration-short) var(--cmp-hover-easing);
+
+  &:disabled {
+    @include field-disabled-2;
+  }
+
+  &:focus {
+    border-color: var(--cmp-color-primary);
+    box-shadow: inset 0 0 0 1px var(--cmp-color-primary);
+  }
+
+  &::selection {
+    background-color: var(--cmp-color-black-10);
+  }
+
+  &::placeholder {
+    color: var(--cmp-color-primary-200);
+  }
+}
+
+@mixin group-field {
+  @include input-reset; // TODO required?
+  @include typo.font-m-bold;
+
+  position: relative;
+  width: 100%;
+  height: $cmp-fields-field-height-2;
+  padding: 0 sp.cmp_space(16); // horizontal padding only
+  border: 1px solid var(--cmp-color-primary-800);
+  border-radius: var(--cmp-border-radius-s);
+  background: var(--cmp-color-white);
+  transition:
+    box-shadow var(--cmp-hover-duration-short) var(--cmp-hover-easing),
+    border-color var(--cmp-hover-duration-short) var(--cmp-hover-easing);
+
+  &:disabled {
+    @include field-disabled-2;
+  }
+
+  &:focus {
+    border-color: var(--cmp-color-primary);
+    box-shadow: inset 0 0 0 1px var(--cmp-color-primary);
+  }
+
+  &::selection {
+    background-color: var(--cmp-color-black-10);
+  }
+
+  &::placeholder {
+    color: var(--cmp-color-primary-200);
+  }
+}
+
+@mixin field-decorators {
+  display: flex;
+  align-items: center;
+  margin-bottom: sp.cmp_space(8);
+  position: relative;
+}
+
+@mixin group-field-decorators {
+  @include field-decorators;
+}
+
+@mixin field-label {
+  @include typo.font-m-bold;
+
+  pointer-events: none;
+  margin-right: sp.cmp_space(8); // space between label and tooltip
+
+  // animation
+  transform: translateY(0) scale(1); // default placement
+  transform-origin: left top;
+  transition:
+    transform var(--cmp-hover-duration-short) var(--cmp-hover-easing),
+    margin-right var(--cmp-hover-duration-short) var(--cmp-hover-easing),
+    font-size var(--cmp-hover-duration-short) var(--cmp-hover-easing),
+    color var(--cmp-hover-duration-short) var(--cmp-hover-easing);
+}
+
+@mixin group-field-label {
+  @include field-label;
+}
+
+@mixin field-label-floating {
+  @include typo.font-s-bold;
+
+  position: absolute;
+  left: sp.cmp_space(16);
+  margin-right: 0;
+  color: var(--cmp-color-primary-300);
+  z-index: 1; // keep on top of field
+
+  // animation
+  transform: translateY($cmp-field-label-floating-offset) scale(1);
+}
+
+@mixin field-tooltip-2 {
+  // tbd
+}
+
+@mixin group-field-tooltip {
+  @include field-tooltip-2;
+}
+
+@mixin field-prefix {
+  position: absolute;
+  top: math.div($cmp-fields-field-height-2, 2);
+  left: 0;
+  padding-left: sp.cmp_space(16);
+  padding-right: sp.cmp_space(16);
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1; // keep on top of field
+}
+
+@mixin group-field-prefix {
+  padding-bottom: sp.cmp_space(8);
+}
+
+@mixin field-suffix {
+  position: absolute;
+  top: math.div($cmp-fields-field-height-2, 2);
+  right: 0;
+  padding-left: sp.cmp_space(16);
+  padding-right: sp.cmp_space(16);
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1; // keep on top of field
+}
+
+@mixin group-field-suffix {
+  padding-top: sp.cmp_space(8);
+}
+
+@mixin field-validation-errors {
+  margin-top: sp.cmp_space(8);
+  margin-bottom: sp.cmp_space(16);
+}
+
+@mixin field-validation-error {
+  @include typo.font-xs;
+
+  display: block;
+  color: var(--cmp-color-accent-system-danger);
+}
+
+@mixin field-dropdown {
+  height: $cmp-fields-field-height-2; // ensure same height as field
+
+  &.open .dropdown-panel {
+    // animation
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+@mixin field-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+
+  .caret {
+    float: right;
+    transition: transform var(--cmp-hover-duration-short) var(--cmp-hover-easing);
+  }
+
+  .caret.rotated {
+    transform: rotate(180deg);
+  }
+}
+
+@mixin field-dropdown-panel {
+  position: absolute;
+  box-shadow: var(--cmp-box-shadow-xl);
+  border: 1px solid var(--cmp-color-primary-800);
+  border-radius: var(--cmp-border-radius-s);
+  background: var(--cmp-color-white);
+  overflow: hidden; // clip inner content to border-radius
+  z-index: var(--cmp-layer-flyout); // keep on top of field
+
+  // extend 1px to top, left and right
+  top: calc(100% + 1px);
+  left: -1px;
+  width: calc(100% + 2px);
+
+  // animation
+  opacity: 0;
+  transform: translateY(-0.25rem); // slight offset when closed
+  pointer-events: none; // prevent hover/clicks when closed
+  transition:
+    opacity var(--cmp-hover-duration-short) var(--cmp-hover-easing),
+    transform var(--cmp-hover-duration-short) var(--cmp-hover-easing);
+}
+
+@mixin field-dropdown-option {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--cmp-color-black-hover);
+  }
+}

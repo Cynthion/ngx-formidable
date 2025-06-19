@@ -1,0 +1,13 @@
+@use '../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.errors {
+  @include field-validation-errors;
+}
+
+.error {
+  @include field-validation-error;
+}
