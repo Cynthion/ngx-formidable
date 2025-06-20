@@ -1,0 +1,9 @@
+@use '../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.input-field {
+  @include field;
+}

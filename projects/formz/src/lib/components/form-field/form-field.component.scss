@@ -28,11 +28,6 @@
   @include field-prefix;
 }
 
-// set by FormFieldDirective on element projected into Content
-.field {
-  @include field;
-}
-
 .suffix-wrapper {
   @include field-suffix;
 }

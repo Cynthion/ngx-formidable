@@ -1,0 +1,64 @@
+{
+  /* VS CODE */
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "explicit",
+    "source.fixAll.stylelint": "explicit"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode", // Prettier as default formatter
+  "editor.formatOnSave": true,
+  "editor.trimAutoWhitespace": true,
+  "editor.glyphMargin": true, // disable breakpoint line, not used in this project
+
+  "files.trimTrailingWhitespace": true,
+
+  "task.allowAutomaticTasks": "off",
+
+  /* LANGUAGES */
+  "[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp"
+  },
+  // "[html]": {
+  //   // format HTML with Prettier first, then with the built-in formatter
+  //   "editor.defaultFormatter": "Jota0222.multi-formatter",
+  //   "multiFormatter.formatterList": ["esbenp.prettier-vscode", "vscode.html-language-features"],
+  // },
+  // "html.format.wrapAttributes": "force-aligned",
+  // "html.format.preserveNewLines": true,
+  // "html.format.wrapLineLength": 160 /* also change in .editorconfig */,
+  // "html.autoClosingTags": true,
+  // "html.format.contentUnformatted": "pre,code,textarea",
+
+  "javascript.preferences.quoteStyle": "single",
+  "javascript.preferences.importModuleSpecifier": "relative",
+
+  "typescript.preferences.quoteStyle": "single",
+  "typescript.preferences.importModuleSpecifier": "relative",
+
+  // https://ionicframework.com/docs/angular/build-options#standalone-based-applications
+  "typescript.preferences.autoImportFileExcludePatterns": ["@ionic/angular/common", "@ionic/angular"],
+
+  /* EXTENSIONS */
+  "eslint.enable": true,
+  "eslint.useFlatConfig": true,
+  "eslint.debug": false,
+  "eslint.validate": ["javascript", "typescript", "html"],
+
+  /*
+  Configure the Stylelint plugin to parse SCSS files.
+  - customSyntax points to the PostCSS syntax module. (https://github.com/postcss/postcss#syntaxes)
+  - validate sets the languages that the plugin will lint
+  */
+  "stylelint.customSyntax": "postcss-scss",
+  "stylelint.validate": ["scss"],
+
+  /*
+  Prevent reporting of same errors by both the editor built-in linter [scss] and the
+  extension [stylelint]
+  */
+  "css.validate": true,
+  "less.validate": true,
+  "scss.validate": false,
+
+  // Draw.io
+  "hediet.vscode-drawio.theme": "min"
+}

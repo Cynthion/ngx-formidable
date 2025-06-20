@@ -10,8 +10,8 @@ import {
   Output
 } from '@angular/core';
 import { NgModel } from '@angular/forms';
-import { AbstractFormFieldDirective } from './abstract-form-field.directive';
 import { FormFieldType, ICustomFormField } from '../form-model';
+import { AbstractFormFieldDirective } from './abstract-form-field.directive';
 
 /**
  * Directive to enhance form fields (native or custom) with common behaviors:
@@ -35,10 +35,7 @@ export class FormFieldDirective extends AbstractFormFieldDirective implements On
   protected elementTag!: string;
   protected isNativeElement = false;
 
-  constructor(
-    public elementRef: ElementRef<HTMLElement>,
-    @Optional() protected ngModel: NgModel
-  ) {
+  constructor(public elementRef: ElementRef<HTMLElement>, @Optional() protected ngModel: NgModel) {
     super();
   }
 
@@ -66,6 +63,7 @@ export class FormFieldDirective extends AbstractFormFieldDirective implements On
     }
   }
 
+  // TODO move these into native wrappers
   /** Listen to value changes of native <input> and <textarea> elements. */
   @HostListener('input')
   onInput(): void {

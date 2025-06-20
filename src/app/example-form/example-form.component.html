@@ -14,7 +14,8 @@
   <fieldset class="fieldset">
     <!-- First Name -->
     <formz-form-field>
-      <input
+      <!-- <formz-field-input [ngModel]="vm.formValue.firstName"></formz-field-input> -->
+       <input
         formzFormField
         formzFormFieldErrors
         placeholder="Your first name"
@@ -34,15 +35,13 @@
     </formz-form-field>
 
     <!-- Gender -->
-    <formz-form-field>
+    <!-- <formz-form-field>
       <select
         formzFormField
         formzFormFieldErrors
         autocomplete="sex"
         name="gender"
         [ngModel]="vm.formValue.gender">
-        <!-- 'value' will be seen in the FormModel, 'content' is what is presented -->
-        <!-- if 'value' is set in the FormModel, it is pre-filled -->
         <option value="male">Male</option>
         <option value="female">Female</option>
       </select>
@@ -54,10 +53,10 @@
       <div formzFormFieldTooltip>(Tooltip)</div>
       <div formzFormFieldPrefix>Prefix</div>
       <div formzFormFieldSuffix>Suffix</div>
-    </formz-form-field>
+    </formz-form-field> -->
 
     <!-- Nationality -->
-    <formz-form-field>
+    <!-- <formz-form-field>
       <formz-form-field-dropdown
         formzFormField
         formzFormFieldErrors
@@ -74,10 +73,10 @@
         Label
       </div>
       <div formzFormFieldTooltip>(Tooltip)</div>
-    </formz-form-field>
+    </formz-form-field> -->
 
     <!-- Religion -->
-    <formz-form-field>
+    <!-- <formz-form-field>
       <formz-form-field-radio-group
         formzFormField
         formzFormFieldErrors
@@ -97,7 +96,7 @@
       <div formzFormFieldTooltip>(Tooltip)</div>
       <div formzFormFieldPrefix>Prefix</div>
       <div formzFormFieldSuffix>Suffix</div>
-    </formz-form-field>
+    </formz-form-field> -->
 
     <!-- Passwords Group -->
      <!-- TODO add form group -->

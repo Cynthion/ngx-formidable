@@ -10,6 +10,7 @@ import {
 import { FormFieldDirective } from '../../directives/form-field.directive';
 import { AbstractFormFieldComponent } from '../abstract-form-field.component';
 
+// TODO rename to FormFieldDecoratorComponent
 @Component({
   selector: 'formz-form-field',
   templateUrl: './form-field.component.html',
