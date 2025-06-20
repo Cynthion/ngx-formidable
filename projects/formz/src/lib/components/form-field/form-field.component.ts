@@ -11,7 +11,7 @@ import { FormFieldDirective } from '../../directives/form-field.directive';
 import { AbstractFormFieldComponent } from '../abstract-form-field.component';
 
 @Component({
-  selector: 'cmp-ui-form-field',
+  selector: 'formz-form-field',
   templateUrl: './form-field.component.html',
   styleUrls: ['./form-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

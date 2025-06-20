@@ -3,7 +3,7 @@
 // import { FormGroupFieldDirective } from '../directives/form-group-field.directive';
 
 // @Component({
-//   selector: 'cmp-ui-form-group-field',
+//   selector: 'formz-form-group-field',
 //   templateUrl: './form-group-field.component.html',
 //   styleUrls: ['./form-group-field.component.scss'],
 //   changeDetection: ChangeDetectionStrategy.OnPush

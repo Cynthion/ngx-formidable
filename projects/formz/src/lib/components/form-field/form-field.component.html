@@ -8,14 +8,14 @@
     [class.hidden]="!hasLabel"
     [class.floating]="isLabelFloating"
     [attr.for]="fieldId">
-    <ng-content select="[cmpUiFormFieldLabel]"></ng-content>
+    <ng-content select="[formzFormFieldLabel]"></ng-content>
   </label>
 
   <!-- Tooltip -->
   <div
     class="tooltip-wrapper"
     [class.hidden]="!hasTooltip">
-    <ng-content select="[cmpUiFormFieldTooltip]"></ng-content>
+    <ng-content select="[formzFormFieldTooltip]"></ng-content>
   </div>
 </div>
 
@@ -25,17 +25,17 @@
     #prefixWrapperRef
     class="prefix-wrapper"
     [class.hidden]="!hasPrefix">
-    <ng-content select="[cmpUiFormFieldPrefix]"></ng-content>
+    <ng-content select="[formzFormFieldPrefix]"></ng-content>
   </div>
 
   <!-- Content -->
-  <ng-content select="[cmpUiFormField]"></ng-content>
+  <ng-content select="[formzFormField]"></ng-content>
 
   <!-- Suffix -->
   <div
     #suffixWrapperRef
     class="suffix-wrapper"
     [class.hidden]="!hasSuffix">
-    <ng-content select="[cmpUiFormFieldSuffix]"></ng-content>
+    <ng-content select="[formzFormFieldSuffix]"></ng-content>
   </div>
 </div>

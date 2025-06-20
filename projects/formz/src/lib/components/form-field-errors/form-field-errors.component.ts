@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@a
 import { AbstractControl, NgModel, NgModelGroup } from '@angular/forms';
 
 @Component({
-  selector: 'cmp-ui-form-field-errors',
+  selector: 'formz-form-field-errors',
   templateUrl: './form-field-errors.component.html',
   styleUrls: ['./form-field-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -17,7 +17,7 @@ import { FormFieldDropdownOptionComponent } from '../form-field-dropdown-option/
 import { HasValueAndFocusChange } from '../../model';
 
 @Component({
-  selector: 'cmp-ui-form-field-dropdown',
+  selector: 'formz-form-field-dropdown',
   templateUrl: './form-field-dropdown.component.html',
   styleUrls: ['./form-field-dropdown.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

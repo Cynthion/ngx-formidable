@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Optional
 import { FormFieldDropdownComponent } from '../form-field-dropdown/form-field-dropdown.component';
 
 @Component({
-  selector: 'cmp-ui-form-field-dropdown-option',
+  selector: 'formz-form-field-dropdown-option',
   templateUrl: './form-field-dropdown-option.component.html',
   styleUrls: ['./form-field-dropdown-option.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -17,7 +17,7 @@ export class FormFieldDropdownOptionComponent implements OnInit {
 
   ngOnInit() {
     if (!this.dropdown) {
-      throw new Error('cmp-ui-form-field-dropdown-option must be inside cmp-ui-form-field-dropdown!');
+      throw new Error('formz-form-field-dropdown-option must be inside formz-form-field-dropdown!');
     }
   }
 

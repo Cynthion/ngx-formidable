@@ -13,7 +13,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { HasValueAndFocusChange } from '../../model';
 
 @Component({
-  selector: 'cmp-ui-form-field-radio-group',
+  selector: 'formz-form-field-radio-group',
   templateUrl: './form-field-radio-group.component.html',
   styleUrls: ['./form-field-radio-group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

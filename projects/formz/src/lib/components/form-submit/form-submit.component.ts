@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 // import { ButtonColor } from '../../../../../common/models/button.model';
 
 @Component({
-  selector: 'cmp-ui-form-submit',
+  selector: 'formz-form-submit',
   templateUrl: './form-submit.component.html',
   styleUrls: ['./form-submit.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

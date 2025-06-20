@@ -20,7 +20,7 @@ import { FormFieldType, HasValueAndFocusChange } from '../model';
  * - Emits coherent 'focusChange' and 'valueChange' events for native and custom elements.
  * - Accepts any host element, native (<input>, <textarea>, <select>) or custom.
  */
-@Directive({ selector: '[cmpUiFormField]' })
+@Directive({ selector: '[formzFormField]' })
 export class FormFieldDirective extends AbstractFormFieldDirective implements OnInit {
   @Input() fieldType: FormFieldType = 'field';
 

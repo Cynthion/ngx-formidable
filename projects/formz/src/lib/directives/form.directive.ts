@@ -37,7 +37,7 @@ import { FormValidationOptions } from '../model';
  * Source: https://github.dev/simplifiedcourses/ngx-vest-forms
  */
 @Directive({
-  selector: 'form[cmpUiForm]'
+  selector: 'form[formzForm]'
 })
 export class FormDirective<T extends Record<string, unknown>> implements OnDestroy {
   public readonly ngForm = inject(NgForm, { self: true, optional: false });

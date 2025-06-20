@@ -10,7 +10,7 @@ import { FormFieldErrorsComponent } from '../components/form-field-errors/form-f
  * This directive creates an instance of `FormFieldErrorsComponent` and manages its lifecycle.
  * It listens to changes in the form control and updates the component accordingly.
  */
-@Directive({ selector: '[cmpUiFormFieldErrors]' })
+@Directive({ selector: '[formzFormFieldErrors]' })
 export class FormFieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly injector = inject(Injector);

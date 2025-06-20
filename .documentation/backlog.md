@@ -7,7 +7,7 @@
 - add placeholder directive?
 - don't support floating label for <select>?
 - fix weird coloring when auto-selectin/tabbing a value (`autofill-selected`)
-- cmp-ui-form-dropdown: support key navigation
+- form-dropdown: support key navigation
 - automatically add `name` property on fields based on vm?
 - close dropdown-panel when "outer-click" happens
 - use `CustomFieldControlDirective` (project) for custom controls like `FormFieldDropdownComponent`?
@@ -15,3 +15,5 @@
 - consolidate templates/scss for FormField and FormGroupField?
 - support tabbing
 - create a `BaseHasValueAndFocusChange` class (and rename), see TODO: move this, c'tor content, onDestroy and HasValueAndFocusChange to a base class?
+- resolve all TODOs
+- remove all `cmp` prefixes

@@ -9,5 +9,5 @@ import { v4 as uuid } from 'uuid';
 @Directive()
 export abstract class AbstractFormFieldDirective {
   // auto-generate a unique ID for the form field
-  @HostBinding('attr.id') id = `cmp-ui-form-field-${uuid()}`;
+  @HostBinding('attr.id') id = `formz-form-field-${uuid()}`;
 }

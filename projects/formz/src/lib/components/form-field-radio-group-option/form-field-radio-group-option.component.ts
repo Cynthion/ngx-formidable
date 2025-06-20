@@ -11,7 +11,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { FormFieldRadioGroupComponent } from '../form-field-radio-group/form-field-radio-group.component';
 
 @Component({
-  selector: 'cmp-ui-form-field-radio-group-option',
+  selector: 'formz-form-field-radio-group-option',
   templateUrl: './form-field-radio-group-option.component.html',
   styleUrls: ['./form-field-radio-group-option.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,7 +30,7 @@ export class FormFieldRadioGroupOptionComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     if (!this.radioGroup) {
-      throw new Error('cmp-ui-form-field-radio-group-option must be inside cmp-ui-form-field-radio-group!');
+      throw new Error('formz-form-field-radio-group-option must be inside formz-form-field-radio-group!');
     }
 
     // TODO move this to the c'tor?

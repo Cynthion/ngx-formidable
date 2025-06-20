@@ -3,7 +3,7 @@ import { ExampleFormModel, exampleFormShape, exampleFormValidationSuite } from '
 import { FormValidationOptions } from 'projects/formz/src/lib/model';
 
 @Component({
-  selector: 'cmp-ui-example-form',
+  selector: 'formz-example-form',
   templateUrl: './example-form.component.html',
   styleUrls: ['./example-form.component.scss']
 })
@@ -45,7 +45,7 @@ export class ExampleFormComponent {
   }
 
   protected onSubmit(): void {
-    // TODO choose either cmp-ui-form-submit.sibmitClick or form.ngSubmit
+    // TODO choose either formz-form-submit.sibmitClick or form.ngSubmit
     if (this.isValid()) {
       // TODO remove
       console.log(this.formValue());

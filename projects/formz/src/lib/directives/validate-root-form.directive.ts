@@ -74,7 +74,7 @@ test(ROOT_FORM, 'Brecht is not 30 anymore', () => {
 
  */
 @Directive({
-  selector: 'form[cmpUiValidateRootForm][formValue][suite]',
+  selector: 'form[formzValidateRootForm][formValue][suite]',
   providers: [
     {
       provide: NG_ASYNC_VALIDATORS,
@@ -95,7 +95,7 @@ export class ValidateRootFormDirective<T> implements AsyncValidator, OnDestroy {
    * Whether the root form should be validated or not
    * This will use the field rootForm
    */
-  public readonly cmpUiValidateRootForm = input(false); // TODO does this do anything?
+  public readonly formzValidateRootForm = input(false); // TODO does this do anything?
 
   // Used to debounce formValues to make sure the validation suite is not triggered all the time.
   private readonly formValueCache: Record<

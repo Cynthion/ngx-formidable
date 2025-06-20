@@ -1,5 +1,5 @@
 /*
- * Public API Surface of formz
+ * Public API Surface of ngx-formz
  */
 
 export * from './lib/formz.module';

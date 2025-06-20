@@ -8,7 +8,7 @@
 //  * - Automatically generates a unique ID for the form group field.
 //  * - Applies a default CSS class for styling.
 //  */
-// @Directive({ selector: '[cmpUiFormGroupField]' })
+// @Directive({ selector: '[formzFormGroupField]' })
 // export class FormGroupFieldDirective extends AbstractFormFieldDirective implements OnInit {
 //   @HostBinding('class.group-field') groupFieldClass = true;
 
