@@ -24,4 +24,4 @@ export * from './lib/directives/form-model.directive';
 export * from './lib/directives/form.directive';
 export * from './lib/directives/validate-root-form.directive';
 
-export * from './lib/model';
+export * from './lib/form-model';

@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import { ExampleFormModel, exampleFormShape, exampleFormValidationSuite } from './example-form.model';
-import { FormValidationOptions } from 'projects/formz/src/lib/model';
+import { FormValidationOptions } from 'projects/formz/src/lib/form-model';
 
 @Component({
   selector: 'formz-example-form',

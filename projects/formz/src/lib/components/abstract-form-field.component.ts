@@ -3,7 +3,7 @@ import { FormFieldLabelDirective } from '../directives/form-field-label.directiv
 import { FormFieldPrefixDirective } from '../directives/form-field-prefix.directive';
 import { FormFieldSuffixDirective } from '../directives/form-field-suffix.directive';
 import { FormFieldTooltipDirective } from '../directives/form-field-tooltip.directive';
-import { IFormField } from '../form-field.interface';
+import { IFormField } from '../form-model';
 
 // TODO move this back into FormField2Component
 @Directive()

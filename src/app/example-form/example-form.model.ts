@@ -1,4 +1,4 @@
-import { ROOT_FORM } from 'projects/formz/src/lib/model';
+import { ROOT_FORM } from 'projects/formz/src/lib/form-model';
 import { DeepPartial, DeepRequired } from 'projects/formz/src/lib/utility-types';
 import { enforce, omitWhen, only, staticSuite, test } from 'vest';
 

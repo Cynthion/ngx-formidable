@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-import { HasValueAndFocusChange } from '../../model';
+import { ICustomFormField } from '../../form-model';
 
 @Component({
   selector: 'formz-form-field-radio-group',
@@ -25,7 +25,7 @@ import { HasValueAndFocusChange } from '../../model';
     }
   ]
 })
-export class FormFieldRadioGroupComponent implements OnInit, OnDestroy, ControlValueAccessor, HasValueAndFocusChange {
+export class FormFieldRadioGroupComponent implements OnInit, OnDestroy, ControlValueAccessor, ICustomFormField {
   @Input({ required: true }) name!: string;
 
   // TODO are the needed on this level?

@@ -2,7 +2,7 @@ import { Directive, inject, input } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { FormDirective } from './form.directive';
-import { FormValidationOptions } from '../model';
+import { FormValidationOptions } from '../form-model';
 import { getFormGroupFieldPath } from '../form.helpers';
 
 /**

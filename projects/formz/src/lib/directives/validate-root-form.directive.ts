@@ -8,7 +8,7 @@ import {
 } from '@angular/forms';
 import { debounceTime, Observable, of, ReplaySubject, Subject, switchMap, take, takeUntil } from 'rxjs';
 import { StaticSuite } from 'vest';
-import { FormValidationOptions, ROOT_FORM } from '../model';
+import { FormValidationOptions, ROOT_FORM } from '../form-model';
 import { cloneDeep } from '../utility.helpers';
 import { set } from '../form.helpers';
 

@@ -14,7 +14,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { FormFieldDropdownOptionComponent } from '../form-field-dropdown-option/form-field-dropdown-option.component';
-import { HasValueAndFocusChange } from '../../model';
+import { ICustomFormField } from '../../form-model';
 
 @Component({
   selector: 'formz-form-field-dropdown',
@@ -29,7 +29,7 @@ import { HasValueAndFocusChange } from '../../model';
     }
   ]
 })
-export class FormFieldDropdownComponent implements OnInit, OnDestroy, ControlValueAccessor, HasValueAndFocusChange {
+export class FormFieldDropdownComponent implements OnInit, OnDestroy, ControlValueAccessor, ICustomFormField {
   @Input() placeholder?: string;
 
   // TODO move this, onInit, onDestroy and HasValueAndFocusChange to a base class?

@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { NgModel } from '@angular/forms';
 import { AbstractFormFieldDirective } from './abstract-form-field.directive';
-import { FormFieldType, HasValueAndFocusChange } from '../model';
+import { FormFieldType, ICustomFormField } from '../form-model';
 
 /**
  * Directive to enhance form fields (native or custom) with common behaviors:
@@ -99,12 +99,12 @@ export class FormFieldDirective extends AbstractFormFieldDirective implements On
   }
 
   private tryGetValue(): string {
-    const host = this.element as unknown as HasValueAndFocusChange;
+    const host = this.element as unknown as ICustomFormField;
     return host?.value ?? '';
   }
 
   private listenToHostOutputs(): void {
-    const host = this.element as unknown as HasValueAndFocusChange;
+    const host = this.element as unknown as ICustomFormField;
 
     if (host.valueChange$.subscribe) {
       host.valueChange$.subscribe((value: string) => this.valueChange.emit(value));

@@ -30,7 +30,7 @@ import { getAllFormErrors, mergeValuesAndRawValues, set } from '../form.helpers'
 import { validateFormShape } from '../form-validate.helpers';
 import { DeepRequired } from '../utility-types';
 import { cloneDeep } from '../utility.helpers';
-import { FormValidationOptions } from '../model';
+import { FormValidationOptions } from '../form-model';
 
 /**
  * Holds the formValue, the validation suite and some handy outputs.
