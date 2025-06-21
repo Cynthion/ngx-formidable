@@ -80,9 +80,10 @@ $formz-flyout-z-index: 9999;
   border: 1px solid var(--formz-color-field-border, #{$formz-color-field-border});
   border-radius: var(--formz-field-border-radius, #{$formz-field-border-radius});
   background: var(--formz-color-field-background, #{$formz-color-field-background});
-  transition:
-    box-shadow var(--formz-hover-duration-short, #{$formz-hover-duration-short}) var(--formz-hover-easing, #{$formz-hover-easing}),
-    border-color var(--formz-hover-duration-short, #{$formz-hover-duration-short}) var(--formz-hover-easing, #{$formz-hover-easing});
+  transition: box-shadow var(--formz-hover-duration-short, #{$formz-hover-duration-short})
+      var(--formz-hover-easing, #{$formz-hover-easing}),
+    border-color var(--formz-hover-duration-short, #{$formz-hover-duration-short})
+      var(--formz-hover-easing, #{$formz-hover-easing});
 
   &:disabled {
     @include field-disabled;
@@ -102,48 +103,45 @@ $formz-flyout-z-index: 9999;
   }
 }
 
-@mixin group-field {
-  @include input-reset; // TODO required?
-  @include typo.font-m-bold;
+// @mixin group-field {
+//   @include input-reset; // TODO required?
+//   @include typo.font-m-bold;
 
-  position: relative;
-  width: 100%;
-  height: $formz-field-height;
-  padding: 0 sp.cmp_space(16); // horizontal padding only
-  border: 1px solid var(--formz-color-field-border, #{$formz-color-field-border});
-  border-radius: var(--formz-field-border-radius, #{$formz-field-border-radius});
-  background: var(--formz-color-field-background, #{$formz-color-field-background});
-  transition:
-    box-shadow var(--formz-hover-duration-short, #{$formz-hover-duration-short}) var(--formz-hover-easing, #{$formz-hover-easing}),
-    border-color var(--formz-hover-duration-short, #{$formz-hover-duration-short}) var(--formz-hover-easing, #{$formz-hover-easing});
+//   position: relative;
+//   width: 100%;
+//   height: $formz-field-height;
+//   padding: 0 sp.cmp_space(16); // horizontal padding only
+//   border: 1px solid var(--formz-color-field-border, #{$formz-color-field-border});
+//   border-radius: var(--formz-field-border-radius, #{$formz-field-border-radius});
+//   background: var(--formz-color-field-background, #{$formz-color-field-background});
+//   transition: box-shadow var(--formz-hover-duration-short, #{$formz-hover-duration-short})
+//       var(--formz-hover-easing, #{$formz-hover-easing}),
+//     border-color var(--formz-hover-duration-short, #{$formz-hover-duration-short})
+//       var(--formz-hover-easing, #{$formz-hover-easing});
 
-  &:disabled {
-    @include field-disabled;
-  }
+//   &:disabled {
+//     @include field-disabled;
+//   }
 
-  &:focus {
-    border-color: var(--formz-color-field-border-focus, #{$formz-color-field-border-focus});
-    box-shadow: inset 0 0 0 1px var(--formz-color-field-border-focus, #{$formz-color-field-border-focus});
-  }
+//   &:focus {
+//     border-color: var(--formz-color-field-border-focus, #{$formz-color-field-border-focus});
+//     box-shadow: inset 0 0 0 1px var(--formz-color-field-border-focus, #{$formz-color-field-border-focus});
+//   }
 
-  &::selection {
-    background-color: var(--formz-color-field-selection, #{$formz-color-field-selection});
-  }
+//   &::selection {
+//     background-color: var(--formz-color-field-selection, #{$formz-color-field-selection});
+//   }
 
-  &::placeholder {
-    color: var(--formz-color-field-placeholder, #{$formz-color-field-placeholder});
-  }
-}
+//   &::placeholder {
+//     color: var(--formz-color-field-placeholder, #{$formz-color-field-placeholder});
+//   }
+// }
 
-@mixin field-decorators {
+@mixin field-before {
   display: flex;
   align-items: center;
   margin-bottom: sp.cmp_space(8);
   position: relative;
-}
-
-@mixin group-field-decorators {
-  @include field-decorators;
 }
 
 @mixin field-label {
@@ -155,15 +153,14 @@ $formz-flyout-z-index: 9999;
   // animation
   transform: translateY(0) scale(1); // default placement
   transform-origin: left top;
-  transition:
-    transform var(--formz-hover-duration-short, #{$formz-hover-duration-short}) var(--formz-hover-easing, #{$formz-hover-easing}),
-    margin-right var(--formz-hover-duration-short, #{$formz-hover-duration-short}) var(--formz-hover-easing, #{$formz-hover-easing}),
-    font-size var(--formz-hover-duration-short, #{$formz-hover-duration-short}) var(--formz-hover-easing, #{$formz-hover-easing}),
-    color var(--formz-hover-duration-short, #{$formz-hover-duration-short}) var(--formz-hover-easing, #{$formz-hover-easing});
-}
-
-@mixin group-field-label {
-  @include field-label;
+  transition: transform var(--formz-hover-duration-short, #{$formz-hover-duration-short})
+      var(--formz-hover-easing, #{$formz-hover-easing}),
+    margin-right var(--formz-hover-duration-short, #{$formz-hover-duration-short})
+      var(--formz-hover-easing, #{$formz-hover-easing}),
+    font-size var(--formz-hover-duration-short, #{$formz-hover-duration-short})
+      var(--formz-hover-easing, #{$formz-hover-easing}),
+    color var(--formz-hover-duration-short, #{$formz-hover-duration-short})
+      var(--formz-hover-easing, #{$formz-hover-easing});
 }
 
 @mixin field-label-floating {
@@ -183,13 +180,9 @@ $formz-flyout-z-index: 9999;
   // tbd
 }
 
-@mixin group-field-tooltip {
-  @include field-tooltip;
-}
-
 @mixin field-prefix {
   position: absolute;
-  top: math.div(var(--formz-field-height), 2);
+  top: math.div(var(--formz-field-height, #{formz-field-height}), 2);
   left: 0;
   padding-left: sp.cmp_space(16);
   padding-right: sp.cmp_space(16);
@@ -198,23 +191,15 @@ $formz-flyout-z-index: 9999;
   z-index: 1; // keep on top of field
 }
 
-@mixin group-field-prefix {
-  padding-bottom: sp.cmp_space(8);
-}
-
 @mixin field-suffix {
   position: absolute;
-  top: math.div($formz-field-height, 2);
+  top: math.div(var(--formz-field-height, #{formz-field-height}), 2);
   right: 0;
   padding-left: sp.cmp_space(16);
   padding-right: sp.cmp_space(16);
   transform: translateY(-50%);
   pointer-events: none;
   z-index: 1; // keep on top of field
-}
-
-@mixin group-field-suffix {
-  padding-top: sp.cmp_space(8);
 }
 
 @mixin field-validation-errors {
@@ -251,7 +236,8 @@ $formz-flyout-z-index: 9999;
 
   .caret {
     float: right;
-    transition: transform var(--formz-hover-duration-short, #{$formz-hover-duration-short}) var(--formz-hover-easing, #{$formz-hover-easing});
+    transition: transform var(--formz-hover-duration-short, #{$formz-hover-duration-short})
+      var(--formz-hover-easing, #{$formz-hover-easing});
   }
 
   .caret.rotated {
@@ -277,9 +263,10 @@ $formz-flyout-z-index: 9999;
   opacity: 0;
   transform: translateY(-0.25rem); // slight offset when closed
   pointer-events: none; // prevent hover/clicks when closed
-  transition:
-    opacity var(--formz-hover-duration-short, #{$formz-hover-duration-short}) var(--formz-hover-easing, #{$formz-hover-easing}),
-    transform var(--formz-hover-duration-short, #{$formz-hover-duration-short}) var(--formz-hover-easing, #{$formz-hover-easing});
+  transition: opacity var(--formz-hover-duration-short, #{$formz-hover-duration-short})
+      var(--formz-hover-easing, #{$formz-hover-easing}),
+    transform var(--formz-hover-duration-short, #{$formz-hover-duration-short})
+      var(--formz-hover-easing, #{$formz-hover-easing});
 }
 
 @mixin field-dropdown-option {

@@ -1,31 +1,31 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Optional } from '@angular/core';
-import { FormFieldDropdownComponent } from '../form-field-dropdown/form-field-dropdown.component';
+// import { ChangeDetectionStrategy, Component, ElementRef, Input, OnInit, Optional } from '@angular/core';
+// import { FormFieldDropdownComponent } from '../form-field-dropdown/form-field-dropdown.component';
 
-@Component({
-  selector: 'formz-form-field-dropdown-option',
-  templateUrl: './form-field-dropdown-option.component.html',
-  styleUrls: ['./form-field-dropdown-option.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
-})
-export class FormFieldDropdownOptionComponent implements OnInit {
-  @Input({ required: true }) value!: string;
+// @Component({
+//   selector: 'formz-form-field-dropdown-option',
+//   templateUrl: './form-field-dropdown-option.component.html',
+//   styleUrls: ['./form-field-dropdown-option.component.scss'],
+//   changeDetection: ChangeDetectionStrategy.OnPush
+// })
+// export class FormFieldDropdownOptionComponent implements OnInit {
+//   @Input({ required: true }) value!: string;
 
-  constructor(
-    @Optional() private dropdown: FormFieldDropdownComponent,
-    private el: ElementRef
-  ) {}
+//   constructor(
+//     @Optional() private dropdown: FormFieldDropdownComponent,
+//     private el: ElementRef
+//   ) {}
 
-  ngOnInit() {
-    if (!this.dropdown) {
-      throw new Error('formz-form-field-dropdown-option must be inside formz-form-field-dropdown!');
-    }
-  }
+//   ngOnInit() {
+//     if (!this.dropdown) {
+//       throw new Error('formz-form-field-dropdown-option must be inside formz-form-field-dropdown!');
+//     }
+//   }
 
-  get label(): string {
-    return this.el.nativeElement.innerText.trim();
-  }
+//   get label(): string {
+//     return this.el.nativeElement.innerText.trim();
+//   }
 
-  select() {
-    this.dropdown.selectOption(this.value, this.label);
-  }
-}
+//   select() {
+//     this.dropdown.selectOption(this.value, this.label);
+//   }
+// }

@@ -4,8 +4,8 @@
   display: block;
 }
 
-.decorators {
-  @include field-decorators;
+.before-wrapper {
+  @include field-before;
 }
 
 .label-wrapper {

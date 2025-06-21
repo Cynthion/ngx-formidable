@@ -1,4 +1,6 @@
-import { Observable } from "rxjs";
+import { ElementRef } from '@angular/core';
+import { ControlValueAccessor } from '@angular/forms';
+import { Observable } from 'rxjs';
 
 export const ROOT_FORM = 'rootForm';
 
@@ -6,18 +8,17 @@ export interface FormValidationOptions {
   debounceValidationInMs: number;
 }
 
-export interface IFormField {
-  fieldId: string | null;
-  isLabelFloating: boolean;
-}
-
 /**
- * Interface for a custom component that emits value and focus changes.
+ * Interface for all Formz fields.
+ * It extends ControlValueAccessor to integrate with Angular forms.
  */
-export interface ICustomFormField {
+export interface IFormzField extends ControlValueAccessor {
+  fieldId: string;
+  value: string;
+  isLabelFloating: boolean;
   valueChange$: Observable<string>;
   focusChange$: Observable<boolean>;
-  value: string;
+  elementRef: ElementRef<HTMLElement>;
 }
 
-export type FormFieldType = 'field' | 'option';
+export type FieldDecoratorLayout = 'single' | 'option';

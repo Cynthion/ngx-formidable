@@ -1,17 +1,17 @@
-@use '../../styles/variables' as *;
+// @use '../../styles/variables' as *;
 
-:host {
-  display: block;
-}
+// :host {
+//   display: block;
+// }
 
-.dropdown {
-  @include field-dropdown;
-}
+// .dropdown {
+//   @include field-dropdown;
+// }
 
-.dropdown-trigger {
-  @include field-dropdown-trigger;
-}
+// .dropdown-trigger {
+//   @include field-dropdown-trigger;
+// }
 
-.dropdown-panel {
-  @include field-dropdown-panel;
-}
+// .dropdown-panel {
+//   @include field-dropdown-panel;
+// }

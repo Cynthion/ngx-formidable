@@ -13,9 +13,9 @@
   (ngSubmit)="onSubmit()">
   <fieldset class="fieldset">
     <!-- First Name -->
-    <formz-form-field>
+    <formz-field-decorator [decoratorLayout]="'single'">
       <!-- <formz-field-input [ngModel]="vm.formValue.firstName"></formz-field-input> -->
-       <input
+       <formz-input-field
         formzFormField
         formzFormFieldErrors
         placeholder="Your first name"
@@ -23,7 +23,8 @@
         maxlength="1000"
         type="text"
         name="firstName"
-        [ngModel]="vm.formValue.firstName" />
+        [ngModel]="vm.formValue.firstName">
+      </formz-input-field>
       <div
         formzFormFieldLabel
         [isFloating]="true">
@@ -32,7 +33,7 @@
       <div formzFormFieldTooltip>(Tooltip)</div>
       <!-- <div formzFormFieldPrefix>Prefix</div> -->
       <div formzFormFieldSuffix>Suffix</div>
-    </formz-form-field>
+    </formz-field-decorator>
 
     <!-- Gender -->
     <!-- <formz-form-field>
