@@ -18,9 +18,7 @@
     "removeComments": true,
     "sourceMap": true,
     "paths": {
-      "formz": [
-        "projects/formz/dist/formz"
-      ]
+      "formz": ["projects/formz/src/public-api.ts"]
     },
 
     /* JavaScript Support */

@@ -18,3 +18,4 @@
 - resolve all TODOs
 - remove all `cmp` prefixes
 - try removing the `formzFormField` directive in consumer
+- fix floating label
