@@ -44,76 +44,76 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
 
-  // TODO in constructor, check that nested field implements IFormzField
-
   ngAfterContentInit(): void {
+    console.log('FieldDecoratorComponent. ngAfterContentInit');
+
     this.hasLabel = !!this.projectedLabel;
     this.hasTooltip = !!this.projectedTooltip;
     this.hasPrefix = !!this.projectedPrefix;
     this.hasSuffix = !!this.projectedSuffix;
-
-    // TODO subscribe to input events based in IFormzField interface
-    // if (this.projectedField) {
-    //   this.projectedField.focusChange.subscribe((focused) => {
-    //     this.isFieldFocused = focused;
-    //     this.cdRef.markForCheck();
-    //   });
-
-    //   this.projectedField.valueChange.subscribe((value) => {
-    //     this.isFieldFilled = value.length > 0;
-    //     this.cdRef.markForCheck();
-    //   });
-    // }
   }
 
   ngAfterViewInit(): void {
-    // if prefix/suffix are projected, adjust the padding of the field
-    const field = this.elementRef.nativeElement;
-    const prefixWrapper = this.prefixWrapper?.nativeElement;
-    const suffixWrapper = this.suffixWrapper?.nativeElement;
+    console.log('FieldDecoratorComponent. ngAfterViewInit');
 
-    const prefixWidth = this.projectedPrefix?.elementRef.nativeElement.offsetWidth || 0;
-    const suffixWidth = this.projectedSuffix?.elementRef.nativeElement.offsetWidth || 0;
-
-    if (field && prefixWrapper && prefixWidth) {
-      const prefixStyle = window.getComputedStyle(prefixWrapper);
-      const prefixPaddingLeft = parseFloat(prefixStyle.paddingLeft) || 0;
-      const prefixPaddingRight = parseFloat(prefixStyle.paddingRight) || 0;
-
-      field.style.paddingLeft = `${prefixPaddingLeft + prefixWidth + prefixPaddingRight}px`;
-    }
-    if (field && suffixWrapper && suffixWidth) {
-      const suffixStyle = window.getComputedStyle(suffixWrapper);
-      const suffixPaddingLeft = parseFloat(suffixStyle.paddingLeft) || 0;
-      const suffixPaddingRight = parseFloat(suffixStyle.paddingRight) || 0;
-
-      field.style.paddingRight = `${suffixPaddingLeft + suffixWidth + suffixPaddingRight}px`;
-    }
+    this.doLayoutAdjustments();
   }
 
   //#region IFormzField
 
   get fieldId(): string {
-    return (this.projectedField as unknown as IFormzField).fieldId ?? '';
+    return this.projectedField?.formzField.fieldId ?? '';
   }
 
   get value(): string {
-    return (this.projectedField as unknown as IFormzField).value ?? '';
+    return this.projectedField?.formzField.value ?? '';
   }
 
   get isLabelFloating(): boolean {
+    if (!this.projectedField) return false;
+
     const isLabelConfiguredToFloat = this.projectedLabel?.isFloating ?? false;
-    const isFieldLabelFloating = (this.projectedField as unknown as IFormzField).isLabelFloating ?? false;
+    const isFieldLabelFloating = this.projectedField.formzField.isLabelFloating ?? false;
 
     return isLabelConfiguredToFloat && isFieldLabelFloating;
   }
 
   get elementRef(): ElementRef<HTMLElement> {
-    return (this.projectedField as unknown as IFormzField).elementRef;
+    if (!this.projectedField) {
+      throw new Error('FieldDecoratorComponent: projectedField is not available yet.');
+    }
+    return this.projectedField.formzField.elementRef;
   }
 
   valueChange$ = this.valueChangeSubject$.asObservable();
   focusChange$ = this.focusChangeSubject$.asObservable();
 
   //#endregion
+
+  private doLayoutAdjustments(): void {
+    requestAnimationFrame(() => {
+      // if prefix/suffix are projected, adjust the padding of the field
+      const field = this.elementRef.nativeElement;
+      const prefixWrapper = this.prefixWrapper?.nativeElement;
+      const suffixWrapper = this.suffixWrapper?.nativeElement;
+
+      const prefixWidth = this.projectedPrefix?.elementRef.nativeElement.offsetWidth || 0;
+      const suffixWidth = this.projectedSuffix?.elementRef.nativeElement.offsetWidth || 0;
+
+      if (field && prefixWrapper && prefixWidth) {
+        const prefixStyle = window.getComputedStyle(prefixWrapper);
+        const prefixPaddingLeft = parseFloat(prefixStyle.paddingLeft) || 0;
+        const prefixPaddingRight = parseFloat(prefixStyle.paddingRight) || 0;
+
+        field.style.paddingLeft = `${prefixPaddingLeft + prefixWidth + prefixPaddingRight}px`;
+      }
+      if (field && suffixWrapper && suffixWidth) {
+        const suffixStyle = window.getComputedStyle(suffixWrapper);
+        const suffixPaddingLeft = parseFloat(suffixStyle.paddingLeft) || 0;
+        const suffixPaddingRight = parseFloat(suffixStyle.paddingRight) || 0;
+
+        field.style.paddingRight = `${suffixPaddingLeft + suffixWidth + suffixPaddingRight}px`;
+      }
+    });
+  }
 }

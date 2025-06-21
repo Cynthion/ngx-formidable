@@ -1,4 +1,5 @@
-import { Directive, OnInit } from '@angular/core';
+import { Directive, Host, OnInit } from '@angular/core';
+import { FormzFieldBase } from '../form-model';
 
 // TODO move features into different components
 /**
@@ -9,6 +10,8 @@ import { Directive, OnInit } from '@angular/core';
  */
 @Directive({ selector: '[formzFormField]' })
 export class FormFieldDirective implements OnInit {
+  constructor(@Host() public formzField: FormzFieldBase) {}
+
   // auto-generate a unique ID for the form field
   // @HostBinding('attr.id') id = `formz-form-field-${uuid()}`;
 
