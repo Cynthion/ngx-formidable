@@ -1,8 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
 
-/* Only works if loaded from node_modules */
-// @use 'formz/styles/style';
-
 // use the /src/styles.scss
 @use 'styles/styles.scss';
 
@@ -11,11 +8,7 @@
 // resolves to: 'projects/formz/src/lib/styles/_formz.scss'
 @use 'formz' as formz;
 
-// @use 'formz/styles/variables' as formz;
-
-body {
-  @include formz.formz-css-vars;
-}
+@include formz.formz-css-vars;
 
 // TODO use app theme variables
 // Lib Overrides

@@ -25,7 +25,6 @@ $formz-hover-easing: cubic-bezier(0.39, 0.575, 0.565, 1);
 $formz-flyout-z-index: 9999;
 
 @mixin formz-css-vars {
-  background-color: red;
   // CSS Variables for configuration and overrides
   :root {
     --formz-color-validation-error: #{$formz-color-validation-error};
