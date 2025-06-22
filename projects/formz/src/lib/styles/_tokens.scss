@@ -1,15 +1,25 @@
-// TODO move colors to a separate file
-// TODO add variable for text color
+// 100: #f2faff
+// 200: #c7d7e2
+// 300: #9fb7c7
+// 400: #7b99af
+// 500: #5b7f99
+// 600: #3e6988
+// 700: #255476
+// 800: #114367
+// 900: #00345a
 
 // SCSS Variables for internal (default) styling
 $formz-color-validation-error: #dc5858;
+$formz-color-field-text: #00345a;
+$formz-color-field-label: $formz-color-field-text;
+$formz-color-field-label-floating: #5b7f99;
+$formz-color-field-tooltip: $formz-color-field-text;
 $formz-color-field-placeholder: #5b7f99;
 $formz-color-field-selection: #9fb7c7;
-$formz-color-field-border: #5b7f99;
-$formz-color-field-border-focus: #00345a;
+$formz-color-field-border: #114367;
+$formz-color-field-border-focus: #5b7f99;
 $formz-color-field-background: #f2faff;
 $formz-color-field-hover: rgba(0, 0, 0, 0.31);
-$formz-color-field-label-floating: #00345a;
 
 $formz-field-height: 66px;
 $formz-field-label-floating-offset: 35px;

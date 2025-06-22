@@ -3,13 +3,16 @@
 // CSS Variables for configuration and override
 :root {
   --formz-color-validation-error: #{tokens.$formz-color-validation-error};
+  --formz-color-field-text: #{tokens.$formz-color-field-text};
+  --formz-color-field-label: #{tokens.$formz-color-field-label};
+  --formz-color-field-label-floating: #{tokens.$formz-color-field-label-floating};
+  --formz-color-field-tooltip: #{tokens.$formz-color-field-tooltip};
   --formz-color-field-placeholder: #{tokens.$formz-color-field-placeholder};
   --formz-color-field-selection: #{tokens.$formz-color-field-selection};
   --formz-color-field-border: #{tokens.$formz-color-field-border};
   --formz-color-field-border-focus: #{tokens.$formz-color-field-border-focus};
   --formz-color-field-background: #{tokens.$formz-color-field-background};
   --formz-color-field-hover: #{tokens.$formz-color-field-hover};
-  --formz-color-field-label-floating: #{tokens.$formz-color-field-label-floating};
 
   --formz-field-height: #{tokens.$formz-field-height};
   --formz-field-label-floating-offset: #{tokens.$formz-field-label-floating-offset};
