@@ -1,0 +1,22 @@
+// SCSS Variables for internal (default) styling
+$formz-color-validation-error: red;
+$formz-color-field-placeholder: violet;
+$formz-color-field-selection: pink;
+$formz-color-field-border: turquoise;
+$formz-color-field-border-focus: rgb(11, 87, 79);
+$formz-color-field-background: yellow;
+$formz-color-field-hover: rgba(0, 0, 0, 0.31);
+$formz-color-field-label-floating: orange;
+
+$formz-field-height: 66px;
+$formz-field-label-floating-offset: 35px;
+
+$formz-field-border-radius: 4px;
+
+$formz-dropdown-panel-background: lime;
+$formz-dropdown-panel-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);
+
+$formz-hover-duration-short: 0.15s;
+$formz-hover-easing: cubic-bezier(0.39, 0.575, 0.565, 1);
+
+$formz-flyout-z-index: 9999;

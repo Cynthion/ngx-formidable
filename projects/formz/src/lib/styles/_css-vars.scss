@@ -1,0 +1,26 @@
+@use './tokens';
+
+// CSS Variables for configuration and override
+:root {
+  --formz-color-validation-error: #{tokens.$formz-color-validation-error};
+  --formz-color-field-placeholder: #{tokens.$formz-color-field-placeholder};
+  --formz-color-field-selection: #{tokens.$formz-color-field-selection};
+  --formz-color-field-border: #{tokens.$formz-color-field-border};
+  --formz-color-field-border-focus: #{tokens.$formz-color-field-border-focus};
+  --formz-color-field-background: #{tokens.$formz-color-field-background};
+  --formz-color-field-hover: #{tokens.$formz-color-field-hover};
+  --formz-color-field-label-floating: #{tokens.$formz-color-field-label-floating};
+
+  --formz-field-height: #{tokens.$formz-field-height};
+  --formz-field-label-floating-offset: #{tokens.$formz-field-label-floating-offset};
+
+  --formz-field-border-radius: #{tokens.$formz-field-border-radius};
+
+  --formz-dropdown-panel-background: #{tokens.$formz-dropdown-panel-background};
+  --formz-dropdown-panel-box-shadow: #{tokens.$formz-dropdown-panel-box-shadow};
+
+  --formz-hover-duration-short: #{tokens.$formz-hover-duration-short};
+  --formz-hover-easing: #{tokens.$formz-hover-easing};
+
+  --formz-flyout-z-index: #{tokens.$formz-flyout-z-index};
+}

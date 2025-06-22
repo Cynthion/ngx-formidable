@@ -1,55 +1,6 @@
 @use 'typography' as typo;
 @use 'spacings' as sp;
-
-// SCSS Variables for default styling
-$formz-color-validation-error: red;
-$formz-color-field-placeholder: violet;
-$formz-color-field-selection: pink;
-$formz-color-field-border: turquoise;
-$formz-color-field-border-focus: rgb(11, 87, 79);
-$formz-color-field-background: yellow;
-$formz-color-field-hover: rgba(0, 0, 0, 0.31);
-$formz-color-field-label-floating: orange;
-
-$formz-field-height: 66px;
-$formz-field-label-floating-offset: 35px;
-
-$formz-field-border-radius: 4px;
-
-$formz-dropdown-panel-background: lime;
-$formz-dropdown-panel-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);
-
-$formz-hover-duration-short: 0.15s;
-$formz-hover-easing: cubic-bezier(0.39, 0.575, 0.565, 1);
-
-$formz-flyout-z-index: 9999;
-
-@mixin formz-css-vars {
-  // CSS Variables for configuration and overrides
-  :root {
-    --formz-color-validation-error: #{$formz-color-validation-error};
-    --formz-color-field-placeholder: #{$formz-color-field-placeholder};
-    --formz-color-field-selection: #{$formz-color-field-selection};
-    --formz-color-field-border: #{$formz-color-field-border};
-    --formz-color-field-border-focus: #{$formz-color-field-border-focus};
-    --formz-color-field-background: #{$formz-color-field-background};
-    --formz-color-field-hover: #{$formz-color-field-hover};
-    --formz-color-field-label-floating: #{$formz-color-field-label-floating};
-
-    --formz-field-height: #{$formz-field-height};
-    --formz-field-label-floating-offset: #{$formz-field-label-floating-offset};
-
-    --formz-field-border-radius: #{$formz-field-border-radius};
-
-    --formz-dropdown-panel-background: #{$formz-dropdown-panel-background};
-    --formz-dropdown-panel-box-shadow: #{$formz-dropdown-panel-box-shadow};
-
-    --formz-hover-duration-short: #{$formz-hover-duration-short};
-    --formz-hover-easing: #{$formz-hover-easing};
-
-    --formz-flyout-z-index: #{$formz-flyout-z-index};
-  }
-}
+@use '../tokens' as tokens;
 
 @mixin input-reset {
   outline: 0;
@@ -76,31 +27,31 @@ $formz-flyout-z-index: 9999;
 
   position: relative;
   width: 100%;
-  height: $formz-field-height;
+  height: tokens.$formz-field-height;
   padding: 0 sp.cmp_space(16); // horizontal padding only
-  border: 1px solid var(--formz-color-field-border, #{$formz-color-field-border});
-  border-radius: var(--formz-field-border-radius, #{$formz-field-border-radius});
-  background: var(--formz-color-field-background, #{$formz-color-field-background});
-  transition: box-shadow var(--formz-hover-duration-short, #{$formz-hover-duration-short})
-      var(--formz-hover-easing, #{$formz-hover-easing}),
-    border-color var(--formz-hover-duration-short, #{$formz-hover-duration-short})
-      var(--formz-hover-easing, #{$formz-hover-easing});
+  border: 1px solid var(--formz-color-field-border, #{tokens.$formz-color-field-border});
+  border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
+  background: var(--formz-color-field-background, #{tokens.$formz-color-field-background});
+  transition: box-shadow var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+      var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
+    border-color var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+      var(--formz-hover-easing, #{tokens.$formz-hover-easing});
 
   &:disabled {
     @include field-disabled;
   }
 
   &:focus {
-    border-color: var(--formz-color-field-border-focus, #{$formz-color-field-border-focus});
-    box-shadow: inset 0 0 0 1px var(--formz-color-field-border-focus, #{$formz-color-field-border-focus});
+    border-color: var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
+    box-shadow: inset 0 0 0 1px var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
   }
 
   &::selection {
-    background-color: var(--formz-color-field-selection, #{$formz-color-field-selection});
+    background-color: var(--formz-color-field-selection, #{tokens.$formz-color-field-selection});
   }
 
   &::placeholder {
-    color: var(--formz-color-field-placeholder, #{$formz-color-field-placeholder});
+    color: var(--formz-color-field-placeholder, #{tokens.$formz-color-field-placeholder});
   }
 }
 
@@ -110,31 +61,31 @@ $formz-flyout-z-index: 9999;
 
 //   position: relative;
 //   width: 100%;
-//   height: $formz-field-height;
+//   height: tokens.$formz-field-height;
 //   padding: 0 sp.cmp_space(16); // horizontal padding only
-//   border: 1px solid var(--formz-color-field-border, #{$formz-color-field-border});
-//   border-radius: var(--formz-field-border-radius, #{$formz-field-border-radius});
-//   background: var(--formz-color-field-background, #{$formz-color-field-background});
-//   transition: box-shadow var(--formz-hover-duration-short, #{$formz-hover-duration-short})
-//       var(--formz-hover-easing, #{$formz-hover-easing}),
-//     border-color var(--formz-hover-duration-short, #{$formz-hover-duration-short})
-//       var(--formz-hover-easing, #{$formz-hover-easing});
+//   border: 1px solid var(--formz-color-field-border, #{tokens.$formz-color-field-border});
+//   border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
+//   background: var(--formz-color-field-background, #{tokens.$formz-color-field-background});
+//   transition: box-shadow var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+//       var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
+//     border-color var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+//       var(--formz-hover-easing, #{tokens.$formz-hover-easing});
 
 //   &:disabled {
 //     @include field-disabled;
 //   }
 
 //   &:focus {
-//     border-color: var(--formz-color-field-border-focus, #{$formz-color-field-border-focus});
-//     box-shadow: inset 0 0 0 1px var(--formz-color-field-border-focus, #{$formz-color-field-border-focus});
+//     border-color: var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
+//     box-shadow: inset 0 0 0 1px var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
 //   }
 
 //   &::selection {
-//     background-color: var(--formz-color-field-selection, #{$formz-color-field-selection});
+//     background-color: var(--formz-color-field-selection, #{tokens.$formz-color-field-selection});
 //   }
 
 //   &::placeholder {
-//     color: var(--formz-color-field-placeholder, #{$formz-color-field-placeholder});
+//     color: var(--formz-color-field-placeholder, #{tokens.$formz-color-field-placeholder});
 //   }
 // }
 
@@ -154,14 +105,14 @@ $formz-flyout-z-index: 9999;
   // animation
   transform: translateY(0) scale(1); // default placement
   transform-origin: left top;
-  transition: transform var(--formz-hover-duration-short, #{$formz-hover-duration-short})
-      var(--formz-hover-easing, #{$formz-hover-easing}),
-    margin-right var(--formz-hover-duration-short, #{$formz-hover-duration-short})
-      var(--formz-hover-easing, #{$formz-hover-easing}),
-    font-size var(--formz-hover-duration-short, #{$formz-hover-duration-short})
-      var(--formz-hover-easing, #{$formz-hover-easing}),
-    color var(--formz-hover-duration-short, #{$formz-hover-duration-short})
-      var(--formz-hover-easing, #{$formz-hover-easing});
+  transition: transform var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+      var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
+    margin-right var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+      var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
+    font-size var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+      var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
+    color var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+      var(--formz-hover-easing, #{tokens.$formz-hover-easing});
 }
 
 @mixin field-label-floating {
@@ -170,11 +121,11 @@ $formz-flyout-z-index: 9999;
   position: absolute;
   left: sp.cmp_space(16);
   margin-right: 0;
-  color: var(--formz-color-field-label-floating, #{$formz-color-field-label-floating});
+  color: var(--formz-color-field-label-floating, #{tokens.$formz-color-field-label-floating});
   z-index: 1; // keep on top of field
 
   // animation
-  transform: translateY($formz-field-label-floating-offset) scale(1);
+  transform: translateY(tokens.$formz-field-label-floating-offset) scale(1);
 }
 
 @mixin field-tooltip {
@@ -212,11 +163,11 @@ $formz-flyout-z-index: 9999;
   @include typo.font-xs;
 
   display: block;
-  color: var(--formz-color-validation-error, #{$formz-color-validation-error});
+  color: var(--formz-color-validation-error, #{tokens.$formz-color-validation-error});
 }
 
 @mixin field-dropdown {
-  height: $formz-field-height; // ensure same height as field
+  height: tokens.$formz-field-height; // ensure same height as field
 
   &.open .dropdown-panel {
     // animation
@@ -237,8 +188,8 @@ $formz-flyout-z-index: 9999;
 
   .caret {
     float: right;
-    transition: transform var(--formz-hover-duration-short, #{$formz-hover-duration-short})
-      var(--formz-hover-easing, #{$formz-hover-easing});
+    transition: transform var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+      var(--formz-hover-easing, #{tokens.$formz-hover-easing});
   }
 
   .caret.rotated {
@@ -248,12 +199,12 @@ $formz-flyout-z-index: 9999;
 
 @mixin field-dropdown-panel {
   position: absolute;
-  box-shadow: var(--formz-dropdown-panel-box-shadow, #{$formz-dropdown-panel-box-shadow});
-  border: 1px solid var(--formz-color-field-border, #{$formz-color-field-border});
-  border-radius: var(--formz-field-border-radius, #{$formz-field-border-radius});
-  background: var(--formz-dropdown-panel-background, #{$formz-dropdown-panel-background});
+  box-shadow: var(--formz-dropdown-panel-box-shadow, #{tokens.$formz-dropdown-panel-box-shadow});
+  border: 1px solid var(--formz-color-field-border, #{tokens.$formz-color-field-border});
+  border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
+  background: var(--formz-dropdown-panel-background, #{tokens.$formz-dropdown-panel-background});
   overflow: hidden; // clip inner content to border-radius
-  z-index: var(--formz-flyout-z-index, #{$formz-flyout-z-index}); // keep on top of field
+  z-index: var(--formz-flyout-z-index, #{tokens.$formz-flyout-z-index}); // keep on top of field
 
   // extend 1px to top, left and right
   top: calc(100% + 1px);
@@ -264,10 +215,10 @@ $formz-flyout-z-index: 9999;
   opacity: 0;
   transform: translateY(-0.25rem); // slight offset when closed
   pointer-events: none; // prevent hover/clicks when closed
-  transition: opacity var(--formz-hover-duration-short, #{$formz-hover-duration-short})
-      var(--formz-hover-easing, #{$formz-hover-easing}),
-    transform var(--formz-hover-duration-short, #{$formz-hover-duration-short})
-      var(--formz-hover-easing, #{$formz-hover-easing});
+  transition: opacity var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+      var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
+    transform var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+      var(--formz-hover-easing, #{tokens.$formz-hover-easing});
 }
 
 @mixin field-dropdown-option {
@@ -275,6 +226,6 @@ $formz-flyout-z-index: 9999;
   cursor: pointer;
 
   &:hover {
-    background: var(--formz-color-field-hover, #{$formz-color-field-hover});
+    background: var(--formz-color-field-hover, #{tokens.$formz-color-field-hover});
   }
 }
