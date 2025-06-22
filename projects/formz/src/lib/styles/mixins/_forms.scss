@@ -1,4 +1,3 @@
-@use 'sass:math';
 @use 'typography' as typo;
 @use 'spacings' as sp;
 
@@ -25,29 +24,32 @@ $formz-hover-easing: cubic-bezier(0.39, 0.575, 0.565, 1);
 
 $formz-flyout-z-index: 9999;
 
-// CSS Variables for configuration and overrides
-:root {
-  --formz-color-validation-error: #{$formz-color-validation-error};
-  --formz-color-field-placeholder: #{$formz-color-field-placeholder};
-  --formz-color-field-selection: #{$formz-color-field-selection};
-  --formz-color-field-border: #{$formz-color-field-border};
-  --formz-color-field-border-focus: #{$formz-color-field-border-focus};
-  --formz-color-field-background: #{$formz-color-field-background};
-  --formz-color-field-hover: #{$formz-color-field-hover};
-  --formz-color-field-label-floating: #{$formz-color-field-label-floating};
+@mixin formz-css-vars {
+  background-color: red;
+  // CSS Variables for configuration and overrides
+  :root {
+    --formz-color-validation-error: #{$formz-color-validation-error};
+    --formz-color-field-placeholder: #{$formz-color-field-placeholder};
+    --formz-color-field-selection: #{$formz-color-field-selection};
+    --formz-color-field-border: #{$formz-color-field-border};
+    --formz-color-field-border-focus: #{$formz-color-field-border-focus};
+    --formz-color-field-background: #{$formz-color-field-background};
+    --formz-color-field-hover: #{$formz-color-field-hover};
+    --formz-color-field-label-floating: #{$formz-color-field-label-floating};
 
-  --formz-field-height: #{$formz-field-height};
-  --formz-field-label-floating-offset: #{$formz-field-label-floating-offset};
+    --formz-field-height: #{$formz-field-height};
+    --formz-field-label-floating-offset: #{$formz-field-label-floating-offset};
 
-  --formz-field-border-radius: #{$formz-field-border-radius};
+    --formz-field-border-radius: #{$formz-field-border-radius};
 
-  --formz-dropdown-panel-background: #{$formz-dropdown-panel-background};
-  --formz-dropdown-panel-box-shadow: #{$formz-dropdown-panel-box-shadow};
+    --formz-dropdown-panel-background: #{$formz-dropdown-panel-background};
+    --formz-dropdown-panel-box-shadow: #{$formz-dropdown-panel-box-shadow};
 
-  --formz-hover-duration-short: #{$formz-hover-duration-short};
-  --formz-hover-easing: #{$formz-hover-easing};
+    --formz-hover-duration-short: #{$formz-hover-duration-short};
+    --formz-hover-easing: #{$formz-hover-easing};
 
-  --formz-flyout-z-index: #{$formz-flyout-z-index};
+    --formz-flyout-z-index: #{$formz-flyout-z-index};
+  }
 }
 
 @mixin input-reset {
@@ -182,7 +184,7 @@ $formz-flyout-z-index: 9999;
 
 @mixin field-prefix {
   position: absolute;
-  top: math.div(var(--formz-field-height, #{formz-field-height}), 2);
+  top: calc(var(--formz-field-height, #{formz-field-height}) / 2);
   left: 0;
   padding-left: sp.cmp_space(16);
   padding-right: sp.cmp_space(16);
@@ -193,7 +195,7 @@ $formz-flyout-z-index: 9999;
 
 @mixin field-suffix {
   position: absolute;
-  top: math.div(var(--formz-field-height, #{formz-field-height}), 2);
+  top: calc(var(--formz-field-height, #{formz-field-height}) / 2);
   right: 0;
   padding-left: sp.cmp_space(16);
   padding-right: sp.cmp_space(16);
