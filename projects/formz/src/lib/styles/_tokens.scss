@@ -1,19 +1,22 @@
+// TODO move colors to a separate file
+// TODO add variable for text color
+
 // SCSS Variables for internal (default) styling
-$formz-color-validation-error: red;
-$formz-color-field-placeholder: violet;
-$formz-color-field-selection: pink;
-$formz-color-field-border: turquoise;
-$formz-color-field-border-focus: rgb(11, 87, 79);
-$formz-color-field-background: yellow;
+$formz-color-validation-error: #dc5858;
+$formz-color-field-placeholder: #5b7f99;
+$formz-color-field-selection: #9fb7c7;
+$formz-color-field-border: #5b7f99;
+$formz-color-field-border-focus: #00345a;
+$formz-color-field-background: #f2faff;
 $formz-color-field-hover: rgba(0, 0, 0, 0.31);
-$formz-color-field-label-floating: orange;
+$formz-color-field-label-floating: #00345a;
 
 $formz-field-height: 66px;
 $formz-field-label-floating-offset: 35px;
 
-$formz-field-border-radius: 4px;
+$formz-field-border-radius: 6px;
 
-$formz-dropdown-panel-background: lime;
+$formz-dropdown-panel-background: #f2faff;
 $formz-dropdown-panel-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);
 
 $formz-hover-duration-short: 0.15s;

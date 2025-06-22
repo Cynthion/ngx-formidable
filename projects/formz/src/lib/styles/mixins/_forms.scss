@@ -55,40 +55,6 @@
   }
 }
 
-// @mixin group-field {
-//   @include input-reset; // TODO required?
-//   @include typo.font-m-bold;
-
-//   position: relative;
-//   width: 100%;
-//   height: tokens.$formz-field-height;
-//   padding: 0 sp.cmp_space(16); // horizontal padding only
-//   border: 1px solid var(--formz-color-field-border, #{tokens.$formz-color-field-border});
-//   border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
-//   background: var(--formz-color-field-background, #{tokens.$formz-color-field-background});
-//   transition: box-shadow var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
-//       var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
-//     border-color var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
-//       var(--formz-hover-easing, #{tokens.$formz-hover-easing});
-
-//   &:disabled {
-//     @include field-disabled;
-//   }
-
-//   &:focus {
-//     border-color: var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
-//     box-shadow: inset 0 0 0 1px var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
-//   }
-
-//   &::selection {
-//     background-color: var(--formz-color-field-selection, #{tokens.$formz-color-field-selection});
-//   }
-
-//   &::placeholder {
-//     color: var(--formz-color-field-placeholder, #{tokens.$formz-color-field-placeholder});
-//   }
-// }
-
 @mixin field-before {
   display: flex;
   align-items: center;
