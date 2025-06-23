@@ -71,11 +71,13 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
 
   //#region ControlValueAccessor
 
-  private onChange: (value: any) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  private onChange: (value: unknown) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouched: () => void = () => {};
   protected isDisabled = false;
 
-  writeValue(value: any): void {
+  writeValue(value: string): void {
     console.log('InputFieldComponent. writeValue', value);
 
     if (this.inputRef) {
@@ -88,11 +90,11 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
     }
   }
 
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: never): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: never): void {
     this.onTouched = fn;
   }
 

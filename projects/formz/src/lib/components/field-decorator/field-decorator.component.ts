@@ -50,8 +50,6 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   private cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
 
-  ngOnInit(): void {}
-
   ngAfterContentInit(): void {
     this.hasLabel = !!this.projectedLabel;
     this.hasTooltip = !!this.projectedTooltip;

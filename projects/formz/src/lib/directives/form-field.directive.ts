@@ -1,4 +1,4 @@
-import { Directive, Host, OnInit } from '@angular/core';
+import { Directive, Host } from '@angular/core';
 import { FormzFieldBase } from '../form-model';
 
 // TODO move features into different components
@@ -9,7 +9,7 @@ import { FormzFieldBase } from '../form-model';
  * - Accepts any host element, native (<input>, <textarea>, <select>) or custom.
  */
 @Directive({ selector: '[formzFormField]' })
-export class FormFieldDirective implements OnInit {
+export class FormFieldDirective {
   constructor(@Host() public formzField: FormzFieldBase) {}
 
   // auto-generate a unique ID for the form field
@@ -28,26 +28,26 @@ export class FormFieldDirective implements OnInit {
 
   // constructor(public elementRef: ElementRef<HTMLElement>) {}
 
-  ngOnInit(): void {
-    // this.element = this.elementRef.nativeElement;
-    // this.elementTag = this.element.tagName.toLowerCase();
-    // this.isNativeElement = ['input', 'textarea', 'select'].includes(this.elementTag);
-    // TODO need to subscribe to focus events of custom controls?
-    // if (this.ngModel) {
-    //   this.ngModel.valueChanges?.subscribe((value) => {
-    //     this.valueChange.emit(value ?? '');
-    //   });
-    //   // emit the initial value immediately
-    //   const initialValue = this.ngModel.model ?? this.tryGetValue();
-    //   this.valueChange.emit(initialValue);
-    // } else {
-    //   // fallback: emit current DOM value
-    //   if (!this.isNativeElement) {
-    //     this.listenToHostOutputs();
-    //   }
-    //   this.valueChange.emit(this.tryGetValue());
-    // }
-  }
+  // ngOnInit(): void {
+  //   // this.element = this.elementRef.nativeElement;
+  //   // this.elementTag = this.element.tagName.toLowerCase();
+  //   // this.isNativeElement = ['input', 'textarea', 'select'].includes(this.elementTag);
+  //   // TODO need to subscribe to focus events of custom controls?
+  //   // if (this.ngModel) {
+  //   //   this.ngModel.valueChanges?.subscribe((value) => {
+  //   //     this.valueChange.emit(value ?? '');
+  //   //   });
+  //   //   // emit the initial value immediately
+  //   //   const initialValue = this.ngModel.model ?? this.tryGetValue();
+  //   //   this.valueChange.emit(initialValue);
+  //   // } else {
+  //   //   // fallback: emit current DOM value
+  //   //   if (!this.isNativeElement) {
+  //   //     this.listenToHostOutputs();
+  //   //   }
+  //   //   this.valueChange.emit(this.tryGetValue());
+  //   // }
+  // }
 
   // TODO move these into native wrappers
   // /** Listen to value changes of native <input> and <textarea> elements. */

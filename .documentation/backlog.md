@@ -1,6 +1,6 @@
 # Backlog
 
-- configure eslint
+- add an overwriteable FormzConfig (e.g., `inputDebounceTime`)
 - extract a `FormComponent` (with `footer` content projection) from `ExampleFormComponent` for re-use
 - re-style `_forms.scss`, merge old styling into new
 - add placeholder directive?
