@@ -32,14 +32,12 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
 
   protected onInputChange(): void {
     const value = this.value;
-    console.log('InputFieldComponent. onInputChange', value);
     this.valueChangeSubject$.next(value);
     this.isFieldFilled = value.length > 0;
     this.onChange(value); // notify ControlValueAccessor of the change
   }
 
   protected onFocusChange(isFocused: boolean): void {
-    console.log('InputFieldComponent. onFocusChange', isFocused);
     this.focusChangeSubject$.next(isFocused);
     this.isFieldFocused = isFocused;
 
@@ -63,7 +61,6 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   }
 
   get elementRef(): ElementRef<HTMLElement> {
-    console.log('InputFieldComponent. elementRef', this.inputRef);
     return this.inputRef as ElementRef<HTMLElement>;
   }
 

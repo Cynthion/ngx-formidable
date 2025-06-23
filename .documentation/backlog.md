@@ -1,6 +1,5 @@
 # Backlog
 
-- make styles overrideable
 - configure eslint
 - extract a `FormComponent` (with `footer` content projection) from `ExampleFormComponent` for re-use
 - re-style `_forms.scss`, merge old styling into new
@@ -18,4 +17,4 @@
 - resolve all TODOs
 - remove all `cmp` prefixes
 - try removing the `formzFormField` directive in consumer
-- fix floating label
+- implement disabled behaviour

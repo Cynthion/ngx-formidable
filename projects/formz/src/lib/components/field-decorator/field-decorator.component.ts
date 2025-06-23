@@ -2,13 +2,16 @@ import {
   AfterContentInit,
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ContentChild,
   ElementRef,
+  inject,
   Input,
+  OnDestroy,
   ViewChild
 } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { FormFieldLabelDirective } from '../../directives/form-field-label.directive';
 import { FormFieldPrefixDirective } from '../../directives/form-field-prefix.directive';
 import { FormFieldSuffixDirective } from '../../directives/form-field-suffix.directive';
@@ -22,7 +25,7 @@ import { FieldDecoratorLayout, IFormzField } from '../../form-model';
   styleUrls: ['./field-decorator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit, IFormzField {
+export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit, OnDestroy, IFormzField {
   // View children are used to access the prefix and suffix wrappers
   @ViewChild('prefixWrapperRef') prefixWrapper?: ElementRef<HTMLDivElement>;
   @ViewChild('suffixWrapperRef') suffixWrapper?: ElementRef<HTMLDivElement>;
@@ -43,10 +46,13 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
+  private destroy$ = new Subject<void>();
+
+  private cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
+
+  ngOnInit(): void {}
 
   ngAfterContentInit(): void {
-    console.log('FieldDecoratorComponent. ngAfterContentInit');
-
     this.hasLabel = !!this.projectedLabel;
     this.hasTooltip = !!this.projectedTooltip;
     this.hasPrefix = !!this.projectedPrefix;
@@ -54,9 +60,17 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   }
 
   ngAfterViewInit(): void {
-    console.log('FieldDecoratorComponent. ngAfterViewInit');
+    // interact with the projected field content
+    this.registerFieldEvents();
+    this.adjustLayout();
 
-    this.doLayoutAdjustments();
+    // evaluate the initial state of the field
+    this.cdr.markForCheck();
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   //#region IFormzField
@@ -90,7 +104,21 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   //#endregion
 
-  private doLayoutAdjustments(): void {
+  private registerFieldEvents(): void {
+    if (this.projectedField) {
+      this.projectedField.formzField.focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
+        this.focusChangeSubject$.next(focused);
+        this.cdr.markForCheck();
+      });
+
+      this.projectedField.formzField.valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
+        this.valueChangeSubject$.next(value);
+        this.cdr.markForCheck();
+      });
+    }
+  }
+
+  private adjustLayout(): void {
     requestAnimationFrame(() => {
       // if prefix/suffix are projected, adjust the padding of the field
       const field = this.elementRef.nativeElement;
