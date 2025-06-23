@@ -13,8 +13,6 @@
 - rename components
 - consolidate templates/scss for FormField and FormGroupField?
 - support tabbing
-- create a `BaseHasValueAndFocusChange` class (and rename), see TODO: move this, c'tor content, onDestroy and HasValueAndFocusChange to a base class?
 - resolve all TODOs
 - remove all `cmp` prefixes
 - try removing the `formzFormField` directive in consumer
-- implement disabled behaviour

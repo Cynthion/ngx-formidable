@@ -12,10 +12,18 @@
   }
 }
 
+@mixin field-readonly {
+  background: var(--formz-color-field-background-readonly, #{tokens.$formz-color-field-background-readonly});
+  color: var(--formz-color-field-text-readonly, #{tokens.$formz-color-field-text-readonly});
+}
+
 @mixin field-disabled {
   opacity: 0.65;
   cursor: not-allowed;
   pointer-events: none;
+
+  background: var(--formz-color-field-background-disabled, #{tokens.$formz-color-field-background-disabled});
+  color: var(--formz-color-field-text-disabled, #{tokens.$formz-color-field-text-disabled});
 }
 
 /**
@@ -37,6 +45,10 @@
       var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
     border-color var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
       var(--formz-hover-easing, #{tokens.$formz-hover-easing});
+
+  &.readonly {
+    @include field-readonly;
+  }
 
   &:disabled {
     @include field-disabled;

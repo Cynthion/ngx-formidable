@@ -4,6 +4,8 @@
 :root {
   --formz-color-validation-error: #{tokens.$formz-color-validation-error};
   --formz-color-field-text: #{tokens.$formz-color-field-text};
+  --formz-color-field-text-readonly: #{tokens.$formz-color-field-text-readonly};
+  --formz-color-field-text-disabled: #{tokens.$formz-color-field-text-disabled};
   --formz-color-field-label: #{tokens.$formz-color-field-label};
   --formz-color-field-label-floating: #{tokens.$formz-color-field-label-floating};
   --formz-color-field-tooltip: #{tokens.$formz-color-field-tooltip};
@@ -12,6 +14,8 @@
   --formz-color-field-border: #{tokens.$formz-color-field-border};
   --formz-color-field-border-focus: #{tokens.$formz-color-field-border-focus};
   --formz-color-field-background: #{tokens.$formz-color-field-background};
+  --formz-color-field-background-readonly: #{tokens.$formz-color-field-background-readonly};
+  --formz-color-field-background-disabled: #{tokens.$formz-color-field-background-disabled};
   --formz-color-field-hover: #{tokens.$formz-color-field-hover};
 
   --formz-field-height: #{tokens.$formz-field-height};

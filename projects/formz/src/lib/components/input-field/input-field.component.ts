@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
@@ -22,6 +22,8 @@ import { FormzFieldBase } from '../../form-model';
 })
 export class InputFieldComponent extends FormzFieldBase implements ControlValueAccessor {
   @ViewChild('inputRef') inputRef!: ElementRef<HTMLInputElement>;
+
+  @Input() readonly = false;
 
   private id = uuid();
   private isFieldFocused = false;
@@ -48,6 +50,9 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
 
   //#region IFormzField
 
+  valueChange$ = this.valueChangeSubject$.asObservable();
+  focusChange$ = this.focusChangeSubject$.asObservable();
+
   get fieldId(): string {
     return this.id;
   }
@@ -64,9 +69,6 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
     return this.inputRef as ElementRef<HTMLElement>;
   }
 
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
   //#endregion
 
   //#region ControlValueAccessor
@@ -75,7 +77,6 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   private onChange: (value: unknown) => void = () => {};
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouched: () => void = () => {};
-  protected isDisabled = false;
 
   writeValue(value: string): void {
     console.log('InputFieldComponent. writeValue', value);
@@ -99,11 +100,10 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.isDisabled = isDisabled;
-
     if (this.inputRef) {
       this.inputRef.nativeElement.disabled = isDisabled;
     }
   }
+
   //#endregion
 }

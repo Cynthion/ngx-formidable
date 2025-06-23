@@ -8,9 +8,21 @@
 // 800: #114367
 // 900: #00345a
 
+// 100: #f5f5f5
+// 200: #dddddd
+// 300: #c5c5c5
+// 400: #acacac
+// 500: #949494
+// 600: #7c7c7c
+// 700: #646464
+// 800: #4b4b4b
+// 900: #333333
+
 // SCSS Variables for internal (default) styling
 $formz-color-validation-error: #dc5858;
 $formz-color-field-text: #00345a;
+$formz-color-field-text-readonly: #646464;
+$formz-color-field-text-disabled: #333333;
 $formz-color-field-label: $formz-color-field-text;
 $formz-color-field-label-floating: #3e6988;
 $formz-color-field-tooltip: $formz-color-field-text;
@@ -19,6 +31,8 @@ $formz-color-field-selection: #9fb7c7;
 $formz-color-field-border: #114367;
 $formz-color-field-border-focus: #5b7f99;
 $formz-color-field-background: #f2faff;
+$formz-color-field-background-readonly: #c5c5c5;
+$formz-color-field-background-disabled: #acacac;
 $formz-color-field-hover: rgba(0, 0, 0, 0.31);
 
 $formz-field-height: 66px;

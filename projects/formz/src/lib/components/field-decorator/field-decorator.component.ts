@@ -73,6 +73,9 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   //#region IFormzField
 
+  valueChange$ = this.valueChangeSubject$.asObservable();
+  focusChange$ = this.focusChangeSubject$.asObservable();
+
   get fieldId(): string {
     return this.projectedField?.formzField.fieldId ?? '';
   }
@@ -97,8 +100,9 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     return this.projectedField.formzField.elementRef;
   }
 
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
+  get readonly(): boolean {
+    return this.projectedField?.formzField.readonly ?? false;
+  }
 
   //#endregion
 

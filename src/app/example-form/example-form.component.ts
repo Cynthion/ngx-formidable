@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
-import { ExampleFormModel, exampleFormShape, exampleFormValidationSuite } from './example-form.model';
 import { FormValidationOptions } from 'projects/formz/src/lib/form-model';
+import { ExampleFormModel, exampleFormShape, exampleFormValidationSuite } from './example-form.model';
 
 @Component({
   selector: 'formz-example-form',
@@ -29,6 +29,8 @@ export class ExampleFormComponent {
       isDirty: this.isDirty(),
       isValid: this.isValid(),
       errors: this.errors(),
+      isReadOnly: true,
+      isDisabled: true,
 
       // custom vieModel properties
       showPasswords: this.formValue().firstName,

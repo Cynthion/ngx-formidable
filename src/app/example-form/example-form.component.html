@@ -22,7 +22,9 @@
         maxlength="1000"
         type="text"
         name="firstName"
-        [ngModel]="vm.formValue.firstName">
+        [ngModel]="vm.formValue.firstName"
+        [disabled]="vm.isDisabled"
+        [readonly]="vm.isReadOnly">
       </formz-input-field>
       <div
         formzFormFieldLabel

@@ -7,7 +7,8 @@
   maxlength="1000"
   type="text"
   name="firstName"
-  [disabled]="isDisabled"
+  [class.readonly]="readonly"
+  [readOnly]="readonly"
   (input)="onInputChange()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)" />

@@ -43,22 +43,6 @@ module.exports = tseslint.config(
           ignoreRestSiblings: true
         }
       ],
-      '@angular-eslint/directive-selector': [
-        'error',
-        {
-          type: 'attribute',
-          prefix: 'enq',
-          style: 'camelCase'
-        }
-      ],
-      '@angular-eslint/component-selector': [
-        'error',
-        {
-          type: 'element',
-          prefix: 'enq',
-          style: 'kebab-case'
-        }
-      ],
       'rxjs-x/finnish': [
         'error',
         {

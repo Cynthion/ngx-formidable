@@ -17,6 +17,7 @@ export interface IFormzField {
   valueChange$: Observable<string>;
   focusChange$: Observable<boolean>;
   elementRef: ElementRef<HTMLElement>;
+  readonly: boolean;
 }
 
 /**
@@ -31,6 +32,7 @@ export abstract class FormzFieldBase implements IFormzField {
   abstract valueChange$: Observable<string>;
   abstract focusChange$: Observable<boolean>;
   abstract get elementRef(): ElementRef<HTMLElement>;
+  abstract get readonly(): boolean;
 }
 
 export type FieldDecoratorLayout = 'single' | 'option';
