@@ -18,12 +18,16 @@
 }
 
 @mixin field-disabled {
-  opacity: 0.65;
   cursor: not-allowed;
   pointer-events: none;
 
   background: var(--formz-color-field-background-disabled, #{tokens.$formz-color-field-background-disabled});
   color: var(--formz-color-field-text-disabled, #{tokens.$formz-color-field-text-disabled});
+}
+
+@mixin field-required {
+  background: pink;
+  color: white;
 }
 
 /**
@@ -41,17 +45,22 @@
   border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
   background: var(--formz-color-field-background, #{tokens.$formz-color-field-background});
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
-  transition: box-shadow var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+  transition:
+    box-shadow var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
       var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
     border-color var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
       var(--formz-hover-easing, #{tokens.$formz-hover-easing});
 
-  &.readonly {
+  &:read-only {
     @include field-readonly;
   }
 
   &:disabled {
     @include field-disabled;
+  }
+
+  &:required {
+    @include field-required;
   }
 
   &:focus {
@@ -85,7 +94,8 @@
   // animation
   transform: translateY(0) scale(1); // default placement
   transform-origin: left top;
-  transition: transform var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+  transition:
+    transform var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
       var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
     margin-right var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
       var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
@@ -197,7 +207,8 @@
   opacity: 0;
   transform: translateY(-0.25rem); // slight offset when closed
   pointer-events: none; // prevent hover/clicks when closed
-  transition: opacity var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
+  transition:
+    opacity var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
       var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
     transform var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
       var(--formz-hover-easing, #{tokens.$formz-hover-easing});

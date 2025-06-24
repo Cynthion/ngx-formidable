@@ -100,10 +100,6 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     return this.projectedField.formzField.elementRef;
   }
 
-  get readonly(): boolean {
-    return this.projectedField?.formzField.readonly ?? false;
-  }
-
   //#endregion
 
   private registerFieldEvents(): void {

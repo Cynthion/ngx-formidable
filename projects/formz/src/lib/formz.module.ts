@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { FieldDecoratorComponent } from './components/field-decorator/field-decorator.component';
 import { FormFieldErrorsComponent } from './components/form-field-errors/form-field-errors.component';
 import { InputFieldComponent } from './components/input-field/input-field.component';
+import { FieldAttributesDirective } from './directives/field-attributes.directive';
 import { FormFieldErrorsDirective } from './directives/form-field-errors.directive';
 import { FormFieldLabelDirective } from './directives/form-field-label.directive';
 import { FormFieldPrefixDirective } from './directives/form-field-prefix.directive';
@@ -27,6 +28,7 @@ const components = [
   // Formz Directives
   // TODO
   FormFieldDirective,
+  FieldAttributesDirective,
   FormFieldLabelDirective,
   FormFieldTooltipDirective,
   FormFieldPrefixDirective,

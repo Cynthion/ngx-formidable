@@ -17,14 +17,16 @@
       <formz-input-field
         formzFormField
         formzFormFieldErrors
+        type="text"
         placeholder="Your first name"
         autocomplete="given-name"
-        maxlength="1000"
-        type="text"
         name="firstName"
+        [minLength]="10"
+        [maxLength]="15"
         [ngModel]="vm.formValue.firstName"
         [disabled]="vm.isDisabled"
-        [readonly]="vm.isReadOnly">
+        [readOnly]="vm.isReadOnly"
+        [required]="vm.isRequired">
       </formz-input-field>
       <div
         formzFormFieldLabel
@@ -101,7 +103,7 @@
     </formz-form-field> -->
 
     <!-- Passwords Group -->
-     <!-- TODO add form group -->
+    <!-- TODO add form group -->
 
     <div class="footer">
       <!-- Submit -->

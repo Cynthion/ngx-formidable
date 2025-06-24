@@ -9,8 +9,8 @@ import {
 import { debounceTime, Observable, of, ReplaySubject, Subject, switchMap, take, takeUntil } from 'rxjs';
 import { StaticSuite } from 'vest';
 import { FormValidationOptions, ROOT_FORM } from '../form-model';
-import { cloneDeep } from '../utility.helpers';
 import { set } from '../form.helpers';
+import { cloneDeep } from '../utility.helpers';
 
 /**
 Source: https://github.dev/simplifiedcourses/ngx-vest-forms

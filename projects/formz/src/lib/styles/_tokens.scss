@@ -21,8 +21,8 @@
 // SCSS Variables for internal (default) styling
 $formz-color-validation-error: #dc5858;
 $formz-color-field-text: #00345a;
-$formz-color-field-text-readonly: #646464;
-$formz-color-field-text-disabled: #333333;
+$formz-color-field-text-readonly: #255476;
+$formz-color-field-text-disabled: #646464;
 $formz-color-field-label: $formz-color-field-text;
 $formz-color-field-label-floating: #3e6988;
 $formz-color-field-tooltip: $formz-color-field-text;
@@ -32,7 +32,7 @@ $formz-color-field-border: #114367;
 $formz-color-field-border-focus: #5b7f99;
 $formz-color-field-background: #f2faff;
 $formz-color-field-background-readonly: #c5c5c5;
-$formz-color-field-background-disabled: #acacac;
+$formz-color-field-background-disabled: #c5c5c5;
 $formz-color-field-hover: rgba(0, 0, 0, 0.31);
 
 $formz-field-height: 66px;

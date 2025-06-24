@@ -19,7 +19,6 @@ export interface IFormzField {
   valueChange$: Observable<string>;
   focusChange$: Observable<boolean>;
   elementRef: ElementRef<HTMLElement>;
-  readonly: boolean;
 }
 
 /**
@@ -34,5 +33,18 @@ export abstract class FormzFieldBase implements IFormzField {
   abstract valueChange$: Observable<string>;
   abstract focusChange$: Observable<boolean>;
   abstract get elementRef(): ElementRef<HTMLElement>;
-  abstract get readonly(): boolean;
 }
+
+type FormzInputFieldsKeys =
+  | 'type'
+  | 'name'
+  | 'placeholder'
+  | 'autocomplete'
+  | 'minLength'
+  | 'maxLength'
+  | 'disabled'
+  | 'readOnly'
+  | 'required';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface IFormzInputField extends Partial<Pick<HTMLInputElement, FormzInputFieldsKeys>> {}

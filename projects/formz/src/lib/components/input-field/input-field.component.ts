@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, View
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FormzFieldBase } from '../../form-model';
+import { FormzFieldBase, IFormzInputField } from '../../form-model';
 
 @Component({
   selector: 'formz-input-field',
@@ -20,10 +20,8 @@ import { FormzFieldBase } from '../../form-model';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InputFieldComponent extends FormzFieldBase implements ControlValueAccessor {
+export class InputFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzInputField {
   @ViewChild('inputRef') inputRef!: ElementRef<HTMLInputElement>;
-
-  @Input() readonly = false;
 
   private id = uuid();
   private isFieldFocused = false;
@@ -104,6 +102,20 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
       this.inputRef.nativeElement.disabled = isDisabled;
     }
   }
+
+  //#endregion
+
+  //#region IFormzInputField
+
+  @Input() type = 'text';
+  @Input() name = '';
+  @Input() placeholder = '';
+  @Input() autocomplete: AutoFill = 'off';
+  @Input() minLength?: number = undefined;
+  @Input() maxLength?: number = undefined;
+  @Input() disabled = false;
+  @Input() readOnly = false;
+  @Input() required = false;
 
   //#endregion
 }
