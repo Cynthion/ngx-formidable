@@ -29,8 +29,8 @@ export class ExampleFormComponent {
       isDirty: this.isDirty(),
       isValid: this.isValid(),
       errors: this.errors(),
-      isReadOnly: true,
-      isDisabled: true,
+      isReadOnly: false,
+      isDisabled: false,
 
       // custom vieModel properties
       showPasswords: this.formValue().firstName,

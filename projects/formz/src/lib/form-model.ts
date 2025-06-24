@@ -3,6 +3,8 @@ import { Observable } from 'rxjs';
 
 export const ROOT_FORM = 'rootForm';
 
+export type FieldDecoratorLayout = 'single' | 'option';
+
 export interface FormValidationOptions {
   debounceValidationInMs: number;
 }
@@ -34,5 +36,3 @@ export abstract class FormzFieldBase implements IFormzField {
   abstract get elementRef(): ElementRef<HTMLElement>;
   abstract get readonly(): boolean;
 }
-
-export type FieldDecoratorLayout = 'single' | 'option';
