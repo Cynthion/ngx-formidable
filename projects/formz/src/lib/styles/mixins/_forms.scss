@@ -26,8 +26,8 @@
 }
 
 @mixin field-required {
-  background: pink;
-  color: white;
+  background: var(--formz-color-field-background-required, #{tokens.$formz-color-field-background-required});
+  color: var(--formz-color-field-text-required, #{tokens.$formz-color-field-text-required});
 }
 
 /**
