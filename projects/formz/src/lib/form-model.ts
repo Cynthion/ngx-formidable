@@ -36,7 +36,6 @@ export abstract class FormzFieldBase implements IFormzField {
 }
 
 type FormzInputFieldsKeys =
-  | 'type'
   | 'name'
   | 'placeholder'
   | 'autocomplete'
@@ -46,5 +45,6 @@ type FormzInputFieldsKeys =
   | 'readOnly'
   | 'required';
 
+/** The subset of `<input/>` properties that are supported. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface IFormzInputField extends Partial<Pick<HTMLInputElement, FormzInputFieldsKeys>> {}
+export interface IFormzInputField extends Pick<HTMLInputElement, FormzInputFieldsKeys> {}

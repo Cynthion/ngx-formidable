@@ -1,13 +1,13 @@
 <input
   #inputRef
+  type="text"
   class="input-field"
   [id]="fieldId"
-  [type]="type"
   [placeholder]="placeholder"
   [attr.name]="name"
   [attr.autocomplete]="autocomplete"
-  [attr.minlength]="minLength"
-  [attr.maxlength]="maxLength"
+  [attr.minlength]="minLength > -1 ? minLength : null"
+  [attr.maxlength]="maxLength > -1 ? maxLength : null"
   [attr.readonly]="readOnly ? '' : null"
   [attr.disabled]="disabled ? '' : null"
   [required]="required"

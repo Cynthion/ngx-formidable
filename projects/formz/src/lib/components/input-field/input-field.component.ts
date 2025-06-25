@@ -107,12 +107,11 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
 
   //#region IFormzInputField
 
-  @Input() type = 'text';
   @Input() name = '';
   @Input() placeholder = '';
   @Input() autocomplete: AutoFill = 'off';
-  @Input() minLength?: number = undefined;
-  @Input() maxLength?: number = undefined;
+  @Input() minLength = -1;
+  @Input() maxLength = -1;
   @Input() disabled = false;
   @Input() readOnly = false;
   @Input() required = false;
