@@ -1,7 +1,7 @@
 import { Directive, ElementRef, Input } from '@angular/core';
 
-@Directive({ selector: '[formzFormFieldLabel]' })
-export class FormFieldLabelDirective {
+@Directive({ selector: '[formzFieldLabel]' })
+export class FieldLabelDirective {
   /** Whether the label should float above the field. */
   @Input() isFloating = false;
 

@@ -1,6 +1,6 @@
 import { Directive, ElementRef } from '@angular/core';
 
-@Directive({ selector: '[formzFormFieldSuffix]' })
-export class FormFieldSuffixDirective {
+@Directive({ selector: '[formzFieldPrefix]' })
+export class FieldPrefixDirective {
   constructor(public elementRef: ElementRef) {}
 }

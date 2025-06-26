@@ -74,16 +74,16 @@ test(ROOT_FORM, 'Brecht is not 30 anymore', () => {
 
  */
 @Directive({
-  selector: 'form[formzValidateRootForm][formValue][suite]',
+  selector: 'form[formzRootValidate][formValue][suite]',
   providers: [
     {
       provide: NG_ASYNC_VALIDATORS,
-      useExisting: ValidateRootFormDirective,
+      useExisting: FormRootValidateDirective,
       multi: true
     }
   ]
 })
-export class ValidateRootFormDirective<T> implements AsyncValidator, OnDestroy {
+export class FormRootValidateDirective<T> implements AsyncValidator, OnDestroy {
   public validationOptions = input<FormValidationOptions>({ debounceValidationInMs: 0 });
 
   private readonly destroy$ = new Subject<void>();

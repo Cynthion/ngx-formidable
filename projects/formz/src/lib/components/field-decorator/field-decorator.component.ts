@@ -11,12 +11,12 @@ import {
   OnDestroy,
   ViewChild
 } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
-import { FormFieldLabelDirective } from '../../directives/form-field-label.directive';
-import { FormFieldPrefixDirective } from '../../directives/form-field-prefix.directive';
-import { FormFieldSuffixDirective } from '../../directives/form-field-suffix.directive';
-import { FormFieldTooltipDirective } from '../../directives/form-field-tooltip.directive';
-import { FormFieldDirective } from '../../directives/form-field.directive';
+import { Subject } from 'rxjs';
+import { FieldLabelDirective } from '../../directives/field-label.directive';
+import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
+import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
+import { FieldTooltipDirective } from '../../directives/field-tooltip.directive';
+import { FieldDirective } from '../../directives/field.directive';
 import { FieldDecoratorLayout, IFormzField } from '../../form-model';
 
 @Component({
@@ -31,11 +31,11 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   @ViewChild('suffixWrapperRef') suffixWrapper?: ElementRef<HTMLDivElement>;
 
   // Content children are used to project the label, tooltip, field, prefix and suffix
-  @ContentChild(FormFieldLabelDirective) projectedLabel?: FormFieldLabelDirective;
-  @ContentChild(FormFieldTooltipDirective) projectedTooltip?: FormFieldTooltipDirective;
-  @ContentChild(FormFieldDirective) projectedField?: FormFieldDirective;
-  @ContentChild(FormFieldPrefixDirective) projectedPrefix?: FormFieldPrefixDirective;
-  @ContentChild(FormFieldSuffixDirective) projectedSuffix?: FormFieldSuffixDirective;
+  @ContentChild(FieldLabelDirective) projectedLabel?: FieldLabelDirective;
+  @ContentChild(FieldTooltipDirective) projectedTooltip?: FieldTooltipDirective;
+  @ContentChild(FieldDirective) projectedField?: FieldDirective;
+  @ContentChild(FieldPrefixDirective) projectedPrefix?: FieldPrefixDirective;
+  @ContentChild(FieldSuffixDirective) projectedSuffix?: FieldSuffixDirective;
 
   @Input() decoratorLayout: FieldDecoratorLayout = 'single'; // TODO implement 'option' layout
 
@@ -59,7 +59,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   ngAfterViewInit(): void {
     // interact with the projected field content
-    this.registerFieldEvents();
+    // this.registerFieldEvents();
     this.adjustLayout();
 
     // evaluate the initial state of the field
@@ -102,19 +102,19 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   //#endregion
 
-  private registerFieldEvents(): void {
-    if (this.projectedField) {
-      this.projectedField.formzField.focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
-        this.focusChangeSubject$.next(focused);
-        this.cdr.markForCheck();
-      });
+  // private registerFieldEvents(): void {
+  //   if (this.projectedField) {
+  //     this.projectedField.formzField.focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
+  //       this.focusChangeSubject$.next(focused);
+  //       this.cdr.markForCheck();
+  //     });
 
-      this.projectedField.formzField.valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
-        this.valueChangeSubject$.next(value);
-        this.cdr.markForCheck();
-      });
-    }
-  }
+  //     this.projectedField.formzField.valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
+  //       this.valueChangeSubject$.next(value);
+  //       this.cdr.markForCheck();
+  //     });
+  //   }
+  // }
 
   private adjustLayout(): void {
     requestAnimationFrame(() => {

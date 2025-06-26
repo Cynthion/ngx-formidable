@@ -4,39 +4,37 @@ import { FormsModule } from '@angular/forms';
 import { FieldDecoratorComponent } from './components/field-decorator/field-decorator.component';
 import { FormFieldErrorsComponent } from './components/form-field-errors/form-field-errors.component';
 import { InputFieldComponent } from './components/input-field/input-field.component';
-import { FieldAttributesDirective } from './directives/field-attributes.directive';
-import { FormFieldErrorsDirective } from './directives/form-field-errors.directive';
-import { FormFieldLabelDirective } from './directives/form-field-label.directive';
-import { FormFieldPrefixDirective } from './directives/form-field-prefix.directive';
-import { FormFieldSuffixDirective } from './directives/form-field-suffix.directive';
-import { FormFieldTooltipDirective } from './directives/form-field-tooltip.directive';
-import { FormFieldDirective } from './directives/form-field.directive';
+import { FieldErrorsDirective } from './directives/field-errors.directive';
+import { FieldLabelDirective } from './directives/field-label.directive';
+import { FieldPrefixDirective } from './directives/field-prefix.directive';
+import { FieldSuffixDirective } from './directives/field-suffix.directive';
+import { FieldTooltipDirective } from './directives/field-tooltip.directive';
+import { FieldDirective } from './directives/field.directive';
 import { FormModelGroupDirective } from './directives/form-model-group.directive';
 import { FormModelDirective } from './directives/form-model.directive';
+import { FormRootValidateDirective } from './directives/form-root-validate.directive';
 import { FormDirective } from './directives/form.directive';
-import { ValidateRootFormDirective } from './directives/validate-root-form.directive';
 
 const components = [
   // Ngx Vest Forms Directives
   FormDirective,
   FormModelDirective,
   FormModelGroupDirective,
-  ValidateRootFormDirective,
+  FormRootValidateDirective,
   // Formz Components
+  FormFieldErrorsComponent,
   FieldDecoratorComponent,
   InputFieldComponent,
   // Formz Directives
+  FieldDirective,
+  FieldTooltipDirective,
+  FieldLabelDirective,
+  FieldPrefixDirective,
+  FieldSuffixDirective,
+  FieldErrorsDirective
   // TODO
-  FormFieldDirective,
-  FieldAttributesDirective,
-  FormFieldLabelDirective,
-  FormFieldTooltipDirective,
-  FormFieldPrefixDirective,
-  FormFieldSuffixDirective,
-  FormFieldErrorsDirective,
   // FormFieldDropdownComponent,
   // FormFieldDropdownOptionComponent,
-  FormFieldErrorsComponent
   // FormFieldRadioGroupComponent,
   // FormFieldRadioGroupOptionComponent,
 ];
