@@ -1,0 +1,12 @@
+<select
+  #selectRef
+  class="select-field"
+  [id]="fieldId"
+  [attr.name]="name"
+  [attr.disabled]="disabled ? '' : null"
+  [required]="required"
+  (input)="onInputChange()"
+  (focus)="onFocusChange(true)"
+  (blur)="onFocusChange(false)">
+  <ng-content></ng-content>
+</select>

@@ -54,3 +54,9 @@ type FormzTextareaFieldsKeys = FormzInputFieldsKeys;
 /** The subset of `<textarea/>` properties that are supported. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IFormzTextareaField extends Pick<HTMLTextAreaElement, FormzTextareaFieldsKeys> {}
+
+type FormzSelectFieldsKeys = 'name' | 'disabled' | 'required';
+
+/** The subset of `<select/>` properties that are supported. */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface IFormzSelectField extends Pick<HTMLSelectElement, FormzSelectFieldsKeys> {}

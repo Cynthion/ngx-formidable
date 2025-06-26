@@ -61,25 +61,28 @@
     </formz-field-decorator>
 
     <!-- Gender -->
-    <!-- <formz-form-field>
-      <select
-        formzFormField
-        formzFormFieldErrors
+    <formz-field-decorator [decoratorLayout]="'single'">
+      <formz-select-field
+        formzField
+        formzFieldErrors
+        placeholder="Your gender"
         autocomplete="sex"
         name="gender"
-        [ngModel]="vm.formValue.gender">
+        [ngModel]="vm.formValue.gender"
+        [disabled]="false"
+        [required]="false">
         <option value="male">Male</option>
         <option value="female">Female</option>
-      </select>
+      </formz-select-field>
       <div
-        formzFormFieldLabel
+        formzFieldLabel
         [isFloating]="true">
         Label
       </div>
-      <div formzFormFieldTooltip>(Tooltip)</div>
-      <div formzFormFieldPrefix>Prefix</div>
-      <div formzFormFieldSuffix>Suffix</div>
-    </formz-form-field> -->
+      <div formzFieldTooltip>(Tooltip)</div>
+      <div formzFieldPrefix>Prefix</div>
+      <div formzFieldSuffix>Suffix</div>
+    </formz-field-decorator>
 
     <!-- Nationality -->
     <!-- <formz-form-field>

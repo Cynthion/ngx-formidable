@@ -77,6 +77,15 @@
   }
 }
 
+@mixin select-field {
+  @include input-field;
+
+  &:read-only {
+    background: var(--formz-color-field-background, #{tokens.$formz-color-field-background});
+    color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
+  }
+}
+
 @mixin textarea-field {
   @include input-field;
 
