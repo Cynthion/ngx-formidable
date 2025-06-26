@@ -37,6 +37,29 @@
       <div formzFieldSuffix>Suffix</div>
     </formz-field-decorator>
 
+    <!-- Last Name -->
+    <formz-field-decorator [decoratorLayout]="'single'">
+      <formz-textarea-field
+        formzField
+        formzFieldErrors
+        placeholder="Your last name"
+        autocomplete="family-name"
+        name="lastName"
+        [ngModel]="vm.formValue.lastName"
+        [disabled]="false"
+        [readOnly]="false"
+        [required]="false">
+      </formz-textarea-field>
+      <div
+        formzFieldLabel
+        [isFloating]="true">
+        Label
+      </div>
+      <div formzFieldTooltip>(Tooltip)</div>
+      <div formzFieldPrefix>Prefix</div>
+      <div formzFieldSuffix>Suffix</div>
+    </formz-field-decorator>
+
     <!-- Gender -->
     <!-- <formz-form-field>
       <select

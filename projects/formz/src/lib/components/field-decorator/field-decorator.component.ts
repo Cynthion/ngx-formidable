@@ -11,7 +11,7 @@ import {
   OnDestroy,
   ViewChild
 } from '@angular/core';
-import { Subject } from 'rxjs';
+import { merge, Subject, takeUntil } from 'rxjs';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
 import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
@@ -59,7 +59,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   ngAfterViewInit(): void {
     // interact with the projected field content
-    // this.registerFieldEvents();
+    this.registerFieldEvents();
     this.adjustLayout();
 
     // evaluate the initial state of the field
@@ -102,19 +102,26 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   //#endregion
 
-  // private registerFieldEvents(): void {
-  //   if (this.projectedField) {
-  //     this.projectedField.formzField.focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
-  //       this.focusChangeSubject$.next(focused);
-  //       this.cdr.markForCheck();
-  //     });
+  private registerFieldEvents(): void {
+    if (this.projectedField) {
+      const { focusChange$, valueChange$ } = this.projectedField.formzField;
 
-  //     this.projectedField.formzField.valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
-  //       this.valueChangeSubject$.next(value);
-  //       this.cdr.markForCheck();
-  //     });
-  //   }
-  // }
+      // as a decorator, the wrapped field's events are forwarded
+      focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
+        this.focusChangeSubject$.next(focused);
+      });
+
+      valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
+        this.valueChangeSubject$.next(value);
+      });
+
+      merge(focusChange$, valueChange$)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(() => {
+          this.cdr.markForCheck();
+        });
+    }
+  }
 
   private adjustLayout(): void {
     requestAnimationFrame(() => {

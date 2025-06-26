@@ -10,6 +10,7 @@ export * from './lib/components/form-field-errors/form-field-errors.component';
 // export * from './lib/components/form-field-radio-group/form-field-radio-group.component';
 export * from './lib/components/form-submit/form-submit.component';
 export * from './lib/components/input-field/input-field.component';
+export * from './lib/components/textarea-field/textarea-field.component';
 export * from './lib/formz.module';
 
 export * from './lib/directives/field-errors.directive';

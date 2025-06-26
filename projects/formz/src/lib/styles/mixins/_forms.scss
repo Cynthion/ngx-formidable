@@ -33,7 +33,7 @@
 /**
  * Styling for input and textarea elements.
  */
-@mixin field {
+@mixin input-field {
   @include input-reset;
   @include typo.font-m;
 
@@ -75,6 +75,15 @@
   &::placeholder {
     color: var(--formz-color-field-placeholder, #{tokens.$formz-color-field-placeholder});
   }
+}
+
+@mixin textarea-field {
+  @include input-field;
+
+  min-height: var(--formz-textarea-min-height, #{tokens.$formz-textarea-min-height});
+  max-height: var(--formz-textarea-max-height, #{tokens.$formz-textarea-max-height});
+  padding-top: var(--formz-textarea-padding-top, #{tokens.$formz-textarea-padding-top});
+  resize: vertical;
 }
 
 @mixin field-before {

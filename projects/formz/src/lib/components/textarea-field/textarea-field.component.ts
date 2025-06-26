@@ -2,26 +2,26 @@ import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, View
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FormzFieldBase, IFormzInputField } from '../../form-model';
+import { FormzFieldBase, IFormzTextareaField } from '../../form-model';
 
 @Component({
-  selector: 'formz-input-field',
-  templateUrl: './input-field.component.html',
-  styleUrls: ['./input-field.component.scss'],
+  selector: 'formz-textarea-field',
+  templateUrl: './textarea-field.component.html',
+  styleUrls: ['./textarea-field.component.scss'],
   providers: [
     // required to use FormzFieldBase  during injection as a base class for this component
-    { provide: FormzFieldBase, useExisting: forwardRef(() => InputFieldComponent) },
+    { provide: FormzFieldBase, useExisting: forwardRef(() => TextareaFieldComponent) },
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => InputFieldComponent),
+      useExisting: forwardRef(() => TextareaFieldComponent),
       multi: true
     }
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InputFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzInputField {
-  @ViewChild('inputRef') inputRef!: ElementRef<HTMLInputElement>;
+export class TextareaFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzTextareaField {
+  @ViewChild('textareaRef') textareaRef!: ElementRef<HTMLTextAreaElement>;
 
   private id = uuid();
   private isFieldFocused = false;
@@ -30,11 +30,21 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
 
+  /**
+   * Enable or disable autosizing of the textarea.
+   * If true, the textarea will automatically adjust its height based on the content.
+   */
+  @Input() enableAutosize = true;
+
   protected onInputChange(): void {
     const value = this.value;
     this.valueChangeSubject$.next(value);
     this.isFieldFilled = value.length > 0;
     this.onChange(value); // notify ControlValueAccessor of the change
+
+    if (this.enableAutosize) {
+      this.autoResize();
+    }
   }
 
   protected onFocusChange(isFocused: boolean): void {
@@ -56,7 +66,7 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   }
 
   get value(): string {
-    return this.inputRef?.nativeElement.value || '';
+    return this.textareaRef?.nativeElement.value || '';
   }
 
   get isLabelFloating(): boolean {
@@ -64,7 +74,7 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   }
 
   get elementRef(): ElementRef<HTMLElement> {
-    return this.inputRef as ElementRef<HTMLElement>;
+    return this.textareaRef as ElementRef<HTMLElement>;
   }
 
   //#endregion
@@ -77,8 +87,8 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    if (this.inputRef) {
-      this.inputRef.nativeElement.value = value ?? '';
+    if (this.textareaRef) {
+      this.textareaRef.nativeElement.value = value ?? '';
       this.isFieldFilled = !!value;
     }
   }
@@ -92,14 +102,14 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   }
 
   setDisabledState(isDisabled: boolean): void {
-    if (this.inputRef) {
-      this.inputRef.nativeElement.disabled = isDisabled;
+    if (this.textareaRef) {
+      this.textareaRef.nativeElement.disabled = isDisabled;
     }
   }
 
   //#endregion
 
-  //#region IFormzInputField
+  //#region IFormzTextareaField
 
   @Input() name = '';
   @Input() placeholder = '';
@@ -111,4 +121,12 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   @Input() required = false;
 
   //#endregion
+
+  private autoResize(): void {
+    const textarea = this.textareaRef?.nativeElement;
+    if (!textarea) return;
+
+    textarea.style.height = 'auto'; // reset height to recalculate
+    textarea.style.height = textarea.scrollHeight + 'px';
+  }
 }

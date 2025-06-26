@@ -10,6 +10,7 @@ import { ExampleFormModel, exampleFormShape, exampleFormValidationSuite } from '
 export class ExampleFormComponent {
   protected readonly formValue = signal<ExampleFormModel>({
     firstName: 'Chris',
+    lastName: '',
     gender: 'male',
     nationality: 'jp',
     religion: 'buddhism'
