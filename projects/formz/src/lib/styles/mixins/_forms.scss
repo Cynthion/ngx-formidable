@@ -86,6 +86,17 @@
   }
 }
 
+@mixin dropdown-field {
+  @include select-field;
+
+  &.open .dropdown-panel {
+    // animation
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
 @mixin textarea-field {
   @include input-field;
 
@@ -176,18 +187,7 @@
   color: var(--formz-color-validation-error, #{tokens.$formz-color-validation-error});
 }
 
-@mixin field-dropdown {
-  height: tokens.$formz-field-height; // ensure same height as field
-
-  &.open .dropdown-panel {
-    // animation
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
-}
-
-@mixin field-dropdown-trigger {
+@mixin dropdown-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -207,7 +207,7 @@
   }
 }
 
-@mixin field-dropdown-panel {
+@mixin dropdown-panel {
   position: absolute;
   box-shadow: var(--formz-dropdown-panel-box-shadow, #{tokens.$formz-dropdown-panel-box-shadow});
   border: 1px solid var(--formz-color-field-border, #{tokens.$formz-color-field-border});
@@ -232,7 +232,7 @@
       var(--formz-hover-easing, #{tokens.$formz-hover-easing});
 }
 
-@mixin field-dropdown-option {
+@mixin dropdown-option {
   padding: 0.5rem 1rem;
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
   cursor: pointer;

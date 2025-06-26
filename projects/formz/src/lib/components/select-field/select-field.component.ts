@@ -28,7 +28,7 @@ export class SelectFieldComponent extends FormzFieldBase implements ControlValue
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
 
-  protected onInputChange(): void {
+  protected onChangeChange(): void {
     const value = this.value;
     this.valueChangeSubject$.next(value);
     this.onChange(value); // notify ControlValueAccessor of the change

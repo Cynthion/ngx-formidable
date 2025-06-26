@@ -1,9 +1,10 @@
-<!-- <div
-  class="dropdown"
+<div
+  #dropdownRef
+  class="dropdown-field"
   [class.open]="isOpen">
   <div
     class="dropdown-trigger"
-    (click)="toggleDropdown()">
+    (click)="toggleDropdownPanel(!isOpen)">
     {{ selectedLabel || placeholder }}
     <span
       class="caret"
@@ -17,4 +18,4 @@
     class="dropdown-panel">
     <ng-content></ng-content>
   </div>
-</div> -->
+</div>

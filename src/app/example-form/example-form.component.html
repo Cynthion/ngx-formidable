@@ -30,7 +30,7 @@
       <div
         formzFieldLabel
         [isFloating]="true">
-        Label
+        First Name
       </div>
       <div formzFieldTooltip>(Tooltip)</div>
       <div formzFieldPrefix>Prefix</div>
@@ -53,7 +53,7 @@
       <div
         formzFieldLabel
         [isFloating]="true">
-        Label
+        Last Name
       </div>
       <div formzFieldTooltip>(Tooltip)</div>
       <div formzFieldPrefix>Prefix</div>
@@ -65,8 +65,6 @@
       <formz-select-field
         formzField
         formzFieldErrors
-        placeholder="Your gender"
-        autocomplete="sex"
         name="gender"
         [ngModel]="vm.formValue.gender"
         [disabled]="false"
@@ -77,7 +75,7 @@
       <div
         formzFieldLabel
         [isFloating]="true">
-        Label
+        Gender
       </div>
       <div formzFieldTooltip>(Tooltip)</div>
       <div formzFieldPrefix>Prefix</div>
@@ -85,24 +83,28 @@
     </formz-field-decorator>
 
     <!-- Nationality -->
-    <!-- <formz-form-field>
-      <formz-form-field-dropdown
-        formzFormField
-        formzFormFieldErrors
+    <formz-field-decorator>
+      <formz-dropdown-field
+        formzField
+        formzFieldErrors
         placeholder="Select..."
         name="nationality"
-        [ngModel]="vm.formValue.nationality">
-        <formz-form-field-dropdown-option value="de">🇩🇪 Germany</formz-form-field-dropdown-option>
-        <formz-form-field-dropdown-option value="fr">🇫🇷 France</formz-form-field-dropdown-option>
-        <formz-form-field-dropdown-option value="jp">🇯🇵 Japan</formz-form-field-dropdown-option>
-      </formz-form-field-dropdown>
+        [ngModel]="vm.formValue.nationality"
+        [disabled]="false"
+        [required]="false">
+        <formz-dropdown-option value="de">🇩🇪 Germany</formz-dropdown-option>
+        <formz-dropdown-option value="fr">🇫🇷 France</formz-dropdown-option>
+        <formz-dropdown-option value="jp">🇯🇵 Japan</formz-dropdown-option>
+      </formz-dropdown-field>
       <div
-        formzFormFieldLabel
+        formzFieldLabel
         [isFloating]="true">
-        Label
+        Nationality
       </div>
-      <div formzFormFieldTooltip>(Tooltip)</div>
-    </formz-form-field> -->
+      <div formzFieldTooltip>(Tooltip)</div>
+      <div formzFieldPrefix>Prefix</div>
+      <div formzFieldSuffix>Suffix</div>
+    </formz-field-decorator>
 
     <!-- Religion -->
     <!-- <formz-form-field>

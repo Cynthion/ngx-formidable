@@ -60,3 +60,10 @@ type FormzSelectFieldsKeys = 'name' | 'disabled' | 'required';
 /** The subset of `<select/>` properties that are supported. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IFormzSelectField extends Pick<HTMLSelectElement, FormzSelectFieldsKeys> {}
+
+export interface IFormzDropdownField {
+  name: string;
+  placeholder?: string;
+  disabled?: boolean;
+  required?: boolean;
+}

@@ -5,7 +5,7 @@
   [attr.name]="name"
   [attr.disabled]="disabled ? '' : null"
   [required]="required"
-  (input)="onInputChange()"
+  (change)="onChangeChange()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <ng-content></ng-content>

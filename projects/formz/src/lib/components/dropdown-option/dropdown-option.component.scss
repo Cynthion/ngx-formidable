@@ -1,0 +1,9 @@
+@use '../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.dropdown-option {
+  @include dropdown-option;
+}

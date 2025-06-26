@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DropdownFieldComponent } from './components/dropdown-field/dropdown-field.component';
+import { DropdownOptionComponent } from './components/dropdown-option/dropdown-option.component';
 import { FieldDecoratorComponent } from './components/field-decorator/field-decorator.component';
 import { FormFieldErrorsComponent } from './components/form-field-errors/form-field-errors.component';
 import { InputFieldComponent } from './components/input-field/input-field.component';
@@ -27,6 +29,8 @@ const components = [
   FormFieldErrorsComponent,
   FieldDecoratorComponent,
   InputFieldComponent,
+  DropdownFieldComponent,
+  DropdownOptionComponent,
   SelectFieldComponent,
   TextareaFieldComponent,
   // Formz Directives
@@ -37,8 +41,6 @@ const components = [
   FieldSuffixDirective,
   FieldErrorsDirective
   // TODO
-  // FormFieldDropdownComponent,
-  // FormFieldDropdownOptionComponent,
   // FormFieldRadioGroupComponent,
   // FormFieldRadioGroupOptionComponent,
 ];
