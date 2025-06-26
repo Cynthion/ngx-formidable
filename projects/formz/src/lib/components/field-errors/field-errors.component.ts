@@ -2,12 +2,12 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@a
 import { AbstractControl, NgModel, NgModelGroup } from '@angular/forms';
 
 @Component({
-  selector: 'formz-form-field-errors',
-  templateUrl: './form-field-errors.component.html',
-  styleUrls: ['./form-field-errors.component.scss'],
+  selector: 'formz-field-errors',
+  templateUrl: './field-errors.component.html',
+  styleUrls: ['./field-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FormFieldErrorsComponent {
+export class FieldErrorsComponent {
   @Input() ngModel?: NgModel;
   @Input() ngModelGroup?: NgModelGroup;
 

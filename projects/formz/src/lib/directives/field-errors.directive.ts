@@ -1,13 +1,13 @@
 import { AfterViewInit, Directive, inject, Injector, OnDestroy, Optional, ViewContainerRef } from '@angular/core';
 import { NgModel, NgModelGroup } from '@angular/forms';
 import { of, Subject, switchMap, takeUntil } from 'rxjs';
-import { FormFieldErrorsComponent } from '../components/form-field-errors/form-field-errors.component';
+import { FieldErrorsComponent } from '../components/field-errors/field-errors.component';
 import { FormDirective } from './form.directive';
 
 /**
  * Directive to display form field errors.
  *
- * This directive creates an instance of `FormFieldErrorsComponent` and manages its lifecycle.
+ * This directive creates an instance of `FieldErrorsComponent` and manages its lifecycle.
  * It listens to changes in the form control and updates the component accordingly.
  */
 @Directive({ selector: '[formzFieldErrors]' })
@@ -17,7 +17,7 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly formDirective = inject(FormDirective);
   private readonly destroy$ = new Subject<void>();
 
-  private formFieldErrorsComponentRef = this.viewContainerRef.createComponent(FormFieldErrorsComponent, {
+  private fieldErrorsComponentRef = this.viewContainerRef.createComponent(FieldErrorsComponent, {
     injector: this.injector
   });
 
@@ -31,12 +31,12 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
 
-    this.formFieldErrorsComponentRef.destroy();
+    this.fieldErrorsComponentRef.destroy();
   }
 
   public ngAfterViewInit(): void {
-    this.formFieldErrorsComponentRef.instance.ngModel = this.ngModel ?? undefined;
-    this.formFieldErrorsComponentRef.instance.ngModelGroup = this.ngModelGroup ?? undefined;
+    this.fieldErrorsComponentRef.instance.ngModel = this.ngModel ?? undefined;
+    this.fieldErrorsComponentRef.instance.ngModelGroup = this.ngModelGroup ?? undefined;
 
     // When the form is idle, listen to all events of the ngModel or ngModelgroup
     // and mark the component and its ancestors as dirty. (Allows use of OnPush.)
@@ -48,7 +48,7 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe(() => {
-        this.formFieldErrorsComponentRef.instance.markForCheck();
+        this.fieldErrorsComponentRef.instance.markForCheck();
       });
   }
 }

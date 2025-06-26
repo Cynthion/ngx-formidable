@@ -3,9 +3,7 @@
  */
 
 export * from './lib/components/field-decorator/field-decorator.component';
-// export * from './lib/components/form-field-dropdown-option/form-field-dropdown-option.component';
-// export * from './lib/components/form-field-dropdown/form-field-dropdown.component';
-export * from './lib/components/form-field-errors/form-field-errors.component';
+export * from './lib/components/field-errors/field-errors.component';
 // export * from './lib/components/form-field-radio-group-option/form-field-radio-group-option.component';
 // export * from './lib/components/form-field-radio-group/form-field-radio-group.component';
 export * from './lib/components/dropdown-field/dropdown-field.component';

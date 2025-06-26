@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DropdownFieldComponent } from './components/dropdown-field/dropdown-field.component';
 import { DropdownOptionComponent } from './components/dropdown-option/dropdown-option.component';
 import { FieldDecoratorComponent } from './components/field-decorator/field-decorator.component';
-import { FormFieldErrorsComponent } from './components/form-field-errors/form-field-errors.component';
+import { FieldErrorsComponent } from './components/field-errors/field-errors.component';
 import { InputFieldComponent } from './components/input-field/input-field.component';
 import { SelectFieldComponent } from './components/select-field/select-field.component';
 import { TextareaFieldComponent } from './components/textarea-field/textarea-field.component';
@@ -26,7 +26,7 @@ const components = [
   FormModelGroupDirective,
   FormRootValidateDirective,
   // Formz Components
-  FormFieldErrorsComponent,
+  FieldErrorsComponent,
   FieldDecoratorComponent,
   InputFieldComponent,
   DropdownFieldComponent,
