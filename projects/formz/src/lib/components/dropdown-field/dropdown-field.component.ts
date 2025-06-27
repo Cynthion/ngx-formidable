@@ -1,7 +1,9 @@
 import {
+  AfterContentInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ContentChildren,
   ElementRef,
   forwardRef,
   inject,
@@ -9,12 +11,14 @@ import {
   NgZone,
   OnDestroy,
   OnInit,
+  QueryList,
   ViewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../form-model';
+import { FieldOptionComponent } from '../field-option/field-option.component';
 
 @Component({
   selector: 'formz-dropdown-field',
@@ -34,7 +38,7 @@ import { FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../fo
 })
 export class DropdownFieldComponent
   extends FormzFieldBase
-  implements OnInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
+  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
 {
   @ViewChild('dropdownRef') dropdownRef!: ElementRef<HTMLDivElement>;
 
@@ -68,7 +72,15 @@ export class DropdownFieldComponent
     this.unregisterGlobalListeners();
   }
 
-  public selectOption(value: string, label: string): void {
+  ngAfterContentInit(): void {
+    if ((this.options?.length ?? 0) > 0 && (this.optionComponents?.length ?? 0) > 0) {
+      throw new Error('DropdownFieldComponent cannot use both [options] and <formz-field-option> content projection.');
+    }
+
+    this.optionComponents?.changes.subscribe(() => this.cdRef.markForCheck());
+  }
+
+  public selectOption(value: string, label?: string): void {
     this.selectedValue = value;
     this.selectedLabel = label;
     this.focusChangeSubject$.next(false); // simulate blur on selection
@@ -146,8 +158,8 @@ export class DropdownFieldComponent
   @Input() required = false;
   @Input() options?: IFormzFieldOption[] = [];
 
-  // @ContentChildren(forwardRef(() => FieldOptionComponent))
-  // optionComponents?: QueryList<FieldOptionComponent>;
+  @ContentChildren(forwardRef(() => FieldOptionComponent))
+  optionComponents?: QueryList<FieldOptionComponent>;
 
   //#endregion
 
@@ -168,8 +180,48 @@ export class DropdownFieldComponent
       };
 
       const onKeyDown = (event: KeyboardEvent) => {
-        if (this.isOpen && event.key === 'Escape') {
+        const options = this.options?.length
+          ? this.options
+          : this.optionComponents?.map((opt) => ({
+              value: opt.value,
+              label: opt.label || opt.innerTextAsLabel
+            })) || [];
+
+        if (event.key === 'Escape' && this.isOpen) {
           this.ngZone.run(() => this.toggleDropdownPanel(false));
+          return;
+        }
+
+        if (event.key === 'ArrowDown') {
+          this.ngZone.run(() => {
+            if (!this.isOpen) {
+              this.toggleDropdownPanel(true);
+              this.setHighlightedIndex(0);
+            } else {
+              this.setHighlightedIndex((this.highlightedIndex + 1) % options.length);
+            }
+            this.cdRef.markForCheck();
+          });
+          event.preventDefault();
+        }
+
+        if (event.key === 'ArrowUp') {
+          this.ngZone.run(() => {
+            if (this.isOpen) {
+              this.setHighlightedIndex((this.highlightedIndex - 1 + options.length) % options.length);
+            }
+          });
+          event.preventDefault();
+        }
+
+        if (event.key === 'Enter') {
+          this.ngZone.run(() => {
+            if (this.isOpen && options[this.highlightedIndex]) {
+              const opt = options[this.highlightedIndex]!;
+              this.selectOption(opt.value, opt.label);
+            }
+          });
+          event.preventDefault();
         }
       };
 
@@ -185,4 +237,18 @@ export class DropdownFieldComponent
     this.globalClickUnlisten?.();
     this.globalKeydownUnlisten?.();
   }
+
+  private setHighlightedIndex(index: number): void {
+    this.highlightedIndex = index;
+    this.updateHighlightState();
+    this.cdRef.markForCheck();
+  }
+
+  private updateHighlightState() {
+    this.optionComponents?.forEach((comp, i) => {
+      comp.setHighlighted(i === this.highlightedIndex);
+    });
+  }
+
+  highlightedIndex = -1;
 }

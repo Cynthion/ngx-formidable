@@ -251,3 +251,8 @@
   pointer-events: auto;
   touch-action: auto;
 }
+
+@mixin highlighted {
+  background: pink;
+  color: blue;
+}

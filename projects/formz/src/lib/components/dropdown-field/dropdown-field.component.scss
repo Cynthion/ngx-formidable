@@ -19,3 +19,7 @@
 .backdrop {
   @include backdrop;
 }
+
+.highlighted {
+  @include highlighted;
+}
