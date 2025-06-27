@@ -2,19 +2,16 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChildren,
   ElementRef,
   forwardRef,
   inject,
   Input,
-  QueryList,
   ViewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FormzFieldBase, IFormzDropdownField } from '../../form-model';
-import { DropdownOptionComponent } from '../dropdown-option/dropdown-option.component';
+import { FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../form-model';
 
 @Component({
   selector: 'formz-dropdown-field',
@@ -34,9 +31,6 @@ import { DropdownOptionComponent } from '../dropdown-option/dropdown-option.comp
 })
 export class DropdownFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzDropdownField {
   @ViewChild('dropdownRef') dropdownRef!: ElementRef<HTMLDivElement>;
-
-  @ContentChildren(forwardRef(() => DropdownOptionComponent))
-  options!: QueryList<DropdownOptionComponent>;
 
   protected selectedValue?: string;
   protected selectedLabel?: string;
@@ -127,6 +121,10 @@ export class DropdownFieldComponent extends FormzFieldBase implements ControlVal
   @Input() placeholder = '';
   @Input() disabled = false;
   @Input() required = false;
+  @Input() options?: IFormzFieldOption[] = [];
+
+  // @ContentChildren(forwardRef(() => FieldOptionComponent))
+  // optionComponents?: QueryList<FieldOptionComponent>;
 
   //#endregion
 

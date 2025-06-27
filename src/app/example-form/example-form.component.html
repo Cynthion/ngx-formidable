@@ -68,9 +68,11 @@
         name="gender"
         [ngModel]="vm.formValue.gender"
         [disabled]="false"
-        [required]="false">
-        <option value="male">Male</option>
-        <option value="female">Female</option>
+        [required]="false"
+        [options]="genderOptions">
+        <formz-field-option
+          [value]="'other'"
+          [label]="'Other'" />
       </formz-select-field>
       <div
         formzFieldLabel
@@ -91,10 +93,10 @@
         name="nationality"
         [ngModel]="vm.formValue.nationality"
         [disabled]="false"
-        [required]="false">
-        <formz-dropdown-option value="de">🇩🇪 Germany</formz-dropdown-option>
-        <formz-dropdown-option value="fr">🇫🇷 France</formz-dropdown-option>
-        <formz-dropdown-option value="jp">🇯🇵 Japan</formz-dropdown-option>
+        [required]="false"
+        [options]="nationalityOptions">
+        <formz-field-option [value]="'ch'">🇨🇭 Switzerland</formz-field-option>
+        <formz-field-option [value]="'other'"> Some other country </formz-field-option>
       </formz-dropdown-field>
       <div
         formzFieldLabel
@@ -105,6 +107,27 @@
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
     </formz-field-decorator>
+
+    <!-- Hobby -->
+    <!-- <formz-field-decorator>
+      <formz-autocomplete-field
+        formzField
+        formzFieldErrors
+        placeholder="Select..."
+        name="nationality"
+        [ngModel]="vm.formValue.nationality"
+        [disabled]="false"
+        [required]="false">
+      </formz-autocomplete-field>
+      <div
+        formzFieldLabel
+        [isFloating]="true">
+        Nationality
+      </div>
+      <div formzFieldTooltip>(Tooltip)</div>
+      <div formzFieldPrefix>Prefix</div>
+      <div formzFieldSuffix>Suffix</div>
+    </formz-field-decorator> -->
 
     <!-- Religion -->
     <!-- <formz-form-field>

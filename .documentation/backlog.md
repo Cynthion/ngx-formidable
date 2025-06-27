@@ -9,3 +9,4 @@
 - try removing the `formzFormField` directive in consumer
 - support showing multiple errors
 - resolve all TODOs
+- disabled/required for dropdown/autocomplete

@@ -1,8 +1,18 @@
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ContentChildren,
+  ElementRef,
+  forwardRef,
+  Input,
+  QueryList,
+  ViewChild
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FormzFieldBase, IFormzSelectField } from '../../form-model';
+import { FormzFieldBase, IFormzFieldOption, IFormzSelectField } from '../../form-model';
+import { FieldOptionComponent } from '../field-option/field-option.component';
 
 @Component({
   selector: 'formz-select-field',
@@ -97,6 +107,10 @@ export class SelectFieldComponent extends FormzFieldBase implements ControlValue
   @Input() name = '';
   @Input() disabled = false;
   @Input() required = false;
+  @Input() options?: IFormzFieldOption[] = [];
+
+  @ContentChildren(forwardRef(() => FieldOptionComponent))
+  optionComponents?: QueryList<FieldOptionComponent>;
 
   //#endregion
 }

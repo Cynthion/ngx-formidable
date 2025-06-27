@@ -9,6 +9,11 @@ export interface FormValidationOptions {
   debounceValidationInMs: number;
 }
 
+export interface IFormzFieldOption {
+  value: string;
+  label?: string;
+}
+
 /**
  * Interface for all Formz fields.
  */
@@ -46,24 +51,26 @@ type FormzInputFieldsKeys =
   | 'required';
 
 /** The subset of `<input/>` properties that are supported. */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface IFormzInputField extends Pick<HTMLInputElement, FormzInputFieldsKeys> {}
+export type IFormzInputField = Pick<HTMLInputElement, FormzInputFieldsKeys>;
 
 type FormzTextareaFieldsKeys = FormzInputFieldsKeys;
 
 /** The subset of `<textarea/>` properties that are supported. */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface IFormzTextareaField extends Pick<HTMLTextAreaElement, FormzTextareaFieldsKeys> {}
+export type IFormzTextareaField = Pick<HTMLTextAreaElement, FormzTextareaFieldsKeys>;
 
 type FormzSelectFieldsKeys = 'name' | 'disabled' | 'required';
 
 /** The subset of `<select/>` properties that are supported. */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface IFormzSelectField extends Pick<HTMLSelectElement, FormzSelectFieldsKeys> {}
+export interface IFormzSelectField extends Pick<HTMLSelectElement, FormzSelectFieldsKeys> {
+  options?: IFormzFieldOption[];
+}
 
 export interface IFormzDropdownField {
   name: string;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
+  options?: IFormzFieldOption[];
 }
+
+export type IFormzAutocompleteField = IFormzDropdownField;

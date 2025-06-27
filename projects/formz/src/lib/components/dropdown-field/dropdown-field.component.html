@@ -16,6 +16,15 @@
   <div
     *ngIf="isOpen"
     class="dropdown-panel">
+    @for (option of options; track option.value) {
+      <formz-field-option
+        value="{{ option.value }}"
+        [label]="option.label">
+        {{ option.label }}
+      </formz-field-option>
+    }
+    <!-- @if (optionComponents) { -->
     <ng-content></ng-content>
+    <!-- } -->
   </div>
 </div>

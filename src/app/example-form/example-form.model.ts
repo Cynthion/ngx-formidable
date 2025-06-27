@@ -10,7 +10,7 @@ export interface Password {
 }
 
 export type UserGender = 'male' | 'female';
-export type UserNationality = 'de' | 'fr' | 'jp';
+export type UserNationality = 'ch' | 'de' | 'fr' | 'jp';
 export type UserReligion = 'christian' | 'islam' | 'hindu' | 'buddhism';
 
 export interface User {
@@ -18,6 +18,7 @@ export interface User {
   lastName: string;
   gender?: UserGender;
   nationality?: UserNationality;
+  hobby?: string;
   religion?: UserReligion;
   passwords: Password;
 }
@@ -49,6 +50,7 @@ export const exampleFormShape: ExampleFormShape = {
   lastName: '',
   gender: 'male', // TODO how to use undefined in shape?
   nationality: 'jp',
+  hobby: '',
   religion: 'buddhism',
   passwords: {
     password: '',

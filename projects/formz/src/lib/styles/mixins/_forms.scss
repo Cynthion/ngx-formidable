@@ -232,7 +232,7 @@
       var(--formz-hover-easing, #{tokens.$formz-hover-easing});
 }
 
-@mixin dropdown-option {
+@mixin field-option {
   padding: 0.5rem 1rem;
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
   cursor: pointer;
