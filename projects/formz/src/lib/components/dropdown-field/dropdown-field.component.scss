@@ -15,3 +15,7 @@
 .dropdown-panel {
   @include dropdown-panel;
 }
+
+.backdrop {
+  @include backdrop;
+}

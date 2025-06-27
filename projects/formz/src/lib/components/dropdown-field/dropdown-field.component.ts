@@ -32,6 +32,8 @@ import { FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../fo
 export class DropdownFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzDropdownField {
   @ViewChild('dropdownRef') dropdownRef!: ElementRef<HTMLDivElement>;
 
+  @Input() enableBackdrop = true;
+
   protected selectedValue?: string;
   protected selectedLabel?: string;
   protected isOpen = false;

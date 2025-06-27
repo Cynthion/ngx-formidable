@@ -13,6 +13,13 @@
     >
   </div>
 
+  <!-- Backdrop -->
+  <div
+    *ngIf="isOpen && enableBackdrop"
+    class="backdrop"
+    (click)="toggleDropdownPanel(false)"></div>
+
+  <!-- Panel -->
   <div
     *ngIf="isOpen"
     class="dropdown-panel">
@@ -23,8 +30,6 @@
         {{ option.label }}
       </formz-field-option>
     }
-    <!-- @if (optionComponents) { -->
     <ng-content></ng-content>
-    <!-- } -->
   </div>
 </div>

@@ -241,3 +241,13 @@
     background: var(--formz-color-field-hover, #{tokens.$formz-color-field-hover});
   }
 }
+
+@mixin backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+
+  // Allow clicks but don't prevent scroll
+  pointer-events: auto;
+  touch-action: auto;
+}
