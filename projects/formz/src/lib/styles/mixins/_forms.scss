@@ -245,7 +245,7 @@
 @mixin backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--formz-color-backdrop, #{tokens.$formz-color-backdrop});
 
   // Allow clicks but don't prevent scroll
   pointer-events: auto;

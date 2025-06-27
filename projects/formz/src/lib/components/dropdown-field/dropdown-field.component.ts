@@ -6,6 +6,9 @@ import {
   forwardRef,
   inject,
   Input,
+  NgZone,
+  OnDestroy,
+  OnInit,
   ViewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -29,10 +32,13 @@ import { FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../fo
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DropdownFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzDropdownField {
+export class DropdownFieldComponent
+  extends FormzFieldBase
+  implements OnInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
+{
   @ViewChild('dropdownRef') dropdownRef!: ElementRef<HTMLDivElement>;
 
-  @Input() enableBackdrop = true;
+  @Input() enableBackdrop = false;
 
   protected selectedValue?: string;
   protected selectedLabel?: string;
@@ -46,6 +52,21 @@ export class DropdownFieldComponent extends FormzFieldBase implements ControlVal
   private focusChangeSubject$ = new Subject<boolean>();
 
   private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+
+  private globalClickUnlisten?: () => void;
+  private globalKeydownUnlisten?: () => void;
+
+  constructor(private ngZone: NgZone) {
+    super();
+  }
+
+  ngOnInit(): void {
+    this.registerGlobalListeners();
+  }
+
+  ngOnDestroy(): void {
+    this.unregisterGlobalListeners();
+  }
 
   public selectOption(value: string, label: string): void {
     this.selectedValue = value;
@@ -136,5 +157,32 @@ export class DropdownFieldComponent extends FormzFieldBase implements ControlVal
     this.isFieldFocused = isOpen;
 
     this.cdRef.markForCheck();
+  }
+
+  private registerGlobalListeners(): void {
+    this.ngZone.runOutsideAngular(() => {
+      const onClick = (event: MouseEvent) => {
+        if (this.isOpen && this.dropdownRef && !this.dropdownRef.nativeElement.contains(event.target as Node)) {
+          this.ngZone.run(() => this.toggleDropdownPanel(false));
+        }
+      };
+
+      const onKeyDown = (event: KeyboardEvent) => {
+        if (this.isOpen && event.key === 'Escape') {
+          this.ngZone.run(() => this.toggleDropdownPanel(false));
+        }
+      };
+
+      document.addEventListener('click', onClick);
+      document.addEventListener('keydown', onKeyDown);
+
+      this.globalClickUnlisten = () => document.removeEventListener('click', onClick);
+      this.globalKeydownUnlisten = () => document.removeEventListener('keydown', onKeyDown);
+    });
+  }
+
+  private unregisterGlobalListeners(): void {
+    this.globalClickUnlisten?.();
+    this.globalKeydownUnlisten?.();
   }
 }
