@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AutocompleteFieldComponent } from './components/autocomplete-field/autocomplete-field.component';
 import { DropdownFieldComponent } from './components/dropdown-field/dropdown-field.component';
 import { FieldDecoratorComponent } from './components/field-decorator/field-decorator.component';
 import { FieldErrorsComponent } from './components/field-errors/field-errors.component';
@@ -28,9 +29,9 @@ const components = [
   // Formz Components
   FieldErrorsComponent,
   FieldDecoratorComponent,
-  // AutocompleteFieldComponent,
   InputFieldComponent,
   DropdownFieldComponent,
+  AutocompleteFieldComponent,
   FieldOptionComponent,
   SelectFieldComponent,
   TextareaFieldComponent,

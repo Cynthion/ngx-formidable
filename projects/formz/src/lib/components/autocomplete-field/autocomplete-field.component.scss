@@ -1,0 +1,25 @@
+@use '../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.dropdown-field {
+  @include dropdown-field;
+}
+
+.dropdown-trigger {
+  @include dropdown-trigger;
+}
+
+.dropdown-panel {
+  @include dropdown-panel;
+}
+
+.backdrop {
+  @include backdrop;
+}
+
+.highlighted {
+  @include highlighted;
+}

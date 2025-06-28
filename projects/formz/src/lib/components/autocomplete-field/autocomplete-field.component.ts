@@ -20,26 +20,26 @@ import { FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../fo
 import { FieldOptionComponent } from '../field-option/field-option.component';
 
 @Component({
-  selector: 'formz-dropdown-field',
-  templateUrl: './dropdown-field.component.html',
-  styleUrls: ['./dropdown-field.component.scss'],
+  selector: 'formz-autocomplete-field',
+  templateUrl: './autocomplete-field.component.html',
+  styleUrls: ['./autocomplete-field.component.scss'],
   providers: [
     // required to use FormzFieldBase  during injection as a base class for this component
-    { provide: FormzFieldBase, useExisting: forwardRef(() => DropdownFieldComponent) },
+    { provide: FormzFieldBase, useExisting: forwardRef(() => AutocompleteFieldComponent) },
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => DropdownFieldComponent),
+      useExisting: forwardRef(() => AutocompleteFieldComponent),
       multi: true
     }
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DropdownFieldComponent
+export class AutocompleteFieldComponent
   extends FormzFieldBase
   implements OnInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
 {
-  @ViewChild('dropdownRef') dropdownRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('autocompleteRef') autocompleteRef!: ElementRef<HTMLDivElement>;
 
   @Input() enableBackdrop = false;
 
@@ -110,7 +110,7 @@ export class DropdownFieldComponent
   }
 
   get elementRef(): ElementRef<HTMLElement> {
-    return this.dropdownRef as ElementRef<HTMLElement>;
+    return this.autocompleteRef as ElementRef<HTMLElement>;
   }
 
   //#endregion
@@ -187,16 +187,16 @@ export class DropdownFieldComponent
   }
 
   private handleDocumentClick(event: MouseEvent): void {
-    if (!this.isOpen || !this.dropdownRef) return;
+    if (!this.isOpen || !this.autocompleteRef) return;
 
-    const clickedInside = this.dropdownRef.nativeElement.contains(event.target as Node);
+    const clickedInside = this.autocompleteRef.nativeElement.contains(event.target as Node);
     if (!clickedInside) {
       this.ngZone.run(() => this.toggleDropdownPanel(false));
     }
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
+    if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) return;
     if (!this.isFieldFocused) return;
     if (this.disabled) return;
 
