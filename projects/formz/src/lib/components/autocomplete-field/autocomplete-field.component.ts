@@ -51,7 +51,7 @@ export class AutocompleteFieldComponent
   protected highlightedIndex = -1;
 
   private id = uuid();
-  private isFieldFocused = false;
+  protected isFieldFocused = false;
   private isFieldFilled = false;
 
   private valueChangeSubject$ = new Subject<string>();

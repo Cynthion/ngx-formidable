@@ -47,6 +47,11 @@
   color: var(--formz-color-field-text-required, #{tokens.$formz-color-field-text-required});
 }
 
+@mixin field-focused {
+  border-color: var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
+  box-shadow: inset 0 0 0 1px var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
+}
+
 /**
  * Styling for input and textarea elements.
  */
@@ -81,8 +86,7 @@
   }
 
   &:focus {
-    border-color: var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
-    box-shadow: inset 0 0 0 1px var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
+    @include field-focused;
   }
 
   &::selection {
@@ -111,6 +115,10 @@
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
+  }
+
+  &.focused {
+    @include field-focused;
   }
 }
 

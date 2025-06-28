@@ -1,11 +1,12 @@
 <div
   #autocompleteRef
-  tabindex="0"
   class="field"
-  [class.open]="isOpen">
+  [class.open]="isOpen"
+  [class.focused]="isFieldFocused">
   <!-- Input Field -->
   <input
     #inputRef
+    autofocus
     type="text"
     class="wrapped-input"
     [id]="fieldId"
