@@ -14,7 +14,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../form-model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
@@ -68,6 +68,7 @@ export class AutocompleteFieldComponent
 
   ngOnInit(): void {
     this.registerGlobalListeners();
+    this.registerAutocomplete();
   }
 
   ngOnDestroy(): void {
@@ -85,9 +86,18 @@ export class AutocompleteFieldComponent
     this.togglePanel(false); // close the dropdown panel after selection
   }
 
+  private readonly filterChange$ = new BehaviorSubject<string>('');
+  protected readonly filteredOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+
   protected onInputChange(): void {
-    // TODO implement
-    // this.selectedValue = value;
+    const value = this.inputRef.nativeElement.value;
+
+    this.filterChange$.next(value);
+
+    // TODO comment following line to only allow prefedined options (add setting)
+    // this.onChange(value); // notify ControlValueAccessor of the change
+
+    this.isFieldFilled = value.length > 0;
   }
 
   protected onFocusChange(isFocused: boolean): void {
@@ -96,6 +106,10 @@ export class AutocompleteFieldComponent
 
     if (!isFocused) {
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
+    }
+
+    if (isFocused) {
+      this.togglePanel(true);
     }
   }
 
@@ -243,7 +257,7 @@ export class AutocompleteFieldComponent
         }
       });
     } else {
-      this.ngZone.run(() => this.togglePanel(false));
+      // panel must stay open
     }
   }
 
@@ -312,6 +326,20 @@ export class AutocompleteFieldComponent
           block: 'nearest'
         });
       }
+    });
+  }
+
+  private registerAutocomplete(): void {
+    // TODO make debounce configurable
+    this.filterChange$.pipe(debounceTime(200), distinctUntilChanged()).subscribe((filterValue: string) => {
+      // TODO check initial value
+      console.log('Filter value changed:', filterValue);
+
+      const allOptions = this.combineAllOptions();
+      console.log('All options:', allOptions);
+      const filteredOptions = allOptions.filter((opt) => opt.label?.toLowerCase().includes(filterValue.toLowerCase()));
+
+      this.filteredOptions$.next(filteredOptions);
     });
   }
 }
