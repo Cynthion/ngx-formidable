@@ -253,6 +253,5 @@
 }
 
 @mixin highlighted {
-  background: pink;
-  color: blue;
+  background: var(--formz-color-field-highlight, #{tokens.$formz-color-field-highlight});
 }

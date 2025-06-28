@@ -180,50 +180,8 @@ export class DropdownFieldComponent
 
   private registerGlobalListeners(): void {
     this.ngZone.runOutsideAngular(() => {
-      const onClick = (event: MouseEvent) => {
-        if (this.isOpen && this.dropdownRef && !this.dropdownRef.nativeElement.contains(event.target as Node)) {
-          this.ngZone.run(() => this.toggleDropdownPanel(false));
-        }
-      };
-
-      const onKeyDown = (event: KeyboardEvent) => {
-        const options = this.getFlatOptions();
-
-        if (event.key === 'Escape' && this.isOpen) {
-          this.ngZone.run(() => this.toggleDropdownPanel(false));
-          return;
-        }
-
-        if (event.key === 'ArrowDown') {
-          this.ngZone.run(() => {
-            if (!this.isOpen) {
-              this.toggleDropdownPanel(true);
-            } else {
-              this.setHighlightedIndex((this.highlightedIndex + 1) % options.length);
-            }
-          });
-          event.preventDefault();
-        }
-
-        if (event.key === 'ArrowUp') {
-          this.ngZone.run(() => {
-            if (this.isOpen) {
-              this.setHighlightedIndex((this.highlightedIndex - 1 + options.length) % options.length);
-            }
-          });
-          event.preventDefault();
-        }
-
-        if (event.key === 'Enter') {
-          this.ngZone.run(() => {
-            if (this.isOpen && options[this.highlightedIndex]) {
-              const opt = options[this.highlightedIndex]!;
-              this.selectOption(opt.value, opt.label);
-            }
-          });
-          event.preventDefault();
-        }
-      };
+      const onClick = (event: MouseEvent) => this.handleDocumentClick(event);
+      const onKeyDown = (event: KeyboardEvent) => this.handleKeyDown(event);
 
       document.addEventListener('click', onClick);
       document.addEventListener('keydown', onKeyDown);
@@ -236,6 +194,51 @@ export class DropdownFieldComponent
   private unregisterGlobalListeners(): void {
     this.globalClickUnlisten?.();
     this.globalKeydownUnlisten?.();
+  }
+
+  private handleDocumentClick(event: MouseEvent): void {
+    if (!this.isOpen || !this.dropdownRef) return;
+
+    const clickedInside = this.dropdownRef.nativeElement.contains(event.target as Node);
+    if (!clickedInside) {
+      this.ngZone.run(() => this.toggleDropdownPanel(false));
+    }
+  }
+
+  private handleKeyDown(event: KeyboardEvent): void {
+    if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) return;
+
+    const options = this.getFlatOptions();
+    const optionCount = options.length;
+
+    this.ngZone.run(() => {
+      switch (event.key) {
+        case 'Escape':
+          if (this.isOpen) this.toggleDropdownPanel(false);
+          break;
+        case 'ArrowDown':
+          if (!this.isOpen) {
+            this.toggleDropdownPanel(true);
+          } else if (optionCount > 0) {
+            this.setHighlightedIndex((this.highlightedIndex + 1) % optionCount);
+          }
+          event.preventDefault();
+          break;
+        case 'ArrowUp':
+          if (this.isOpen && optionCount > 0) {
+            this.setHighlightedIndex((this.highlightedIndex - 1 + optionCount) % optionCount);
+            event.preventDefault();
+          }
+          break;
+        case 'Enter':
+          if (this.isOpen && options[this.highlightedIndex]) {
+            const opt = options[this.highlightedIndex]!;
+            this.selectOption(opt.value, opt.label);
+            event.preventDefault();
+          }
+          break;
+      }
+    });
   }
 
   private setHightlightedOption(): void {
