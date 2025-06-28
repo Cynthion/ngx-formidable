@@ -198,46 +198,44 @@ export class DropdownFieldComponent
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
     if (!this.isFieldFocused) return;
     if (this.disabled) return;
 
-    const allOptions = this.combineAllOptions();
-    const allOptionsCount = allOptions.length;
+    if (['Escape', 'ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) {
+      const allOptions = this.combineAllOptions();
+      const allOptionsCount = allOptions.length;
 
-    this.ngZone.run(() => {
-      switch (event.key) {
-        case 'Escape':
-          if (this.isOpen) this.toggleDropdownPanel(false);
-          break;
-        case 'ArrowDown':
-          if (!this.isOpen) {
-            this.toggleDropdownPanel(true);
-          } else if (allOptionsCount > 0) {
-            this.setHighlightedIndex((this.highlightedIndex + 1) % allOptionsCount);
-          }
-          event.preventDefault();
-          break;
-        case 'ArrowUp':
-          if (this.isOpen && allOptionsCount > 0) {
-            this.setHighlightedIndex((this.highlightedIndex - 1 + allOptionsCount) % allOptionsCount);
+      this.ngZone.run(() => {
+        switch (event.key) {
+          case 'Escape':
+            if (this.isOpen) this.toggleDropdownPanel(false);
+            break;
+          case 'ArrowDown':
+            if (!this.isOpen) {
+              this.toggleDropdownPanel(true);
+            } else if (allOptionsCount > 0) {
+              this.setHighlightedIndex((this.highlightedIndex + 1) % allOptionsCount);
+            }
             event.preventDefault();
-          }
-          break;
-        case 'Enter':
-          if (this.isOpen && allOptions[this.highlightedIndex]) {
-            const opt = allOptions[this.highlightedIndex]!;
-            this.selectOption(opt.value, opt.label);
-            event.preventDefault();
-          }
-          break;
-        case 'Tab':
-          if (this.isOpen) {
-            this.toggleDropdownPanel(false);
-          }
-          break;
-      }
-    });
+            break;
+          case 'ArrowUp':
+            if (this.isOpen && allOptionsCount > 0) {
+              this.setHighlightedIndex((this.highlightedIndex - 1 + allOptionsCount) % allOptionsCount);
+              event.preventDefault();
+            }
+            break;
+          case 'Enter':
+            if (this.isOpen && allOptions[this.highlightedIndex]) {
+              const opt = allOptions[this.highlightedIndex]!;
+              this.selectOption(opt.value, opt.label);
+              event.preventDefault();
+            }
+            break;
+        }
+      });
+    } else {
+      this.ngZone.run(() => this.toggleDropdownPanel(false));
+    }
   }
 
   private setHightlightedOption(): void {
