@@ -74,11 +74,12 @@ export class DropdownFieldComponent
   }
 
   ngAfterContentInit(): void {
-    if ((this.options?.length ?? 0) > 0 && (this.optionComponents?.length ?? 0) > 0) {
-      throw new Error('DropdownFieldComponent cannot use both [options] and <formz-field-option> content projection.');
-    }
-
-    this.optionComponents?.changes.subscribe(() => this.cdRef.markForCheck());
+    console.log('asd');
+    // if ((this.options?.length ?? 0) > 0 && (this.optionComponents?.length ?? 0) > 0) {
+    //   throw new Error('DropdownFieldComponent cannot use both [options] and <formz-field-option> content projection.');
+    // }
+    // this.optionComponents?.changes.subscribe(() => this.cdRef.markForCheck());
+    // this.cdRef.markForCheck();
   }
 
   public selectOption(value: string, label?: string): void {
@@ -133,7 +134,7 @@ export class DropdownFieldComponent
 
   writeValue(value: string): void {
     this.selectedValue = value;
-    this.selectedLabel = this.options?.find((opt) => opt.value === value)?.label ?? '';
+    this.selectedLabel = this.getFlatOptions().find((opt) => opt.value === value)?.label ?? '';
     this.isFieldFilled = !!value;
   }
 

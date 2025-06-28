@@ -13,7 +13,7 @@ export class ExampleFormComponent {
     lastName: '',
     gender: 'male',
     hobby: 'software development',
-    nationality: 'ch',
+    nationality: 'jp',
     religion: 'buddhism'
   });
   protected readonly formShape = exampleFormShape;
