@@ -39,7 +39,8 @@ export class DropdownFieldComponent
   extends FormzFieldBase
   implements OnInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
 {
-  @ViewChild('dropdownRef') dropdownRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
   @Input() enableBackdrop = false;
 
@@ -161,6 +162,7 @@ export class DropdownFieldComponent
 
     if (isOpen) {
       this.setHightlightedOption();
+      this.scrollIntoView();
     } else {
       this.highlightedIndex = -1; // reset highlighted index when closing
     }
@@ -267,5 +269,42 @@ export class DropdownFieldComponent
       })) ?? [];
 
     return [...inlineOptions, ...projectedOptions];
+  }
+
+  private scrollIntoView(): void {
+    setTimeout(() => {
+      const field = this.dropdownRef?.nativeElement;
+      const panel = this.panelRef?.nativeElement;
+
+      if (!field || !panel) return;
+
+      const fieldRect = field.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+
+      const fieldBottomEdge = fieldRect.bottom;
+      const fieldTopEdge = fieldRect.top;
+
+      const panelBottomEdge = panelRect.bottom;
+      const panelTopEdge = panelRect.top;
+
+      const viewportHeight = window.innerHeight;
+
+      const isFieldOutOfView = fieldBottomEdge > viewportHeight || fieldTopEdge < 0;
+      const isPanelOutOfView = panelBottomEdge > viewportHeight || panelTopEdge < 0;
+
+      if (isFieldOutOfView) {
+        field.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+      }
+
+      if (isPanelOutOfView) {
+        panel.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+      }
+    });
   }
 }

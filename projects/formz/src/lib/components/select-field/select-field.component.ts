@@ -31,7 +31,7 @@ import { FieldOptionComponent } from '../field-option/field-option.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzSelectField {
-  @ViewChild('selectRef') selectRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLInputElement>;
 
   private id = uuid();
 

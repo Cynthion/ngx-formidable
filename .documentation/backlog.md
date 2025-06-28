@@ -8,4 +8,4 @@
 - support showing multiple errors
 - resolve all TODOs
 - disabled/required for dropdown/autocomplete
-- scrollIntoView
+- combine common functionality of dropdown/autocomplete

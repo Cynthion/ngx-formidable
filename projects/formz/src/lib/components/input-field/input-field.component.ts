@@ -21,7 +21,7 @@ import { FormzFieldBase, IFormzInputField } from '../../form-model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InputFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzInputField {
-  @ViewChild('inputRef') inputRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
   private id = uuid();
   private isFieldFocused = false;

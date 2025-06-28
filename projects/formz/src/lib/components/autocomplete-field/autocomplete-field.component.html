@@ -25,6 +25,7 @@
   <!-- Panel -->
   <div
     *ngIf="isOpen"
+    #panelRef
     class="dropdown-panel">
     <!-- Inline Options -->
     @for (option of options; track option.value; let i = $index) {

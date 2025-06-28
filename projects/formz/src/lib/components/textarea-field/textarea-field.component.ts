@@ -21,7 +21,7 @@ import { FormzFieldBase, IFormzTextareaField } from '../../form-model';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TextareaFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzTextareaField {
-  @ViewChild('textareaRef') textareaRef!: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('textareaRef', { static: true }) textareaRef!: ElementRef<HTMLTextAreaElement>;
 
   private id = uuid();
   private isFieldFocused = false;
