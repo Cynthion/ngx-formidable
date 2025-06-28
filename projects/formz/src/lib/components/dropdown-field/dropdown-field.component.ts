@@ -1,5 +1,4 @@
 import {
-  AfterContentInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -38,7 +37,7 @@ import { FieldOptionComponent } from '../field-option/field-option.component';
 })
 export class DropdownFieldComponent
   extends FormzFieldBase
-  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
+  implements OnInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
 {
   @ViewChild('dropdownRef') dropdownRef!: ElementRef<HTMLDivElement>;
 
@@ -71,15 +70,6 @@ export class DropdownFieldComponent
 
   ngOnDestroy(): void {
     this.unregisterGlobalListeners();
-  }
-
-  ngAfterContentInit(): void {
-    console.log('asd');
-    // if ((this.options?.length ?? 0) > 0 && (this.optionComponents?.length ?? 0) > 0) {
-    //   throw new Error('DropdownFieldComponent cannot use both [options] and <formz-field-option> content projection.');
-    // }
-    // this.optionComponents?.changes.subscribe(() => this.cdRef.markForCheck());
-    // this.cdRef.markForCheck();
   }
 
   public selectOption(value: string, label?: string): void {
@@ -134,7 +124,7 @@ export class DropdownFieldComponent
 
   writeValue(value: string): void {
     this.selectedValue = value;
-    this.selectedLabel = this.getFlatOptions().find((opt) => opt.value === value)?.label ?? '';
+    this.selectedLabel = this.combineAllOptions().find((opt) => opt.value === value)?.label ?? '';
     this.isFieldFilled = !!value;
   }
 
@@ -209,8 +199,8 @@ export class DropdownFieldComponent
   private handleKeyDown(event: KeyboardEvent): void {
     if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) return;
 
-    const options = this.getFlatOptions();
-    const optionCount = options.length;
+    const allOptions = this.combineAllOptions();
+    const allOptionsCount = allOptions.length;
 
     this.ngZone.run(() => {
       switch (event.key) {
@@ -220,20 +210,20 @@ export class DropdownFieldComponent
         case 'ArrowDown':
           if (!this.isOpen) {
             this.toggleDropdownPanel(true);
-          } else if (optionCount > 0) {
-            this.setHighlightedIndex((this.highlightedIndex + 1) % optionCount);
+          } else if (allOptionsCount > 0) {
+            this.setHighlightedIndex((this.highlightedIndex + 1) % allOptionsCount);
           }
           event.preventDefault();
           break;
         case 'ArrowUp':
-          if (this.isOpen && optionCount > 0) {
-            this.setHighlightedIndex((this.highlightedIndex - 1 + optionCount) % optionCount);
+          if (this.isOpen && allOptionsCount > 0) {
+            this.setHighlightedIndex((this.highlightedIndex - 1 + allOptionsCount) % allOptionsCount);
             event.preventDefault();
           }
           break;
         case 'Enter':
-          if (this.isOpen && options[this.highlightedIndex]) {
-            const opt = options[this.highlightedIndex]!;
+          if (this.isOpen && allOptions[this.highlightedIndex]) {
+            const opt = allOptions[this.highlightedIndex]!;
             this.selectOption(opt.value, opt.label);
             event.preventDefault();
           }
@@ -243,28 +233,33 @@ export class DropdownFieldComponent
   }
 
   private setHightlightedOption(): void {
-    const options = this.getFlatOptions();
+    const allOptions = this.combineAllOptions();
 
-    const selectedIndex = options.findIndex((opt) => opt.value === this.selectedValue);
+    const selectedIndex = allOptions.findIndex((opt) => opt.value === this.selectedValue);
     this.setHighlightedIndex(selectedIndex > 0 ? selectedIndex : 0);
   }
 
   private setHighlightedIndex(index: number): void {
     this.highlightedIndex = index;
 
+    // highlight content projection options
+    const inlineOptionCount = this.options?.length ?? 0;
     this.optionComponents?.forEach((comp, i) => {
-      comp.setHighlighted(i === this.highlightedIndex);
+      comp.setHighlighted(i === this.highlightedIndex - inlineOptionCount);
     });
 
     this.cdRef.markForCheck();
   }
 
-  private getFlatOptions(): IFormzFieldOption[] {
-    return this.options?.length
-      ? this.options
-      : this.optionComponents?.toArray().map((opt) => ({
-          value: opt.value,
-          label: opt.label || opt.innerTextAsLabel
-        })) || [];
+  private combineAllOptions(): IFormzFieldOption[] {
+    const inlineOptions = this.options ?? [];
+
+    const projectedOptions =
+      this.optionComponents?.toArray().map((opt) => ({
+        value: opt.value,
+        label: opt.label || opt.innerTextAsLabel
+      })) ?? [];
+
+    return [...inlineOptions, ...projectedOptions];
   }
 }
