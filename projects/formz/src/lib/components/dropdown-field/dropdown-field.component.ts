@@ -47,6 +47,7 @@ export class DropdownFieldComponent
   protected selectedValue?: string;
   protected selectedLabel?: string;
   protected isOpen = false;
+  protected highlightedIndex = -1;
 
   private id = uuid();
   private isFieldFocused = false;
@@ -168,6 +169,12 @@ export class DropdownFieldComponent
     this.focusChangeSubject$.next(isOpen);
     this.isFieldFocused = isOpen;
 
+    if (isOpen) {
+      this.setHightlightedOption();
+    } else {
+      this.highlightedIndex = -1; // reset highlighted index when closing
+    }
+
     this.cdRef.markForCheck();
   }
 
@@ -180,12 +187,7 @@ export class DropdownFieldComponent
       };
 
       const onKeyDown = (event: KeyboardEvent) => {
-        const options = this.options?.length
-          ? this.options
-          : this.optionComponents?.map((opt) => ({
-              value: opt.value,
-              label: opt.label || opt.innerTextAsLabel
-            })) || [];
+        const options = this.getFlatOptions();
 
         if (event.key === 'Escape' && this.isOpen) {
           this.ngZone.run(() => this.toggleDropdownPanel(false));
@@ -196,11 +198,9 @@ export class DropdownFieldComponent
           this.ngZone.run(() => {
             if (!this.isOpen) {
               this.toggleDropdownPanel(true);
-              this.setHighlightedIndex(0);
             } else {
               this.setHighlightedIndex((this.highlightedIndex + 1) % options.length);
             }
-            this.cdRef.markForCheck();
           });
           event.preventDefault();
         }
@@ -238,17 +238,29 @@ export class DropdownFieldComponent
     this.globalKeydownUnlisten?.();
   }
 
-  private setHighlightedIndex(index: number): void {
-    this.highlightedIndex = index;
-    this.updateHighlightState();
-    this.cdRef.markForCheck();
+  private setHightlightedOption(): void {
+    const options = this.getFlatOptions();
+
+    const selectedIndex = options.findIndex((opt) => opt.value === this.selectedValue);
+    this.setHighlightedIndex(selectedIndex > 0 ? selectedIndex : 0);
   }
 
-  private updateHighlightState() {
+  private setHighlightedIndex(index: number): void {
+    this.highlightedIndex = index;
+
     this.optionComponents?.forEach((comp, i) => {
       comp.setHighlighted(i === this.highlightedIndex);
     });
+
+    this.cdRef.markForCheck();
   }
 
-  highlightedIndex = -1;
+  private getFlatOptions(): IFormzFieldOption[] {
+    return this.options?.length
+      ? this.options
+      : this.optionComponents?.toArray().map((opt) => ({
+          value: opt.value,
+          label: opt.label || opt.innerTextAsLabel
+        })) || [];
+  }
 }
