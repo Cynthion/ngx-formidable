@@ -46,10 +46,10 @@
   background: var(--formz-color-field-background, #{tokens.$formz-color-field-background});
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
   transition:
-    box-shadow var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
-      var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
-    border-color var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
-      var(--formz-hover-easing, #{tokens.$formz-hover-easing});
+    box-shadow var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+      var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
+    border-color var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+      var(--formz-animation-easing, #{tokens.$formz-animation-easing});
 
   &:read-only {
     @include field-readonly;
@@ -89,7 +89,7 @@
 @mixin dropdown-field {
   @include select-field;
 
-  &.open .dropdown-panel {
+  &.open .panel {
     // animation
     opacity: 1;
     transform: translateY(0);
@@ -124,14 +124,14 @@
   transform: translateY(0) scale(1); // default placement
   transform-origin: left top;
   transition:
-    transform var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
-      var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
-    margin-right var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
-      var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
-    font-size var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
-      var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
-    color var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
-      var(--formz-hover-easing, #{tokens.$formz-hover-easing});
+    transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+      var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
+    margin-right var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+      var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
+    font-size var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+      var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
+    color var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+      var(--formz-animation-easing, #{tokens.$formz-animation-easing});
 }
 
 @mixin field-label-floating {
@@ -198,8 +198,8 @@
 
   .caret {
     float: right;
-    transition: transform var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
-      var(--formz-hover-easing, #{tokens.$formz-hover-easing});
+    transition: transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+      var(--formz-animation-easing, #{tokens.$formz-animation-easing});
   }
 
   .caret.rotated {
@@ -226,10 +226,10 @@
   transform: translateY(-0.25rem); // slight offset when closed
   pointer-events: none; // prevent hover/clicks when closed
   transition:
-    opacity var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
-      var(--formz-hover-easing, #{tokens.$formz-hover-easing}),
-    transform var(--formz-hover-duration-short, #{tokens.$formz-hover-duration-short})
-      var(--formz-hover-easing, #{tokens.$formz-hover-easing});
+    opacity var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+      var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
+    transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+      var(--formz-animation-easing, #{tokens.$formz-animation-easing});
 }
 
 @mixin field-option {

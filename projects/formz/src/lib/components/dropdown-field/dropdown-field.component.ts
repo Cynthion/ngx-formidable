@@ -81,7 +81,7 @@ export class DropdownFieldComponent
     this.isFieldFilled = value.length > 0;
     this.onChange(value); // notify ControlValueAccessor of the change
     this.onTouched();
-    this.toggleDropdownPanel(false); // close the dropdown panel after selection
+    this.togglePanel(false); // close the dropdown panel after selection
   }
 
   protected onFocusChange(isFocused: boolean): void {
@@ -156,7 +156,7 @@ export class DropdownFieldComponent
 
   //#endregion
 
-  toggleDropdownPanel(isOpen: boolean): void {
+  togglePanel(isOpen: boolean): void {
     this.isOpen = isOpen;
     this.focusChangeSubject$.next(isOpen);
 
@@ -193,7 +193,7 @@ export class DropdownFieldComponent
 
     const clickedInside = this.dropdownRef.nativeElement.contains(event.target as Node);
     if (!clickedInside) {
-      this.ngZone.run(() => this.toggleDropdownPanel(false));
+      this.ngZone.run(() => this.togglePanel(false));
     }
   }
 
@@ -208,11 +208,11 @@ export class DropdownFieldComponent
       this.ngZone.run(() => {
         switch (event.key) {
           case 'Escape':
-            if (this.isOpen) this.toggleDropdownPanel(false);
+            if (this.isOpen) this.togglePanel(false);
             break;
           case 'ArrowDown':
             if (!this.isOpen) {
-              this.toggleDropdownPanel(true);
+              this.togglePanel(true);
             } else if (allOptionsCount > 0) {
               this.setHighlightedIndex((this.highlightedIndex + 1) % allOptionsCount);
             }
@@ -234,7 +234,7 @@ export class DropdownFieldComponent
         }
       });
     } else {
-      this.ngZone.run(() => this.toggleDropdownPanel(false));
+      this.ngZone.run(() => this.togglePanel(false));
     }
   }
 

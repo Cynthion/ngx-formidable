@@ -34,8 +34,8 @@
   --formz-dropdown-panel-background: #{tokens.$formz-dropdown-panel-background};
   --formz-dropdown-panel-box-shadow: #{tokens.$formz-dropdown-panel-box-shadow};
 
-  --formz-hover-duration-short: #{tokens.$formz-hover-duration-short};
-  --formz-hover-easing: #{tokens.$formz-hover-easing};
+  --formz-animation-duration: #{tokens.$formz-animation-duration};
+  --formz-animation-easing: #{tokens.$formz-animation-easing};
 
   --formz-flyout-z-index: #{tokens.$formz-flyout-z-index};
 }

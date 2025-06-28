@@ -1,13 +1,13 @@
 <div
   #dropdownRef
   tabindex="0"
-  class="dropdown-field"
+  class="field"
   [class.open]="isOpen"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <div
-    class="dropdown-trigger"
-    (click)="toggleDropdownPanel(!isOpen)">
+    class="trigger"
+    (click)="togglePanel(!isOpen)">
     {{ selectedLabel || placeholder }}
     <span
       class="caret"
@@ -20,13 +20,13 @@
   <div
     *ngIf="isOpen && enableBackdrop"
     class="backdrop"
-    (click)="toggleDropdownPanel(false)"></div>
+    (click)="togglePanel(false)"></div>
 
   <!-- Panel -->
   <div
     *ngIf="isOpen"
     #panelRef
-    class="dropdown-panel">
+    class="panel">
     <!-- Inline Options -->
     @for (option of options; track option.value; let i = $index) {
       <formz-field-option

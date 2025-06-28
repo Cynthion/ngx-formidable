@@ -4,15 +4,15 @@
   display: block;
 }
 
-.dropdown-field {
+.field {
   @include dropdown-field;
 }
 
-.dropdown-trigger {
+.trigger {
   @include dropdown-trigger;
 }
 
-.dropdown-panel {
+.panel {
   @include dropdown-panel;
 }
 
