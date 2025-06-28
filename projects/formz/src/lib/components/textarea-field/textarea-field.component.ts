@@ -104,9 +104,7 @@ export class TextareaFieldComponent extends FormzFieldBase implements ControlVal
   }
 
   setDisabledState(isDisabled: boolean): void {
-    if (this.textareaRef) {
-      this.textareaRef.nativeElement.disabled = isDisabled;
-    }
+    this.disabled = isDisabled;
   }
 
   //#endregion

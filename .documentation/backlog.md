@@ -6,5 +6,5 @@
 - try removing the `formzFormField` directive in consumer
 - support showing multiple errors
 - resolve all TODOs
-- disabled/required for dropdown/autocomplete
+- disabled/required for dropdown/autocomplete (check inner input)
 - combine common functionality of dropdown/autocomplete

@@ -95,9 +95,7 @@ export class SelectFieldComponent extends FormzFieldBase implements ControlValue
   }
 
   setDisabledState(isDisabled: boolean): void {
-    if (this.selectRef) {
-      this.selectRef.nativeElement.disabled = isDisabled;
-    }
+    this.disabled = isDisabled;
   }
 
   //#endregion

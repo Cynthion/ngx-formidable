@@ -2,19 +2,20 @@
   #autocompleteRef
   tabindex="0"
   class="field"
-  [class.open]="isOpen"
-  (focus)="onFocusChange(true)"
-  (blur)="onFocusChange(false)">
-  <div
-    class="trigger"
-    (click)="togglePanel(!isOpen)">
-    {{ selectedLabel || placeholder }}
-    <span
-      class="caret"
-      [class.rotated]="isOpen"
-      >▼</span
-    >
-  </div>
+  [class.open]="isOpen">
+  <!-- Input Field -->
+  <input
+    #inputRef
+    type="text"
+    class="wrapped-input"
+    [id]="fieldId"
+    [placeholder]="placeholder"
+    [attr.name]="name"
+    [attr.disabled]="disabled ? '' : null"
+    [required]="required"
+    (input)="onInputChange()"
+    (focus)="onFocusChange(true)"
+    (blur)="onFocusChange(false)" />
 
   <!-- Backdrop -->
   <div

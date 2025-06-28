@@ -12,6 +12,23 @@
   }
 }
 
+@mixin wrapped-input {
+  @include input-reset;
+
+  background: transparent;
+  width: 100%;
+  height: 100%;
+  border: none;
+
+  &::selection {
+    background-color: var(--formz-color-field-selection, #{tokens.$formz-color-field-selection});
+  }
+
+  &::placeholder {
+    color: var(--formz-color-field-placeholder, #{tokens.$formz-color-field-placeholder});
+  }
+}
+
 @mixin field-readonly {
   background: var(--formz-color-field-background-readonly, #{tokens.$formz-color-field-background-readonly});
   color: var(--formz-color-field-text-readonly, #{tokens.$formz-color-field-text-readonly});
@@ -95,6 +112,10 @@
     transform: translateY(0);
     pointer-events: auto;
   }
+}
+
+@mixin autocomplete-field {
+  @include dropdown-field;
 }
 
 @mixin textarea-field {
@@ -230,6 +251,10 @@
       var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
     transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
       var(--formz-animation-easing, #{tokens.$formz-animation-easing});
+}
+
+@mixin autocomplete-panel {
+  @include dropdown-panel;
 }
 
 @mixin field-option {

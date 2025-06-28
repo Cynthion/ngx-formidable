@@ -92,9 +92,7 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   }
 
   setDisabledState(isDisabled: boolean): void {
-    if (this.inputRef) {
-      this.inputRef.nativeElement.disabled = isDisabled;
-    }
+    this.disabled = isDisabled;
   }
 
   //#endregion

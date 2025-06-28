@@ -40,6 +40,7 @@ export class AutocompleteFieldComponent
   implements OnInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
 {
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
   @Input() enableBackdrop = false;
@@ -82,6 +83,11 @@ export class AutocompleteFieldComponent
     this.onChange(value); // notify ControlValueAccessor of the change
     this.onTouched();
     this.togglePanel(false); // close the dropdown panel after selection
+  }
+
+  protected onInputChange(): void {
+    // TODO implement
+    // this.selectedValue = value;
   }
 
   protected onFocusChange(isFocused: boolean): void {
@@ -127,6 +133,9 @@ export class AutocompleteFieldComponent
     this.selectedValue = value;
     this.selectedLabel = this.combineAllOptions().find((opt) => opt.value === value)?.label ?? '';
     this.isFieldFilled = !!value;
+
+    // write chosen value
+    this.inputRef.nativeElement.value = this.selectedLabel;
   }
 
   registerOnChange(fn: never): void {

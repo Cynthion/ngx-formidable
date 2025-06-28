@@ -12,7 +12,7 @@ export class ExampleFormComponent {
     firstName: 'Chris',
     lastName: '',
     gender: 'male',
-    hobby: 'software development',
+    hobby: 'dev',
     nationality: 'jp',
     religion: 'buddhism'
   });

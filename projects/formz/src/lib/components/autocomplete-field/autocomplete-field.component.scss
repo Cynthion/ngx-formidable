@@ -5,15 +5,15 @@
 }
 
 .field {
-  @include dropdown-field;
+  @include autocomplete-field;
 }
 
-.trigger {
-  @include dropdown-trigger;
+.wrapped-input {
+  @include wrapped-input;
 }
 
 .panel {
-  @include dropdown-panel;
+  @include autocomplete-panel;
 }
 
 .backdrop {
