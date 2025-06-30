@@ -34,7 +34,6 @@ export class SelectFieldComponent extends FormzFieldBase implements ControlValue
   @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLInputElement>;
 
   private id = uuid();
-  private isFieldFocused = false;
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
 
@@ -46,7 +45,6 @@ export class SelectFieldComponent extends FormzFieldBase implements ControlValue
 
   protected onFocusChange(isFocused: boolean): void {
     this.focusChangeSubject$.next(isFocused);
-    this.isFieldFocused = isFocused;
 
     if (!isFocused) {
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
@@ -67,10 +65,6 @@ export class SelectFieldComponent extends FormzFieldBase implements ControlValue
   }
 
   readonly isLabelFloating = false;
-
-  get isBackdropVisible(): boolean {
-    return this.isFieldFocused;
-  }
 
   get elementRef(): ElementRef<HTMLElement> {
     return this.selectRef as ElementRef<HTMLElement>;

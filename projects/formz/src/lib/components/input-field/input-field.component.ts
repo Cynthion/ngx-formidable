@@ -63,10 +63,6 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
     return !this.isFieldFocused && !this.isFieldFilled;
   }
 
-  get isBackdropVisible(): boolean {
-    return this.isFieldFocused;
-  }
-
   get elementRef(): ElementRef<HTMLElement> {
     return this.inputRef as ElementRef<HTMLElement>;
   }

@@ -128,10 +128,6 @@ export class AutocompleteFieldComponent
     return !this.isFieldFocused && !this.isFieldFilled;
   }
 
-  get isBackdropVisible(): boolean {
-    return this.isOpen;
-  }
-
   get elementRef(): ElementRef<HTMLElement> {
     return this.autocompleteRef as ElementRef<HTMLElement>;
   }

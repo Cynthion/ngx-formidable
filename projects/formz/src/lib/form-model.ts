@@ -21,7 +21,6 @@ export interface IFormzField {
   fieldId: string;
   value: string;
   isLabelFloating: boolean;
-  isBackdropVisible: boolean;
   valueChange$: Observable<string>;
   focusChange$: Observable<boolean>;
   elementRef: ElementRef<HTMLElement>;
@@ -36,7 +35,6 @@ export abstract class FormzFieldBase implements IFormzField {
   abstract get fieldId(): string;
   abstract get value(): string;
   abstract get isLabelFloating(): boolean;
-  abstract get isBackdropVisible(): boolean;
   abstract valueChange$: Observable<string>;
   abstract focusChange$: Observable<boolean>;
   abstract get elementRef(): ElementRef<HTMLElement>;

@@ -108,10 +108,6 @@ export class DropdownFieldComponent
     return !this.isFieldFocused && !this.isFieldFilled;
   }
 
-  get isBackdropVisible(): boolean {
-    return this.isOpen;
-  }
-
   get elementRef(): ElementRef<HTMLElement> {
     return this.dropdownRef as ElementRef<HTMLElement>;
   }

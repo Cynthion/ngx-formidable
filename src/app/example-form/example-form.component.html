@@ -13,9 +13,7 @@
   (ngSubmit)="onSubmit()">
   <fieldset class="fieldset">
     <!-- First Name -->
-    <formz-field-decorator
-      [enableBackdrop]="true"
-      [decoratorLayout]="'single'">
+    <formz-field-decorator [decoratorLayout]="'single'">
       <formz-input-field
         formzField
         formzFieldErrors
@@ -87,7 +85,7 @@
     </formz-field-decorator>
 
     <!-- Nationality -->
-    <formz-field-decorator [enableBackdrop]="false">
+    <formz-field-decorator>
       <formz-dropdown-field
         formzField
         formzFieldErrors
@@ -111,7 +109,7 @@
     </formz-field-decorator>
 
     <!-- Hobby -->
-    <formz-field-decorator [enableBackdrop]="false">
+    <formz-field-decorator>
       <formz-autocomplete-field
         formzField
         formzFieldErrors

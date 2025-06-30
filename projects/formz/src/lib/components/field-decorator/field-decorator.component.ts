@@ -38,7 +38,6 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   @ContentChild(FieldSuffixDirective) projectedSuffix?: FieldSuffixDirective;
 
   @Input() decoratorLayout: FieldDecoratorLayout = 'single'; // TODO implement 'option' layout
-  @Input() enableBackdrop = false;
 
   protected hasLabel = false;
   protected hasTooltip = false;
@@ -92,10 +91,6 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     const isFieldLabelFloating = this.projectedField.formzField.isLabelFloating ?? false;
 
     return isLabelConfiguredToFloat && isFieldLabelFloating;
-  }
-
-  get isBackdropVisible(): boolean {
-    return this.projectedField?.formzField.isBackdropVisible ?? false;
   }
 
   get elementRef(): ElementRef<HTMLElement> {
