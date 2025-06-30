@@ -136,10 +136,10 @@
 }
 
 @mixin field-before {
+  position: relative;
   display: flex;
   align-items: center;
   margin-bottom: sp.cmp_space(8);
-  position: relative;
 }
 
 @mixin field-label {

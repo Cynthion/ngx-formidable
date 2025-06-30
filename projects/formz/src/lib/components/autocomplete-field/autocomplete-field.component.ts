@@ -16,7 +16,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../form-model';
+import { FormzFieldBase, IFormzAutocompleteField, IFormzFieldOption } from '../../form-model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
 
 @Component({
@@ -37,7 +37,7 @@ import { FieldOptionComponent } from '../field-option/field-option.component';
 })
 export class AutocompleteFieldComponent
   extends FormzFieldBase
-  implements OnInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
+  implements OnInit, OnDestroy, ControlValueAccessor, IFormzAutocompleteField
 {
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
