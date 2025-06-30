@@ -16,10 +16,6 @@
   @include autocomplete-panel;
 }
 
-.backdrop {
-  @include backdrop;
-}
-
 .highlighted {
   @include highlighted;
 }

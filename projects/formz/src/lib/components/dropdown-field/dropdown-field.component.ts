@@ -42,8 +42,6 @@ export class DropdownFieldComponent
   @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
-  @Input() enableBackdrop = false;
-
   protected selectedValue?: string;
   protected selectedLabel?: string;
   protected isOpen = false;
@@ -108,6 +106,10 @@ export class DropdownFieldComponent
 
   get isLabelFloating(): boolean {
     return !this.isFieldFocused && !this.isFieldFilled;
+  }
+
+  get isBackdropVisible(): boolean {
+    return this.isOpen;
   }
 
   get elementRef(): ElementRef<HTMLElement> {

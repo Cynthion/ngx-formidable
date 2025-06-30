@@ -6,7 +6,6 @@
   <!-- Input Field -->
   <input
     #inputRef
-    autofocus
     type="text"
     class="wrapped-input"
     [id]="fieldId"
@@ -17,12 +16,6 @@
     (input)="onInputChange()"
     (focus)="onFocusChange(true)"
     (blur)="onFocusChange(false)" />
-
-  <!-- Backdrop -->
-  <div
-    *ngIf="isOpen && enableBackdrop"
-    class="backdrop"
-    (click)="togglePanel(false)"></div>
 
   <!-- Panel -->
   <div

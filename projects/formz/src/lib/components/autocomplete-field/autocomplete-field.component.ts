@@ -43,8 +43,6 @@ export class AutocompleteFieldComponent
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
-  @Input() enableBackdrop = false;
-
   protected selectedValue?: string;
   protected selectedLabel?: string;
   protected isOpen = false;
@@ -108,9 +106,9 @@ export class AutocompleteFieldComponent
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
     }
 
-    if (isFocused) {
-      this.togglePanel(true);
-    }
+    // if (isFocused) {
+    //   this.togglePanel(true);
+    // }
   }
 
   //#region IFormzField
@@ -128,6 +126,10 @@ export class AutocompleteFieldComponent
 
   get isLabelFloating(): boolean {
     return !this.isFieldFocused && !this.isFieldFilled;
+  }
+
+  get isBackdropVisible(): boolean {
+    return this.isOpen;
   }
 
   get elementRef(): ElementRef<HTMLElement> {

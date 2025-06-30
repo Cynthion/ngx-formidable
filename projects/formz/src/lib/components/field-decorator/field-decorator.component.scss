@@ -32,6 +32,10 @@
   @include field-suffix;
 }
 
+.backdrop {
+  @include backdrop;
+}
+
 .hidden {
   display: none;
 }

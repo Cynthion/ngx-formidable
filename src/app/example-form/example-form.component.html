@@ -13,7 +13,9 @@
   (ngSubmit)="onSubmit()">
   <fieldset class="fieldset">
     <!-- First Name -->
-    <formz-field-decorator [decoratorLayout]="'single'">
+    <formz-field-decorator
+      [enableBackdrop]="true"
+      [decoratorLayout]="'single'">
       <formz-input-field
         formzField
         formzFieldErrors
@@ -85,7 +87,7 @@
     </formz-field-decorator>
 
     <!-- Nationality -->
-    <formz-field-decorator>
+    <formz-field-decorator [enableBackdrop]="false">
       <formz-dropdown-field
         formzField
         formzFieldErrors
@@ -94,8 +96,7 @@
         [ngModel]="vm.formValue.nationality"
         [disabled]="false"
         [required]="false"
-        [options]="nationalityOptions"
-        [enableBackdrop]="true">
+        [options]="nationalityOptions">
         <formz-field-option [value]="'ch'">🇨🇭 Switzerland</formz-field-option>
         <formz-field-option [value]="'other'">Some other country</formz-field-option>
       </formz-dropdown-field>
@@ -110,7 +111,7 @@
     </formz-field-decorator>
 
     <!-- Hobby -->
-    <formz-field-decorator>
+    <formz-field-decorator [enableBackdrop]="false">
       <formz-autocomplete-field
         formzField
         formzFieldErrors
@@ -119,8 +120,7 @@
         [ngModel]="vm.formValue.hobby"
         [disabled]="false"
         [required]="false"
-        [options]="hobbyOptions"
-        [enableBackdrop]="true">
+        [options]="hobbyOptions">
         <formz-field-option [value]="'garden'">Gardening</formz-field-option>
         <formz-field-option [value]="'other'">Some other hobby</formz-field-option>
       </formz-autocomplete-field>

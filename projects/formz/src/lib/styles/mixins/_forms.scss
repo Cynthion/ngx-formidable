@@ -279,6 +279,7 @@
   position: fixed;
   inset: 0;
   background: var(--formz-color-backdrop, #{tokens.$formz-color-backdrop});
+  z-index: 0;
 
   // Allow clicks but don't prevent scroll
   pointer-events: auto;

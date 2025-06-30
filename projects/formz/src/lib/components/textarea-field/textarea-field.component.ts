@@ -75,6 +75,10 @@ export class TextareaFieldComponent extends FormzFieldBase implements ControlVal
     return !this.isFieldFocused && !this.isFieldFilled;
   }
 
+  get isBackdropVisible(): boolean {
+    return this.isFieldFocused;
+  }
+
   get elementRef(): ElementRef<HTMLElement> {
     return this.textareaRef as ElementRef<HTMLElement>;
   }
