@@ -11,7 +11,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FormzFieldBase, IFormzFieldOption, IFormzSelectField } from '../../form-model';
+import { FORMZ_OPTION_FIELD, FormzFieldBase, IFormzFieldOption, IFormzSelectField } from '../../form-model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
 
 @Component({
@@ -26,12 +26,19 @@ import { FieldOptionComponent } from '../field-option/field-option.component';
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => SelectFieldComponent),
       multi: true
+    },
+    // required to provide this component as IFormzOptionField
+    {
+      provide: FORMZ_OPTION_FIELD,
+      useExisting: SelectFieldComponent
     }
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SelectFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzSelectField {
   @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLInputElement>;
+
+  protected selectedOption?: IFormzFieldOption;
 
   private id = uuid();
   private valueChangeSubject$ = new Subject<string>();
@@ -80,9 +87,7 @@ export class SelectFieldComponent extends FormzFieldBase implements ControlValue
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    if (this.selectRef) {
-      this.selectRef.nativeElement.value = value ?? '';
-    }
+    this.selectRef.nativeElement.value = value ?? '';
   }
 
   registerOnChange(fn: never): void {
@@ -104,10 +109,24 @@ export class SelectFieldComponent extends FormzFieldBase implements ControlValue
   @Input() name = '';
   @Input() disabled = false;
   @Input() required = false;
+
+  //#endregion
+
+  //#region IFormzOptionField
+
   @Input() options?: IFormzFieldOption[] = [];
+  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.', disabled: true };
 
   @ContentChildren(forwardRef(() => FieldOptionComponent))
   optionComponents?: QueryList<FieldOptionComponent>;
+
+  get hasOptions(): boolean {
+    return (this.options?.length ?? 0) > 0 || (this.optionComponents?.length ?? 0) > 0;
+  }
+
+  public selectOption(_option: IFormzFieldOption): void {
+    // not used in select field, but required by IFormzOptionField interface
+  }
 
   //#endregion
 }

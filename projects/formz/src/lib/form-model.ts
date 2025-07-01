@@ -1,4 +1,4 @@
-import { Directive, ElementRef } from '@angular/core';
+import { Directive, ElementRef, InjectionToken } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export const ROOT_FORM = 'rootForm';
@@ -41,6 +41,14 @@ export abstract class FormzFieldBase implements IFormzField {
   abstract get elementRef(): ElementRef<HTMLElement>;
 }
 
+/** Interface for all Formz fields that support multiple options. */
+export interface IFormzOptionField {
+  options?: IFormzFieldOption[];
+  emptyOption?: IFormzFieldOption;
+  hasOptions: boolean;
+  selectOption(option: IFormzFieldOption): void;
+}
+
 type FormzInputFieldsKeys =
   | 'name'
   | 'placeholder'
@@ -62,16 +70,7 @@ export type IFormzTextareaField = Pick<HTMLTextAreaElement, FormzTextareaFieldsK
 type FormzSelectFieldsKeys = 'name' | 'disabled' | 'required';
 
 /** The subset of `<select/>` properties that are supported. */
-export interface IFormzSelectField extends Pick<HTMLSelectElement, FormzSelectFieldsKeys> {
-  options?: IFormzFieldOption[];
-}
-
-export interface IFormzOptionField {
-  options?: IFormzFieldOption[];
-  emptyOption?: IFormzFieldOption;
-  hasOptions: boolean;
-  selectOption(option: IFormzFieldOption): void;
-}
+export interface IFormzSelectField extends Pick<HTMLSelectElement, FormzSelectFieldsKeys>, IFormzOptionField {}
 
 export interface IFormzDropdownField extends IFormzOptionField {
   name: string;
@@ -81,3 +80,5 @@ export interface IFormzDropdownField extends IFormzOptionField {
 }
 
 export type IFormzAutocompleteField = IFormzDropdownField;
+
+export const FORMZ_OPTION_FIELD = new InjectionToken<IFormzOptionField>('FORMZ_OPTION_FIELD');

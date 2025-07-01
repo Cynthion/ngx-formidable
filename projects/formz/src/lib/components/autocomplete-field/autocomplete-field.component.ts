@@ -17,7 +17,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, Subject, takeUntil } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FormzFieldBase, IFormzAutocompleteField, IFormzFieldOption } from '../../form-model';
+import { FORMZ_OPTION_FIELD, FormzFieldBase, IFormzAutocompleteField, IFormzFieldOption } from '../../form-model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
 
 @Component({
@@ -32,6 +32,11 @@ import { FieldOptionComponent } from '../field-option/field-option.component';
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => AutocompleteFieldComponent),
       multi: true
+    },
+    // required to provide this component as IFormzOptionField
+    {
+      provide: FORMZ_OPTION_FIELD,
+      useExisting: AutocompleteFieldComponent
     }
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -101,6 +106,10 @@ export class AutocompleteFieldComponent
 
     if (!isFocused) {
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
+    }
+
+    if (isFocused && !this.isOpen && this.isFieldFilled) {
+      this.togglePanel(true); // open the panel on focus
     }
   }
 
@@ -175,7 +184,7 @@ export class AutocompleteFieldComponent
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
-  @Input() emptyOption?: IFormzFieldOption;
+  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.', disabled: true };
 
   @ContentChildren(forwardRef(() => FieldOptionComponent))
   optionComponents?: QueryList<FieldOptionComponent>;
@@ -201,7 +210,7 @@ export class AutocompleteFieldComponent
     this.isOpen = isOpen;
 
     if (isOpen) {
-      this.setHightlightedOption();
+      this.highlightSelectedOption();
       this.scrollIntoView();
     } else {
       this.setHighlightedIndex(-1); // reset highlighted index when closing
@@ -279,7 +288,7 @@ export class AutocompleteFieldComponent
     }
   }
 
-  private setHightlightedOption(): void {
+  private highlightSelectedOption(): void {
     const filteredOptions = this.filteredOptions();
 
     const selectedIndex = filteredOptions.findIndex((opt) => opt.value === this.selectedOption?.value);
@@ -319,8 +328,7 @@ export class AutocompleteFieldComponent
       ? allOptions.filter((opt) => opt.label?.toLowerCase().includes(filterValue.toLowerCase()))
       : allOptions;
 
-    const filteredOrEmptyOptions =
-      filteredOptions.length > 0 ? filteredOptions : this.emptyOption ? [this.emptyOption] : [];
+    const filteredOrEmptyOptions = filteredOptions.length > 0 ? filteredOptions : [this.emptyOption];
 
     return filteredOrEmptyOptions;
   }
@@ -373,7 +381,7 @@ export class AutocompleteFieldComponent
       .subscribe((filterValue: string) => {
         console.log('Filter value changed:', filterValue);
 
-        this.setHighlightedIndex(-1); // TODO keep option highlighted if still in filtered set
+        this.highlightSelectedOption(); // TODO works?
 
         const filteredOptions = this.filteredOptions();
 

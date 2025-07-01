@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostBinding, Input, Optional } from '@angular/core';
-import { IFormzFieldOption } from '../../form-model';
-import { DropdownFieldComponent } from '../dropdown-field/dropdown-field.component';
+import { ChangeDetectionStrategy, Component, ElementRef, HostBinding, Inject, Input, Optional } from '@angular/core';
+import { FORMZ_OPTION_FIELD, IFormzFieldOption, IFormzOptionField } from '../../form-model';
 
 @Component({
   selector: 'formz-field-option',
@@ -10,25 +9,27 @@ import { DropdownFieldComponent } from '../dropdown-field/dropdown-field.compone
 })
 export class FieldOptionComponent implements IFormzFieldOption {
   @Input({ required: true }) value!: string;
-  @Input() label?: string = undefined;
+  @Input() label?: string;
 
   @HostBinding('class.disabled')
   @Input()
   disabled = false;
 
-  @HostBinding('class.highlighted') isHighlighted = false;
+  @HostBinding('class.highlighted') isHighlighted = false; // TODO make Input
 
   constructor(
-    @Optional() private dropdownField: DropdownFieldComponent,
+    @Optional() @Inject(FORMZ_OPTION_FIELD) private parent: IFormzOptionField,
     private el: ElementRef
-  ) {}
+  ) {
+    if (!this.parent) {
+      throw new Error(
+        'formz-field-option must be used inside a component that provides FORMZ_OPTION_FIELD (i.e. implements IFormzOptionField).'
+      );
+    }
+  }
 
   select() {
     if (this.disabled) return;
-
-    if (!this.dropdownField) {
-      throw new Error('formz-dropdown-option has no valid parent.');
-    }
 
     const option: IFormzFieldOption = {
       value: this.value,
@@ -36,7 +37,7 @@ export class FieldOptionComponent implements IFormzFieldOption {
       disabled: this.disabled
     };
 
-    this.dropdownField.selectOption(option);
+    this.parent.selectOption(option);
   }
 
   setHighlighted(value: boolean) {

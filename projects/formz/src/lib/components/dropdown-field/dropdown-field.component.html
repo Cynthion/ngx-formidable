@@ -35,10 +35,10 @@
       <ng-content></ng-content>
     } @else {
       <formz-field-option
-        [value]="emptyOption?.value || 'empty'"
-        [label]="emptyOption?.label"
-        [disabled]="true">
-        {{ emptyOption?.label || 'No options available' }}
+        [value]="emptyOption.value"
+        [label]="emptyOption.label"
+        [disabled]="emptyOption.disabled || true">
+        {{ emptyOption.label }}
       </formz-field-option>
     }
   </div>

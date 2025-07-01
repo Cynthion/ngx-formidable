@@ -16,7 +16,7 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../form-model';
+import { FORMZ_OPTION_FIELD, FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../form-model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
 
 @Component({
@@ -31,6 +31,11 @@ import { FieldOptionComponent } from '../field-option/field-option.component';
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => DropdownFieldComponent),
       multi: true
+    },
+    // required to provide this component as IFormzOptionField
+    {
+      provide: FORMZ_OPTION_FIELD,
+      useExisting: DropdownFieldComponent
     }
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -147,7 +152,7 @@ export class DropdownFieldComponent
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
-  @Input() emptyOption?: IFormzFieldOption;
+  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.', disabled: true };
 
   @ContentChildren(forwardRef(() => FieldOptionComponent))
   optionComponents?: QueryList<FieldOptionComponent>;
@@ -173,7 +178,7 @@ export class DropdownFieldComponent
     this.isOpen = isOpen;
 
     if (isOpen) {
-      this.setHightlightedOption();
+      this.highlightSelectedOption();
       this.scrollIntoView();
     } else {
       this.setHighlightedIndex(-1); // reset highlighted index when closing
@@ -251,7 +256,7 @@ export class DropdownFieldComponent
     }
   }
 
-  private setHightlightedOption(): void {
+  private highlightSelectedOption(): void {
     const allOptions = this.combineAllOptions();
 
     const selectedIndex = allOptions.findIndex((opt) => opt.value === this.selectedOption?.value);

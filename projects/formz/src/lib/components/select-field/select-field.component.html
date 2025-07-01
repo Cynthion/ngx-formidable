@@ -8,14 +8,23 @@
   (change)="onChangeChange()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
-  @for (option of options; track option.value) {
-    <option [value]="option.value">
-      {{ option.label }}
-    </option>
-  }
-  @for (option of optionComponents; track option.value) {
-    <option [value]="option.value">
-      {{ option.label }}
-    </option>
+  @if (hasOptions) {
+    @for (option of options; track option.value) {
+      <option [value]="option.value">
+        {{ option.label }}
+      </option>
+    }
+    @for (option of optionComponents; track option.value) {
+      <option [value]="option.value">
+        {{ option.label }}
+      </option>
+    }
+  } @else {
+    <formz-field-option
+      [value]="emptyOption.value"
+      [label]="emptyOption.label"
+      [disabled]="emptyOption.disabled || true">
+      {{ emptyOption.label }}
+    </formz-field-option>
   }
 </select>
