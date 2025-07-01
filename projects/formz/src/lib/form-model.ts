@@ -67,8 +67,10 @@ export interface IFormzSelectField extends Pick<HTMLSelectElement, FormzSelectFi
 }
 
 export interface IFormzOptionField {
+  options?: IFormzFieldOption[];
   emptyOption?: IFormzFieldOption;
   hasOptions: boolean;
+  selectOption(option: IFormzFieldOption): void;
 }
 
 export interface IFormzDropdownField extends IFormzOptionField {
@@ -76,7 +78,6 @@ export interface IFormzDropdownField extends IFormzOptionField {
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
-  options?: IFormzFieldOption[];
 }
 
 export type IFormzAutocompleteField = IFormzDropdownField;

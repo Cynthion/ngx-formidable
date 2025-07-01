@@ -8,7 +8,7 @@
   <div
     class="trigger"
     (click)="togglePanel(!isOpen)">
-    {{ selectedLabel || placeholder }}
+    {{ selectedOption?.label || placeholder }}
     <span
       class="caret"
       [class.rotated]="isOpen"

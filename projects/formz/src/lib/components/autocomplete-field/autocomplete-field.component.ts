@@ -43,8 +43,7 @@ export class AutocompleteFieldComponent
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
-  protected selectedValue?: string;
-  protected selectedLabel?: string;
+  protected selectedOption?: IFormzFieldOption;
   protected isOpen = false;
   protected highlightedIndex = -1;
 
@@ -73,17 +72,6 @@ export class AutocompleteFieldComponent
     this.unregisterGlobalListeners();
   }
 
-  public selectOption(value: string, label?: string): void {
-    this.selectedValue = value;
-    this.selectedLabel = label;
-    this.focusChangeSubject$.next(false); // simulate blur on selection
-    this.valueChangeSubject$.next(value);
-    this.isFieldFilled = value.length > 0;
-    this.onChange(value); // notify ControlValueAccessor of the change
-    this.onTouched();
-    this.togglePanel(false); // close the dropdown panel after selection
-  }
-
   private readonly filterChange$ = new BehaviorSubject<string>('');
   protected readonly filteredOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
@@ -105,44 +93,7 @@ export class AutocompleteFieldComponent
     if (!isFocused) {
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
     }
-
-    // if (isFocused) {
-    //   this.togglePanel(true);
-    // }
   }
-
-  //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  get fieldId(): string {
-    return this.id;
-  }
-
-  get value(): string {
-    return this.selectedValue ?? '';
-  }
-
-  get isLabelFloating(): boolean {
-    return !this.isFieldFocused && !this.isFieldFilled;
-  }
-
-  get elementRef(): ElementRef<HTMLElement> {
-    return this.autocompleteRef as ElementRef<HTMLElement>;
-  }
-
-  //#endregion
-
-  //#region IFormzOptionField
-
-  @Input() emptyOption?: IFormzFieldOption;
-
-  get hasOptions(): boolean {
-    return (this.options?.length ?? 0) > 0 || (this.optionComponents?.length ?? 0) > 0;
-  }
-
-  //#endregion
 
   //#region ControlValueAccessor
 
@@ -152,12 +103,18 @@ export class AutocompleteFieldComponent
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    this.selectedValue = value;
-    this.selectedLabel = this.combineAllOptions().find((opt) => opt.value === value)?.label ?? '';
+    const label = this.combineAllOptions().find((opt) => opt.value === value)?.label ?? '';
+
+    this.selectedOption = {
+      ...this.selectedOption,
+      value,
+      label
+    };
+
     this.isFieldFilled = !!value;
 
     // write chosen value
-    this.inputRef.nativeElement.value = this.selectedLabel;
+    this.inputRef.nativeElement.value = label;
   }
 
   registerOnChange(fn: never): void {
@@ -174,16 +131,60 @@ export class AutocompleteFieldComponent
 
   //#endregion
 
+  //#region IFormzField
+
+  valueChange$ = this.valueChangeSubject$.asObservable();
+  focusChange$ = this.focusChangeSubject$.asObservable();
+
+  get fieldId(): string {
+    return this.id;
+  }
+
+  get value(): string {
+    return this.selectedOption?.value ?? '';
+  }
+
+  get isLabelFloating(): boolean {
+    return !this.isFieldFocused && !this.isFieldFilled;
+  }
+
+  get elementRef(): ElementRef<HTMLElement> {
+    return this.autocompleteRef as ElementRef<HTMLElement>;
+  }
+
+  //#endregion
+
   //#region IFormzDropdownField
 
   @Input() name = '';
   @Input() placeholder = '';
   @Input() disabled = false;
   @Input() required = false;
+
+  //#endregion
+
+  //#region IFormzOptionField
+
   @Input() options?: IFormzFieldOption[] = [];
+  @Input() emptyOption?: IFormzFieldOption;
 
   @ContentChildren(forwardRef(() => FieldOptionComponent))
   optionComponents?: QueryList<FieldOptionComponent>;
+
+  get hasOptions(): boolean {
+    return (this.options?.length ?? 0) > 0 || (this.optionComponents?.length ?? 0) > 0;
+  }
+
+  public selectOption(option: IFormzFieldOption): void {
+    this.selectedOption = option;
+
+    this.focusChangeSubject$.next(false); // simulate blur on selection
+    this.valueChangeSubject$.next(this.selectedOption.value);
+    this.isFieldFilled = this.selectedOption.value.length > 0;
+    this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
+    this.onTouched();
+    this.togglePanel(false); // close the dropdown panel after selection
+  }
 
   //#endregion
 
@@ -257,8 +258,8 @@ export class AutocompleteFieldComponent
             break;
           case 'Enter':
             if (this.isOpen && allOptions[this.highlightedIndex]) {
-              const opt = allOptions[this.highlightedIndex]!;
-              this.selectOption(opt.value, opt.label);
+              const option = allOptions[this.highlightedIndex]!;
+              this.selectOption(option);
               event.preventDefault();
             }
             break;
@@ -272,7 +273,7 @@ export class AutocompleteFieldComponent
   private setHightlightedOption(): void {
     const allOptions = this.combineAllOptions();
 
-    const selectedIndex = allOptions.findIndex((opt) => opt.value === this.selectedValue);
+    const selectedIndex = allOptions.findIndex((opt) => opt.value === this.selectedOption?.value);
     this.setHighlightedIndex(selectedIndex > 0 ? selectedIndex : 0);
   }
 

@@ -42,8 +42,7 @@ export class DropdownFieldComponent
   @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
-  protected selectedValue?: string;
-  protected selectedLabel?: string;
+  protected selectedOption?: IFormzFieldOption;
   protected isOpen = false;
   protected highlightedIndex = -1;
 
@@ -71,17 +70,6 @@ export class DropdownFieldComponent
     this.unregisterGlobalListeners();
   }
 
-  public selectOption(value: string, label?: string): void {
-    this.selectedValue = value;
-    this.selectedLabel = label;
-    this.focusChangeSubject$.next(false); // simulate blur on selection
-    this.valueChangeSubject$.next(value);
-    this.isFieldFilled = value.length > 0;
-    this.onChange(value); // notify ControlValueAccessor of the change
-    this.onTouched();
-    this.togglePanel(false); // close the dropdown panel after selection
-  }
-
   protected onFocusChange(isFocused: boolean): void {
     this.focusChangeSubject$.next(isFocused);
     this.isFieldFocused = isFocused;
@@ -91,29 +79,6 @@ export class DropdownFieldComponent
     }
   }
 
-  //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  get fieldId(): string {
-    return this.id;
-  }
-
-  get value(): string {
-    return this.selectedValue ?? '';
-  }
-
-  get isLabelFloating(): boolean {
-    return !this.isFieldFocused && !this.isFieldFilled;
-  }
-
-  get elementRef(): ElementRef<HTMLElement> {
-    return this.dropdownRef as ElementRef<HTMLElement>;
-  }
-
-  //#endregion
-
   //#region ControlValueAccessor
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -122,8 +87,14 @@ export class DropdownFieldComponent
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    this.selectedValue = value;
-    this.selectedLabel = this.combineAllOptions().find((opt) => opt.value === value)?.label ?? '';
+    const label = this.combineAllOptions().find((opt) => opt.value === value)?.label ?? '';
+
+    this.selectedOption = {
+      ...this.selectedOption,
+      value,
+      label
+    };
+
     this.isFieldFilled = !!value;
   }
 
@@ -141,25 +112,59 @@ export class DropdownFieldComponent
 
   //#endregion
 
+  //#region IFormzField
+
+  valueChange$ = this.valueChangeSubject$.asObservable();
+  focusChange$ = this.focusChangeSubject$.asObservable();
+
+  get fieldId(): string {
+    return this.id;
+  }
+
+  get value(): string {
+    return this.selectedOption?.value ?? '';
+  }
+
+  get isLabelFloating(): boolean {
+    return !this.isFieldFocused && !this.isFieldFilled;
+  }
+
+  get elementRef(): ElementRef<HTMLElement> {
+    return this.dropdownRef as ElementRef<HTMLElement>;
+  }
+
+  //#endregion
+
   //#region IFormzDropdownField
 
   @Input() name = '';
   @Input() placeholder = '';
   @Input() disabled = false;
   @Input() required = false;
-  @Input() options?: IFormzFieldOption[] = [];
-
-  @ContentChildren(forwardRef(() => FieldOptionComponent))
-  optionComponents?: QueryList<FieldOptionComponent>;
 
   //#endregion
 
   //#region IFormzOptionField
 
+  @Input() options?: IFormzFieldOption[] = [];
   @Input() emptyOption?: IFormzFieldOption;
+
+  @ContentChildren(forwardRef(() => FieldOptionComponent))
+  optionComponents?: QueryList<FieldOptionComponent>;
 
   get hasOptions(): boolean {
     return (this.options?.length ?? 0) > 0 || (this.optionComponents?.length ?? 0) > 0;
+  }
+
+  public selectOption(option: IFormzFieldOption): void {
+    this.selectedOption = option;
+
+    this.focusChangeSubject$.next(false); // simulate blur on selection
+    this.valueChangeSubject$.next(this.selectedOption.value);
+    this.isFieldFilled = this.selectedOption.value.length > 0;
+    this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
+    this.onTouched();
+    this.togglePanel(false); // close the dropdown panel after selection
   }
 
   //#endregion
@@ -234,8 +239,8 @@ export class DropdownFieldComponent
             break;
           case 'Enter':
             if (this.isOpen && allOptions[this.highlightedIndex]) {
-              const opt = allOptions[this.highlightedIndex]!;
-              this.selectOption(opt.value, opt.label);
+              const option = allOptions[this.highlightedIndex]!;
+              this.selectOption(option);
               event.preventDefault();
             }
             break;
@@ -249,7 +254,7 @@ export class DropdownFieldComponent
   private setHightlightedOption(): void {
     const allOptions = this.combineAllOptions();
 
-    const selectedIndex = allOptions.findIndex((opt) => opt.value === this.selectedValue);
+    const selectedIndex = allOptions.findIndex((opt) => opt.value === this.selectedOption?.value);
     this.setHighlightedIndex(selectedIndex > 0 ? selectedIndex : 0);
   }
 

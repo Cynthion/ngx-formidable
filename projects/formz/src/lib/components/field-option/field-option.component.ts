@@ -29,7 +29,14 @@ export class FieldOptionComponent implements IFormzFieldOption {
     if (!this.dropdownField) {
       throw new Error('formz-dropdown-option has no valid parent.');
     }
-    this.dropdownField.selectOption(this.value, this.label ?? this.innerTextAsLabel);
+
+    const option: IFormzFieldOption = {
+      value: this.value,
+      label: this.label ?? this.innerTextAsLabel,
+      disabled: this.disabled
+    };
+
+    this.dropdownField.selectOption(option);
   }
 
   setHighlighted(value: boolean) {
