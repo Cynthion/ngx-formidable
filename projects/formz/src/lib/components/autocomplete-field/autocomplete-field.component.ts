@@ -14,7 +14,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject, debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { FormzFieldBase, IFormzAutocompleteField, IFormzFieldOption } from '../../form-model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
@@ -114,7 +114,7 @@ export class AutocompleteFieldComponent
     this.isFieldFilled = !!value;
 
     // write chosen value
-    this.inputRef.nativeElement.value = label;
+    this.inputRef.nativeElement.value = label; // TODO required?
   }
 
   registerOnChange(fn: never): void {
@@ -339,16 +339,33 @@ export class AutocompleteFieldComponent
   }
 
   private registerAutocomplete(): void {
-    // TODO make debounce configurable
-    this.filterChange$.pipe(debounceTime(200), distinctUntilChanged()).subscribe((filterValue: string) => {
-      // TODO check initial value
-      console.log('Filter value changed:', filterValue);
+    this.filterChange$
+      .pipe(
+        debounceTime(200),
+        distinctUntilChanged(),
+        filter(() => this.isFieldFocused)
+      )
+      .subscribe((filterValue: string) => {
+        console.log('Filter value changed:', filterValue);
 
-      const allOptions = this.combineAllOptions();
-      console.log('All options:', allOptions);
-      const filteredOptions = allOptions.filter((opt) => opt.label?.toLowerCase().includes(filterValue.toLowerCase()));
+        const allOptions = this.combineAllOptions();
 
-      this.filteredOptions$.next(filteredOptions);
-    });
+        const filteredOptions = filterValue
+          ? allOptions.filter((opt) => opt.label?.toLowerCase().includes(filterValue.toLowerCase()))
+          : allOptions;
+
+        const filteredOrEmptyOptions =
+          filteredOptions.length > 0 ? filteredOptions : this.emptyOption ? [this.emptyOption] : [];
+
+        this.filteredOptions$.next(filteredOrEmptyOptions);
+
+        if (filteredOrEmptyOptions.length > 0 && !this.isOpen) {
+          this.togglePanel(true);
+        }
+
+        if (filteredOrEmptyOptions.length === 0 && this.isOpen) {
+          this.togglePanel(false);
+        }
+      });
   }
 }
