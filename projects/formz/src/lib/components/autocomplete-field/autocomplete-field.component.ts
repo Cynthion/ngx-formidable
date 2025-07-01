@@ -1,4 +1,5 @@
 import {
+  AfterContentInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -14,7 +15,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, Subject } from 'rxjs';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, Subject, takeUntil } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { FormzFieldBase, IFormzAutocompleteField, IFormzFieldOption } from '../../form-model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
@@ -37,7 +38,7 @@ import { FieldOptionComponent } from '../field-option/field-option.component';
 })
 export class AutocompleteFieldComponent
   extends FormzFieldBase
-  implements OnInit, OnDestroy, ControlValueAccessor, IFormzAutocompleteField
+  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzAutocompleteField
 {
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
@@ -53,6 +54,7 @@ export class AutocompleteFieldComponent
 
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
+  private destroy$ = new Subject<void>();
 
   private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
@@ -70,15 +72,22 @@ export class AutocompleteFieldComponent
 
   ngOnDestroy(): void {
     this.unregisterGlobalListeners();
+
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  private readonly filterChange$ = new BehaviorSubject<string>('');
+  ngAfterContentInit(): void {
+    this.filteredOptions$.next(this.filteredOptions());
+  }
+
+  private readonly filterValue$ = new BehaviorSubject<string>('');
   protected readonly filteredOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
   protected onInputChange(): void {
     const value = this.inputRef.nativeElement.value;
 
-    this.filterChange$.next(value);
+    this.filterValue$.next(value);
 
     // TODO comment following line to only allow prefedined options (add setting)
     // this.onChange(value); // notify ControlValueAccessor of the change
@@ -195,7 +204,7 @@ export class AutocompleteFieldComponent
       this.setHightlightedOption();
       this.scrollIntoView();
     } else {
-      this.highlightedIndex = -1; // reset highlighted index when closing
+      this.setHighlightedIndex(-1); // reset highlighted index when closing
     }
 
     this.cdRef.markForCheck();
@@ -234,8 +243,8 @@ export class AutocompleteFieldComponent
     if (this.disabled) return;
 
     if (['Escape', 'ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) {
-      const allOptions = this.combineAllOptions();
-      const allOptionsCount = allOptions.length;
+      const filteredOptions = this.filteredOptions();
+      const filteredOptionsCount = filteredOptions.length;
 
       this.ngZone.run(() => {
         switch (event.key) {
@@ -245,20 +254,20 @@ export class AutocompleteFieldComponent
           case 'ArrowDown':
             if (!this.isOpen) {
               this.togglePanel(true);
-            } else if (allOptionsCount > 0) {
-              this.setHighlightedIndex((this.highlightedIndex + 1) % allOptionsCount);
+            } else if (filteredOptionsCount > 0) {
+              this.setHighlightedIndex((this.highlightedIndex + 1) % filteredOptionsCount);
             }
             event.preventDefault();
             break;
           case 'ArrowUp':
-            if (this.isOpen && allOptionsCount > 0) {
-              this.setHighlightedIndex((this.highlightedIndex - 1 + allOptionsCount) % allOptionsCount);
+            if (this.isOpen && filteredOptionsCount > 0) {
+              this.setHighlightedIndex((this.highlightedIndex - 1 + filteredOptionsCount) % filteredOptionsCount);
               event.preventDefault();
             }
             break;
           case 'Enter':
-            if (this.isOpen && allOptions[this.highlightedIndex]) {
-              const option = allOptions[this.highlightedIndex]!;
+            if (this.isOpen && filteredOptions[this.highlightedIndex]) {
+              const option = filteredOptions[this.highlightedIndex]!;
               this.selectOption(option);
               event.preventDefault();
             }
@@ -271,9 +280,9 @@ export class AutocompleteFieldComponent
   }
 
   private setHightlightedOption(): void {
-    const allOptions = this.combineAllOptions();
+    const filteredOptions = this.filteredOptions();
 
-    const selectedIndex = allOptions.findIndex((opt) => opt.value === this.selectedOption?.value);
+    const selectedIndex = filteredOptions.findIndex((opt) => opt.value === this.selectedOption?.value);
     this.setHighlightedIndex(selectedIndex > 0 ? selectedIndex : 0);
   }
 
@@ -299,6 +308,21 @@ export class AutocompleteFieldComponent
       })) ?? [];
 
     return [...inlineOptions, ...projectedOptions];
+  }
+
+  private filteredOptions(): IFormzFieldOption[] {
+    const filterValue = this.filterValue$.value;
+
+    const allOptions = this.combineAllOptions();
+
+    const filteredOptions = filterValue
+      ? allOptions.filter((opt) => opt.label?.toLowerCase().includes(filterValue.toLowerCase()))
+      : allOptions;
+
+    const filteredOrEmptyOptions =
+      filteredOptions.length > 0 ? filteredOptions : this.emptyOption ? [this.emptyOption] : [];
+
+    return filteredOrEmptyOptions;
   }
 
   private scrollIntoView(): void {
@@ -339,31 +363,27 @@ export class AutocompleteFieldComponent
   }
 
   private registerAutocomplete(): void {
-    this.filterChange$
+    this.filterValue$
       .pipe(
         debounceTime(200),
         distinctUntilChanged(),
-        filter(() => this.isFieldFocused)
+        filter(() => this.isFieldFocused),
+        takeUntil(this.destroy$)
       )
       .subscribe((filterValue: string) => {
         console.log('Filter value changed:', filterValue);
 
-        const allOptions = this.combineAllOptions();
+        this.setHighlightedIndex(-1); // TODO keep option highlighted if still in filtered set
 
-        const filteredOptions = filterValue
-          ? allOptions.filter((opt) => opt.label?.toLowerCase().includes(filterValue.toLowerCase()))
-          : allOptions;
+        const filteredOptions = this.filteredOptions();
 
-        const filteredOrEmptyOptions =
-          filteredOptions.length > 0 ? filteredOptions : this.emptyOption ? [this.emptyOption] : [];
+        this.filteredOptions$.next(filteredOptions);
 
-        this.filteredOptions$.next(filteredOrEmptyOptions);
-
-        if (filteredOrEmptyOptions.length > 0 && !this.isOpen) {
+        if (filteredOptions.length > 0 && !this.isOpen) {
           this.togglePanel(true);
         }
 
-        if (filteredOrEmptyOptions.length === 0 && this.isOpen) {
+        if (filteredOptions.length === 0 && this.isOpen) {
           this.togglePanel(false);
         }
       });

@@ -176,7 +176,7 @@ export class DropdownFieldComponent
       this.setHightlightedOption();
       this.scrollIntoView();
     } else {
-      this.highlightedIndex = -1; // reset highlighted index when closing
+      this.setHighlightedIndex(-1); // reset highlighted index when closing
     }
 
     this.cdRef.markForCheck();
