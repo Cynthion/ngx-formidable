@@ -94,7 +94,8 @@
         [ngModel]="vm.formValue.nationality"
         [disabled]="false"
         [required]="false"
-        [options]="nationalityOptions">
+        [options]="nationalityOptions"
+        [emptyOption]="nationalityEmptyOption">
         <formz-field-option [value]="'ch'">🇨🇭 Switzerland</formz-field-option>
         <formz-field-option [value]="'other'">Some other country</formz-field-option>
       </formz-dropdown-field>
@@ -118,7 +119,8 @@
         [ngModel]="vm.formValue.hobby"
         [disabled]="false"
         [required]="false"
-        [options]="hobbyOptions">
+        [options]="hobbyOptions"
+        [emptyOption]="hobbyEmptyOption">
         <formz-field-option [value]="'garden'">Gardening</formz-field-option>
         <formz-field-option [value]="'other'">Some other hobby</formz-field-option>
       </formz-autocomplete-field>

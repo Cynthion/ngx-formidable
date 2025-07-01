@@ -6,6 +6,10 @@
   &.highlighted {
     @include highlighted;
   }
+
+  &.disabled {
+    @include disabled;
+  }
 }
 
 .field-option {

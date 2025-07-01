@@ -35,6 +35,11 @@ export class ExampleFormComponent {
     { value: 'jp', label: '🇯🇵  Japan' }
   ];
 
+  protected nationalityEmptyOption: IFormzFieldOption = {
+    value: 'empty',
+    label: 'No nationality available.'
+  };
+
   protected hobbyOptions: IFormzFieldOption[] = [
     { value: 'dev', label: 'Software Development' },
     { value: 'gaming', label: 'Gaming' },
@@ -42,6 +47,11 @@ export class ExampleFormComponent {
     { value: 'sports', label: 'Sports' },
     { value: 'cooking', label: 'Cooking' }
   ];
+
+  protected hobbyEmptyOption: IFormzFieldOption = {
+    value: 'empty',
+    label: 'No hobby available.'
+  };
 
   // TODO add type for vm?
   private readonly viewModel = computed(() => {

@@ -134,6 +134,16 @@ export class AutocompleteFieldComponent
 
   //#endregion
 
+  //#region IFormzOptionField
+
+  @Input() emptyOption?: IFormzFieldOption;
+
+  get hasOptions(): boolean {
+    return (this.options?.length ?? 0) > 0 || (this.optionComponents?.length ?? 0) > 0;
+  }
+
+  //#endregion
+
   //#region ControlValueAccessor
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -179,7 +189,6 @@ export class AutocompleteFieldComponent
 
   togglePanel(isOpen: boolean): void {
     this.isOpen = isOpen;
-    this.focusChangeSubject$.next(isOpen);
 
     if (isOpen) {
       this.setHightlightedOption();
@@ -193,7 +202,7 @@ export class AutocompleteFieldComponent
 
   private registerGlobalListeners(): void {
     this.ngZone.runOutsideAngular(() => {
-      const onClick = (event: MouseEvent) => this.handleDocumentClick(event);
+      const onClick = (event: MouseEvent) => this.handleExternalClick(event);
       const onKeyDown = (event: KeyboardEvent) => this.handleKeyDown(event);
 
       document.addEventListener('click', onClick);
@@ -209,10 +218,11 @@ export class AutocompleteFieldComponent
     this.globalKeydownUnlisten?.();
   }
 
-  private handleDocumentClick(event: MouseEvent): void {
-    if (!this.isOpen || !this.autocompleteRef) return;
+  private handleExternalClick(event: MouseEvent): void {
+    if (!this.isOpen) return;
 
     const clickedInside = this.autocompleteRef.nativeElement.contains(event.target as Node);
+
     if (!clickedInside) {
       this.ngZone.run(() => this.togglePanel(false));
     }

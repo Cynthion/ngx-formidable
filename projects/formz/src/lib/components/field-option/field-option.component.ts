@@ -12,6 +12,10 @@ export class FieldOptionComponent implements IFormzFieldOption {
   @Input({ required: true }) value!: string;
   @Input() label?: string = undefined;
 
+  @HostBinding('class.disabled')
+  @Input()
+  disabled = false;
+
   @HostBinding('class.highlighted') isHighlighted = false;
 
   constructor(
@@ -20,6 +24,8 @@ export class FieldOptionComponent implements IFormzFieldOption {
   ) {}
 
   select() {
+    if (this.disabled) return;
+
     if (!this.dropdownField) {
       throw new Error('formz-dropdown-option has no valid parent.');
     }

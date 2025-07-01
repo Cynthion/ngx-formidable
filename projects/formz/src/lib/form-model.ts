@@ -12,6 +12,7 @@ export interface FormValidationOptions {
 export interface IFormzFieldOption {
   value: string;
   label?: string;
+  disabled?: boolean;
 }
 
 /**
@@ -65,7 +66,12 @@ export interface IFormzSelectField extends Pick<HTMLSelectElement, FormzSelectFi
   options?: IFormzFieldOption[];
 }
 
-export interface IFormzDropdownField {
+export interface IFormzOptionField {
+  emptyOption?: IFormzFieldOption;
+  hasOptions: boolean;
+}
+
+export interface IFormzDropdownField extends IFormzOptionField {
   name: string;
   placeholder?: string;
   disabled?: boolean;

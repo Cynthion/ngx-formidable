@@ -278,3 +278,8 @@
 @mixin highlighted {
   background: var(--formz-color-field-highlight, #{tokens.$formz-color-field-highlight});
 }
+
+@mixin disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
