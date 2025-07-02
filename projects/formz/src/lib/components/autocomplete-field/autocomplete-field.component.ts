@@ -195,6 +195,7 @@ export class AutocompleteFieldComponent
 
   public selectOption(option: IFormzFieldOption): void {
     this.selectedOption = option;
+    this.inputRef.nativeElement.value = option.label ?? ''; // update input value with selected option label
 
     this.focusChangeSubject$.next(false); // simulate blur on selection
     this.valueChangeSubject$.next(this.selectedOption.value);
@@ -202,6 +203,11 @@ export class AutocompleteFieldComponent
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.onTouched();
     this.togglePanel(false); // close the dropdown panel after selection
+  }
+
+  private deselectOption(): void {
+    this.selectedOption = undefined;
+    this.onChange('');
   }
 
   //#endregion
@@ -250,42 +256,40 @@ export class AutocompleteFieldComponent
   private handleKeyDown(event: KeyboardEvent): void {
     if (!this.isFieldFocused) return;
     if (this.disabled) return;
+    if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
 
-    if (['Escape', 'ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) {
-      const filteredOptions = this.filteredOptions();
-      const filteredOptionsCount = filteredOptions.length;
+    const filteredOptions = this.filteredOptions();
+    const filteredOptionsCount = filteredOptions.length;
 
-      this.ngZone.run(() => {
-        switch (event.key) {
-          case 'Escape':
-            if (this.isOpen) this.togglePanel(false);
-            break;
-          case 'ArrowDown':
-            if (!this.isOpen) {
-              this.togglePanel(true);
-            } else if (filteredOptionsCount > 0) {
-              this.setHighlightedIndex((this.highlightedIndex + 1) % filteredOptionsCount);
-            }
+    this.ngZone.run(() => {
+      switch (event.key) {
+        case 'Escape':
+        case 'Tab':
+          if (this.isOpen) this.togglePanel(false);
+          break;
+        case 'ArrowDown':
+          if (!this.isOpen) {
+            this.togglePanel(true);
+          } else if (filteredOptionsCount > 0) {
+            this.setHighlightedIndex((this.highlightedIndex + 1) % filteredOptionsCount);
+          }
+          event.preventDefault();
+          break;
+        case 'ArrowUp':
+          if (this.isOpen && filteredOptionsCount > 0) {
+            this.setHighlightedIndex((this.highlightedIndex - 1 + filteredOptionsCount) % filteredOptionsCount);
             event.preventDefault();
-            break;
-          case 'ArrowUp':
-            if (this.isOpen && filteredOptionsCount > 0) {
-              this.setHighlightedIndex((this.highlightedIndex - 1 + filteredOptionsCount) % filteredOptionsCount);
-              event.preventDefault();
-            }
-            break;
-          case 'Enter':
-            if (this.isOpen && filteredOptions[this.highlightedIndex]) {
-              const option = filteredOptions[this.highlightedIndex]!;
-              this.selectOption(option);
-              event.preventDefault();
-            }
-            break;
-        }
-      });
-    } else {
-      // panel must stay open
-    }
+          }
+          break;
+        case 'Enter':
+          if (this.isOpen && filteredOptions[this.highlightedIndex]) {
+            const option = filteredOptions[this.highlightedIndex]!;
+            this.selectOption(option);
+            event.preventDefault();
+          }
+          break;
+      }
+    });
   }
 
   private highlightSelectedOption(): void {
@@ -378,10 +382,8 @@ export class AutocompleteFieldComponent
         filter(() => this.isFieldFocused),
         takeUntil(this.destroy$)
       )
-      .subscribe((filterValue: string) => {
-        console.log('Filter value changed:', filterValue);
-
-        this.highlightSelectedOption(); // TODO works?
+      .subscribe(() => {
+        this.deselectOption();
 
         const filteredOptions = this.filteredOptions();
 

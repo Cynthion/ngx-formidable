@@ -218,42 +218,40 @@ export class DropdownFieldComponent
   private handleKeyDown(event: KeyboardEvent): void {
     if (!this.isFieldFocused) return;
     if (this.disabled) return;
+    if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
 
-    if (['Escape', 'ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) {
-      const allOptions = this.combineAllOptions();
-      const allOptionsCount = allOptions.length;
+    const allOptions = this.combineAllOptions();
+    const allOptionsCount = allOptions.length;
 
-      this.ngZone.run(() => {
-        switch (event.key) {
-          case 'Escape':
-            if (this.isOpen) this.togglePanel(false);
-            break;
-          case 'ArrowDown':
-            if (!this.isOpen) {
-              this.togglePanel(true);
-            } else if (allOptionsCount > 0) {
-              this.setHighlightedIndex((this.highlightedIndex + 1) % allOptionsCount);
-            }
+    this.ngZone.run(() => {
+      switch (event.key) {
+        case 'Escape':
+        case 'Tab':
+          if (this.isOpen) this.togglePanel(false);
+          break;
+        case 'ArrowDown':
+          if (!this.isOpen) {
+            this.togglePanel(true);
+          } else if (allOptionsCount > 0) {
+            this.setHighlightedIndex((this.highlightedIndex + 1) % allOptionsCount);
+          }
+          event.preventDefault();
+          break;
+        case 'ArrowUp':
+          if (this.isOpen && allOptionsCount > 0) {
+            this.setHighlightedIndex((this.highlightedIndex - 1 + allOptionsCount) % allOptionsCount);
             event.preventDefault();
-            break;
-          case 'ArrowUp':
-            if (this.isOpen && allOptionsCount > 0) {
-              this.setHighlightedIndex((this.highlightedIndex - 1 + allOptionsCount) % allOptionsCount);
-              event.preventDefault();
-            }
-            break;
-          case 'Enter':
-            if (this.isOpen && allOptions[this.highlightedIndex]) {
-              const option = allOptions[this.highlightedIndex]!;
-              this.selectOption(option);
-              event.preventDefault();
-            }
-            break;
-        }
-      });
-    } else {
-      this.ngZone.run(() => this.togglePanel(false));
-    }
+          }
+          break;
+        case 'Enter':
+          if (this.isOpen && allOptions[this.highlightedIndex]) {
+            const option = allOptions[this.highlightedIndex]!;
+            this.selectOption(option);
+            event.preventDefault();
+          }
+          break;
+      }
+    });
   }
 
   private highlightSelectedOption(): void {

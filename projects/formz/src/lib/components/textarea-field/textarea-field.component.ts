@@ -48,8 +48,6 @@ export class TextareaFieldComponent extends FormzFieldBase implements ControlVal
   }
 
   protected onFocusChange(isFocused: boolean): void {
-    console.log('TextareaField onFocusChange', isFocused);
-
     this.focusChangeSubject$.next(isFocused);
     this.isFieldFocused = isFocused;
 

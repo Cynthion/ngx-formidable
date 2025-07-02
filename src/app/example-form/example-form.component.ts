@@ -78,7 +78,6 @@ export class ExampleFormComponent {
   protected onSubmit(): void {
     // TODO choose either formz-form-submit.sibmitClick or form.ngSubmit
     if (this.isValid()) {
-      // TODO remove
       console.log(this.formValue());
     }
   }
