@@ -152,7 +152,7 @@ export class DropdownFieldComponent
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
-  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.', disabled: true };
+  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.' };
 
   @ContentChildren(forwardRef(() => FieldOptionComponent))
   optionComponents?: QueryList<FieldOptionComponent>;
@@ -162,6 +162,8 @@ export class DropdownFieldComponent
   }
 
   public selectOption(option: IFormzFieldOption): void {
+    if (option.disabled) return;
+
     this.selectedOption = option;
 
     this.focusChangeSubject$.next(false); // simulate blur on selection
@@ -169,7 +171,7 @@ export class DropdownFieldComponent
     this.isFieldFilled = this.selectedOption.value.length > 0;
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.onTouched();
-    this.togglePanel(false); // close the dropdown panel after selection
+    this.togglePanel(false);
   }
 
   //#endregion

@@ -28,6 +28,7 @@
       <formz-field-option
         [value]="option.value"
         [label]="option.label"
+        [disabled]="option.disabled || false"
         [class.highlighted]="i === highlightedIndex">
         {{ option.label }}
       </formz-field-option>

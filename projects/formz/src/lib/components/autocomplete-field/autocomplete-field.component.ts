@@ -83,7 +83,7 @@ export class AutocompleteFieldComponent
   }
 
   ngAfterContentInit(): void {
-    this.filteredOptions$.next(this.filteredOptions());
+    this.filteredOptions$.next(this.filteredOptions()); // TODO update after first selection
   }
 
   private readonly filterValue$ = new BehaviorSubject<string>('');
@@ -132,7 +132,7 @@ export class AutocompleteFieldComponent
     this.isFieldFilled = !!value;
 
     // write chosen value
-    this.inputRef.nativeElement.value = label; // TODO required?
+    this.inputRef.nativeElement.value = label;
   }
 
   registerOnChange(fn: never): void {
@@ -184,7 +184,7 @@ export class AutocompleteFieldComponent
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
-  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.', disabled: true };
+  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.' };
 
   @ContentChildren(forwardRef(() => FieldOptionComponent))
   optionComponents?: QueryList<FieldOptionComponent>;
@@ -194,6 +194,8 @@ export class AutocompleteFieldComponent
   }
 
   public selectOption(option: IFormzFieldOption): void {
+    if (option.disabled) return;
+
     this.selectedOption = option;
     this.inputRef.nativeElement.value = option.label ?? ''; // update input value with selected option label
 
@@ -202,7 +204,7 @@ export class AutocompleteFieldComponent
     this.isFieldFilled = this.selectedOption.value.length > 0;
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.onTouched();
-    this.togglePanel(false); // close the dropdown panel after selection
+    this.togglePanel(false);
   }
 
   private deselectOption(): void {
@@ -332,7 +334,8 @@ export class AutocompleteFieldComponent
       ? allOptions.filter((opt) => opt.label?.toLowerCase().includes(filterValue.toLowerCase()))
       : allOptions;
 
-    const filteredOrEmptyOptions = filteredOptions.length > 0 ? filteredOptions : [this.emptyOption];
+    const emptyOption = { ...this.emptyOption, disabled: true };
+    const filteredOrEmptyOptions = filteredOptions.length > 0 ? filteredOptions : [emptyOption];
 
     return filteredOrEmptyOptions;
   }
@@ -388,6 +391,8 @@ export class AutocompleteFieldComponent
         const filteredOptions = this.filteredOptions();
 
         this.filteredOptions$.next(filteredOptions);
+
+        // if (filteredOptions.length === 1 && filteredOptions[1]?.label === this.selectedOption?.label) return;
 
         if (filteredOptions.length > 0 && !this.isOpen) {
           this.togglePanel(true);
