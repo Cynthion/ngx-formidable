@@ -98,6 +98,12 @@
         [emptyOption]="nationalityEmptyOption">
         <formz-field-option [value]="'ch'">🇨🇭 Switzerland</formz-field-option>
         <formz-field-option [value]="'other'">Some other country</formz-field-option>
+        <formz-field-option
+          [value]="'custom'"
+          [label]="'The Special One'">
+          <p>I'm a special item</p>
+          <pre>And I can have any content</pre>
+        </formz-field-option>
       </formz-dropdown-field>
       <div
         formzFieldLabel
@@ -123,6 +129,12 @@
         [emptyOption]="hobbyEmptyOption">
         <formz-field-option [value]="'garden'">Gardening (content)</formz-field-option>
         <formz-field-option [value]="'other'">Some other hobby (content)</formz-field-option>
+        <formz-field-option
+          [value]="'custom'"
+          [label]="'The Special One'">
+          <p>I'm a special item</p>
+          <pre>And I can have any content</pre>
+        </formz-field-option>
       </formz-autocomplete-field>
       <div
         formzFieldLabel

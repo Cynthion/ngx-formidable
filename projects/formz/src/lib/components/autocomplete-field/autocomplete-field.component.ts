@@ -83,7 +83,7 @@ export class AutocompleteFieldComponent
   }
 
   ngAfterContentInit(): void {
-    this.filteredOptions$.next(this.filteredOptions()); // TODO update after first selection
+    this.filteredOptions$.next(this.filteredOptions());
   }
 
   private readonly filterValue$ = new BehaviorSubject<string>('');
@@ -93,9 +93,6 @@ export class AutocompleteFieldComponent
     const value = this.inputRef.nativeElement.value;
 
     this.filterValue$.next(value);
-
-    // TODO comment following line to only allow prefedined options (add setting)
-    // this.onChange(value); // notify ControlValueAccessor of the change
 
     this.isFieldFilled = value.length > 0;
   }

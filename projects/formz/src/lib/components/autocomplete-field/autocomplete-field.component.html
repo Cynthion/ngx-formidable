@@ -23,7 +23,6 @@
     *ngIf="isOpen"
     #panelRef
     class="panel">
-    <!-- Inline Options -->
     @for (option of filteredOptions$ | async; track option.value; let i = $index) {
       <formz-field-option
         [value]="option.value"
