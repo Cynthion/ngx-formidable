@@ -208,6 +208,7 @@ export class AutocompleteFieldComponent
   }
 
   private deselectOption(): void {
+    this.setHighlightedIndex(-1);
     this.selectedOption = undefined;
     this.onChange('');
   }
@@ -391,8 +392,6 @@ export class AutocompleteFieldComponent
         const filteredOptions = this.filteredOptions();
 
         this.filteredOptions$.next(filteredOptions);
-
-        // if (filteredOptions.length === 1 && filteredOptions[1]?.label === this.selectedOption?.label) return;
 
         if (filteredOptions.length > 0 && !this.isOpen) {
           this.togglePanel(true);
