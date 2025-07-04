@@ -36,13 +36,14 @@
     }
 
     <!-- Content Projected Options -->
+    <!-- Option components are re-created in order to control and filter them. -->
     @for (option of filteredProjectedOptions$ | async; track option.value; let i = $index) {
       <formz-field-option
         [value]="option.value"
         [label]="option.label"
         [disabled]="option.disabled || false"
         [match]="option.match"
-        [highlighted]="i === highlightedIndex">
+        [highlighted]="i === highlightedIndex - filteredInlineOptions$.value.length">
         <ng-container *ngTemplateOutlet="option.template"></ng-container>
       </formz-field-option>
     }

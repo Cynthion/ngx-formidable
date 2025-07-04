@@ -83,7 +83,6 @@ export class AutocompleteFieldComponent
   }
 
   ngAfterContentInit(): void {
-    // this.filteredOptions$.next(this.filteredOptions());
     this.updateFilteredOptions();
   }
 
@@ -195,8 +194,14 @@ export class AutocompleteFieldComponent
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;
 
-    this.selectedOption = option;
-    this.inputRef.nativeElement.value = option.label ?? ''; // update input value with selected option label
+    const newOption: IFormzFieldOption = {
+      value: option.value,
+      label: option.label || option.value, // value as fallback for optional label
+      disabled: option.disabled
+    };
+
+    this.selectedOption = newOption;
+    this.inputRef.nativeElement.value = this.selectedOption.label!; // update input value with selected option label
 
     this.focusChangeSubject$.next(false); // simulate blur on selection
     this.valueChangeSubject$.next(this.selectedOption.value);
@@ -218,7 +223,7 @@ export class AutocompleteFieldComponent
     this.isOpen = isOpen;
 
     if (isOpen) {
-      // this.highlightSelectedOption();
+      this.highlightSelectedOption();
       this.scrollIntoView();
     } else {
       this.setHighlightedIndex(-1); // reset highlighted index when closing
@@ -292,6 +297,17 @@ export class AutocompleteFieldComponent
           break;
       }
     });
+  }
+
+  private highlightSelectedOption(): void {
+    const filteredOptions = this.getFilteredCombinedOptions();
+    const selectedIndex = filteredOptions.findIndex((opt) => opt.value === this.selectedOption?.value);
+
+    if (selectedIndex >= 0) {
+      this.setHighlightedIndex(selectedIndex);
+    } else {
+      this.setHighlightedIndex(-1); // reset if no selected option found
+    }
   }
 
   private setHighlightedIndex(index: number): void {

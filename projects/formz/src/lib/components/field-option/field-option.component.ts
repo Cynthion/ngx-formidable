@@ -47,14 +47,6 @@ export class FieldOptionComponent implements IFormzFieldOption {
   }
 
   select() {
-    if (this.disabled) return;
-
-    const option: IFormzFieldOption = {
-      value: this.value,
-      label: this.label || this.value, // value as fallback for optional label
-      disabled: this.disabled
-    };
-
-    this.parent.selectOption(option);
+    this.parent.selectOption(this);
   }
 }
