@@ -218,6 +218,41 @@ export class AutocompleteFieldComponent
     this.onChange('');
   }
 
+  private combineAllOptions(): IFormzFieldOption[] {
+    const inlineOptions = this.options ?? [];
+    const projectedOptions = this.optionComponents?.toArray() ?? [];
+
+    return [...inlineOptions, ...projectedOptions];
+  }
+
+  private getFilteredOptions(): IFormzFieldOption[] {
+    return [...this.filteredInlineOptions$.value, ...this.filteredProjectedOptions$.value];
+  }
+
+  private updateFilteredOptions(): void {
+    const filterValue = this.filterValue$.value;
+
+    // inline options
+    const inlineOptions = this.options ?? [];
+    const filteredInlineOptions = filterValue
+      ? inlineOptions.filter((opt) =>
+          opt.match ? opt.match(filterValue) : opt.label?.toLowerCase().includes(filterValue.toLowerCase())
+        )
+      : inlineOptions;
+
+    this.filteredInlineOptions$.next(filteredInlineOptions);
+
+    // projected options
+    const projectedOptions = this.optionComponents?.toArray() ?? [];
+    const filteredProjectedOptions = filterValue
+      ? projectedOptions.filter((opt) =>
+          opt.match ? opt.match(filterValue) : opt.label?.toLowerCase().includes(filterValue.toLowerCase())
+        )
+      : projectedOptions;
+
+    this.filteredProjectedOptions$.next(filteredProjectedOptions);
+  }
+
   //#endregion
 
   togglePanel(isOpen: boolean): void {
@@ -312,41 +347,6 @@ export class AutocompleteFieldComponent
     this.highlightedIndex = index;
 
     this.cdRef.markForCheck();
-  }
-
-  private combineAllOptions(): IFormzFieldOption[] {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
-
-    return [...inlineOptions, ...projectedOptions];
-  }
-
-  private getFilteredOptions(): IFormzFieldOption[] {
-    return [...this.filteredInlineOptions$.value, ...this.filteredProjectedOptions$.value];
-  }
-
-  private updateFilteredOptions(): void {
-    const filterValue = this.filterValue$.value;
-
-    // inline options
-    const inlineOptions = this.options ?? [];
-    const filteredInlineOptions = filterValue
-      ? inlineOptions.filter((opt) =>
-          opt.match ? opt.match(filterValue) : opt.label?.toLowerCase().includes(filterValue.toLowerCase())
-        )
-      : inlineOptions;
-
-    this.filteredInlineOptions$.next(filteredInlineOptions);
-
-    // projected options
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
-    const filteredProjectedOptions = filterValue
-      ? projectedOptions.filter((opt) =>
-          opt.match ? opt.match(filterValue) : opt.label?.toLowerCase().includes(filterValue.toLowerCase())
-        )
-      : projectedOptions;
-
-    this.filteredProjectedOptions$.next(filteredProjectedOptions);
   }
 
   private scrollIntoView(): void {

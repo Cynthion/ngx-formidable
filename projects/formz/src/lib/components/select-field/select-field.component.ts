@@ -1,4 +1,5 @@
 import {
+  AfterContentInit,
   ChangeDetectionStrategy,
   Component,
   ContentChildren,
@@ -9,10 +10,15 @@ import {
   ViewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FORMZ_OPTION_FIELD, FormzFieldBase, IFormzFieldOption, IFormzSelectField } from '../../form-model';
-import { FieldOptionComponent } from '../field-option/field-option.component';
+import {
+  FORMZ_FIELD_OPTION,
+  FORMZ_OPTION_FIELD,
+  FormzFieldBase,
+  IFormzFieldOption,
+  IFormzSelectField
+} from '../../form-model';
 
 @Component({
   selector: 'formz-select-field',
@@ -35,7 +41,10 @@ import { FieldOptionComponent } from '../field-option/field-option.component';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SelectFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzSelectField {
+export class SelectFieldComponent
+  extends FormzFieldBase
+  implements AfterContentInit, ControlValueAccessor, IFormzSelectField
+{
   @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLInputElement>;
 
   protected selectedOption?: IFormzFieldOption;
@@ -43,6 +52,10 @@ export class SelectFieldComponent extends FormzFieldBase implements ControlValue
   private id = uuid();
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
+
+  ngAfterContentInit(): void {
+    this.updateOptions();
+  }
 
   protected onChangeChange(): void {
     const value = this.value;
@@ -115,17 +128,25 @@ export class SelectFieldComponent extends FormzFieldBase implements ControlValue
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
-  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.', disabled: true };
+  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.' };
 
-  @ContentChildren(forwardRef(() => FieldOptionComponent))
-  optionComponents?: QueryList<FieldOptionComponent>;
+  @ContentChildren(FORMZ_FIELD_OPTION)
+  optionComponents?: QueryList<IFormzFieldOption>;
 
-  get hasOptions(): boolean {
-    return (this.options?.length ?? 0) > 0 || (this.optionComponents?.length ?? 0) > 0;
-  }
+  protected readonly inlineOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+  protected readonly projectedOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
   public selectOption(_option: IFormzFieldOption): void {
     // not used in select field, but required by IFormzOptionField interface
+    // <option> is selected by the user through the native <select> element
+  }
+
+  private updateOptions(): void {
+    const inlineOptions = this.options ?? [];
+    const projectedOptions = this.optionComponents?.toArray() ?? [];
+
+    this.inlineOptions$.next(inlineOptions);
+    this.projectedOptions$.next(projectedOptions);
   }
 
   //#endregion

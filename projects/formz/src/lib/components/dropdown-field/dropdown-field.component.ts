@@ -193,6 +193,21 @@ export class DropdownFieldComponent
     this.togglePanel(false);
   }
 
+  private combineAllOptions(): IFormzFieldOption[] {
+    const inlineOptions = this.options ?? [];
+    const projectedOptions = this.optionComponents?.toArray() ?? [];
+
+    return [...inlineOptions, ...projectedOptions];
+  }
+
+  private updateOptions(): void {
+    const inlineOptions = this.options ?? [];
+    const projectedOptions = this.optionComponents?.toArray() ?? [];
+
+    this.inlineOptions$.next(inlineOptions);
+    this.projectedOptions$.next(projectedOptions);
+  }
+
   //#endregion
 
   togglePanel(isOpen: boolean): void {
@@ -287,21 +302,6 @@ export class DropdownFieldComponent
     this.highlightedIndex = index;
 
     this.cdRef.markForCheck();
-  }
-
-  private combineAllOptions(): IFormzFieldOption[] {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
-
-    return [...inlineOptions, ...projectedOptions];
-  }
-
-  private updateOptions(): void {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
-
-    this.inlineOptions$.next(inlineOptions);
-    this.projectedOptions$.next(projectedOptions);
   }
 
   private scrollIntoView(): void {

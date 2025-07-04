@@ -275,11 +275,13 @@
   }
 }
 
-@mixin highlighted {
-  background: var(--formz-color-field-highlight, #{tokens.$formz-color-field-highlight});
-}
-
 @mixin disabled {
   cursor: not-allowed;
   pointer-events: none;
+
+  background: var(--formz-color-field-disabled, #{tokens.$formz-color-field-disabled});
+}
+
+@mixin highlighted {
+  background: var(--formz-color-field-highlighted, #{tokens.$formz-color-field-highlighted});
 }

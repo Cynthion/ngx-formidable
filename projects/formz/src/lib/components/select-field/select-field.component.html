@@ -8,23 +8,31 @@
   (change)="onChangeChange()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
-  @if (hasOptions) {
-    @for (option of options; track option.value) {
-      <option [value]="option.value">
-        {{ option.label }}
-      </option>
-    }
-    @for (option of optionComponents; track option.value) {
-      <option [value]="option.value">
-        {{ option.label }}
-      </option>
-    }
-  } @else {
-    <formz-field-option
+  @for (option of inlineOptions$.value; track option.value) {
+    <option
+      [value]="option.value"
+      [disabled]="option.disabled || false">
+      {{ option.label || option.value }}
+    </option>
+  }
+
+  <!-- Content Projected Options -->
+  <!-- Option are re-created in order to use native <option> components. -->
+  @for (option of projectedOptions$.value; track option.value) {
+    <option
+      [value]="option.value"
+      [disabled]="option.disabled || false">
+      {{ option.label || option.value }}
+    </option>
+  }
+
+  <!-- Empty Option -->
+  @if (inlineOptions$.value.length === 0 && projectedOptions$.value.length === 0) {
+    <option
       [value]="emptyOption.value"
       [label]="emptyOption.label"
-      [disabled]="emptyOption.disabled || true">
+      [disabled]="true">
       {{ emptyOption.label }}
-    </formz-field-option>
+    </option>
   }
 </select>

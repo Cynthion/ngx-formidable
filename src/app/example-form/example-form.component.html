@@ -61,7 +61,7 @@
     </formz-field-decorator> -->
 
     <!-- Gender -->
-    <!-- <formz-field-decorator [decoratorLayout]="'single'">
+    <formz-field-decorator [decoratorLayout]="'single'">
       <formz-select-field
         formzField
         formzFieldErrors
@@ -72,7 +72,9 @@
         [options]="genderOptions">
         <formz-field-option
           [value]="'other'"
-          [label]="'Other'" />
+          [label]="'Other'"
+          [disabled]="true" />
+        <formz-field-option [value]="'trans'">Trans</formz-field-option>
       </formz-select-field>
       <div
         formzFieldLabel
@@ -82,7 +84,7 @@
       <div formzFieldTooltip>(Select)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator> -->
+    </formz-field-decorator>
 
     <!-- Nationality -->
     <!-- <formz-field-decorator>
@@ -133,7 +135,8 @@
         [emptyOption]="hobbyEmptyOption">
         <formz-field-option
           [value]="'garden'"
-          [label]="'Gardening'">
+          [label]="'Gardening'"
+          [disabled]="true">
           Gardening
         </formz-field-option>
         <formz-field-option
