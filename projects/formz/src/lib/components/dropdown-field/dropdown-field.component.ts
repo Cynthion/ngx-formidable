@@ -1,4 +1,5 @@
 import {
+  AfterContentInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -14,7 +15,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { FORMZ_OPTION_FIELD, FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../form-model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
@@ -42,7 +43,7 @@ import { FieldOptionComponent } from '../field-option/field-option.component';
 })
 export class DropdownFieldComponent
   extends FormzFieldBase
-  implements OnInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
+  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
 {
   @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
@@ -75,12 +76,20 @@ export class DropdownFieldComponent
     this.unregisterGlobalListeners();
   }
 
+  ngAfterContentInit(): void {
+    this.updateOptions();
+  }
+
   protected onFocusChange(isFocused: boolean): void {
     this.focusChangeSubject$.next(isFocused);
     this.isFieldFocused = isFocused;
 
     if (!isFocused) {
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
+    }
+
+    if (isFocused && !this.isOpen && this.isFieldFilled) {
+      this.togglePanel(true); // open the panel on focus
     }
   }
 
@@ -157,14 +166,19 @@ export class DropdownFieldComponent
   @ContentChildren(forwardRef(() => FieldOptionComponent))
   optionComponents?: QueryList<FieldOptionComponent>;
 
-  get hasOptions(): boolean {
-    return (this.options?.length ?? 0) > 0 || (this.optionComponents?.length ?? 0) > 0;
-  }
+  protected readonly inlineOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+  protected readonly projectedOptions$ = new BehaviorSubject<FieldOptionComponent[]>([]);
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;
 
-    this.selectedOption = option;
+    const newOption: IFormzFieldOption = {
+      value: option.value,
+      label: option.label || option.value, // value as fallback for optional label
+      disabled: option.disabled
+    };
+
+    this.selectedOption = newOption;
 
     this.focusChangeSubject$.next(false); // simulate blur on selection
     this.valueChangeSubject$.next(this.selectedOption.value);
@@ -222,8 +236,8 @@ export class DropdownFieldComponent
     if (this.disabled) return;
     if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
 
-    const allOptions = this.combineAllOptions();
-    const allOptionsCount = allOptions.length;
+    const options = this.combineAllOptions();
+    const count = options.length;
 
     this.ngZone.run(() => {
       switch (event.key) {
@@ -234,20 +248,20 @@ export class DropdownFieldComponent
         case 'ArrowDown':
           if (!this.isOpen) {
             this.togglePanel(true);
-          } else if (allOptionsCount > 0) {
-            this.setHighlightedIndex((this.highlightedIndex + 1) % allOptionsCount);
+          } else if (count > 0) {
+            this.setHighlightedIndex((this.highlightedIndex + 1) % count);
           }
           event.preventDefault();
           break;
         case 'ArrowUp':
-          if (this.isOpen && allOptionsCount > 0) {
-            this.setHighlightedIndex((this.highlightedIndex - 1 + allOptionsCount) % allOptionsCount);
+          if (this.isOpen && count > 0) {
+            this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
             event.preventDefault();
           }
           break;
         case 'Enter':
-          if (this.isOpen && allOptions[this.highlightedIndex]) {
-            const option = allOptions[this.highlightedIndex]!;
+          if (this.isOpen && options[this.highlightedIndex]) {
+            const option = options[this.highlightedIndex]!;
             this.selectOption(option);
             event.preventDefault();
           }
@@ -257,34 +271,32 @@ export class DropdownFieldComponent
   }
 
   private highlightSelectedOption(): void {
-    const allOptions = this.combineAllOptions();
+    const options = this.combineAllOptions();
 
-    const selectedIndex = allOptions.findIndex((opt) => opt.value === this.selectedOption?.value);
-    this.setHighlightedIndex(selectedIndex > 0 ? selectedIndex : 0);
+    const selectedIndex = options.findIndex((opt) => opt.value === this.selectedOption?.value);
+
+    this.setHighlightedIndex(selectedIndex);
   }
 
   private setHighlightedIndex(index: number): void {
     this.highlightedIndex = index;
-
-    // highlight content projection options
-    const inlineOptionCount = this.options?.length ?? 0;
-    this.optionComponents?.forEach((comp, i) => {
-      comp.highlighted = i === this.highlightedIndex - inlineOptionCount;
-    });
 
     this.cdRef.markForCheck();
   }
 
   private combineAllOptions(): IFormzFieldOption[] {
     const inlineOptions = this.options ?? [];
-
-    const projectedOptions =
-      this.optionComponents?.toArray().map((opt) => ({
-        value: opt.value,
-        label: opt.label
-      })) ?? [];
+    const projectedOptions = this.optionComponents?.toArray() ?? [];
 
     return [...inlineOptions, ...projectedOptions];
+  }
+
+  private updateOptions(): void {
+    const inlineOptions = this.options ?? [];
+    const projectedOptions = this.optionComponents?.toArray() ?? [];
+
+    this.inlineOptions$.next(inlineOptions);
+    this.projectedOptions$.next(projectedOptions);
   }
 
   private scrollIntoView(): void {

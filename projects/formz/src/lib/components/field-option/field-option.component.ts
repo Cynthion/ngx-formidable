@@ -38,6 +38,8 @@ export class FieldOptionComponent implements IFormzFieldOption {
     return this.contentTemplate;
   }
 
+  protected hasProjectedContent = true;
+
   constructor(@Optional() @Inject(FORMZ_OPTION_FIELD) private parent: IFormzOptionField) {
     if (!this.parent) {
       throw new Error(

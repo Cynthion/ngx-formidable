@@ -12,8 +12,8 @@ export interface FormValidationOptions {
 export interface IFormzFieldOption {
   value: string;
   label?: string;
-  disabled?: boolean;
   match?: (filterValue: string) => boolean;
+  disabled?: boolean;
 }
 
 /**
@@ -46,7 +46,6 @@ export abstract class FormzFieldBase implements IFormzField {
 export interface IFormzOptionField {
   options?: IFormzFieldOption[];
   emptyOption?: IFormzFieldOption;
-  hasOptions: boolean;
   selectOption(option: IFormzFieldOption): void;
 }
 

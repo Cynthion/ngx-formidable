@@ -1,10 +1,11 @@
 <div
   class="field-option"
   (click)="select()">
-  <!-- Render content for both inline and projected content. -->
+  <!-- captures the content projection inside a template reference for later export -->
   <ng-template #contentTemplate>
     <ng-content></ng-content>
   </ng-template>
 
+  <!-- render contentTemplate immediately -->
   <ng-container *ngTemplateOutlet="contentTemplate"></ng-container>
 </div>

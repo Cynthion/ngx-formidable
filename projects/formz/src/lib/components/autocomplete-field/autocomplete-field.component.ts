@@ -187,10 +187,6 @@ export class AutocompleteFieldComponent
   protected readonly filteredInlineOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
   protected readonly filteredProjectedOptions$ = new BehaviorSubject<FieldOptionComponent[]>([]);
 
-  get hasOptions(): boolean {
-    return (this.options?.length ?? 0) > 0 || (this.optionComponents?.length ?? 0) > 0;
-  }
-
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;
 
@@ -265,8 +261,8 @@ export class AutocompleteFieldComponent
     if (this.disabled) return;
     if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
 
-    const filteredOptions = this.getFilteredOptions();
-    const count = filteredOptions.length;
+    const options = this.getFilteredOptions();
+    const count = options.length;
 
     this.ngZone.run(() => {
       switch (event.key) {
@@ -289,8 +285,8 @@ export class AutocompleteFieldComponent
           }
           break;
         case 'Enter':
-          if (this.isOpen && filteredOptions[this.highlightedIndex]) {
-            const option = filteredOptions[this.highlightedIndex]!;
+          if (this.isOpen && options[this.highlightedIndex]) {
+            const option = options[this.highlightedIndex]!;
             this.selectOption(option);
             event.preventDefault();
           }
@@ -300,14 +296,11 @@ export class AutocompleteFieldComponent
   }
 
   private highlightSelectedOption(): void {
-    const filteredOptions = this.getFilteredOptions();
-    const selectedIndex = filteredOptions.findIndex((opt) => opt.value === this.selectedOption?.value);
+    const options = this.getFilteredOptions();
 
-    if (selectedIndex >= 0) {
-      this.setHighlightedIndex(selectedIndex);
-    } else {
-      this.setHighlightedIndex(-1); // reset if no selected option found
-    }
+    const selectedIndex = options.findIndex((opt) => opt.value === this.selectedOption?.value);
+
+    this.setHighlightedIndex(selectedIndex);
   }
 
   private setHighlightedIndex(index: number): void {
