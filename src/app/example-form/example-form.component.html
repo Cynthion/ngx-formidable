@@ -140,7 +140,8 @@
         <formz-field-option [value]="'other'">Some other hobby ([projected] content)</formz-field-option>
         <formz-field-option
           [value]="'custom'"
-          [label]="'The Special One'">
+          [label]="'The Special One'"
+          [match]="specialMatchFn">
           <p>I'm a special item</p>
           <pre>And I can have any content</pre>
         </formz-field-option>

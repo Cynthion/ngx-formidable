@@ -45,12 +45,23 @@ export class ExampleFormComponent {
     { value: 'gaming', label: 'Gaming' },
     { value: 'reading', label: 'Reading' },
     { value: 'sports', label: 'Sports' },
+    {
+      value: 'swimming',
+      label: 'Swimming',
+      match: (filterValue: string) =>
+        ['swimming', 'pool', 'aqua', 'dive'].some((word) => word.includes(filterValue.toLowerCase()))
+    },
     { value: 'cooking', label: 'Cooking' }
   ];
 
   protected hobbyEmptyOption: IFormzFieldOption = {
     value: 'empty',
     label: 'No hobby available.'
+  };
+
+  protected specialMatchFn = (filterValue: string): boolean => {
+    // Custom matching logic for the religion field
+    return ['special', 'legend', 'epic', 'custom', 'random'].some((word) => word.includes(filterValue.toLowerCase()));
   };
 
   // TODO add type for vm?
