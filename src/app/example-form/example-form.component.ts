@@ -9,12 +9,13 @@ import { ExampleFormModel, exampleFormShape, exampleFormValidationSuite } from '
 })
 export class ExampleFormComponent {
   protected readonly formValue = signal<ExampleFormModel>({
-    firstName: 'Chris',
+    firstName: 'Cynth¡on',
     lastName: '',
     gender: 'male',
-    hobby: 'dev',
-    nationality: 'jp',
-    religion: 'buddhism'
+    nationality: 'ch',
+    hobby: 'gaming',
+    animal: 'cat',
+    religion: 'christian'
   });
   protected readonly formShape = exampleFormShape;
   protected readonly suite = exampleFormValidationSuite;
@@ -58,6 +59,29 @@ export class ExampleFormComponent {
   protected hobbyEmptyOption: IFormzFieldOption = {
     value: 'empty',
     label: 'No hobby available.'
+  };
+
+  protected animalOptions1: IFormzFieldOption[] = [
+    { value: 'cat', label: 'Cat' },
+    { value: 'dog', label: 'Dog' }
+  ];
+
+  protected animalOptions2: IFormzFieldOption[] = [
+    { value: 'axolotl', label: 'Axolotl' },
+    { value: 'capybara', label: 'Capybara' },
+    { value: 'fennec_fox', label: 'Fennec Fox' },
+    { value: 'pangolin', label: 'Pangolin' },
+    { value: 'quokka', label: 'Quokka' },
+    { value: 'slow_loris', label: 'Slow Loris' },
+    { value: 'tarsier', label: 'Tarsier' },
+    { value: 'kinkajou', label: 'Kinkajou' },
+    { value: 'okapi', label: 'Okapi' },
+    { value: 'maned_wolf', label: 'Maned Wolf' }
+  ];
+
+  protected animalEmptyOption: IFormzFieldOption = {
+    value: 'empty',
+    label: 'No animal available.'
   };
 
   protected specialMatchFn = (filterValue: string): boolean => {

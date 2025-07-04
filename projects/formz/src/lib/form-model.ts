@@ -1,4 +1,4 @@
-import { Directive, ElementRef, InjectionToken } from '@angular/core';
+import { Directive, ElementRef, InjectionToken, TemplateRef } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export const ROOT_FORM = 'rootForm';
@@ -9,11 +9,14 @@ export interface FormValidationOptions {
   debounceValidationInMs: number;
 }
 
-export interface IFormzFieldOption {
+export interface IFormzFieldOption<T = unknown> {
   value: string;
   label?: string;
-  match?: (filterValue: string) => boolean;
+  template?: TemplateRef<T>;
+  highlighted?: boolean;
   disabled?: boolean;
+  select?: () => void;
+  match?: (filterValue: string) => boolean;
 }
 
 /**
@@ -81,4 +84,8 @@ export interface IFormzDropdownField extends IFormzOptionField {
 
 export type IFormzAutocompleteField = IFormzDropdownField;
 
+/** InjectionToken for field components that support multiple options. */
 export const FORMZ_OPTION_FIELD = new InjectionToken<IFormzOptionField>('FORMZ_OPTION_FIELD');
+
+/** InjectionToken for option components that can be used in field components that support multiple options. */
+export const FORMZ_FIELD_OPTION = new InjectionToken<IFormzFieldOption>('FORMZ_FIELD_OPTION');

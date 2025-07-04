@@ -13,7 +13,7 @@
   (ngSubmit)="onSubmit()">
   <fieldset class="fieldset">
     <!-- First Name -->
-    <formz-field-decorator [decoratorLayout]="'single'">
+    <!-- <formz-field-decorator [decoratorLayout]="'single'">
       <formz-input-field
         formzField
         formzFieldErrors
@@ -35,10 +35,10 @@
       <div formzFieldTooltip>(Input)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+    </formz-field-decorator> -->
 
     <!-- Last Name -->
-    <formz-field-decorator [decoratorLayout]="'single'">
+    <!-- <formz-field-decorator [decoratorLayout]="'single'">
       <formz-textarea-field
         formzField
         formzFieldErrors
@@ -58,10 +58,10 @@
       <div formzFieldTooltip>(Textarea)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+    </formz-field-decorator> -->
 
     <!-- Gender -->
-    <formz-field-decorator [decoratorLayout]="'single'">
+    <!-- <formz-field-decorator [decoratorLayout]="'single'">
       <formz-select-field
         formzField
         formzFieldErrors
@@ -82,10 +82,10 @@
       <div formzFieldTooltip>(Select)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+    </formz-field-decorator> -->
 
     <!-- Nationality -->
-    <formz-field-decorator>
+    <!-- <formz-field-decorator>
       <formz-dropdown-field
         formzField
         formzFieldErrors
@@ -117,7 +117,7 @@
       <div formzFieldTooltip>(Dropdown)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+    </formz-field-decorator> -->
 
     <!-- Hobby -->
     <formz-field-decorator>
@@ -156,6 +156,36 @@
         Hobby
       </div>
       <div formzFieldTooltip>(Autocomplete)</div>
+      <div formzFieldPrefix>Prefix</div>
+      <div formzFieldSuffix>Suffix</div>
+    </formz-field-decorator>
+
+    <!-- Animals -->
+    <formz-field-decorator>
+      <formz-autocomplete-field
+        formzField
+        formzFieldErrors
+        placeholder="Select..."
+        name="animal"
+        [ngModel]="vm.formValue.animal"
+        [disabled]="false"
+        [required]="false"
+        [options]="animalOptions1"
+        [emptyOption]="animalEmptyOption">
+        @for (option of animalOptions2; track option.value) {
+          <fuzzy-field-option
+            [value]="option.value"
+            [label]="option.label">
+            {{ option.label }}
+          </fuzzy-field-option>
+        }
+      </formz-autocomplete-field>
+      <div
+        formzFieldLabel
+        [isFloating]="true">
+        Animal
+      </div>
+      <div formzFieldTooltip>(Autocomplete with custom options)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
     </formz-field-decorator>

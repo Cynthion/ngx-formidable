@@ -17,8 +17,13 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FORMZ_OPTION_FIELD, FormzFieldBase, IFormzDropdownField, IFormzFieldOption } from '../../form-model';
-import { FieldOptionComponent } from '../field-option/field-option.component';
+import {
+  FORMZ_FIELD_OPTION,
+  FORMZ_OPTION_FIELD,
+  FormzFieldBase,
+  IFormzDropdownField,
+  IFormzFieldOption
+} from '../../form-model';
 
 @Component({
   selector: 'formz-dropdown-field',
@@ -163,11 +168,11 @@ export class DropdownFieldComponent
   @Input() options?: IFormzFieldOption[] = [];
   @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.' };
 
-  @ContentChildren(forwardRef(() => FieldOptionComponent))
-  optionComponents?: QueryList<FieldOptionComponent>;
+  @ContentChildren(FORMZ_FIELD_OPTION)
+  optionComponents?: QueryList<IFormzFieldOption>;
 
   protected readonly inlineOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
-  protected readonly projectedOptions$ = new BehaviorSubject<FieldOptionComponent[]>([]);
+  protected readonly projectedOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;

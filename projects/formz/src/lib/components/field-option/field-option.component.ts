@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  forwardRef,
   HostBinding,
   Inject,
   Input,
@@ -8,13 +9,20 @@ import {
   TemplateRef,
   ViewChild
 } from '@angular/core';
-import { FORMZ_OPTION_FIELD, IFormzFieldOption, IFormzOptionField } from '../../form-model';
+import { FORMZ_FIELD_OPTION, FORMZ_OPTION_FIELD, IFormzFieldOption, IFormzOptionField } from '../../form-model';
 
 @Component({
   selector: 'formz-field-option',
   templateUrl: './field-option.component.html',
   styleUrls: ['./field-option.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    {
+      // required to provide this component as IFormzFieldOption
+      provide: FORMZ_FIELD_OPTION,
+      useExisting: forwardRef(() => FieldOptionComponent)
+    }
+  ]
 })
 export class FieldOptionComponent implements IFormzFieldOption {
   @ViewChild('contentTemplate', { static: true }) private contentTemplate!: TemplateRef<unknown>;
@@ -30,7 +38,13 @@ export class FieldOptionComponent implements IFormzFieldOption {
   @Input()
   highlighted = false;
 
+  @Input() select?: () => void = () => {
+    // default select
+    this.parent.selectOption(this);
+  };
+
   @Input() match?: (filterValue: string) => boolean = (filterValue: string) => {
+    // default match
     return this.label?.toLowerCase().includes(filterValue.toLowerCase()) ?? false;
   };
 
@@ -46,9 +60,5 @@ export class FieldOptionComponent implements IFormzFieldOption {
         'formz-field-option must be used inside a component that provides FORMZ_OPTION_FIELD (i.e. implements IFormzOptionField).'
       );
     }
-  }
-
-  select() {
-    this.parent.selectOption(this);
   }
 }

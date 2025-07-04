@@ -17,8 +17,13 @@ import {
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, Subject, takeUntil } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FORMZ_OPTION_FIELD, FormzFieldBase, IFormzAutocompleteField, IFormzFieldOption } from '../../form-model';
-import { FieldOptionComponent } from '../field-option/field-option.component';
+import {
+  FORMZ_FIELD_OPTION,
+  FORMZ_OPTION_FIELD,
+  FormzFieldBase,
+  IFormzAutocompleteField,
+  IFormzFieldOption
+} from '../../form-model';
 
 @Component({
   selector: 'formz-autocomplete-field',
@@ -180,12 +185,12 @@ export class AutocompleteFieldComponent
   @Input() options?: IFormzFieldOption[] = [];
   @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.' };
 
-  @ContentChildren(forwardRef(() => FieldOptionComponent))
-  optionComponents?: QueryList<FieldOptionComponent>;
+  @ContentChildren(FORMZ_FIELD_OPTION)
+  optionComponents?: QueryList<IFormzFieldOption>;
 
   private readonly filterValue$ = new BehaviorSubject<string>('');
   protected readonly filteredInlineOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
-  protected readonly filteredProjectedOptions$ = new BehaviorSubject<FieldOptionComponent[]>([]);
+  protected readonly filteredProjectedOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;

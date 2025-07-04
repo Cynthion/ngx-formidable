@@ -1,5 +1,4 @@
-import { ROOT_FORM } from 'projects/formz/src/lib/form-model';
-import { DeepPartial, DeepRequired } from 'projects/formz/src/lib/utility-types';
+import { DeepPartial, DeepRequired, ROOT_FORM } from 'formz';
 import { enforce, omitWhen, only, staticSuite, test } from 'vest';
 
 //#region FormModel
@@ -19,23 +18,10 @@ export interface User {
   gender?: UserGender;
   nationality?: UserNationality;
   hobby?: string;
+  animal?: string;
   religion?: UserReligion;
   passwords: Password;
 }
-
-export const initialPasswords: Password = {
-  password: '',
-  confirmPassword: ''
-};
-
-export const initialUser: User = {
-  firstName: '',
-  lastName: '',
-  gender: undefined,
-  nationality: undefined,
-  religion: undefined,
-  passwords: initialPasswords
-};
 
 export type ExampleFormModel = DeepPartial<User>;
 
@@ -49,9 +35,10 @@ export const exampleFormShape: ExampleFormShape = {
   firstName: '',
   lastName: '',
   gender: 'male', // TODO how to use undefined in shape?
-  nationality: 'jp',
+  nationality: 'ch',
   hobby: '',
-  religion: 'buddhism',
+  animal: '',
+  religion: 'christian',
   passwords: {
     password: '',
     confirmPassword: ''
