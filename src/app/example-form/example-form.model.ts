@@ -1,4 +1,4 @@
-import { DeepPartial, DeepRequired, ROOT_FORM } from 'formz';
+import { DeepPartial, DeepRequired, IFormzFieldOption, ROOT_FORM } from 'formz';
 import { enforce, omitWhen, only, staticSuite, test } from 'vest';
 
 //#region FormModel
@@ -78,5 +78,23 @@ export const exampleFormValidationSuite = staticSuite((model: ExampleFormModel, 
     });
   });
 });
+
+//#endregion
+
+//#region Custom Models, etc.
+
+export interface HighlightEntry {
+  text: string;
+  isHighlighted: boolean;
+}
+
+export interface HighlightedEntries {
+  labelEntries: HighlightEntry[];
+  subtitleEntries: HighlightEntry[];
+}
+
+export interface AnimalFormFieldOption extends IFormzFieldOption {
+  subtitle?: string;
+}
 
 //#endregion

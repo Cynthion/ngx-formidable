@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, forwardRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, Input } from '@angular/core';
 import { FieldOptionComponent, FORMZ_FIELD_OPTION } from 'formz';
+import { HighlightedEntries } from '../example-form/example-form.model';
 
 @Component({
   selector: 'fuzzy-field-option',
@@ -15,5 +16,12 @@ import { FieldOptionComponent, FORMZ_FIELD_OPTION } from 'formz';
   ]
 })
 export class FuzzyFieldOptionComponent extends FieldOptionComponent {
-  // TODO don't necessarily extend from FieldOptionComponent
+  @Input() subtitle?: string = 'sub';
+
+  protected highlightedEntries: HighlightedEntries = {
+    labelEntries: [],
+    subtitleEntries: []
+  };
+
+  override match?: ((filterValue: string) => boolean) | undefined;
 }

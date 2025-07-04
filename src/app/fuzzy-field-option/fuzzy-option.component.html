@@ -1,11 +1,15 @@
-<div
-  class="field-option"
-  (click)="select ? select() : null">
-  <!-- captures the content projection inside a template reference for later export -->
+<div (click)="select ? select() : null">
   <ng-template #contentTemplate>
-    <ng-content></ng-content>
+    <!-- Custom Template -->
+    <p>
+      @for (entry of highlightedEntries.labelEntries; track entry.text) {
+        <span [class.option-highlight]="entry.isHighlighted">{{ entry.text }}</span>
+      }
+    </p>
+    <p>
+      @for (entry of highlightedEntries.subtitleEntries; track entry.text) {
+        <span [class.option-highlight]="entry.isHighlighted">{{ entry.text }}</span>
+      }
+    </p>
   </ng-template>
-
-  <!-- render contentTemplate immediately -->
-  <ng-container *ngTemplateOutlet="contentTemplate"></ng-container>
 </div>

@@ -1,6 +1,11 @@
 import { Component, computed, signal } from '@angular/core';
 import { FormValidationOptions, IFormzFieldOption } from 'projects/formz/src/lib/form-model';
-import { ExampleFormModel, exampleFormShape, exampleFormValidationSuite } from './example-form.model';
+import {
+  AnimalFormFieldOption,
+  ExampleFormModel,
+  exampleFormShape,
+  exampleFormValidationSuite
+} from './example-form.model';
 
 @Component({
   selector: 'formz-example-form',
@@ -61,22 +66,22 @@ export class ExampleFormComponent {
     label: 'No hobby available.'
   };
 
-  protected animalOptions1: IFormzFieldOption[] = [
+  protected animalOptionsDefault: IFormzFieldOption[] = [
     { value: 'cat', label: 'Cat' },
     { value: 'dog', label: 'Dog' }
   ];
 
-  protected animalOptions2: IFormzFieldOption[] = [
-    { value: 'axolotl', label: 'Axolotl' },
-    { value: 'capybara', label: 'Capybara' },
-    { value: 'fennec_fox', label: 'Fennec Fox' },
-    { value: 'pangolin', label: 'Pangolin' },
-    { value: 'quokka', label: 'Quokka' },
-    { value: 'slow_loris', label: 'Slow Loris' },
-    { value: 'tarsier', label: 'Tarsier' },
-    { value: 'kinkajou', label: 'Kinkajou' },
-    { value: 'okapi', label: 'Okapi' },
-    { value: 'maned_wolf', label: 'Maned Wolf' }
+  protected animalOptionsExtended: AnimalFormFieldOption[] = [
+    { value: 'axolotl', label: 'Axolotl', subtitle: 'Mexican salamander' },
+    { value: 'capybara', label: 'Capybara', subtitle: "World's largest rodent" },
+    { value: 'fennec_fox', label: 'Fennec Fox', subtitle: 'Small desert fox' },
+    { value: 'pangolin', label: 'Pangolin', subtitle: 'Scaly anteater' },
+    { value: 'quokka', label: 'Quokka', subtitle: 'Happiest animal on Earth' },
+    { value: 'slow_loris', label: 'Slow Loris', subtitle: 'Venomous primate', disabled: true },
+    { value: 'tarsier', label: 'Tarsier', subtitle: 'Small primate with large eyes' },
+    { value: 'kinkajou', label: 'Kinkajou', subtitle: 'Honey bear' },
+    { value: 'okapi', label: 'Okapi', subtitle: 'Forest giraffe' },
+    { value: 'maned_wolf', label: 'Maned Wolf', subtitle: 'Tall, long-legged canid' }
   ];
 
   protected animalEmptyOption: IFormzFieldOption = {
