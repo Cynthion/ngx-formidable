@@ -399,6 +399,10 @@ export class AutocompleteFieldComponent
       .subscribe(() => {
         this.deselectOption();
         this.updateFilteredOptions();
+
+        if (!this.isOpen) {
+          this.togglePanel(true);
+        }
       });
   }
 }
