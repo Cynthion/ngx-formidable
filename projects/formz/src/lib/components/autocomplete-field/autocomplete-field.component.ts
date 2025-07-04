@@ -102,9 +102,9 @@ export class AutocompleteFieldComponent
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
     }
 
-    if (isFocused && !this.isOpen && this.isFieldFilled) {
-      this.togglePanel(true); // open the panel on focus
-    }
+    // if (isFocused && !this.isOpen && this.isFieldFilled) {
+    //   this.togglePanel(true); // open the panel on focus
+    // }
   }
 
   //#region ControlValueAccessor

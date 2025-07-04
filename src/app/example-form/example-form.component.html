@@ -13,7 +13,7 @@
   (ngSubmit)="onSubmit()">
   <fieldset class="fieldset">
     <!-- First Name -->
-    <!-- <formz-field-decorator [decoratorLayout]="'single'">
+    <formz-field-decorator [decoratorLayout]="'single'">
       <formz-input-field
         formzField
         formzFieldErrors
@@ -35,10 +35,10 @@
       <div formzFieldTooltip>(Input)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator> -->
+    </formz-field-decorator>
 
     <!-- Last Name -->
-    <!-- <formz-field-decorator [decoratorLayout]="'single'">
+    <formz-field-decorator [decoratorLayout]="'single'">
       <formz-textarea-field
         formzField
         formzFieldErrors
@@ -58,10 +58,10 @@
       <div formzFieldTooltip>(Textarea)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator> -->
+    </formz-field-decorator>
 
     <!-- Gender -->
-    <!-- <formz-field-decorator [decoratorLayout]="'single'">
+    <formz-field-decorator [decoratorLayout]="'single'">
       <formz-select-field
         formzField
         formzFieldErrors
@@ -82,7 +82,7 @@
       <div formzFieldTooltip>(Select)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator> -->
+    </formz-field-decorator>
 
     <!-- Nationality -->
     <formz-field-decorator>
@@ -94,7 +94,7 @@
         [ngModel]="vm.formValue.nationality"
         [disabled]="false"
         [required]="false"
-        [options]="[]"
+        [options]="nationalityOptions"
         [emptyOption]="nationalityEmptyOption">
         <formz-field-option
           [value]="'ch'"
