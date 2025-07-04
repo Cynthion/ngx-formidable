@@ -24,7 +24,7 @@
     #panelRef
     class="panel">
     <!-- Inline Options -->
-    @for (option of filteredInlineOptions$ | async; track option.value; let i = $index) {
+    @for (option of filteredInlineOptions$.value; track option.value; let i = $index) {
       <formz-field-option
         [value]="option.value"
         [label]="option.label"
@@ -37,7 +37,7 @@
 
     <!-- Content Projected Options -->
     <!-- Option components are re-created in order to control and filter them. -->
-    @for (option of filteredProjectedOptions$ | async; track option.value; let i = $index) {
+    @for (option of filteredProjectedOptions$.value; track option.value; let i = $index) {
       <formz-field-option
         [value]="option.value"
         [label]="option.label"
@@ -45,6 +45,16 @@
         [match]="option.match"
         [highlighted]="i === highlightedIndex - filteredInlineOptions$.value.length">
         <ng-container *ngTemplateOutlet="option.template"></ng-container>
+      </formz-field-option>
+    }
+
+    <!-- Empty Option -->
+    @if (filteredInlineOptions$.value.length === 0 && filteredProjectedOptions$.value.length === 0) {
+      <formz-field-option
+        [value]="emptyOption.value"
+        [label]="emptyOption.label"
+        [disabled]="true">
+        {{ emptyOption.label }}
       </formz-field-option>
     }
   </div>

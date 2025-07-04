@@ -265,7 +265,7 @@ export class AutocompleteFieldComponent
     if (this.disabled) return;
     if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
 
-    const filteredOptions = this.getFilteredCombinedOptions();
+    const filteredOptions = this.getFilteredOptions();
     const count = filteredOptions.length;
 
     this.ngZone.run(() => {
@@ -300,7 +300,7 @@ export class AutocompleteFieldComponent
   }
 
   private highlightSelectedOption(): void {
-    const filteredOptions = this.getFilteredCombinedOptions();
+    const filteredOptions = this.getFilteredOptions();
     const selectedIndex = filteredOptions.findIndex((opt) => opt.value === this.selectedOption?.value);
 
     if (selectedIndex >= 0) {
@@ -321,6 +321,10 @@ export class AutocompleteFieldComponent
     const projectedOptions = this.optionComponents?.toArray() ?? [];
 
     return [...inlineOptions, ...projectedOptions];
+  }
+
+  private getFilteredOptions(): IFormzFieldOption[] {
+    return [...this.filteredInlineOptions$.value, ...this.filteredProjectedOptions$.value];
   }
 
   private updateFilteredOptions(): void {
@@ -345,30 +349,6 @@ export class AutocompleteFieldComponent
       : projectedOptions;
 
     this.filteredProjectedOptions$.next(filteredProjectedOptions);
-
-    // both empty
-    if (filteredInlineOptions.length === 0 && filteredProjectedOptions.length === 0) {
-      this.filteredInlineOptions$.next([this.emptyOption]);
-      this.filteredProjectedOptions$.next([]);
-    }
-  }
-
-  private getFilteredCombinedOptions(): (IFormzFieldOption & { source: 'inline' | 'projected'; index: number })[] {
-    const inline: (IFormzFieldOption & { source: 'inline' | 'projected'; index: number })[] =
-      this.filteredInlineOptions$.value.map((opt, i) => ({
-        ...opt,
-        source: 'inline' as const,
-        index: i
-      }));
-
-    const projected: (IFormzFieldOption & { source: 'inline' | 'projected'; index: number })[] =
-      this.filteredProjectedOptions$.value.map((opt, i) => ({
-        ...opt,
-        source: 'projected' as const,
-        index: i
-      }));
-
-    return [...inline, ...projected];
   }
 
   private scrollIntoView(): void {
