@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, ElementRef, HostBinding, Inject, Input, Optional } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  Inject,
+  Input,
+  Optional,
+  TemplateRef,
+  ViewChild
+} from '@angular/core';
 import { FORMZ_OPTION_FIELD, IFormzFieldOption, IFormzOptionField } from '../../form-model';
 
 @Component({
@@ -8,6 +17,8 @@ import { FORMZ_OPTION_FIELD, IFormzFieldOption, IFormzOptionField } from '../../
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class FieldOptionComponent implements IFormzFieldOption {
+  @ViewChild('contentTemplate', { static: true }) private contentTemplate!: TemplateRef<unknown>;
+
   @Input({ required: true }) value!: string;
   @Input() label?: string;
 
@@ -15,12 +26,19 @@ export class FieldOptionComponent implements IFormzFieldOption {
   @Input()
   disabled = false;
 
-  @HostBinding('class.highlighted') isHighlighted = false; // TODO make Input
+  @HostBinding('class.highlighted')
+  @Input()
+  highlighted = false;
 
-  constructor(
-    @Optional() @Inject(FORMZ_OPTION_FIELD) private parent: IFormzOptionField,
-    private el: ElementRef
-  ) {
+  @Input() match?: (filterValue: string) => boolean = (filterValue: string) => {
+    return this.label?.toLowerCase().includes(filterValue.toLowerCase()) ?? false;
+  };
+
+  get template(): TemplateRef<unknown> {
+    return this.contentTemplate;
+  }
+
+  constructor(@Optional() @Inject(FORMZ_OPTION_FIELD) private parent: IFormzOptionField) {
     if (!this.parent) {
       throw new Error(
         'formz-field-option must be used inside a component that provides FORMZ_OPTION_FIELD (i.e. implements IFormzOptionField).'
@@ -33,18 +51,10 @@ export class FieldOptionComponent implements IFormzFieldOption {
 
     const option: IFormzFieldOption = {
       value: this.value,
-      label: this.label ?? this.innerTextAsLabel,
+      label: this.label || this.value, // value as fallback for optional label
       disabled: this.disabled
     };
 
     this.parent.selectOption(option);
-  }
-
-  setHighlighted(value: boolean) {
-    this.isHighlighted = value;
-  }
-
-  get innerTextAsLabel(): string {
-    return this.el.nativeElement.innerText.trim();
   }
 }

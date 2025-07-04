@@ -96,8 +96,12 @@
         [required]="false"
         [options]="nationalityOptions"
         [emptyOption]="nationalityEmptyOption">
-        <formz-field-option [value]="'ch'">🇨🇭 Switzerland</formz-field-option>
-        <formz-field-option [value]="'other'">Some other country</formz-field-option>
+        <formz-field-option
+          [value]="'ch'"
+          [label]="'🇨🇭 Switzerland'" />
+        <formz-field-option
+          [value]="'other'"
+          [label]="'Some other country'" />
         <formz-field-option
           [value]="'custom'"
           [label]="'The Special One'">
@@ -127,8 +131,13 @@
         [required]="false"
         [options]="hobbyOptions"
         [emptyOption]="hobbyEmptyOption">
-        <formz-field-option [value]="'garden'">Gardening (content)</formz-field-option>
-        <formz-field-option [value]="'other'">Some other hobby (content)</formz-field-option>
+        <!-- TODO content as label -->
+        <formz-field-option
+          [value]="'garden'"
+          [label]="'Gardening'">
+          Gardening ([projected] content)
+        </formz-field-option>
+        <formz-field-option [value]="'other'">Some other hobby ([projected] content)</formz-field-option>
         <formz-field-option
           [value]="'custom'"
           [label]="'The Special One'">
@@ -184,9 +193,9 @@
 
   <!-- Show Debugging Data -->
   <div style="margin-top: 20px">
-    <pre>{{ vm.formValue | json }}</pre>
-    <pre>{{ vm.isDirty }}</pre>
-    <pre>{{ vm.isValid }}</pre>
-    <pre>{{ vm.errors | json }}</pre>
+    <pre>Value:<br/>{{ vm.formValue | json }}</pre>
+    <pre>Dirty: {{ vm.isDirty }}</pre>
+    <pre>Valid: {{ vm.isValid }}</pre>
+    <pre>Errors:<br/>{{ vm.errors | json }}</pre>
   </div>
 </form>

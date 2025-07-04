@@ -269,7 +269,7 @@ export class DropdownFieldComponent
     // highlight content projection options
     const inlineOptionCount = this.options?.length ?? 0;
     this.optionComponents?.forEach((comp, i) => {
-      comp.setHighlighted(i === this.highlightedIndex - inlineOptionCount);
+      comp.highlighted = i === this.highlightedIndex - inlineOptionCount;
     });
 
     this.cdRef.markForCheck();
@@ -281,7 +281,7 @@ export class DropdownFieldComponent
     const projectedOptions =
       this.optionComponents?.toArray().map((opt) => ({
         value: opt.value,
-        label: opt.label || opt.innerTextAsLabel
+        label: opt.label
       })) ?? [];
 
     return [...inlineOptions, ...projectedOptions];

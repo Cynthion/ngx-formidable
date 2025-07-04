@@ -13,6 +13,7 @@ export interface IFormzFieldOption {
   value: string;
   label?: string;
   disabled?: boolean;
+  match?: (filterValue: string) => boolean;
 }
 
 /**

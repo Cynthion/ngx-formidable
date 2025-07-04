@@ -23,13 +23,27 @@
     *ngIf="isOpen"
     #panelRef
     class="panel">
-    @for (option of filteredOptions$ | async; track option.value; let i = $index) {
+    <!-- Inline Options -->
+    @for (option of filteredInlineOptions$ | async; track option.value; let i = $index) {
       <formz-field-option
         [value]="option.value"
         [label]="option.label"
         [disabled]="option.disabled || false"
-        [class.highlighted]="i === highlightedIndex">
+        [match]="option.match"
+        [highlighted]="i === highlightedIndex">
         {{ option.label }}
+      </formz-field-option>
+    }
+
+    <!-- Content Projected Options -->
+    @for (option of filteredProjectedOptions$ | async; track option.value; let i = $index) {
+      <formz-field-option
+        [value]="option.value"
+        [label]="option.label"
+        [disabled]="option.disabled || false"
+        [match]="option.match"
+        [highlighted]="i === highlightedIndex">
+        <ng-container *ngTemplateOutlet="option.template"></ng-container>
       </formz-field-option>
     }
   </div>

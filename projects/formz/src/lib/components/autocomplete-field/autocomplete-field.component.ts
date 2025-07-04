@@ -83,11 +83,9 @@ export class AutocompleteFieldComponent
   }
 
   ngAfterContentInit(): void {
-    this.filteredOptions$.next(this.filteredOptions());
+    // this.filteredOptions$.next(this.filteredOptions());
+    this.updateFilteredOptions();
   }
-
-  private readonly filterValue$ = new BehaviorSubject<string>('');
-  protected readonly filteredOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
   protected onInputChange(): void {
     const value = this.inputRef.nativeElement.value;
@@ -186,6 +184,10 @@ export class AutocompleteFieldComponent
   @ContentChildren(forwardRef(() => FieldOptionComponent))
   optionComponents?: QueryList<FieldOptionComponent>;
 
+  private readonly filterValue$ = new BehaviorSubject<string>('');
+  protected readonly filteredInlineOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+  protected readonly filteredProjectedOptions$ = new BehaviorSubject<FieldOptionComponent[]>([]);
+
   get hasOptions(): boolean {
     return (this.options?.length ?? 0) > 0 || (this.optionComponents?.length ?? 0) > 0;
   }
@@ -216,7 +218,7 @@ export class AutocompleteFieldComponent
     this.isOpen = isOpen;
 
     if (isOpen) {
-      this.highlightSelectedOption();
+      // this.highlightSelectedOption();
       this.scrollIntoView();
     } else {
       this.setHighlightedIndex(-1); // reset highlighted index when closing
@@ -258,8 +260,8 @@ export class AutocompleteFieldComponent
     if (this.disabled) return;
     if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
 
-    const filteredOptions = this.filteredOptions();
-    const filteredOptionsCount = filteredOptions.length;
+    const filteredOptions = this.getFilteredCombinedOptions();
+    const count = filteredOptions.length;
 
     this.ngZone.run(() => {
       switch (event.key) {
@@ -270,14 +272,14 @@ export class AutocompleteFieldComponent
         case 'ArrowDown':
           if (!this.isOpen) {
             this.togglePanel(true);
-          } else if (filteredOptionsCount > 0) {
-            this.setHighlightedIndex((this.highlightedIndex + 1) % filteredOptionsCount);
+          } else if (count > 0) {
+            this.setHighlightedIndex((this.highlightedIndex + 1) % count);
           }
           event.preventDefault();
           break;
         case 'ArrowUp':
-          if (this.isOpen && filteredOptionsCount > 0) {
-            this.setHighlightedIndex((this.highlightedIndex - 1 + filteredOptionsCount) % filteredOptionsCount);
+          if (this.isOpen && count > 0) {
+            this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
             event.preventDefault();
           }
           break;
@@ -292,50 +294,65 @@ export class AutocompleteFieldComponent
     });
   }
 
-  private highlightSelectedOption(): void {
-    const filteredOptions = this.filteredOptions();
-
-    const selectedIndex = filteredOptions.findIndex((opt) => opt.value === this.selectedOption?.value);
-    this.setHighlightedIndex(selectedIndex > 0 ? selectedIndex : 0);
-  }
-
   private setHighlightedIndex(index: number): void {
     this.highlightedIndex = index;
-
-    // highlight content projection options
-    const inlineOptionCount = this.options?.length ?? 0;
-    this.optionComponents?.forEach((comp, i) => {
-      comp.setHighlighted(i === this.highlightedIndex - inlineOptionCount);
-    });
 
     this.cdRef.markForCheck();
   }
 
   private combineAllOptions(): IFormzFieldOption[] {
     const inlineOptions = this.options ?? [];
-
-    const projectedOptions =
-      this.optionComponents?.toArray().map((opt) => ({
-        value: opt.value,
-        label: opt.label || opt.innerTextAsLabel
-      })) ?? [];
+    const projectedOptions = this.optionComponents?.toArray() ?? [];
 
     return [...inlineOptions, ...projectedOptions];
   }
 
-  private filteredOptions(): IFormzFieldOption[] {
+  private updateFilteredOptions(): void {
     const filterValue = this.filterValue$.value;
 
-    const allOptions = this.combineAllOptions();
+    // inline options
+    const inlineOptions = this.options ?? [];
+    const filteredInlineOptions = filterValue
+      ? inlineOptions.filter((opt) =>
+          opt.match ? opt.match(filterValue) : opt.label?.toLowerCase().includes(filterValue.toLowerCase())
+        )
+      : inlineOptions;
 
-    const filteredOptions = filterValue
-      ? allOptions.filter((opt) => opt.label?.toLowerCase().includes(filterValue.toLowerCase()))
-      : allOptions;
+    this.filteredInlineOptions$.next(filteredInlineOptions);
 
-    const emptyOption = { ...this.emptyOption, disabled: true };
-    const filteredOrEmptyOptions = filteredOptions.length > 0 ? filteredOptions : [emptyOption];
+    // projected options
+    const projectedOptions = this.optionComponents?.toArray() ?? [];
+    const filteredProjectedOptions = filterValue
+      ? projectedOptions.filter((opt) =>
+          opt.match ? opt.match(filterValue) : opt.label?.toLowerCase().includes(filterValue.toLowerCase())
+        )
+      : projectedOptions;
 
-    return filteredOrEmptyOptions;
+    this.filteredProjectedOptions$.next(filteredProjectedOptions);
+
+    // both empty
+    if (filteredInlineOptions.length === 0 && filteredProjectedOptions.length === 0) {
+      this.filteredInlineOptions$.next([this.emptyOption]);
+      this.filteredProjectedOptions$.next([]);
+    }
+  }
+
+  private getFilteredCombinedOptions(): (IFormzFieldOption & { source: 'inline' | 'projected'; index: number })[] {
+    const inline: (IFormzFieldOption & { source: 'inline' | 'projected'; index: number })[] =
+      this.filteredInlineOptions$.value.map((opt, i) => ({
+        ...opt,
+        source: 'inline' as const,
+        index: i
+      }));
+
+    const projected: (IFormzFieldOption & { source: 'inline' | 'projected'; index: number })[] =
+      this.filteredProjectedOptions$.value.map((opt, i) => ({
+        ...opt,
+        source: 'projected' as const,
+        index: i
+      }));
+
+    return [...inline, ...projected];
   }
 
   private scrollIntoView(): void {
@@ -385,18 +402,7 @@ export class AutocompleteFieldComponent
       )
       .subscribe(() => {
         this.deselectOption();
-
-        const filteredOptions = this.filteredOptions();
-
-        this.filteredOptions$.next(filteredOptions);
-
-        if (filteredOptions.length > 0 && !this.isOpen) {
-          this.togglePanel(true);
-        }
-
-        if (filteredOptions.length === 0 && this.isOpen) {
-          this.togglePanel(false);
-        }
+        this.updateFilteredOptions();
       });
   }
 }
