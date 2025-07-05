@@ -1,0 +1,13 @@
+@use '../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.field {
+  @include date-field;
+}
+
+.panel {
+  @include date-panel;
+}

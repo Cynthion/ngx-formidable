@@ -87,10 +87,8 @@ export class TextareaFieldComponent extends FormzFieldBase implements ControlVal
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    if (this.textareaRef) {
-      this.textareaRef.nativeElement.value = value ?? '';
-      this.isFieldFilled = !!value;
-    }
+    this.textareaRef.nativeElement.value = value ?? '';
+    this.isFieldFilled = !!value;
   }
 
   registerOnChange(fn: never): void {

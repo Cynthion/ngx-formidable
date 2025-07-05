@@ -84,6 +84,19 @@ export interface IFormzDropdownField extends IFormzOptionField {
 
 export type IFormzAutocompleteField = IFormzDropdownField;
 
+export interface IFormzDateField {
+  name: string;
+  placeholder?: string;
+  disabled?: boolean;
+  required?: boolean;
+  // TODO implement
+  // minDate?: Date;
+  // maxDate?: Date;
+  // pattern?: string;
+  // mask?: string;
+  selectDate(date: string): void;
+}
+
 /** InjectionToken for field components that support multiple options. */
 export const FORMZ_OPTION_FIELD = new InjectionToken<IFormzOptionField>('FORMZ_OPTION_FIELD');
 

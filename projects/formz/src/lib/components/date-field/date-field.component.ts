@@ -1,9 +1,8 @@
 import {
-  AfterContentInit,
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChildren,
   ElementRef,
   forwardRef,
   inject,
@@ -11,54 +10,43 @@ import {
   NgZone,
   OnDestroy,
   OnInit,
-  QueryList,
   ViewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject, Subject } from 'rxjs';
+import Pikaday, { PikadayOptions } from 'pikaday';
+import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import {
-  FORMZ_FIELD_OPTION,
-  FORMZ_OPTION_FIELD,
-  FormzFieldBase,
-  IFormzDropdownField,
-  IFormzFieldOption
-} from '../../form-model';
+import { FormzFieldBase, IFormzDateField } from '../../form-model';
 
 @Component({
-  selector: 'formz-dropdown-field',
-  templateUrl: './dropdown-field.component.html',
-  styleUrls: ['./dropdown-field.component.scss'],
+  selector: 'formz-date-field',
+  templateUrl: './date-field.component.html',
+  styleUrls: ['./date-field.component.scss'],
   providers: [
     // required to use FormzFieldBase  during injection as a base class for this component
-    { provide: FormzFieldBase, useExisting: forwardRef(() => DropdownFieldComponent) },
+    { provide: FormzFieldBase, useExisting: forwardRef(() => DateFieldComponent) },
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => DropdownFieldComponent),
+      useExisting: forwardRef(() => DateFieldComponent),
       multi: true
-    },
-    // required to provide this component as IFormzOptionField
-    {
-      provide: FORMZ_OPTION_FIELD,
-      useExisting: DropdownFieldComponent
     }
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DropdownFieldComponent
+export class DateFieldComponent
   extends FormzFieldBase
-  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
+  implements OnInit, AfterViewInit, OnDestroy, ControlValueAccessor, IFormzDateField
 {
-  @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
-  protected selectedOption?: IFormzFieldOption;
+  protected selectedDate?: string; // TODO type Date?
   protected isOpen = false;
-  protected highlightedIndex = -1;
 
   private id = uuid();
-  private isFieldFocused = false;
+  protected isFieldFocused = false;
   private isFieldFilled = false;
 
   private valueChangeSubject$ = new Subject<string>();
@@ -69,6 +57,42 @@ export class DropdownFieldComponent
   private globalClickUnlisten?: () => void;
   private globalKeydownUnlisten?: () => void;
 
+  private pikadayOptions: PikadayOptions = {
+    format: 'YYYY-MM-DD' // or any other format you prefer
+    // bound: false,
+    // ariaLabel: '',
+    // position: 'bottom right',
+    // reposition: true,
+    // container: undefined,
+    // defaultDate: undefined,
+    // setDefaultDate: false,
+    // firstDay: 1, // Monday
+    // minDate: undefined,
+    // maxDate: undefined,
+    // disableWeekends: false,
+    // disableDayFn: undefined,
+    // yearRange: 10,
+    // showWeekNumber: false,
+    // pickWholeWeek: false,
+    // isRTL: false,
+    // i18n: undefined,
+    // yearSuffix: '',
+    // showMonthAfterYear: false,
+    // showDaysInNextAndPreviousMonths: true,
+    // enableSelectionDaysInNextAndPreviousMonths: true,
+    // numberOfMonths: 1,
+    // mainCalendar: 'left',
+    // events: undefined,
+    // theme: undefined,
+    // blurFieldOnSelect: false, // TODO use?
+    // formatStrict: false,
+    // toString: undefined,
+    // parse: undefined,
+    // keyboardInput: true
+  };
+
+  private picker = new Pikaday(this.pikadayOptions);
+
   constructor(private ngZone: NgZone) {
     super();
   }
@@ -77,12 +101,30 @@ export class DropdownFieldComponent
     this.registerGlobalListeners();
   }
 
+  ngAfterViewInit(): void {
+    // Initialize Pikaday after the view is initialized
+    this.picker = new Pikaday({
+      ...this.pikadayOptions,
+      field: this.inputRef.nativeElement,
+      trigger: this.inputRef.nativeElement,
+      onSelect: (date: Date) => this.onSelect(this.picker, date),
+      onOpen: () => this.onOpen(),
+      onClose: () => this.onClose(),
+      onDraw: () => this.onDraw()
+    });
+  }
+
   ngOnDestroy(): void {
     this.unregisterGlobalListeners();
   }
 
-  ngAfterContentInit(): void {
-    this.updateOptions();
+  protected onInputChange(): void {
+    const value = this.inputRef.nativeElement.value;
+
+    // this.inputChange$.emit(value);
+    // this.filterValue$.next(value);
+
+    this.isFieldFilled = value.length > 0;
   }
 
   protected onFocusChange(isFocused: boolean): void {
@@ -102,15 +144,12 @@ export class DropdownFieldComponent
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    const label = this.combineAllOptions().find((opt) => opt.value === value)?.label ?? '';
-
-    this.selectedOption = {
-      ...this.selectedOption,
-      value,
-      label
-    };
+    this.selectedDate = value;
 
     this.isFieldFilled = !!value;
+
+    // write to wrapped input
+    this.inputRef.nativeElement.value = value;
   }
 
   registerOnChange(fn: never): void {
@@ -137,7 +176,7 @@ export class DropdownFieldComponent
   }
 
   get value(): string {
-    return this.selectedOption?.value ?? '';
+    return this.selectedDate ?? '';
   }
 
   get isLabelFloating(): boolean {
@@ -145,63 +184,27 @@ export class DropdownFieldComponent
   }
 
   get elementRef(): ElementRef<HTMLElement> {
-    return this.dropdownRef as ElementRef<HTMLElement>;
+    return this.dateRef as ElementRef<HTMLElement>;
   }
 
   //#endregion
 
-  //#region IFormzDropdownField
+  //#region IFormzDateField
 
   @Input() name = '';
   @Input() placeholder = '';
   @Input() disabled = false;
   @Input() required = false;
 
-  //#endregion
-
-  //#region IFormzOptionField
-
-  @Input() options?: IFormzFieldOption[] = [];
-  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.' };
-
-  @ContentChildren(FORMZ_FIELD_OPTION)
-  optionComponents?: QueryList<IFormzFieldOption>;
-
-  protected readonly inlineOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
-  protected readonly projectedOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
-
-  public selectOption(option: IFormzFieldOption): void {
-    if (option.disabled) return;
-
-    const newOption: IFormzFieldOption = {
-      value: option.value,
-      label: option.label || option.value, // value as fallback for optional label
-      disabled: option.disabled
-    };
-
-    this.selectedOption = newOption;
+  public selectDate(date: string): void {
+    this.selectedDate = date;
 
     this.focusChangeSubject$.next(false); // simulate blur on selection
-    this.valueChangeSubject$.next(this.selectedOption.value);
-    this.isFieldFilled = this.selectedOption.value.length > 0;
-    this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
+    this.valueChangeSubject$.next(this.selectedDate);
+    this.isFieldFilled = this.selectDate.length > 0;
+    this.onChange(this.selectDate); // notify ControlValueAccessor of the change
     this.onTouched();
     this.togglePanel(false);
-  }
-
-  private combineAllOptions(): IFormzFieldOption[] {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
-
-    return [...inlineOptions, ...projectedOptions];
-  }
-
-  private updateOptions(): void {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
-
-    this.inlineOptions$.next(inlineOptions);
-    this.projectedOptions$.next(projectedOptions);
   }
 
   //#endregion
@@ -210,10 +213,11 @@ export class DropdownFieldComponent
     this.isOpen = isOpen;
 
     if (isOpen) {
-      this.highlightSelectedOption();
+      // TODO highlight selected date?
+      // this.highlightSelectedOption();
       this.scrollIntoView();
     } else {
-      this.setHighlightedIndex(-1); // reset highlighted index when closing
+      // this.setHighlightedIndex(-1); // reset highlighted index when closing
     }
 
     this.cdRef.markForCheck();
@@ -240,7 +244,7 @@ export class DropdownFieldComponent
   private handleExternalClick(event: MouseEvent): void {
     if (!this.isOpen) return;
 
-    const clickedInside = this.dropdownRef.nativeElement.contains(event.target as Node);
+    const clickedInside = this.dateRef.nativeElement.contains(event.target as Node);
 
     if (!clickedInside) {
       this.ngZone.run(() => this.togglePanel(false));
@@ -250,10 +254,9 @@ export class DropdownFieldComponent
   private handleKeyDown(event: KeyboardEvent): void {
     if (!this.isFieldFocused) return;
     if (this.disabled) return;
-    if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
+    if (!['Escape', 'ArrowDown', 'Tab'].includes(event.key)) return;
 
-    const options = this.combineAllOptions();
-    const count = options.length;
+    // TODO support selection of date within picker
 
     this.ngZone.run(() => {
       switch (event.key) {
@@ -264,45 +267,16 @@ export class DropdownFieldComponent
         case 'ArrowDown':
           if (!this.isOpen) {
             this.togglePanel(true);
-          } else if (count > 0) {
-            this.setHighlightedIndex((this.highlightedIndex + 1) % count);
           }
           event.preventDefault();
-          break;
-        case 'ArrowUp':
-          if (this.isOpen && count > 0) {
-            this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
-            event.preventDefault();
-          }
-          break;
-        case 'Enter':
-          if (this.isOpen && options[this.highlightedIndex]) {
-            const option = options[this.highlightedIndex]!;
-            this.selectOption(option);
-            event.preventDefault();
-          }
           break;
       }
     });
   }
 
-  private highlightSelectedOption(): void {
-    const options = this.combineAllOptions();
-
-    const selectedIndex = options.findIndex((opt) => opt.value === this.selectedOption?.value);
-
-    this.setHighlightedIndex(selectedIndex);
-  }
-
-  private setHighlightedIndex(index: number): void {
-    this.highlightedIndex = index;
-
-    this.cdRef.markForCheck();
-  }
-
   private scrollIntoView(): void {
     setTimeout(() => {
-      const field = this.dropdownRef?.nativeElement;
+      const field = this.dateRef?.nativeElement;
       const panel = this.panelRef?.nativeElement;
 
       if (!field || !panel) return;
@@ -336,4 +310,24 @@ export class DropdownFieldComponent
       }
     });
   }
+
+  //#region Pikaday
+
+  private onSelect(pikaday: Pikaday, date: Date): void {
+    this.selectDate(pikaday.toString(date.toString()));
+  }
+
+  private onOpen(): void {
+    //
+  }
+
+  private onClose(): void {
+    //
+  }
+
+  private onDraw(): void {
+    //
+  }
+
+  //#endregion
 }

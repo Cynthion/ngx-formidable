@@ -98,6 +98,15 @@
   }
 }
 
+@mixin textarea-field {
+  @include input-field;
+
+  min-height: var(--formz-textarea-min-height, #{tokens.$formz-textarea-min-height});
+  max-height: var(--formz-textarea-max-height, #{tokens.$formz-textarea-max-height});
+  padding-top: var(--formz-textarea-padding-top, #{tokens.$formz-textarea-padding-top});
+  resize: vertical;
+}
+
 @mixin select-field {
   @include input-field;
 
@@ -107,7 +116,7 @@
   }
 }
 
-@mixin dropdown-field {
+@mixin panel-field {
   @include select-field;
 
   &.open .panel {
@@ -116,23 +125,30 @@
     transform: translateY(0);
     pointer-events: auto;
   }
+}
 
+@mixin input-wrapper-field {
   &.focused {
     @include field-focused;
   }
+
+  .wrapped-input {
+    @include wrapped-input;
+  }
+}
+
+@mixin dropdown-field {
+  @include panel-field;
 }
 
 @mixin autocomplete-field {
-  @include dropdown-field;
+  @include panel-field;
+  @include input-wrapper-field;
 }
 
-@mixin textarea-field {
-  @include input-field;
-
-  min-height: var(--formz-textarea-min-height, #{tokens.$formz-textarea-min-height});
-  max-height: var(--formz-textarea-max-height, #{tokens.$formz-textarea-max-height});
-  padding-top: var(--formz-textarea-padding-top, #{tokens.$formz-textarea-padding-top});
-  resize: vertical;
+@mixin date-field {
+  @include panel-field;
+  @include input-wrapper-field;
 }
 
 @mixin field-before {
@@ -236,7 +252,7 @@
   }
 }
 
-@mixin dropdown-panel {
+@mixin panel {
   position: absolute;
   box-shadow: var(--formz-dropdown-panel-box-shadow, #{tokens.$formz-dropdown-panel-box-shadow});
   border: 1px solid var(--formz-color-field-border, #{tokens.$formz-color-field-border});
@@ -261,8 +277,16 @@
       var(--formz-animation-easing, #{tokens.$formz-animation-easing});
 }
 
+@mixin dropdown-panel {
+  @include panel;
+}
+
 @mixin autocomplete-panel {
-  @include dropdown-panel;
+  @include panel;
+}
+
+@mixin date-panel {
+  @include panel;
 }
 
 @mixin field-option {

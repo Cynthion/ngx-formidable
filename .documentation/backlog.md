@@ -7,3 +7,9 @@
 - support showing multiple errors
 - resolve all TODOs
 - fix valuedChange$ and focusedChange$ in all fields
+- handle switch case defaults
+- extract common functionalities into helpers
+- support readonly for all fields (dropdown, autocomplete, date)
+- implement dropdown also with inner/wrapped input?
+- dropdown: write towards selection
+- remove moment.js from pikaday package (via patch-package patches)

@@ -23,6 +23,7 @@ export class ExampleFormComponent {
     nationality: 'ch',
     hobby: 'gaming',
     animal: 'cat',
+    birthdate: '1989-06-29',
     religion: 'christian'
   });
   protected readonly formShape = exampleFormShape;

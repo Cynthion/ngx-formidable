@@ -1,0 +1,30 @@
+<div
+  #dateRef
+  class="field"
+  [class.open]="isOpen"
+  [class.focused]="isFieldFocused">
+  <!-- Input Field -->
+  <input
+    #inputRef
+    type="text"
+    autocomplete="off"
+    class="wrapped-input"
+    [id]="fieldId"
+    [placeholder]="placeholder"
+    [attr.name]="name"
+    [attr.disabled]="disabled ? '' : null"
+    [readonly]="null"
+    [required]="required"
+    (input)="onInputChange()"
+    (focus)="onFocusChange(true)"
+    (blur)="onFocusChange(false)" />
+
+  <!-- Panel -->
+  <div
+    *ngIf="isOpen"
+    #panelRef
+    class="panel">
+    <!-- Date Picker -->
+    Date Picker comes here...
+  </div>
+</div>

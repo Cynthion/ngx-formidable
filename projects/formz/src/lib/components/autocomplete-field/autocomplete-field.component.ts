@@ -112,10 +112,6 @@ export class AutocompleteFieldComponent
     if (!isFocused) {
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
     }
-
-    // if (isFocused && !this.isOpen && this.isFieldFilled) {
-    //   this.togglePanel(true); // open the panel on focus
-    // }
   }
 
   //#region ControlValueAccessor
@@ -136,7 +132,7 @@ export class AutocompleteFieldComponent
 
     this.isFieldFilled = !!value;
 
-    // write chosen value
+    // write to wrapped input
     this.inputRef.nativeElement.value = label;
   }
 

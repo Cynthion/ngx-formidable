@@ -25,6 +25,8 @@
     "@angular/common": "^18.2.0",
     "@angular/core": "^18.2.0",
     "@types/uuid": "^10.0.0",
+    "@types/pikaday": "^1.7.9",
+    "pikaday": "^1.8.2",
     "uuid": "^10.0.0",
     "vest": "^5.4.6"
   },

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AutocompleteFieldComponent } from './components/autocomplete-field/autocomplete-field.component';
+import { DateFieldComponent } from './components/date-field/date-field.component';
 import { DropdownFieldComponent } from './components/dropdown-field/dropdown-field.component';
 import { FieldDecoratorComponent } from './components/field-decorator/field-decorator.component';
 import { FieldErrorsComponent } from './components/field-errors/field-errors.component';
@@ -32,6 +33,7 @@ const components = [
   InputFieldComponent,
   DropdownFieldComponent,
   AutocompleteFieldComponent,
+  DateFieldComponent,
   FieldOptionComponent,
   SelectFieldComponent,
   TextareaFieldComponent,

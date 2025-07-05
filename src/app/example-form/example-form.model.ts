@@ -19,6 +19,7 @@ export interface User {
   nationality?: UserNationality;
   hobby?: string;
   animal?: string;
+  birthdate?: string;
   religion?: UserReligion;
   passwords: Password;
 }
@@ -38,6 +39,7 @@ export const exampleFormShape: ExampleFormShape = {
   nationality: 'ch',
   hobby: '',
   animal: '',
+  birthdate: '',
   religion: 'christian',
   passwords: {
     password: '',
