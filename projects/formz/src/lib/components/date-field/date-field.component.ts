@@ -13,7 +13,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import Pikaday, { PikadayOptions } from 'pikaday';
+import Pikaday from 'pikaday';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { FormzFieldBase, IFormzDateField } from '../../form-model';
@@ -41,6 +41,7 @@ export class DateFieldComponent
   @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
+  @ViewChild('pickerRef') pickerRef?: ElementRef<HTMLDivElement>;
 
   protected selectedDate?: string; // TODO type Date?
   protected isOpen = false;
@@ -57,41 +58,41 @@ export class DateFieldComponent
   private globalClickUnlisten?: () => void;
   private globalKeydownUnlisten?: () => void;
 
-  private pikadayOptions: PikadayOptions = {
-    format: 'YYYY-MM-DD' // or any other format you prefer
-    // bound: false,
-    // ariaLabel: '',
-    // position: 'bottom right',
-    // reposition: true,
-    // container: undefined,
-    // defaultDate: undefined,
-    // setDefaultDate: false,
-    // firstDay: 1, // Monday
-    // minDate: undefined,
-    // maxDate: undefined,
-    // disableWeekends: false,
-    // disableDayFn: undefined,
-    // yearRange: 10,
-    // showWeekNumber: false,
-    // pickWholeWeek: false,
-    // isRTL: false,
-    // i18n: undefined,
-    // yearSuffix: '',
-    // showMonthAfterYear: false,
-    // showDaysInNextAndPreviousMonths: true,
-    // enableSelectionDaysInNextAndPreviousMonths: true,
-    // numberOfMonths: 1,
-    // mainCalendar: 'left',
-    // events: undefined,
-    // theme: undefined,
-    // blurFieldOnSelect: false, // TODO use?
-    // formatStrict: false,
-    // toString: undefined,
-    // parse: undefined,
-    // keyboardInput: true
-  };
+  // private pikadayOptions: PikadayOptions = {
+  //   format: 'YYYY-MM-DD' // or any other format you prefer
+  //   // bound: false,
+  //   // ariaLabel: '',
+  //   // position: 'bottom right',
+  //   // reposition: true,
+  //   // container: undefined,
+  //   // defaultDate: undefined,
+  //   // setDefaultDate: false,
+  //   // firstDay: 1, // Monday
+  //   // minDate: undefined,
+  //   // maxDate: undefined,
+  //   // disableWeekends: false,
+  //   // disableDayFn: undefined,
+  //   // yearRange: 10,
+  //   // showWeekNumber: false,
+  //   // pickWholeWeek: false,
+  //   // isRTL: false,
+  //   // i18n: undefined,
+  //   // yearSuffix: '',
+  //   // showMonthAfterYear: false,
+  //   // showDaysInNextAndPreviousMonths: true,
+  //   // enableSelectionDaysInNextAndPreviousMonths: true,
+  //   // numberOfMonths: 1,
+  //   // mainCalendar: 'left',
+  //   // events: undefined,
+  //   // theme: undefined,
+  //   // blurFieldOnSelect: false, // TODO use?
+  //   // formatStrict: false,
+  //   // toString: undefined,
+  //   // parse: undefined,
+  //   // keyboardInput: true
+  // };
 
-  private picker = new Pikaday(this.pikadayOptions);
+  private picker?: Pikaday;
 
   constructor(private ngZone: NgZone) {
     super();
@@ -102,16 +103,21 @@ export class DateFieldComponent
   }
 
   ngAfterViewInit(): void {
-    // Initialize Pikaday after the view is initialized
     this.picker = new Pikaday({
-      ...this.pikadayOptions,
+      // ...this.pikadayOptions
       field: this.inputRef.nativeElement,
-      trigger: this.inputRef.nativeElement,
-      onSelect: (date: Date) => this.onSelect(this.picker, date),
-      onOpen: () => this.onOpen(),
-      onClose: () => this.onClose(),
-      onDraw: () => this.onDraw()
+      trigger: undefined, // TODO use button or manual
+      bound: false,
+      container: this.pickerRef?.nativeElement,
+      reposition: false,
+      position: undefined
+      // onSelect: (date: Date) => this.onSelect(this.picker, date),
+      // onOpen: () => this.onOpen(),
+      // onClose: () => this.onClose(),
+      // onDraw: () => this.onDraw()
     });
+
+    console.log('Pikaday initialized', this.picker);
   }
 
   ngOnDestroy(): void {
@@ -313,21 +319,21 @@ export class DateFieldComponent
 
   //#region Pikaday
 
-  private onSelect(pikaday: Pikaday, date: Date): void {
-    this.selectDate(pikaday.toString(date.toString()));
-  }
+  // private onSelect(pikaday: Pikaday, date: Date): void {
+  //   this.selectDate(pikaday.toString(date.toString()));
+  // }
 
-  private onOpen(): void {
-    //
-  }
+  // private onOpen(): void {
+  //   //
+  // }
 
-  private onClose(): void {
-    //
-  }
+  // private onClose(): void {
+  //   //
+  // }
 
-  private onDraw(): void {
-    //
-  }
+  // private onDraw(): void {
+  //   //
+  // }
 
   //#endregion
 }
