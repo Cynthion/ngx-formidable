@@ -5,12 +5,14 @@ import {
   Component,
   ContentChildren,
   ElementRef,
+  EventEmitter,
   forwardRef,
   inject,
   Input,
   NgZone,
   OnDestroy,
   OnInit,
+  Output,
   QueryList,
   ViewChild
 } from '@angular/core';
@@ -91,9 +93,13 @@ export class AutocompleteFieldComponent
     this.updateFilteredOptions();
   }
 
+  // TODO expose filterValue$ instead
+  @Output() inputChange$ = new EventEmitter<string>();
+
   protected onInputChange(): void {
     const value = this.inputRef.nativeElement.value;
 
+    this.inputChange$.emit(value);
     this.filterValue$.next(value);
 
     this.isFieldFilled = value.length > 0;

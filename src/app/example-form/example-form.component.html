@@ -13,7 +13,7 @@
   (ngSubmit)="onSubmit()">
   <fieldset class="fieldset">
     <!-- First Name -->
-    <formz-field-decorator [decoratorLayout]="'single'">
+    <!-- <formz-field-decorator [decoratorLayout]="'single'">
       <formz-input-field
         formzField
         formzFieldErrors
@@ -35,10 +35,10 @@
       <div formzFieldTooltip>(Input)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+    </formz-field-decorator> -->
 
     <!-- Last Name -->
-    <formz-field-decorator [decoratorLayout]="'single'">
+    <!-- <formz-field-decorator [decoratorLayout]="'single'">
       <formz-textarea-field
         formzField
         formzFieldErrors
@@ -58,7 +58,7 @@
       <div formzFieldTooltip>(Textarea)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+    </formz-field-decorator> -->
 
     <!-- Gender -->
     <formz-field-decorator [decoratorLayout]="'single'">
@@ -87,7 +87,7 @@
     </formz-field-decorator>
 
     <!-- Nationality -->
-    <formz-field-decorator>
+    <!-- <formz-field-decorator>
       <formz-dropdown-field
         formzField
         formzFieldErrors
@@ -119,7 +119,7 @@
       <div formzFieldTooltip>(Dropdown)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+    </formz-field-decorator> -->
 
     <!-- Hobby -->
     <formz-field-decorator>
@@ -174,13 +174,15 @@
         [disabled]="false"
         [required]="false"
         [options]="animalOptionsDefault"
-        [emptyOption]="animalEmptyOption">
-        @for (option of animalOptionsExtended; track option.value) {
+        [emptyOption]="animalEmptyOption"
+        (inputChange$)="onAnimalFilterChange($event)">
+        @for (option of animalOptionsFiltered$ | async; track option.value) {
           <fuzzy-field-option
             [value]="option.value"
             [label]="option.label"
             [disabled]="option.disabled || false"
-            [subtitle]="option.subtitle">
+            [subtitle]="option.subtitle"
+            [highlightedEntries]="option.highlightedEntries || { labelEntries: [], subtitleEntries: [] }">
           </fuzzy-field-option>
         }
       </formz-autocomplete-field>

@@ -18,10 +18,8 @@ import { HighlightedEntries } from '../example-form/example-form.model';
 export class FuzzyFieldOptionComponent extends FieldOptionComponent {
   @Input() subtitle?: string = 'sub';
 
-  protected highlightedEntries: HighlightedEntries = {
+  @Input() highlightedEntries?: HighlightedEntries = {
     labelEntries: [],
     subtitleEntries: []
   };
-
-  override match?: ((filterValue: string) => boolean) | undefined;
 }

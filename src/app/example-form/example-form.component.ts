@@ -1,10 +1,13 @@
 import { Component, computed, signal } from '@angular/core';
+import Fuse, { FuseResult } from 'fuse.js';
 import { FormValidationOptions, IFormzFieldOption } from 'projects/formz/src/lib/form-model';
+import { map, Observable, startWith, Subject } from 'rxjs';
 import {
   AnimalFormFieldOption,
   ExampleFormModel,
   exampleFormShape,
-  exampleFormValidationSuite
+  exampleFormValidationSuite,
+  HighlightedEntries
 } from './example-form.model';
 
 @Component({
@@ -71,7 +74,7 @@ export class ExampleFormComponent {
     { value: 'dog', label: 'Dog' }
   ];
 
-  protected animalOptionsExtended: AnimalFormFieldOption[] = [
+  protected animalOptionsForFiltering: AnimalFormFieldOption[] = [
     { value: 'axolotl', label: 'Axolotl', subtitle: 'Mexican salamander' },
     { value: 'capybara', label: 'Capybara', subtitle: "World's largest rodent" },
     { value: 'fennec_fox', label: 'Fennec Fox', subtitle: 'Small desert fox' },
@@ -121,5 +124,94 @@ export class ExampleFormComponent {
     if (this.isValid()) {
       console.log(this.formValue());
     }
+  }
+
+  private readonly fuseIndex = new Fuse(this.animalOptionsForFiltering, {
+    keys: [
+      { name: 'label', weight: 0.8 },
+      { name: 'subtitle', weight: 0.2 }
+    ],
+    threshold: 0.17,
+    includeMatches: true,
+    ignoreLocation: true,
+    includeScore: true,
+    minMatchCharLength: 3
+  });
+
+  private readonly animalFilter$ = new Subject<string>();
+
+  protected onAnimalFilterChange(filterValue: string): void {
+    this.animalFilter$.next(filterValue);
+  }
+
+  protected animalOptionsFiltered$: Observable<AnimalFormFieldOption[]> = this.animalFilter$.pipe(
+    map((filterValue) => {
+      const trimmed = filterValue.trim().toLowerCase();
+      if (!trimmed) return this.animalOptionsForFiltering;
+
+      const results = this.fuseIndex.search(trimmed);
+
+      const sorted = results.sort((a, b) => (a.score ?? 1) - (b.score ?? 1));
+
+      const enriched = sorted.map((result: FuseResult<AnimalFormFieldOption>) => ({
+        ...result.item,
+        highlightedEntries: this.extractHighlights(result)
+      }));
+
+      return enriched;
+    }),
+    startWith(this.animalOptionsForFiltering)
+  );
+
+  private extractHighlights<T>(
+    fuseResult: FuseResult<T>,
+    fields: (keyof HighlightedEntries)[] = ['labelEntries', 'subtitleEntries']
+  ): HighlightedEntries {
+    const highlights: HighlightedEntries = {
+      labelEntries: [],
+      subtitleEntries: []
+    };
+
+    if (!fuseResult.matches) return highlights;
+
+    for (const match of fuseResult.matches) {
+      const key = match.key;
+      const value = String(match.value);
+      const indices = match.indices;
+
+      // Map match.key ("label" or "subtitle") → entries key
+      const targetKey = key === 'label' ? 'labelEntries' : key === 'subtitle' ? 'subtitleEntries' : null;
+
+      if (!targetKey || !fields.includes(targetKey as keyof HighlightedEntries)) continue;
+
+      let lastIndex = 0;
+      for (const [start, end] of indices) {
+        // Push unhighlighted segment
+        if (start > lastIndex) {
+          highlights[targetKey].push({
+            text: value.slice(lastIndex, start),
+            isHighlighted: false
+          });
+        }
+
+        // Push highlighted segment
+        highlights[targetKey].push({
+          text: value.slice(start, end + 1),
+          isHighlighted: true
+        });
+
+        lastIndex = end + 1;
+      }
+
+      // Push the remaining unhighlighted segment
+      if (lastIndex < value.length) {
+        highlights[targetKey].push({
+          text: value.slice(lastIndex),
+          isHighlighted: false
+        });
+      }
+    }
+
+    return highlights;
   }
 }

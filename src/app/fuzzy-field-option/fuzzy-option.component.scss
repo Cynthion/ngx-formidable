@@ -1,3 +1,17 @@
+@use '../../styles/variables' as *;
+
 :host {
   display: block;
+}
+
+.option-label {
+  @include font-m;
+}
+
+.option-subtitle {
+  @include font-xs-bold;
+}
+
+.option-highlight {
+  color: var(--cmp-color-accent-one);
 }

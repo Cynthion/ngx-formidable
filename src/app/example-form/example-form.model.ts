@@ -95,6 +95,7 @@ export interface HighlightedEntries {
 
 export interface AnimalFormFieldOption extends IFormzFieldOption {
   subtitle?: string;
+  highlightedEntries?: HighlightedEntries;
 }
 
 //#endregion
