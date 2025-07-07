@@ -52,6 +52,14 @@ $formz-dropdown-panel-background: #f2faff;
 $formz-dropdown-panel-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);
 
 $formz-animation-duration: 0.15s;
-$formz-animation-easing: cubic-bezier(0.39, 0.575, 0.565, 1);
+$formz-animation-easing: cubic-bezier(0.4, 0.6, 0.6, 1);
 
-$formz-flyout-z-index: 9999;
+$formz-hover-duration: 0.25s;
+$formz-hover-easing: cubic-bezier(0.4, 0.6, 0.6, 1);
+
+$formz-flyout-z-index: 999;
+$formz-overlay-z-index: 9999;
+$formz-above-overlay-z-index: 99999;
+
+$formz-pikaday-border-radius: $formz-field-border-radius;
+$formz-pikaday-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);

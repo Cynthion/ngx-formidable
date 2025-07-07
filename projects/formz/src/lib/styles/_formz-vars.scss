@@ -37,5 +37,12 @@
   --formz-animation-duration: #{tokens.$formz-animation-duration};
   --formz-animation-easing: #{tokens.$formz-animation-easing};
 
+  --formz-hover-duration: #{tokens.$formz-hover-duration};
+  --formz-hover-easing: #{tokens.$formz-hover-easing};
+
   --formz-flyout-z-index: #{tokens.$formz-flyout-z-index};
+  --formz-overlay-z-index: #{tokens.$formz-overlay-z-index};
+  --formz-above-overlay-z-index: #{tokens.$formz-above-overlay-z-index};
+
+  --formz-pikaday-border-radius: #{tokens.$formz-pikaday-border-radius};
 }

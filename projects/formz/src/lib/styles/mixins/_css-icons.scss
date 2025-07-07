@@ -1,0 +1,46 @@
+@use 'sass:math';
+
+@mixin css-icon($name, $size: 12px, $stroke: 2px) {
+  position: relative;
+
+  @if $name == 'arrow-left' or $name == 'arrow-right' or $name == 'arrow-up' or $name == 'arrow-down' {
+    &::before {
+      content: '';
+      display: block;
+      width: $size;
+      height: $size;
+      position: absolute;
+      z-index: var(--cmp-layer-flyout);
+      top: 50%;
+      left: 50%;
+      border-left: #{$stroke} solid;
+      border-top: #{$stroke} solid;
+      transform: translate(calc(-50% + #{math.div($stroke, 2)}), -50%) rotate(-45deg);
+    }
+  }
+
+  @if $name == 'arrow-right' {
+    &::before {
+      border-left: none;
+      border-top: none;
+      border-right: #{$stroke} solid;
+      border-bottom: #{$stroke} solid;
+    }
+  }
+
+  @if $name == 'arrow-up' {
+    &::before {
+      border-left: none;
+      border-right: #{$stroke} solid;
+      transform: translate(-50%, calc(-50% - #{math.div($size, 2) + math.div($stroke, 2)})) rotate(-45deg);
+    }
+  }
+
+  @if $name == 'arrow-down' {
+    &::before {
+      border-top: none;
+      border-bottom: #{$stroke} solid;
+      transform: translate(-50%, calc(-50% - #{math.div($size, 2) + math.div($stroke, 2)})) rotate(-45deg);
+    }
+  }
+}

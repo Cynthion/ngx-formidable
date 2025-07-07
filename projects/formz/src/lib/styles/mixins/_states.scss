@@ -1,0 +1,15 @@
+// TODO remove
+@mixin hover($focus: false) {
+  @media (hover: hover) {
+    &:hover,
+    &:active {
+      @content;
+    }
+
+    @if $focus {
+      &:focus {
+        @content;
+      }
+    }
+  }
+}

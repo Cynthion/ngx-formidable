@@ -1,0 +1,309 @@
+@use 'sass:math';
+@use 'css-icons' as icons;
+@use 'spacings' as sp;
+@use 'states' as states;
+@use 'typography' as typo;
+@use 'positioning' as pos;
+@use '../tokens' as tokens;
+
+// These CSS classes customize the pikaday components.
+// Alternatively, the CSS classes provided by the pikaday library can be used and customized:
+// https://github.com/Pikaday/Pikaday#styles
+
+@keyframes animation-date-in {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+
+  99% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.pika-single {
+  @include typo.font-s-bold;
+
+  // z-index: var(--formz-above-overlay-z-index, #{tokens.$formz-above-overlay-z-index});
+  // display: block;
+  // position: relative;
+  // padding-top: sp.cmp_space(8);
+  // background-color: turquoise; // TODO tokenize
+  // opacity: 0; // animation init to avoid animation flicker
+  // border-radius: var(--formz-pikaday-border-radius, #{tokens.$formz-pikaday-border-radius});
+  // box-shadow: var(--formz-pikaday-box-shadow, #{tokens.$formz-pikaday-box-shadow});
+  text-align: center;
+
+  // &.is-hidden {
+  //   display: none;
+  // }
+
+  // &.is-bound {
+  //   position: absolute;
+  //   animation: animation-date-in 0.3s 0.1s forwards;
+  // }
+
+  // clear child float (pika-lendar), using the famous micro clearfix hack
+  // http://nicolasgallagher.com/micro-clearfix-hack/
+  // &::before,
+  // &::after {
+  //   content: ' ';
+  //   display: table;
+  // }
+
+  // &::after {
+  //   clear: both;
+  // }
+}
+
+.pika-lendar {
+  float: left;
+  width: 300px; // TODO make smaller
+  // height: 300px;
+  // padding: sp.cmp_space(24) sp.cmp_space(16);
+  // margin: 0 sp.cmp_space(8);
+
+  & + & {
+    margin-left: sp.cmp_space(16);
+  }
+  // TODO mediaquery
+}
+
+.pika-title {
+  display: flex;
+  align-items: center;
+  // position: relative;
+  // text-align: center;
+  // display: flex;
+  // align-items: center;
+  margin-bottom: sp.cmp_space(8);
+
+  select {
+    cursor: pointer;
+    position: absolute;
+    // z-index: var(--formz-overlay-z-index, #{tokens.$formz-overlay-z-index}) - 1;
+    // margin: 0;
+    left: 0;
+    // top: 5px;
+    opacity: 0;
+  }
+}
+
+.pika-label {
+  // display: inline-block;
+  position: relative;
+  // z-index: var(--formz-overlay-z-index, #{tokens.$formz-overlay-z-index});
+  overflow: hidden;
+  padding: 4px 10px 2px;
+  border-radius: var(--formz-pikaday-border-radius, #{tokens.$formz-pikaday-border-radius});
+
+  & + & {
+    margin-left: sp.cmp_space(8);
+  }
+
+  // hover
+  &::before {
+    @include pos.absolute-cover;
+
+    content: '';
+    display: block;
+    background-color: lime; // TODO tokenize, transparent
+    opacity: 0;
+    transition: opacity 0.2s;
+    // z-index: -1;
+  }
+
+  @include states.hover {
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  // margin: 0;
+  // padding: 5px 3px;
+  // font-size: 14px;
+  // line-height: 20px;
+  // font-weight: bold;
+  // color: $pd-title-color;
+  // background-color: $pd-title-bg;
+}
+
+.pika-prev,
+.pika-next {
+  // display: block;
+  // cursor: pointer;
+  // position: relative;
+  // outline: none;
+  // border: 0;
+  // padding: 0;
+  width: 40px;
+  height: 40px;
+  font-size: 0;
+  // color: transparent;
+  // background-color: transparent;
+  // background-position: center center;
+  // background-repeat: no-repeat;
+  // background-size: 75% 75%;
+
+  // hide text
+  // text-indent: 30px; // hide text using text-indent trick, using width value (it's enough)
+  // white-space: nowrap;
+  // overflow: hidden;
+  // opacity: 1;
+
+  &.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.2;
+  }
+
+  // hover
+  &::before {
+    color: orange; // TODO tokenize
+  }
+
+  &::after {
+    @include pos.absolute-cover;
+
+    content: '';
+    // display: block;
+    background-color: lime; // TODO tokenize, transparent
+    border-radius: var(--formz-pikaday-border-radius, #{tokens.$formz-pikaday-border-radius});
+    opacity: 0;
+    transform: opacity var(--formz-hover-duration, #{tokens.$formz-hover-duration})
+      var(--formz-hover-easing, #{tokens.$formz-hover-easing});
+  }
+
+  @include states.hover {
+    &::after {
+      opacity: 1;
+    }
+  }
+}
+
+.pika-prev,
+.is-rtl .pika-next {
+  @include icons.css-icon(arrow-left, 8px);
+
+  // float: left;
+  order: -1; // flex position
+  margin-right: auto;
+}
+
+.pika-next,
+.is-rtl .pika-prev {
+  @include icons.css-icon(arrow-right, 8px);
+
+  // float: right;
+  margin-left: auto;
+}
+
+.pika-select {
+  // display: inline-block;
+}
+
+.pika-table {
+  width: 100%;
+  // border-collapse: collapse;
+  // border-spacing: 0;
+  // border: 0;
+
+  th,
+  td {
+    width: math.div(100%, 7);
+    // padding: 0;
+  }
+
+  th {
+    text-align: center;
+    padding-bottom: sp.cmp_space(8);
+    // color: $pd-th-color;
+    // font-size: 12px;
+    // line-height: 25px;
+    // font-weight: bold;
+  }
+
+  td {
+    position: relative;
+    padding-bottom: math.div(100%, 7);
+
+    &::before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: calc(100% - 2px);
+      height: calc(100% - 2px);
+      max-width: 48px;
+      max-height: 48px;
+      transform: translate(-50%, -50%);
+      background-color: purple; // TODO tokenize
+      border-radius: 100%;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+
+    &.is-outside-current-month {
+      color: yellow; // TODO tokenize
+    }
+
+    &.is-selected {
+      color: honeydew; // TODO tokenize
+
+      &::before {
+        background-color: purple; // TODO tokenize;
+        opacity: 1;
+      }
+    }
+
+    &.is-disabled {
+      opacity: 0.3;
+
+      .pika-button {
+        cursor: not-allowed;
+      }
+    }
+
+    @include states.hover {
+      &:not(.is-selected, .is-empty, .is-disabled)::before {
+        opacity: 1;
+      }
+    }
+  }
+
+  abbr {
+    color: lightskyblue; // TODO tokenize
+  }
+}
+
+.pika-button {
+  @include pos.absolute-cover;
+
+  display: block;
+  cursor: pointer;
+}
+
+.is-inrange .pika-button {
+  color: lightcoral; // TODO tokenize
+  background: white; // TODO tokenize
+}
+
+.is-startrange .pika-button {
+  color: burlywood; // TODO tokenize
+  background: green;
+  box-shadow: none;
+  border-radius: var(--formz-pikaday-border-radius, #{tokens.$formz-pikaday-border-radius});
+}
+
+.is-endrange .pika-button {
+  color: burlywood; // TODO tokenize
+  background: red; // TODO tokenize
+  box-shadow: none;
+  border-radius: var(--formz-pikaday-border-radius, #{tokens.$formz-pikaday-border-radius});
+}
