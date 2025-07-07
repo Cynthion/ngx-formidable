@@ -6,14 +6,12 @@
 .form {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
-  padding: 10px;
 }
 
 .fieldset {
   display: flex;
   flex-direction: column;
-  flex: 1 1 0;
+  // flex: 1 1 0;
 }
 
 // TODO implement footer to be sticky at the bottom of the form

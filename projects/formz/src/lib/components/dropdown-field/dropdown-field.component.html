@@ -2,7 +2,6 @@
   #dropdownRef
   tabindex="0"
   class="field"
-  [class.open]="isOpen"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <div
@@ -20,7 +19,8 @@
   <div
     *ngIf="isOpen"
     #panelRef
-    class="panel">
+    class="panel"
+    [class.open]="isOpen">
     <!-- Inline Options -->
     @for (option of inlineOptions$.value; track option.value; let i = $index) {
       <formz-field-option

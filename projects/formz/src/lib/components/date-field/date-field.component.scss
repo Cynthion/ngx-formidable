@@ -11,3 +11,7 @@
 .panel {
   @include date-panel;
 }
+
+.picker-wrapper {
+  @include date-picker-wrapper;
+}

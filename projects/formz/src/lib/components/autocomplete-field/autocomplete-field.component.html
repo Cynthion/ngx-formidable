@@ -1,7 +1,6 @@
 <div
   #autocompleteRef
   class="field"
-  [class.open]="isOpen"
   [class.focused]="isFieldFocused">
   <!-- Input Field -->
   <input
@@ -22,7 +21,8 @@
   <div
     *ngIf="isOpen"
     #panelRef
-    class="panel">
+    class="panel"
+    [class.open]="isOpen">
     <!-- Inline Options -->
     @for (option of filteredInlineOptions$.value; track option.value; let i = $index) {
       <formz-field-option

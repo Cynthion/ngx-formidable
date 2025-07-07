@@ -61,7 +61,7 @@
 
   position: relative;
   width: 100%;
-  height: tokens.$formz-field-height;
+  height: var(--formz-field-height, #{tokens.$formz-field-height});
   padding: 0 sp.cmp_space(16); // horizontal padding only
   border: 1px solid var(--formz-color-field-border, #{tokens.$formz-color-field-border});
   border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
@@ -118,13 +118,6 @@
 
 @mixin panel-field {
   @include select-field;
-
-  &.open .panel {
-    // animation
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-  }
 }
 
 @mixin input-wrapper-field {
@@ -268,13 +261,22 @@
 
   // animation
   opacity: 0;
-  transform: translateY(-0.25rem); // slight offset when closed
-  pointer-events: none; // prevent hover/clicks when closed
+  display: none;
+  transform: translateY(-0.25rem);
+  pointer-events: none;
   transition:
     opacity var(--formz-animation-duration, #{tokens.$formz-animation-duration})
       var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
     transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
       var(--formz-animation-easing, #{tokens.$formz-animation-easing});
+
+  &.open {
+    // animation
+    opacity: 1;
+    display: block;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
 }
 
 @mixin dropdown-panel {
@@ -308,4 +310,11 @@
 
 @mixin highlighted {
   background: var(--formz-color-field-highlighted, #{tokens.$formz-color-field-highlighted});
+}
+
+@mixin date-picker-wrapper {
+  display: flex;
+  justify-content: center;
+
+  margin: sp.cmp_space(8);
 }

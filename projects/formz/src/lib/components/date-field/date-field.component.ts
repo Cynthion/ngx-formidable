@@ -110,11 +110,12 @@ export class DateFieldComponent
       bound: false,
       container: this.pickerRef?.nativeElement,
       reposition: false,
-      position: undefined
+      position: undefined,
       // onSelect: (date: Date) => this.onSelect(this.picker, date),
       // onOpen: () => this.onOpen(),
       // onClose: () => this.onClose(),
-      // onDraw: () => this.onDraw()
+      // onDraw: () => this.onDraw(),
+      keyboardInput: false // TODO
     });
 
     console.log('Pikaday initialized', this.picker);

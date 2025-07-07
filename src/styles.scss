@@ -11,7 +11,14 @@
 // Formz Lib Overrides
 :root {
   // TODO use app theme variables
+  // --formz-field-height: 50px;
   // --formz-color-validation-error: red;
   // --formz-color-field-background: rgb(209, 143, 233);
   // --formz-color-field-highlighted: rgba(170, 64, 237, 0.177);
+}
+
+body {
+  // height: 100%;
+  // width: 100%;
+  margin: 10px;
 }

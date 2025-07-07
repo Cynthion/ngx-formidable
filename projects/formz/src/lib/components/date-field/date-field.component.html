@@ -1,7 +1,6 @@
 <div
   #dateRef
   class="field"
-  [class.open]="isOpen"
   [class.focused]="isFieldFocused">
   <!-- Input Field -->
   <input
@@ -21,10 +20,12 @@
 
   <!-- Panel -->
   <div
-    *ngIf="true"
     #panelRef
-    class="panel">
-    <!-- Date Picker -->
-    <div #pickerRef></div>
+    class="panel"
+    [class.open]="true">
+    <div class="picker-wrapper">
+      <!-- Date Picker -->
+      <div #pickerRef></div>
+    </div>
   </div>
 </div>
