@@ -245,7 +245,27 @@
   }
 }
 
+@mixin panel-left-aligned {
+  left: -1px;
+  right: unset;
+  width: unset;
+}
+
+@mixin panel-right-aligned {
+  left: unset;
+  right: -1px;
+  width: unset;
+}
+
+@mixin panel-full-width {
+  @include panel-left-aligned;
+
+  width: calc(100% + 2px);
+}
+
 @mixin panel {
+  @include panel-full-width;
+
   position: absolute;
   box-shadow: var(--formz-dropdown-panel-box-shadow, #{tokens.$formz-dropdown-panel-box-shadow});
   border: 1px solid var(--formz-color-field-border, #{tokens.$formz-color-field-border});
@@ -256,8 +276,6 @@
 
   // extend 1px to top, left and right
   top: calc(100% + 1px);
-  left: -1px;
-  width: calc(100% + 2px);
 
   // animation
   opacity: 0;
@@ -316,5 +334,5 @@
   display: flex;
   justify-content: center;
 
-  margin: sp.cmp_space(8);
+  margin: sp.cmp_space(16);
 }

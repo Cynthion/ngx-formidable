@@ -17,7 +17,7 @@ import {
 })
 export class ExampleFormComponent {
   protected readonly formValue = signal<ExampleFormModel>({
-    firstName: 'Cynth¡on',
+    firstName: 'Cynthion',
     lastName: '',
     gender: 'male',
     nationality: 'ch',
