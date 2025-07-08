@@ -20,7 +20,7 @@
   --formz-color-field-background-required: #{tokens.$formz-color-field-background-required};
   --formz-color-field-disabled: #{tokens.$formz-color-field-disabled};
   --formz-color-field-highlighted: #{tokens.$formz-color-field-highlighted};
-  --formz-color-field-hover: #{tokens.$formz-color-field-hover};
+  --formz-color-field-hover: #{tokens.$formz-color-field-hovered};
 
   --formz-field-height: #{tokens.$formz-field-height};
   --formz-field-label-floating-offset: #{tokens.$formz-field-label-floating-offset};
@@ -44,5 +44,15 @@
   --formz-overlay-z-index: #{tokens.$formz-overlay-z-index};
   --formz-above-overlay-z-index: #{tokens.$formz-above-overlay-z-index};
 
-  --formz-pikaday-border-radius: #{tokens.$formz-pikaday-border-radius};
+  --formz-color-date-field-panel-select: #{tokens.$formz-color-date-field-panel-select};
+  --formz-color-date-field-panel-select-hover: #{tokens.$formz-color-date-field-panel-select-hover};
+  --formz-color-date-field-panel-date-highlighted-text: #{tokens.$formz-color-date-field-panel-date-highlighted-text};
+  --formz-color-date-field-panel-date-highlighted: #{tokens.$formz-color-date-field-panel-date-highlighted};
+  --formz-color-date-field-panel-date-hovered: #{tokens.$formz-color-date-field-panel-date-hovered};
+  --formz-color-date-field-panel-date-out-of-range: #{tokens.$formz-color-date-field-panel-date-out-of-range};
+  --formz-color-date-field-panel-day-label: #{tokens.$formz-color-date-field-panel-day-label};
+
+  --formz-date-field-panel-width: #{tokens.$formz-date-field-panel-width};
+  --formz-date-field-panel-border-radius: #{tokens.$formz-date-field-panel-border-radius};
+  --formz-date-field-panel-box-shadow: #{tokens.$formz-date-field-panel-box-shadow};
 }

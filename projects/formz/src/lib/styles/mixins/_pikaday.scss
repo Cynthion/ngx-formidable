@@ -34,11 +34,11 @@
   // display: block;
   // position: relative;
   // padding-top: sp.cmp_space(8);
-  // background-color: turquoise; // TODO tokenize
+  // background-color: turquoise;
   // opacity: 0; // animation init to avoid animation flicker
-  // border-radius: var(--formz-pikaday-border-radius, #{tokens.$formz-pikaday-border-radius});
-  // box-shadow: var(--formz-pikaday-box-shadow, #{tokens.$formz-pikaday-box-shadow});
-  text-align: center;
+  // border-radius: var(--formz-date-field-panel-border-radius, #{tokens.$formz-date-field-panel-border-radius});
+  // box-shadow: var(--formz-date-field-panel-box-shadow, #{tokens.$formz-date-field-panel-box-shadow});
+  // text-align: center;
 
   // &.is-hidden {
   //   display: none;
@@ -64,7 +64,8 @@
 
 .pika-lendar {
   float: left;
-  width: 300px; // TODO make smaller
+  width: var(--formz-date-field-panel-width, #{tokens.$formz-date-field-panel-width});
+  height: calc(var(--formz-date-field-panel-width, #{tokens.$formz-date-field-panel-width}) * 1.125); // extend by 1/8
   // height: 300px;
   // padding: sp.cmp_space(24) sp.cmp_space(16);
   // margin: 0 sp.cmp_space(8);
@@ -72,7 +73,6 @@
   & + & {
     margin-left: sp.cmp_space(16);
   }
-  // TODO mediaquery
 }
 
 .pika-title {
@@ -101,7 +101,7 @@
   // z-index: var(--formz-overlay-z-index, #{tokens.$formz-overlay-z-index});
   overflow: hidden;
   padding: 4px 10px 2px;
-  border-radius: var(--formz-pikaday-border-radius, #{tokens.$formz-pikaday-border-radius});
+  border-radius: var(--formz-date-field-panel-border-radius, #{tokens.$formz-date-field-panel-border-radius});
 
   & + & {
     margin-left: sp.cmp_space(8);
@@ -113,7 +113,10 @@
 
     content: '';
     display: block;
-    background-color: lime; // TODO tokenize, transparent
+    background-color: var(
+      --formz-color-date-field-panel-select-hover,
+      #{tokens.$formz-color-date-field-panel-select-hover}
+    );
     opacity: 0;
     transition: opacity 0.2s;
     // z-index: -1;
@@ -164,7 +167,7 @@
 
   // hover
   &::before {
-    color: orange; // TODO tokenize
+    color: var(--formz-color-date-field-panel-select, #{tokens.$formz-color-date-field-panel-select});
   }
 
   &::after {
@@ -172,8 +175,11 @@
 
     content: '';
     // display: block;
-    background-color: lime; // TODO tokenize, transparent
-    border-radius: var(--formz-pikaday-border-radius, #{tokens.$formz-pikaday-border-radius});
+    background-color: var(
+      --formz-color-date-field-panel-select-hover,
+      #{tokens.$formz-color-date-field-panel-select-hover}
+    );
+    border-radius: var(--formz-date-field-panel-border-radius, #{tokens.$formz-date-field-panel-border-radius});
     opacity: 0;
     transform: opacity var(--formz-hover-duration, #{tokens.$formz-hover-duration})
       var(--formz-hover-easing, #{tokens.$formz-hover-easing});
@@ -243,21 +249,33 @@
       max-width: 48px;
       max-height: 48px;
       transform: translate(-50%, -50%);
-      background-color: purple; // TODO tokenize
+      background-color: var(
+        --formz-color-date-field-panel-date-hovered,
+        #{tokens.$formz-color-date-field-panel-date-hovered}
+      );
       border-radius: 100%;
       opacity: 0;
       transition: opacity 0.1s;
     }
 
     &.is-outside-current-month {
-      color: yellow; // TODO tokenize
+      color: var(
+        --formz-color-date-field-panel-date-out-of-range,
+        #{tokens.$formz-color-date-field-panel-date-out-of-range}
+      );
     }
 
     &.is-selected {
-      color: honeydew; // TODO tokenize
+      color: var(
+        --formz-color-date-field-panel-date-highlighted-text,
+        #{tokens.$formz-color-date-field-panel-date-highlighted-text}
+      );
 
       &::before {
-        background-color: purple; // TODO tokenize;
+        background-color: var(
+          --formz-color-date-field-panel-date-highlighted,
+          #{tokens.$formz-color-date-field-panel-date-highlighted}
+        );
         opacity: 1;
       }
     }
@@ -278,7 +296,7 @@
   }
 
   abbr {
-    color: lightskyblue; // TODO tokenize
+    color: var(--formz-color-date-field-panel-day-label, #{tokens.$formz-color-date-field-panel-day-label});
   }
 }
 
@@ -287,23 +305,4 @@
 
   display: block;
   cursor: pointer;
-}
-
-.is-inrange .pika-button {
-  color: lightcoral; // TODO tokenize
-  background: white; // TODO tokenize
-}
-
-.is-startrange .pika-button {
-  color: burlywood; // TODO tokenize
-  background: green;
-  box-shadow: none;
-  border-radius: var(--formz-pikaday-border-radius, #{tokens.$formz-pikaday-border-radius});
-}
-
-.is-endrange .pika-button {
-  color: burlywood; // TODO tokenize
-  background: red; // TODO tokenize
-  box-shadow: none;
-  border-radius: var(--formz-pikaday-border-radius, #{tokens.$formz-pikaday-border-radius});
 }

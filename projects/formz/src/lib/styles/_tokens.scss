@@ -35,9 +35,9 @@ $formz-color-field-background: #f2faff;
 $formz-color-field-background-readonly: #c5c5c5;
 $formz-color-field-background-disabled: #c5c5c5;
 $formz-color-field-background-required: $formz-color-field-background;
-$formz-color-field-disabled: rgba(33, 33, 33, 0.3);
 $formz-color-field-highlighted: rgba(0, 0, 0, 0.1);
-$formz-color-field-hover: rgba(0, 0, 0, 0.2);
+$formz-color-field-hovered: rgba(0, 0, 0, 0.2);
+$formz-color-field-disabled: rgba(0, 0, 0, 0.3);
 
 $formz-field-height: 65px;
 $formz-field-label-floating-offset: 35px;
@@ -61,5 +61,14 @@ $formz-flyout-z-index: 999;
 $formz-overlay-z-index: 9999;
 $formz-above-overlay-z-index: 99999;
 
-$formz-pikaday-border-radius: $formz-field-border-radius;
-$formz-pikaday-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);
+$formz-color-date-field-panel-select: $formz-color-field-label;
+$formz-color-date-field-panel-select-hover: $formz-color-field-hovered;
+$formz-color-date-field-panel-date-highlighted-text: $formz-color-field-text;
+$formz-color-date-field-panel-date-highlighted: $formz-color-field-highlighted;
+$formz-color-date-field-panel-date-hovered: $formz-color-field-hovered;
+$formz-color-date-field-panel-date-out-of-range: $formz-color-field-background-disabled;
+$formz-color-date-field-panel-day-label: #5b7f99;
+
+$formz-date-field-panel-width: 300px;
+$formz-date-field-panel-border-radius: $formz-field-border-radius;
+$formz-date-field-panel-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);

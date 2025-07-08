@@ -89,9 +89,9 @@ export interface IFormzDateField {
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
+  minDate?: Date;
+  maxDate?: Date;
   // TODO implement
-  // minDate?: Date;
-  // maxDate?: Date;
   // pattern?: string;
   // mask?: string;
   selectDate(date: string): void;

@@ -103,6 +103,8 @@ export class DateFieldComponent
   }
 
   ngAfterViewInit(): void {
+    const defaultDate = this.getDefaultDate(this.minDate, this.maxDate);
+
     this.picker = new Pikaday({
       // ...this.pikadayOptions
       field: this.inputRef.nativeElement,
@@ -111,17 +113,26 @@ export class DateFieldComponent
       container: this.pickerRef?.nativeElement,
       reposition: false,
       position: undefined,
-      numberOfMonths: 1,
+      defaultDate,
+      minDate: this.minDate,
+      maxDate: this.maxDate,
+      numberOfMonths: 2,
+      yearRange: 2, // to either side
       mainCalendar: 'left',
       showWeekNumber: false,
       showMonthAfterYear: false,
       showDaysInNextAndPreviousMonths: true,
+      pickWholeWeek: true,
+      isRTL: false, // true not supported yet
+      yearSuffix: '',
       // onSelect: (date: Date) => this.onSelect(this.picker, date),
       // onOpen: () => this.onOpen(),
       // onClose: () => this.onClose(),
       // onDraw: () => this.onDraw(),
       keyboardInput: false // TODO
     });
+
+    this.picker.setDate(defaultDate, true);
 
     console.log('Pikaday initialized', this.picker);
   }
@@ -207,6 +218,8 @@ export class DateFieldComponent
   @Input() placeholder = '';
   @Input() disabled = false;
   @Input() required = false;
+  @Input() minDate?: Date;
+  @Input() maxDate?: Date;
 
   public selectDate(date: string): void {
     this.selectedDate = date;
@@ -342,4 +355,16 @@ export class DateFieldComponent
   // }
 
   //#endregion
+
+  private getDefaultDate(minDate?: Date, maxDate?: Date, initialDate: Date = new Date()): Date {
+    const initialDateMs = initialDate.getTime();
+
+    if (minDate && minDate.getTime() > initialDateMs) {
+      return minDate;
+    } else if (maxDate && maxDate.getTime() < initialDateMs) {
+      return maxDate;
+    }
+
+    return initialDate;
+  }
 }

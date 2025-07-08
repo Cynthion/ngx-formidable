@@ -15,6 +15,7 @@
   // --formz-color-validation-error: red;
   // --formz-color-field-background: rgb(209, 143, 233);
   // --formz-color-field-highlighted: rgba(170, 64, 237, 0.177);
+  // --formz-date-field-panel-width: 200px;
 }
 
 body {
@@ -22,3 +23,8 @@ body {
   // width: 100%;
   margin: 16px;
 }
+
+// Pikaday styles can be overwritten here
+// .pika-lendar {
+//   background-color: yellow;
+// }

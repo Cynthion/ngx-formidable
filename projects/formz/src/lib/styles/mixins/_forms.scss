@@ -315,7 +315,7 @@
   cursor: pointer;
 
   &:hover {
-    background: var(--formz-color-field-hover, #{tokens.$formz-color-field-hover});
+    background: var(--formz-color-field-hover, #{tokens.$formz-color-field-hovered});
   }
 }
 
