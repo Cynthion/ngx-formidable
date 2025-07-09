@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { AutocompleteFieldComponent } from './components/autocomplete-field/autocomplete-field.component';
 import { DateFieldComponent } from './components/date-field/date-field.component';
 import { DropdownFieldComponent } from './components/dropdown-field/dropdown-field.component';
@@ -51,8 +52,25 @@ const components = [
 
 @NgModule({
   declarations: [components],
-  imports: [CommonModule, FormsModule],
-  exports: [components, FormsModule],
-  providers: []
+  imports: [
+    CommonModule,
+    FormsModule,
+    // ngx-mask
+    NgxMaskDirective,
+    NgxMaskPipe
+  ],
+  exports: [
+    components,
+    FormsModule,
+    // ngx-mask
+    NgxMaskDirective,
+    NgxMaskPipe
+  ],
+  providers: [
+    // ngx-mask
+    provideNgxMask({
+      validation: false // <- your desired default config
+    })
+  ]
 })
 export class FormzModule {}

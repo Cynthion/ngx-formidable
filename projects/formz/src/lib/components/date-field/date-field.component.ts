@@ -281,7 +281,7 @@ export class DateFieldComponent
     this.isOpen = isOpen;
 
     if (isOpen) {
-      // TODO highlight selected date?
+      // TODO highlight selected date? done via defaultDate & setDefaultDate
       // this.highlightSelectedOption();
       this.scrollIntoView();
     } else {
