@@ -1,4 +1,5 @@
 import { Directive, ElementRef, InjectionToken, TemplateRef } from '@angular/core';
+import { PikadayOptions } from 'pikaday';
 import { Observable } from 'rxjs';
 
 export const ROOT_FORM = 'rootForm';
@@ -84,13 +85,35 @@ export interface IFormzDropdownField extends IFormzOptionField {
 
 export type IFormzAutocompleteField = IFormzDropdownField;
 
-export interface IFormzDateField {
+/** The subset of `PikadayOptions` that are supported. */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface IFormzPikadayOptions
+  extends Pick<
+    PikadayOptions,
+    | 'ariaLabel'
+    | 'format'
+    | 'defaultDate'
+    | 'setDefaultDate'
+    | 'firstDay'
+    | 'minDate'
+    | 'maxDate'
+    | 'disableWeekends'
+    | 'disableDayFn'
+    | 'yearRange'
+    | 'i18n'
+    | 'yearSuffix'
+    | 'showMonthAfterYear'
+    | 'showDaysInNextAndPreviousMonths'
+    | 'enableSelectionDaysInNextAndPreviousMonths'
+    | 'numberOfMonths'
+    | 'events'
+  > {}
+
+export interface IFormzDateField extends IFormzPikadayOptions {
   name: string;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
-  minDate?: Date;
-  maxDate?: Date;
   // TODO implement
   // pattern?: string;
   // mask?: string;

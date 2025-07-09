@@ -8,12 +8,14 @@ import {
   inject,
   Input,
   NgZone,
+  OnChanges,
   OnDestroy,
   OnInit,
+  SimpleChanges,
   ViewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import Pikaday from 'pikaday';
+import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { FormzFieldBase, IFormzDateField } from '../../form-model';
@@ -36,7 +38,7 @@ import { FormzFieldBase, IFormzDateField } from '../../form-model';
 })
 export class DateFieldComponent
   extends FormzFieldBase
-  implements OnInit, AfterViewInit, OnDestroy, ControlValueAccessor, IFormzDateField
+  implements OnInit, AfterViewInit, OnChanges, OnDestroy, ControlValueAccessor, IFormzDateField
 {
   @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
@@ -58,39 +60,44 @@ export class DateFieldComponent
   private globalClickUnlisten?: () => void;
   private globalKeydownUnlisten?: () => void;
 
-  // private pikadayOptions: PikadayOptions = {
-  //   format: 'YYYY-MM-DD' // or any other format you prefer
-  //   // bound: false,
-  //   // ariaLabel: '',
-  //   // position: 'bottom right',
-  //   // reposition: true,
-  //   // container: undefined,
-  //   // defaultDate: undefined,
-  //   // setDefaultDate: false,
-  //   // firstDay: 1, // Monday
-  //   // minDate: undefined,
-  //   // maxDate: undefined,
-  //   // disableWeekends: false,
-  //   // disableDayFn: undefined,
-  //   // yearRange: 10,
-  //   // showWeekNumber: false,
-  //   // pickWholeWeek: false,
-  //   // isRTL: false,
-  //   // i18n: undefined,
-  //   // yearSuffix: '',
-  //   // showMonthAfterYear: false,
-  //   // showDaysInNextAndPreviousMonths: true,
-  //   // enableSelectionDaysInNextAndPreviousMonths: true,
-  //   // numberOfMonths: 1,
-  //   // mainCalendar: 'left',
-  //   // events: undefined,
-  //   // theme: undefined,
-  //   // blurFieldOnSelect: false, // TODO use?
-  //   // formatStrict: false,
-  //   // toString: undefined,
-  //   // parse: undefined,
-  //   // keyboardInput: true
-  // };
+  private readonly staticOptions: PikadayOptions = {
+    field: undefined, // not supported
+    trigger: undefined, // not supported
+    bound: false, // not supported
+    position: undefined, // not supported
+    reposition: false, // not supported
+    container: undefined, // not supported
+    showWeekNumber: false, // not supported
+    pickWholeWeek: false, // not supported
+    isRTL: false, // not supported
+    mainCalendar: 'left', // not supported
+    events: [], // not supported
+    theme: undefined, // not supported
+    blurFieldOnSelect: false, // not supported
+    formatStrict: false, // not supported
+    toString: undefined, // not supported
+    parse: undefined, // not supported
+    keyboardInput: false // not supported
+  };
+
+  private readonly defaultOptions: PikadayOptions = {
+    ariaLabel: undefined,
+    format: 'YYYY-MM-DD', // TODO
+    defaultDate: undefined,
+    setDefaultDate: true,
+    firstDay: 1,
+    minDate: undefined,
+    maxDate: undefined,
+    disableWeekends: false,
+    disableDayFn: undefined,
+    yearRange: 2,
+    // i18n: undefined, // TODO
+    yearSuffix: undefined,
+    showMonthAfterYear: false,
+    showDaysInNextAndPreviousMonths: true,
+    enableSelectionDaysInNextAndPreviousMonths: true,
+    numberOfMonths: 1
+  };
 
   private picker?: Pikaday;
 
@@ -103,38 +110,13 @@ export class DateFieldComponent
   }
 
   ngAfterViewInit(): void {
-    const defaultDate = this.getDefaultDate(this.minDate, this.maxDate);
+    this.updateOptions();
+  }
 
-    this.picker = new Pikaday({
-      // ...this.pikadayOptions
-      field: this.inputRef.nativeElement,
-      trigger: undefined, // TODO use button or manual
-      bound: false,
-      container: this.pickerRef?.nativeElement,
-      reposition: false,
-      position: undefined,
-      defaultDate,
-      minDate: this.minDate,
-      maxDate: this.maxDate,
-      numberOfMonths: 2,
-      yearRange: 2, // to either side
-      mainCalendar: 'left',
-      showWeekNumber: false,
-      showMonthAfterYear: false,
-      showDaysInNextAndPreviousMonths: true,
-      pickWholeWeek: true,
-      isRTL: false, // true not supported yet
-      yearSuffix: '',
-      // onSelect: (date: Date) => this.onSelect(this.picker, date),
-      // onOpen: () => this.onOpen(),
-      // onClose: () => this.onClose(),
-      // onDraw: () => this.onDraw(),
-      keyboardInput: false // TODO
-    });
-
-    this.picker.setDate(defaultDate, true);
-
-    console.log('Pikaday initialized', this.picker);
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes[0] && !changes[0].firstChange) {
+      this.updateOptions();
+    }
   }
 
   ngOnDestroy(): void {
@@ -218,8 +200,6 @@ export class DateFieldComponent
   @Input() placeholder = '';
   @Input() disabled = false;
   @Input() required = false;
-  @Input() minDate?: Date;
-  @Input() maxDate?: Date;
 
   public selectDate(date: string): void {
     this.selectedDate = date;
@@ -230,6 +210,69 @@ export class DateFieldComponent
     this.onChange(this.selectDate); // notify ControlValueAccessor of the change
     this.onTouched();
     this.togglePanel(false);
+  }
+
+  //#endregion
+
+  //#region IFormzPikadayOptions
+
+  @Input() ariaLabel?: string;
+  @Input() format?: string;
+  @Input() defaultDate?: Date;
+  @Input() setDefaultDate?: boolean;
+  @Input() firstDay?: number;
+  @Input() minDate?: Date;
+  @Input() maxDate?: Date;
+  @Input() disableWeekends?: boolean;
+  @Input() disableDayFn?: (date: Date) => boolean;
+  @Input() yearRange?: number | number[];
+  @Input() i18n?: PikadayI18nConfig;
+  @Input() yearSuffix?: string;
+  @Input() showMonthAfterYear?: boolean;
+  @Input() showDaysInNextAndPreviousMonths?: boolean;
+  @Input() enableSelectionDaysInNextAndPreviousMonths?: boolean;
+  @Input() numberOfMonths?: number;
+
+  private updateOptions(): void {
+    const dynamicOptions: PikadayOptions = {
+      ...this.defaultOptions,
+      ariaLabel: this.ariaLabel ?? this.defaultOptions.ariaLabel,
+      format: this.format ?? this.defaultOptions.format,
+      defaultDate: this.getDefaultDate(this.minDate, this.maxDate, this.defaultDate) ?? this.defaultOptions.defaultDate,
+      setDefaultDate: this.setDefaultDate ?? this.defaultOptions.setDefaultDate,
+      firstDay: this.firstDay ?? this.defaultOptions.firstDay,
+      minDate: this.minDate ?? this.defaultOptions.minDate,
+      maxDate: this.maxDate ?? this.defaultOptions.maxDate,
+      disableWeekends: this.disableWeekends ?? this.defaultOptions.disableWeekends,
+      disableDayFn: this.disableDayFn ?? this.defaultOptions.disableDayFn,
+      yearRange: this.yearRange ?? this.defaultOptions.yearRange,
+      // i18n: this.i18n ?? this.defaultOptions.i18n,
+      yearSuffix: this.yearSuffix ?? this.defaultOptions.yearSuffix,
+      showMonthAfterYear: this.showMonthAfterYear ?? this.defaultOptions.showMonthAfterYear,
+      showDaysInNextAndPreviousMonths:
+        this.showDaysInNextAndPreviousMonths ?? this.defaultOptions.showDaysInNextAndPreviousMonths,
+      enableSelectionDaysInNextAndPreviousMonths:
+        this.enableSelectionDaysInNextAndPreviousMonths ??
+        this.defaultOptions.enableSelectionDaysInNextAndPreviousMonths,
+      numberOfMonths: this.numberOfMonths ?? this.defaultOptions.numberOfMonths
+    };
+
+    const updatedOptions: PikadayOptions = {
+      ...this.staticOptions,
+      ...dynamicOptions,
+      field: this.inputRef.nativeElement,
+      container: this.pickerRef?.nativeElement
+      // onSelect: (date: Date) => this.onSelect(this.picker, date),
+      // onOpen: () => this.onOpen(),
+      // onClose: () => this.onClose(),
+      // onDraw: () => this.onDraw(),
+    };
+
+    if (!this.picker) {
+      this.picker = new Pikaday(updatedOptions);
+    } else {
+      this.picker.config(updatedOptions);
+    }
   }
 
   //#endregion
