@@ -106,7 +106,6 @@ export interface IFormzPikadayOptions
     | 'showDaysInNextAndPreviousMonths'
     | 'enableSelectionDaysInNextAndPreviousMonths'
     | 'numberOfMonths'
-    | 'events'
   > {}
 
 export interface IFormzDateField extends IFormzPikadayOptions {

@@ -92,7 +92,7 @@ export class DateFieldComponent
     disableDayFn: undefined,
     yearRange: 2,
     // i18n: undefined, // TODO
-    yearSuffix: undefined,
+    yearSuffix: '',
     showMonthAfterYear: false,
     showDaysInNextAndPreviousMonths: true,
     enableSelectionDaysInNextAndPreviousMonths: true,
