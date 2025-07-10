@@ -6,6 +6,7 @@ import {
   ElementRef,
   forwardRef,
   inject,
+  Injector,
   Input,
   NgZone,
   OnChanges,
@@ -14,7 +15,7 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, NgControl, NgModel } from '@angular/forms';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
@@ -101,12 +102,31 @@ export class DateFieldComponent
 
   private picker?: Pikaday;
 
+  private readonly injector: Injector = inject(Injector);
+
+  control!: FormControl; // initialized in ngOnInit
+
   constructor(private ngZone: NgZone) {
     super();
   }
 
   ngOnInit(): void {
+    const ngControl = this.injector.get(NgControl, null, { self: true, optional: true });
+
+    this.control = this.getFormControlFromNgControlDirective(ngControl);
+    this.control.setErrors({ errors: ['Wrong date format.'] }); // TODO remove, just for testing
+
     this.registerGlobalListeners();
+  }
+
+  private getFormControlFromNgControlDirective(ngControl: NgControl | null): FormControl {
+    // ngModel directive (for Template-Driven Forms)
+    if (ngControl instanceof NgModel) {
+      return ngControl.control;
+    }
+
+    // no directive set
+    return new FormControl();
   }
 
   ngAfterViewInit(): void {
