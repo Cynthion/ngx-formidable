@@ -111,11 +111,13 @@ export class DateFieldComponent
 
   ngAfterViewInit(): void {
     this.updateOptions();
+    this.updateMask();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes[0] && !changes[0].firstChange) {
       this.updateOptions();
+      this.updateMask();
     }
   }
 
@@ -130,6 +132,8 @@ export class DateFieldComponent
     // this.filterValue$.next(value);
 
     this.isFieldFilled = value.length > 0;
+
+    this.validateDate(value); // TODO add validator outside?
   }
 
   protected onFocusChange(isFocused: boolean): void {
@@ -200,6 +204,9 @@ export class DateFieldComponent
   @Input() placeholder = '';
   @Input() disabled = false;
   @Input() required = false;
+  @Input() maskFormat = 'DD.MM.YYYY';
+
+  protected ngxMask = '0000-00-00';
 
   public selectDate(date: string): void {
     this.selectedDate = date;
@@ -210,6 +217,47 @@ export class DateFieldComponent
     this.onChange(this.selectDate); // notify ControlValueAccessor of the change
     this.onTouched();
     this.togglePanel(false);
+  }
+
+  private updateMask(): void {
+    // TODO add/control supported mask formats
+    switch (this.maskFormat) {
+      case 'DD.MM.YYYY':
+        this.ngxMask = '00.00.0000';
+        break;
+      case 'MM/DD/YYYY':
+        this.ngxMask = '00/00/0000';
+        break;
+      case 'DD/MM/YY':
+        this.ngxMask = '00/00/00';
+        break;
+      case 'YYYY-MM-DD':
+      default:
+        this.ngxMask = '0000-00-00';
+        break;
+    }
+  }
+
+  private checkValidDate(value: string): boolean {
+    if (!value) return false;
+
+    return false; // TODO input function, based on format
+  }
+
+  private validateDate(value: string): void {
+    const isValid = this.checkValidDate(value);
+
+    console.log('Date validation result:', isValid);
+
+    // TODO validate
+    // const control = this.ngControl.control;
+    // if (control) {
+    //   if (isValid) {
+    //     control.setErrors({ invalidDate: true });
+    //   } else {
+    //     control.setErrors(null);
+    //   }
+    // }
   }
 
   //#endregion

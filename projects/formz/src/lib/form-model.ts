@@ -114,6 +114,7 @@ export interface IFormzDateField extends IFormzPikadayOptions {
   disabled?: boolean;
   required?: boolean;
   // TODO implement
+  maskFormat: 'YYYY-MM-DD' | 'DD.MM.YYYY' | string;
   // pattern?: string;
   // mask?: string;
   selectDate(date: string): void;
