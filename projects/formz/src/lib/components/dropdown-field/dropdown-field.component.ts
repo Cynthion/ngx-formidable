@@ -77,12 +77,12 @@ export class DropdownFieldComponent
     this.registerGlobalListeners();
   }
 
-  ngOnDestroy(): void {
-    this.unregisterGlobalListeners();
-  }
-
   ngAfterContentInit(): void {
     this.updateOptions();
+  }
+
+  ngOnDestroy(): void {
+    this.unregisterGlobalListeners();
   }
 
   protected onFocusChange(isFocused: boolean): void {

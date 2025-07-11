@@ -10,7 +10,7 @@ export interface Password {
 
 export type UserGender = 'male' | 'female';
 export type UserNationality = 'ch' | 'de' | 'fr' | 'jp';
-export type UserReligion = 'christian' | 'islam' | 'hindu' | 'buddhism';
+export type UserReligion = 'christian' | 'islam' | 'hindu' | 'buddhism' | 'agnostic';
 
 export interface User {
   firstName: string;
@@ -40,7 +40,7 @@ export const exampleFormShape: ExampleFormShape = {
   hobby: '',
   animal: '',
   birthdate: '',
-  religion: 'christian',
+  religion: 'hindu',
   passwords: {
     password: '',
     confirmPassword: ''

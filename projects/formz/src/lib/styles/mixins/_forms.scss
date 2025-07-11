@@ -437,4 +437,8 @@
 }
 
 @mixin radio-group-field {
+  // TODO make it work
+  &:focus-visible {
+    @include field-focused;
+  }
 }

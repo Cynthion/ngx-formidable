@@ -1,11 +1,16 @@
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ContentChildren,
   ElementRef,
   forwardRef,
+  inject,
   Input,
+  NgZone,
+  OnDestroy,
+  OnInit,
   QueryList,
   ViewChild
 } from '@angular/core';
@@ -43,41 +48,54 @@ import {
 })
 export class RadioGroupFieldComponent
   extends FormzFieldBase
-  implements AfterContentInit, ControlValueAccessor, IFormzRadioGroupField
+  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzRadioGroupField
 {
   @ViewChild('radioGroupRef', { static: true }) radioGroupRef!: ElementRef<HTMLDivElement>;
 
   protected selectedOption?: IFormzFieldOption;
+  protected highlightedIndex = -1;
 
   private id = uuid();
+  private isFieldFocused = false;
 
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
 
-  // private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+
+  private globalKeydownUnlisten?: () => void;
+
+  constructor(private ngZone: NgZone) {
+    super();
+  }
+
+  ngOnInit(): void {
+    this.registerGlobalListeners();
+  }
 
   ngAfterContentInit(): void {
     this.updateOptions();
   }
 
-  protected onOptionChangeChange(option: IFormzFieldOption): void {
-    console.log('onOptionChangeChange', option);
+  ngOnDestroy(): void {
+    this.unregisterGlobalListeners();
+  }
+
+  protected onOptionChangeChange(_option: IFormzFieldOption): void {
     this.onChangeChange();
   }
 
-  protected onOptionFocusChange(option: IFormzFieldOption, isFocused: boolean): void {
-    console.log('onOptionFocusChange', option, isFocused);
-    this.onFocusChange(isFocused);
-  }
-
   private onChangeChange(): void {
+    // TODO fix
     const value = this.value;
+    console.log('onChangeChange', value);
     this.valueChangeSubject$.next(value);
     this.onChange(value); // notify ControlValueAccessor of the change
   }
 
-  private onFocusChange(isFocused: boolean): void {
+  protected onFocusChange(isFocused: boolean): void {
     this.focusChangeSubject$.next(isFocused);
+    this.isFieldFocused = isFocused;
 
     if (!isFocused) {
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
@@ -170,6 +188,8 @@ export class RadioGroupFieldComponent
     this.valueChangeSubject$.next(this.selectedOption.value);
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.onTouched();
+
+    this.highlightSelectedOption();
   }
 
   private combineAllOptions(): IFormzFieldOption[] {
@@ -192,4 +212,65 @@ export class RadioGroupFieldComponent
   }
 
   //#endregion
+
+  private registerGlobalListeners(): void {
+    this.ngZone.runOutsideAngular(() => {
+      const onKeyDown = (event: KeyboardEvent) => this.handleKeyDown(event);
+
+      document.addEventListener('keydown', onKeyDown);
+
+      this.globalKeydownUnlisten = () => document.removeEventListener('keydown', onKeyDown);
+    });
+  }
+
+  private unregisterGlobalListeners(): void {
+    this.globalKeydownUnlisten?.();
+  }
+
+  private handleKeyDown(event: KeyboardEvent): void {
+    if (!this.isFieldFocused) return;
+    if (this.disabled) return;
+    if (!['ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) return;
+
+    const options = this.combineAllOptions();
+    const count = options.length;
+
+    this.ngZone.run(() => {
+      switch (event.key) {
+        case 'ArrowDown':
+          if (count > 0) {
+            this.setHighlightedIndex((this.highlightedIndex + 1) % count);
+          }
+          event.preventDefault();
+          break;
+        case 'ArrowUp':
+          if (count > 0) {
+            this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
+          }
+          event.preventDefault();
+          break;
+        case 'Enter':
+          if (options[this.highlightedIndex]) {
+            const option = options[this.highlightedIndex]!;
+            this.selectOption(option);
+            event.preventDefault();
+          }
+          break;
+      }
+    });
+  }
+
+  private highlightSelectedOption(): void {
+    const options = this.combineAllOptions();
+
+    const selectedIndex = options.findIndex((opt) => opt.value === this.selectedOption?.value);
+
+    this.setHighlightedIndex(selectedIndex);
+  }
+
+  private setHighlightedIndex(index: number): void {
+    this.highlightedIndex = index;
+
+    this.cdRef.markForCheck();
+  }
 }

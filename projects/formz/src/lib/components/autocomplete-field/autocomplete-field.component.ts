@@ -82,15 +82,15 @@ export class AutocompleteFieldComponent
     this.registerAutocomplete();
   }
 
+  ngAfterContentInit(): void {
+    this.updateFilteredOptions();
+  }
+
   ngOnDestroy(): void {
     this.unregisterGlobalListeners();
 
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  ngAfterContentInit(): void {
-    this.updateFilteredOptions();
   }
 
   // TODO expose filterValue$ instead
