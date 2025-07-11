@@ -104,8 +104,8 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   @Input() autocomplete: AutoFill = 'off';
   @Input() minLength = -1;
   @Input() maxLength = -1;
-  @Input() disabled = false;
   @Input() readOnly = false;
+  @Input() disabled = false;
   @Input() required = false;
 
   //#endregion

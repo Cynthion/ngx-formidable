@@ -61,8 +61,8 @@ type FormzInputFieldsKeys =
   | 'autocomplete'
   | 'minLength'
   | 'maxLength'
-  | 'disabled'
   | 'readOnly'
+  | 'disabled'
   | 'required';
 
 /** The subset of `<input/>` properties that are supported. */
@@ -85,7 +85,7 @@ export interface IFormzDropdownField extends IFormzOptionField {
   required?: boolean;
 }
 
-type FormzRadioGroupFieldsKeys = 'name' | 'disabled' | 'readOnly' | 'required';
+type FormzRadioGroupFieldsKeys = 'name' | 'readOnly' | 'disabled' | 'required';
 
 /** The subset of `<input type="radio"/> properties that are supported.` */
 export interface IFormzRadioGroupField extends Pick<HTMLInputElement, FormzRadioGroupFieldsKeys>, IFormzOptionField {}

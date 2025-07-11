@@ -2,18 +2,14 @@
 @use 'spacings' as sp;
 @use '../tokens' as tokens;
 
-@mixin input-reset {
+@mixin field-reset {
   outline: 0;
   hyphens: none;
   appearance: none;
-
-  &:focus {
-    outline: 0;
-  }
 }
 
 @mixin wrapped-input {
-  @include input-reset;
+  @include field-reset;
 
   background: transparent;
   width: 100%;
@@ -27,6 +23,11 @@
   &::placeholder {
     color: var(--formz-color-field-placeholder, #{tokens.$formz-color-field-placeholder});
   }
+}
+
+@mixin field-colors {
+  background: var(--formz-color-field-background, #{tokens.$formz-color-field-background});
+  color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
 }
 
 @mixin field-readonly {
@@ -52,26 +53,19 @@
   box-shadow: inset 0 0 0 1px var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
 }
 
-/**
- * Styling for input and textarea elements.
- */
-@mixin input-field {
-  @include input-reset;
-  @include typo.font-m;
-
-  position: relative;
-  width: 100%;
-  height: var(--formz-field-height, #{tokens.$formz-field-height});
-  padding: 0 sp.cmp_space(16); // horizontal padding only
+@mixin border {
   border: 1px solid var(--formz-color-field-border, #{tokens.$formz-color-field-border});
   border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
-  background: var(--formz-color-field-background, #{tokens.$formz-color-field-background});
-  color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
-  transition:
-    box-shadow var(--formz-animation-duration, #{tokens.$formz-animation-duration})
-      var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
-    border-color var(--formz-animation-duration, #{tokens.$formz-animation-duration})
-      var(--formz-animation-easing, #{tokens.$formz-animation-easing});
+}
+
+@mixin field {
+  @include field-reset;
+  @include border;
+  @include field-colors;
+  // @include typo.font-m; // TODO tokenize font size
+
+  width: 100%;
+  position: relative;
 
   &:read-only {
     @include field-readonly;
@@ -98,6 +92,32 @@
   }
 }
 
+@mixin field-group {
+  @include field-reset;
+  // @include border; // TODO tokenize group border colors
+  // @include field-colors; // TODO tokenize group colors
+  // @include typo.font-m; // TODO tokenize font size
+
+  &:focus {
+    @include field-focused;
+  }
+
+  &:focus-visible {
+    @include field-focused;
+  }
+}
+
+@mixin radio-button-field-group {
+  @include field-group;
+}
+
+@mixin input-field {
+  @include field;
+
+  height: var(--formz-field-height, #{tokens.$formz-field-height});
+  padding: 0 sp.cmp_space(16); // horizontal padding only
+}
+
 @mixin textarea-field {
   @include input-field;
 
@@ -110,9 +130,9 @@
 @mixin select-field {
   @include input-field;
 
+  // select field is always read-only, so a reset is needed
   &:read-only {
-    background: var(--formz-color-field-background, #{tokens.$formz-color-field-background});
-    color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
+    @include field-colors;
   }
 }
 
@@ -320,56 +340,20 @@
   @include panel;
 }
 
-// @mixin field-option-prefix-base {
-//   display: block;
-//   position: relative;
-//   min-width: 24px; // TODO introduce const
-//   min-height: 24px;
+@mixin field-option-disabled {
+  cursor: not-allowed;
+  pointer-events: none;
 
-//   &::before,
-//   &::after {
-//     content: '';
-//     display: block;
-//     position: absolute;
-//     top: 0;
-//     left: 0;
-//     width: 24px;
-//     height: 24px;
-//     border: 2px solid lime; // TODO tokenize
-//     border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
-//   }
+  background: var(--formz-color-field-disabled, #{tokens.$formz-color-field-disabled});
+}
 
-//   &::before {
-//     background-color: white;
-//   }
+@mixin field-option-selected {
+  background: var(--formz-color-field-selected, #{tokens.$formz-color-field-selected});
+}
 
-//   &::after {
-//     border-color: lime;
-//     opacity: 0;
-//     transition: opacity var(--formz-hover-duration, #{tokens.$formz-hover-duration})
-//       var(--formz-hover-easing, #{tokens.$formz-hover-easing});
-//   }
-// }
-
-// @mixin field-option-prefix-mark-base {
-//   display: block;
-//   position: absolute;
-//   top: 12px;
-//   left: 12px;
-//   opacity: 0;
-//   transition: opacity var(--formz-hover-duration, #{tokens.$formz-hover-duration})
-//     var(--formz-hover-easing, #{tokens.$formz-hover-easing});
-// }
-
-// @mixin field-radio-group-mark {
-//   @include field-option-prefix-mark-base;
-
-//   width: 4px;
-//   height: 4px;
-//   border-radius: 100%;
-//   background-color: red;
-//   transform: translate(-50%, -50%);
-// }
+@mixin field-option-highlighted {
+  background: var(--formz-color-field-highlighted, #{tokens.$formz-color-field-highlighted});
+}
 
 @mixin field-option-inline {
   padding: 0.5rem 1rem;
@@ -397,7 +381,7 @@
 }
 
 @mixin radio-group-prefix-outer {
-  width: 21px;
+  width: 21px; // TODO tokenize
   height: 21px;
   border: 2px solid var(--formz-color-option-prefix-outer, #{tokens.$formz-color-option-prefix-outer});
   border-radius: 50%;
@@ -408,25 +392,10 @@
 }
 
 @mixin radio-group-prefix-inner {
-  width: 7px;
+  width: 7px; // TODO tokenize
   height: 7px;
   border-radius: 50%;
   background: var(--formz-color-option-prefix-inner, #{tokens.$formz-color-option-prefix-inner});
-}
-
-@mixin disabled {
-  cursor: not-allowed;
-  pointer-events: none;
-
-  background: var(--formz-color-field-disabled, #{tokens.$formz-color-field-disabled});
-}
-
-@mixin selected {
-  background: var(--formz-color-field-selected, #{tokens.$formz-color-field-selected});
-}
-
-@mixin highlighted {
-  background: var(--formz-color-field-highlighted, #{tokens.$formz-color-field-highlighted});
 }
 
 @mixin date-picker-wrapper {
@@ -434,11 +403,4 @@
   justify-content: center;
 
   margin: sp.cmp_space(16);
-}
-
-@mixin radio-group-field {
-  // TODO make it work
-  &:focus-visible {
-    @include field-focused;
-  }
 }

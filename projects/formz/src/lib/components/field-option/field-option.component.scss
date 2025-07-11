@@ -4,15 +4,15 @@
   display: block;
 
   &.disabled {
-    @include disabled;
+    @include field-option-disabled;
   }
 
   &.selected {
-    @include selected;
+    @include field-option-selected;
   }
 
   &.highlighted {
-    @include highlighted;
+    @include field-option-highlighted;
   }
 }
 

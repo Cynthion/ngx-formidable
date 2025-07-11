@@ -11,7 +11,3 @@
 .panel {
   @include autocomplete-panel;
 }
-
-.highlighted {
-  @include highlighted;
-}
