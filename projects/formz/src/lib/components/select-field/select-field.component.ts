@@ -101,7 +101,12 @@ export class SelectFieldComponent
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    this.selectRef.nativeElement.value = value ?? '';
+    const found = this.combineAllOptions().find((opt) => opt.value === value);
+
+    this.selectedOption = found ? { ...found } : undefined;
+
+    // write to wrapped select element
+    this.selectRef.nativeElement.value = found ? found.value : '';
   }
 
   registerOnChange(fn: never): void {
@@ -148,6 +153,13 @@ export class SelectFieldComponent
 
     this.inlineOptions$.next(inlineOptions);
     this.projectedOptions$.next(projectedOptions);
+  }
+
+  private combineAllOptions(): IFormzFieldOption[] {
+    const inlineOptions = this.options ?? [];
+    const projectedOptions = this.optionComponents?.toArray() ?? [];
+
+    return [...inlineOptions, ...projectedOptions];
   }
 
   //#endregion

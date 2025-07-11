@@ -10,7 +10,15 @@ export interface Password {
 
 export type UserGender = 'male' | 'female';
 export type UserNationality = 'ch' | 'de' | 'fr' | 'jp';
-export type UserReligion = 'christian' | 'islam' | 'hindu' | 'buddhism' | 'agnostic';
+export type UserReligion =
+  | 'christian'
+  | 'islam'
+  | 'hindu'
+  | 'buddhism'
+  | 'buddhist'
+  | 'agnostic'
+  | 'atheist'
+  | 'custom';
 
 export interface User {
   firstName: string;

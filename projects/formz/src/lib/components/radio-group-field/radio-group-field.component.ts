@@ -131,13 +131,9 @@ export class RadioGroupFieldComponent
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    const label = this.combineAllOptions().find((opt) => opt.value === value)?.label ?? '';
+    const found = this.combineAllOptions().find((opt) => opt.value === value);
 
-    this.selectedOption = {
-      ...this.selectedOption,
-      value,
-      label
-    };
+    this.selectedOption = found ? { ...found } : undefined;
   }
 
   registerOnChange(fn: never): void {

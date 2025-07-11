@@ -102,15 +102,10 @@ export class DropdownFieldComponent
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    const label = this.combineAllOptions().find((opt) => opt.value === value)?.label ?? '';
+    const found = this.combineAllOptions().find((opt) => opt.value === value);
 
-    this.selectedOption = {
-      ...this.selectedOption,
-      value,
-      label
-    };
-
-    this.isFieldFilled = !!value;
+    this.selectedOption = found ? { ...found } : undefined;
+    this.isFieldFilled = found ? !!value : false;
   }
 
   registerOnChange(fn: never): void {

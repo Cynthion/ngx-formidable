@@ -21,10 +21,10 @@ export class ExampleFormComponent {
     lastName: '',
     gender: 'male',
     nationality: 'ch',
-    hobby: 'gaming',
+    hobby: 'reading',
     animal: 'cat',
     birthdate: '1989-06-29',
-    religion: 'christian'
+    religion: 'agnostic'
   });
   protected readonly formShape = exampleFormShape;
   protected readonly suite = exampleFormValidationSuite;

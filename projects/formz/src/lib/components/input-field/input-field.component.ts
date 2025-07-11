@@ -77,8 +77,10 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    this.inputRef.nativeElement.value = value ?? '';
     this.isFieldFilled = !!value;
+
+    // write to wrapped input element
+    this.inputRef.nativeElement.value = value ?? '';
   }
 
   registerOnChange(fn: never): void {

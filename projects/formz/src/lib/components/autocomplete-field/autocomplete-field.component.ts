@@ -122,18 +122,13 @@ export class AutocompleteFieldComponent
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    const label = this.combineAllOptions().find((opt) => opt.value === value)?.label ?? '';
+    const found = this.combineAllOptions().find((opt) => opt.value === value);
 
-    this.selectedOption = {
-      ...this.selectedOption,
-      value,
-      label
-    };
+    this.selectedOption = found ? { ...found } : undefined;
+    this.isFieldFilled = found ? !!value : false;
 
-    this.isFieldFilled = !!value;
-
-    // write to wrapped input
-    this.inputRef.nativeElement.value = label;
+    // write to wrapped input element
+    this.inputRef.nativeElement.value = found ? found.label || found.value : '';
   }
 
   registerOnChange(fn: never): void {
