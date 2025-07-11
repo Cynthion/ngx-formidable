@@ -30,6 +30,7 @@
         [label]="option.label"
         [match]="option.match"
         [disabled]="option.disabled || false"
+        [selected]="option.value === value"
         [highlighted]="i === highlightedIndex">
         {{ option.label || option.value }}
       </formz-field-option>
@@ -43,6 +44,7 @@
         [label]="option.label"
         [match]="option.match"
         [disabled]="option.disabled || false"
+        [selected]="option.value === value"
         [highlighted]="i === highlightedIndex - filteredInlineOptions$.value.length">
         <ng-container *ngTemplateOutlet="option.template ?? null"></ng-container>
       </formz-field-option>
@@ -54,7 +56,7 @@
         [value]="emptyOption.value"
         [label]="emptyOption.label"
         [disabled]="true">
-        {{ emptyOption.label }}
+        {{ emptyOption.label || emptyOption.value }}
       </formz-field-option>
     }
   </div>

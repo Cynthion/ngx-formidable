@@ -3,15 +3,35 @@
 :host {
   display: block;
 
-  &.highlighted {
-    @include highlighted;
-  }
-
   &.disabled {
     @include disabled;
   }
+
+  &.selected {
+    @include selected;
+  }
+
+  &.highlighted {
+    @include highlighted;
+  }
 }
 
-.field-option {
-  @include field-option;
+.field-option-inline {
+  @include field-option-inline;
+}
+
+.field-option-radio-group {
+  @include field-option-radio-group;
+}
+
+.field-option-prefix {
+  @include field-option-prefix;
+}
+
+.radio-outer {
+  @include radio-group-prefix-outer;
+}
+
+.radio-inner {
+  @include radio-group-prefix-inner;
 }

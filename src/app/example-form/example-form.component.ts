@@ -93,6 +93,19 @@ export class ExampleFormComponent {
     label: 'No animal available.'
   };
 
+  protected religionOptions: IFormzFieldOption[] = [
+    { value: 'christian', label: 'Christianity' },
+    { value: 'muslim', label: 'Islam' },
+    { value: 'hindu', label: 'Hinduism' },
+    { value: 'buddhist', label: 'Buddhism' },
+    { value: 'jewish', label: 'Judaism' }
+  ];
+
+  protected religionEmptyOption: IFormzFieldOption = {
+    value: 'empty',
+    label: 'No religion available.'
+  };
+
   protected specialMatchFn = (filterValue: string): boolean => {
     // Custom matching logic for the religion field
     return ['special', 'legend', 'epic', 'custom', 'random'].some((word) => word.includes(filterValue.toLowerCase()));

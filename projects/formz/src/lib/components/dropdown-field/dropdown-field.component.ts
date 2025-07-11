@@ -137,7 +137,7 @@ export class DropdownFieldComponent
   }
 
   get value(): string {
-    return this.selectedOption?.value ?? '';
+    return this.selectedOption?.value || '';
   }
 
   get isLabelFloating(): boolean {

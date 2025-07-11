@@ -13,7 +13,7 @@
   (ngSubmit)="onSubmit()">
   <fieldset class="fieldset">
     <!-- First Name -->
-    <!-- <formz-field-decorator [decoratorLayout]="'single'">
+    <!-- <formz-field-decorator>
       <formz-input-field
         formzField
         formzFieldErrors
@@ -38,7 +38,7 @@
     </formz-field-decorator> -->
 
     <!-- Last Name -->
-    <!-- <formz-field-decorator [decoratorLayout]="'single'">
+    <!-- <formz-field-decorator>
       <formz-textarea-field
         formzField
         formzFieldErrors
@@ -61,7 +61,7 @@
     </formz-field-decorator> -->
 
     <!-- Gender -->
-    <!-- <formz-field-decorator [decoratorLayout]="'single'">
+    <formz-field-decorator>
       <formz-select-field
         formzField
         formzFieldErrors
@@ -84,10 +84,10 @@
       <div formzFieldTooltip>(Select)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator> -->
+    </formz-field-decorator>
 
     <!-- Nationality -->
-    <!-- <formz-field-decorator>
+    <formz-field-decorator>
       <formz-dropdown-field
         formzField
         formzFieldErrors
@@ -119,10 +119,10 @@
       <div formzFieldTooltip>(Dropdown)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator> -->
+    </formz-field-decorator>
 
     <!-- Hobby -->
-    <!-- <formz-field-decorator>
+    <formz-field-decorator>
       <formz-autocomplete-field
         formzField
         formzFieldErrors
@@ -161,7 +161,7 @@
       <div formzFieldTooltip>(Autocomplete)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator> -->
+    </formz-field-decorator>
 
     <!-- Animals -->
     <!-- <formz-field-decorator>
@@ -197,7 +197,7 @@
     </formz-field-decorator> -->
 
     <!-- Birthdate -->
-    <formz-field-decorator>
+    <!-- <formz-field-decorator>
       <formz-date-field
         formzField
         formzFieldErrors
@@ -215,30 +215,49 @@
       <div formzFieldTooltip>(Date)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+    </formz-field-decorator> -->
 
     <!-- Religion -->
-    <!-- <formz-form-field>
-      <formz-form-field-radio-group
-        formzFormField
-        formzFormFieldErrors
+    <formz-field-decorator [layout]="'group'">
+      <formz-radio-group-field
+        formzField
+        formzFieldErrors
         name="religion"
-        [fieldType]="'option'"
-        [ngModel]="vm.formValue.religion">
-        <formz-form-field-radio-group-option value="christian">Christian</formz-form-field-radio-group-option>
-        <formz-form-field-radio-group-option value="islam">Islam</formz-form-field-radio-group-option>
-        <formz-form-field-radio-group-option value="hindu">Hindu</formz-form-field-radio-group-option>
-        <formz-form-field-radio-group-option value="buddhism">Buddhism</formz-form-field-radio-group-option>
-      </formz-form-field-radio-group>
+        [ngModel]="vm.formValue.religion"
+        [disabled]="false"
+        [readOnly]="false"
+        [required]="false"
+        [options]="religionOptions"
+        [emptyOption]="religionEmptyOption">
+        <formz-field-option
+          [value]="'atheist'"
+          [label]="'Atheist'"
+          [disabled]="true">
+          Atheist
+        </formz-field-option>
+        <formz-field-option
+          [value]="'agnostic'"
+          [label]="'AGNOSTIC'"
+          >Agnostic (other label)</formz-field-option
+        >
+        <formz-field-option [value]="'other'">Other (no label)</formz-field-option>
+        <formz-field-option
+          [value]="'custom'"
+          [label]="'The Special One'"
+          [match]="specialMatchFn">
+          <p>I'm a special item</p>
+          <pre>And I can have any content</pre>
+        </formz-field-option>
+      </formz-radio-group-field>
       <div
-        formzFormFieldLabel
+        formzFieldLabel
         [isFloating]="true">
-        Label
+        Religion
       </div>
-      <div formzFormFieldTooltip>(Tooltip)</div>
-      <div formzFormFieldPrefix>Prefix</div>
-      <div formzFormFieldSuffix>Suffix</div>
-    </formz-form-field> -->
+      <div formzFieldTooltip>(Radio Group)</div>
+      <div formzFieldPrefix>Prefix</div>
+      <div formzFieldSuffix>Suffix</div>
+    </formz-field-decorator>
 
     <!-- Passwords Group -->
     <!-- TODO add form group -->

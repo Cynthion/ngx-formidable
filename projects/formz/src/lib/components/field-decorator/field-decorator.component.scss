@@ -20,16 +20,27 @@
   @include field-tooltip;
 }
 
-.container {
+.container-single {
   position: relative;
 }
 
-.prefix-wrapper {
-  @include field-prefix;
+.prefix-wrapper-single {
+  @include field-prefix-single;
 }
 
-.suffix-wrapper {
-  @include field-suffix;
+.suffix-wrapper-single {
+  @include field-suffix-single;
+}
+
+.container-group {
+}
+
+.prefix-wrapper-group {
+  @include field-prefix-group;
+}
+
+.suffix-wrapper-group {
+  @include field-suffix-group;
 }
 
 .hidden {

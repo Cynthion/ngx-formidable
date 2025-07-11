@@ -4,7 +4,8 @@ import { Observable } from 'rxjs';
 
 export const ROOT_FORM = 'rootForm';
 
-export type FieldDecoratorLayout = 'single' | 'option';
+export type FieldDecoratorLayout = 'single' | 'group';
+export type FieldOptionLayout = 'inline' | 'radio-group';
 
 export interface FormValidationOptions {
   debounceValidationInMs: number;
@@ -14,8 +15,9 @@ export interface IFormzFieldOption<T = unknown> {
   value: string;
   label?: string;
   template?: TemplateRef<T>;
-  highlighted?: boolean;
   disabled?: boolean;
+  selected?: boolean;
+  highlighted?: boolean;
   select?: () => void;
   match?: (filterValue: string) => boolean;
 }
@@ -82,6 +84,11 @@ export interface IFormzDropdownField extends IFormzOptionField {
   disabled?: boolean;
   required?: boolean;
 }
+
+type FormzRadioGroupFieldsKeys = 'name' | 'disabled' | 'readOnly' | 'required';
+
+/** The subset of `<input type="radio"/> properties that are supported.` */
+export interface IFormzRadioGroupField extends Pick<HTMLInputElement, FormzRadioGroupFieldsKeys>, IFormzOptionField {}
 
 export type IFormzAutocompleteField = IFormzDropdownField;
 

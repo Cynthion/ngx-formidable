@@ -37,7 +37,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   @ContentChild(FieldPrefixDirective) projectedPrefix?: FieldPrefixDirective;
   @ContentChild(FieldSuffixDirective) projectedSuffix?: FieldSuffixDirective;
 
-  @Input() decoratorLayout: FieldDecoratorLayout = 'single'; // TODO implement 'option' layout
+  @Input() layout: FieldDecoratorLayout = 'single';
 
   protected hasLabel = false;
   protected hasTooltip = false;
@@ -124,6 +124,8 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   }
 
   private adjustLayout(): void {
+    if (this.layout !== 'single') return;
+
     requestAnimationFrame(() => {
       // if prefix/suffix are projected, adjust the padding of the field
       const field = this.elementRef.nativeElement;

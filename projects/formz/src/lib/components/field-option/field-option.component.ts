@@ -9,7 +9,13 @@ import {
   TemplateRef,
   ViewChild
 } from '@angular/core';
-import { FORMZ_FIELD_OPTION, FORMZ_OPTION_FIELD, IFormzFieldOption, IFormzOptionField } from '../../form-model';
+import {
+  FieldOptionLayout,
+  FORMZ_FIELD_OPTION,
+  FORMZ_OPTION_FIELD,
+  IFormzFieldOption,
+  IFormzOptionField
+} from '../../form-model';
 
 @Component({
   selector: 'formz-field-option',
@@ -34,6 +40,10 @@ export class FieldOptionComponent implements IFormzFieldOption {
   @Input()
   disabled = false;
 
+  @HostBinding('class.selected')
+  @Input()
+  selected = false;
+
   @HostBinding('class.highlighted')
   @Input()
   highlighted = false;
@@ -47,6 +57,8 @@ export class FieldOptionComponent implements IFormzFieldOption {
     // default match
     return this.label?.toLowerCase().includes(filterValue.toLowerCase()) ?? false;
   };
+
+  @Input() layout: FieldOptionLayout = 'inline';
 
   get template(): TemplateRef<unknown> {
     return this.contentTemplate;

@@ -8,20 +8,23 @@
   (change)="onChangeChange()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
+  <!-- Inline Options -->
   @for (option of inlineOptions$.value; track option.value) {
     <option
       [value]="option.value"
-      [disabled]="option.disabled || false">
+      [disabled]="option.disabled || false"
+      [selected]="option.value === value">
       {{ option.label || option.value }}
     </option>
   }
 
   <!-- Content Projected Options -->
-  <!-- Option are re-created in order to use native <option> components. -->
+  <!-- Options are re-created in order to use native <option> elements. -->
   @for (option of projectedOptions$.value; track option.value) {
     <option
       [value]="option.value"
-      [disabled]="option.disabled || false">
+      [disabled]="option.disabled || false"
+      [selected]="option.value === value">
       {{ option.label || option.value }}
     </option>
   }
@@ -32,7 +35,7 @@
       [value]="emptyOption.value"
       [label]="emptyOption.label"
       [disabled]="true">
-      {{ emptyOption.label }}
+      {{ emptyOption.label || emptyOption.value }}
     </option>
   }
 </select>

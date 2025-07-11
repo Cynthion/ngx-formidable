@@ -1,6 +1,17 @@
 <div
-  class="field-option"
+  ngClass="field-option-{{ layout }}"
   (click)="select ? select() : null">
+  <!-- Prefix for Radio Group -->
+  <span
+    *ngIf="layout === 'radio-group'"
+    class="field-option-prefix">
+    <span class="radio-outer">
+      <span
+        *ngIf="selected"
+        class="radio-inner"></span>
+    </span>
+  </span>
+
   <!-- captures the content projection inside a template reference for later export -->
   <ng-template #contentTemplate>
     <ng-content></ng-content>

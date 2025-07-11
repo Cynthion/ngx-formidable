@@ -9,6 +9,7 @@ import { FieldDecoratorComponent } from './components/field-decorator/field-deco
 import { FieldErrorsComponent } from './components/field-errors/field-errors.component';
 import { FieldOptionComponent } from './components/field-option/field-option.component';
 import { InputFieldComponent } from './components/input-field/input-field.component';
+import { RadioGroupFieldComponent } from './components/radio-group-field/radio-group-field.component';
 import { SelectFieldComponent } from './components/select-field/select-field.component';
 import { TextareaFieldComponent } from './components/textarea-field/textarea-field.component';
 import { FieldErrorsDirective } from './directives/field-errors.directive';
@@ -38,6 +39,7 @@ const components = [
   FieldOptionComponent,
   SelectFieldComponent,
   TextareaFieldComponent,
+  RadioGroupFieldComponent,
   // Formz Directives
   FieldDirective,
   FieldTooltipDirective,

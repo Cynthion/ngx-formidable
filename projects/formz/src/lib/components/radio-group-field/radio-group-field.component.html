@@ -1,0 +1,75 @@
+<div
+  #radioGroupRef
+  class="field">
+  <!-- TODO does label work? -->
+  <!-- TODO add keyboard & highlighted -->
+  <!-- Inline Options -->
+  @for (option of inlineOptions$ | async; track option.value) {
+    <!-- <label> -->
+    <input
+      hidden
+      type="radio"
+      [id]="option.value"
+      [attr.name]="name"
+      [attr.disabled]="option.disabled || disabled ? '' : null"
+      [required]="required"
+      [checked]="option.value === value"
+      (change)="onOptionChangeChange(option)"
+      (focus)="onOptionFocusChange(option, true)"
+      (blur)="onOptionFocusChange(option, false)" />
+    <formz-field-option
+      [layout]="'radio-group'"
+      [value]="option.value"
+      [label]="option.label"
+      [disabled]="option.disabled || disabled"
+      [selected]="option.value === value">
+      {{ option.label || option.value }}
+    </formz-field-option>
+    <!-- </label> -->
+  }
+
+  <!-- Content Projected Options -->
+  <!-- Options are re-created in order to use native <input> elements. -->
+  @for (option of projectedOptions$ | async; track option.value) {
+    <!-- <label> -->
+    <input
+      hidden
+      type="radio"
+      [id]="option.value"
+      [attr.name]="name"
+      [attr.disabled]="option.disabled || disabled ? '' : null"
+      [required]="required"
+      [checked]="option.value === value"
+      (change)="onOptionChangeChange(option)"
+      (focus)="onOptionFocusChange(option, true)"
+      (blur)="onOptionFocusChange(option, false)" />
+    <formz-field-option
+      [layout]="'radio-group'"
+      [value]="option.value"
+      [label]="option.label"
+      [disabled]="option.disabled || disabled"
+      [selected]="option.value === value">
+      <ng-container *ngTemplateOutlet="option.template ?? null"></ng-container>
+    </formz-field-option>
+    <!-- </label> -->
+  }
+
+  <!-- Empty Option -->
+  @if (inlineOptions$.value.length === 0 && projectedOptions$.value.length === 0) {
+    <label>
+      <input
+        type="radio"
+        [id]="emptyOption.value"
+        [name]="name"
+        [value]="emptyOption.value"
+        [disabled]="emptyOption.disabled || disabled" />
+      <formz-field-option
+        [layout]="'radio-group'"
+        [value]="emptyOption.value"
+        [label]="emptyOption.label"
+        [disabled]="true">
+        {{ emptyOption.label || emptyOption.value }}
+      </formz-field-option>
+    </label>
+  }
+</div>

@@ -17,6 +17,9 @@
 - allow user to externally style pikaday
 - The label's for attribute doesn't match any element id. This might prevent the browser from correctly autofilling the form and accessibility tools from working correctly.
 - check safari/firefox/edge
-- rename highlighted -> selected
 - introduce a secondary color (date day label)
 - datefns needed?
+- selectOption(option: IFormzFieldOption): void {
+  if (this.readOnly || this.disabled || option.disabled) return; }
+- panel below/above field
+- browser errors/warnings

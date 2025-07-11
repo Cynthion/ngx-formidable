@@ -189,7 +189,7 @@
   color: var(--formz-color-field-tooltip, #{tokens.$formz-color-field-tooltip});
 }
 
-@mixin field-prefix {
+@mixin field-prefix-single {
   position: absolute;
   top: calc(var(--formz-field-height, #{formz-field-height}) / 2);
   left: 0;
@@ -201,7 +201,7 @@
   z-index: 1; // keep on top of field
 }
 
-@mixin field-suffix {
+@mixin field-suffix-single {
   position: absolute;
   top: calc(var(--formz-field-height, #{formz-field-height}) / 2);
   right: 0;
@@ -211,6 +211,17 @@
   transform: translateY(-50%);
   pointer-events: none;
   z-index: 1; // keep on top of field
+}
+
+@mixin field-prefix-group {
+  padding-bottom: sp.cmp_space(16);
+  color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
+}
+
+@mixin field-suffix-group {
+  padding-top: sp.cmp_space(16);
+  padding-bottom: sp.cmp_space(16);
+  color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
 }
 
 @mixin field-validation-errors {
@@ -309,7 +320,58 @@
   @include panel;
 }
 
-@mixin field-option {
+// @mixin field-option-prefix-base {
+//   display: block;
+//   position: relative;
+//   min-width: 24px; // TODO introduce const
+//   min-height: 24px;
+
+//   &::before,
+//   &::after {
+//     content: '';
+//     display: block;
+//     position: absolute;
+//     top: 0;
+//     left: 0;
+//     width: 24px;
+//     height: 24px;
+//     border: 2px solid lime; // TODO tokenize
+//     border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
+//   }
+
+//   &::before {
+//     background-color: white;
+//   }
+
+//   &::after {
+//     border-color: lime;
+//     opacity: 0;
+//     transition: opacity var(--formz-hover-duration, #{tokens.$formz-hover-duration})
+//       var(--formz-hover-easing, #{tokens.$formz-hover-easing});
+//   }
+// }
+
+// @mixin field-option-prefix-mark-base {
+//   display: block;
+//   position: absolute;
+//   top: 12px;
+//   left: 12px;
+//   opacity: 0;
+//   transition: opacity var(--formz-hover-duration, #{tokens.$formz-hover-duration})
+//     var(--formz-hover-easing, #{tokens.$formz-hover-easing});
+// }
+
+// @mixin field-radio-group-mark {
+//   @include field-option-prefix-mark-base;
+
+//   width: 4px;
+//   height: 4px;
+//   border-radius: 100%;
+//   background-color: red;
+//   transform: translate(-50%, -50%);
+// }
+
+@mixin field-option-inline {
   padding: 0.5rem 1rem;
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
   cursor: pointer;
@@ -319,11 +381,48 @@
   }
 }
 
+@mixin field-option-radio-group {
+  @include field-option-inline;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0.5rem 1rem 0.5rem 0;
+}
+
+@mixin field-option-prefix {
+  display: flex;
+  align-items: center;
+  padding: 0rem 1rem;
+}
+
+@mixin radio-group-prefix-outer {
+  width: 21px;
+  height: 21px;
+  border: 2px solid var(--formz-color-option-prefix-outer, #{tokens.$formz-color-option-prefix-outer});
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--formz-color-option-prefix-background, #{tokens.$formz-color-option-prefix-background});
+}
+
+@mixin radio-group-prefix-inner {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--formz-color-option-prefix-inner, #{tokens.$formz-color-option-prefix-inner});
+}
+
 @mixin disabled {
   cursor: not-allowed;
   pointer-events: none;
 
   background: var(--formz-color-field-disabled, #{tokens.$formz-color-field-disabled});
+}
+
+@mixin selected {
+  background: var(--formz-color-field-selected, #{tokens.$formz-color-field-selected});
 }
 
 @mixin highlighted {
@@ -335,4 +434,7 @@
   justify-content: center;
 
   margin: sp.cmp_space(16);
+}
+
+@mixin radio-group-field {
 }

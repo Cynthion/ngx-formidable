@@ -12,6 +12,7 @@ export * from './lib/components/dropdown-field/dropdown-field.component';
 export * from './lib/components/field-option/field-option.component';
 export * from './lib/components/form-submit/form-submit.component';
 export * from './lib/components/input-field/input-field.component';
+export * from './lib/components/radio-group-field/radio-group-field.component';
 export * from './lib/components/select-field/select-field.component';
 export * from './lib/components/textarea-field/textarea-field.component';
 export * from './lib/formz.module';

@@ -19,6 +19,7 @@
   --formz-color-field-background-disabled: #{tokens.$formz-color-field-background-disabled};
   --formz-color-field-background-required: #{tokens.$formz-color-field-background-required};
   --formz-color-field-disabled: #{tokens.$formz-color-field-disabled};
+  --formz-color-field-selected: #{tokens.$formz-color-field-selected};
   --formz-color-field-highlighted: #{tokens.$formz-color-field-highlighted};
   --formz-color-field-hover: #{tokens.$formz-color-field-hovered};
 
@@ -55,4 +56,8 @@
   --formz-date-field-panel-width: #{tokens.$formz-date-field-panel-width};
   --formz-date-field-panel-border-radius: #{tokens.$formz-date-field-panel-border-radius};
   --formz-date-field-panel-box-shadow: #{tokens.$formz-date-field-panel-box-shadow};
+
+  --formz-color-option-prefix-outer: #{tokens.$formz-color-option-prefix-outer};
+  --formz-color-option-prefix-inner: #{tokens.$formz-color-option-prefix-inner};
+  --formz-color-option-prefix-background: #{tokens.$formz-color-option-prefix-background};
 }
