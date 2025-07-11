@@ -95,10 +95,8 @@ export class ExampleFormComponent {
 
   protected religionOptions: IFormzFieldOption[] = [
     { value: 'christian', label: 'Christianity' },
-    { value: 'muslim', label: 'Islam' },
     { value: 'hindu', label: 'Hinduism' },
-    { value: 'buddhist', label: 'Buddhism' },
-    { value: 'jewish', label: 'Judaism' }
+    { value: 'buddhist', label: 'Buddhism' }
   ];
 
   protected religionEmptyOption: IFormzFieldOption = {
