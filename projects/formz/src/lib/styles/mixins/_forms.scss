@@ -342,7 +342,7 @@
 
 @mixin field-option-disabled {
   cursor: not-allowed;
-  pointer-events: none;
+  pointer-events: auto;
 
   background: var(--formz-color-field-disabled, #{tokens.$formz-color-field-disabled});
 }
@@ -358,7 +358,6 @@
 @mixin field-option-inline {
   padding: 0.5rem 1rem;
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
-  cursor: pointer;
 
   &:hover {
     background: var(--formz-color-field-hover, #{tokens.$formz-color-field-hovered});

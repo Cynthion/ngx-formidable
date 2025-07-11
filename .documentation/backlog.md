@@ -23,3 +23,5 @@
   if (this.readOnly || this.disabled || option.disabled) return; }
 - panel below/above field
 - browser errors/warnings
+- testarea: show maxLength counter
+- suffixes: clear/reset
