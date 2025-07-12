@@ -5,12 +5,14 @@ import {
   Component,
   ContentChildren,
   ElementRef,
+  EventEmitter,
   forwardRef,
   inject,
   Input,
   NgZone,
   OnDestroy,
   OnInit,
+  Output,
   QueryList,
   ViewChild
 } from '@angular/core';
@@ -82,6 +84,7 @@ export class CheckboxGroupFieldComponent
 
   protected onFocusChange(isFocused: boolean): void {
     this.focusChangeSubject$.next(isFocused);
+    this.focusChanged.emit(isFocused);
     this.isFieldFocused = isFocused;
 
     if (!isFocused) {
@@ -133,6 +136,9 @@ export class CheckboxGroupFieldComponent
   valueChange$ = this.valueChangeSubject$.asObservable();
   focusChange$ = this.focusChangeSubject$.asObservable();
 
+  @Output() valueChanged = new EventEmitter<string[]>();
+  @Output() focusChanged = new EventEmitter<boolean>();
+
   get fieldId(): string {
     return this.id;
   }
@@ -179,6 +185,7 @@ export class CheckboxGroupFieldComponent
     const newValue = this.value;
 
     this.valueChangeSubject$.next(newValue);
+    this.valueChanged.emit(newValue);
     this.onChange(newValue); // notify ControlValueAccessor of the change
     this.onTouched();
   }

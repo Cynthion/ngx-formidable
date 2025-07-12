@@ -5,12 +5,14 @@ import {
   Component,
   ContentChildren,
   ElementRef,
+  EventEmitter,
   forwardRef,
   inject,
   Input,
   NgZone,
   OnDestroy,
   OnInit,
+  Output,
   QueryList,
   ViewChild
 } from '@angular/core';
@@ -82,6 +84,7 @@ export class RadioGroupFieldComponent
 
   protected onFocusChange(isFocused: boolean): void {
     this.focusChangeSubject$.next(isFocused);
+    this.focusChanged.emit(isFocused);
     this.isFieldFocused = isFocused;
 
     if (!isFocused) {
@@ -130,6 +133,9 @@ export class RadioGroupFieldComponent
   valueChange$ = this.valueChangeSubject$.asObservable();
   focusChange$ = this.focusChangeSubject$.asObservable();
 
+  @Output() valueChanged = new EventEmitter<string>();
+  @Output() focusChanged = new EventEmitter<boolean>();
+
   get fieldId(): string {
     return this.id;
   }
@@ -172,6 +178,7 @@ export class RadioGroupFieldComponent
     this.selectedOption = newOption;
 
     this.valueChangeSubject$.next(this.selectedOption.value);
+    this.valueChanged.emit(this.selectedOption.value);
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.onTouched();
 

@@ -1,4 +1,4 @@
-import { ElementRef, InjectionToken, TemplateRef } from '@angular/core';
+import { ElementRef, EventEmitter, InjectionToken, TemplateRef } from '@angular/core';
 import { PikadayOptions } from 'pikaday';
 import { Observable } from 'rxjs';
 
@@ -31,6 +31,8 @@ export interface IFormzField<T = string> {
   isLabelFloating: boolean;
   valueChange$: Observable<T>;
   focusChange$: Observable<boolean>;
+  valueChanged: EventEmitter<T>;
+  focusChanged: EventEmitter<boolean>;
   elementRef: ElementRef<HTMLElement>;
   decoratorLayout?: FieldDecoratorLayout;
 }

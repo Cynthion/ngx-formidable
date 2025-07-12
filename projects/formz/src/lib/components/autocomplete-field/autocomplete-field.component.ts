@@ -106,6 +106,7 @@ export class AutocompleteFieldComponent
 
   protected onFocusChange(isFocused: boolean): void {
     this.focusChangeSubject$.next(isFocused);
+    this.focusChanged.emit(isFocused);
     this.isFieldFocused = isFocused;
 
     if (!isFocused) {
@@ -158,6 +159,9 @@ export class AutocompleteFieldComponent
   valueChange$ = this.valueChangeSubject$.asObservable();
   focusChange$ = this.focusChangeSubject$.asObservable();
 
+  @Output() valueChanged = new EventEmitter<string>();
+  @Output() focusChanged = new EventEmitter<boolean>();
+
   get fieldId(): string {
     return this.id;
   }
@@ -204,7 +208,9 @@ export class AutocompleteFieldComponent
     this.inputRef.nativeElement.value = this.selectedOption.label!; // update input value with selected option label
 
     this.focusChangeSubject$.next(false); // simulate blur on selection
+    this.focusChanged.emit(false);
     this.valueChangeSubject$.next(this.selectedOption.value);
+    this.valueChanged.emit(this.selectedOption.value);
     this.isFieldFilled = this.selectedOption.value.length > 0;
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.onTouched();

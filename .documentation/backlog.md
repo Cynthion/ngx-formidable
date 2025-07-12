@@ -1,14 +1,14 @@
 # Backlog
 
+- FIX: selectField: value not updating
 - rename libary to `formidable`
+- remove `IFormzField` from decorator
 - base class for all fields (id, etc.)
 - extract common functionalities into helpers
 - add an overwriteable FormzConfig (e.g., `inputDebounceTime`)
 - remove all `cmp` prefixes
 - support showing multiple errors
 - resolve all TODOs
-- fix valuedChange$ and focusedChange$ in all fields
-- handle switch case defaults
 - dropdown: write towards selection
 - left/right panel options in interface
 - check safari/firefox/edge

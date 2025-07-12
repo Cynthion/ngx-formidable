@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  EventEmitter,
+  forwardRef,
+  Input,
+  Output,
+  ViewChild
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
@@ -41,6 +50,7 @@ export class TextareaFieldComponent implements ControlValueAccessor, IFormzTexta
   protected onInputChange(): void {
     const value = this.value;
     this.valueChangeSubject$.next(value);
+    this.valueChanged.emit(value);
     this.isFieldFilled = value.length > 0;
     this.onChange(value); // notify ControlValueAccessor of the change
 
@@ -51,6 +61,7 @@ export class TextareaFieldComponent implements ControlValueAccessor, IFormzTexta
 
   protected onFocusChange(isFocused: boolean): void {
     this.focusChangeSubject$.next(isFocused);
+    this.focusChanged.emit(isFocused);
     this.isFieldFocused = isFocused;
 
     if (!isFocused) {
@@ -103,6 +114,9 @@ export class TextareaFieldComponent implements ControlValueAccessor, IFormzTexta
 
   valueChange$ = this.valueChangeSubject$.asObservable();
   focusChange$ = this.focusChangeSubject$.asObservable();
+
+  @Output() valueChanged = new EventEmitter<string>();
+  @Output() focusChanged = new EventEmitter<boolean>();
 
   get fieldId(): string {
     return this.id;

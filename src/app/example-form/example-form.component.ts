@@ -144,6 +144,14 @@ export class ExampleFormComponent {
     this.formValue.set(formValue);
   }
 
+  protected onValueChanged(_fieldName: string, _value: string | string[]): void {
+    // console.log(`Value changed on ${fieldName} field:`, value);
+  }
+
+  protected onFocusChanged(_fieldName: string, _isFocused: boolean): void {
+    // console.log(`Focus changed on ${fieldName} field:`, isFocused);
+  }
+
   protected onSubmit(): void {
     // TODO choose either formz-form-submit.sibmitClick or form.ngSubmit
     if (this.isValid()) {

@@ -26,7 +26,9 @@
         [ngModel]="vm.formValue.firstName"
         [disabled]="false"
         [readOnly]="false"
-        [required]="false">
+        [required]="false"
+        (valueChanged)="onValueChanged('firstName', $event)"
+        (focusChanged)="onFocusChanged('firstName', $event)">
       </formz-input-field>
       And some optional other content here, like a button or a link.
       <div
@@ -49,7 +51,9 @@
         [ngModel]="vm.formValue.lastName"
         [disabled]="false"
         [readOnly]="false"
-        [required]="false">
+        [required]="false"
+        (valueChanged)="onValueChanged('lastName', $event)"
+        (focusChanged)="onFocusChanged('lastName', $event)">
       </formz-textarea-field>
       <div
         formzFieldLabel
@@ -69,7 +73,9 @@
         [ngModel]="vm.formValue.gender"
         [disabled]="false"
         [required]="false"
-        [options]="genderOptions">
+        [options]="genderOptions"
+        (valueChanged)="onValueChanged('gender', $event)"
+        (focusChanged)="onFocusChanged('gender', $event)">
         <formz-field-option
           [value]="'other'"
           [label]="'Other'"
@@ -96,7 +102,9 @@
         [disabled]="false"
         [required]="false"
         [options]="nationalityOptions"
-        [emptyOption]="nationalityEmptyOption">
+        [emptyOption]="nationalityEmptyOption"
+        (valueChanged)="onValueChanged('nationality', $event)"
+        (focusChanged)="onFocusChanged('nationality', $event)">
         <formz-field-option
           [value]="'ch'"
           [label]="'CH'"
@@ -130,7 +138,9 @@
         [disabled]="false"
         [required]="false"
         [options]="hobbyOptions"
-        [emptyOption]="hobbyEmptyOption">
+        [emptyOption]="hobbyEmptyOption"
+        (valueChanged)="onValueChanged('hobby', $event)"
+        (focusChanged)="onFocusChanged('hobby', $event)">
         <formz-field-option
           [value]="'garden'"
           [label]="'Gardening'"
@@ -172,7 +182,9 @@
         [required]="false"
         [options]="animalOptionsDefault"
         [emptyOption]="animalEmptyOption"
-        (inputChange$)="onAnimalFilterChange($event)">
+        (inputChange$)="onAnimalFilterChange($event)"
+        (valueChanged)="onValueChanged('animal', $event)"
+        (focusChanged)="onFocusChanged('animal', $event)">
         @for (option of animalOptionsFiltered$ | async; track option.value) {
           <fuzzy-field-option
             [value]="option.value"
@@ -201,7 +213,9 @@
         name="birthdate"
         [ngModel]="vm.formValue.birthdate"
         [disabled]="false"
-        [required]="false">
+        [required]="false"
+        (valueChanged)="onValueChanged('birthdate', $event)"
+        (focusChanged)="onFocusChanged('birthdate', $event)">
       </formz-date-field>
       <div
         formzFieldLabel
@@ -222,7 +236,9 @@
         [disabled]="false"
         [required]="false"
         [options]="religionOptions"
-        [emptyOption]="religionEmptyOption">
+        [emptyOption]="religionEmptyOption"
+        (valueChanged)="onValueChanged('religion', $event)"
+        (focusChanged)="onFocusChanged('religion', $event)">
         <formz-field-option
           [value]="'atheist'"
           [label]="'Atheist'"
@@ -262,7 +278,9 @@
         [disabled]="false"
         [required]="false"
         [options]="allergiesOptions"
-        [emptyOption]="allergiesEmptyOption">
+        [emptyOption]="allergiesEmptyOption"
+        (valueChanged)="onValueChanged('allergies', $event)"
+        (focusChanged)="onFocusChanged('allergies', $event)">
         <formz-field-option
           [value]="'lactose'"
           [label]="'Lactose'"

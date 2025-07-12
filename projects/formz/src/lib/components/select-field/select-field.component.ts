@@ -4,8 +4,10 @@ import {
   Component,
   ContentChildren,
   ElementRef,
+  EventEmitter,
   forwardRef,
   Input,
+  Output,
   QueryList,
   ViewChild
 } from '@angular/core';
@@ -60,11 +62,13 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
   protected onChangeChange(): void {
     const value = this.value;
     this.valueChangeSubject$.next(value);
+    this.valueChanged.emit(value);
     this.onChange(value); // notify ControlValueAccessor of the change
   }
 
   protected onFocusChange(isFocused: boolean): void {
     this.focusChangeSubject$.next(isFocused);
+    this.focusChanged.emit(isFocused);
 
     if (!isFocused) {
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
@@ -113,6 +117,9 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
 
   valueChange$ = this.valueChangeSubject$.asObservable();
   focusChange$ = this.focusChangeSubject$.asObservable();
+
+  @Output() valueChanged = new EventEmitter<string>();
+  @Output() focusChanged = new EventEmitter<boolean>();
 
   get fieldId(): string {
     return this.id;

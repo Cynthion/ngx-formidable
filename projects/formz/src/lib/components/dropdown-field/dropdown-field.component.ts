@@ -5,12 +5,14 @@ import {
   Component,
   ContentChildren,
   ElementRef,
+  EventEmitter,
   forwardRef,
   inject,
   Input,
   NgZone,
   OnDestroy,
   OnInit,
+  Output,
   QueryList,
   ViewChild
 } from '@angular/core';
@@ -86,6 +88,7 @@ export class DropdownFieldComponent
 
   protected onFocusChange(isFocused: boolean): void {
     this.focusChangeSubject$.next(isFocused);
+    this.focusChanged.emit(isFocused);
     this.isFieldFocused = isFocused;
 
     if (!isFocused) {
@@ -135,6 +138,9 @@ export class DropdownFieldComponent
   valueChange$ = this.valueChangeSubject$.asObservable();
   focusChange$ = this.focusChangeSubject$.asObservable();
 
+  @Output() valueChanged = new EventEmitter<string>();
+  @Output() focusChanged = new EventEmitter<boolean>();
+
   get fieldId(): string {
     return this.id;
   }
@@ -179,7 +185,9 @@ export class DropdownFieldComponent
     this.selectedOption = newOption;
 
     this.focusChangeSubject$.next(false); // simulate blur on selection
+    this.focusChanged.emit(false);
     this.valueChangeSubject$.next(this.selectedOption.value);
+    this.valueChanged.emit(this.selectedOption.value);
     this.isFieldFilled = this.selectedOption.value.length > 0;
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.onTouched();

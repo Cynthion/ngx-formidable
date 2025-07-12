@@ -6,8 +6,10 @@ import {
   Component,
   ContentChild,
   ElementRef,
+  EventEmitter,
   inject,
   OnDestroy,
+  Output,
   ViewChild
 } from '@angular/core';
 import { merge, Subject, takeUntil } from 'rxjs';
@@ -74,6 +76,9 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   valueChange$ = this.valueChangeSubject$.asObservable();
   focusChange$ = this.focusChangeSubject$.asObservable();
 
+  @Output() valueChanged = new EventEmitter<string>();
+  @Output() focusChanged = new EventEmitter<boolean>();
+
   get fieldId(): string {
     return this.projectedField?.fieldId ?? '';
   }
@@ -111,10 +116,12 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
       // as a decorator, the wrapped field's events are forwarded
       focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
         this.focusChangeSubject$.next(focused);
+        this.focusChanged.emit(focused);
       });
 
       valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
         this.valueChangeSubject$.next(value);
+        this.valueChanged.emit(value);
       });
 
       merge(focusChange$, valueChange$)
