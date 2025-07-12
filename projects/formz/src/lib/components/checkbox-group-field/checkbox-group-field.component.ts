@@ -244,8 +244,8 @@ export class CheckboxGroupFieldComponent
           event.preventDefault();
           break;
         case 'Enter':
-          if (options[this.highlightedIndex]) {
-            const option = options[this.highlightedIndex]!;
+          if (this.optionsState?.[this.highlightedIndex]) {
+            const option = this.optionsState[this.highlightedIndex]!;
             this.selectOption(option);
             event.preventDefault();
           }
