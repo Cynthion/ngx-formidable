@@ -2,17 +2,15 @@ import {
   AfterContentInit,
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ContentChild,
   ElementRef,
   EventEmitter,
-  inject,
   OnDestroy,
   Output,
   ViewChild
 } from '@angular/core';
-import { merge, Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
 import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
@@ -30,14 +28,12 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   @ViewChild('prefixWrapperRef') prefixWrapper?: ElementRef<HTMLDivElement>;
   @ViewChild('suffixWrapperRef') suffixWrapper?: ElementRef<HTMLDivElement>;
 
-  // Content children are used to project the label, tooltip, field, prefix and suffix
+  // Content children are used to project the field, label, tooltip, prefix and suffix
+  @ContentChild(FORMZ_FIELD) projectedField?: IFormzField;
   @ContentChild(FieldLabelDirective) projectedLabel?: FieldLabelDirective;
   @ContentChild(FieldTooltipDirective) projectedTooltip?: FieldTooltipDirective;
-  // @ContentChild(FieldDirective) projectedField?: FieldDirective;
   @ContentChild(FieldPrefixDirective) projectedPrefix?: FieldPrefixDirective;
   @ContentChild(FieldSuffixDirective) projectedSuffix?: FieldSuffixDirective;
-
-  @ContentChild(FORMZ_FIELD) projectedField?: IFormzField;
 
   protected hasLabel = false;
   protected hasTooltip = false;
@@ -48,8 +44,6 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   private focusChangeSubject$ = new Subject<boolean>();
   private destroy$ = new Subject<void>();
 
-  private cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
-
   ngAfterContentInit(): void {
     this.hasLabel = !!this.projectedLabel;
     this.hasTooltip = !!this.projectedTooltip;
@@ -59,11 +53,8 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   ngAfterViewInit(): void {
     // interact with the projected field content
-    this.registerFieldEvents();
+    this.forwardEvents();
     this.adjustLayout();
-
-    // evaluate the initial state of the field
-    this.cdr.markForCheck();
   }
 
   ngOnDestroy() {
@@ -107,30 +98,22 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     return this.projectedField?.decoratorLayout ?? 'single';
   }
 
-  //#endregion
-
-  private registerFieldEvents(): void {
+  /** As a decorator, the wrapped field events are forwarded. */
+  private forwardEvents(): void {
     if (this.projectedField) {
-      const { focusChange$, valueChange$ } = this.projectedField;
-
-      // as a decorator, the wrapped field's events are forwarded
-      focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
+      this.projectedField.focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
         this.focusChangeSubject$.next(focused);
         this.focusChanged.emit(focused);
       });
 
-      valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
+      this.projectedField.valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
         this.valueChangeSubject$.next(value);
         this.valueChanged.emit(value);
       });
-
-      merge(focusChange$, valueChange$)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(() => {
-          this.cdr.markForCheck();
-        });
     }
   }
+
+  //#endregion
 
   private adjustLayout(): void {
     if (this.decoratorLayout !== 'single') return;
