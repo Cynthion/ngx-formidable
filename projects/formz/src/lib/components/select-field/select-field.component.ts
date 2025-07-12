@@ -4,16 +4,13 @@ import {
   Component,
   ContentChildren,
   ElementRef,
-  EventEmitter,
   forwardRef,
   Input,
-  Output,
   QueryList,
   ViewChild
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { v4 as uuid } from 'uuid';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
 import {
   EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
@@ -23,6 +20,7 @@ import {
   IFormzFieldOption,
   IFormzSelectField
 } from '../../form-model';
+import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
   selector: 'formz-select-field',
@@ -48,12 +46,8 @@ import {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SelectFieldComponent implements AfterContentInit, ControlValueAccessor, IFormzSelectField {
+export class SelectFieldComponent extends BaseFieldDirective implements AfterContentInit, IFormzSelectField {
   @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLInputElement>;
-
-  private id = uuid();
-  private valueChangeSubject$ = new Subject<string>();
-  private focusChangeSubject$ = new Subject<boolean>();
 
   ngAfterContentInit(): void {
     this.updateOptions();
@@ -77,28 +71,11 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
 
   //#region ControlValueAccessor
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onChange: (value: unknown) => void = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onTouched: () => void = () => {};
-
-  writeValue(value: string): void {
+  protected doWriteValue(value: string): void {
     const found = this.options$.value.find((opt) => opt.value === value);
 
-    // write to wrapped select element
+    // write to wrapped element
     this.selectRef.nativeElement.value = found ? found.value : '';
-  }
-
-  registerOnChange(fn: never): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: never): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
   }
 
   //#endregion
@@ -106,22 +83,11 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
   //#region IFormzSelectField
 
   @Input() name = '';
-  @Input() disabled = false;
   @Input() required = false;
 
   //#endregion
 
   //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  @Output() valueChanged = new EventEmitter<string>();
-  @Output() focusChanged = new EventEmitter<boolean>();
-
-  get fieldId(): string {
-    return this.id;
-  }
 
   get value(): string {
     return this.selectRef.nativeElement.value;
