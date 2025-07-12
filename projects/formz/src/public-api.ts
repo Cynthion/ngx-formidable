@@ -21,7 +21,6 @@ export * from './lib/directives/field-label.directive';
 export * from './lib/directives/field-prefix.directive';
 export * from './lib/directives/field-suffix.directive';
 export * from './lib/directives/field-tooltip.directive';
-export * from './lib/directives/field.directive';
 export * from './lib/directives/form-model-group.directive';
 export * from './lib/directives/form-model.directive';
 export * from './lib/directives/form-root-validate.directive';

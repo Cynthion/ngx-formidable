@@ -19,26 +19,28 @@ import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, NgControl, NgMode
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FormzFieldBase, IFormzDateField } from '../../form-model';
+import { FieldDecoratorLayout, FORMZ_FIELD, IFormzDateField } from '../../form-model';
 
 @Component({
   selector: 'formz-date-field',
   templateUrl: './date-field.component.html',
   styleUrls: ['./date-field.component.scss'],
   providers: [
-    // required to use FormzFieldBase  during injection as a base class for this component
-    { provide: FormzFieldBase, useExisting: forwardRef(() => DateFieldComponent) },
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => DateFieldComponent),
       multi: true
+    },
+    // required to provide this component as IFormzField
+    {
+      provide: FORMZ_FIELD,
+      useExisting: DateFieldComponent
     }
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DateFieldComponent
-  extends FormzFieldBase
   implements OnInit, AfterViewInit, OnChanges, OnDestroy, ControlValueAccessor, IFormzDateField
 {
   @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
@@ -103,12 +105,9 @@ export class DateFieldComponent
   private picker?: Pikaday;
 
   private readonly injector: Injector = inject(Injector);
+  private readonly ngZone: NgZone = inject(NgZone);
 
   control!: FormControl; // initialized in ngOnInit
-
-  constructor(private ngZone: NgZone) {
-    super();
-  }
 
   ngOnInit(): void {
     const ngControl = this.injector.get(NgControl, null, { self: true, optional: true });
@@ -215,6 +214,8 @@ export class DateFieldComponent
   get elementRef(): ElementRef<HTMLElement> {
     return this.dateRef as ElementRef<HTMLElement>;
   }
+
+  decoratorLayout?: FieldDecoratorLayout = 'single';
 
   //#endregion
 

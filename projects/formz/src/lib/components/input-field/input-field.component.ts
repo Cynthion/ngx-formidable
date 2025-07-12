@@ -2,25 +2,28 @@ import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, View
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FormzFieldBase, IFormzInputField } from '../../form-model';
+import { FieldDecoratorLayout, FORMZ_FIELD, IFormzInputField } from '../../form-model';
 
 @Component({
   selector: 'formz-input-field',
   templateUrl: './input-field.component.html',
   styleUrls: ['./input-field.component.scss'],
   providers: [
-    // required to use FormzFieldBase  during injection as a base class for this component
-    { provide: FormzFieldBase, useExisting: forwardRef(() => InputFieldComponent) },
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => InputFieldComponent),
       multi: true
+    },
+    // required to provide this component as IFormzField
+    {
+      provide: FORMZ_FIELD,
+      useExisting: InputFieldComponent
     }
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InputFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzInputField {
+export class InputFieldComponent implements ControlValueAccessor, IFormzInputField {
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
   private id = uuid();
@@ -66,6 +69,8 @@ export class InputFieldComponent extends FormzFieldBase implements ControlValueA
   get elementRef(): ElementRef<HTMLElement> {
     return this.inputRef as ElementRef<HTMLElement>;
   }
+
+  decoratorLayout?: FieldDecoratorLayout = 'single';
 
   //#endregion
 

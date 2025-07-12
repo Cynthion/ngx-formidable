@@ -18,7 +18,6 @@ import { FieldLabelDirective } from './directives/field-label.directive';
 import { FieldPrefixDirective } from './directives/field-prefix.directive';
 import { FieldSuffixDirective } from './directives/field-suffix.directive';
 import { FieldTooltipDirective } from './directives/field-tooltip.directive';
-import { FieldDirective } from './directives/field.directive';
 import { FormModelGroupDirective } from './directives/form-model-group.directive';
 import { FormModelDirective } from './directives/form-model.directive';
 import { FormRootValidateDirective } from './directives/form-root-validate.directive';
@@ -43,7 +42,6 @@ const components = [
   RadioGroupFieldComponent,
   CheckboxGroupFieldComponent,
   // Formz Directives
-  FieldDirective,
   FieldTooltipDirective,
   FieldLabelDirective,
   FieldPrefixDirective,

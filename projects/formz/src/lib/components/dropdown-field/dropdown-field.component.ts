@@ -18,9 +18,10 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import {
+  FieldDecoratorLayout,
+  FORMZ_FIELD,
   FORMZ_FIELD_OPTION,
   FORMZ_OPTION_FIELD,
-  FormzFieldBase,
   IFormzDropdownField,
   IFormzFieldOption
 } from '../../form-model';
@@ -30,13 +31,16 @@ import {
   templateUrl: './dropdown-field.component.html',
   styleUrls: ['./dropdown-field.component.scss'],
   providers: [
-    // required to use FormzFieldBase  during injection as a base class for this component
-    { provide: FormzFieldBase, useExisting: forwardRef(() => DropdownFieldComponent) },
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => DropdownFieldComponent),
       multi: true
+    },
+    // required to provide this component as IFormzField
+    {
+      provide: FORMZ_FIELD,
+      useExisting: DropdownFieldComponent
     },
     // required to provide this component as IFormzOptionField
     {
@@ -47,7 +51,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DropdownFieldComponent
-  extends FormzFieldBase
   implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
 {
   @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
@@ -65,13 +68,10 @@ export class DropdownFieldComponent
   private focusChangeSubject$ = new Subject<boolean>();
 
   private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private ngZone: NgZone = inject(NgZone);
 
   private globalClickUnlisten?: () => void;
   private globalKeydownUnlisten?: () => void;
-
-  constructor(private ngZone: NgZone) {
-    super();
-  }
 
   ngOnInit(): void {
     this.registerGlobalListeners();
@@ -142,6 +142,8 @@ export class DropdownFieldComponent
   get elementRef(): ElementRef<HTMLElement> {
     return this.dropdownRef as ElementRef<HTMLElement>;
   }
+
+  decoratorLayout?: FieldDecoratorLayout = 'single';
 
   //#endregion
 

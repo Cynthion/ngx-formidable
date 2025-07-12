@@ -18,9 +18,10 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import {
+  FieldDecoratorLayout,
+  FORMZ_FIELD,
   FORMZ_FIELD_OPTION,
   FORMZ_OPTION_FIELD,
-  FormzFieldBase,
   IFormzCheckboxGroupField,
   IFormzFieldOption
 } from '../../form-model';
@@ -30,13 +31,16 @@ import {
   templateUrl: './checkbox-group-field.component.html',
   styleUrls: ['./checkbox-group-field.component.scss'],
   providers: [
-    // required to use FormzFieldBase  during injection as a base class for this component
-    { provide: FormzFieldBase, useExisting: forwardRef(() => CheckboxGroupFieldComponent) },
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => CheckboxGroupFieldComponent),
       multi: true
+    },
+    // required to provide this component as IFormzField
+    {
+      provide: FORMZ_FIELD,
+      useExisting: CheckboxGroupFieldComponent
     },
     // required to provide this component as IFormzOptionField
     {
@@ -47,7 +51,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CheckboxGroupFieldComponent
-  extends FormzFieldBase<string[]>
   implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzCheckboxGroupField
 {
   @ViewChild('checkboxGroupRef', { static: true }) checkboxGroupRef!: ElementRef<HTMLDivElement>;
@@ -62,12 +65,9 @@ export class CheckboxGroupFieldComponent
   private focusChangeSubject$ = new Subject<boolean>();
 
   private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private ngZone: NgZone = inject(NgZone);
 
   private globalKeydownUnlisten?: () => void;
-
-  constructor(private ngZone: NgZone) {
-    super();
-  }
 
   ngOnInit(): void {
     this.registerGlobalListeners();
@@ -108,6 +108,8 @@ export class CheckboxGroupFieldComponent
   get elementRef(): ElementRef<HTMLElement> {
     return this.checkboxGroupRef as ElementRef<HTMLElement>;
   }
+
+  decoratorLayout?: FieldDecoratorLayout = 'group';
 
   //#endregion
 

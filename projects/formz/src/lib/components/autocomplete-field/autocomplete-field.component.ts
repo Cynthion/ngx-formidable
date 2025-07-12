@@ -20,9 +20,10 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, Subject, takeUntil } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import {
+  FieldDecoratorLayout,
+  FORMZ_FIELD,
   FORMZ_FIELD_OPTION,
   FORMZ_OPTION_FIELD,
-  FormzFieldBase,
   IFormzAutocompleteField,
   IFormzFieldOption
 } from '../../form-model';
@@ -32,13 +33,16 @@ import {
   templateUrl: './autocomplete-field.component.html',
   styleUrls: ['./autocomplete-field.component.scss'],
   providers: [
-    // required to use FormzFieldBase  during injection as a base class for this component
-    { provide: FormzFieldBase, useExisting: forwardRef(() => AutocompleteFieldComponent) },
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => AutocompleteFieldComponent),
       multi: true
+    },
+    // required to provide this component as IFormzField
+    {
+      provide: FORMZ_FIELD,
+      useExisting: AutocompleteFieldComponent
     },
     // required to provide this component as IFormzOptionField
     {
@@ -49,7 +53,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AutocompleteFieldComponent
-  extends FormzFieldBase
   implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzAutocompleteField
 {
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
@@ -69,13 +72,10 @@ export class AutocompleteFieldComponent
   private destroy$ = new Subject<void>();
 
   private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private ngZone: NgZone = inject(NgZone);
 
   private globalClickUnlisten?: () => void;
   private globalKeydownUnlisten?: () => void;
-
-  constructor(private ngZone: NgZone) {
-    super();
-  }
 
   ngOnInit(): void {
     this.registerGlobalListeners();
@@ -165,6 +165,8 @@ export class AutocompleteFieldComponent
   get elementRef(): ElementRef<HTMLElement> {
     return this.autocompleteRef as ElementRef<HTMLElement>;
   }
+
+  decoratorLayout?: FieldDecoratorLayout = 'single';
 
   //#endregion
 

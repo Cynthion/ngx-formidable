@@ -2,25 +2,28 @@ import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, View
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FormzFieldBase, IFormzTextareaField } from '../../form-model';
+import { FieldDecoratorLayout, FORMZ_FIELD, IFormzTextareaField } from '../../form-model';
 
 @Component({
   selector: 'formz-textarea-field',
   templateUrl: './textarea-field.component.html',
   styleUrls: ['./textarea-field.component.scss'],
   providers: [
-    // required to use FormzFieldBase  during injection as a base class for this component
-    { provide: FormzFieldBase, useExisting: forwardRef(() => TextareaFieldComponent) },
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => TextareaFieldComponent),
       multi: true
+    },
+    // required to provide this component as IFormzField
+    {
+      provide: FORMZ_FIELD,
+      useExisting: TextareaFieldComponent
     }
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TextareaFieldComponent extends FormzFieldBase implements ControlValueAccessor, IFormzTextareaField {
+export class TextareaFieldComponent implements ControlValueAccessor, IFormzTextareaField {
   @ViewChild('textareaRef', { static: true }) textareaRef!: ElementRef<HTMLTextAreaElement>;
 
   private id = uuid();
@@ -76,6 +79,8 @@ export class TextareaFieldComponent extends FormzFieldBase implements ControlVal
   get elementRef(): ElementRef<HTMLElement> {
     return this.textareaRef as ElementRef<HTMLElement>;
   }
+
+  decoratorLayout?: FieldDecoratorLayout = 'single';
 
   //#endregion
 

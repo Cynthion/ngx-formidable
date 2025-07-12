@@ -1,8 +1,11 @@
-import { Directive, ElementRef, InjectionToken, TemplateRef } from '@angular/core';
+import { ElementRef, InjectionToken, TemplateRef } from '@angular/core';
 import { PikadayOptions } from 'pikaday';
 import { Observable } from 'rxjs';
 
 export const ROOT_FORM = 'rootForm';
+
+/** InjectionToken for field components. */
+export const FORMZ_FIELD = new InjectionToken<IFormzField>('FORMZ_FIELD');
 
 /** InjectionToken for field components that support multiple options. */
 export const FORMZ_OPTION_FIELD = new InjectionToken<IFormzOptionField>('FORMZ_OPTION_FIELD');
@@ -27,20 +30,7 @@ export interface IFormzField<T = string> {
   valueChange$: Observable<T>;
   focusChange$: Observable<boolean>;
   elementRef: ElementRef<HTMLElement>;
-}
-
-/**
- * Base class for all Formz fields.
- * Required for injection.
- */
-@Directive()
-export abstract class FormzFieldBase<T = string> implements IFormzField<T> {
-  abstract get fieldId(): string;
-  abstract get value(): T;
-  abstract get isLabelFloating(): boolean;
-  abstract valueChange$: Observable<T>;
-  abstract focusChange$: Observable<boolean>;
-  abstract get elementRef(): ElementRef<HTMLElement>;
+  decoratorLayout?: FieldDecoratorLayout;
 }
 
 /** Interface for all Formz fields that support multiple options. */
@@ -73,27 +63,36 @@ type FormzInputFieldsKeys =
   | 'required';
 
 /** The subset of `<input/>` properties that are supported. */
-export type IFormzInputField = Pick<HTMLInputElement, FormzInputFieldsKeys>;
+export interface IFormzInputField extends Pick<HTMLInputElement, FormzInputFieldsKeys>, IFormzField {}
 
 type FormzGroupFieldsKeys = 'name' | 'disabled' | 'required';
 
 /** The subset of `<input type="radio"/> properties that are supported.` */
-export interface IFormzRadioGroupField extends Pick<HTMLInputElement, FormzGroupFieldsKeys>, IFormzOptionField {}
+export interface IFormzRadioGroupField
+  extends Pick<HTMLInputElement, FormzGroupFieldsKeys>,
+    IFormzField,
+    IFormzOptionField {}
 
 /** The subset of `<input type="checkbox"/> properties that are supported.` */
-export interface IFormzCheckboxGroupField extends Pick<HTMLInputElement, FormzGroupFieldsKeys>, IFormzOptionField {}
+export interface IFormzCheckboxGroupField
+  extends Pick<HTMLInputElement, FormzGroupFieldsKeys>,
+    IFormzField<string[]>,
+    IFormzOptionField {}
 
 type FormzTextareaFieldsKeys = FormzInputFieldsKeys;
 
 /** The subset of `<textarea/>` properties that are supported. */
-export type IFormzTextareaField = Pick<HTMLTextAreaElement, FormzTextareaFieldsKeys>;
+export interface IFormzTextareaField extends Pick<HTMLTextAreaElement, FormzTextareaFieldsKeys>, IFormzField {}
 
 type FormzSelectFieldsKeys = 'name' | 'disabled' | 'required';
 
 /** The subset of `<select/>` properties that are supported. */
-export interface IFormzSelectField extends Pick<HTMLSelectElement, FormzSelectFieldsKeys>, IFormzOptionField {}
+export interface IFormzSelectField
+  extends Pick<HTMLSelectElement, FormzSelectFieldsKeys>,
+    IFormzField,
+    IFormzOptionField {}
 
-export interface IFormzDropdownField extends IFormzOptionField {
+export interface IFormzDropdownField extends IFormzField, IFormzOptionField {
   name: string;
   placeholder?: string;
   disabled?: boolean;
@@ -125,7 +124,7 @@ export interface IFormzPikadayOptions
     | 'numberOfMonths'
   > {}
 
-export interface IFormzDateField extends IFormzPikadayOptions {
+export interface IFormzDateField extends IFormzField, IFormzPikadayOptions {
   name: string;
   placeholder?: string;
   disabled?: boolean;

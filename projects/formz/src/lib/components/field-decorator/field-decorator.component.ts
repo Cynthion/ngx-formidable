@@ -7,7 +7,6 @@ import {
   ContentChild,
   ElementRef,
   inject,
-  Input,
   OnDestroy,
   ViewChild
 } from '@angular/core';
@@ -16,8 +15,7 @@ import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
 import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
 import { FieldTooltipDirective } from '../../directives/field-tooltip.directive';
-import { FieldDirective } from '../../directives/field.directive';
-import { FieldDecoratorLayout, IFormzField } from '../../form-model';
+import { FieldDecoratorLayout, FORMZ_FIELD, IFormzField } from '../../form-model';
 
 @Component({
   selector: 'formz-field-decorator',
@@ -33,11 +31,11 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   // Content children are used to project the label, tooltip, field, prefix and suffix
   @ContentChild(FieldLabelDirective) projectedLabel?: FieldLabelDirective;
   @ContentChild(FieldTooltipDirective) projectedTooltip?: FieldTooltipDirective;
-  @ContentChild(FieldDirective) projectedField?: FieldDirective;
+  // @ContentChild(FieldDirective) projectedField?: FieldDirective;
   @ContentChild(FieldPrefixDirective) projectedPrefix?: FieldPrefixDirective;
   @ContentChild(FieldSuffixDirective) projectedSuffix?: FieldSuffixDirective;
 
-  @Input() layout: FieldDecoratorLayout = 'single';
+  @ContentChild(FORMZ_FIELD) projectedField?: IFormzField;
 
   protected hasLabel = false;
   protected hasTooltip = false;
@@ -77,18 +75,18 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   focusChange$ = this.focusChangeSubject$.asObservable();
 
   get fieldId(): string {
-    return this.projectedField?.formzField.fieldId ?? '';
+    return this.projectedField?.fieldId ?? '';
   }
 
   get value(): string {
-    return this.projectedField?.formzField.value ?? '';
+    return this.projectedField?.value ?? '';
   }
 
   get isLabelFloating(): boolean {
     if (!this.projectedField) return false;
 
     const isLabelConfiguredToFloat = this.projectedLabel?.isFloating ?? false;
-    const isFieldLabelFloating = this.projectedField.formzField.isLabelFloating ?? false;
+    const isFieldLabelFloating = this.projectedField?.isLabelFloating ?? false;
 
     return isLabelConfiguredToFloat && isFieldLabelFloating;
   }
@@ -97,14 +95,18 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     if (!this.projectedField) {
       throw new Error('FieldDecoratorComponent: projectedField is not available yet.');
     }
-    return this.projectedField.formzField.elementRef;
+    return this.projectedField?.elementRef;
+  }
+
+  get decoratorLayout(): FieldDecoratorLayout {
+    return this.projectedField?.decoratorLayout ?? 'single';
   }
 
   //#endregion
 
   private registerFieldEvents(): void {
     if (this.projectedField) {
-      const { focusChange$, valueChange$ } = this.projectedField.formzField;
+      const { focusChange$, valueChange$ } = this.projectedField;
 
       // as a decorator, the wrapped field's events are forwarded
       focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
@@ -124,7 +126,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   }
 
   private adjustLayout(): void {
-    if (this.layout !== 'single') return;
+    if (this.decoratorLayout !== 'single') return;
 
     requestAnimationFrame(() => {
       // if prefix/suffix are projected, adjust the padding of the field

@@ -14,8 +14,9 @@
   <fieldset class="fieldset">
     <!-- First Name -->
     <formz-field-decorator>
+      <!-- TODO fix -->
+      <!-- And some optional other content here, like a button or a link. -->
       <formz-input-field
-        formzField
         formzFieldErrors
         placeholder="Your first name"
         autocomplete="given-name"
@@ -27,6 +28,7 @@
         [readOnly]="false"
         [required]="false">
       </formz-input-field>
+      And some optional other content here, like a button or a link.
       <div
         formzFieldLabel
         [isFloating]="true">
@@ -40,7 +42,6 @@
     <!-- Last Name -->
     <formz-field-decorator>
       <formz-textarea-field
-        formzField
         formzFieldErrors
         placeholder="Your last name"
         autocomplete="family-name"
@@ -63,7 +64,6 @@
     <!-- Gender -->
     <formz-field-decorator>
       <formz-select-field
-        formzField
         formzFieldErrors
         name="gender"
         [ngModel]="vm.formValue.gender"
@@ -89,7 +89,6 @@
     <!-- Nationality -->
     <formz-field-decorator>
       <formz-dropdown-field
-        formzField
         formzFieldErrors
         placeholder="Select..."
         name="nationality"
@@ -124,7 +123,6 @@
     <!-- Hobby -->
     <formz-field-decorator>
       <formz-autocomplete-field
-        formzField
         formzFieldErrors
         placeholder="Select..."
         name="hobby"
@@ -166,7 +164,6 @@
     <!-- Animals -->
     <formz-field-decorator>
       <formz-autocomplete-field
-        formzField
         formzFieldErrors
         placeholder="Select..."
         name="animal"
@@ -191,7 +188,7 @@
         [isFloating]="true">
         Animal
       </div>
-      <div formzFieldTooltip>(Autocomplete with custom options)</div>
+      <div formzFieldTooltip>(Autocomplete [custom fuzzy options])</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
     </formz-field-decorator>
@@ -199,7 +196,6 @@
     <!-- Birthdate -->
     <!-- <formz-field-decorator>
       <formz-date-field
-        formzField
         formzFieldErrors
         placeholder="?"
         name="birthdate"
@@ -218,9 +214,8 @@
     </formz-field-decorator> -->
 
     <!-- Religion -->
-    <!-- <formz-field-decorator [layout]="'group'">
+    <formz-field-decorator>
       <formz-radio-group-field
-        formzField
         formzFieldErrors
         name="religion"
         [ngModel]="vm.formValue.religion"
@@ -256,12 +251,11 @@
       <div formzFieldTooltip>(Radio Group)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator> -->
+    </formz-field-decorator>
 
     <!-- Allergies -->
-    <formz-field-decorator [layout]="'group'">
+    <formz-field-decorator>
       <formz-checkbox-group-field
-        formzField
         formzFieldErrors
         name="allergies"
         [ngModel]="vm.formValue.allergies"

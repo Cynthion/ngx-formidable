@@ -19,22 +19,22 @@
   </div>
 </div>
 
-<div ngClass="container-{{ layout }}">
+<div ngClass="container-{{ decoratorLayout }}">
   <!-- Prefix -->
   <div
     #prefixWrapperRef
-    ngClass="prefix-wrapper-{{ layout }}"
+    ngClass="prefix-wrapper-{{ decoratorLayout }}"
     [class.hidden]="!hasPrefix">
     <ng-content select="[formzFieldPrefix]"></ng-content>
   </div>
 
   <!-- Content -->
-  <ng-content select="[formzField]"></ng-content>
+  <ng-content></ng-content>
 
   <!-- Suffix -->
   <div
     #suffixWrapperRef
-    ngClass="suffix-wrapper-{{ layout }}"
+    ngClass="suffix-wrapper-{{ decoratorLayout }}"
     [class.hidden]="!hasSuffix">
     <ng-content select="[formzFieldSuffix]"></ng-content>
   </div>

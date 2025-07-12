@@ -13,9 +13,10 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import {
+  FieldDecoratorLayout,
+  FORMZ_FIELD,
   FORMZ_FIELD_OPTION,
   FORMZ_OPTION_FIELD,
-  FormzFieldBase,
   IFormzFieldOption,
   IFormzSelectField
 } from '../../form-model';
@@ -25,13 +26,16 @@ import {
   templateUrl: './select-field.component.html',
   styleUrls: ['./select-field.component.scss'],
   providers: [
-    // required to use FormzFieldBase  during injection as a base class for this component
-    { provide: FormzFieldBase, useExisting: forwardRef(() => SelectFieldComponent) },
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => SelectFieldComponent),
       multi: true
+    },
+    // required to provide this component as IFormzField
+    {
+      provide: FORMZ_FIELD,
+      useExisting: SelectFieldComponent
     },
     // required to provide this component as IFormzOptionField
     {
@@ -41,10 +45,7 @@ import {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SelectFieldComponent
-  extends FormzFieldBase
-  implements AfterContentInit, ControlValueAccessor, IFormzSelectField
-{
+export class SelectFieldComponent implements AfterContentInit, ControlValueAccessor, IFormzSelectField {
   @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLInputElement>;
 
   protected selectedOption?: IFormzFieldOption;
@@ -90,6 +91,8 @@ export class SelectFieldComponent
   get elementRef(): ElementRef<HTMLElement> {
     return this.selectRef as ElementRef<HTMLElement>;
   }
+
+  decoratorLayout?: FieldDecoratorLayout = 'single';
 
   //#endregion
 
