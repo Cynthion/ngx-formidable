@@ -46,7 +46,7 @@ import { BaseFieldDirective } from '../base-field.component';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SelectFieldComponent extends BaseFieldDirective implements AfterContentInit, IFormzSelectField {
+export class SelectFieldComponent extends BaseFieldDirective implements IFormzSelectField, AfterContentInit {
   @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLInputElement>;
 
   ngAfterContentInit(): void {

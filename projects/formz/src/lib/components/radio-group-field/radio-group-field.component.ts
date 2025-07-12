@@ -5,21 +5,19 @@ import {
   Component,
   ContentChildren,
   ElementRef,
-  EventEmitter,
   forwardRef,
   inject,
   Input,
   NgZone,
   OnDestroy,
   OnInit,
-  Output,
   QueryList,
   ViewChild
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { v4 as uuid } from 'uuid';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
 import {
+  EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
   FORMZ_FIELD,
   FORMZ_FIELD_OPTION,
@@ -27,6 +25,7 @@ import {
   IFormzFieldOption,
   IFormzRadioGroupField
 } from '../../form-model';
+import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
   selector: 'formz-radio-group-field',
@@ -53,17 +52,14 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RadioGroupFieldComponent
-  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzRadioGroupField
+  extends BaseFieldDirective
+  implements IFormzRadioGroupField, OnInit, AfterContentInit, OnDestroy
 {
   @ViewChild('radioGroupRef', { static: true }) radioGroupRef!: ElementRef<HTMLDivElement>;
 
   protected highlightedIndex = -1;
 
-  private id = uuid();
-  private isFieldFocused = false;
   private _value = '';
-  private valueChangeSubject$ = new Subject<string>();
-  private focusChangeSubject$ = new Subject<boolean>();
 
   private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
   private ngZone: NgZone = inject(NgZone);
@@ -94,28 +90,11 @@ export class RadioGroupFieldComponent
 
   //#region ControlValueAccessor
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onChange: (value: unknown) => void = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onTouched: () => void = () => {};
-
-  writeValue(value: string): void {
+  protected doWriteValue(value: string): void {
     this._value = value;
     const found = this.options$.value.find((opt) => opt.value === value);
 
     this.selectedOption = found ? { ...found } : undefined;
-  }
-
-  registerOnChange(fn: never): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: never): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
   }
 
   //#endregion
@@ -123,22 +102,11 @@ export class RadioGroupFieldComponent
   //#region IFormzRadioGroupField
 
   @Input() name = '';
-  @Input() disabled = false;
   @Input() required = false;
 
   //#endregion
 
   //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  @Output() valueChanged = new EventEmitter<string>();
-  @Output() focusChanged = new EventEmitter<boolean>();
-
-  get fieldId(): string {
-    return this.id;
-  }
 
   get value(): string {
     return this.selectedOption?.value || '';
@@ -157,7 +125,7 @@ export class RadioGroupFieldComponent
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
-  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.' };
+  @Input() emptyOption: IFormzFieldOption = EMPTY_FIELD_OPTION;
 
   @ContentChildren(FORMZ_FIELD_OPTION)
   optionComponents?: QueryList<IFormzFieldOption>;

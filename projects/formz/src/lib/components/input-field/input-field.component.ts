@@ -26,6 +26,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormzInp
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
   protected onInputChange(): void {
+    // TODO this is common for many fields, combine to base class?
     const value = this.value;
     this.valueChangeSubject$.next(value);
     this.valueChanged.emit(value);
@@ -34,6 +35,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormzInp
   }
 
   protected onFocusChange(isFocused: boolean): void {
+    // TODO this is common for many fields, combine to base class?
     this.focusChangeSubject$.next(isFocused);
     this.focusChanged.emit(isFocused);
     this.isFieldFocused = isFocused;

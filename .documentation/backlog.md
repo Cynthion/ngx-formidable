@@ -12,7 +12,7 @@
 - check safari/firefox/edge
 - introduce a secondary color (date day label)
 - datefns needed?
-- support readonly for all fields (dropdown, autocomplete, date):
+- support disabled and readonly for all fields (dropdown, autocomplete, date):
   - selectOption(option: IFormzFieldOption): void {
     if (this.readOnly || this.disabled || option.disabled) return; }
 - panel below/above field
