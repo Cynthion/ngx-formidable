@@ -123,7 +123,7 @@ export class TextareaFieldComponent implements ControlValueAccessor, IFormzTexta
   }
 
   get value(): string {
-    return this.textareaRef?.nativeElement.value || '';
+    return this.textareaRef.nativeElement.value;
   }
 
   get isLabelFloating(): boolean {

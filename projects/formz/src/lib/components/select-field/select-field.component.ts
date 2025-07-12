@@ -85,8 +85,6 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
   writeValue(value: string): void {
     const found = this.options$.value.find((opt) => opt.value === value);
 
-    this.selectedOption = found ? { ...found } : undefined;
-
     // write to wrapped select element
     this.selectRef.nativeElement.value = found ? found.value : '';
   }
@@ -126,7 +124,7 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
   }
 
   get value(): string {
-    return this.selectedOption?.value ?? '';
+    return this.selectRef.nativeElement.value;
   }
 
   readonly isLabelFloating = false;
@@ -149,11 +147,9 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
 
   protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
-  private selectedOption?: IFormzFieldOption;
-
   public selectOption(_option: IFormzFieldOption): void {
-    // not used in select field, but required by IFormzOptionField interface
-    // <option> is selected by the user through the native <select> element
+    // Not used in select field, but required by IFormzOptionField interface.
+    // An <option> is selected by the user through the native <select> element.
   }
 
   private updateOptions(): void {

@@ -1,6 +1,5 @@
 # Backlog
 
-- FIX: selectField: value not updating
 - rename libary to `formidable`
 - remove `IFormzField` from decorator
 - base class for all fields (id, etc.)

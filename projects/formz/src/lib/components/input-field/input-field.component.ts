@@ -113,7 +113,7 @@ export class InputFieldComponent implements ControlValueAccessor, IFormzInputFie
   }
 
   get value(): string {
-    return this.inputRef?.nativeElement.value || '';
+    return this.inputRef.nativeElement.value;
   }
 
   get isLabelFloating(): boolean {
