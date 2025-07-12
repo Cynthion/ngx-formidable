@@ -60,6 +60,7 @@ export class CheckboxGroupFieldComponent
 
   private id = uuid();
   private isFieldFocused = false;
+  private _value: string[] = [];
 
   private valueChangeSubject$ = new Subject<string[]>();
   private focusChangeSubject$ = new Subject<boolean>();
@@ -121,11 +122,10 @@ export class CheckboxGroupFieldComponent
   private onTouched: () => void = () => {};
 
   writeValue(value: string[]): void {
+    this._value = value;
     const values: string[] = Array.isArray(value) ? value : [];
 
-    const allOptions = this.combineAllOptions();
-
-    this.optionsState = allOptions.map((opt) => ({
+    this.optionsState = this.options$.value.map((opt) => ({
       ...opt,
       selected: values.includes(opt.value)
     }));
@@ -161,8 +161,7 @@ export class CheckboxGroupFieldComponent
   @ContentChildren(FORMZ_FIELD_OPTION)
   optionComponents?: QueryList<IFormzFieldOption>;
 
-  protected readonly inlineOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
-  protected readonly projectedOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+  protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;
@@ -184,13 +183,6 @@ export class CheckboxGroupFieldComponent
     this.onTouched();
   }
 
-  private combineAllOptions(): IFormzFieldOption[] {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
-
-    return [...inlineOptions, ...projectedOptions];
-  }
-
   private updateOptions(): void {
     // The projected options (option.template) might not be available immediately after content initialization,
     // so we use setTimeout to ensure they are processed after the current change detection cycle.
@@ -198,8 +190,9 @@ export class CheckboxGroupFieldComponent
       const inlineOptions = this.options ?? [];
       const projectedOptions = this.optionComponents?.toArray() ?? [];
 
-      this.inlineOptions$.next(inlineOptions);
-      this.projectedOptions$.next(projectedOptions);
+      this.options$.next([...inlineOptions, ...projectedOptions]);
+
+      this.writeValue(this._value);
     });
   }
 
@@ -228,7 +221,7 @@ export class CheckboxGroupFieldComponent
     if (this.disabled) return;
     if (!['ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) return;
 
-    const options = this.combineAllOptions();
+    const options = this.options$.value;
     const count = options.length;
 
     this.ngZone.run(() => {

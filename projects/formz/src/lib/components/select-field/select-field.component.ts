@@ -104,7 +104,7 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    const found = this.combineAllOptions().find((opt) => opt.value === value);
+    const found = this.options$.value.find((opt) => opt.value === value);
 
     this.selectedOption = found ? { ...found } : undefined;
 
@@ -142,8 +142,7 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
   @ContentChildren(FORMZ_FIELD_OPTION)
   optionComponents?: QueryList<IFormzFieldOption>;
 
-  protected readonly inlineOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
-  protected readonly projectedOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+  protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
   public selectOption(_option: IFormzFieldOption): void {
     // not used in select field, but required by IFormzOptionField interface
@@ -154,15 +153,7 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
     const inlineOptions = this.options ?? [];
     const projectedOptions = this.optionComponents?.toArray() ?? [];
 
-    this.inlineOptions$.next(inlineOptions);
-    this.projectedOptions$.next(projectedOptions);
-  }
-
-  private combineAllOptions(): IFormzFieldOption[] {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
-
-    return [...inlineOptions, ...projectedOptions];
+    this.options$.next([...inlineOptions, ...projectedOptions]);
   }
 
   //#endregion

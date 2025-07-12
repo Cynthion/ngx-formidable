@@ -187,9 +187,9 @@ export class AutocompleteFieldComponent
   @ContentChildren(FORMZ_FIELD_OPTION)
   optionComponents?: QueryList<IFormzFieldOption>;
 
+  protected readonly filteredOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+
   private readonly filterValue$ = new BehaviorSubject<string>('');
-  protected readonly filteredInlineOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
-  protected readonly filteredProjectedOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;
@@ -224,32 +224,20 @@ export class AutocompleteFieldComponent
     return [...inlineOptions, ...projectedOptions];
   }
 
-  private getFilteredOptions(): IFormzFieldOption[] {
-    return [...this.filteredInlineOptions$.value, ...this.filteredProjectedOptions$.value];
-  }
-
   private updateFilteredOptions(): void {
     const filterValue = this.filterValue$.value;
 
-    // inline options
     const inlineOptions = this.options ?? [];
-    const filteredInlineOptions = filterValue
-      ? inlineOptions.filter((opt) =>
-          opt.match ? opt.match(filterValue) : opt.label?.toLowerCase().includes(filterValue.toLowerCase())
-        )
-      : inlineOptions;
-
-    this.filteredInlineOptions$.next(filteredInlineOptions);
-
-    // projected options
     const projectedOptions = this.optionComponents?.toArray() ?? [];
-    const filteredProjectedOptions = filterValue
-      ? projectedOptions.filter((opt) =>
+    const allOptions = [...inlineOptions, ...projectedOptions];
+
+    const filteredOptions = filterValue
+      ? allOptions.filter((opt) =>
           opt.match ? opt.match(filterValue) : opt.label?.toLowerCase().includes(filterValue.toLowerCase())
         )
-      : projectedOptions;
+      : allOptions;
 
-    this.filteredProjectedOptions$.next(filteredProjectedOptions);
+    this.filteredOptions$.next(filteredOptions);
   }
 
   //#endregion
@@ -300,7 +288,7 @@ export class AutocompleteFieldComponent
     if (this.disabled) return;
     if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
 
-    const options = this.getFilteredOptions();
+    const options = this.filteredOptions$.value;
     const count = options.length;
 
     this.ngZone.run(() => {
@@ -335,9 +323,7 @@ export class AutocompleteFieldComponent
   }
 
   private highlightSelectedOption(): void {
-    const options = this.getFilteredOptions();
-
-    const selectedIndex = options.findIndex((opt) => opt.value === this.selectedOption?.value);
+    const selectedIndex = this.filteredOptions$.value.findIndex((opt) => opt.value === this.selectedOption?.value);
 
     this.setHighlightedIndex(selectedIndex);
   }

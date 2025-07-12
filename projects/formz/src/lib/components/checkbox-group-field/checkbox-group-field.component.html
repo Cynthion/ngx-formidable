@@ -5,8 +5,9 @@
   class="field"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
-  <!-- Inline Options -->
-  @for (option of inlineOptions$ | async; track option.value; let i = $index) {
+  <!-- Options -->
+  <!-- Options are re-created in order to use native <input> elements. -->
+  @for (option of options$ | async; track option.value; let i = $index) {
     <input
       hidden
       type="checkbox"
@@ -23,35 +24,13 @@
       [disabled]="option.disabled || disabled"
       [selected]="isChecked(option.value)"
       [highlighted]="i === highlightedIndex">
-      {{ option.label || option.value }}
+      <ng-container
+        *ngIf="option.template; else labelContent"
+        [ngTemplateOutlet]="option.template">
+      </ng-container>
+      <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
     </formz-field-option>
-  }
-
-  <!-- Content Projected Options -->
-  <!-- Options are re-created in order to use native <input> elements. -->
-  @for (option of projectedOptions$ | async; track option.value; let i = $index) {
-    <input
-      hidden
-      type="checkbox"
-      [id]="option.value"
-      [tabindex]="-1"
-      [attr.name]="name"
-      [attr.disabled]="option.disabled || disabled ? '' : null"
-      [required]="required"
-      [checked]="isChecked(option.value)" />
-    <formz-field-option
-      [layout]="'checkbox-group'"
-      [value]="option.value"
-      [label]="option.label"
-      [disabled]="option.disabled || disabled"
-      [selected]="isChecked(option.value)"
-      [highlighted]="i === highlightedIndex - inlineOptions$.value.length">
-      <ng-container *ngTemplateOutlet="option.template ?? null"></ng-container>
-    </formz-field-option>
-  }
-
-  <!-- Empty Option -->
-  @if (inlineOptions$.value.length === 0 && projectedOptions$.value.length === 0) {
+  } @empty {
     <input
       type="checkbox"
       [id]="emptyOption.value"

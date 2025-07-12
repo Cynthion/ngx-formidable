@@ -29,6 +29,7 @@
 - support patterns (ngx-mask)
 - <input> value & checked could be added to interface, if used withouth FormControl
 - add support for `ReactiveForms`
+- sortFn for options
 - combine inline & projected options:
 
   ````

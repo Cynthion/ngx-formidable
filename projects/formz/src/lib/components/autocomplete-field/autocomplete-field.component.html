@@ -23,8 +23,9 @@
     #panelRef
     class="panel"
     [class.open]="isOpen">
-    <!-- Inline Options -->
-    @for (option of filteredInlineOptions$.value; track option.value; let i = $index) {
+    <!-- Options -->
+    <!-- Option components are re-created in order to control and filter them. -->
+    @for (option of filteredOptions$.value; track option.value; let i = $index) {
       <formz-field-option
         [value]="option.value"
         [label]="option.label"
@@ -32,26 +33,13 @@
         [disabled]="option.disabled || false"
         [selected]="option.value === value"
         [highlighted]="i === highlightedIndex">
-        {{ option.label || option.value }}
+        <ng-container
+          *ngIf="option.template; else labelContent"
+          [ngTemplateOutlet]="option.template">
+        </ng-container>
+        <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
       </formz-field-option>
-    }
-
-    <!-- Content Projected Options -->
-    <!-- Option components are re-created in order to control and filter them. -->
-    @for (option of filteredProjectedOptions$.value; track option.value; let i = $index) {
-      <formz-field-option
-        [value]="option.value"
-        [label]="option.label"
-        [match]="option.match"
-        [disabled]="option.disabled || false"
-        [selected]="option.value === value"
-        [highlighted]="i === highlightedIndex - filteredInlineOptions$.value.length">
-        <ng-container *ngTemplateOutlet="option.template ?? null"></ng-container>
-      </formz-field-option>
-    }
-
-    <!-- Empty Option -->
-    @if (filteredInlineOptions$.value.length === 0 && filteredProjectedOptions$.value.length === 0) {
+    } @empty {
       <formz-field-option
         [value]="emptyOption.value"
         [label]="emptyOption.label"
