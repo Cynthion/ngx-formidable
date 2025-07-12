@@ -1,7 +1,7 @@
 <div
-  #radioGroupRef
+  #checkboxGroupRef
   tabindex="0"
-  role="radiogroup"
+  role="group"
   class="field"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
@@ -9,19 +9,19 @@
   @for (option of inlineOptions$ | async; track option.value; let i = $index) {
     <input
       hidden
-      type="radio"
+      type="checkbox"
       [id]="option.value"
       [tabindex]="-1"
       [attr.name]="name"
       [attr.disabled]="option.disabled || disabled ? '' : null"
       [required]="required"
-      [checked]="option.value === value" />
+      [checked]="isChecked(option.value)" />
     <formz-field-option
-      [layout]="'radio-group'"
+      [layout]="'checkbox-group'"
       [value]="option.value"
       [label]="option.label"
       [disabled]="option.disabled || disabled"
-      [selected]="option.value === value"
+      [selected]="isChecked(option.value)"
       [highlighted]="i === highlightedIndex">
       {{ option.label || option.value }}
     </formz-field-option>
@@ -32,19 +32,19 @@
   @for (option of projectedOptions$ | async; track option.value; let i = $index) {
     <input
       hidden
-      type="radio"
+      type="checkbox"
       [id]="option.value"
       [tabindex]="-1"
       [attr.name]="name"
       [attr.disabled]="option.disabled || disabled ? '' : null"
       [required]="required"
-      [checked]="option.value === value" />
+      [checked]="isChecked(option.value)" />
     <formz-field-option
-      [layout]="'radio-group'"
+      [layout]="'checkbox-group'"
       [value]="option.value"
       [label]="option.label"
       [disabled]="option.disabled || disabled"
-      [selected]="option.value === value"
+      [selected]="isChecked(option.value)"
       [highlighted]="i === highlightedIndex - inlineOptions$.value.length">
       <ng-container *ngTemplateOutlet="option.template ?? null"></ng-container>
     </formz-field-option>
@@ -53,14 +53,14 @@
   <!-- Empty Option -->
   @if (inlineOptions$.value.length === 0 && projectedOptions$.value.length === 0) {
     <input
-      type="radio"
+      type="checkbox"
       [id]="emptyOption.value"
       [tabindex]="-1"
       [name]="name"
       [value]="emptyOption.value"
       [disabled]="emptyOption.disabled || disabled" />
     <formz-field-option
-      [layout]="'radio-group'"
+      [layout]="'checkbox-group'"
       [value]="emptyOption.value"
       [label]="emptyOption.label"
       [disabled]="true">

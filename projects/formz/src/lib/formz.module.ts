@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { AutocompleteFieldComponent } from './components/autocomplete-field/autocomplete-field.component';
+import { CheckboxGroupFieldComponent } from './components/checkbox-group-field/checkbox-group-field.component';
 import { DateFieldComponent } from './components/date-field/date-field.component';
 import { DropdownFieldComponent } from './components/dropdown-field/dropdown-field.component';
 import { FieldDecoratorComponent } from './components/field-decorator/field-decorator.component';
@@ -40,6 +41,7 @@ const components = [
   SelectFieldComponent,
   TextareaFieldComponent,
   RadioGroupFieldComponent,
+  CheckboxGroupFieldComponent,
   // Formz Directives
   FieldDirective,
   FieldTooltipDirective,
@@ -47,9 +49,6 @@ const components = [
   FieldPrefixDirective,
   FieldSuffixDirective,
   FieldErrorsDirective
-  // TODO
-  // FormFieldRadioGroupComponent,
-  // FormFieldRadioGroupOptionComponent,
 ];
 
 @NgModule({

@@ -24,4 +24,11 @@
 - panel below/above field
 - browser errors/warnings
 - testarea: show maxLength counter
-- suffixes: clear/reset
+- suffixes: clear/reset, copy, validation state, loading
+- `fieldset` & `legend` for fieldset
+- validation error: styling
+- styling for field options based on layout
+- support patterns (ngx-mask)
+- <input> value & checked could be added to interface, if used withouth FormControl
+- add support for `ReactiveForms`
+- detect decorator layout automatically

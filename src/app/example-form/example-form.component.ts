@@ -24,7 +24,8 @@ export class ExampleFormComponent {
     hobby: 'reading',
     animal: 'cat',
     birthdate: '1989-06-29',
-    religion: 'agnostic'
+    religion: 'agnostic',
+    allergies: ['dust', 'lactose']
   });
   protected readonly formShape = exampleFormShape;
   protected readonly suite = exampleFormValidationSuite;
@@ -102,6 +103,19 @@ export class ExampleFormComponent {
   protected religionEmptyOption: IFormzFieldOption = {
     value: 'empty',
     label: 'No religion available.'
+  };
+
+  protected allergiesOptions: IFormzFieldOption[] = [
+    { value: 'pollen', label: 'Pollen' },
+
+    { value: 'dust', label: 'Dust' },
+    { value: 'peanuts', label: 'Peanuts' },
+    { value: 'shellfish', label: 'Shellfish' }
+  ];
+
+  protected allergiesEmptyOption: IFormzFieldOption = {
+    value: 'empty',
+    label: 'No allergies available.'
   };
 
   protected specialMatchFn = (filterValue: string): boolean => {

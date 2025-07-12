@@ -218,14 +218,13 @@
     </formz-field-decorator> -->
 
     <!-- Religion -->
-    <formz-field-decorator [layout]="'group'">
+    <!-- <formz-field-decorator [layout]="'group'">
       <formz-radio-group-field
         formzField
         formzFieldErrors
         name="religion"
         [ngModel]="vm.formValue.religion"
         [disabled]="false"
-        [readOnly]="false"
         [required]="false"
         [options]="religionOptions"
         [emptyOption]="religionEmptyOption">
@@ -255,6 +254,47 @@
         Religion
       </div>
       <div formzFieldTooltip>(Radio Group)</div>
+      <div formzFieldPrefix>Prefix</div>
+      <div formzFieldSuffix>Suffix</div>
+    </formz-field-decorator> -->
+
+    <!-- Allergies -->
+    <formz-field-decorator [layout]="'group'">
+      <formz-checkbox-group-field
+        formzField
+        formzFieldErrors
+        name="allergies"
+        [ngModel]="vm.formValue.allergies"
+        [disabled]="false"
+        [required]="false"
+        [options]="allergiesOptions"
+        [emptyOption]="allergiesEmptyOption">
+        <formz-field-option
+          [value]="'lactose'"
+          [label]="'Lactose'"
+          [disabled]="true">
+          Lactose
+        </formz-field-option>
+        <formz-field-option
+          [value]="'gluten'"
+          [label]="'GLUTEN'"
+          >Gluten (other label)</formz-field-option
+        >
+        <formz-field-option [value]="'other'">Soy (no label)</formz-field-option>
+        <formz-field-option
+          [value]="'custom'"
+          [label]="'The Special One'"
+          [match]="specialMatchFn">
+          <p>I'm a special item</p>
+          <pre>And I can have any content</pre>
+        </formz-field-option>
+      </formz-checkbox-group-field>
+      <div
+        formzFieldLabel
+        [isFloating]="true">
+        Allergies
+      </div>
+      <div formzFieldTooltip>(Checkbox Group)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
     </formz-field-decorator>

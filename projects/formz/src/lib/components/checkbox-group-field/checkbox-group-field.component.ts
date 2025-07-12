@@ -21,44 +21,44 @@ import {
   FORMZ_FIELD_OPTION,
   FORMZ_OPTION_FIELD,
   FormzFieldBase,
-  IFormzFieldOption,
-  IFormzRadioGroupField
+  IFormzCheckboxGroupField,
+  IFormzFieldOption
 } from '../../form-model';
 
 @Component({
-  selector: 'formz-radio-group-field',
-  templateUrl: './radio-group-field.component.html',
-  styleUrls: ['./radio-group-field.component.scss'],
+  selector: 'formz-checkbox-group-field',
+  templateUrl: './checkbox-group-field.component.html',
+  styleUrls: ['./checkbox-group-field.component.scss'],
   providers: [
     // required to use FormzFieldBase  during injection as a base class for this component
-    { provide: FormzFieldBase, useExisting: forwardRef(() => RadioGroupFieldComponent) },
+    { provide: FormzFieldBase, useExisting: forwardRef(() => CheckboxGroupFieldComponent) },
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => RadioGroupFieldComponent),
+      useExisting: forwardRef(() => CheckboxGroupFieldComponent),
       multi: true
     },
     // required to provide this component as IFormzOptionField
     {
       provide: FORMZ_OPTION_FIELD,
-      useExisting: RadioGroupFieldComponent
+      useExisting: CheckboxGroupFieldComponent
     }
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RadioGroupFieldComponent
-  extends FormzFieldBase
-  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzRadioGroupField
+export class CheckboxGroupFieldComponent
+  extends FormzFieldBase<string[]>
+  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzCheckboxGroupField
 {
-  @ViewChild('radioGroupRef', { static: true }) radioGroupRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('checkboxGroupRef', { static: true }) checkboxGroupRef!: ElementRef<HTMLDivElement>;
 
-  protected selectedOption?: IFormzFieldOption;
+  protected optionsState?: IFormzFieldOption[];
   protected highlightedIndex = -1;
 
   private id = uuid();
   private isFieldFocused = false;
 
-  private valueChangeSubject$ = new Subject<string>();
+  private valueChangeSubject$ = new Subject<string[]>();
   private focusChangeSubject$ = new Subject<boolean>();
 
   private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
@@ -99,14 +99,14 @@ export class RadioGroupFieldComponent
     return this.id;
   }
 
-  get value(): string {
-    return this.selectedOption?.value || '';
+  get value(): string[] {
+    return this.optionsState?.filter((opt) => opt.selected).map((opt) => opt.value) || [];
   }
 
   readonly isLabelFloating = false;
 
   get elementRef(): ElementRef<HTMLElement> {
-    return this.radioGroupRef as ElementRef<HTMLElement>;
+    return this.checkboxGroupRef as ElementRef<HTMLElement>;
   }
 
   //#endregion
@@ -118,10 +118,15 @@ export class RadioGroupFieldComponent
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   private onTouched: () => void = () => {};
 
-  writeValue(value: string): void {
-    const found = this.combineAllOptions().find((opt) => opt.value === value);
+  writeValue(value: string[]): void {
+    const values: string[] = Array.isArray(value) ? value : [];
 
-    this.selectedOption = found ? { ...found } : undefined;
+    const allOptions = this.combineAllOptions();
+
+    this.optionsState = allOptions.map((opt) => ({
+      ...opt,
+      checked: values.includes(opt.value)
+    }));
   }
 
   registerOnChange(fn: never): void {
@@ -138,7 +143,7 @@ export class RadioGroupFieldComponent
 
   //#endregion
 
-  //#region IFormzRadioGroupField
+  //#region IFormzCheckboxGroupField
 
   @Input() name = '';
   @Input() disabled = false;
@@ -163,16 +168,18 @@ export class RadioGroupFieldComponent
     const newOption: IFormzFieldOption = {
       value: option.value,
       label: option.label || option.value, // value as fallback for optional label
-      disabled: option.disabled
+      disabled: option.disabled,
+      selected: !option.selected // toggle the selected state
     };
 
-    this.selectedOption = newOption;
+    this.optionsState =
+      this.optionsState?.map((opt) => (opt.value === option.value ? { ...opt, ...newOption } : opt)) || [];
 
-    this.valueChangeSubject$.next(this.selectedOption.value);
-    this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
+    const newValue = this.optionsState.map((opt) => opt.value);
+
+    this.valueChangeSubject$.next(newValue);
+    this.onChange(newValue); // notify ControlValueAccessor of the change
     this.onTouched();
-
-    this.highlightSelectedOption();
   }
 
   private combineAllOptions(): IFormzFieldOption[] {
@@ -192,6 +199,10 @@ export class RadioGroupFieldComponent
       this.inlineOptions$.next(inlineOptions);
       this.projectedOptions$.next(projectedOptions);
     });
+  }
+
+  protected isChecked(value: string): boolean {
+    return this.optionsState?.some((opt) => opt.value === value && opt.selected) || false;
   }
 
   //#endregion
@@ -241,14 +252,6 @@ export class RadioGroupFieldComponent
           break;
       }
     });
-  }
-
-  private highlightSelectedOption(): void {
-    const options = this.combineAllOptions();
-
-    const selectedIndex = options.findIndex((opt) => opt.value === this.selectedOption?.value);
-
-    this.setHighlightedIndex(selectedIndex);
   }
 
   private setHighlightedIndex(index: number): void {

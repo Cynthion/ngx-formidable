@@ -29,6 +29,7 @@ export interface User {
   animal?: string;
   birthdate?: string;
   religion?: UserReligion;
+  allergies?: string[];
   passwords: Password;
 }
 
@@ -49,6 +50,7 @@ export const exampleFormShape: ExampleFormShape = {
   animal: '',
   birthdate: '',
   religion: 'hindu',
+  allergies: [],
   passwords: {
     password: '',
     confirmPassword: ''

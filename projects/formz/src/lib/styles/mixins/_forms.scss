@@ -92,10 +92,10 @@
   }
 }
 
-@mixin field-group {
+@mixin group-field {
   @include field-reset;
-  // @include border; // TODO tokenize group border colors
-  // @include field-colors; // TODO tokenize group colors
+  // @include border; // TODO tokenize group border colors -> transparent default
+  // @include field-colors; // TODO tokenize group colors -> transparent default
   // @include typo.font-m; // TODO tokenize font size
 
   &:focus {
@@ -107,8 +107,12 @@
   }
 }
 
-@mixin radio-button-field-group {
-  @include field-group;
+@mixin radio-button-group-field {
+  @include group-field;
+}
+
+@mixin checkbox-group-field {
+  @include group-field;
 }
 
 @mixin input-field {

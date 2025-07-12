@@ -4,8 +4,14 @@ import { Observable } from 'rxjs';
 
 export const ROOT_FORM = 'rootForm';
 
+/** InjectionToken for field components that support multiple options. */
+export const FORMZ_OPTION_FIELD = new InjectionToken<IFormzOptionField>('FORMZ_OPTION_FIELD');
+
+/** InjectionToken for option components that can be used in field components that support multiple options. */
+export const FORMZ_FIELD_OPTION = new InjectionToken<IFormzFieldOption>('FORMZ_FIELD_OPTION');
+
 export type FieldDecoratorLayout = 'single' | 'group';
-export type FieldOptionLayout = 'inline' | 'radio-group';
+export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 
 export interface FormValidationOptions {
   debounceValidationInMs: number;
@@ -25,11 +31,11 @@ export interface IFormzFieldOption<T = unknown> {
 /**
  * Interface for all Formz fields.
  */
-export interface IFormzField {
+export interface IFormzField<T = string> {
   fieldId: string;
-  value: string;
+  value: T;
   isLabelFloating: boolean;
-  valueChange$: Observable<string>;
+  valueChange$: Observable<T>;
   focusChange$: Observable<boolean>;
   elementRef: ElementRef<HTMLElement>;
 }
@@ -39,11 +45,11 @@ export interface IFormzField {
  * Required for injection.
  */
 @Directive()
-export abstract class FormzFieldBase implements IFormzField {
+export abstract class FormzFieldBase<T = string> implements IFormzField<T> {
   abstract get fieldId(): string;
-  abstract get value(): string;
+  abstract get value(): T;
   abstract get isLabelFloating(): boolean;
-  abstract valueChange$: Observable<string>;
+  abstract valueChange$: Observable<T>;
   abstract focusChange$: Observable<boolean>;
   abstract get elementRef(): ElementRef<HTMLElement>;
 }
@@ -68,6 +74,18 @@ type FormzInputFieldsKeys =
 /** The subset of `<input/>` properties that are supported. */
 export type IFormzInputField = Pick<HTMLInputElement, FormzInputFieldsKeys>;
 
+type FormzRadioGroupFieldsKeys = 'name' | 'disabled' | 'required';
+
+/** The subset of `<input type="radio"/> properties that are supported.` */
+export interface IFormzRadioGroupField extends Pick<HTMLInputElement, FormzRadioGroupFieldsKeys>, IFormzOptionField {}
+
+type FormzCheckboxGroupFieldsKeys = FormzRadioGroupFieldsKeys;
+
+/** The subset of `<input type="checkbox"/> properties that are supported.` */
+export interface IFormzCheckboxGroupField
+  extends Pick<HTMLInputElement, FormzCheckboxGroupFieldsKeys>,
+    IFormzOptionField {}
+
 type FormzTextareaFieldsKeys = FormzInputFieldsKeys;
 
 /** The subset of `<textarea/>` properties that are supported. */
@@ -84,11 +102,6 @@ export interface IFormzDropdownField extends IFormzOptionField {
   disabled?: boolean;
   required?: boolean;
 }
-
-type FormzRadioGroupFieldsKeys = 'name' | 'readOnly' | 'disabled' | 'required';
-
-/** The subset of `<input type="radio"/> properties that are supported.` */
-export interface IFormzRadioGroupField extends Pick<HTMLInputElement, FormzRadioGroupFieldsKeys>, IFormzOptionField {}
 
 export type IFormzAutocompleteField = IFormzDropdownField;
 
@@ -126,9 +139,3 @@ export interface IFormzDateField extends IFormzPikadayOptions {
   // mask?: string;
   selectDate(date: string): void;
 }
-
-/** InjectionToken for field components that support multiple options. */
-export const FORMZ_OPTION_FIELD = new InjectionToken<IFormzOptionField>('FORMZ_OPTION_FIELD');
-
-/** InjectionToken for option components that can be used in field components that support multiple options. */
-export const FORMZ_FIELD_OPTION = new InjectionToken<IFormzFieldOption>('FORMZ_FIELD_OPTION');
