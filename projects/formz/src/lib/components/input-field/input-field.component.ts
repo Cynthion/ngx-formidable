@@ -1,17 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  EventEmitter,
-  forwardRef,
-  Input,
-  Output,
-  ViewChild
-} from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { v4 as uuid } from 'uuid';
+import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { FieldDecoratorLayout, FORMZ_FIELD, IFormzInputField } from '../../form-model';
+import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
   selector: 'formz-input-field',
@@ -32,14 +22,8 @@ import { FieldDecoratorLayout, FORMZ_FIELD, IFormzInputField } from '../../form-
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InputFieldComponent implements ControlValueAccessor, IFormzInputField {
+export class InputFieldComponent extends BaseFieldDirective implements IFormzInputField {
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
-
-  private id = uuid();
-  private isFieldFocused = false;
-  private isFieldFilled = false;
-  private valueChangeSubject$ = new Subject<string>();
-  private focusChangeSubject$ = new Subject<boolean>();
 
   protected onInputChange(): void {
     const value = this.value;
@@ -61,28 +45,9 @@ export class InputFieldComponent implements ControlValueAccessor, IFormzInputFie
 
   //#region ControlValueAccessor
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onChange: (value: unknown) => void = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onTouched: () => void = () => {};
-
-  writeValue(value: string): void {
-    this.isFieldFilled = !!value;
-
+  protected doWriteValue(value: string): void {
     // write to wrapped input element
     this.inputRef.nativeElement.value = value ?? '';
-  }
-
-  registerOnChange(fn: never): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: never): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
   }
 
   //#endregion
@@ -95,22 +60,11 @@ export class InputFieldComponent implements ControlValueAccessor, IFormzInputFie
   @Input() minLength = -1;
   @Input() maxLength = -1;
   @Input() readOnly = false;
-  @Input() disabled = false;
   @Input() required = false;
 
   //#endregion
 
   //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  @Output() valueChanged = new EventEmitter<string>();
-  @Output() focusChanged = new EventEmitter<boolean>();
-
-  get fieldId(): string {
-    return this.id;
-  }
 
   get value(): string {
     return this.inputRef.nativeElement.value;
@@ -124,7 +78,7 @@ export class InputFieldComponent implements ControlValueAccessor, IFormzInputFie
     return this.inputRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout?: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'single';
 
   //#endregion
 }

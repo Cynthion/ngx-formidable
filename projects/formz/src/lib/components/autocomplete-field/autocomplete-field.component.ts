@@ -178,7 +178,7 @@ export class AutocompleteFieldComponent
     return this.autocompleteRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout?: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'single';
 
   //#endregion
 

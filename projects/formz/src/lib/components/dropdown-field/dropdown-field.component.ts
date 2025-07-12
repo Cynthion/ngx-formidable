@@ -157,7 +157,7 @@ export class DropdownFieldComponent
     return this.dropdownRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout?: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'single';
 
   //#endregion
 

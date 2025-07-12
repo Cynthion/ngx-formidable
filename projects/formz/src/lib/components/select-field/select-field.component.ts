@@ -133,7 +133,7 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
     return this.selectRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout?: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'single';
 
   //#endregion
 

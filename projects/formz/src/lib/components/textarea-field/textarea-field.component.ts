@@ -134,7 +134,7 @@ export class TextareaFieldComponent implements ControlValueAccessor, IFormzTexta
     return this.textareaRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout?: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'single';
 
   //#endregion
 

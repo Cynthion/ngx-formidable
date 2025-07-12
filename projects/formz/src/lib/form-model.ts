@@ -27,6 +27,7 @@ export interface FormValidationOptions {
  */
 export interface IFormzField<T = string> {
   fieldId: string;
+  disabled: boolean;
   value: T;
   isLabelFloating: boolean;
   valueChange$: Observable<T>;
@@ -34,7 +35,7 @@ export interface IFormzField<T = string> {
   valueChanged: EventEmitter<T>;
   focusChanged: EventEmitter<boolean>;
   elementRef: ElementRef<HTMLElement>;
-  decoratorLayout?: FieldDecoratorLayout;
+  decoratorLayout: FieldDecoratorLayout;
 }
 
 /** Interface for all Formz fields that support multiple options. */
@@ -63,13 +64,23 @@ type FormzInputFieldsKeys =
   | 'minLength'
   | 'maxLength'
   | 'readOnly'
-  | 'disabled'
+  // | 'disabled'
+  | 'required';
+
+type FormzTextareaFieldsKeys = FormzInputFieldsKeys;
+
+type FormzSelectFieldsKeys =
+  | 'name'
+  //  | 'disabled'
   | 'required';
 
 /** The subset of `<input/>` properties that are supported. */
 export interface IFormzInputField extends Pick<HTMLInputElement, FormzInputFieldsKeys>, IFormzField {}
 
-type FormzGroupFieldsKeys = 'name' | 'disabled' | 'required';
+type FormzGroupFieldsKeys =
+  | 'name'
+  // | 'disabled'
+  | 'required';
 
 /** The subset of `<input type="radio"/> properties that are supported.` */
 export interface IFormzRadioGroupField
@@ -83,12 +94,8 @@ export interface IFormzCheckboxGroupField
     IFormzField<string[]>,
     IFormzOptionField {}
 
-type FormzTextareaFieldsKeys = FormzInputFieldsKeys;
-
 /** The subset of `<textarea/>` properties that are supported. */
 export interface IFormzTextareaField extends Pick<HTMLTextAreaElement, FormzTextareaFieldsKeys>, IFormzField {}
-
-type FormzSelectFieldsKeys = 'name' | 'disabled' | 'required';
 
 /** The subset of `<select/>` properties that are supported. */
 export interface IFormzSelectField
@@ -99,7 +106,6 @@ export interface IFormzSelectField
 export interface IFormzDropdownField extends IFormzField, IFormzOptionField {
   name: string;
   placeholder?: string;
-  disabled?: boolean;
   required?: boolean;
 }
 
@@ -131,7 +137,6 @@ export interface IFormzPikadayOptions
 export interface IFormzDateField extends IFormzField, IFormzPikadayOptions {
   name: string;
   placeholder?: string;
-  disabled?: boolean;
   required?: boolean;
   // TODO implement
   maskFormat: 'YYYY-MM-DD' | 'DD.MM.YYYY' | string;

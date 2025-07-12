@@ -150,7 +150,7 @@ export class RadioGroupFieldComponent
     return this.radioGroupRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout?: FieldDecoratorLayout = 'group';
+  decoratorLayout: FieldDecoratorLayout = 'group';
 
   //#endregion
 

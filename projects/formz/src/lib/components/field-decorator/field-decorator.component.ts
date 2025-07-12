@@ -2,10 +2,12 @@ import {
   AfterContentInit,
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ContentChild,
   ElementRef,
   EventEmitter,
+  inject,
   OnDestroy,
   Output,
   ViewChild
@@ -40,6 +42,8 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   protected hasPrefix = false;
   protected hasSuffix = false;
 
+  private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
   private destroy$ = new Subject<void>();
@@ -55,6 +59,9 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     // interact with the projected field content
     this.forwardEvents();
     this.adjustLayout();
+
+    // evaluate the initial state of the field
+    this.cdRef.markForCheck();
   }
 
   ngOnDestroy() {
@@ -72,6 +79,10 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   get fieldId(): string {
     return this.projectedField?.fieldId ?? '';
+  }
+
+  get disabled(): boolean {
+    return this.projectedField?.disabled ?? false;
   }
 
   get value(): string {
@@ -104,11 +115,13 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
       this.projectedField.focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
         this.focusChangeSubject$.next(focused);
         this.focusChanged.emit(focused);
+        this.cdRef.markForCheck();
       });
 
       this.projectedField.valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
         this.valueChangeSubject$.next(value);
         this.valueChanged.emit(value);
+        this.cdRef.markForCheck();
       });
     }
   }
