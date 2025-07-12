@@ -102,7 +102,7 @@ export class DropdownFieldComponent
   private onTouched: () => void = () => {};
 
   writeValue(value: string): void {
-    const found = this.combineAllOptions().find((opt) => opt.value === value);
+    const found = this.options$.value.find((opt) => opt.value === value);
 
     this.selectedOption = found ? { ...found } : undefined;
     this.isFieldFilled = found ? !!value : false;
@@ -164,8 +164,7 @@ export class DropdownFieldComponent
   @ContentChildren(FORMZ_FIELD_OPTION)
   optionComponents?: QueryList<IFormzFieldOption>;
 
-  protected readonly inlineOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
-  protected readonly projectedOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+  protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;
@@ -186,19 +185,11 @@ export class DropdownFieldComponent
     this.togglePanel(false);
   }
 
-  private combineAllOptions(): IFormzFieldOption[] {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
-
-    return [...inlineOptions, ...projectedOptions];
-  }
-
   private updateOptions(): void {
     const inlineOptions = this.options ?? [];
     const projectedOptions = this.optionComponents?.toArray() ?? [];
 
-    this.inlineOptions$.next(inlineOptions);
-    this.projectedOptions$.next(projectedOptions);
+    this.options$.next([...inlineOptions, ...projectedOptions]);
   }
 
   //#endregion
@@ -249,7 +240,7 @@ export class DropdownFieldComponent
     if (this.disabled) return;
     if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
 
-    const options = this.combineAllOptions();
+    const options = this.options$.value;
     const count = options.length;
 
     this.ngZone.run(() => {
@@ -284,9 +275,7 @@ export class DropdownFieldComponent
   }
 
   private highlightSelectedOption(): void {
-    const options = this.combineAllOptions();
-
-    const selectedIndex = options.findIndex((opt) => opt.value === this.selectedOption?.value);
+    const selectedIndex = this.options$.value.findIndex((opt) => opt.value === this.selectedOption?.value);
 
     this.setHighlightedIndex(selectedIndex);
   }
