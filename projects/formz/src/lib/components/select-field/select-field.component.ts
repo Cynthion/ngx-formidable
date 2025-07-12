@@ -13,6 +13,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import {
+  EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
   FORMZ_FIELD,
   FORMZ_FIELD_OPTION,
@@ -48,10 +49,7 @@ import {
 export class SelectFieldComponent implements AfterContentInit, ControlValueAccessor, IFormzSelectField {
   @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLInputElement>;
 
-  protected selectedOption?: IFormzFieldOption;
-
   private id = uuid();
-
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
 
@@ -72,29 +70,6 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
     }
   }
-
-  //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  get fieldId(): string {
-    return this.id;
-  }
-
-  get value(): string {
-    return this.selectRef?.nativeElement.value || '';
-  }
-
-  readonly isLabelFloating = false;
-
-  get elementRef(): ElementRef<HTMLElement> {
-    return this.selectRef as ElementRef<HTMLElement>;
-  }
-
-  decoratorLayout?: FieldDecoratorLayout = 'single';
-
-  //#endregion
 
   //#region ControlValueAccessor
 
@@ -134,15 +109,40 @@ export class SelectFieldComponent implements AfterContentInit, ControlValueAcces
 
   //#endregion
 
+  //#region IFormzField
+
+  valueChange$ = this.valueChangeSubject$.asObservable();
+  focusChange$ = this.focusChangeSubject$.asObservable();
+
+  get fieldId(): string {
+    return this.id;
+  }
+
+  get value(): string {
+    return this.selectedOption?.value ?? '';
+  }
+
+  readonly isLabelFloating = false;
+
+  get elementRef(): ElementRef<HTMLElement> {
+    return this.selectRef as ElementRef<HTMLElement>;
+  }
+
+  decoratorLayout?: FieldDecoratorLayout = 'single';
+
+  //#endregion
+
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
-  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.' };
+  @Input() emptyOption: IFormzFieldOption = EMPTY_FIELD_OPTION;
 
   @ContentChildren(FORMZ_FIELD_OPTION)
   optionComponents?: QueryList<IFormzFieldOption>;
 
   protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+
+  private selectedOption?: IFormzFieldOption;
 
   public selectOption(_option: IFormzFieldOption): void {
     // not used in select field, but required by IFormzOptionField interface

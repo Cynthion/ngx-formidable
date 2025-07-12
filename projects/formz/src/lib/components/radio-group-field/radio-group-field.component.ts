@@ -55,13 +55,11 @@ export class RadioGroupFieldComponent
 {
   @ViewChild('radioGroupRef', { static: true }) radioGroupRef!: ElementRef<HTMLDivElement>;
 
-  protected selectedOption?: IFormzFieldOption;
   protected highlightedIndex = -1;
 
   private id = uuid();
   private isFieldFocused = false;
   private _value = '';
-
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
 
@@ -90,29 +88,6 @@ export class RadioGroupFieldComponent
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
     }
   }
-
-  //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  get fieldId(): string {
-    return this.id;
-  }
-
-  get value(): string {
-    return this.selectedOption?.value || '';
-  }
-
-  readonly isLabelFloating = false;
-
-  get elementRef(): ElementRef<HTMLElement> {
-    return this.radioGroupRef as ElementRef<HTMLElement>;
-  }
-
-  decoratorLayout?: FieldDecoratorLayout = 'group';
-
-  //#endregion
 
   //#region ControlValueAccessor
 
@@ -150,6 +125,29 @@ export class RadioGroupFieldComponent
 
   //#endregion
 
+  //#region IFormzField
+
+  valueChange$ = this.valueChangeSubject$.asObservable();
+  focusChange$ = this.focusChangeSubject$.asObservable();
+
+  get fieldId(): string {
+    return this.id;
+  }
+
+  get value(): string {
+    return this.selectedOption?.value || '';
+  }
+
+  readonly isLabelFloating = false;
+
+  get elementRef(): ElementRef<HTMLElement> {
+    return this.radioGroupRef as ElementRef<HTMLElement>;
+  }
+
+  decoratorLayout?: FieldDecoratorLayout = 'group';
+
+  //#endregion
+
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
@@ -159,6 +157,8 @@ export class RadioGroupFieldComponent
   optionComponents?: QueryList<IFormzFieldOption>;
 
   protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+
+  private selectedOption?: IFormzFieldOption;
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;

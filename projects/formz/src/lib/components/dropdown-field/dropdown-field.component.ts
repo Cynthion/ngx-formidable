@@ -18,6 +18,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import {
+  EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
   FORMZ_FIELD,
   FORMZ_FIELD_OPTION,
@@ -56,14 +57,12 @@ export class DropdownFieldComponent
   @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
-  protected selectedOption?: IFormzFieldOption;
   protected isOpen = false;
   protected highlightedIndex = -1;
 
   private id = uuid();
   private isFieldFocused = false;
   private isFieldFilled = false;
-
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
 
@@ -122,6 +121,15 @@ export class DropdownFieldComponent
 
   //#endregion
 
+  //#region IFormzDropdownField
+
+  @Input() name = '';
+  @Input() placeholder = '';
+  @Input() disabled = false;
+  @Input() required = false;
+
+  //#endregion
+
   //#region IFormzField
 
   valueChange$ = this.valueChangeSubject$.asObservable();
@@ -147,24 +155,17 @@ export class DropdownFieldComponent
 
   //#endregion
 
-  //#region IFormzDropdownField
-
-  @Input() name = '';
-  @Input() placeholder = '';
-  @Input() disabled = false;
-  @Input() required = false;
-
-  //#endregion
-
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
-  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.' };
+  @Input() emptyOption: IFormzFieldOption = EMPTY_FIELD_OPTION;
 
   @ContentChildren(FORMZ_FIELD_OPTION)
   optionComponents?: QueryList<IFormzFieldOption>;
 
   protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+
+  protected selectedOption?: IFormzFieldOption; // TODO make private, use wrapped input
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;
@@ -194,7 +195,7 @@ export class DropdownFieldComponent
 
   //#endregion
 
-  togglePanel(isOpen: boolean): void {
+  protected togglePanel(isOpen: boolean): void {
     this.isOpen = isOpen;
 
     if (isOpen) {

@@ -48,7 +48,6 @@ export class DateFieldComponent
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
   @ViewChild('pickerRef') pickerRef?: ElementRef<HTMLDivElement>;
 
-  protected selectedDate?: string; // TODO type Date?
   protected isOpen = false;
 
   private id = uuid();
@@ -228,6 +227,8 @@ export class DateFieldComponent
   @Input() maskFormat = 'DD.MM.YYYY';
 
   protected ngxMask = '0000-00-00';
+
+  private selectedDate?: string; // TODO type Date?
 
   public selectDate(date: string): void {
     this.selectedDate = date;

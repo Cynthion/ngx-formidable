@@ -20,6 +20,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, Subject, takeUntil } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import {
+  EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
   FORMZ_FIELD,
   FORMZ_FIELD_OPTION,
@@ -59,14 +60,12 @@ export class AutocompleteFieldComponent
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
-  protected selectedOption?: IFormzFieldOption;
   protected isOpen = false;
   protected highlightedIndex = -1;
 
   private id = uuid();
   protected isFieldFocused = false;
   private isFieldFilled = false;
-
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
   private destroy$ = new Subject<void>();
@@ -145,6 +144,15 @@ export class AutocompleteFieldComponent
 
   //#endregion
 
+  //#region IFormzAutocompleteField
+
+  @Input() name = '';
+  @Input() placeholder = '';
+  @Input() disabled = false;
+  @Input() required = false;
+
+  //#endregion
+
   //#region IFormzField
 
   valueChange$ = this.valueChangeSubject$.asObservable();
@@ -170,19 +178,10 @@ export class AutocompleteFieldComponent
 
   //#endregion
 
-  //#region IFormzDropdownField
-
-  @Input() name = '';
-  @Input() placeholder = '';
-  @Input() disabled = false;
-  @Input() required = false;
-
-  //#endregion
-
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
-  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.' };
+  @Input() emptyOption: IFormzFieldOption = EMPTY_FIELD_OPTION;
 
   @ContentChildren(FORMZ_FIELD_OPTION)
   optionComponents?: QueryList<IFormzFieldOption>;
@@ -190,6 +189,7 @@ export class AutocompleteFieldComponent
   protected readonly filteredOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
   private readonly filterValue$ = new BehaviorSubject<string>('');
+  private selectedOption?: IFormzFieldOption;
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;
@@ -227,9 +227,7 @@ export class AutocompleteFieldComponent
   private updateFilteredOptions(): void {
     const filterValue = this.filterValue$.value;
 
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
-    const allOptions = [...inlineOptions, ...projectedOptions];
+    const allOptions = this.combineAllOptions();
 
     const filteredOptions = filterValue
       ? allOptions.filter((opt) =>
@@ -242,7 +240,7 @@ export class AutocompleteFieldComponent
 
   //#endregion
 
-  togglePanel(isOpen: boolean): void {
+  protected togglePanel(isOpen: boolean): void {
     this.isOpen = isOpen;
 
     if (isOpen) {

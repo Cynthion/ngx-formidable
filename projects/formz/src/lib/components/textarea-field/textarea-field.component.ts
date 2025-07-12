@@ -29,7 +29,6 @@ export class TextareaFieldComponent implements ControlValueAccessor, IFormzTexta
   private id = uuid();
   private isFieldFocused = false;
   private isFieldFilled = false;
-
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
 
@@ -58,31 +57,6 @@ export class TextareaFieldComponent implements ControlValueAccessor, IFormzTexta
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
     }
   }
-
-  //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  get fieldId(): string {
-    return this.id;
-  }
-
-  get value(): string {
-    return this.textareaRef?.nativeElement.value || '';
-  }
-
-  get isLabelFloating(): boolean {
-    return !this.isFieldFocused && !this.isFieldFilled;
-  }
-
-  get elementRef(): ElementRef<HTMLElement> {
-    return this.textareaRef as ElementRef<HTMLElement>;
-  }
-
-  decoratorLayout?: FieldDecoratorLayout = 'single';
-
-  //#endregion
 
   //#region ControlValueAccessor
 
@@ -122,6 +96,31 @@ export class TextareaFieldComponent implements ControlValueAccessor, IFormzTexta
   @Input() disabled = false;
   @Input() readOnly = false;
   @Input() required = false;
+
+  //#endregion
+
+  //#region IFormzField
+
+  valueChange$ = this.valueChangeSubject$.asObservable();
+  focusChange$ = this.focusChangeSubject$.asObservable();
+
+  get fieldId(): string {
+    return this.id;
+  }
+
+  get value(): string {
+    return this.textareaRef?.nativeElement.value || '';
+  }
+
+  get isLabelFloating(): boolean {
+    return !this.isFieldFocused && !this.isFieldFilled;
+  }
+
+  get elementRef(): ElementRef<HTMLElement> {
+    return this.textareaRef as ElementRef<HTMLElement>;
+  }
+
+  decoratorLayout?: FieldDecoratorLayout = 'single';
 
   //#endregion
 

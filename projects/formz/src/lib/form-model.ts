@@ -13,6 +13,8 @@ export const FORMZ_OPTION_FIELD = new InjectionToken<IFormzOptionField>('FORMZ_O
 /** InjectionToken for option components that can be used in field components that support multiple options. */
 export const FORMZ_FIELD_OPTION = new InjectionToken<IFormzFieldOption>('FORMZ_FIELD_OPTION');
 
+export const EMPTY_FIELD_OPTION: IFormzFieldOption = { value: 'empty', label: 'No options available.', disabled: true };
+
 export type FieldDecoratorLayout = 'single' | 'group';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 

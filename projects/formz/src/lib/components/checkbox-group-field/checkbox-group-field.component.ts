@@ -55,13 +55,11 @@ export class CheckboxGroupFieldComponent
 {
   @ViewChild('checkboxGroupRef', { static: true }) checkboxGroupRef!: ElementRef<HTMLDivElement>;
 
-  protected optionsState?: IFormzFieldOption[];
   protected highlightedIndex = -1;
 
   private id = uuid();
   private isFieldFocused = false;
   private _value: string[] = [];
-
   private valueChangeSubject$ = new Subject<string[]>();
   private focusChangeSubject$ = new Subject<boolean>();
 
@@ -90,29 +88,6 @@ export class CheckboxGroupFieldComponent
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
     }
   }
-
-  //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  get fieldId(): string {
-    return this.id;
-  }
-
-  get value(): string[] {
-    return this.optionsState?.filter((opt) => opt.selected).map((opt) => opt.value) || [];
-  }
-
-  readonly isLabelFloating = false;
-
-  get elementRef(): ElementRef<HTMLElement> {
-    return this.checkboxGroupRef as ElementRef<HTMLElement>;
-  }
-
-  decoratorLayout?: FieldDecoratorLayout = 'group';
-
-  //#endregion
 
   //#region ControlValueAccessor
 
@@ -153,6 +128,29 @@ export class CheckboxGroupFieldComponent
 
   //#endregion
 
+  //#region IFormzField
+
+  valueChange$ = this.valueChangeSubject$.asObservable();
+  focusChange$ = this.focusChangeSubject$.asObservable();
+
+  get fieldId(): string {
+    return this.id;
+  }
+
+  get value(): string[] {
+    return this.optionsState?.filter((opt) => opt.selected).map((opt) => opt.value) || [];
+  }
+
+  readonly isLabelFloating = false;
+
+  get elementRef(): ElementRef<HTMLElement> {
+    return this.checkboxGroupRef as ElementRef<HTMLElement>;
+  }
+
+  decoratorLayout?: FieldDecoratorLayout = 'group';
+
+  //#endregion
+
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
@@ -162,6 +160,8 @@ export class CheckboxGroupFieldComponent
   optionComponents?: QueryList<IFormzFieldOption>;
 
   protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+
+  private optionsState?: IFormzFieldOption[];
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;

@@ -29,7 +29,6 @@ export class InputFieldComponent implements ControlValueAccessor, IFormzInputFie
   private id = uuid();
   private isFieldFocused = false;
   private isFieldFilled = false;
-
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();
 
@@ -48,31 +47,6 @@ export class InputFieldComponent implements ControlValueAccessor, IFormzInputFie
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
     }
   }
-
-  //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  get fieldId(): string {
-    return this.id;
-  }
-
-  get value(): string {
-    return this.inputRef?.nativeElement.value || '';
-  }
-
-  get isLabelFloating(): boolean {
-    return !this.isFieldFocused && !this.isFieldFilled;
-  }
-
-  get elementRef(): ElementRef<HTMLElement> {
-    return this.inputRef as ElementRef<HTMLElement>;
-  }
-
-  decoratorLayout?: FieldDecoratorLayout = 'single';
-
-  //#endregion
 
   //#region ControlValueAccessor
 
@@ -112,6 +86,31 @@ export class InputFieldComponent implements ControlValueAccessor, IFormzInputFie
   @Input() readOnly = false;
   @Input() disabled = false;
   @Input() required = false;
+
+  //#endregion
+
+  //#region IFormzField
+
+  valueChange$ = this.valueChangeSubject$.asObservable();
+  focusChange$ = this.focusChangeSubject$.asObservable();
+
+  get fieldId(): string {
+    return this.id;
+  }
+
+  get value(): string {
+    return this.inputRef?.nativeElement.value || '';
+  }
+
+  get isLabelFloating(): boolean {
+    return !this.isFieldFocused && !this.isFieldFilled;
+  }
+
+  get elementRef(): ElementRef<HTMLElement> {
+    return this.inputRef as ElementRef<HTMLElement>;
+  }
+
+  decoratorLayout?: FieldDecoratorLayout = 'single';
 
   //#endregion
 }
