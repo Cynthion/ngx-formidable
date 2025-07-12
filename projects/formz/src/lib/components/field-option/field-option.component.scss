@@ -24,6 +24,10 @@
   @include field-option-radio-group;
 }
 
+.field-option-checkbox-group {
+  @include field-option-checkbox-group;
+}
+
 .field-option-prefix {
   @include field-option-prefix;
 }
@@ -34,6 +38,14 @@
 
 .radio-inner {
   @include radio-group-prefix-inner;
+}
+
+.checkbox-outer {
+  @include checkbox-group-prefix-outer;
+}
+
+.checkbox-inner {
+  @include checkbox-group-prefix-inner;
 }
 
 .content {

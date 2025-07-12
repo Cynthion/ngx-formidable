@@ -12,6 +12,18 @@
     </span>
   </span>
 
+  <!-- Prefix for Checkbox Group -->
+  <span
+    *ngIf="layout === 'checkbox-group'"
+    class="field-option-prefix">
+    <span class="checkbox-outer">
+      <span
+        *ngIf="selected"
+        class="checkbox-inner"></span>
+    </span>
+  </span>
+
+  <!-- Content -->
   <div class="content">
     <!-- captures the content projection inside a template reference for later export -->
     <ng-template #contentTemplate>

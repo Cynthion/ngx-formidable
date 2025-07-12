@@ -377,28 +377,42 @@
   padding: 0.5rem 1rem 0.5rem 0;
 }
 
+@mixin field-option-checkbox-group {
+  @include field-option-radio-group;
+}
+
 @mixin field-option-prefix {
   display: flex;
   align-items: center;
   padding: 0rem 1rem;
 }
 
-@mixin radio-group-prefix-outer {
-  width: 21px; // TODO tokenize
-  height: 21px;
+@mixin checkbox-group-prefix-outer {
+  width: var(--formz-option-prefix-dimension-outer, #{tokens.$formz-option-prefix-dimension-outer});
+  height: var(--formz-option-prefix-dimension-outer, #{tokens.$formz-option-prefix-dimension-outer});
   border: 2px solid var(--formz-color-option-prefix-outer, #{tokens.$formz-color-option-prefix-outer});
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--formz-color-option-prefix-background, #{tokens.$formz-color-option-prefix-background});
 }
 
-@mixin radio-group-prefix-inner {
-  width: 7px; // TODO tokenize
-  height: 7px;
-  border-radius: 50%;
+@mixin checkbox-group-prefix-inner {
+  width: var(--formz-option-prefix-dimension-inner, #{tokens.$formz-option-prefix-dimension-inner});
+  height: var(--formz-option-prefix-dimension-inner, #{tokens.$formz-option-prefix-dimension-inner});
   background: var(--formz-color-option-prefix-inner, #{tokens.$formz-color-option-prefix-inner});
+}
+
+@mixin radio-group-prefix-outer {
+  @include checkbox-group-prefix-outer;
+
+  border-radius: 50%;
+}
+
+@mixin radio-group-prefix-inner {
+  @include checkbox-group-prefix-inner;
+
+  border-radius: 50%;
 }
 
 @mixin date-picker-wrapper {

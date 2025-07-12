@@ -17,17 +17,6 @@ export interface FormValidationOptions {
   debounceValidationInMs: number;
 }
 
-export interface IFormzFieldOption<T = unknown> {
-  value: string;
-  label?: string;
-  template?: TemplateRef<T>;
-  disabled?: boolean;
-  selected?: boolean;
-  highlighted?: boolean;
-  select?: () => void;
-  match?: (filterValue: string) => boolean;
-}
-
 /**
  * Interface for all Formz fields.
  */
@@ -61,6 +50,18 @@ export interface IFormzOptionField {
   selectOption(option: IFormzFieldOption): void;
 }
 
+/** Interface for all Formz options. */
+export interface IFormzFieldOption<T = unknown> {
+  value: string;
+  label?: string;
+  template?: TemplateRef<T>;
+  disabled?: boolean;
+  selected?: boolean;
+  highlighted?: boolean;
+  select?: () => void;
+  match?: (filterValue: string) => boolean;
+}
+
 type FormzInputFieldsKeys =
   | 'name'
   | 'placeholder'
@@ -74,17 +75,13 @@ type FormzInputFieldsKeys =
 /** The subset of `<input/>` properties that are supported. */
 export type IFormzInputField = Pick<HTMLInputElement, FormzInputFieldsKeys>;
 
-type FormzRadioGroupFieldsKeys = 'name' | 'disabled' | 'required';
+type FormzGroupFieldsKeys = 'name' | 'disabled' | 'required';
 
 /** The subset of `<input type="radio"/> properties that are supported.` */
-export interface IFormzRadioGroupField extends Pick<HTMLInputElement, FormzRadioGroupFieldsKeys>, IFormzOptionField {}
-
-type FormzCheckboxGroupFieldsKeys = FormzRadioGroupFieldsKeys;
+export interface IFormzRadioGroupField extends Pick<HTMLInputElement, FormzGroupFieldsKeys>, IFormzOptionField {}
 
 /** The subset of `<input type="checkbox"/> properties that are supported.` */
-export interface IFormzCheckboxGroupField
-  extends Pick<HTMLInputElement, FormzCheckboxGroupFieldsKeys>,
-    IFormzOptionField {}
+export interface IFormzCheckboxGroupField extends Pick<HTMLInputElement, FormzGroupFieldsKeys>, IFormzOptionField {}
 
 type FormzTextareaFieldsKeys = FormzInputFieldsKeys;
 
