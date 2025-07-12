@@ -107,7 +107,6 @@ export class ExampleFormComponent {
 
   protected allergiesOptions: IFormzFieldOption[] = [
     { value: 'pollen', label: 'Pollen' },
-
     { value: 'dust', label: 'Dust' },
     { value: 'peanuts', label: 'Peanuts' },
     { value: 'shellfish', label: 'Shellfish' }

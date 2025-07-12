@@ -1,5 +1,6 @@
 # Backlog
 
+- rename libary to `formidable`
 - add an overwriteable FormzConfig (e.g., `inputDebounceTime`)
 - remove all `cmp` prefixes
 - automatically add `name` property on fields based on vm?
@@ -32,3 +33,10 @@
 - <input> value & checked could be added to interface, if used withouth FormControl
 - add support for `ReactiveForms`
 - detect decorator layout automatically
+- combine inline & projected options:
+
+  ````
+  <ng-container *ngIf="option.template; else labelContent" [ngTemplateOutlet]="option.template"></ng-container>
+  <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
+  ```
+  ````

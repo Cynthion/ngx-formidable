@@ -125,7 +125,7 @@ export class CheckboxGroupFieldComponent
 
     this.optionsState = allOptions.map((opt) => ({
       ...opt,
-      checked: values.includes(opt.value)
+      selected: values.includes(opt.value)
     }));
   }
 
@@ -175,7 +175,7 @@ export class CheckboxGroupFieldComponent
     this.optionsState =
       this.optionsState?.map((opt) => (opt.value === option.value ? { ...opt, ...newOption } : opt)) || [];
 
-    const newValue = this.optionsState.map((opt) => opt.value);
+    const newValue = this.value;
 
     this.valueChangeSubject$.next(newValue);
     this.onChange(newValue); // notify ControlValueAccessor of the change
@@ -202,7 +202,7 @@ export class CheckboxGroupFieldComponent
   }
 
   protected isChecked(value: string): boolean {
-    return this.optionsState?.some((opt) => opt.value === value && opt.selected) || false;
+    return this.value.includes(value);
   }
 
   //#endregion
