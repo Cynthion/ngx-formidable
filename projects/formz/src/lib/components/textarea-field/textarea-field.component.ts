@@ -1,17 +1,7 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  EventEmitter,
-  forwardRef,
-  Input,
-  Output,
-  ViewChild
-} from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { v4 as uuid } from 'uuid';
+import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { FieldDecoratorLayout, FORMZ_FIELD, IFormzTextareaField } from '../../form-model';
+import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
   selector: 'formz-textarea-field',
@@ -32,20 +22,8 @@ import { FieldDecoratorLayout, FORMZ_FIELD, IFormzTextareaField } from '../../fo
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TextareaFieldComponent implements ControlValueAccessor, IFormzTextareaField {
+export class TextareaFieldComponent extends BaseFieldDirective implements IFormzTextareaField {
   @ViewChild('textareaRef', { static: true }) textareaRef!: ElementRef<HTMLTextAreaElement>;
-
-  private id = uuid();
-  private isFieldFocused = false;
-  private isFieldFilled = false;
-  private valueChangeSubject$ = new Subject<string>();
-  private focusChangeSubject$ = new Subject<boolean>();
-
-  /**
-   * Enable or disable autosizing of the textarea.
-   * If true, the textarea will automatically adjust its height based on the content.
-   */
-  @Input() enableAutosize = true;
 
   protected onInputChange(): void {
     const value = this.value;
@@ -71,28 +49,9 @@ export class TextareaFieldComponent implements ControlValueAccessor, IFormzTexta
 
   //#region ControlValueAccessor
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onChange: (value: unknown) => void = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onTouched: () => void = () => {};
-
-  writeValue(value: string): void {
-    this.isFieldFilled = !!value;
-
-    // write to wrapped textarea element
+  protected doWriteValue(value: string): void {
+    // write to wrapped element
     this.textareaRef.nativeElement.value = value ?? '';
-  }
-
-  registerOnChange(fn: never): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: never): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
   }
 
   //#endregion
@@ -104,23 +63,14 @@ export class TextareaFieldComponent implements ControlValueAccessor, IFormzTexta
   @Input() autocomplete: AutoFill = 'off';
   @Input() minLength = -1;
   @Input() maxLength = -1;
-  @Input() disabled = false;
   @Input() readOnly = false;
   @Input() required = false;
+
+  @Input() enableAutosize = true;
 
   //#endregion
 
   //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  @Output() valueChanged = new EventEmitter<string>();
-  @Output() focusChanged = new EventEmitter<boolean>();
-
-  get fieldId(): string {
-    return this.id;
-  }
 
   get value(): string {
     return this.textareaRef.nativeElement.value;

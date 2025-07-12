@@ -95,7 +95,13 @@ export interface IFormzCheckboxGroupField
     IFormzOptionField {}
 
 /** The subset of `<textarea/>` properties that are supported. */
-export interface IFormzTextareaField extends Pick<HTMLTextAreaElement, FormzTextareaFieldsKeys>, IFormzField {}
+export interface IFormzTextareaField extends Pick<HTMLTextAreaElement, FormzTextareaFieldsKeys>, IFormzField {
+  /**
+   * Enable or disable autosizing of the textarea.
+   * If true, the textarea will automatically adjust its height based on the content.
+   */
+  enableAutosize: boolean;
+}
 
 /** The subset of `<select/>` properties that are supported. */
 export interface IFormzSelectField

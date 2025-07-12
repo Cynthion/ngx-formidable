@@ -46,7 +46,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormzInp
   //#region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
-    // write to wrapped input element
+    // write to wrapped element
     this.inputRef.nativeElement.value = value ?? '';
   }
 
