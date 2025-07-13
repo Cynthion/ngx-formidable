@@ -4,7 +4,6 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
-  EventEmitter,
   forwardRef,
   inject,
   Injector,
@@ -13,15 +12,13 @@ import {
   OnChanges,
   OnDestroy,
   OnInit,
-  Output,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, NgControl, NgModel } from '@angular/forms';
+import { FormControl, NG_VALUE_ACCESSOR, NgControl, NgModel } from '@angular/forms';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
-import { Subject } from 'rxjs';
-import { v4 as uuid } from 'uuid';
-import { FieldDecoratorLayout, FORMZ_FIELD, IFormzDateField } from '../../form-model';
+import { FieldDecoratorLayout, FORMZ_FIELD } from '../../form-model';
+import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
   selector: 'formz-date-field',
@@ -42,9 +39,7 @@ import { FieldDecoratorLayout, FORMZ_FIELD, IFormzDateField } from '../../form-m
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DateFieldComponent
-  implements OnInit, AfterViewInit, OnChanges, OnDestroy, ControlValueAccessor, IFormzDateField
-{
+export class DateFieldComponent extends BaseFieldDirective implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
@@ -52,14 +47,7 @@ export class DateFieldComponent
 
   protected isOpen = false;
 
-  private id = uuid();
-  protected isFieldFocused = false;
-  private isFieldFilled = false;
-
-  private valueChangeSubject$ = new Subject<string>();
-  private focusChangeSubject$ = new Subject<boolean>();
-
-  private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   private globalClickUnlisten?: () => void;
   private globalKeydownUnlisten?: () => void;
@@ -168,12 +156,7 @@ export class DateFieldComponent
 
   //#region ControlValueAccessor
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onChange: (value: unknown) => void = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onTouched: () => void = () => {};
-
-  writeValue(value: string): void {
+  protected doWriteValue(value: string): void {
     this.selectedDate = value;
 
     this.isFieldFilled = !!value;
@@ -182,31 +165,9 @@ export class DateFieldComponent
     this.inputRef.nativeElement.value = value;
   }
 
-  registerOnChange(fn: never): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: never): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
-
   //#endregion
 
   //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  @Output() valueChanged = new EventEmitter<string>();
-  @Output() focusChanged = new EventEmitter<boolean>();
-
-  get fieldId(): string {
-    return this.id;
-  }
 
   get value(): string {
     return this.selectedDate ?? '';
@@ -228,7 +189,6 @@ export class DateFieldComponent
 
   @Input() name = '';
   @Input() placeholder = '';
-  @Input() disabled = false;
   @Input() required = false;
   @Input() maskFormat = 'DD.MM.YYYY';
 

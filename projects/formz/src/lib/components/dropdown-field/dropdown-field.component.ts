@@ -5,20 +5,17 @@ import {
   Component,
   ContentChildren,
   ElementRef,
-  EventEmitter,
   forwardRef,
   inject,
   Input,
   NgZone,
   OnDestroy,
   OnInit,
-  Output,
   QueryList,
   ViewChild
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { v4 as uuid } from 'uuid';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
 import {
   EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
@@ -28,6 +25,7 @@ import {
   IFormzDropdownField,
   IFormzFieldOption
 } from '../../form-model';
+import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
   selector: 'formz-dropdown-field',
@@ -54,7 +52,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DropdownFieldComponent
-  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzDropdownField
+  extends BaseFieldDirective
+  implements IFormzDropdownField, OnInit, AfterContentInit, OnDestroy
 {
   @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
@@ -62,14 +61,8 @@ export class DropdownFieldComponent
   protected isOpen = false;
   protected highlightedIndex = -1;
 
-  private id = uuid();
-  private isFieldFocused = false;
-  private isFieldFilled = false;
-  private valueChangeSubject$ = new Subject<string>();
-  private focusChangeSubject$ = new Subject<boolean>();
-
-  private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
-  private ngZone: NgZone = inject(NgZone);
+  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private readonly ngZone: NgZone = inject(NgZone);
 
   private globalClickUnlisten?: () => void;
   private globalKeydownUnlisten?: () => void;
@@ -98,28 +91,11 @@ export class DropdownFieldComponent
 
   //#region ControlValueAccessor
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onChange: (value: unknown) => void = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onTouched: () => void = () => {};
-
-  writeValue(value: string): void {
+  protected doWriteValue(value: string): void {
     const found = this.options$.value.find((opt) => opt.value === value);
 
     this.selectedOption = found ? { ...found } : undefined;
     this.isFieldFilled = found ? !!value : false;
-  }
-
-  registerOnChange(fn: never): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: never): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
   }
 
   //#endregion
@@ -128,22 +104,11 @@ export class DropdownFieldComponent
 
   @Input() name = '';
   @Input() placeholder = '';
-  @Input() disabled = false;
   @Input() required = false;
 
   //#endregion
 
   //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  @Output() valueChanged = new EventEmitter<string>();
-  @Output() focusChanged = new EventEmitter<boolean>();
-
-  get fieldId(): string {
-    return this.id;
-  }
 
   get value(): string {
     return this.selectedOption?.value || '';
@@ -195,6 +160,8 @@ export class DropdownFieldComponent
   }
 
   private updateOptions(): void {
+    // The projected options (option.template) might not be available immediately after content initialization,
+    // but the options are wrapped in a panel which on open renders the options.
     const inlineOptions = this.options ?? [];
     const projectedOptions = this.optionComponents?.toArray() ?? [];
 

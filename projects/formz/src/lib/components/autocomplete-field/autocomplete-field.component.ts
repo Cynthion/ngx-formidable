@@ -16,9 +16,8 @@ import {
   QueryList,
   ViewChild
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, Subject, takeUntil } from 'rxjs';
-import { v4 as uuid } from 'uuid';
 import {
   EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
@@ -28,6 +27,7 @@ import {
   IFormzAutocompleteField,
   IFormzFieldOption
 } from '../../form-model';
+import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
   selector: 'formz-autocomplete-field',
@@ -54,7 +54,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AutocompleteFieldComponent
-  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzAutocompleteField
+  extends BaseFieldDirective
+  implements IFormzAutocompleteField, OnInit, AfterContentInit, OnDestroy
 {
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
@@ -62,16 +63,11 @@ export class AutocompleteFieldComponent
 
   protected isOpen = false;
   protected highlightedIndex = -1;
+  protected filterChangeSubject$ = new BehaviorSubject<string>(this.value || '');
 
-  private id = uuid();
-  protected isFieldFocused = false;
-  private isFieldFilled = false;
-  private valueChangeSubject$ = new Subject<string>();
-  private focusChangeSubject$ = new Subject<boolean>();
-  private destroy$ = new Subject<void>();
-
-  private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
-  private ngZone: NgZone = inject(NgZone);
+  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private readonly ngZone: NgZone = inject(NgZone);
+  private readonly destroy$ = new Subject<void>();
 
   private globalClickUnlisten?: () => void;
   private globalKeydownUnlisten?: () => void;
@@ -92,14 +88,11 @@ export class AutocompleteFieldComponent
     this.destroy$.complete();
   }
 
-  // TODO expose filterValue$ instead
-  @Output() inputChange$ = new EventEmitter<string>();
-
   protected onInputChange(): void {
     const value = this.inputRef.nativeElement.value;
 
-    this.inputChange$.emit(value);
-    this.filterValue$.next(value);
+    this.filterChangeSubject$.next(value);
+    this.filterChanged.emit(value);
 
     this.isFieldFilled = value.length > 0;
   }
@@ -116,12 +109,7 @@ export class AutocompleteFieldComponent
 
   //#region ControlValueAccessor
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onChange: (value: unknown) => void = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onTouched: () => void = () => {};
-
-  writeValue(value: string): void {
+  protected doWriteValue(value: string): void {
     const found = this.combineAllOptions().find((opt) => opt.value === value);
 
     this.selectedOption = found ? { ...found } : undefined;
@@ -131,40 +119,21 @@ export class AutocompleteFieldComponent
     this.inputRef.nativeElement.value = found ? found.label || found.value : '';
   }
 
-  registerOnChange(fn: never): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: never): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
-
   //#endregion
 
   //#region IFormzAutocompleteField
 
+  public filterChange$ = this.filterChangeSubject$.asObservable();
+
   @Input() name = '';
   @Input() placeholder = '';
-  @Input() disabled = false;
   @Input() required = false;
+
+  @Output() filterChanged = new EventEmitter<string>();
 
   //#endregion
 
   //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  @Output() valueChanged = new EventEmitter<string>();
-  @Output() focusChanged = new EventEmitter<boolean>();
-
-  get fieldId(): string {
-    return this.id;
-  }
 
   get value(): string {
     return this.selectedOption?.value || '';
@@ -192,7 +161,6 @@ export class AutocompleteFieldComponent
 
   protected readonly filteredOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
-  private readonly filterValue$ = new BehaviorSubject<string>('');
   private selectedOption?: IFormzFieldOption;
 
   public selectOption(option: IFormzFieldOption): void {
@@ -231,7 +199,7 @@ export class AutocompleteFieldComponent
   }
 
   private updateFilteredOptions(): void {
-    const filterValue = this.filterValue$.value;
+    const filterValue = this.filterChangeSubject$.value;
 
     const allOptions = this.combineAllOptions();
 
@@ -376,7 +344,7 @@ export class AutocompleteFieldComponent
   }
 
   private registerAutocomplete(): void {
-    this.filterValue$
+    this.filterChangeSubject$
       .pipe(
         debounceTime(200),
         distinctUntilChanged(),

@@ -5,21 +5,19 @@ import {
   Component,
   ContentChildren,
   ElementRef,
-  EventEmitter,
   forwardRef,
   inject,
   Input,
   NgZone,
   OnDestroy,
   OnInit,
-  Output,
   QueryList,
   ViewChild
 } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { v4 as uuid } from 'uuid';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { BehaviorSubject } from 'rxjs';
 import {
+  EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
   FORMZ_FIELD,
   FORMZ_FIELD_OPTION,
@@ -27,6 +25,7 @@ import {
   IFormzCheckboxGroupField,
   IFormzFieldOption
 } from '../../form-model';
+import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
   selector: 'formz-checkbox-group-field',
@@ -53,20 +52,17 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CheckboxGroupFieldComponent
-  implements OnInit, AfterContentInit, OnDestroy, ControlValueAccessor, IFormzCheckboxGroupField
+  extends BaseFieldDirective<string[]>
+  implements IFormzCheckboxGroupField, OnInit, AfterContentInit, OnDestroy
 {
   @ViewChild('checkboxGroupRef', { static: true }) checkboxGroupRef!: ElementRef<HTMLDivElement>;
 
   protected highlightedIndex = -1;
 
-  private id = uuid();
-  private isFieldFocused = false;
   private _value: string[] = [];
-  private valueChangeSubject$ = new Subject<string[]>();
-  private focusChangeSubject$ = new Subject<boolean>();
 
-  private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
-  private ngZone: NgZone = inject(NgZone);
+  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private readonly ngZone: NgZone = inject(NgZone);
 
   private globalKeydownUnlisten?: () => void;
 
@@ -94,12 +90,7 @@ export class CheckboxGroupFieldComponent
 
   //#region ControlValueAccessor
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onChange: (value: unknown) => void = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private onTouched: () => void = () => {};
-
-  writeValue(value: string[]): void {
+  protected doWriteValue(value: string[]): void {
     this._value = value;
     const values: string[] = Array.isArray(value) ? value : [];
 
@@ -109,39 +100,16 @@ export class CheckboxGroupFieldComponent
     }));
   }
 
-  registerOnChange(fn: never): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: never): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
-
   //#endregion
 
   //#region IFormzCheckboxGroupField
 
   @Input() name = '';
-  @Input() disabled = false;
   @Input() required = false;
 
   //#endregion
 
   //#region IFormzField
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  @Output() valueChanged = new EventEmitter<string[]>();
-  @Output() focusChanged = new EventEmitter<boolean>();
-
-  get fieldId(): string {
-    return this.id;
-  }
 
   get value(): string[] {
     return this.optionsState?.filter((opt) => opt.selected).map((opt) => opt.value) || [];
@@ -160,7 +128,7 @@ export class CheckboxGroupFieldComponent
   //#region IFormzOptionField
 
   @Input() options?: IFormzFieldOption[] = [];
-  @Input() emptyOption: IFormzFieldOption = { value: 'empty', label: 'No options available.' };
+  @Input() emptyOption: IFormzFieldOption = EMPTY_FIELD_OPTION;
 
   @ContentChildren(FORMZ_FIELD_OPTION)
   optionComponents?: QueryList<IFormzFieldOption>;

@@ -42,7 +42,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   protected hasPrefix = false;
   protected hasSuffix = false;
 
-  private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   private valueChangeSubject$ = new Subject<string>();
   private focusChangeSubject$ = new Subject<boolean>();

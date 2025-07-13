@@ -19,7 +19,7 @@ export abstract class BaseFieldDirective<T = string> implements ControlValueAcce
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected onTouched: () => void = () => {};
 
-  writeValue(value: string): void {
+  writeValue(value: T): void {
     this.isFieldFilled = !!value;
 
     this.doWriteValue(value);
@@ -37,7 +37,7 @@ export abstract class BaseFieldDirective<T = string> implements ControlValueAcce
     this.disabled = isDisabled;
   }
 
-  protected abstract doWriteValue(value: string): void;
+  protected abstract doWriteValue(value: T): void;
 
   //#endregion
 

@@ -1,7 +1,6 @@
 # Backlog
 
 - rename libary to `formidable`
-- base class for all fields (id, etc.)
 - extract common functionalities into helpers
 - add an overwriteable FormzConfig (e.g., `inputDebounceTime`)
 - remove all `cmp` prefixes

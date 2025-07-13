@@ -61,8 +61,8 @@ export class RadioGroupFieldComponent
 
   private _value = '';
 
-  private cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
-  private ngZone: NgZone = inject(NgZone);
+  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  private readonly ngZone: NgZone = inject(NgZone);
 
   private globalKeydownUnlisten?: () => void;
 

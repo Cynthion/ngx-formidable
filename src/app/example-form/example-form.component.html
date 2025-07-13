@@ -182,9 +182,9 @@
         [required]="false"
         [options]="animalOptionsDefault"
         [emptyOption]="animalEmptyOption"
-        (inputChange$)="onAnimalFilterChange($event)"
         (valueChanged)="onValueChanged('animal', $event)"
-        (focusChanged)="onFocusChanged('animal', $event)">
+        (focusChanged)="onFocusChanged('animal', $event)"
+        (filterChanged)="onAnimalFilterChange($event)">
         @for (option of animalOptionsFiltered$ | async; track option.value) {
           <fuzzy-field-option
             [value]="option.value"

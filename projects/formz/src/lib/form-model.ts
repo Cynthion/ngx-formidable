@@ -115,7 +115,10 @@ export interface IFormzDropdownField extends IFormzField, IFormzOptionField {
   required?: boolean;
 }
 
-export type IFormzAutocompleteField = IFormzDropdownField;
+export interface IFormzAutocompleteField extends IFormzDropdownField {
+  filterChange$: Observable<string>;
+  filterChanged: EventEmitter<string>;
+}
 
 /** The subset of `PikadayOptions` that are supported. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
