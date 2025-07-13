@@ -25,11 +25,23 @@ import { BaseFieldDirective } from '../base-field.component';
 export class InputFieldComponent extends BaseFieldDirective implements IFormzInputField {
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
+  protected registerKeyboard = false;
+  protected registerExternalClick = false;
+  protected registeredKeys: string[] = [];
+
   protected doOnValueChange(): void {
     // No additional actions needed
   }
 
   protected doOnFocusChange(_isFocused: boolean): void {
+    // No additional actions needed
+  }
+
+  protected doHandleKeyDown(_event: KeyboardEvent): void {
+    // No additional actions needed
+  }
+
+  protected doHandleExternalClick(): void {
     // No additional actions needed
   }
 

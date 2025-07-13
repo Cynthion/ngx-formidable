@@ -8,7 +8,6 @@ import {
   forwardRef,
   inject,
   Input,
-  NgZone,
   OnDestroy,
   OnInit,
   QueryList,
@@ -57,25 +56,18 @@ export class CheckboxGroupFieldComponent
 {
   @ViewChild('checkboxGroupRef', { static: true }) checkboxGroupRef!: ElementRef<HTMLDivElement>;
 
+  protected registerKeyboard = true;
+  protected registerExternalClick = false;
+  protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
+
   protected highlightedIndex = -1;
 
   private _value: string[] = [];
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
-  private readonly ngZone: NgZone = inject(NgZone);
-
-  private globalKeydownUnlisten?: () => void;
-
-  ngOnInit(): void {
-    this.registerGlobalListeners();
-  }
 
   ngAfterContentInit(): void {
     this.updateOptions();
-  }
-
-  ngOnDestroy(): void {
-    this.unregisterGlobalListeners();
   }
 
   protected doOnValueChange(): void {
@@ -83,6 +75,34 @@ export class CheckboxGroupFieldComponent
   }
 
   protected doOnFocusChange(_isFocused: boolean): void {
+    // No additional actions needed
+  }
+
+  protected doHandleKeyDown(event: KeyboardEvent): void {
+    const options = this.options$.value;
+    const count = options.length;
+
+    switch (event.key) {
+      case 'ArrowDown':
+        if (count > 0) {
+          this.setHighlightedIndex((this.highlightedIndex + 1) % count);
+        }
+        break;
+      case 'ArrowUp':
+        if (count > 0) {
+          this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
+        }
+        break;
+      case 'Enter':
+        if (this.optionsState?.[this.highlightedIndex]) {
+          const option = this.optionsState[this.highlightedIndex]!;
+          this.selectOption(option);
+        }
+        break;
+    }
+  }
+
+  protected doHandleExternalClick(): void {
     // No additional actions needed
   }
 
@@ -174,53 +194,6 @@ export class CheckboxGroupFieldComponent
   }
 
   //#endregion
-
-  private registerGlobalListeners(): void {
-    this.ngZone.runOutsideAngular(() => {
-      const onKeyDown = (event: KeyboardEvent) => this.handleKeyDown(event);
-
-      document.addEventListener('keydown', onKeyDown);
-
-      this.globalKeydownUnlisten = () => document.removeEventListener('keydown', onKeyDown);
-    });
-  }
-
-  private unregisterGlobalListeners(): void {
-    this.globalKeydownUnlisten?.();
-  }
-
-  private handleKeyDown(event: KeyboardEvent): void {
-    if (!this.isFieldFocused) return;
-    if (this.disabled) return;
-    if (!['ArrowDown', 'ArrowUp', 'Enter'].includes(event.key)) return;
-
-    const options = this.options$.value;
-    const count = options.length;
-
-    this.ngZone.run(() => {
-      switch (event.key) {
-        case 'ArrowDown':
-          if (count > 0) {
-            this.setHighlightedIndex((this.highlightedIndex + 1) % count);
-          }
-          event.preventDefault();
-          break;
-        case 'ArrowUp':
-          if (count > 0) {
-            this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
-          }
-          event.preventDefault();
-          break;
-        case 'Enter':
-          if (this.optionsState?.[this.highlightedIndex]) {
-            const option = this.optionsState[this.highlightedIndex]!;
-            this.selectOption(option);
-            event.preventDefault();
-          }
-          break;
-      }
-    });
-  }
 
   private setHighlightedIndex(index: number): void {
     this.highlightedIndex = index;

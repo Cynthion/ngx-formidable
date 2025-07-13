@@ -8,7 +8,6 @@ import {
   inject,
   Injector,
   Input,
-  NgZone,
   OnChanges,
   OnDestroy,
   OnInit,
@@ -45,12 +44,13 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
   @ViewChild('pickerRef') pickerRef?: ElementRef<HTMLDivElement>;
 
+  protected registerKeyboard = true;
+  protected registerExternalClick = true;
+  protected registeredKeys = ['Escape', 'Tab', 'ArrowDown'];
+
   protected isOpen = false;
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
-
-  private globalClickUnlisten?: () => void;
-  private globalKeydownUnlisten?: () => void;
 
   private readonly staticOptions: PikadayOptions = {
     field: undefined, // not supported
@@ -94,17 +94,16 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   private picker?: Pikaday;
 
   private readonly injector: Injector = inject(Injector);
-  private readonly ngZone: NgZone = inject(NgZone);
 
   control!: FormControl; // initialized in ngOnInit
 
-  ngOnInit(): void {
+  override ngOnInit(): void {
+    super.ngOnInit();
+
     const ngControl = this.injector.get(NgControl, null, { self: true, optional: true });
 
     this.control = this.getFormControlFromNgControlDirective(ngControl);
     this.control.setErrors({ errors: ['Wrong date format.'] }); // TODO remove, just for testing
-
-    this.registerGlobalListeners();
   }
 
   private getFormControlFromNgControlDirective(ngControl: NgControl | null): FormControl {
@@ -129,10 +128,6 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     }
   }
 
-  ngOnDestroy(): void {
-    this.unregisterGlobalListeners();
-  }
-
   protected doOnValueChange(): void {
     const value = this.inputRef.nativeElement.value; // TODO use this.value instead?
 
@@ -144,6 +139,27 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
 
   protected doOnFocusChange(_isFocused: boolean): void {
     // No additional actions needed
+  }
+
+  protected doHandleKeyDown(event: KeyboardEvent): void {
+    // TODO support selection of date within picker
+    switch (event.key) {
+      case 'Escape':
+      case 'Tab':
+        if (this.isOpen) this.togglePanel(false);
+        break;
+      case 'ArrowDown':
+        if (!this.isOpen) {
+          this.togglePanel(true);
+        }
+        break;
+    }
+  }
+
+  protected doHandleExternalClick(): void {
+    if (!this.isOpen) return;
+
+    this.togglePanel(false);
   }
 
   //#region ControlValueAccessor
@@ -319,57 +335,6 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     }
 
     this.cdRef.markForCheck();
-  }
-
-  private registerGlobalListeners(): void {
-    this.ngZone.runOutsideAngular(() => {
-      const onClick = (event: MouseEvent) => this.handleExternalClick(event);
-      const onKeyDown = (event: KeyboardEvent) => this.handleKeyDown(event);
-
-      document.addEventListener('click', onClick);
-      document.addEventListener('keydown', onKeyDown);
-
-      this.globalClickUnlisten = () => document.removeEventListener('click', onClick);
-      this.globalKeydownUnlisten = () => document.removeEventListener('keydown', onKeyDown);
-    });
-  }
-
-  private unregisterGlobalListeners(): void {
-    this.globalClickUnlisten?.();
-    this.globalKeydownUnlisten?.();
-  }
-
-  private handleExternalClick(event: MouseEvent): void {
-    if (!this.isOpen) return;
-
-    const clickedInside = this.dateRef.nativeElement.contains(event.target as Node);
-
-    if (!clickedInside) {
-      this.ngZone.run(() => this.togglePanel(false));
-    }
-  }
-
-  private handleKeyDown(event: KeyboardEvent): void {
-    if (!this.isFieldFocused) return;
-    if (this.disabled) return;
-    if (!['Escape', 'ArrowDown', 'Tab'].includes(event.key)) return;
-
-    // TODO support selection of date within picker
-
-    this.ngZone.run(() => {
-      switch (event.key) {
-        case 'Escape':
-        case 'Tab':
-          if (this.isOpen) this.togglePanel(false);
-          break;
-        case 'ArrowDown':
-          if (!this.isOpen) {
-            this.togglePanel(true);
-          }
-          event.preventDefault();
-          break;
-      }
-    });
   }
 
   private scrollIntoView(): void {

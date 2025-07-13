@@ -1,16 +1,35 @@
-import { Directive, ElementRef, EventEmitter, Output } from '@angular/core';
+import { Directive, ElementRef, EventEmitter, inject, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { FieldDecoratorLayout, IFormzField } from '../form-model';
 
 @Directive()
-export abstract class BaseFieldDirective<T = string> implements ControlValueAccessor, IFormzField<T> {
+export abstract class BaseFieldDirective<T = string>
+  implements ControlValueAccessor, IFormzField<T>, OnInit, OnDestroy
+{
+  protected abstract registerKeyboard: boolean;
+  protected abstract registerExternalClick: boolean;
+  protected abstract registeredKeys: string[];
+
   protected id = uuid();
   protected isFieldFocused = false;
   protected isFieldFilled = false;
   protected valueChangeSubject$ = new Subject<T>();
   protected focusChangeSubject$ = new Subject<boolean>();
+
+  protected readonly ngZone: NgZone = inject(NgZone);
+
+  private globalKeyboardUnlisten?: () => void;
+  private globalExternalClickUnlisten?: () => void;
+
+  ngOnInit(): void {
+    this.registerGlobalListeners();
+  }
+
+  ngOnDestroy(): void {
+    this.unregisterGlobalListeners();
+  }
 
   protected onValueChange(): void {
     const value = this.value;
@@ -89,4 +108,47 @@ export abstract class BaseFieldDirective<T = string> implements ControlValueAcce
   abstract decoratorLayout: FieldDecoratorLayout;
 
   //#endregion
+
+  private registerGlobalListeners(): void {
+    if (this.registerKeyboard || this.registerExternalClick) {
+      this.ngZone.runOutsideAngular(() => {
+        if (this.registerKeyboard) {
+          const onKeyDown = (event: KeyboardEvent) =>
+            this.ngZone.run(() => {
+              if (!this.isFieldFocused || this.disabled) return;
+              if (!this.registeredKeys.includes(event.key)) return;
+
+              this.doHandleKeyDown(event);
+
+              if (event.key === 'Tab') return;
+              event.preventDefault();
+            });
+
+          document.addEventListener('keydown', onKeyDown);
+          this.globalKeyboardUnlisten = () => document.removeEventListener('keydown', onKeyDown);
+        }
+
+        if (this.registerExternalClick) {
+          const onClick = (event: MouseEvent) => {
+            const isClickInside = this.elementRef.nativeElement.contains(event.target as Node);
+            if (isClickInside) return;
+
+            this.ngZone.run(() => this.doHandleExternalClick());
+          };
+
+          document.addEventListener('click', onClick);
+          this.globalExternalClickUnlisten = () => document.removeEventListener('click', onClick);
+        }
+      });
+    }
+  }
+
+  private unregisterGlobalListeners(): void {
+    this.globalKeyboardUnlisten?.();
+    this.globalExternalClickUnlisten?.();
+  }
+
+  protected abstract doHandleKeyDown(event: KeyboardEvent): void;
+
+  protected abstract doHandleExternalClick(): void;
 }

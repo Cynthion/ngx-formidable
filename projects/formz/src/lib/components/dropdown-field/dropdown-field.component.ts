@@ -8,9 +8,6 @@ import {
   forwardRef,
   inject,
   Input,
-  NgZone,
-  OnDestroy,
-  OnInit,
   QueryList,
   ViewChild
 } from '@angular/core';
@@ -51,32 +48,21 @@ import { BaseFieldDirective } from '../base-field.component';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DropdownFieldComponent
-  extends BaseFieldDirective
-  implements IFormzDropdownField, OnInit, AfterContentInit, OnDestroy
-{
+export class DropdownFieldComponent extends BaseFieldDirective implements IFormzDropdownField, AfterContentInit {
   @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
+
+  protected registerKeyboard = true;
+  protected registerExternalClick = true;
+  protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
   protected isOpen = false;
   protected highlightedIndex = -1;
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
-  private readonly ngZone: NgZone = inject(NgZone);
-
-  private globalClickUnlisten?: () => void;
-  private globalKeydownUnlisten?: () => void;
-
-  ngOnInit(): void {
-    this.registerGlobalListeners();
-  }
 
   ngAfterContentInit(): void {
     this.updateOptions();
-  }
-
-  ngOnDestroy(): void {
-    this.unregisterGlobalListeners();
   }
 
   protected doOnValueChange(): void {
@@ -85,6 +71,42 @@ export class DropdownFieldComponent
 
   protected doOnFocusChange(_isFocused: boolean): void {
     // No additional actions needed
+  }
+
+  protected doHandleKeyDown(event: KeyboardEvent): void {
+    const options = this.options$.value;
+    const count = options.length;
+
+    switch (event.key) {
+      case 'Escape':
+      case 'Tab':
+        if (this.isOpen) this.togglePanel(false);
+        break;
+      case 'ArrowDown':
+        if (!this.isOpen) {
+          this.togglePanel(true);
+        } else if (count > 0) {
+          this.setHighlightedIndex((this.highlightedIndex + 1) % count);
+        }
+        break;
+      case 'ArrowUp':
+        if (this.isOpen && count > 0) {
+          this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
+        }
+        break;
+      case 'Enter':
+        if (this.isOpen && options[this.highlightedIndex]) {
+          const option = options[this.highlightedIndex]!;
+          this.selectOption(option);
+        }
+        break;
+    }
+  }
+
+  protected doHandleExternalClick(): void {
+    if (!this.isOpen) return;
+
+    this.togglePanel(false);
   }
 
   //#region ControlValueAccessor
@@ -179,73 +201,6 @@ export class DropdownFieldComponent
     }
 
     this.cdRef.markForCheck();
-  }
-
-  private registerGlobalListeners(): void {
-    this.ngZone.runOutsideAngular(() => {
-      const onClick = (event: MouseEvent) => this.handleExternalClick(event);
-      const onKeyDown = (event: KeyboardEvent) => this.handleKeyDown(event);
-
-      document.addEventListener('click', onClick);
-      document.addEventListener('keydown', onKeyDown);
-
-      this.globalClickUnlisten = () => document.removeEventListener('click', onClick);
-      this.globalKeydownUnlisten = () => document.removeEventListener('keydown', onKeyDown);
-    });
-  }
-
-  private unregisterGlobalListeners(): void {
-    this.globalClickUnlisten?.();
-    this.globalKeydownUnlisten?.();
-  }
-
-  private handleExternalClick(event: MouseEvent): void {
-    if (!this.isOpen) return;
-
-    const clickedInside = this.dropdownRef.nativeElement.contains(event.target as Node);
-
-    if (!clickedInside) {
-      this.ngZone.run(() => this.togglePanel(false));
-    }
-  }
-
-  private handleKeyDown(event: KeyboardEvent): void {
-    if (!this.isFieldFocused) return;
-    if (this.disabled) return;
-    if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) return;
-
-    const options = this.options$.value;
-    const count = options.length;
-
-    this.ngZone.run(() => {
-      switch (event.key) {
-        case 'Escape':
-        case 'Tab':
-          if (this.isOpen) this.togglePanel(false);
-          break;
-        case 'ArrowDown':
-          if (!this.isOpen) {
-            this.togglePanel(true);
-          } else if (count > 0) {
-            this.setHighlightedIndex((this.highlightedIndex + 1) % count);
-          }
-          event.preventDefault();
-          break;
-        case 'ArrowUp':
-          if (this.isOpen && count > 0) {
-            this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
-            event.preventDefault();
-          }
-          break;
-        case 'Enter':
-          if (this.isOpen && options[this.highlightedIndex]) {
-            const option = options[this.highlightedIndex]!;
-            this.selectOption(option);
-            event.preventDefault();
-          }
-          break;
-      }
-    });
   }
 
   private highlightSelectedOption(): void {
