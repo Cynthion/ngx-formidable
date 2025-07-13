@@ -88,7 +88,7 @@ export class AutocompleteFieldComponent
     this.destroy$.complete();
   }
 
-  protected onInputChange(): void {
+  protected doOnValueChange(): void {
     const value = this.inputRef.nativeElement.value;
 
     this.filterChangeSubject$.next(value);
@@ -97,14 +97,8 @@ export class AutocompleteFieldComponent
     this.isFieldFilled = value.length > 0;
   }
 
-  protected onFocusChange(isFocused: boolean): void {
-    this.focusChangeSubject$.next(isFocused);
-    this.focusChanged.emit(isFocused);
-    this.isFieldFocused = isFocused;
-
-    if (!isFocused) {
-      this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
-    }
+  protected doOnFocusChange(_isFocused: boolean): void {
+    // No additional actions needed
   }
 
   //#region ControlValueAccessor

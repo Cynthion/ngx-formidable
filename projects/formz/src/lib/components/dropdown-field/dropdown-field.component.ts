@@ -79,14 +79,12 @@ export class DropdownFieldComponent
     this.unregisterGlobalListeners();
   }
 
-  protected onFocusChange(isFocused: boolean): void {
-    this.focusChangeSubject$.next(isFocused);
-    this.focusChanged.emit(isFocused);
-    this.isFieldFocused = isFocused;
+  protected doOnValueChange(): void {
+    // No additional actions needed
+  }
 
-    if (!isFocused) {
-      this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
-    }
+  protected doOnFocusChange(_isFocused: boolean): void {
+    // No additional actions needed
   }
 
   //#region ControlValueAccessor

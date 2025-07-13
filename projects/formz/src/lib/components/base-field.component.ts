@@ -12,6 +12,31 @@ export abstract class BaseFieldDirective<T = string> implements ControlValueAcce
   protected valueChangeSubject$ = new Subject<T>();
   protected focusChangeSubject$ = new Subject<boolean>();
 
+  protected onValueChange(): void {
+    const value = this.value;
+    this.valueChangeSubject$.next(value);
+    this.valueChanged.emit(value);
+    this.isFieldFilled = typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
+    this.onChange(value); // notify ControlValueAccessor of the change
+
+    this.doOnValueChange();
+  }
+
+  protected onFocusChange(isFocused: boolean): void {
+    this.focusChangeSubject$.next(isFocused);
+    this.focusChanged.emit(isFocused);
+    this.isFieldFocused = isFocused;
+
+    if (!isFocused) {
+      this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
+    }
+
+    this.doOnFocusChange(isFocused);
+  }
+
+  protected abstract doOnValueChange(): void;
+  protected abstract doOnFocusChange(isFocused: boolean): void;
+
   //#region ControlValueAccessor
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

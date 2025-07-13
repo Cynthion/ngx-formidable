@@ -25,24 +25,12 @@ import { BaseFieldDirective } from '../base-field.component';
 export class InputFieldComponent extends BaseFieldDirective implements IFormzInputField {
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
-  protected onInputChange(): void {
-    // TODO this is common for many fields, combine to base class?
-    const value = this.value;
-    this.valueChangeSubject$.next(value);
-    this.valueChanged.emit(value);
-    this.isFieldFilled = value.length > 0;
-    this.onChange(value); // notify ControlValueAccessor of the change
+  protected doOnValueChange(): void {
+    // No additional actions needed
   }
 
-  protected onFocusChange(isFocused: boolean): void {
-    // TODO this is common for many fields, combine to base class?
-    this.focusChangeSubject$.next(isFocused);
-    this.focusChanged.emit(isFocused);
-    this.isFieldFocused = isFocused;
-
-    if (!isFocused) {
-      this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
-    }
+  protected doOnFocusChange(_isFocused: boolean): void {
+    // No additional actions needed
   }
 
   //#region ControlValueAccessor

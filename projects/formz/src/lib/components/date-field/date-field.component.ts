@@ -133,25 +133,17 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     this.unregisterGlobalListeners();
   }
 
-  protected onInputChange(): void {
-    const value = this.inputRef.nativeElement.value;
+  protected doOnValueChange(): void {
+    const value = this.inputRef.nativeElement.value; // TODO use this.value instead?
 
     // this.inputChange$.emit(value);
     // this.filterValue$.next(value);
 
-    this.isFieldFilled = value.length > 0;
-
     this.validateDate(value); // TODO add validator outside?
   }
 
-  protected onFocusChange(isFocused: boolean): void {
-    this.focusChangeSubject$.next(isFocused);
-    this.focusChanged.emit(isFocused);
-    this.isFieldFocused = isFocused;
-
-    if (!isFocused) {
-      this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
-    }
+  protected doOnFocusChange(_isFocused: boolean): void {
+    // No additional actions needed
   }
 
   //#region ControlValueAccessor

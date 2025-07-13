@@ -53,20 +53,12 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormzSe
     this.updateOptions();
   }
 
-  protected onChangeChange(): void {
-    const value = this.value;
-    this.valueChangeSubject$.next(value);
-    this.valueChanged.emit(value);
-    this.onChange(value); // notify ControlValueAccessor of the change
+  protected doOnValueChange(): void {
+    // No additional actions needed
   }
 
-  protected onFocusChange(isFocused: boolean): void {
-    this.focusChangeSubject$.next(isFocused);
-    this.focusChanged.emit(isFocused);
-
-    if (!isFocused) {
-      this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
-    }
+  protected doOnFocusChange(_isFocused: boolean): void {
+    // No additional actions needed
   }
 
   //#region ControlValueAccessor
