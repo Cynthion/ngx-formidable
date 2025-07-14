@@ -1,7 +1,7 @@
 // Source: https://github.dev/simplifiedcourses/ngx-vest-forms
 
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
-import { ROOT_FORM } from './form-model';
+import { ROOT_FORM } from './formz.model';
 
 /**
  * Merges a forms values and raw values.

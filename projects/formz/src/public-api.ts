@@ -26,5 +26,5 @@ export * from './lib/directives/form-model.directive';
 export * from './lib/directives/form-root-validate.directive';
 export * from './lib/directives/form.directive';
 
-export * from './lib/form-model';
+export * from './lib/formz.model';
 export * from './lib/utility-types';

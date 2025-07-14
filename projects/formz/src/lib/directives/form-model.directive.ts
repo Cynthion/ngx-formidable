@@ -1,9 +1,9 @@
 import { Directive, inject, input } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { FormDirective } from './form.directive';
-import { FormValidationOptions } from '../form-model';
 import { getFormControlFieldPath } from '../form.helpers';
+import { FormValidationOptions } from '../formz.model';
+import { FormDirective } from './form.directive';
 
 /**
  * Hooks into Angular's 'ngModel' and creates an async validator.

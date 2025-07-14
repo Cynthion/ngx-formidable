@@ -26,6 +26,7 @@ export interface FormValidationOptions {
  * Interface for all Formz fields.
  */
 export interface IFormzField<T = string> {
+  elementRef: ElementRef<HTMLElement>; // TODO rename to fieldRef
   fieldId: string;
   disabled: boolean;
   value: T;
@@ -34,7 +35,6 @@ export interface IFormzField<T = string> {
   focusChange$: Observable<boolean>;
   valueChanged: EventEmitter<T>;
   focusChanged: EventEmitter<boolean>;
-  elementRef: ElementRef<HTMLElement>;
   decoratorLayout: FieldDecoratorLayout;
 }
 
@@ -55,6 +55,13 @@ export interface IFormzFieldOption<T = unknown> {
   highlighted?: boolean;
   select?: () => void;
   match?: (filterValue: string) => boolean;
+}
+
+/** Interface for all Formz fields that have a panel. */
+export interface IFormzPanelField {
+  panelRef?: ElementRef<HTMLElement>;
+  isPanelOpen: boolean;
+  togglePanel(isOpen: boolean): void;
 }
 
 type FormzInputFieldsKeys =

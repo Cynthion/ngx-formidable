@@ -25,7 +25,7 @@ import {
   FORMZ_OPTION_FIELD,
   IFormzAutocompleteField,
   IFormzFieldOption
-} from '../../form-model';
+} from '../../formz.model';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({

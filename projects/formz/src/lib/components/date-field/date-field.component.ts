@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { FormControl, NG_VALUE_ACCESSOR, NgControl, NgModel } from '@angular/forms';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
-import { FieldDecoratorLayout, FORMZ_FIELD } from '../../form-model';
+import { FieldDecoratorLayout, FORMZ_FIELD } from '../../formz.model';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({

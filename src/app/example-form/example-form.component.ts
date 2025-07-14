@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import Fuse, { FuseResult } from 'fuse.js';
-import { FormValidationOptions, IFormzFieldOption } from 'projects/formz/src/lib/form-model';
+import { FormValidationOptions, IFormzFieldOption } from 'projects/formz/src/lib/formz.model';
 import { map, Observable, startWith, Subject } from 'rxjs';
 import {
   AnimalFormFieldOption,

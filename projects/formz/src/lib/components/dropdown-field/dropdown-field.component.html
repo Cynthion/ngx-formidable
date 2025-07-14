@@ -6,21 +6,21 @@
   (blur)="onFocusChange(false)">
   <div
     class="trigger"
-    (click)="togglePanel(!isOpen)">
+    (click)="togglePanel(!isPanelOpen)">
     {{ selectedOption?.label || placeholder }}
     <span
       class="caret"
-      [class.rotated]="isOpen"
+      [class.rotated]="isPanelOpen"
       >▼</span
     >
   </div>
 
   <!-- Panel -->
   <div
-    *ngIf="isOpen"
+    *ngIf="isPanelOpen"
     #panelRef
     class="panel"
-    [class.open]="isOpen">
+    [class.open]="isPanelOpen">
     <!-- Options -->
     <!-- Option components are re-created in order to control them. -->
     @for (option of options$.value; track option.value; let i = $index) {

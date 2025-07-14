@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { FieldDecoratorLayout, FORMZ_FIELD, IFormzTextareaField } from '../../form-model';
+import { FieldDecoratorLayout, FORMZ_FIELD, IFormzTextareaField } from '../../formz.model';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({

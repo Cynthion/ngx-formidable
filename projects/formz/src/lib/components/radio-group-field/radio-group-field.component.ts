@@ -23,7 +23,7 @@ import {
   FORMZ_OPTION_FIELD,
   IFormzFieldOption,
   IFormzRadioGroupField
-} from '../../form-model';
+} from '../../formz.model';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({

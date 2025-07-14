@@ -23,7 +23,7 @@ import {
   FORMZ_OPTION_FIELD,
   IFormzCheckboxGroupField,
   IFormzFieldOption
-} from '../../form-model';
+} from '../../formz.model';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
