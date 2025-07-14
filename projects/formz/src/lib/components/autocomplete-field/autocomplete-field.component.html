@@ -19,10 +19,10 @@
 
   <!-- Panel -->
   <div
-    *ngIf="isOpen"
+    *ngIf="isPanelOpen"
     #panelRef
     class="panel"
-    [class.open]="isOpen">
+    [class.open]="isPanelOpen">
     <!-- Options -->
     <!-- Option components are re-created in order to control and filter them. -->
     @for (option of filteredOptions$.value; track option.value; let i = $index) {

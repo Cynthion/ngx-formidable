@@ -26,6 +26,7 @@ import {
   IFormzAutocompleteField,
   IFormzFieldOption
 } from '../../formz.model';
+import { PanelBehavior } from '../../panel.behavior';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -58,13 +59,11 @@ export class AutocompleteFieldComponent
 {
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
-  @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
   protected registerKeyboard = true;
   protected registerExternalClick = true;
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
-  protected isOpen = false;
   protected highlightedIndex = -1;
   protected filterChangeSubject$ = new BehaviorSubject<string>(this.value || '');
 
@@ -107,22 +106,22 @@ export class AutocompleteFieldComponent
     switch (event.key) {
       case 'Escape':
       case 'Tab':
-        if (this.isOpen) this.togglePanel(false);
+        if (this.isPanelOpen) this.togglePanel(false);
         break;
       case 'ArrowDown':
-        if (!this.isOpen) {
+        if (!this.isPanelOpen) {
           this.togglePanel(true);
         } else if (count > 0) {
           this.setHighlightedIndex((this.highlightedIndex + 1) % count);
         }
         break;
       case 'ArrowUp':
-        if (this.isOpen && count > 0) {
+        if (this.isPanelOpen && count > 0) {
           this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
         }
         break;
       case 'Enter':
-        if (this.isOpen && options[this.highlightedIndex]) {
+        if (this.isPanelOpen && options[this.highlightedIndex]) {
           const option = options[this.highlightedIndex]!;
           this.selectOption(option);
         }
@@ -131,7 +130,7 @@ export class AutocompleteFieldComponent
   }
 
   protected doHandleExternalClick(): void {
-    if (!this.isOpen) return;
+    if (!this.isPanelOpen) return;
 
     this.togglePanel(false);
   }
@@ -243,18 +242,32 @@ export class AutocompleteFieldComponent
 
   //#endregion
 
-  protected togglePanel(isOpen: boolean): void {
-    this.isOpen = isOpen;
+  //#region IFormzPanelField
 
+  @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
+
+  @Input()
+  get isPanelOpen(): boolean {
+    return this.panelBehavior.isPanelOpen;
+  }
+  set isPanelOpen(val: boolean) {
+    this.panelBehavior.togglePanel(val);
+  }
+
+  private panelBehavior = new PanelBehavior(this.autocompleteRef, this.panelRef);
+
+  protected togglePanel(isOpen: boolean): void {
+    this.panelBehavior.togglePanel(isOpen);
+
+    // additional field specific behavior
     if (isOpen) {
       this.highlightSelectedOption();
-      this.scrollIntoView();
     } else {
-      this.setHighlightedIndex(-1); // reset highlighted index when closing
+      this.setHighlightedIndex(-1);
     }
-
-    this.cdRef.markForCheck();
   }
+
+  //#endregion
 
   private highlightSelectedOption(): void {
     const selectedIndex = this.filteredOptions$.value.findIndex((opt) => opt.value === this.selectedOption?.value);
@@ -266,43 +279,6 @@ export class AutocompleteFieldComponent
     this.highlightedIndex = index;
 
     this.cdRef.markForCheck();
-  }
-
-  private scrollIntoView(): void {
-    setTimeout(() => {
-      const field = this.autocompleteRef?.nativeElement;
-      const panel = this.panelRef?.nativeElement;
-
-      if (!field || !panel) return;
-
-      const fieldRect = field.getBoundingClientRect();
-      const panelRect = panel.getBoundingClientRect();
-
-      const fieldBottomEdge = fieldRect.bottom;
-      const fieldTopEdge = fieldRect.top;
-
-      const panelBottomEdge = panelRect.bottom;
-      const panelTopEdge = panelRect.top;
-
-      const viewportHeight = window.innerHeight;
-
-      const isFieldOutOfView = fieldBottomEdge > viewportHeight || fieldTopEdge < 0;
-      const isPanelOutOfView = panelBottomEdge > viewportHeight || panelTopEdge < 0;
-
-      if (isFieldOutOfView) {
-        field.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest'
-        });
-      }
-
-      if (isPanelOutOfView) {
-        panel.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest'
-        });
-      }
-    });
   }
 
   private registerAutocomplete(): void {
@@ -317,7 +293,7 @@ export class AutocompleteFieldComponent
         this.deselectOption();
         this.updateFilteredOptions();
 
-        if (!this.isOpen) {
+        if (!this.isPanelOpen) {
           this.togglePanel(true);
         }
       });

@@ -1,7 +1,6 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ElementRef,
   forwardRef,
@@ -17,6 +16,7 @@ import {
 import { FormControl, NG_VALUE_ACCESSOR, NgControl, NgModel } from '@angular/forms';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { FieldDecoratorLayout, FORMZ_FIELD } from '../../formz.model';
+import { PanelBehavior } from '../../panel.behavior';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -41,16 +41,13 @@ import { BaseFieldDirective } from '../base-field.component';
 export class DateFieldComponent extends BaseFieldDirective implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
-  @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
   @ViewChild('pickerRef') pickerRef?: ElementRef<HTMLDivElement>;
 
   protected registerKeyboard = true;
   protected registerExternalClick = true;
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown'];
 
-  protected isOpen = false;
-
-  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  // private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   private readonly staticOptions: PikadayOptions = {
     field: undefined, // not supported
@@ -146,10 +143,10 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     switch (event.key) {
       case 'Escape':
       case 'Tab':
-        if (this.isOpen) this.togglePanel(false);
+        if (this.isPanelOpen) this.togglePanel(false);
         break;
       case 'ArrowDown':
-        if (!this.isOpen) {
+        if (!this.isPanelOpen) {
           this.togglePanel(true);
         }
         break;
@@ -157,7 +154,7 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   }
 
   protected doHandleExternalClick(): void {
-    if (!this.isOpen) return;
+    if (!this.isPanelOpen) return;
 
     this.togglePanel(false);
   }
@@ -323,56 +320,32 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
 
   //#endregion
 
+  //#region IFormzPanelField
+
+  @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
+
+  @Input()
+  get isPanelOpen(): boolean {
+    return this.panelBehavior.isPanelOpen;
+  }
+  set isPanelOpen(val: boolean) {
+    this.panelBehavior.togglePanel(val);
+  }
+
+  private panelBehavior = new PanelBehavior(this.dateRef, this.panelRef);
+
   protected togglePanel(isOpen: boolean): void {
-    this.isOpen = isOpen;
+    this.panelBehavior.togglePanel(isOpen);
 
+    // additional field specific behavior
     if (isOpen) {
-      // TODO highlight selected date? done via defaultDate & setDefaultDate
       // this.highlightSelectedOption();
-      this.scrollIntoView();
     } else {
-      // this.setHighlightedIndex(-1); // reset highlighted index when closing
+      // this.setHighlightedIndex(-1);
     }
-
-    this.cdRef.markForCheck();
   }
 
-  private scrollIntoView(): void {
-    setTimeout(() => {
-      const field = this.dateRef?.nativeElement;
-      const panel = this.panelRef?.nativeElement;
-
-      if (!field || !panel) return;
-
-      const fieldRect = field.getBoundingClientRect();
-      const panelRect = panel.getBoundingClientRect();
-
-      const fieldBottomEdge = fieldRect.bottom;
-      const fieldTopEdge = fieldRect.top;
-
-      const panelBottomEdge = panelRect.bottom;
-      const panelTopEdge = panelRect.top;
-
-      const viewportHeight = window.innerHeight;
-
-      const isFieldOutOfView = fieldBottomEdge > viewportHeight || fieldTopEdge < 0;
-      const isPanelOutOfView = panelBottomEdge > viewportHeight || panelTopEdge < 0;
-
-      if (isFieldOutOfView) {
-        field.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest'
-        });
-      }
-
-      if (isPanelOutOfView) {
-        panel.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest'
-        });
-      }
-    });
-  }
+  //#endregion
 
   //#region Pikaday
 
