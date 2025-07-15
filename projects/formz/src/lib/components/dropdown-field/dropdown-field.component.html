@@ -19,7 +19,7 @@
   <div
     *ngIf="isPanelOpen"
     #panelRef
-    class="panel"
+    class="panel panel-{{ panelPosition }}"
     [class.open]="isPanelOpen">
     <!-- Options -->
     <!-- Option components are re-created in order to control them. -->

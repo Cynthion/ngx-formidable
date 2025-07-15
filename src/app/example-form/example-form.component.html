@@ -103,6 +103,7 @@
         [required]="false"
         [options]="nationalityOptions"
         [emptyOption]="nationalityEmptyOption"
+        [panelPosition]="'left'"
         (valueChanged)="onValueChanged('nationality', $event)"
         (focusChanged)="onFocusChanged('nationality', $event)">
         <formz-field-option

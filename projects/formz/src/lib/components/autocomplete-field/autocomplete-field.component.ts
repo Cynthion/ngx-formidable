@@ -23,6 +23,7 @@ import {
   FORMZ_FIELD,
   FORMZ_FIELD_OPTION,
   FORMZ_OPTION_FIELD,
+  FormzPanelPosition,
   IFormzAutocompleteField,
   IFormzFieldOption
 } from '../../formz.model';
@@ -252,6 +253,14 @@ export class AutocompleteFieldComponent
   }
   set isPanelOpen(val: boolean) {
     this.panelBehavior.togglePanel(val);
+  }
+
+  @Input()
+  get panelPosition(): FormzPanelPosition {
+    return this.panelBehavior.panelPosition;
+  }
+  set panelPosition(val: FormzPanelPosition) {
+    this.panelBehavior.panelPosition = val;
   }
 
   private panelBehavior = new PanelBehavior(this.autocompleteRef, this.panelRef);

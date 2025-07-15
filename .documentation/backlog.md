@@ -6,7 +6,6 @@
 - support showing multiple errors
 - resolve all TODOs
 - dropdown: write towards selection
-- left/right panel options in interface
 - check safari/firefox/edge
 - introduce a secondary color (date day label)
 - datefns needed?

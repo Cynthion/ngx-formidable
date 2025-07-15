@@ -292,14 +292,22 @@
   width: unset;
 }
 
-@mixin panel-full-width {
+@mixin panel-full-aligned {
   @include panel-left-aligned;
 
   width: calc(100% + 2px);
 }
 
-@mixin panel {
-  @include panel-full-width;
+@mixin panel() {
+  @include panel-full-aligned;
+
+  &.panel-left {
+    @include panel-left-aligned;
+  }
+
+  &.panel-right {
+    @include panel-right-aligned;
+  }
 
   position: absolute;
   box-shadow: var(--formz-dropdown-panel-box-shadow, #{tokens.$formz-dropdown-panel-box-shadow});
@@ -332,16 +340,16 @@
   }
 }
 
-@mixin dropdown-panel {
-  @include panel;
+@mixin dropdown-panel() {
+  @include panel();
 }
 
-@mixin autocomplete-panel {
-  @include panel;
+@mixin autocomplete-panel() {
+  @include panel();
 }
 
-@mixin date-panel {
-  @include panel;
+@mixin date-panel() {
+  @include panel();
 }
 
 @mixin field-option-disabled {

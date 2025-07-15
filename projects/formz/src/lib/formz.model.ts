@@ -17,6 +17,7 @@ export const EMPTY_FIELD_OPTION: IFormzFieldOption = { value: 'empty', label: 'N
 
 export type FieldDecoratorLayout = 'single' | 'group';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
+export type FormzPanelPosition = 'left' | 'right' | 'full';
 
 export interface FormValidationOptions {
   debounceValidationInMs: number;
@@ -62,6 +63,7 @@ export interface IFormzPanelField {
   panelRef?: ElementRef<HTMLElement>;
   isPanelOpen: boolean;
   togglePanel(isOpen: boolean): void;
+  panelPosition: FormzPanelPosition;
 }
 
 type FormzInputFieldsKeys =

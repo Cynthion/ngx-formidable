@@ -19,6 +19,7 @@ import {
   FORMZ_FIELD,
   FORMZ_FIELD_OPTION,
   FORMZ_OPTION_FIELD,
+  FormzPanelPosition,
   IFormzDropdownField,
   IFormzFieldOption
 } from '../../formz.model';
@@ -198,6 +199,14 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormz
   }
   set isPanelOpen(val: boolean) {
     this.panelBehavior.togglePanel(val);
+  }
+
+  @Input()
+  get panelPosition(): FormzPanelPosition {
+    return this.panelBehavior.panelPosition;
+  }
+  set panelPosition(val: FormzPanelPosition) {
+    this.panelBehavior.panelPosition = val;
   }
 
   private panelBehavior = new PanelBehavior(this.dropdownRef, this.panelRef);

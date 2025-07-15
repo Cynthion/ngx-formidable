@@ -1,10 +1,11 @@
 import { ElementRef } from '@angular/core';
-import { IFormzPanelField } from './formz.model';
+import { FormzPanelPosition, IFormzPanelField } from './formz.model';
 
 export class PanelBehavior implements IFormzPanelField {
   public fieldRef?: ElementRef<HTMLElement>;
   public panelRef?: ElementRef<HTMLElement>;
   public isPanelOpen = false;
+  public panelPosition: FormzPanelPosition = 'full';
 
   constructor(fieldRef?: ElementRef<HTMLElement>, panelRef?: ElementRef<HTMLElement>) {
     this.fieldRef = fieldRef;

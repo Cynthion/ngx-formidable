@@ -10,7 +10,6 @@
 
 .panel {
   @include date-panel;
-  @include panel-right-aligned;
 }
 
 .picker-wrapper {
