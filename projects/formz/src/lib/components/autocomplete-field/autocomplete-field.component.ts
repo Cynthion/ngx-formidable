@@ -64,7 +64,6 @@ export class AutocompleteFieldComponent
   protected registerExternalClick = true;
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
-  protected highlightedIndex = -1;
   protected filterChangeSubject$ = new BehaviorSubject<string>(this.value || '');
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
@@ -112,17 +111,17 @@ export class AutocompleteFieldComponent
         if (!this.isPanelOpen) {
           this.togglePanel(true);
         } else if (count > 0) {
-          this.setHighlightedIndex((this.highlightedIndex + 1) % count);
+          this.setHighlightedIndex((this.highlightedOptionIndex$.value + 1) % count);
         }
         break;
       case 'ArrowUp':
         if (this.isPanelOpen && count > 0) {
-          this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
+          this.setHighlightedIndex((this.highlightedOptionIndex$.value - 1 + count) % count);
         }
         break;
       case 'Enter':
-        if (this.isPanelOpen && options[this.highlightedIndex]) {
-          const option = options[this.highlightedIndex]!;
+        if (this.isPanelOpen && options[this.highlightedOptionIndex$.value]) {
+          const option = options[this.highlightedOptionIndex$.value]!;
           this.selectOption(option);
         }
         break;
@@ -188,6 +187,7 @@ export class AutocompleteFieldComponent
   optionComponents?: QueryList<IFormzFieldOption>;
 
   protected readonly filteredOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+  protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
 
   private selectedOption?: IFormzFieldOption;
 
@@ -262,6 +262,7 @@ export class AutocompleteFieldComponent
     // additional field specific behavior
     if (isOpen) {
       this.highlightSelectedOption();
+      this.cdRef.markForCheck();
     } else {
       this.setHighlightedIndex(-1);
     }
@@ -276,9 +277,7 @@ export class AutocompleteFieldComponent
   }
 
   private setHighlightedIndex(index: number): void {
-    this.highlightedIndex = index;
-
-    this.cdRef.markForCheck();
+    this.highlightedOptionIndex$.next(index);
   }
 
   private registerAutocomplete(): void {

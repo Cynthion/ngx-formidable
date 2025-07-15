@@ -1,12 +1,10 @@
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ContentChildren,
   ElementRef,
   forwardRef,
-  inject,
   Input,
   OnDestroy,
   OnInit,
@@ -60,11 +58,7 @@ export class CheckboxGroupFieldComponent
   protected registerExternalClick = false;
   protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
-  protected highlightedIndex = -1;
-
   private _value: string[] = [];
-
-  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   ngAfterContentInit(): void {
     this.updateOptions();
@@ -85,17 +79,17 @@ export class CheckboxGroupFieldComponent
     switch (event.key) {
       case 'ArrowDown':
         if (count > 0) {
-          this.setHighlightedIndex((this.highlightedIndex + 1) % count);
+          this.setHighlightedIndex((this.highlightedOptionIndex$.value + 1) % count);
         }
         break;
       case 'ArrowUp':
         if (count > 0) {
-          this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
+          this.setHighlightedIndex((this.highlightedOptionIndex$.value - 1 + count) % count);
         }
         break;
       case 'Enter':
-        if (this.optionsState?.[this.highlightedIndex]) {
-          const option = this.optionsState[this.highlightedIndex]!;
+        if (this.optionsState?.[this.highlightedOptionIndex$.value]) {
+          const option = this.optionsState[this.highlightedOptionIndex$.value]!;
           this.selectOption(option);
         }
         break;
@@ -152,6 +146,7 @@ export class CheckboxGroupFieldComponent
   optionComponents?: QueryList<IFormzFieldOption>;
 
   protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
+  protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
 
   private optionsState?: IFormzFieldOption[];
 
@@ -196,8 +191,6 @@ export class CheckboxGroupFieldComponent
   //#endregion
 
   private setHighlightedIndex(index: number): void {
-    this.highlightedIndex = index;
-
-    this.cdRef.markForCheck();
+    this.highlightedOptionIndex$.next(index);
   }
 }

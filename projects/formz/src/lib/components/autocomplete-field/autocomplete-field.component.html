@@ -32,7 +32,7 @@
         [match]="option.match"
         [disabled]="option.disabled || false"
         [selected]="option.value === value"
-        [highlighted]="i === highlightedIndex">
+        [highlighted]="i === (highlightedOptionIndex$ | async)">
         <ng-container
           *ngIf="option.template; else labelContent"
           [ngTemplateOutlet]="option.template">
