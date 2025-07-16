@@ -319,6 +319,7 @@
 
   // extend 1px to top, left and right
   top: calc(100% + 1px);
+  bottom: auto;
 
   // animation
   opacity: 0;

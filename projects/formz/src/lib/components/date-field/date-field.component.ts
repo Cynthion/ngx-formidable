@@ -15,8 +15,8 @@ import {
 } from '@angular/core';
 import { FormControl, NG_VALUE_ACCESSOR, NgControl, NgModel } from '@angular/forms';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
-import { FieldDecoratorLayout, FORMZ_FIELD } from '../../formz.model';
-import { PanelBehavior } from '../../panel.behavior';
+import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition } from '../../formz.model';
+import { scrollIntoView } from '../../panel.behavior';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -326,20 +326,24 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
 
   @Input()
   get isPanelOpen(): boolean {
-    return this.panelBehavior.isPanelOpen;
+    return this._isPanelOpen;
   }
   set isPanelOpen(val: boolean) {
-    this.panelBehavior.togglePanel(val);
+    this.togglePanel(val);
   }
 
-  private panelBehavior = new PanelBehavior(this.dateRef, this.panelRef);
+  @Input() panelPosition: FormzPanelPosition = 'full';
+
+  private _isPanelOpen = false;
 
   protected togglePanel(isOpen: boolean): void {
-    this.panelBehavior.togglePanel(isOpen);
+    this._isPanelOpen = isOpen;
 
     // additional field specific behavior
     if (isOpen) {
       // this.highlightSelectedOption();
+      setTimeout(() => scrollIntoView(this.dateRef, this.panelRef));
+      // this.cdRef.markForCheck();
     } else {
       // this.setHighlightedIndex(-1);
     }

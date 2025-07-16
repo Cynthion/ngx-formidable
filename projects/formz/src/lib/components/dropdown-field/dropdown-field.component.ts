@@ -23,7 +23,7 @@ import {
   IFormzDropdownField,
   IFormzFieldOption
 } from '../../formz.model';
-import { PanelBehavior } from '../../panel.behavior';
+import { scrollIntoView } from '../../panel.behavior';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -195,28 +195,23 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormz
 
   @Input()
   get isPanelOpen(): boolean {
-    return this.panelBehavior.isPanelOpen;
+    return this._isPanelOpen;
   }
   set isPanelOpen(val: boolean) {
-    this.panelBehavior.togglePanel(val);
+    this.togglePanel(val);
   }
 
-  @Input()
-  get panelPosition(): FormzPanelPosition {
-    return this.panelBehavior.panelPosition;
-  }
-  set panelPosition(val: FormzPanelPosition) {
-    this.panelBehavior.panelPosition = val;
-  }
+  @Input() panelPosition: FormzPanelPosition = 'full';
 
-  private panelBehavior = new PanelBehavior(this.dropdownRef, this.panelRef);
+  private _isPanelOpen = false;
 
   protected togglePanel(isOpen: boolean): void {
-    this.panelBehavior.togglePanel(isOpen);
+    this._isPanelOpen = isOpen;
 
     // additional field specific behavior
     if (isOpen) {
       this.highlightSelectedOption();
+      setTimeout(() => scrollIntoView(this.dropdownRef, this.panelRef));
       this.cdRef.markForCheck();
     } else {
       this.setHighlightedIndex(-1);

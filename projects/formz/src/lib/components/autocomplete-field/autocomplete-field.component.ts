@@ -27,7 +27,7 @@ import {
   IFormzAutocompleteField,
   IFormzFieldOption
 } from '../../formz.model';
-import { PanelBehavior } from '../../panel.behavior';
+import { scrollIntoView } from '../../panel.behavior';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -249,29 +249,24 @@ export class AutocompleteFieldComponent
 
   @Input()
   get isPanelOpen(): boolean {
-    return this.panelBehavior.isPanelOpen;
+    return this._isPanelOpen;
   }
   set isPanelOpen(val: boolean) {
-    this.panelBehavior.togglePanel(val);
+    this.togglePanel(val);
   }
 
-  @Input()
-  get panelPosition(): FormzPanelPosition {
-    return this.panelBehavior.panelPosition;
-  }
-  set panelPosition(val: FormzPanelPosition) {
-    this.panelBehavior.panelPosition = val;
-  }
+  @Input() panelPosition: FormzPanelPosition = 'full';
 
-  private panelBehavior = new PanelBehavior(this.autocompleteRef, this.panelRef);
+  private _isPanelOpen = false;
 
   protected togglePanel(isOpen: boolean): void {
-    this.panelBehavior.togglePanel(isOpen);
+    this._isPanelOpen = isOpen;
+    this.cdRef.markForCheck();
 
     // additional field specific behavior
     if (isOpen) {
       this.highlightSelectedOption();
-      this.cdRef.markForCheck();
+      setTimeout(() => scrollIntoView(this.autocompleteRef, this.panelRef));
     } else {
       this.setHighlightedIndex(-1);
     }
