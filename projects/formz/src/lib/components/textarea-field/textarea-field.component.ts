@@ -89,8 +89,7 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormz
   //#endregion
 
   private autoResize(): void {
-    const textarea = this.textareaRef?.nativeElement;
-    if (!textarea) return;
+    const textarea = this.textareaRef.nativeElement;
 
     textarea.style.height = 'auto'; // reset height to recalculate
     textarea.style.height = `${textarea.scrollHeight}px`;
