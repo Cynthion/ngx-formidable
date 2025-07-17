@@ -51,6 +51,7 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormzSe
 
   protected registerKeyboard = false;
   protected registerExternalClick = false;
+  protected registerWindowResizeScroll = null;
   protected registeredKeys: string[] = [];
 
   ngAfterContentInit(): void {

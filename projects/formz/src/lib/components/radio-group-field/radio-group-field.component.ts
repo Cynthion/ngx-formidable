@@ -58,6 +58,7 @@ export class RadioGroupFieldComponent
 
   protected registerKeyboard = true;
   protected registerExternalClick = false;
+  protected registerWindowResizeScroll = null;
   protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
   protected highlightedIndex = -1;

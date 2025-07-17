@@ -27,6 +27,7 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormz
 
   protected registerKeyboard = false;
   protected registerExternalClick = false;
+  protected registerWindowResizeScroll = null;
   protected registeredKeys: string[] = [];
 
   protected doOnValueChange(): void {

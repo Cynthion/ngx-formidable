@@ -56,6 +56,7 @@ export class CheckboxGroupFieldComponent
 
   protected registerKeyboard = true;
   protected registerExternalClick = false;
+  protected registerWindowResizeScroll = null;
   protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
   private _value: string[] = [];

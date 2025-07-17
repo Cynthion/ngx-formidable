@@ -55,6 +55,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormz
 
   protected registerKeyboard = true;
   protected registerExternalClick = true;
+  protected registerWindowResizeScroll = () => this.updatePositions();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
@@ -211,14 +212,18 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormz
     // additional field specific behavior
     if (isOpen) {
       this.highlightSelectedOption();
-      setTimeout(() => {
-        updatePanelPosition(this.dropdownRef, this.panelRef);
-        scrollIntoView(this.dropdownRef, this.panelRef);
-      });
+      scrollIntoView(this.dropdownRef, this.panelRef);
+      this.updatePositions();
       this.cdRef.markForCheck();
     } else {
       this.setHighlightedIndex(-1);
     }
+  }
+
+  private updatePositions(): void {
+    setTimeout(() => {
+      updatePanelPosition(this.dropdownRef, this.panelRef);
+    });
   }
 
   //#endregion

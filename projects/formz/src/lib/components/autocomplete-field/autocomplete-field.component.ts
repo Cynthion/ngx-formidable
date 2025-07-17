@@ -63,6 +63,7 @@ export class AutocompleteFieldComponent
 
   protected registerKeyboard = true;
   protected registerExternalClick = true;
+  protected registerWindowResizeScroll = () => this.updatePositions();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
   protected filterChangeSubject$ = new BehaviorSubject<string>(this.value || '');
@@ -266,13 +267,17 @@ export class AutocompleteFieldComponent
     // additional field specific behavior
     if (isOpen) {
       this.highlightSelectedOption();
-      setTimeout(() => {
-        updatePanelPosition(this.autocompleteRef, this.panelRef);
-        scrollIntoView(this.autocompleteRef, this.panelRef);
-      });
+      scrollIntoView(this.autocompleteRef, this.panelRef);
+      this.updatePositions();
     } else {
       this.setHighlightedIndex(-1);
     }
+  }
+
+  private updatePositions(): void {
+    setTimeout(() => {
+      updatePanelPosition(this.autocompleteRef, this.panelRef);
+    });
   }
 
   //#endregion

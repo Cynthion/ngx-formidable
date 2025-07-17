@@ -10,6 +10,7 @@ export abstract class BaseFieldDirective<T = string>
 {
   protected abstract registerKeyboard: boolean;
   protected abstract registerExternalClick: boolean;
+  protected abstract registerWindowResizeScroll: (() => void) | null;
   protected abstract registeredKeys: string[];
 
   protected id = uuid();
@@ -22,6 +23,7 @@ export abstract class BaseFieldDirective<T = string>
 
   private globalKeyboardUnlisten?: () => void;
   private globalExternalClickUnlisten?: () => void;
+  private globalWindowResizeScrollUnlisten?: () => void;
 
   ngOnInit(): void {
     this.registerGlobalListeners();
@@ -139,6 +141,15 @@ export abstract class BaseFieldDirective<T = string>
           document.addEventListener('click', onClick);
           this.globalExternalClickUnlisten = () => document.removeEventListener('click', onClick);
         }
+
+        if (this.registerWindowResizeScroll) {
+          const onResizeScroll = () => this.ngZone.run(() => this.registerWindowResizeScroll?.());
+
+          window.addEventListener('resize', onResizeScroll);
+          window.addEventListener('scroll', onResizeScroll);
+          this.globalWindowResizeScrollUnlisten = () => window.removeEventListener('resize', onResizeScroll);
+          this.globalWindowResizeScrollUnlisten = () => window.removeEventListener('scroll', onResizeScroll);
+        }
       });
     }
   }
@@ -146,6 +157,7 @@ export abstract class BaseFieldDirective<T = string>
   private unregisterGlobalListeners(): void {
     this.globalKeyboardUnlisten?.();
     this.globalExternalClickUnlisten?.();
+    this.globalWindowResizeScrollUnlisten?.();
   }
 
   protected abstract doHandleKeyDown(event: KeyboardEvent): void;
