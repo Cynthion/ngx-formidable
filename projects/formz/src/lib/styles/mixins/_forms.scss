@@ -339,6 +339,11 @@
     transform: translateY(0);
     pointer-events: auto;
   }
+
+  &.above {
+    top: auto;
+    bottom: calc(100% + 1px);
+  }
 }
 
 @mixin dropdown-panel() {

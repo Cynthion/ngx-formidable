@@ -16,7 +16,7 @@ import {
 import { FormControl, NG_VALUE_ACCESSOR, NgControl, NgModel } from '@angular/forms';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition } from '../../formz.model';
-import { scrollIntoView } from '../../panel.behavior';
+import { scrollIntoView, updatePanelPosition } from '../../panel.behavior';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -342,7 +342,10 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     // additional field specific behavior
     if (isOpen) {
       // this.highlightSelectedOption();
-      setTimeout(() => scrollIntoView(this.dateRef, this.panelRef));
+      setTimeout(() => {
+        updatePanelPosition(this.dateRef, this.panelRef);
+        scrollIntoView(this.dateRef, this.panelRef);
+      });
       // this.cdRef.markForCheck();
     } else {
       // this.setHighlightedIndex(-1);

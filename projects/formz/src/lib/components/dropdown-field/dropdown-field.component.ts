@@ -23,7 +23,7 @@ import {
   IFormzDropdownField,
   IFormzFieldOption
 } from '../../formz.model';
-import { scrollIntoView } from '../../panel.behavior';
+import { scrollIntoView, updatePanelPosition } from '../../panel.behavior';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -211,7 +211,10 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormz
     // additional field specific behavior
     if (isOpen) {
       this.highlightSelectedOption();
-      setTimeout(() => scrollIntoView(this.dropdownRef, this.panelRef));
+      setTimeout(() => {
+        updatePanelPosition(this.dropdownRef, this.panelRef);
+        scrollIntoView(this.dropdownRef, this.panelRef);
+      });
       this.cdRef.markForCheck();
     } else {
       this.setHighlightedIndex(-1);

@@ -53,10 +53,10 @@ export class ExampleFormComponent {
   };
 
   protected hobbyOptions: IFormzFieldOption[] = [
-    { value: 'dev', label: 'Software Development' },
-    { value: 'gaming (no label)', label: '' },
-    { value: 'reading', label: 'Reading' },
-    { value: 'sports', label: 'Sports' },
+    // { value: 'dev', label: 'Software Development' },
+    // { value: 'gaming (no label)', label: '' },
+    // { value: 'reading', label: 'Reading' },
+    // { value: 'sports', label: 'Sports' },
     {
       value: 'swimming',
       label: 'Swimming',

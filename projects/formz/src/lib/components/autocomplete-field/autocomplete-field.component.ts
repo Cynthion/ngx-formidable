@@ -27,7 +27,7 @@ import {
   IFormzAutocompleteField,
   IFormzFieldOption
 } from '../../formz.model';
-import { scrollIntoView } from '../../panel.behavior';
+import { scrollIntoView, updatePanelPosition } from '../../panel.behavior';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -266,7 +266,10 @@ export class AutocompleteFieldComponent
     // additional field specific behavior
     if (isOpen) {
       this.highlightSelectedOption();
-      setTimeout(() => scrollIntoView(this.autocompleteRef, this.panelRef));
+      setTimeout(() => {
+        updatePanelPosition(this.autocompleteRef, this.panelRef);
+        scrollIntoView(this.autocompleteRef, this.panelRef);
+      });
     } else {
       this.setHighlightedIndex(-1);
     }

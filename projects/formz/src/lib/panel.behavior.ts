@@ -1,5 +1,24 @@
 import { ElementRef } from '@angular/core';
 
+export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef?: ElementRef<HTMLElement>): void {
+  const field = fieldRef?.nativeElement;
+  const panel = panelRef?.nativeElement;
+
+  if (!field || !panel) return;
+
+  const fieldRect = field.getBoundingClientRect();
+  const panelHeight = panel.offsetHeight || 250; // default/fallback height
+
+  const spaceBelow = window.innerHeight - fieldRect.bottom;
+  const spaceAbove = fieldRect.top;
+
+  if (spaceBelow < panelHeight && spaceAbove > panelHeight) {
+    panel.classList.add('above');
+  } else {
+    panel.classList.remove('above');
+  }
+}
+
 export function scrollIntoView(fieldRef?: ElementRef<HTMLElement>, panelRef?: ElementRef<HTMLElement>): void {
   const field = fieldRef?.nativeElement;
   const panel = panelRef?.nativeElement;
