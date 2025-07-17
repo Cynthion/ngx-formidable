@@ -145,7 +145,7 @@ export class ExampleFormComponent {
   }
 
   protected onValueChanged(_fieldName: string, _value: string | string[]): void {
-    console.log(`Value changed on ${_fieldName} field:`, _value);
+    // console.log(`Value changed on ${_fieldName} field:`, _value);
   }
 
   protected onFocusChanged(_fieldName: string, _isFocused: boolean): void {

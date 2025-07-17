@@ -10,7 +10,7 @@
   (blur)="onFocusChange(false)">
   <!-- Options -->
   <!-- Options are re-created in order to use native <option> elements. -->
-  @for (option of options$.value; track option.value) {
+  @for (option of options$ | async; track option.value) {
     <option
       [value]="option.value"
       [disabled]="option.disabled || false"

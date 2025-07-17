@@ -23,7 +23,7 @@
     [class.open]="isPanelOpen">
     <!-- Options -->
     <!-- Option components are re-created in order to control them. -->
-    @for (option of options$.value; track option.value; let i = $index) {
+    @for (option of options$ | async; track option.value; let i = $index) {
       <formz-field-option
         [value]="option.value"
         [label]="option.label"
