@@ -1,6 +1,6 @@
 import { Directive, ElementRef, EventEmitter, inject, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
-import { Subject } from 'rxjs';
+import { debounceTime, fromEvent, merge, Subject, takeUntil } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { FieldDecoratorLayout, IFormzField } from '../formz.model';
 
@@ -23,7 +23,7 @@ export abstract class BaseFieldDirective<T = string>
 
   private globalKeyboardUnlisten?: () => void;
   private globalExternalClickUnlisten?: () => void;
-  private globalWindowResizeScrollUnlisten?: () => void;
+  protected readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
     this.registerGlobalListeners();
@@ -31,6 +31,9 @@ export abstract class BaseFieldDirective<T = string>
 
   ngOnDestroy(): void {
     this.unregisterGlobalListeners();
+
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   protected onValueChange(): void {
@@ -143,12 +146,12 @@ export abstract class BaseFieldDirective<T = string>
         }
 
         if (this.registerWindowResizeScroll) {
-          const onResizeScroll = () => this.ngZone.run(() => this.registerWindowResizeScroll?.());
+          const resize$ = fromEvent(window, 'resize');
+          const scroll$ = fromEvent(window, 'scroll');
 
-          window.addEventListener('resize', onResizeScroll);
-          window.addEventListener('scroll', onResizeScroll);
-          this.globalWindowResizeScrollUnlisten = () => window.removeEventListener('resize', onResizeScroll);
-          this.globalWindowResizeScrollUnlisten = () => window.removeEventListener('scroll', onResizeScroll);
+          merge(resize$, scroll$)
+            .pipe(debounceTime(100), takeUntil(this.destroy$))
+            .subscribe(() => this.ngZone.run(() => this.registerWindowResizeScroll?.()));
         }
       });
     }
@@ -157,7 +160,6 @@ export abstract class BaseFieldDirective<T = string>
   private unregisterGlobalListeners(): void {
     this.globalKeyboardUnlisten?.();
     this.globalExternalClickUnlisten?.();
-    this.globalWindowResizeScrollUnlisten?.();
   }
 
   protected abstract doHandleKeyDown(event: KeyboardEvent): void;

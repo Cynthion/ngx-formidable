@@ -43,8 +43,8 @@ export class ExampleFormComponent {
   protected nationalityOptions: IFormzFieldOption[] = [
     { value: 'de', label: '🇩🇪  Germany' },
     { value: 'fr', label: '🇫🇷  France' },
-    { value: 'jp', label: '🇯🇵  Japan' },
-    { value: 'uk (no label)', label: '' }
+    { value: 'jp', label: '🇯🇵  Japan' }
+    // { value: 'uk (no label)', label: '' }
   ];
 
   protected nationalityEmptyOption: IFormzFieldOption = {
@@ -53,9 +53,9 @@ export class ExampleFormComponent {
   };
 
   protected hobbyOptions: IFormzFieldOption[] = [
-    // { value: 'dev', label: 'Software Development' },
-    // { value: 'gaming (no label)', label: '' },
-    // { value: 'reading', label: 'Reading' },
+    { value: 'dev', label: 'Software Development' },
+    { value: 'gaming (no label)', label: '' },
+    { value: 'reading', label: 'Reading' },
     // { value: 'sports', label: 'Sports' },
     {
       value: 'swimming',

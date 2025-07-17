@@ -1,12 +1,10 @@
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ContentChildren,
   ElementRef,
   forwardRef,
-  inject,
   Input,
   QueryList,
   ViewChild
@@ -55,10 +53,10 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormz
 
   protected registerKeyboard = true;
   protected registerExternalClick = true;
-  protected registerWindowResizeScroll = () => this.updatePositions();
+  protected registerWindowResizeScroll = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
-  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+  // private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   ngAfterContentInit(): void {
     this.updateOptions();
@@ -213,14 +211,14 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormz
     if (isOpen) {
       this.highlightSelectedOption();
       scrollIntoView(this.dropdownRef, this.panelRef);
-      this.updatePositions();
-      this.cdRef.markForCheck();
+      this.updatePanelPosition();
+      // this.cdRef.markForCheck();
     } else {
       this.setHighlightedIndex(-1);
     }
   }
 
-  private updatePositions(): void {
+  private updatePanelPosition(): void {
     setTimeout(() => {
       updatePanelPosition(this.dropdownRef, this.panelRef);
     });

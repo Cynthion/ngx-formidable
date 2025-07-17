@@ -7,12 +7,15 @@ export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef
   if (!field || !panel) return;
 
   const fieldRect = field.getBoundingClientRect();
-  const panelHeight = panel.offsetHeight || 250; // default/fallback height
+  const panelHeight = panel.offsetHeight;
+  const windowHeight = window.innerHeight;
 
-  const spaceBelow = window.innerHeight - fieldRect.bottom;
+  const spaceBelow = windowHeight - fieldRect.bottom;
   const spaceAbove = fieldRect.top;
 
-  if (spaceBelow < panelHeight && spaceAbove > panelHeight) {
+  if (spaceBelow >= panelHeight) {
+    panel.classList.remove('above');
+  } else if (spaceAbove >= panelHeight) {
     panel.classList.add('above');
   } else {
     panel.classList.remove('above');

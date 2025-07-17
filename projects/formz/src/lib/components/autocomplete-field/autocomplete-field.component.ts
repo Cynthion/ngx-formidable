@@ -16,7 +16,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import {
   EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
@@ -63,13 +63,12 @@ export class AutocompleteFieldComponent
 
   protected registerKeyboard = true;
   protected registerExternalClick = true;
-  protected registerWindowResizeScroll = () => this.updatePositions();
+  protected registerWindowResizeScroll = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
   protected filterChangeSubject$ = new BehaviorSubject<string>(this.value || '');
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
-  private readonly destroy$ = new Subject<void>();
 
   override ngOnInit(): void {
     super.ngOnInit();
@@ -268,13 +267,13 @@ export class AutocompleteFieldComponent
     if (isOpen) {
       this.highlightSelectedOption();
       scrollIntoView(this.autocompleteRef, this.panelRef);
-      this.updatePositions();
+      this.updatePanelPosition();
     } else {
       this.setHighlightedIndex(-1);
     }
   }
 
-  private updatePositions(): void {
+  private updatePanelPosition(): void {
     setTimeout(() => {
       updatePanelPosition(this.autocompleteRef, this.panelRef);
     });
@@ -306,6 +305,8 @@ export class AutocompleteFieldComponent
 
         if (!this.isPanelOpen) {
           this.togglePanel(true);
+        } else {
+          this.updatePanelPosition();
         }
       });
   }

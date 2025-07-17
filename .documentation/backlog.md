@@ -24,3 +24,4 @@
 - add support for `ReactiveForms`
 - sortFn for options
 - interface for togglePanel()
+- filters: when empty and no options, then doesn't show all

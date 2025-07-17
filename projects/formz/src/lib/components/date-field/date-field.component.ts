@@ -45,7 +45,7 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
 
   protected registerKeyboard = true;
   protected registerExternalClick = true;
-  protected registerWindowResizeScroll = () => this.updatePositions();
+  protected registerWindowResizeScroll = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown'];
 
   // private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
@@ -344,14 +344,14 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     if (isOpen) {
       // this.highlightSelectedOption();
       scrollIntoView(this.dateRef, this.panelRef);
-      this.updatePositions();
+      this.updatePanelPosition();
       // this.cdRef.markForCheck();
     } else {
       // this.setHighlightedIndex(-1);
     }
   }
 
-  private updatePositions(): void {
+  private updatePanelPosition(): void {
     setTimeout(() => {
       updatePanelPosition(this.dateRef, this.panelRef);
     });

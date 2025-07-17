@@ -54,7 +54,8 @@
 }
 
 @mixin border {
-  border: 1px solid var(--formz-color-field-border, #{tokens.$formz-color-field-border});
+  border: var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness}) solid
+    var(--formz-color-field-border, #{tokens.$formz-color-field-border});
   border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
 }
 
@@ -281,21 +282,21 @@
 }
 
 @mixin panel-left-aligned {
-  left: -1px;
+  left: calc(var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness}) * -1);
   right: unset;
   width: unset;
 }
 
 @mixin panel-right-aligned {
   left: unset;
-  right: -1px;
+  right: calc(var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness}) * -1);
   width: unset;
 }
 
 @mixin panel-full-aligned {
   @include panel-left-aligned;
 
-  width: calc(100% + 2px);
+  width: calc(100% + 2 * var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness}));
 }
 
 @mixin panel() {
@@ -311,38 +312,37 @@
 
   position: absolute;
   box-shadow: var(--formz-dropdown-panel-box-shadow, #{tokens.$formz-dropdown-panel-box-shadow});
-  border: 1px solid var(--formz-color-field-border, #{tokens.$formz-color-field-border});
+  border: var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness}) solid
+    var(--formz-color-field-border, #{tokens.$formz-color-field-border});
   border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
   background: var(--formz-dropdown-panel-background, #{tokens.$formz-dropdown-panel-background});
   overflow: hidden; // clip inner content to border-radius
   z-index: var(--formz-flyout-z-index, #{tokens.$formz-flyout-z-index}); // keep on top of field
 
-  // extend 1px to top, left and right
-  top: calc(100% + 1px);
-  bottom: auto;
+  top: calc(100% + var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness}));
 
-  // animation
   opacity: 0;
-  display: none;
-  transform: translateY(-0.25rem);
+  visibility: hidden;
   pointer-events: none;
+  transform: translateY(-0.25rem);
+
   transition:
     opacity var(--formz-animation-duration, #{tokens.$formz-animation-duration})
       var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
     transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
-      var(--formz-animation-easing, #{tokens.$formz-animation-easing});
+      var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
+    visibility var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+      var(--formz-animation-duration, #{tokens.$formz-animation-duration});
 
   &.open {
-    // animation
     opacity: 1;
-    display: block;
-    transform: translateY(0);
+    visibility: visible;
     pointer-events: auto;
+    transform: translateY(0);
   }
 
   &.above {
-    top: auto;
-    bottom: calc(100% + 1px);
+    transform: translateY(calc(-100% - var(--formz-field-height, #{tokens.$formz-field-height})));
   }
 }
 
