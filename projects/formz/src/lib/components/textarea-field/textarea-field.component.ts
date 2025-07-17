@@ -25,9 +25,9 @@ import { BaseFieldDirective } from '../base-field.component';
 export class TextareaFieldComponent extends BaseFieldDirective implements IFormzTextareaField {
   @ViewChild('textareaRef', { static: true }) textareaRef!: ElementRef<HTMLTextAreaElement>;
 
-  protected registerKeyboard = false;
-  protected registerExternalClick = false;
-  protected registerWindowResizeScroll = null;
+  protected keyboardCallback = null;
+  protected externalClickCallback = null;
+  protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
   protected doOnValueChange(): void {
@@ -37,14 +37,6 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormz
   }
 
   protected doOnFocusChange(_isFocused: boolean): void {
-    // No additional actions needed
-  }
-
-  protected doHandleKeyDown(_event: KeyboardEvent): void {
-    // No additional actions needed
-  }
-
-  protected doHandleExternalClick(): void {
     // No additional actions needed
   }
 

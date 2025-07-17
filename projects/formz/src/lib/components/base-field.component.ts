@@ -1,6 +1,6 @@
 import { Directive, ElementRef, EventEmitter, inject, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
-import { debounceTime, fromEvent, merge, Subject, takeUntil } from 'rxjs';
+import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { FieldDecoratorLayout, IFormzField } from '../formz.model';
 
@@ -8,9 +8,9 @@ import { FieldDecoratorLayout, IFormzField } from '../formz.model';
 export abstract class BaseFieldDirective<T = string>
   implements ControlValueAccessor, IFormzField<T>, OnInit, OnDestroy
 {
-  protected abstract registerKeyboard: boolean;
-  protected abstract registerExternalClick: boolean;
-  protected abstract registerWindowResizeScroll: (() => void) | null;
+  protected abstract keyboardCallback: ((event: KeyboardEvent) => void) | null;
+  protected abstract externalClickCallback: (() => void) | null;
+  protected abstract windowResizeScrollCallback: (() => void) | null;
   protected abstract registeredKeys: string[];
 
   protected id = uuid();
@@ -21,8 +21,6 @@ export abstract class BaseFieldDirective<T = string>
 
   protected readonly ngZone: NgZone = inject(NgZone);
 
-  private globalKeyboardUnlisten?: () => void;
-  private globalExternalClickUnlisten?: () => void;
   protected readonly destroy$ = new Subject<void>();
 
   ngOnInit(): void {
@@ -30,8 +28,6 @@ export abstract class BaseFieldDirective<T = string>
   }
 
   ngOnDestroy(): void {
-    this.unregisterGlobalListeners();
-
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -115,54 +111,46 @@ export abstract class BaseFieldDirective<T = string>
   //#endregion
 
   private registerGlobalListeners(): void {
-    if (this.registerKeyboard || this.registerExternalClick) {
+    if (this.keyboardCallback || this.externalClickCallback || this.windowResizeScrollCallback) {
       this.ngZone.runOutsideAngular(() => {
-        if (this.registerKeyboard) {
-          const onKeyDown = (event: KeyboardEvent) =>
-            this.ngZone.run(() => {
-              if (!this.isFieldFocused || this.disabled) return;
-              if (!this.registeredKeys.includes(event.key)) return;
-
-              this.doHandleKeyDown(event);
-
-              if (event.key === 'Tab') return;
-              event.preventDefault();
-            });
-
-          document.addEventListener('keydown', onKeyDown);
-          this.globalKeyboardUnlisten = () => document.removeEventListener('keydown', onKeyDown);
+        if (this.keyboardCallback) {
+          fromEvent<KeyboardEvent>(document, 'keydown')
+            .pipe(
+              filter(() => this.isFieldFocused && !this.disabled),
+              filter((event) => this.registeredKeys.includes(event.key)),
+              tap((event) => {
+                // immediately prevent default, before debounceTime
+                if (event.key !== 'Tab') event.preventDefault();
+              }),
+              // debounceTime(100),
+              takeUntil(this.destroy$)
+            )
+            .subscribe((event: KeyboardEvent) =>
+              this.ngZone.run(() => {
+                this.keyboardCallback?.(event);
+              })
+            );
         }
 
-        if (this.registerExternalClick) {
-          const onClick = (event: MouseEvent) => {
-            const isClickInside = this.elementRef.nativeElement.contains(event.target as Node);
-            if (isClickInside) return;
-
-            this.ngZone.run(() => this.doHandleExternalClick());
-          };
-
-          document.addEventListener('click', onClick);
-          this.globalExternalClickUnlisten = () => document.removeEventListener('click', onClick);
+        if (this.externalClickCallback) {
+          fromEvent<MouseEvent>(document, 'click')
+            .pipe(
+              debounceTime(50),
+              filter((event) => !this.elementRef.nativeElement.contains(event.target as Node)),
+              takeUntil(this.destroy$)
+            )
+            .subscribe(() => this.ngZone.run(() => this.externalClickCallback?.()));
         }
 
-        if (this.registerWindowResizeScroll) {
+        if (this.windowResizeScrollCallback) {
           const resize$ = fromEvent(window, 'resize');
           const scroll$ = fromEvent(window, 'scroll');
 
           merge(resize$, scroll$)
-            .pipe(debounceTime(100), takeUntil(this.destroy$))
-            .subscribe(() => this.ngZone.run(() => this.registerWindowResizeScroll?.()));
+            .pipe(debounceTime(50), takeUntil(this.destroy$))
+            .subscribe(() => this.ngZone.run(() => this.windowResizeScrollCallback?.()));
         }
       });
     }
   }
-
-  private unregisterGlobalListeners(): void {
-    this.globalKeyboardUnlisten?.();
-    this.globalExternalClickUnlisten?.();
-  }
-
-  protected abstract doHandleKeyDown(event: KeyboardEvent): void;
-
-  protected abstract doHandleExternalClick(): void;
 }

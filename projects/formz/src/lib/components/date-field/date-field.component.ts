@@ -43,9 +43,9 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('pickerRef') pickerRef?: ElementRef<HTMLDivElement>;
 
-  protected registerKeyboard = true;
-  protected registerExternalClick = true;
-  protected registerWindowResizeScroll = () => this.updatePanelPosition();
+  protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
+  protected externalClickCallback = () => this.handleExternalClick();
+  protected windowResizeScrollCallback = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown'];
 
   // private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
@@ -139,7 +139,7 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     // No additional actions needed
   }
 
-  protected doHandleKeyDown(event: KeyboardEvent): void {
+  private handleKeydown(event: KeyboardEvent): void {
     // TODO support selection of date within picker
     switch (event.key) {
       case 'Escape':
@@ -154,7 +154,7 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     }
   }
 
-  protected doHandleExternalClick(): void {
+  private handleExternalClick(): void {
     if (!this.isPanelOpen) return;
 
     this.togglePanel(false);
@@ -343,8 +343,8 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     // additional field specific behavior
     if (isOpen) {
       // this.highlightSelectedOption();
-      scrollIntoView(this.dateRef, this.panelRef);
-      this.updatePanelPosition();
+      setTimeout(() => scrollIntoView(this.dateRef, this.panelRef));
+      updatePanelPosition(this.dateRef, this.panelRef);
       // this.cdRef.markForCheck();
     } else {
       // this.setHighlightedIndex(-1);
@@ -352,9 +352,7 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   }
 
   private updatePanelPosition(): void {
-    setTimeout(() => {
-      updatePanelPosition(this.dateRef, this.panelRef);
-    });
+    setTimeout(() => updatePanelPosition(this.dateRef, this.panelRef));
   }
 
   //#endregion

@@ -49,9 +49,9 @@ import { BaseFieldDirective } from '../base-field.component';
 export class SelectFieldComponent extends BaseFieldDirective implements IFormzSelectField, AfterContentInit {
   @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLInputElement>;
 
-  protected registerKeyboard = false;
-  protected registerExternalClick = false;
-  protected registerWindowResizeScroll = null;
+  protected keyboardCallback = null;
+  protected externalClickCallback = null;
+  protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
   ngAfterContentInit(): void {
@@ -63,14 +63,6 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormzSe
   }
 
   protected doOnFocusChange(_isFocused: boolean): void {
-    // No additional actions needed
-  }
-
-  protected doHandleKeyDown(_event: KeyboardEvent): void {
-    // No additional actions needed
-  }
-
-  protected doHandleExternalClick(): void {
     // No additional actions needed
   }
 

@@ -181,10 +181,10 @@
 
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
   pointer-events: none;
-  margin-right: sp.cmp_space(8); // space between label and tooltip
+  margin-right: sp.cmp_space(8);
 
   // animation
-  transform: translateY(0) scale(1); // default placement
+  transform: translateY(0);
   transform-origin: left top;
   transition:
     transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
@@ -321,21 +321,14 @@
 
   top: calc(100% + var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness}));
 
-  opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transform: translateY(-0.25rem);
 
-  transition:
-    opacity var(--formz-animation-duration, #{tokens.$formz-animation-duration})
-      var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
-    transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
-      var(--formz-animation-easing, #{tokens.$formz-animation-easing}),
-    visibility var(--formz-animation-duration, #{tokens.$formz-animation-duration})
-      var(--formz-animation-duration, #{tokens.$formz-animation-duration});
+  transition: transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+    var(--formz-animation-easing, #{tokens.$formz-animation-easing});
 
   &.open {
-    opacity: 1;
     visibility: visible;
     pointer-events: auto;
     transform: translateY(0);

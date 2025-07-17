@@ -61,9 +61,9 @@ export class AutocompleteFieldComponent
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
-  protected registerKeyboard = true;
-  protected registerExternalClick = true;
-  protected registerWindowResizeScroll = () => this.updatePanelPosition();
+  protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
+  protected externalClickCallback = () => this.handleExternalClick();
+  protected windowResizeScrollCallback = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
   protected filterChangeSubject$ = new BehaviorSubject<string>(this.value || '');
@@ -99,7 +99,7 @@ export class AutocompleteFieldComponent
     // No additional actions needed
   }
 
-  protected doHandleKeyDown(event: KeyboardEvent): void {
+  private handleKeydown(event: KeyboardEvent): void {
     const options = this.filteredOptions$.value;
     const count = options.length;
 
@@ -129,7 +129,7 @@ export class AutocompleteFieldComponent
     }
   }
 
-  protected doHandleExternalClick(): void {
+  private handleExternalClick(): void {
     if (!this.isPanelOpen) return;
 
     this.togglePanel(false);
@@ -266,17 +266,15 @@ export class AutocompleteFieldComponent
     // additional field specific behavior
     if (isOpen) {
       this.highlightSelectedOption();
-      scrollIntoView(this.autocompleteRef, this.panelRef);
-      this.updatePanelPosition();
+      setTimeout(() => scrollIntoView(this.autocompleteRef, this.panelRef));
+      updatePanelPosition(this.autocompleteRef, this.panelRef);
     } else {
       this.setHighlightedIndex(-1);
     }
   }
 
   private updatePanelPosition(): void {
-    setTimeout(() => {
-      updatePanelPosition(this.autocompleteRef, this.panelRef);
-    });
+    setTimeout(() => updatePanelPosition(this.autocompleteRef, this.panelRef));
   }
 
   //#endregion

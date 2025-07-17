@@ -56,9 +56,9 @@ export class RadioGroupFieldComponent
 {
   @ViewChild('radioGroupRef', { static: true }) radioGroupRef!: ElementRef<HTMLDivElement>;
 
-  protected registerKeyboard = true;
-  protected registerExternalClick = false;
-  protected registerWindowResizeScroll = null;
+  protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
+  protected externalClickCallback = null;
+  protected windowResizeScrollCallback = null;
   protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
   protected highlightedIndex = -1;
@@ -79,7 +79,7 @@ export class RadioGroupFieldComponent
     // No additional actions needed
   }
 
-  protected doHandleKeyDown(event: KeyboardEvent): void {
+  private handleKeydown(event: KeyboardEvent): void {
     const options = this.options$.value;
     const count = options.length;
 
@@ -101,10 +101,6 @@ export class RadioGroupFieldComponent
         }
         break;
     }
-  }
-
-  protected doHandleExternalClick(): void {
-    // No additional actions needed
   }
 
   //#region ControlValueAccessor

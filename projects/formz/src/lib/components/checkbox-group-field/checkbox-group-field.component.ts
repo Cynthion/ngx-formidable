@@ -54,9 +54,9 @@ export class CheckboxGroupFieldComponent
 {
   @ViewChild('checkboxGroupRef', { static: true }) checkboxGroupRef!: ElementRef<HTMLDivElement>;
 
-  protected registerKeyboard = true;
-  protected registerExternalClick = false;
-  protected registerWindowResizeScroll = null;
+  protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
+  protected externalClickCallback = null;
+  protected windowResizeScrollCallback = null;
   protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
   private _value: string[] = [];
@@ -73,7 +73,7 @@ export class CheckboxGroupFieldComponent
     // No additional actions needed
   }
 
-  protected doHandleKeyDown(event: KeyboardEvent): void {
+  private handleKeydown(event: KeyboardEvent): void {
     const options = this.options$.value;
     const count = options.length;
 
@@ -95,10 +95,6 @@ export class CheckboxGroupFieldComponent
         }
         break;
     }
-  }
-
-  protected doHandleExternalClick(): void {
-    // No additional actions needed
   }
 
   //#region ControlValueAccessor
