@@ -4,8 +4,6 @@ import {
   Component,
   ElementRef,
   forwardRef,
-  inject,
-  Injector,
   Input,
   OnChanges,
   OnDestroy,
@@ -13,7 +11,9 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import { FormControl, NG_VALUE_ACCESSOR, NgControl, NgModel } from '@angular/forms';
+import { FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { format } from 'date-fns';
+import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition } from '../../formz.model';
 import { scrollIntoView, updatePanelPosition } from '../../panel.behavior';
@@ -65,14 +65,19 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     theme: undefined, // not supported
     blurFieldOnSelect: false, // not supported
     formatStrict: false, // not supported
-    toString: undefined, // not supported
-    parse: undefined, // not supported
-    keyboardInput: false // not supported
+    keyboardInput: false, // not supported
+    toString: (date: Date, unicodeTokenFormat: string): string => this.onFormat(date, unicodeTokenFormat),
+    parse: (dateString: string, unicodeTokenFormat: string): Date | null =>
+      this.onParse(dateString, unicodeTokenFormat),
+    onSelect: (date: Date) => this.onSelect(date)
+    // onOpen: () => this.onOpen(),
+    // onClose: () => this.onClose(),
+    // onDraw: () => this.onDraw(),
   };
 
   private readonly defaultOptions: PikadayOptions = {
     ariaLabel: undefined,
-    format: 'YYYY-MM-DD', // TODO
+    format: 'yyyy-MM-dd',
     defaultDate: undefined,
     setDefaultDate: true,
     firstDay: 1,
@@ -91,27 +96,10 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
 
   private picker?: Pikaday;
 
-  private readonly injector: Injector = inject(Injector);
-
   control!: FormControl; // initialized in ngOnInit
 
-  override ngOnInit(): void {
-    super.ngOnInit();
-
-    const ngControl = this.injector.get(NgControl, null, { self: true, optional: true });
-
-    this.control = this.getFormControlFromNgControlDirective(ngControl);
-    this.control.setErrors({ errors: ['Wrong date format.'] }); // TODO remove, just for testing
-  }
-
-  private getFormControlFromNgControlDirective(ngControl: NgControl | null): FormControl {
-    // ngModel directive (for Template-Driven Forms)
-    if (ngControl instanceof NgModel) {
-      return ngControl.control;
-    }
-
-    // no directive set
-    return new FormControl();
+  constructor(private maskPipe: NgxMaskPipe) {
+    super();
   }
 
   ngAfterViewInit(): void {
@@ -127,12 +115,7 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   }
 
   protected doOnValueChange(): void {
-    const value = this.inputRef.nativeElement.value; // TODO use this.value instead?
-
-    // this.inputChange$.emit(value);
-    // this.filterValue$.next(value);
-
-    this.validateDate(value); // TODO add validator outside?
+    // No additional actions needed
   }
 
   protected doOnFocusChange(_isFocused: boolean): void {
@@ -168,7 +151,8 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     this.isFieldFilled = !!value;
 
     // write to wrapped input
-    this.inputRef.nativeElement.value = value;
+    console.log('doWriteValue:', value);
+    // this.inputRef.nativeElement.value = value;
   }
 
   //#endregion
@@ -196,9 +180,16 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   @Input() name = '';
   @Input() placeholder = '';
   @Input() required = false;
-  @Input() maskFormat = 'DD.MM.YYYY';
+  // @Input() ngxMask = '0000-00-00'; // TODO not required anymore, auto-generated // dD, mM, s, m, Hh are reserved for date/time formatting
+  @Input() unicodeTokenFormat = this.defaultOptions.format; // yyyy-MM-dd
 
-  protected ngxMask = '0000-00-00';
+  protected ngxMask = this.formatToMask(this.unicodeTokenFormat!);
+
+  // TODO provide by interface, update on changes?
+  protected ngxMaskConfig: Partial<NgxMaskConfig> = {
+    showMaskTyped: true,
+    leadZeroDateTime: false // must be enforced by unicodeTokenFormat, if required
+  };
 
   private selectedDate?: string; // TODO type Date?
 
@@ -215,53 +206,11 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     this.togglePanel(false);
   }
 
-  private updateMask(): void {
-    // TODO add/control supported mask formats
-    switch (this.maskFormat) {
-      case 'DD.MM.YYYY':
-        this.ngxMask = '00.00.0000';
-        break;
-      case 'MM/DD/YYYY':
-        this.ngxMask = '00/00/0000';
-        break;
-      case 'DD/MM/YY':
-        this.ngxMask = '00/00/00';
-        break;
-      case 'YYYY-MM-DD':
-      default:
-        this.ngxMask = '0000-00-00';
-        break;
-    }
-  }
-
-  private checkValidDate(value: string): boolean {
-    if (!value) return false;
-
-    return false; // TODO input function, based on format
-  }
-
-  private validateDate(value: string): void {
-    const isValid = this.checkValidDate(value);
-
-    console.log('Date validation result:', isValid);
-
-    // TODO validate
-    // const control = this.ngControl.control;
-    // if (control) {
-    //   if (isValid) {
-    //     control.setErrors({ invalidDate: true });
-    //   } else {
-    //     control.setErrors(null);
-    //   }
-    // }
-  }
-
   //#endregion
 
   //#region IFormzPikadayOptions
 
   @Input() ariaLabel?: string;
-  @Input() format?: string;
   @Input() defaultDate?: Date;
   @Input() setDefaultDate?: boolean;
   @Input() firstDay?: number;
@@ -281,7 +230,7 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     const dynamicOptions: PikadayOptions = {
       ...this.defaultOptions,
       ariaLabel: this.ariaLabel ?? this.defaultOptions.ariaLabel,
-      format: this.format ?? this.defaultOptions.format,
+      format: this.unicodeTokenFormat ?? this.defaultOptions.format,
       defaultDate: this.getDefaultDate(this.minDate, this.maxDate, this.defaultDate) ?? this.defaultOptions.defaultDate,
       setDefaultDate: this.setDefaultDate ?? this.defaultOptions.setDefaultDate,
       firstDay: this.firstDay ?? this.defaultOptions.firstDay,
@@ -306,10 +255,6 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
       ...dynamicOptions,
       field: this.inputRef.nativeElement,
       container: this.pickerRef?.nativeElement
-      // onSelect: (date: Date) => this.onSelect(this.picker, date),
-      // onOpen: () => this.onOpen(),
-      // onClose: () => this.onClose(),
-      // onDraw: () => this.onDraw(),
     };
 
     if (!this.picker) {
@@ -317,6 +262,10 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     } else {
       this.picker.config(updatedOptions);
     }
+  }
+
+  private updateMask(): void {
+    this.ngxMask = this.formatToMask(this.unicodeTokenFormat!);
   }
 
   //#endregion
@@ -359,21 +308,32 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
 
   //#region Pikaday
 
-  // private onSelect(pikaday: Pikaday, date: Date): void {
-  //   this.selectDate(pikaday.toString(date.toString()));
-  // }
+  private onFormat(date: Date, unicodeTokenFormat: string): string {
+    console.log('onFormat called with date:', date, 'and format:', unicodeTokenFormat);
 
-  // private onOpen(): void {
-  //   //
-  // }
+    const formattedDate = format(date, unicodeTokenFormat);
+    const maskedDate = this.maskPipe.transform(formattedDate, this.ngxMask, this.ngxMaskConfig);
 
-  // private onClose(): void {
-  //   //
-  // }
+    return maskedDate;
+  }
 
-  // private onDraw(): void {
-  //   //
-  // }
+  private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
+    console.log('onParse called with dateString:', dateString, 'and format:', unicodeTokenFormat);
+
+    // dateString is the result of `toString` method
+    // const parts = dateString.split('/');
+    // const day = parseInt(parts[0], 10);
+    // const month = parseInt(parts[1], 10) - 1;
+    // const year = parseInt(parts[2], 10);
+    // return new Date(year, month, day);
+
+    return new Date(Date.now());
+  }
+
+  private onSelect(date: Date): void {
+    // this.selectDate(pikaday.toString(date.toString()));
+    console.log('onSelect called with date:', date);
+  }
 
   //#endregion
 
@@ -387,5 +347,10 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     }
 
     return initialDate;
+  }
+
+  private formatToMask(format: string): string {
+    // Replace each run of letters with the same number of zeros
+    return format.replace(/[a-zA-Z]+/g, (match) => '0'.repeat(match.length));
   }
 }

@@ -203,6 +203,8 @@
       <div formzFieldSuffix>Suffix</div>
     </formz-field-decorator> -->
 
+    <!-- TODO [unicodeTokenFormat]="'dd.MM.yyyy'" -->
+    <!-- TODO [ngxMask]="'00.00.0000'", not required anymore -->
     <!-- Birthdate -->
     <formz-field-decorator>
       <formz-date-field
@@ -212,6 +214,7 @@
         [ngModel]="vm.formValue.birthdate"
         [disabled]="false"
         [required]="false"
+        [unicodeTokenFormat]="'dd.MM.yyyy'"
         (valueChanged)="onValueChanged('birthdate', $event)"
         (focusChanged)="onFocusChanged('birthdate', $event)">
       </formz-date-field>

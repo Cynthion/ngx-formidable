@@ -68,8 +68,9 @@ const components = [
   providers: [
     // ngx-mask
     provideNgxMask({
-      validation: false // <- your desired default config
-    })
+      validation: false
+    }),
+    NgxMaskPipe // TODO remove?
   ]
 })
 export class FormzModule {}

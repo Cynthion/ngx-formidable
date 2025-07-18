@@ -156,8 +156,10 @@ export interface IFormzDateField extends IFormzField, IFormzPikadayOptions {
   name: string;
   placeholder?: string;
   required?: boolean;
-  // TODO implement
-  maskFormat: 'YYYY-MM-DD' | 'DD.MM.YYYY' | string;
+  /** Must be a valid NgxMask format. */
+  // ngxMask: string;
+  /** Must be a valid Unicode format. (See https://github.com/date-fns/date-fns/blob/main/docs/unicodeTokens.md) */
+  unicodeTokenFormat: string;
   // pattern?: string;
   // mask?: string;
   selectDate(date: string): void;
