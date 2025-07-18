@@ -18,9 +18,10 @@
 - suffixes: clear/reset, copy, validation state, loading
 - `fieldset` & `legend` for fieldset
 - validation error: styling
-- styling for field options based on layout
+- styling for field options based on layout (single vs. group)
 - support patterns (ngx-mask)
 - <input> value & checked could be added to interface, if used withouth FormControl
 - add support for `ReactiveForms`
 - sortFn for options
-- interface for togglePanel()
+- use rem instead of px
+- move validation errors to the decorator?

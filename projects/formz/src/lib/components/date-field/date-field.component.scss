@@ -12,6 +12,10 @@
   @include date-panel;
 }
 
+.panel-scrollcontainer {
+  @include panel-scrollcontainer();
+}
+
 .picker-wrapper {
   @include date-picker-wrapper;
 }

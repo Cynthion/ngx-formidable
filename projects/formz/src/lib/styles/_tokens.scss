@@ -42,16 +42,16 @@ $formz-color-field-hovered: #5b7f9939; // #5b7f99
 
 $formz-field-height: 66px; // even number
 $formz-field-border-thickness: 1px;
-$formz-field-label-floating-offset: 35px;
-
 $formz-field-border-radius: 6px;
+$formz-field-label-floating-offset: 35px;
 
 $formz-textarea-min-height: 5.7em; // about 2 lines
 $formz-textarea-max-height: none;
 $formz-textarea-padding-top: 20px;
 
-$formz-dropdown-panel-background: #f2faff;
-$formz-dropdown-panel-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);
+$formz-panel-background: #f2faff;
+$formz-panel-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);
+$formz-panel-max-height: 33vh;
 
 $formz-animation-duration: 0.2s;
 $formz-animation-easing: cubic-bezier(0.37, 0, 0.63, 1); // easeInOutSine

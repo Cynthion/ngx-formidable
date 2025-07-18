@@ -173,6 +173,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   margin-bottom: sp.cmp_space(8);
 }
 
@@ -311,13 +312,18 @@
   }
 
   position: absolute;
-  box-shadow: var(--formz-dropdown-panel-box-shadow, #{tokens.$formz-dropdown-panel-box-shadow});
+  box-shadow: var(--formz-panel-box-shadow, #{tokens.$formz-panel-box-shadow});
   border: var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness}) solid
     var(--formz-color-field-border, #{tokens.$formz-color-field-border});
   border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
-  background: var(--formz-dropdown-panel-background, #{tokens.$formz-dropdown-panel-background});
+  background: var(--formz-panel-background, #{tokens.$formz-panel-background});
   overflow: hidden; // clip inner content to border-radius
   z-index: var(--formz-flyout-z-index, #{tokens.$formz-flyout-z-index}); // keep on top of field
+
+  // scroll
+  display: flex;
+  flex-direction: column;
+  max-height: var(--formz-panel-max-height, #{tokens.$formz-panel-max-height});
 
   top: calc(100% + var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness}));
 
@@ -337,6 +343,12 @@
   &.above {
     transform: translateY(calc(-100% - var(--formz-field-height, #{tokens.$formz-field-height})));
   }
+}
+
+@mixin panel-scrollcontainer() {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  max-height: 100%;
 }
 
 @mixin dropdown-panel() {

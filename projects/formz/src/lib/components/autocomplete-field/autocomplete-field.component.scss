@@ -11,3 +11,7 @@
 .panel {
   @include autocomplete-panel;
 }
+
+.panel-scrollcontainer {
+  @include panel-scrollcontainer();
+}

@@ -25,16 +25,16 @@
 
   --formz-field-height: #{tokens.$formz-field-height};
   --formz-field-border-thickness: #{tokens.$formz-field-border-thickness};
-  --formz-field-label-floating-offset: #{tokens.$formz-field-label-floating-offset};
-
   --formz-field-border-radius: #{tokens.$formz-field-border-radius};
+  --formz-field-label-floating-offset: #{tokens.$formz-field-label-floating-offset};
 
   --formz-textarea-min-height: #{tokens.$formz-textarea-min-height};
   --formz-textarea-max-height: #{tokens.$formz-textarea-max-height};
   --formz-textarea-padding-top: #{tokens.$formz-textarea-padding-top};
 
-  --formz-dropdown-panel-background: #{tokens.$formz-dropdown-panel-background};
-  --formz-dropdown-panel-box-shadow: #{tokens.$formz-dropdown-panel-box-shadow};
+  --formz-panel-background: #{tokens.$formz-panel-background};
+  --formz-panel-box-shadow: #{tokens.$formz-panel-box-shadow};
+  --formz-panel-max-height: #{tokens.$formz-panel-max-height};
 
   --formz-animation-duration: #{tokens.$formz-animation-duration};
   --formz-animation-easing: #{tokens.$formz-animation-easing};
