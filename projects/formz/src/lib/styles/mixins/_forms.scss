@@ -360,6 +360,9 @@
 }
 
 @mixin date-panel() {
+  // overwrite panel max height
+  --formz-panel-max-height: 100vh;
+
   @include panel();
 }
 

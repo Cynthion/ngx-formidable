@@ -65,8 +65,7 @@
 .pika-lendar {
   float: left;
   width: var(--formz-date-field-panel-width, #{tokens.$formz-date-field-panel-width});
-  height: calc(var(--formz-date-field-panel-width, #{tokens.$formz-date-field-panel-width}) * 1.125); // extend by 1/8
-  // height: 300px;
+  // height: calc(var(--formz-date-field-panel-width, #{tokens.$formz-date-field-panel-width}) * 1.125); // extend by 1/8
   // padding: sp.cmp_space(24) sp.cmp_space(16);
   // margin: 0 sp.cmp_space(8);
 
@@ -100,11 +99,11 @@
   position: relative;
   // z-index: var(--formz-overlay-z-index, #{tokens.$formz-overlay-z-index});
   overflow: hidden;
-  padding: 4px 10px 2px;
+  padding: 4px 10px;
   border-radius: var(--formz-date-field-panel-border-radius, #{tokens.$formz-date-field-panel-border-radius});
 
   & + & {
-    margin-left: sp.cmp_space(8);
+    margin-left: sp.cmp_space(4);
   }
 
   // hover
@@ -145,8 +144,8 @@
   // outline: none;
   // border: 0;
   // padding: 0;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   font-size: 0;
   // color: transparent;
   // background-color: transparent;

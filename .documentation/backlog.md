@@ -25,3 +25,4 @@
 - sortFn for options
 - use rem instead of px
 - move validation errors to the decorator?
+- use arrow up/down css icons for dropdown

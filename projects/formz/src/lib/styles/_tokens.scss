@@ -51,7 +51,7 @@ $formz-textarea-padding-top: 20px;
 
 $formz-panel-background: #f2faff;
 $formz-panel-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);
-$formz-panel-max-height: 33vh;
+$formz-panel-max-height: 33vh; // 1/3 of viewport height
 
 $formz-animation-duration: 0.2s;
 $formz-animation-easing: cubic-bezier(0.37, 0, 0.63, 1); // easeInOutSine

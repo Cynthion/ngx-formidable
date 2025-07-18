@@ -333,7 +333,7 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     this.togglePanel(val);
   }
 
-  @Input() panelPosition: FormzPanelPosition = 'full';
+  @Input() panelPosition: FormzPanelPosition = 'right';
 
   private _isPanelOpen = false;
 
