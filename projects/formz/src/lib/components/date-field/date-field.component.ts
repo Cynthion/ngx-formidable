@@ -12,7 +12,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition } from '../../formz.model';
@@ -320,14 +320,19 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
     console.log('onParse called with dateString:', dateString, 'and format:', unicodeTokenFormat);
 
-    // dateString is the result of `toString` method
-    // const parts = dateString.split('/');
-    // const day = parseInt(parts[0], 10);
-    // const month = parseInt(parts[1], 10) - 1;
-    // const year = parseInt(parts[2], 10);
-    // return new Date(year, month, day);
+    const maskedDate = dateString.trim();
 
-    return new Date(Date.now());
+    if (maskedDate.includes('_')) {
+      return null;
+    }
+
+    const parsedDate = parse(maskedDate, unicodeTokenFormat, new Date());
+
+    if (isNaN(parsedDate.getTime())) {
+      return null;
+    }
+
+    return parsedDate;
   }
 
   private onSelect(date: Date): void {
@@ -349,8 +354,10 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     return initialDate;
   }
 
-  private formatToMask(format: string): string {
+  private formatToMask(unicodeTokenFormat: string): string {
+    // TODO ensure only valid date/time tokens are provided to unicodeTokenFormat
+    // TODO check possibility: AM/PM, named months/days (MMM, EEEE, etc.) can't be mapped to mask (0) and require alphabetic masks (A), but ngx-mask isn't intended for that.
     // Replace each run of letters with the same number of zeros
-    return format.replace(/[a-zA-Z]+/g, (match) => '0'.repeat(match.length));
+    return unicodeTokenFormat.replace(/[a-zA-Z]+/g, (match) => '0'.repeat(match.length));
   }
 }

@@ -8,7 +8,6 @@
 - dropdown: write towards selection
 - check safari/firefox/edge
 - introduce a secondary color (date day label)
-- datefns needed?
 - support disabled and readonly for all fields (dropdown, autocomplete, date):
   - selectOption(option: IFormzFieldOption): void {
     if (this.readOnly || this.disabled || option.disabled) return; }
