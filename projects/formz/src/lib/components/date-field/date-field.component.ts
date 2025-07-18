@@ -308,18 +308,16 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
 
   //#region Pikaday
 
+  /** Uses the selected Date, formats it and writes the resulting string into the field. */
   private onFormat(date: Date, unicodeTokenFormat: string): string {
-    console.log('onFormat called with date:', date, 'and format:', unicodeTokenFormat);
-
     const formattedDate = format(date, unicodeTokenFormat);
     const maskedDate = this.maskPipe.transform(formattedDate, this.ngxMask, this.ngxMaskConfig);
 
     return maskedDate;
   }
 
+  /** Uses the entered string, parses it and writes the resulting Date into the picker. */
   private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
-    console.log('onParse called with dateString:', dateString, 'and format:', unicodeTokenFormat);
-
     const maskedDate = dateString.trim();
 
     if (maskedDate.includes('_')) {
@@ -338,6 +336,9 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   private onSelect(date: Date): void {
     // this.selectDate(pikaday.toString(date.toString()));
     console.log('onSelect called with date:', date);
+
+    // TODO selectDate
+    // this.selectDate()
   }
 
   //#endregion
