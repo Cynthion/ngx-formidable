@@ -118,8 +118,10 @@ export class DateFieldComponent
     // No additional actions needed
   }
 
-  protected doOnFocusChange(_isFocused: boolean): void {
-    // No additional actions needed
+  protected doOnFocusChange(isFocused: boolean): void {
+    if (isFocused) {
+      this.togglePanel(true);
+    }
   }
 
   private handleKeydown(event: KeyboardEvent): void {
@@ -330,12 +332,10 @@ export class DateFieldComponent
 
     // additional field specific behavior
     if (isOpen) {
-      // this.highlightSelectedOption();
       setTimeout(() => scrollIntoView(this.dateRef, this.panelRef));
       updatePanelPosition(this.dateRef, this.panelRef);
-    } else {
-      // this.setHighlightedIndex(-1);
     }
+
     this.cdRef.markForCheck(); // TODO check if other field panels need this also for when open/closing with keys
   }
 
@@ -395,7 +395,6 @@ export class DateFieldComponent
   private formatToMask(unicodeTokenFormat: string): string {
     // TODO ensure only valid date/time tokens are provided to unicodeTokenFormat
     // TODO check possibility: AM/PM, named months/days (MMM, EEEE, etc.) can't be mapped to mask (0) and require alphabetic masks (A), but ngx-mask isn't intended for that.
-    // Replace each run of letters with the same number of zeros
     return unicodeTokenFormat.replace(/[a-zA-Z]+/g, (match) => '0'.repeat(match.length));
   }
 
