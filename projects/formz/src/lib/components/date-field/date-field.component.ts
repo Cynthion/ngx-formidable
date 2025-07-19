@@ -11,7 +11,7 @@ import {
   SimpleChanges,
   ViewChild
 } from '@angular/core';
-import { FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { format, parse } from 'date-fns';
 import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
@@ -38,7 +38,10 @@ import { BaseFieldDirective } from '../base-field.component';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DateFieldComponent extends BaseFieldDirective implements OnInit, AfterViewInit, OnChanges, OnDestroy {
+export class DateFieldComponent
+  extends BaseFieldDirective<Date>
+  implements OnInit, AfterViewInit, OnChanges, OnDestroy
+{
   @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('pickerRef') pickerRef?: ElementRef<HTMLDivElement>;
@@ -47,8 +50,6 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   protected externalClickCallback = () => this.handleExternalClick();
   protected windowResizeScrollCallback = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown'];
-
-  // private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   private readonly staticOptions: PikadayOptions = {
     field: undefined, // not supported
@@ -69,10 +70,7 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     toString: (date: Date, unicodeTokenFormat: string): string => this.onFormat(date, unicodeTokenFormat),
     parse: (dateString: string, unicodeTokenFormat: string): Date | null =>
       this.onParse(dateString, unicodeTokenFormat),
-    onSelect: (date: Date) => this.onSelect(date)
-    // onOpen: () => this.onOpen(),
-    // onClose: () => this.onClose(),
-    // onDraw: () => this.onDraw(),
+    onSelect: (date: Date) => this.selectDate(date)
   };
 
   private readonly defaultOptions: PikadayOptions = {
@@ -95,8 +93,6 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   };
 
   private picker?: Pikaday;
-
-  control!: FormControl; // initialized in ngOnInit
 
   constructor(private maskPipe: NgxMaskPipe) {
     super();
@@ -145,22 +141,24 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
 
   //#region ControlValueAccessor
 
-  protected doWriteValue(value: string): void {
-    this.selectedDate = value;
+  protected doWriteValue(value: Date): void {
+    console.log('0. doWriteValue:', value);
 
-    this.isFieldFilled = !!value;
+    if (value && this.isValidDate(value)) {
+      this.selectedDate = value;
 
-    // write to wrapped input
-    console.log('doWriteValue:', value);
-    // this.inputRef.nativeElement.value = value;
+      this.isFieldFilled = !!value;
+
+      this.picker?.setDate(value, false);
+    }
   }
 
   //#endregion
 
   //#region IFormzField
 
-  get value(): string {
-    return this.selectedDate ?? '';
+  get value(): Date {
+    return this.selectedDate || new Date();
   }
 
   get isLabelFloating(): boolean {
@@ -180,27 +178,27 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
   @Input() name = '';
   @Input() placeholder = '';
   @Input() required = false;
-  // @Input() ngxMask = '0000-00-00'; // TODO not required anymore, auto-generated // dD, mM, s, m, Hh are reserved for date/time formatting
   @Input() unicodeTokenFormat = this.defaultOptions.format; // yyyy-MM-dd
 
   protected ngxMask = this.formatToMask(this.unicodeTokenFormat!);
 
-  // TODO provide by interface, update on changes?
   protected ngxMaskConfig: Partial<NgxMaskConfig> = {
     showMaskTyped: true,
     leadZeroDateTime: false // must be enforced by unicodeTokenFormat, if required
   };
 
-  private selectedDate?: string; // TODO type Date?
+  private selectedDate?: Date;
 
-  public selectDate(date: string): void {
+  public selectDate(date: Date): void {
+    console.log('2. onSelect/selectDate called with date:', date);
+
     this.selectedDate = date;
 
     this.focusChangeSubject$.next(false); // simulate blur on selection
     this.focusChanged.emit(false);
     this.valueChangeSubject$.next(this.selectedDate);
     this.valueChanged.emit(this.selectedDate);
-    this.isFieldFilled = this.selectDate.length > 0;
+    this.isFieldFilled = !!this.selectDate;
     this.onChange(this.selectDate); // notify ControlValueAccessor of the change
     this.onTouched();
     this.togglePanel(false);
@@ -310,14 +308,19 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
 
   /** Uses the selected Date, formats it and writes the resulting string into the field. */
   private onFormat(date: Date, unicodeTokenFormat: string): string {
+    console.log('onFormat called with date:', date, 'and unicodeTokenFormat:', unicodeTokenFormat);
+
     const formattedDate = format(date, unicodeTokenFormat);
     const maskedDate = this.maskPipe.transform(formattedDate, this.ngxMask, this.ngxMaskConfig);
 
+    console.log('Formatted date:', maskedDate);
     return maskedDate;
   }
 
   /** Uses the entered string, parses it and writes the resulting Date into the picker. */
   private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
+    console.log('onParse called with dateString:', dateString, 'and unicodeTokenFormat:', unicodeTokenFormat);
+
     const maskedDate = dateString.trim();
 
     if (maskedDate.includes('_')) {
@@ -326,19 +329,12 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
 
     const parsedDate = parse(maskedDate, unicodeTokenFormat, new Date());
 
-    if (isNaN(parsedDate.getTime())) {
+    if (!this.isValidDate(parsedDate)) {
       return null;
     }
 
+    console.log('Parsed date:', parsedDate);
     return parsedDate;
-  }
-
-  private onSelect(date: Date): void {
-    // this.selectDate(pikaday.toString(date.toString()));
-    console.log('onSelect called with date:', date);
-
-    // TODO selectDate
-    // this.selectDate()
   }
 
   //#endregion
@@ -360,5 +356,15 @@ export class DateFieldComponent extends BaseFieldDirective implements OnInit, Af
     // TODO check possibility: AM/PM, named months/days (MMM, EEEE, etc.) can't be mapped to mask (0) and require alphabetic masks (A), but ngx-mask isn't intended for that.
     // Replace each run of letters with the same number of zeros
     return unicodeTokenFormat.replace(/[a-zA-Z]+/g, (match) => '0'.repeat(match.length));
+  }
+
+  private isValidDate(date: Date): boolean {
+    const result = date instanceof Date && !isNaN(date.getTime());
+
+    if (!result) {
+      console.error('Invalid date provided to DateFieldComponent:', date);
+    }
+
+    return result;
   }
 }

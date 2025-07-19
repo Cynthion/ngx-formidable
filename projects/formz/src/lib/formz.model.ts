@@ -152,7 +152,7 @@ export interface IFormzPikadayOptions
     | 'numberOfMonths'
   > {}
 
-export interface IFormzDateField extends IFormzField, IFormzPikadayOptions {
+export interface IFormzDateField extends IFormzField<Date>, IFormzPikadayOptions {
   name: string;
   placeholder?: string;
   required?: boolean;

@@ -23,7 +23,7 @@ export class ExampleFormComponent {
     nationality: 'ch',
     hobby: 'reading',
     animal: 'cat',
-    birthdate: '1989-06-29',
+    birthdate: new Date(1989, 5, 29), // TODO also support strings
     religion: 'agnostic',
     allergies: ['dust', 'lactose']
   });
@@ -144,12 +144,12 @@ export class ExampleFormComponent {
     this.formValue.set(formValue);
   }
 
-  protected onValueChanged(_fieldName: string, _value: string | string[]): void {
-    // console.log(`Value changed on ${_fieldName} field:`, _value);
+  protected onValueChanged(_fieldName: string, _value: unknown): void {
+    console.log(`Value changed on ${_fieldName} field:`, _value);
   }
 
   protected onFocusChanged(_fieldName: string, _isFocused: boolean): void {
-    // console.log(`Focus changed on ${_fieldName} field:`, _isFocused);
+    console.log(`Focus changed on ${_fieldName} field:`, _isFocused);
   }
 
   protected onSubmit(): void {

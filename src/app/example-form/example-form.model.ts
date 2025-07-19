@@ -27,7 +27,7 @@ export interface User {
   nationality?: UserNationality;
   hobby?: string;
   animal?: string;
-  birthdate?: string;
+  birthdate?: Date;
   religion?: UserReligion;
   allergies?: string[];
   passwords: Password;
