@@ -149,7 +149,9 @@ export class DateFieldComponent
 
       this.isFieldFilled = !!value;
 
-      this.picker?.setDate(value, false);
+      // ensure ngxMask is initialized before applying the value
+      // don't silent update to achieve valueChanged/focusChanged events
+      setTimeout(() => this.picker?.setDate(value, false));
     }
   }
 
@@ -184,7 +186,8 @@ export class DateFieldComponent
 
   protected ngxMaskConfig: Partial<NgxMaskConfig> = {
     showMaskTyped: true,
-    leadZeroDateTime: false // must be enforced by unicodeTokenFormat, if required
+    leadZeroDateTime: false, // must be enforced by unicodeTokenFormat, if required
+    dropSpecialCharacters: false
   };
 
   private selectedDate?: Date;
@@ -330,7 +333,7 @@ export class DateFieldComponent
     const parsedDate = parse(maskedDate, unicodeTokenFormat, new Date());
 
     if (!this.isValidDate(parsedDate)) {
-      return null;
+      return null; // TODO set selectedDate to null?
     }
 
     console.log('Parsed date:', parsedDate);

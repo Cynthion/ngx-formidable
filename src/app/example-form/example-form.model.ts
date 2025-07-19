@@ -48,7 +48,7 @@ export const exampleFormShape: ExampleFormShape = {
   nationality: 'ch',
   hobby: '',
   animal: '',
-  birthdate: '',
+  birthdate: new Date(),
   religion: 'hindu',
   allergies: [],
   passwords: {
