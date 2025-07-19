@@ -158,7 +158,7 @@ export interface IFormzDateField extends IFormzField<Date>, IFormzPikadayOptions
   required?: boolean;
   /** Must be a valid NgxMask format. */
   // ngxMask: string;
-  /** Must be a valid Unicode format. (See https://github.com/date-fns/date-fns/blob/main/docs/unicodeTokens.md) */
+  /** Must be a valid Unicode format. (See https://date-fns.org/v4.1.0/docs/Unicode-Tokens) */
   unicodeTokenFormat: string;
   // pattern?: string;
   // mask?: string;

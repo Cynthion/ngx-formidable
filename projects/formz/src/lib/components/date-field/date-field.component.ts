@@ -1,9 +1,11 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   forwardRef,
+  inject,
   Input,
   OnChanges,
   OnDestroy,
@@ -12,7 +14,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { format, parse } from 'date-fns';
+import { addDays, format, parse } from 'date-fns';
 import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition } from '../../formz.model';
@@ -49,7 +51,9 @@ export class DateFieldComponent
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = () => this.handleExternalClick();
   protected windowResizeScrollCallback = () => this.updatePanelPosition();
-  protected registeredKeys = ['Escape', 'Tab', 'ArrowDown'];
+  protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'];
+
+  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   private readonly staticOptions: PikadayOptions = {
     field: undefined, // not supported
@@ -119,7 +123,9 @@ export class DateFieldComponent
   }
 
   private handleKeydown(event: KeyboardEvent): void {
-    // TODO support selection of date within picker
+    const date = this.picker?.getDate();
+    let nextDate = null;
+
     switch (event.key) {
       case 'Escape':
       case 'Tab':
@@ -128,8 +134,40 @@ export class DateFieldComponent
       case 'ArrowDown':
         if (!this.isPanelOpen) {
           this.togglePanel(true);
+        } else {
+          if (date) {
+            nextDate = addDays(date, 7);
+          }
         }
         break;
+      case 'ArrowUp':
+        if (this.isPanelOpen && date) {
+          nextDate = addDays(date, -7);
+        }
+        break;
+      case 'ArrowLeft':
+        if (this.isPanelOpen && date) {
+          nextDate = addDays(date, -1);
+        }
+        break;
+      case 'ArrowRight':
+        if (this.isPanelOpen && date) {
+          nextDate = addDays(date, 1);
+        }
+        break;
+      case 'Enter':
+        if (this.isPanelOpen) {
+          const date = this.picker?.getDate();
+          if (date) {
+            this.selectDate(date);
+          }
+        }
+        break;
+    }
+
+    if (nextDate) {
+      // silently set next date
+      this.picker?.setDate(nextDate, true);
     }
   }
 
@@ -295,10 +333,10 @@ export class DateFieldComponent
       // this.highlightSelectedOption();
       setTimeout(() => scrollIntoView(this.dateRef, this.panelRef));
       updatePanelPosition(this.dateRef, this.panelRef);
-      // this.cdRef.markForCheck();
     } else {
       // this.setHighlightedIndex(-1);
     }
+    this.cdRef.markForCheck(); // TODO check if other field panels need this also for when open/closing with keys
   }
 
   private updatePanelPosition(): void {

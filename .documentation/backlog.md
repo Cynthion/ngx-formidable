@@ -27,3 +27,4 @@
 - use arrow up/down css icons for dropdown
 - bouncer for 'null' in all "writeValue" methods -> base class
 - date-field: add ngxconfig provide by interface, update on changes?
+- scrollIntoView upon panel close
