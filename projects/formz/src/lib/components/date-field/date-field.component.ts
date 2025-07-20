@@ -18,6 +18,7 @@ import { addDays, format, isEqual, parse } from 'date-fns';
 import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition } from '../../formz.model';
+import { calendarArrowDown, calendarArrowUp } from '../../icons';
 import { scrollIntoView, updatePanelPosition } from '../../panel.behavior';
 import { BaseFieldDirective } from '../base-field.component';
 
@@ -239,6 +240,9 @@ export class DateFieldComponent
   @Input() unicodeTokenFormat = this.defaultOptions.format; // yyyy-MM-dd
 
   protected ngxMask = this.formatToMask(this.unicodeTokenFormat!);
+
+  protected toggleIconClosed = calendarArrowDown;
+  protected toggleIconOpen = calendarArrowUp;
 
   protected ngxMaskConfig: Partial<NgxMaskConfig> = {
     showMaskTyped: true,

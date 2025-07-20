@@ -24,80 +24,14 @@
       (blur)="onFocusChange(false)" />
 
     <!-- Toggle Trigger -->
-    <!-- <button
-      type="button"
-      tabindex="-1"
-      class="toggle-panel-btn"
-      (click)="togglePanel(!isPanelOpen, true)">
-      <svg
-        width="20"
-        height="20"
-        fill="none"
-        viewBox="0 0 20 20">
-        <rect
-          x="3"
-          y="6"
-          width="14"
-          height="11"
-          rx="2"
-          fill="#888" />
-        <rect
-          x="6"
-          y="9"
-          width="2"
-          height="2"
-          fill="#fff" />
-        <rect
-          x="9"
-          y="9"
-          width="2"
-          height="2"
-          fill="#fff" />
-        <rect
-          x="12"
-          y="9"
-          width="2"
-          height="2"
-          fill="#fff" />
-      </svg>
-    </button> -->
-    <div
+    <!-- TODO provide this as ngContent -->
+    <formz-icon
       role="button"
-      class="toggle-panel-btn"
+      class="toggle"
+      [svg]="isPanelOpen ? toggleIconOpen : toggleIconClosed"
+      [size]="32"
       (mousedown)="$event.preventDefault()"
-      (click)="togglePanel(!isPanelOpen)">
-      <svg
-        width="20"
-        height="20"
-        fill="none"
-        viewBox="0 0 20 20">
-        <rect
-          x="3"
-          y="6"
-          width="14"
-          height="11"
-          rx="2"
-          fill="#888" />
-        <rect
-          x="6"
-          y="9"
-          width="2"
-          height="2"
-          fill="#fff" />
-        <rect
-          x="9"
-          y="9"
-          width="2"
-          height="2"
-          fill="#fff" />
-        <rect
-          x="12"
-          y="9"
-          width="2"
-          height="2"
-          fill="#fff" />
-      </svg>
-    </div>
+      (click)="togglePanel(!isPanelOpen)" />
   </div>
 
   <!-- Panel -->

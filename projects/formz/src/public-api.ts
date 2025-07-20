@@ -10,6 +10,7 @@ export * from './lib/components/field-decorator/field-decorator.component';
 export * from './lib/components/field-errors/field-errors.component';
 export * from './lib/components/field-option/field-option.component';
 export * from './lib/components/form-submit/form-submit.component';
+export * from './lib/components/icon/icon.component';
 export * from './lib/components/input-field/input-field.component';
 export * from './lib/components/radio-group-field/radio-group-field.component';
 export * from './lib/components/select-field/select-field.component';

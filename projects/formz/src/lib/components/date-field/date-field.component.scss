@@ -20,23 +20,16 @@
   @include date-picker-wrapper;
 }
 
-// TODO cleanup
 .wrapper {
   display: flex;
+  align-items: center;
   height: 100%;
 }
 
-// TODO style with icon
-.toggle-panel-btn {
+.toggle {
   cursor: pointer;
-  outline: 0;
 
-  svg {
-    display: block;
-  }
-
-  &:hover,
-  &:focus {
+  &:hover {
     background: #f0f0f0;
   }
 }
