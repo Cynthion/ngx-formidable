@@ -14,7 +14,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { addDays, format, parse } from 'date-fns';
+import { addDays, format, isEqual, parse } from 'date-fns';
 import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition } from '../../formz.model';
@@ -131,8 +131,11 @@ export class DateFieldComponent
     // Only here to satisfy the abstract method
   }
 
-  protected doOnFocusChange(_isFocused: boolean): void {
-    this.trySetDateFromInput();
+  protected doOnFocusChange(isFocused: boolean): void {
+    // try set date on blur
+    if (!isFocused) {
+      this.trySetDateFromInput();
+    }
   }
 
   private handleKeydown(event: KeyboardEvent): void {
@@ -195,7 +198,7 @@ export class DateFieldComponent
   //#region ControlValueAccessor
 
   protected doWriteValue(value: Date): void {
-    console.log('0. doWriteValue:', value);
+    // console.log('0. doWriteValue:', value);
 
     if (value && this.isValidDate(value)) {
       this.selectedDate = value;
@@ -246,12 +249,16 @@ export class DateFieldComponent
   private selectedDate?: Date;
 
   public selectDate(date: Date | undefined): void {
-    console.log('2. onSelect/selectDate called with date:', date);
+    // console.log('2. onSelect/selectDate called with date:', date);
+
+    // only trigger value changes if there are changes
+    if (this.selectedDate === undefined && date === undefined) return;
+    if (this.selectedDate && date && isEqual(this.selectedDate, date)) return;
 
     this.selectedDate = date;
 
-    this.focusChangeSubject$.next(false); // simulate blur on selection
-    this.focusChanged.emit(false);
+    // this.focusChangeSubject$.next(false); // simulate blur on selection
+    // this.focusChanged.emit(false);
     this.valueChangeSubject$.next(this.selectedDate);
     this.valueChanged.emit(this.selectedDate);
     this.isFieldFilled = !!this.selectedDate;
@@ -362,19 +369,19 @@ export class DateFieldComponent
 
   /** Uses the selected Date, formats it and writes the resulting string into the field. */
   private onFormat(date: Date | null, unicodeTokenFormat: string): string {
-    console.log('onFormat called with date:', date, 'and unicodeTokenFormat:', unicodeTokenFormat);
+    // console.log('onFormat called with date:', date, 'and unicodeTokenFormat:', unicodeTokenFormat);
 
     const formattedDate = date ? format(date, unicodeTokenFormat) : '';
 
     const maskedDate = this.maskPipe.transform(formattedDate, this.ngxMask, this.ngxMaskConfig);
 
-    console.log('Formatted date:', maskedDate);
+    // console.log('Formatted date:', maskedDate);
     return maskedDate;
   }
 
   /** Uses the entered string, parses it and writes the resulting Date into the picker. */
   private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
-    console.log('onParse called with dateString:', dateString, 'and unicodeTokenFormat:', unicodeTokenFormat);
+    // console.log('onParse called with dateString:', dateString, 'and unicodeTokenFormat:', unicodeTokenFormat);
 
     const maskedDate = dateString.trim();
 
@@ -388,7 +395,7 @@ export class DateFieldComponent
       return null; // TODO reset or set selectedDate to null?
     }
 
-    console.log('Parsed date:', parsedDate);
+    // console.log('Parsed date:', parsedDate);
     return parsedDate;
   }
 

@@ -12,32 +12,6 @@
   (formValueChange$)="setFormValue($event)"
   (ngSubmit)="onSubmit()">
   <fieldset class="fieldset">
-    <!-- First Name -->
-    <!-- <formz-field-decorator>
-      <formz-input-field
-        formzFieldErrors
-        placeholder="Your first name"
-        autocomplete="given-name"
-        name="firstName"
-        [minLength]="10"
-        [maxLength]="15"
-        [ngModel]="vm.formValue.firstName"
-        [disabled]="false"
-        [readOnly]="false"
-        [required]="false"
-        (valueChanged)="onValueChanged('firstName', $event)"
-        (focusChanged)="onFocusChanged('firstName', $event)">
-      </formz-input-field>
-      <div
-        formzFieldLabel
-        [isFloating]="true">
-        First Name
-      </div>
-      <div formzFieldTooltip>(Input)</div>
-      <div formzFieldPrefix>Prefix</div>
-      <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator> -->
-
     <!-- Last Name -->
     <!-- <formz-field-decorator>
       <formz-textarea-field
@@ -224,6 +198,32 @@
         Birthdate
       </div>
       <div formzFieldTooltip>(Date)</div>
+      <div formzFieldPrefix>Prefix</div>
+      <div formzFieldSuffix>Suffix</div>
+    </formz-field-decorator>
+
+    <!-- First Name -->
+    <formz-field-decorator>
+      <formz-input-field
+        formzFieldErrors
+        placeholder="Your first name"
+        autocomplete="given-name"
+        name="firstName"
+        [minLength]="10"
+        [maxLength]="15"
+        [ngModel]="vm.formValue.firstName"
+        [disabled]="false"
+        [readOnly]="false"
+        [required]="false"
+        (valueChanged)="onValueChanged('firstName', $event)"
+        (focusChanged)="onFocusChanged('firstName', $event)">
+      </formz-input-field>
+      <div
+        formzFieldLabel
+        [isFloating]="true">
+        First Name
+      </div>
+      <div formzFieldTooltip>(Input)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
     </formz-field-decorator>
