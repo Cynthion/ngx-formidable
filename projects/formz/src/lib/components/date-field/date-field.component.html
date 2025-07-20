@@ -2,25 +2,66 @@
   #dateRef
   class="field"
   [class.focused]="isFieldFocused">
-  <!-- Input Field -->
-  <input
-    #inputRef
-    type="text"
-    autocomplete="off"
-    class="wrapped-input"
-    [mask]="ngxMask"
-    [showMaskTyped]="ngxMaskConfig.showMaskTyped || false"
-    [leadZeroDateTime]="ngxMaskConfig.leadZeroDateTime || false"
-    [dropSpecialCharacters]="ngxMaskConfig.dropSpecialCharacters || true"
-    [id]="fieldId"
-    [placeholder]="placeholder"
-    [attr.name]="name"
-    [attr.disabled]="disabled ? '' : null"
-    [readonly]="null"
-    [required]="required"
-    (input)="onValueChange()"
-    (focus)="onFocusChange(true)"
-    (blur)="onFocusChange(false)" />
+  <div class="wrapper">
+    <!-- Input Field -->
+    <input
+      #inputRef
+      type="text"
+      autocomplete="off"
+      class="wrapped-input"
+      [mask]="ngxMask"
+      [showMaskTyped]="ngxMaskConfig.showMaskTyped || false"
+      [leadZeroDateTime]="ngxMaskConfig.leadZeroDateTime || false"
+      [dropSpecialCharacters]="ngxMaskConfig.dropSpecialCharacters || true"
+      [id]="fieldId"
+      [placeholder]="placeholder"
+      [attr.name]="name"
+      [attr.disabled]="disabled ? '' : null"
+      [readonly]="null"
+      [required]="required"
+      (input)="onValueChange()"
+      (focus)="onFocusChange(true)"
+      (blur)="onFocusChange(false)" />
+
+    <!-- Toggle Trigger -->
+    <button
+      type="button"
+      tabindex="-1"
+      class="toggle-panel-btn"
+      (click)="togglePanel(!isPanelOpen)">
+      <svg
+        width="20"
+        height="20"
+        fill="none"
+        viewBox="0 0 20 20">
+        <rect
+          x="3"
+          y="6"
+          width="14"
+          height="11"
+          rx="2"
+          fill="#888" />
+        <rect
+          x="6"
+          y="9"
+          width="2"
+          height="2"
+          fill="#fff" />
+        <rect
+          x="9"
+          y="9"
+          width="2"
+          height="2"
+          fill="#fff" />
+        <rect
+          x="12"
+          y="9"
+          width="2"
+          height="2"
+          fill="#fff" />
+      </svg>
+    </button>
+  </div>
 
   <!-- Panel -->
   <div

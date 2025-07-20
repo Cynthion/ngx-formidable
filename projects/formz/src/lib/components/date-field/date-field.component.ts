@@ -41,7 +41,7 @@ import { BaseFieldDirective } from '../base-field.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DateFieldComponent
-  extends BaseFieldDirective<Date>
+  extends BaseFieldDirective<Date | undefined>
   implements OnInit, AfterViewInit, OnChanges, OnDestroy
 {
   @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
@@ -114,14 +114,25 @@ export class DateFieldComponent
     }
   }
 
-  protected doOnValueChange(): void {
-    // No additional actions needed
+  /** Override onValueChange to only trigger onChange and valueChanged events when a date is set. */
+  protected override onValueChange(): void {
+    const value = this.value;
+    this.isFieldFilled = typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
+
+    // this.valueChangeSubject$.next(value);
+    // this.valueChanged.emit(value);
+    // this.onChange(value); // notify ControlValueAccessor of the change
+
+    // this.doOnValueChange();
   }
 
-  protected doOnFocusChange(isFocused: boolean): void {
-    if (isFocused) {
-      this.togglePanel(true);
-    }
+  protected doOnValueChange(): void {
+    // No additional actions needed
+    // Only here to satisfy the abstract method
+  }
+
+  protected doOnFocusChange(_isFocused: boolean): void {
+    this.trySetDateFromInput();
   }
 
   private handleKeydown(event: KeyboardEvent): void {
@@ -163,6 +174,8 @@ export class DateFieldComponent
           if (date) {
             this.selectDate(date);
           }
+        } else {
+          this.trySetDateFromInput();
         }
         break;
     }
@@ -232,7 +245,7 @@ export class DateFieldComponent
 
   private selectedDate?: Date;
 
-  public selectDate(date: Date): void {
+  public selectDate(date: Date | undefined): void {
     console.log('2. onSelect/selectDate called with date:', date);
 
     this.selectedDate = date;
@@ -241,8 +254,8 @@ export class DateFieldComponent
     this.focusChanged.emit(false);
     this.valueChangeSubject$.next(this.selectedDate);
     this.valueChanged.emit(this.selectedDate);
-    this.isFieldFilled = !!this.selectDate;
-    this.onChange(this.selectDate); // notify ControlValueAccessor of the change
+    this.isFieldFilled = !!this.selectedDate;
+    this.onChange(this.selectedDate); // notify ControlValueAccessor of the change
     this.onTouched();
     this.togglePanel(false);
   }
@@ -348,10 +361,11 @@ export class DateFieldComponent
   //#region Pikaday
 
   /** Uses the selected Date, formats it and writes the resulting string into the field. */
-  private onFormat(date: Date, unicodeTokenFormat: string): string {
+  private onFormat(date: Date | null, unicodeTokenFormat: string): string {
     console.log('onFormat called with date:', date, 'and unicodeTokenFormat:', unicodeTokenFormat);
 
-    const formattedDate = format(date, unicodeTokenFormat);
+    const formattedDate = date ? format(date, unicodeTokenFormat) : '';
+
     const maskedDate = this.maskPipe.transform(formattedDate, this.ngxMask, this.ngxMaskConfig);
 
     console.log('Formatted date:', maskedDate);
@@ -371,7 +385,7 @@ export class DateFieldComponent
     const parsedDate = parse(maskedDate, unicodeTokenFormat, new Date());
 
     if (!this.isValidDate(parsedDate)) {
-      return null; // TODO set selectedDate to null?
+      return null; // TODO reset or set selectedDate to null?
     }
 
     console.log('Parsed date:', parsedDate);
@@ -406,5 +420,30 @@ export class DateFieldComponent
     }
 
     return result;
+  }
+
+  private trySetDateFromInput(): void {
+    const parsedDate = this.onParse(
+      this.inputRef.nativeElement.value,
+      this.unicodeTokenFormat || this.defaultOptions.format!
+    );
+
+    if (parsedDate) {
+      this.setDate(parsedDate);
+    } else {
+      this.resetDate();
+    }
+  }
+
+  private setDate(date: Date): void {
+    this.picker?.setDate(date, false);
+    this.selectDate(date);
+  }
+
+  private resetDate(): void {
+    this.picker?.setDate(null, false);
+    this.selectDate(undefined);
+    const emptyMask = this.onFormat(null, this.unicodeTokenFormat || this.defaultOptions.format!);
+    this.inputRef.nativeElement.value = emptyMask;
   }
 }

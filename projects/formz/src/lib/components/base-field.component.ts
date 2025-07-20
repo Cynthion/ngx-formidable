@@ -34,18 +34,21 @@ export abstract class BaseFieldDirective<T = string>
 
   protected onValueChange(): void {
     const value = this.value;
+
+    this.isFieldFilled = typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
+
     this.valueChangeSubject$.next(value);
     this.valueChanged.emit(value);
-    this.isFieldFilled = typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
     this.onChange(value); // notify ControlValueAccessor of the change
 
     this.doOnValueChange();
   }
 
   protected onFocusChange(isFocused: boolean): void {
+    this.isFieldFocused = isFocused;
+
     this.focusChangeSubject$.next(isFocused);
     this.focusChanged.emit(isFocused);
-    this.isFieldFocused = isFocused;
 
     if (!isFocused) {
       this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
