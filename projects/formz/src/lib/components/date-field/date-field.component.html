@@ -26,12 +26,11 @@
     <!-- Toggle Trigger -->
     <!-- TODO provide this as ngContent -->
     <formz-icon
-      role="button"
+      #toggleRef
       class="toggle"
       [svg]="isPanelOpen ? toggleIconOpen : toggleIconClosed"
       [size]="32"
-      (mousedown)="$event.preventDefault()"
-      (click)="togglePanel(!isPanelOpen)" />
+      (mousedown)="toggleClick($event)" />
   </div>
 
   <!-- Panel -->

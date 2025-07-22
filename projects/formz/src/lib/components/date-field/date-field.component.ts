@@ -75,7 +75,8 @@ export class DateFieldComponent
     toString: (date: Date, unicodeTokenFormat: string): string => this.onFormat(date, unicodeTokenFormat),
     parse: (dateString: string, unicodeTokenFormat: string): Date | null =>
       this.onParse(dateString, unicodeTokenFormat),
-    onSelect: (date: Date) => this.selectDate(date)
+    // onSelect: (date: Date) => this.selectDate(date) // TODO use this
+    onSelect: (date: Date) => this.onSelect(date)
   };
 
   private readonly defaultOptions: PikadayOptions = {
@@ -141,11 +142,11 @@ export class DateFieldComponent
 
   private handleKeydown(event: KeyboardEvent): void {
     const date = this.picker?.getDate();
-    let nextDate = null;
 
     switch (event.key) {
       case 'Escape':
       case 'Tab':
+      case 'Enter':
         if (this.isPanelOpen) this.togglePanel(false);
         break;
       case 'ArrowDown':
@@ -153,40 +154,29 @@ export class DateFieldComponent
           this.togglePanel(true);
         } else {
           if (date) {
-            nextDate = addDays(date, 7);
+            const nextDate = addDays(date, 7);
+            this.picker?.setDate(nextDate, true); // silent update
           }
         }
         break;
       case 'ArrowUp':
         if (this.isPanelOpen && date) {
-          nextDate = addDays(date, -7);
+          const nextDate = addDays(date, -7);
+          this.picker?.setDate(nextDate, true); // silent update
         }
         break;
       case 'ArrowLeft':
         if (this.isPanelOpen && date) {
-          nextDate = addDays(date, -1);
+          const nextDate = addDays(date, -1);
+          this.picker?.setDate(nextDate, true); // silent update
         }
         break;
       case 'ArrowRight':
         if (this.isPanelOpen && date) {
-          nextDate = addDays(date, 1);
+          const nextDate = addDays(date, 1);
+          this.picker?.setDate(nextDate, true); // silent update
         }
         break;
-      case 'Enter':
-        if (this.isPanelOpen) {
-          const date = this.picker?.getDate();
-          if (date) {
-            this.selectDate(date);
-          }
-        } else {
-          this.trySetDateFromInput();
-        }
-        break;
-    }
-
-    if (nextDate) {
-      // silently set next date
-      this.picker?.setDate(nextDate, true);
     }
   }
 
@@ -247,7 +237,7 @@ export class DateFieldComponent
   protected ngxMaskConfig: Partial<NgxMaskConfig> = {
     showMaskTyped: true,
     leadZeroDateTime: false, // must be enforced by unicodeTokenFormat, if required
-    dropSpecialCharacters: false
+    dropSpecialCharacters: false // keep special characters like '-', '.' or '/' in the input
   };
 
   private selectedDate?: Date;
@@ -319,11 +309,17 @@ export class DateFieldComponent
       ...this.staticOptions,
       ...dynamicOptions,
       field: this.inputRef.nativeElement,
+      bound: false,
       container: this.pickerRef?.nativeElement
     };
 
     if (!this.picker) {
       this.picker = new Pikaday(updatedOptions);
+
+      // This is a Pikaday library fix that allows to use "field: undefined" and still show the container.
+      // if (!updatedOptions.field && updatedOptions.container) {
+      //   updatedOptions.container.appendChild(this.picker.el);
+      // }
     } else {
       this.picker.config(updatedOptions);
     }
@@ -382,6 +378,7 @@ export class DateFieldComponent
 
     const formattedDate = date ? format(date, unicodeTokenFormat) : '';
 
+    // TODO is this required?
     const maskedDate = this.maskPipe.transform(formattedDate, this.ngxMask, this.ngxMaskConfig);
 
     // console.log('Formatted date:', maskedDate);
@@ -406,6 +403,12 @@ export class DateFieldComponent
 
     // console.log('Parsed date:', parsedDate);
     return parsedDate;
+  }
+
+  // TODO remove
+  private onSelect(date: Date): void {
+    console.log('onSelect called with date:', date);
+    this.selectDate(date);
   }
 
   //#endregion
@@ -462,4 +465,8 @@ export class DateFieldComponent
     const emptyMask = this.onFormat(null, this.unicodeTokenFormat || this.defaultOptions.format!);
     this.inputRef.nativeElement.value = emptyMask;
   }
+
+  // private removeSpecial(input: string): string {
+  //   return input.replace(/\./g, '').trim();
+  // }
 }

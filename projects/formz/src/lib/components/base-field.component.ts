@@ -123,7 +123,8 @@ export abstract class BaseFieldDirective<T = string>
               filter((event) => this.registeredKeys.includes(event.key)),
               tap((event) => {
                 // immediately prevent default, before debounceTime
-                if (event.key !== 'Tab') event.preventDefault();
+                if (event.key !== 'Tab' && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')
+                  event.preventDefault();
               }),
               // debounceTime(100),
               takeUntil(this.destroy$)
