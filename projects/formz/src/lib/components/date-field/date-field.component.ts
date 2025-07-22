@@ -351,6 +351,11 @@ export class DateFieldComponent
 
   private _isPanelOpen = false;
 
+  protected toggleClick(event: MouseEvent): void {
+    event.preventDefault(); // prevent input from losing focus
+    this.togglePanel(!this.isPanelOpen);
+  }
+
   protected togglePanel(isOpen: boolean): void {
     this._isPanelOpen = isOpen;
 
