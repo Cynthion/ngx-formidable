@@ -14,7 +14,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { addDays, format, isEqual, parse } from 'date-fns';
+import { addDays, format, isEqual, isValid, parse } from 'date-fns';
 import { NgxMaskConfig } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition } from '../../formz.model';
@@ -42,7 +42,7 @@ import { BaseFieldDirective } from '../base-field.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DateFieldComponent
-  extends BaseFieldDirective<Date | undefined>
+  extends BaseFieldDirective<Date | null>
   implements OnInit, AfterViewInit, OnChanges, OnDestroy
 {
   @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
@@ -128,7 +128,7 @@ export class DateFieldComponent
   protected doOnFocusChange(isFocused: boolean): void {
     // try set date on blur
     if (!isFocused) {
-      this.trySetDateFromInput();
+      this.trySetDateFromInput(this.inputRef.nativeElement.value);
     }
   }
 
@@ -185,15 +185,7 @@ export class DateFieldComponent
   //#region ControlValueAccessor
 
   protected doWriteValue(value: Date): void {
-    if (value && this.isValidDate(value)) {
-      this.selectedDate = value;
-
-      this.isFieldFilled = !!value;
-
-      // ensure ngxMask is initialized before applying the value
-      // don't silent update to achieve valueChanged/focusChanged events
-      setTimeout(() => this.picker?.setDate(value, false));
-    }
+    this.trySetDateFromInput(value);
   }
 
   //#endregion
@@ -234,7 +226,7 @@ export class DateFieldComponent
     dropSpecialCharacters: false // keep special characters like '-', '.' or '/' in the input
   };
 
-  private selectedDate?: Date;
+  private selectedDate: Date | null = null;
 
   public selectDate(date: Date | null): void {
     // only trigger value changes if there are changes
@@ -243,7 +235,7 @@ export class DateFieldComponent
     if (this.selectedDate === undefined && date === undefined) return;
     if (this.selectedDate && date && isEqual(this.selectedDate, date)) return;
 
-    this.selectedDate = date ? date : undefined;
+    this.selectedDate = date ? date : null;
 
     this.valueChangeSubject$.next(this.selectedDate);
     this.valueChanged.emit(this.selectedDate);
@@ -374,16 +366,10 @@ export class DateFieldComponent
 
   /** Uses the entered string, parses it and writes/selects the resulting Date into the picker. */
   private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
-    const maskedDate = dateString.trim();
+    const parsedDate = parse(dateString.trim(), unicodeTokenFormat, new Date());
 
-    if (maskedDate.includes('_')) {
+    if (!this.isValidDateObject(parsedDate)) {
       return null;
-    }
-
-    const parsedDate = parse(maskedDate, unicodeTokenFormat, new Date());
-
-    if (!this.isValidDate(parsedDate)) {
-      return null; // TODO reset or set selectedDate to null?
     }
 
     return parsedDate;
@@ -414,38 +400,38 @@ export class DateFieldComponent
     return unicodeTokenFormat.replace(/[a-zA-Z]+/g, (match) => '0'.repeat(match.length));
   }
 
-  private isValidDate(date: Date): boolean {
-    const result = date instanceof Date && !isNaN(date.getTime());
-
-    if (!result) {
-      console.error('Invalid date provided to DateFieldComponent:', date);
-    }
-
-    return result;
+  private isValidDateObject(value: unknown): boolean {
+    return value instanceof Date && isValid(value);
   }
 
-  private trySetDateFromInput(): void {
-    const parsedDate = this.onParse(
-      this.inputRef.nativeElement.value,
-      this.unicodeTokenFormat || this.defaultOptions.format!
-    );
+  private trySetDateFromInput(value: Date | null | string): void {
+    if (!value) {
+      this.setDate(null);
+      return;
+    }
+
+    if (this.isValidDateObject(value)) {
+      this.setDate(value as Date);
+      return;
+    }
+
+    const parsedDate = this.onParse(value as string, this.unicodeTokenFormat || this.defaultOptions.format!);
 
     if (parsedDate) {
       this.setDate(parsedDate);
     } else {
-      this.resetDate();
+      this.setDate(null);
     }
   }
 
-  private setDate(date: Date): void {
-    this.picker?.setDate(date, false);
+  private setDate(date: Date | null): void {
     this.selectDate(date);
-  }
 
-  private resetDate(): void {
-    this.picker?.setDate(null, false);
-    this.selectDate(null);
-    const emptyMask = this.onFormat(null, this.unicodeTokenFormat || this.defaultOptions.format!);
-    this.inputRef.nativeElement.value = emptyMask;
+    // ensure ngxMask is initialized before applying the value
+    // don't silent update to achieve valueChanged/focusChanged events
+    setTimeout(() => {
+      this.picker?.setDate(date, false);
+      // TODO write the emptyMask to the input if date is null
+    });
   }
 }
