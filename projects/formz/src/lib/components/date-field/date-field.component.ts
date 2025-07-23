@@ -15,7 +15,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { addDays, format, isEqual, parse } from 'date-fns';
-import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
+import { NgxMaskConfig } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition } from '../../formz.model';
 import { calendarArrowDown, calendarArrowUp } from '../../icons';
@@ -100,9 +100,9 @@ export class DateFieldComponent
 
   private picker?: Pikaday;
 
-  constructor(private maskPipe: NgxMaskPipe) {
-    super();
-  }
+  // constructor(private maskPipe: NgxMaskPipe) {
+  //   super();
+  // }
 
   ngAfterViewInit(): void {
     this.updateOptions();
@@ -147,7 +147,11 @@ export class DateFieldComponent
       case 'Escape':
       case 'Tab':
       case 'Enter':
-        if (this.isPanelOpen) this.togglePanel(false);
+        if (this.isPanelOpen) {
+          this.togglePanel(false);
+          const currentDate = this.picker!.getDate();
+          this.selectDate(currentDate); // select the current date on close
+        }
         break;
       case 'ArrowDown':
         if (!this.isPanelOpen) {
@@ -189,8 +193,6 @@ export class DateFieldComponent
   //#region ControlValueAccessor
 
   protected doWriteValue(value: Date): void {
-    // console.log('0. doWriteValue:', value);
-
     if (value && this.isValidDate(value)) {
       this.selectedDate = value;
 
@@ -242,17 +244,15 @@ export class DateFieldComponent
 
   private selectedDate?: Date;
 
-  public selectDate(date: Date | undefined): void {
-    // console.log('2. onSelect/selectDate called with date:', date);
-
+  public selectDate(date: Date | null): void {
     // only trigger value changes if there are changes
+    // (panel could close without date change)
+    if (this.selectedDate === null && date === null) return;
     if (this.selectedDate === undefined && date === undefined) return;
     if (this.selectedDate && date && isEqual(this.selectedDate, date)) return;
 
-    this.selectedDate = date;
+    this.selectedDate = date ? date : undefined;
 
-    // this.focusChangeSubject$.next(false); // simulate blur on selection
-    // this.focusChanged.emit(false);
     this.valueChangeSubject$.next(this.selectedDate);
     this.valueChanged.emit(this.selectedDate);
     this.isFieldFilled = !!this.selectedDate;
@@ -374,21 +374,13 @@ export class DateFieldComponent
 
   /** Uses the selected Date, formats it and writes the resulting string into the field. */
   private onFormat(date: Date | null, unicodeTokenFormat: string): string {
-    // console.log('onFormat called with date:', date, 'and unicodeTokenFormat:', unicodeTokenFormat);
-
     const formattedDate = date ? format(date, unicodeTokenFormat) : '';
 
-    // TODO is this required?
-    const maskedDate = this.maskPipe.transform(formattedDate, this.ngxMask, this.ngxMaskConfig);
-
-    // console.log('Formatted date:', maskedDate);
-    return maskedDate;
+    return formattedDate;
   }
 
-  /** Uses the entered string, parses it and writes the resulting Date into the picker. */
+  /** Uses the entered string, parses it and writes/selects the resulting Date into the picker. */
   private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
-    // console.log('onParse called with dateString:', dateString, 'and unicodeTokenFormat:', unicodeTokenFormat);
-
     const maskedDate = dateString.trim();
 
     if (maskedDate.includes('_')) {
@@ -401,11 +393,9 @@ export class DateFieldComponent
       return null; // TODO reset or set selectedDate to null?
     }
 
-    // console.log('Parsed date:', parsedDate);
     return parsedDate;
   }
 
-  // TODO remove
   private onSelect(date: Date): void {
     console.log('onSelect called with date:', date);
     this.selectDate(date);
@@ -461,12 +451,8 @@ export class DateFieldComponent
 
   private resetDate(): void {
     this.picker?.setDate(null, false);
-    this.selectDate(undefined);
+    this.selectDate(null);
     const emptyMask = this.onFormat(null, this.unicodeTokenFormat || this.defaultOptions.format!);
     this.inputRef.nativeElement.value = emptyMask;
   }
-
-  // private removeSpecial(input: string): string {
-  //   return input.replace(/\./g, '').trim();
-  // }
 }
