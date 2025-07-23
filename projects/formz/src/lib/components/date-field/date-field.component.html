@@ -27,7 +27,8 @@
     <!-- TODO provide this as ngContent -->
     <formz-icon
       #toggleRef
-      class="toggle"
+      class="toggle-background"
+      [class.open]="isPanelOpen"
       [svg]="isPanelOpen ? toggleIconOpen : toggleIconClosed"
       [size]="32"
       (mousedown)="toggleClick($event)" />

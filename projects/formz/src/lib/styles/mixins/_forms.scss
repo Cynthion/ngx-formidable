@@ -457,3 +457,25 @@
 
   margin: sp.cmp_space(16);
 }
+
+@mixin toggle-background {
+  position: relative;
+  cursor: pointer;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
+  }
+
+  &:hover::before,
+  &.open::before {
+    opacity: 1;
+    background: var(--formz-color-field-hover, #{tokens.$formz-color-field-hovered});
+  }
+}

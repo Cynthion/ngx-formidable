@@ -100,10 +100,6 @@ export class DateFieldComponent
 
   private picker?: Pikaday;
 
-  // constructor(private maskPipe: NgxMaskPipe) {
-  //   super();
-  // }
-
   ngAfterViewInit(): void {
     this.updateOptions();
     this.updateMask();
@@ -121,11 +117,7 @@ export class DateFieldComponent
     const value = this.value;
     this.isFieldFilled = typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
 
-    // this.valueChangeSubject$.next(value);
-    // this.valueChanged.emit(value);
-    // this.onChange(value); // notify ControlValueAccessor of the change
-
-    // this.doOnValueChange();
+    // value changes are handled in selectDate method
   }
 
   protected doOnValueChange(): void {
@@ -308,7 +300,7 @@ export class DateFieldComponent
     const updatedOptions: PikadayOptions = {
       ...this.staticOptions,
       ...dynamicOptions,
-      field: this.inputRef.nativeElement,
+      field: this.inputRef.nativeElement, // must be set to use onFormat/onParse
       bound: false,
       container: this.pickerRef?.nativeElement
     };
@@ -349,6 +341,7 @@ export class DateFieldComponent
 
   protected toggleClick(event: MouseEvent): void {
     event.preventDefault(); // prevent input from losing focus
+    this.inputRef.nativeElement.focus(); // ensure input remains focused
     this.togglePanel(!this.isPanelOpen);
   }
 

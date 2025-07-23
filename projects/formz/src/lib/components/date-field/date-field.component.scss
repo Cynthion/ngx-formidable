@@ -26,10 +26,6 @@
   height: 100%;
 }
 
-.toggle {
-  cursor: pointer;
-
-  &:hover {
-    background: #f0f0f0;
-  }
+.toggle-background {
+  @include toggle-background;
 }
