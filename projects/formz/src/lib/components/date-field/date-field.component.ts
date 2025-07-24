@@ -17,6 +17,7 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { addDays, format, isEqual, isValid, parse } from 'date-fns';
 import { NgxMaskConfig } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
+import { formatToMask, UNICODE_DATE_TOKENS, validateUnicodeTokenFormat } from '../../date.helpers';
 import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition } from '../../formz.model';
 import { calendarArrowDown, calendarArrowUp } from '../../icons';
 import { scrollIntoView, updatePanelPosition } from '../../panel.behavior';
@@ -54,6 +55,10 @@ export class DateFieldComponent
   protected windowResizeScrollCallback = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'];
 
+  private maskChar = '0';
+  private emptyMaskChar = '_';
+  private defaultUnicodeTokenFormat = 'yyyy-MM-dd';
+
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   private readonly staticOptions: PikadayOptions = {
@@ -75,13 +80,12 @@ export class DateFieldComponent
     toString: (date: Date, unicodeTokenFormat: string): string => this.onFormat(date, unicodeTokenFormat),
     parse: (dateString: string, unicodeTokenFormat: string): Date | null =>
       this.onParse(dateString, unicodeTokenFormat),
-    // onSelect: (date: Date) => this.selectDate(date) // TODO use this
-    onSelect: (date: Date) => this.onSelect(date)
+    onSelect: (date: Date) => this.selectDate(date)
   };
 
   private readonly defaultOptions: PikadayOptions = {
     ariaLabel: undefined,
-    format: 'yyyy-MM-dd',
+    format: this.defaultUnicodeTokenFormat,
     defaultDate: undefined,
     setDefaultDate: true,
     firstDay: 1,
@@ -99,6 +103,19 @@ export class DateFieldComponent
   };
 
   private picker?: Pikaday;
+
+  override ngOnInit(): void {
+    super.ngOnInit();
+
+    if (!validateUnicodeTokenFormat(this.unicodeTokenFormat)) {
+      console.warn(
+        `Invalid unicodeTokenFormat: "${this.unicodeTokenFormat}". ` +
+          `Falling back to default "yyyy-MM-dd". Supported tokens: ${UNICODE_DATE_TOKENS.join(', ')}.`
+      );
+
+      this.unicodeTokenFormat = 'yyyy-MM-dd';
+    }
+  }
 
   ngAfterViewInit(): void {
     this.updateOptions();
@@ -143,6 +160,8 @@ export class DateFieldComponent
           this.togglePanel(false);
           const currentDate = this.picker!.getDate();
           this.selectDate(currentDate); // select the current date on close
+        } else {
+          this.trySetDateFromInput(this.inputRef.nativeElement.value);
         }
         break;
       case 'ArrowDown':
@@ -213,9 +232,10 @@ export class DateFieldComponent
   @Input() name = '';
   @Input() placeholder = '';
   @Input() required = false;
-  @Input() unicodeTokenFormat = this.defaultOptions.format; // yyyy-MM-dd
+  @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
 
-  protected ngxMask = this.formatToMask(this.unicodeTokenFormat!);
+  protected ngxMask = formatToMask(this.unicodeTokenFormat!, this.maskChar);
+  private emptyNgxMask = formatToMask(this.unicodeTokenFormat!, this.emptyMaskChar);
 
   protected toggleIconClosed = calendarArrowDown;
   protected toggleIconOpen = calendarArrowUp;
@@ -278,7 +298,7 @@ export class DateFieldComponent
       disableWeekends: this.disableWeekends ?? this.defaultOptions.disableWeekends,
       disableDayFn: this.disableDayFn ?? this.defaultOptions.disableDayFn,
       yearRange: this.yearRange ?? this.defaultOptions.yearRange,
-      // i18n: this.i18n ?? this.defaultOptions.i18n,
+      // i18n: this.i18n ?? this.defaultOptions.i18n, // TODO
       yearSuffix: this.yearSuffix ?? this.defaultOptions.yearSuffix,
       showMonthAfterYear: this.showMonthAfterYear ?? this.defaultOptions.showMonthAfterYear,
       showDaysInNextAndPreviousMonths:
@@ -299,18 +319,14 @@ export class DateFieldComponent
 
     if (!this.picker) {
       this.picker = new Pikaday(updatedOptions);
-
-      // This is a Pikaday library fix that allows to use "field: undefined" and still show the container.
-      // if (!updatedOptions.field && updatedOptions.container) {
-      //   updatedOptions.container.appendChild(this.picker.el);
-      // }
     } else {
       this.picker.config(updatedOptions);
     }
   }
 
   private updateMask(): void {
-    this.ngxMask = this.formatToMask(this.unicodeTokenFormat!);
+    this.ngxMask = formatToMask(this.unicodeTokenFormat!, this.maskChar);
+    this.emptyNgxMask = formatToMask(this.unicodeTokenFormat!, this.emptyMaskChar);
   }
 
   //#endregion
@@ -375,11 +391,6 @@ export class DateFieldComponent
     return parsedDate;
   }
 
-  private onSelect(date: Date): void {
-    console.log('onSelect called with date:', date);
-    this.selectDate(date);
-  }
-
   //#endregion
 
   private getDefaultDate(minDate?: Date, maxDate?: Date, initialDate: Date = new Date()): Date {
@@ -394,18 +405,12 @@ export class DateFieldComponent
     return initialDate;
   }
 
-  private formatToMask(unicodeTokenFormat: string): string {
-    // TODO ensure only valid date/time tokens are provided to unicodeTokenFormat
-    // TODO check possibility: AM/PM, named months/days (MMM, EEEE, etc.) can't be mapped to mask (0) and require alphabetic masks (A), but ngx-mask isn't intended for that.
-    return unicodeTokenFormat.replace(/[a-zA-Z]+/g, (match) => '0'.repeat(match.length));
-  }
-
   private isValidDateObject(value: unknown): boolean {
     return value instanceof Date && isValid(value);
   }
 
   private trySetDateFromInput(value: Date | null | string): void {
-    if (!value) {
+    if (value === null || value === undefined || value === '') {
       this.setDate(null);
       return;
     }
@@ -415,13 +420,22 @@ export class DateFieldComponent
       return;
     }
 
-    const parsedDate = this.onParse(value as string, this.unicodeTokenFormat || this.defaultOptions.format!);
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed.length === 0) {
+        this.setDate(null);
+        return;
+      }
 
-    if (parsedDate) {
-      this.setDate(parsedDate);
-    } else {
-      this.setDate(null);
+      const parsedDate = this.onParse(trimmed, this.unicodeTokenFormat || this.defaultOptions.format!);
+
+      if (parsedDate) {
+        this.setDate(parsedDate);
+        return;
+      }
     }
+
+    this.setDate(null);
   }
 
   private setDate(date: Date | null): void {
@@ -431,7 +445,10 @@ export class DateFieldComponent
     // don't silent update to achieve valueChanged/focusChanged events
     setTimeout(() => {
       this.picker?.setDate(date, false);
-      // TODO write the emptyMask to the input if date is null
+      // write empty mask until ngxMask re-applies it on focus
+      if (date == null) {
+        this.inputRef.nativeElement.value = this.emptyNgxMask;
+      }
     });
   }
 }
