@@ -94,7 +94,7 @@ export class DateFieldComponent
     disableWeekends: false,
     disableDayFn: undefined,
     yearRange: 2,
-    // i18n: undefined, // TODO
+    i18n: undefined,
     yearSuffix: '',
     showMonthAfterYear: false,
     showDaysInNextAndPreviousMonths: true,
@@ -298,7 +298,7 @@ export class DateFieldComponent
       disableWeekends: this.disableWeekends ?? this.defaultOptions.disableWeekends,
       disableDayFn: this.disableDayFn ?? this.defaultOptions.disableDayFn,
       yearRange: this.yearRange ?? this.defaultOptions.yearRange,
-      // i18n: this.i18n ?? this.defaultOptions.i18n, // TODO
+      i18n: this.i18n ?? this.defaultOptions.i18n,
       yearSuffix: this.yearSuffix ?? this.defaultOptions.yearSuffix,
       showMonthAfterYear: this.showMonthAfterYear ?? this.defaultOptions.showMonthAfterYear,
       showDaysInNextAndPreviousMonths:

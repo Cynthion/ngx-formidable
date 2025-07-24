@@ -212,7 +212,7 @@
         [ngModel]="vm.formValue.birthdate"
         [disabled]="false"
         [required]="false"
-        [unicodeTokenFormat]="'dd . M . yyyy'"
+        [unicodeTokenFormat]="'dd . Mo . yyyy'"
         (valueChanged)="onValueChanged('birthdate', $event)"
         (focusChanged)="onFocusChanged('birthdate', $event)">
       </formz-date-field>
