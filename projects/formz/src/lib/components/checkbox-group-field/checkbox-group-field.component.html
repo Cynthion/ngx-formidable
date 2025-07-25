@@ -5,45 +5,49 @@
   class="field"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
-  <!-- Options -->
-  <!-- Options are re-created in order to use native <input> elements. -->
-  @for (option of options$ | async; track option.value; let i = $index) {
-    <input
-      hidden
-      type="checkbox"
-      [id]="option.value"
-      [tabindex]="-1"
-      [attr.name]="name"
-      [attr.disabled]="option.disabled || disabled ? '' : null"
-      [required]="required"
-      [checked]="isChecked(option.value)" />
-    <formz-field-option
-      [layout]="'checkbox-group'"
-      [value]="option.value"
-      [label]="option.label"
-      [disabled]="option.disabled || disabled"
-      [selected]="isChecked(option.value)"
-      [highlighted]="i === (highlightedOptionIndex$ | async)">
-      <ng-container
-        *ngIf="option.template; else labelContent"
-        [ngTemplateOutlet]="option.template">
-      </ng-container>
-      <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
-    </formz-field-option>
-  } @empty {
-    <input
-      type="checkbox"
-      [id]="emptyOption.value"
-      [tabindex]="-1"
-      [name]="name"
-      [value]="emptyOption.value"
-      [disabled]="emptyOption.disabled || disabled" />
-    <formz-field-option
-      [layout]="'checkbox-group'"
-      [value]="emptyOption.value"
-      [label]="emptyOption.label"
-      [disabled]="true">
-      {{ emptyOption.label || emptyOption.value }}
-    </formz-field-option>
-  }
+  <fieldset>
+    <legend>{{ name }}</legend>
+
+    <!-- Options -->
+    <!-- Options are re-created in order to use native <input> elements. -->
+    @for (option of options$ | async; track option.value; let i = $index) {
+      <input
+        hidden
+        type="checkbox"
+        [id]="option.value"
+        [tabindex]="-1"
+        [attr.name]="name"
+        [attr.disabled]="option.disabled || disabled ? '' : null"
+        [required]="required"
+        [checked]="isChecked(option.value)" />
+      <formz-field-option
+        [layout]="'checkbox-group'"
+        [value]="option.value"
+        [label]="option.label"
+        [disabled]="option.disabled || disabled"
+        [selected]="isChecked(option.value)"
+        [highlighted]="i === (highlightedOptionIndex$ | async)">
+        <ng-container
+          *ngIf="option.template; else labelContent"
+          [ngTemplateOutlet]="option.template">
+        </ng-container>
+        <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
+      </formz-field-option>
+    } @empty {
+      <input
+        type="checkbox"
+        [id]="emptyOption.value"
+        [tabindex]="-1"
+        [name]="name"
+        [value]="emptyOption.value"
+        [disabled]="emptyOption.disabled || disabled" />
+      <formz-field-option
+        [layout]="'checkbox-group'"
+        [value]="emptyOption.value"
+        [label]="emptyOption.label"
+        [disabled]="true">
+        {{ emptyOption.label || emptyOption.value }}
+      </formz-field-option>
+    }
+  </fieldset>
 </div>

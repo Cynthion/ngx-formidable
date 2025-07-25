@@ -1,27 +1,5 @@
-@use 'typography' as typo;
-@use 'spacings' as sp;
 @use '../tokens' as tokens;
-
-$spacing-map: (
-  0: 0rem,
-  1: 0.0625rem,
-  // 1px
-  2: 0.125rem,
-  // 2px
-  4: 0.25rem,
-  // 4px
-  8: 0.5rem,
-  // 8px
-  16: 1rem // 16px
-);
-
-@function spacing($size) {
-  @if map.has-key($spacing-map, $size) != true {
-    @error "'#{$size} is not a valid spacing.";
-  }
-
-  @return map.get($spacing-map, $size);
-}
+@use 'utils' as utils;
 
 @mixin icon {
   display: inline-flex;
@@ -65,6 +43,12 @@ $spacing-map: (
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
 }
 
+@mixin field-font {
+  font-size: var(--formz-field-font-size, #{tokens.$formz-field-font-size});
+  font-weight: var(--formz-field-font-weight, #{tokens.$formz-field-font-weight});
+  line-height: var(--formz-field-line-height, #{tokens.$formz-field-line-height});
+}
+
 @mixin field-readonly {
   background: var(--formz-color-field-background-readonly, #{tokens.$formz-color-field-background-readonly});
   color: var(--formz-color-field-text-readonly, #{tokens.$formz-color-field-text-readonly});
@@ -85,7 +69,8 @@ $spacing-map: (
 
 @mixin field-focused {
   border-color: var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
-  box-shadow: inset 0 0 0 spacing(1) var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
+  box-shadow: inset 0 0 0 utils.spacing(1)
+    var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
 }
 
 @mixin border {
@@ -98,7 +83,7 @@ $spacing-map: (
   @include field-reset;
   @include border;
   @include field-colors;
-  // @include typo.font-m; // TODO tokenize font size
+  @include field-font;
 
   width: 100%;
   position: relative;
@@ -130,9 +115,9 @@ $spacing-map: (
 
 @mixin group-field {
   @include field-reset;
+  @include field-font;
   // @include border; // TODO tokenize group border colors -> transparent default
   // @include field-colors; // TODO tokenize group colors -> transparent default
-  // @include typo.font-m; // TODO tokenize font size
 
   &:focus {
     @include field-focused;
@@ -155,7 +140,7 @@ $spacing-map: (
   @include field;
 
   height: var(--formz-field-height, #{tokens.$formz-field-height});
-  padding: 0 spacing(16); // horizontal padding only
+  padding: 0 utils.spacing(16); // horizontal padding only
 }
 
 @mixin textarea-field {
@@ -221,15 +206,17 @@ $spacing-map: (
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: spacing(8);
+  margin-bottom: utils.spacing(8);
 }
 
 @mixin field-label {
-  @include typo.font-m-bold;
+  font-size: var(--formz-label-font-size, #{tokens.$formz-label-font-size});
+  font-weight: var(--formz-label-font-weight, #{tokens.$formz-label-font-weight});
+  line-height: var(--formz-label-line-height, #{tokens.$formz-label-line-height});
 
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
   pointer-events: none;
-  margin-right: spacing(8);
+  margin-right: utils.spacing(8);
 
   // animation
   transform: translateY(0);
@@ -246,10 +233,12 @@ $spacing-map: (
 }
 
 @mixin field-label-floating {
-  @include typo.font-s-bold;
+  font-size: var(--formz-label-floating-font-size, #{tokens.$formz-label-floating-font-size});
+  font-weight: var(--formz-label-floating-font-weight, #{tokens.$formz-label-floating-font-weight});
+  line-height: var(--formz-label-floating-line-height, #{tokens.$formz-label-floating-line-height});
 
   position: absolute;
-  left: spacing(16);
+  left: utils.spacing(16);
   margin-right: 0;
   color: var(--formz-color-field-label-floating, #{tokens.$formz-color-field-label-floating});
   z-index: 1; // keep on top of field
@@ -266,8 +255,8 @@ $spacing-map: (
   position: absolute;
   top: calc(var(--formz-field-height, #{formz-field-height}) / 2);
   left: 0;
-  padding-left: spacing(16);
-  padding-right: spacing(16);
+  padding-left: utils.spacing(16);
+  padding-right: utils.spacing(16);
   transform: translateY(-50%);
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
   pointer-events: none;
@@ -278,8 +267,8 @@ $spacing-map: (
   position: absolute;
   top: calc(var(--formz-field-height, #{formz-field-height}) / 2);
   right: 0;
-  padding-left: spacing(16);
-  padding-right: spacing(16);
+  padding-left: utils.spacing(16);
+  padding-right: utils.spacing(16);
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
   transform: translateY(-50%);
   pointer-events: none;
@@ -287,23 +276,25 @@ $spacing-map: (
 }
 
 @mixin field-prefix-group {
-  padding-bottom: spacing(16);
+  padding-bottom: utils.spacing(16);
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
 }
 
 @mixin field-suffix-group {
-  padding-top: spacing(16);
-  padding-bottom: spacing(16);
+  padding-top: utils.spacing(16);
+  padding-bottom: utils.spacing(16);
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
 }
 
 @mixin field-validation-errors {
-  margin-top: spacing(8);
-  margin-bottom: spacing(16);
+  margin-top: utils.spacing(8);
+  margin-bottom: utils.spacing(16);
 }
 
 @mixin field-validation-error {
-  @include typo.font-xs;
+  font-size: var(--formz-field-validation-error-font-size, #{tokens.$formz-field-validation-error-font-size});
+  font-weight: var(--formz-field-validation-error-font-weight, #{tokens.$formz-field-validation-error-font-weight});
+  line-height: var(--formz-field-validation-error-line-height, #{tokens.$formz-field-validation-error-line-height});
 
   display: block;
   color: var(--formz-color-validation-error, #{tokens.$formz-color-validation-error});
@@ -358,6 +349,7 @@ $spacing-map: (
     @include panel-right-aligned;
   }
 
+  outline: 0;
   position: absolute;
   box-shadow: var(--formz-panel-box-shadow, #{tokens.$formz-panel-box-shadow});
   border: var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness}) solid
@@ -376,7 +368,7 @@ $spacing-map: (
 
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(-spacing(4));
+  transform: translateY(calc(utils.spacing(4) * -1));
 
   transition: transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
     var(--formz-animation-easing, #{tokens.$formz-animation-easing});
@@ -429,7 +421,7 @@ $spacing-map: (
 }
 
 @mixin field-option-inline {
-  padding: spacing(8) spacing(16);
+  padding: utils.spacing(8) utils.spacing(16);
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
 
   &:hover {
@@ -443,7 +435,7 @@ $spacing-map: (
   display: flex;
   align-items: center;
 
-  padding: spacing(8) spacing(16) spacing(8) spacing(0);
+  padding: utils.spacing(8) utils.spacing(16) utils.spacing(8) utils.spacing(0);
 }
 
 @mixin field-option-checkbox-group {
@@ -453,13 +445,13 @@ $spacing-map: (
 @mixin field-option-prefix {
   display: flex;
   align-items: center;
-  padding: spacing(0) spacing(16);
+  padding: utils.spacing(0) utils.spacing(16);
 }
 
 @mixin checkbox-group-prefix-outer {
   width: var(--formz-option-prefix-dimension-outer, #{tokens.$formz-option-prefix-dimension-outer});
   height: var(--formz-option-prefix-dimension-outer, #{tokens.$formz-option-prefix-dimension-outer});
-  border: spacing(2) solid var(--formz-color-option-prefix-outer, #{tokens.$formz-color-option-prefix-outer});
+  border: utils.spacing(2) solid var(--formz-color-option-prefix-outer, #{tokens.$formz-color-option-prefix-outer});
   display: flex;
   align-items: center;
   justify-content: center;
@@ -488,7 +480,7 @@ $spacing-map: (
   display: flex;
   justify-content: center;
 
-  margin: spacing(16);
+  margin: utils.spacing(16);
 }
 
 @mixin toggle-background {

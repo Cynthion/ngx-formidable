@@ -64,4 +64,20 @@
   --formz-color-option-prefix-outer: #{tokens.$formz-color-option-prefix-outer};
   --formz-color-option-prefix-inner: #{tokens.$formz-color-option-prefix-inner};
   --formz-color-option-prefix-background: #{tokens.$formz-color-option-prefix-background};
+
+  --formz-field-font-size: #{tokens.$formz-field-font-size};
+  --formz-field-font-weight: #{tokens.$formz-field-font-weight};
+  --formz-field-line-height: #{tokens.$formz-field-line-height};
+
+  --formz-label-font-size: #{tokens.$formz-label-font-size};
+  --formz-label-font-weight: #{tokens.$formz-label-font-weight};
+  --formz-label-line-height: #{tokens.$formz-label-line-height};
+
+  --formz-label-floating-font-size: #{tokens.$formz-label-floating-font-size};
+  --formz-label-floating-font-weight: #{tokens.$formz-label-floating-font-weight};
+  --formz-label-floating-line-height: #{tokens.$formz-label-floating-line-height};
+
+  --formz-field-validation-error-font-size: #{tokens.$formz-field-validation-error-font-size};
+  --formz-field-validation-error-font-weight: #{tokens.$formz-field-validation-error-font-weight};
+  --formz-field-validation-error-line-height: #{tokens.$formz-field-validation-error-line-height};
 }

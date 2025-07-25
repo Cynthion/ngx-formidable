@@ -1,0 +1,46 @@
+@use 'sass:map';
+
+// pixel to rem
+$spacing-map: (
+  0: 0rem,
+  1: 0.0625rem,
+  2: 0.125rem,
+  4: 0.25rem,
+  8: 0.5rem,
+  12: 0.75rem,
+  14: 0.875rem,
+  16: 1rem
+);
+
+@function spacing($size) {
+  @if map.has-key($spacing-map, $size) != true {
+    @error "'#{$size} is not a valid spacing.";
+  }
+
+  @return map.get($spacing-map, $size);
+}
+
+@mixin hover($focus: false) {
+  @media (hover: hover) {
+    &:hover,
+    &:active {
+      @content;
+    }
+
+    @if $focus {
+      &:focus {
+        @content;
+      }
+    }
+  }
+}
+
+// Positioned relative to the nearest positioned ancestor
+// (instead of relative to the viewport, like fixed)
+@mixin absolute-cover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
