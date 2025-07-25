@@ -48,10 +48,10 @@ export class TimeFieldComponent
   @ViewChild('timeRef', { static: true }) timeRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
-  protected keyboardCallback = null;
+  protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
-  protected registeredKeys: string[] = [];
+  protected registeredKeys = ['Enter'];
 
   private maskChar = '0';
   private emptyMaskChar = '_';
@@ -97,6 +97,14 @@ export class TimeFieldComponent
     // try set date on blur
     if (!isFocused) {
       this.trySetTimeFromInput(this.inputRef.nativeElement.value);
+    }
+  }
+
+  private handleKeydown(event: KeyboardEvent): void {
+    switch (event.key) {
+      case 'Enter':
+        this.trySetTimeFromInput(this.inputRef.nativeElement.value);
+        break;
     }
   }
 
