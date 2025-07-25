@@ -31,7 +31,7 @@
       [class.open]="isPanelOpen"
       [svg]="isPanelOpen ? toggleIconOpen : toggleIconClosed"
       [size]="32"
-      (click)="toggleClick($event)" />
+      (mousedown)="toggleClick($event)" />
   </div>
 
   <!-- Panel -->
