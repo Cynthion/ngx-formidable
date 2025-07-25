@@ -1,8 +1,8 @@
 import { Directive, inject, input } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { getFormControlFieldPath } from '../form.helpers';
-import { FormValidationOptions } from '../formz.model';
+import { getFormControlFieldPath } from '../helpers/form.helpers';
+import { FormValidationOptions } from '../models/formz.model';
 import { FormDirective } from './form.directive';
 
 /**

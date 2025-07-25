@@ -17,7 +17,7 @@ import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
 import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
 import { FieldTooltipDirective } from '../../directives/field-tooltip.directive';
-import { FieldDecoratorLayout, FORMZ_FIELD, IFormzField } from '../../formz.model';
+import { FieldDecoratorLayout, FORMZ_FIELD, IFormzField } from '../../models/formz.model';
 
 @Component({
   selector: 'formz-field-decorator',

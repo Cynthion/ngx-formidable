@@ -14,6 +14,7 @@ import { InputFieldComponent } from './components/input-field/input-field.compon
 import { RadioGroupFieldComponent } from './components/radio-group-field/radio-group-field.component';
 import { SelectFieldComponent } from './components/select-field/select-field.component';
 import { TextareaFieldComponent } from './components/textarea-field/textarea-field.component';
+import { TimeFieldComponent } from './components/time-field/time-field.component';
 import { FieldErrorsDirective } from './directives/field-errors.directive';
 import { FieldLabelDirective } from './directives/field-label.directive';
 import { FieldPrefixDirective } from './directives/field-prefix.directive';
@@ -43,6 +44,7 @@ const components = [
   TextareaFieldComponent,
   RadioGroupFieldComponent,
   CheckboxGroupFieldComponent,
+  TimeFieldComponent,
   // Formz Directives
   FieldTooltipDirective,
   FieldLabelDirective,
@@ -71,8 +73,7 @@ const components = [
     // ngx-mask
     provideNgxMask({
       validation: false
-    }),
-    NgxMaskPipe // TODO remove?
+    })
   ]
 })
 export class FormzModule {}

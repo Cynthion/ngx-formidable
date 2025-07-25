@@ -26,11 +26,11 @@ import {
   zip
 } from 'rxjs';
 import { StaticSuite } from 'vest';
-import { validateFormShape } from '../form-validate.helpers';
-import { getAllFormErrors, mergeValuesAndRawValues, set } from '../form.helpers';
-import { FormValidationOptions } from '../formz.model';
-import { DeepRequired } from '../utility-types';
-import { cloneDeep } from '../utility.helpers';
+import { validateFormShape } from '../helpers/form-validate.helpers';
+import { getAllFormErrors, mergeValuesAndRawValues, set } from '../helpers/form.helpers';
+import { cloneDeep } from '../helpers/utility.helpers';
+import { FormValidationOptions } from '../models/formz.model';
+import { DeepRequired } from '../models/utility-types';
 
 /**
  * Holds the formValue, the validation suite and some handy outputs.

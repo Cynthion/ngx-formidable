@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import Fuse, { FuseResult } from 'fuse.js';
-import { FormValidationOptions, IFormzFieldOption } from 'projects/formz/src/lib/formz.model';
+import { FormValidationOptions, IFormzFieldOption } from 'projects/formz/src/lib/models/formz.model';
 import { map, Observable, startWith, Subject } from 'rxjs';
 import {
   AnimalFormFieldOption,
@@ -24,6 +24,7 @@ export class ExampleFormComponent {
     hobby: 'reading',
     animal: 'cat',
     birthdate: new Date(1989, 5, 29), // TODO also support strings
+    time: new Date(0, 0, 0, 12, 30, 15),
     religion: 'agnostic',
     allergies: ['dust', 'lactose']
   });

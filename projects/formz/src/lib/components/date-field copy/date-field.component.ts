@@ -17,13 +17,9 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { addDays, format, isEqual, isValid, parse } from 'date-fns';
 import { NgxMaskConfig } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
-import {
-  formatToDateTokenMask,
-  UNICODE_DATE_TOKENS,
-  validateUnicodeDateTokenFormat
-} from '../../helpers/format.helpers';
+import { formatToMask, UNICODE_DATE_TOKENS, validateUnicodeTokenFormat } from '../../date.helpers';
 import { scrollIntoView, updatePanelPosition } from '../../helpers/panel.helpers';
-import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition, IFormzDateField } from '../../models/formz.model';
+import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition } from '../../models/formz.model';
 import { calendarArrowDown, calendarArrowUp } from '../../models/icons';
 import { BaseFieldDirective } from '../base-field.component';
 
@@ -48,7 +44,7 @@ import { BaseFieldDirective } from '../base-field.component';
 })
 export class DateFieldComponent
   extends BaseFieldDirective<Date | null>
-  implements IFormzDateField, OnInit, AfterViewInit, OnChanges, OnDestroy
+  implements OnInit, AfterViewInit, OnChanges, OnDestroy
 {
   @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
@@ -61,7 +57,7 @@ export class DateFieldComponent
 
   private maskChar = '0';
   private emptyMaskChar = '_';
-  private readonly defaultUnicodeTokenFormat = 'yyyy-MM-dd';
+  private defaultUnicodeTokenFormat = 'yyyy-MM-dd';
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
@@ -98,7 +94,7 @@ export class DateFieldComponent
     disableWeekends: false,
     disableDayFn: undefined,
     yearRange: 2,
-    // i18n: undefined, // TODO
+    i18n: undefined,
     yearSuffix: '',
     showMonthAfterYear: false,
     showDaysInNextAndPreviousMonths: true,
@@ -111,13 +107,13 @@ export class DateFieldComponent
   override ngOnInit(): void {
     super.ngOnInit();
 
-    if (!validateUnicodeDateTokenFormat(this.unicodeTokenFormat)) {
+    if (!validateUnicodeTokenFormat(this.unicodeTokenFormat)) {
       console.warn(
         `Invalid unicodeTokenFormat: "${this.unicodeTokenFormat}". ` +
-          `Falling back to default "${this.defaultUnicodeTokenFormat}". Supported tokens: ${UNICODE_DATE_TOKENS.join(', ')}.`
+          `Falling back to default "yyyy-MM-dd". Supported tokens: ${UNICODE_DATE_TOKENS.join(', ')}.`
       );
 
-      this.unicodeTokenFormat = this.defaultUnicodeTokenFormat;
+      this.unicodeTokenFormat = 'yyyy-MM-dd';
     }
   }
 
@@ -238,8 +234,8 @@ export class DateFieldComponent
   @Input() required = false;
   @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
 
-  protected ngxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.maskChar);
-  private emptyNgxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.emptyMaskChar);
+  protected ngxMask = formatToMask(this.unicodeTokenFormat!, this.maskChar);
+  private emptyNgxMask = formatToMask(this.unicodeTokenFormat!, this.emptyMaskChar);
 
   protected toggleIconClosed = calendarArrowDown;
   protected toggleIconOpen = calendarArrowUp;
@@ -282,7 +278,7 @@ export class DateFieldComponent
   @Input() disableWeekends?: boolean;
   @Input() disableDayFn?: (date: Date) => boolean;
   @Input() yearRange?: number | number[];
-  @Input() i18n?: PikadayI18nConfig = undefined;
+  @Input() i18n?: PikadayI18nConfig;
   @Input() yearSuffix?: string;
   @Input() showMonthAfterYear?: boolean;
   @Input() showDaysInNextAndPreviousMonths?: boolean;
@@ -302,7 +298,7 @@ export class DateFieldComponent
       disableWeekends: this.disableWeekends ?? this.defaultOptions.disableWeekends,
       disableDayFn: this.disableDayFn ?? this.defaultOptions.disableDayFn,
       yearRange: this.yearRange ?? this.defaultOptions.yearRange,
-      // i18n: this.i18n || this.defaultOptions.i18n, // TODO
+      i18n: this.i18n ?? this.defaultOptions.i18n,
       yearSuffix: this.yearSuffix ?? this.defaultOptions.yearSuffix,
       showMonthAfterYear: this.showMonthAfterYear ?? this.defaultOptions.showMonthAfterYear,
       showDaysInNextAndPreviousMonths:
@@ -329,8 +325,8 @@ export class DateFieldComponent
   }
 
   private updateMask(): void {
-    this.ngxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.maskChar);
-    this.emptyNgxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.emptyMaskChar);
+    this.ngxMask = formatToMask(this.unicodeTokenFormat!, this.maskChar);
+    this.emptyNgxMask = formatToMask(this.unicodeTokenFormat!, this.emptyMaskChar);
   }
 
   //#endregion
@@ -431,7 +427,7 @@ export class DateFieldComponent
         return;
       }
 
-      const parsedDate = this.onParse(trimmed, this.unicodeTokenFormat || this.defaultUnicodeTokenFormat);
+      const parsedDate = this.onParse(trimmed, this.unicodeTokenFormat || this.defaultOptions.format!);
 
       if (parsedDate) {
         this.setDate(parsedDate);

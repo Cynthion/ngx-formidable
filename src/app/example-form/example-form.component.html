@@ -212,7 +212,7 @@
         [ngModel]="vm.formValue.birthdate"
         [disabled]="false"
         [required]="false"
-        [unicodeTokenFormat]="'dd . Mo . yyyy'"
+        [unicodeTokenFormat]="'dd . MM . yyyy'"
         (valueChanged)="onValueChanged('birthdate', $event)"
         (focusChanged)="onFocusChanged('birthdate', $event)">
       </formz-date-field>
@@ -222,6 +222,29 @@
         Birthdate
       </div>
       <div formzFieldTooltip>(Date)</div>
+      <div formzFieldPrefix>Prefix</div>
+      <div formzFieldSuffix>Suffix</div>
+    </formz-field-decorator>
+
+    <!-- Time -->
+    <formz-field-decorator>
+      <formz-time-field
+        formzFieldErrors
+        placeholder="?"
+        name="time"
+        [ngModel]="vm.formValue.time"
+        [disabled]="false"
+        [required]="false"
+        [unicodeTokenFormat]="'HH : mm'"
+        (valueChanged)="onValueChanged('time', $event)"
+        (focusChanged)="onFocusChanged('time', $event)">
+      </formz-time-field>
+      <div
+        formzFieldLabel
+        [isFloating]="true">
+        Time
+      </div>
+      <div formzFieldTooltip>(Time)</div>
       <div formzFieldPrefix>Prefix</div>
       <div formzFieldSuffix>Suffix</div>
     </formz-field-decorator>

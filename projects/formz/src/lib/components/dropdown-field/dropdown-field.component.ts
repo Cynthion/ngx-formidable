@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
+import { scrollIntoView, updatePanelPosition } from '../../helpers/panel.helpers';
 import {
   EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
@@ -22,8 +23,7 @@ import {
   FormzPanelPosition,
   IFormzDropdownField,
   IFormzFieldOption
-} from '../../formz.model';
-import { scrollIntoView, updatePanelPosition } from '../../panel.behavior';
+} from '../../models/formz.model';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({

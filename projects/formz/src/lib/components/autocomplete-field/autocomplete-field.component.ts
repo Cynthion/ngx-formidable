@@ -17,6 +17,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
+import { scrollIntoView, updatePanelPosition } from '../../helpers/panel.helpers';
 import {
   EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
@@ -26,8 +27,7 @@ import {
   FormzPanelPosition,
   IFormzAutocompleteField,
   IFormzFieldOption
-} from '../../formz.model';
-import { scrollIntoView, updatePanelPosition } from '../../panel.behavior';
+} from '../../models/formz.model';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({

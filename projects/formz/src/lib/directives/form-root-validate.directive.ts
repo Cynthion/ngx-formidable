@@ -8,9 +8,9 @@ import {
 } from '@angular/forms';
 import { debounceTime, Observable, of, ReplaySubject, Subject, switchMap, take, takeUntil } from 'rxjs';
 import { StaticSuite } from 'vest';
-import { set } from '../form.helpers';
-import { FormValidationOptions, ROOT_FORM } from '../formz.model';
-import { cloneDeep } from '../utility.helpers';
+import { set } from '../helpers/form.helpers';
+import { cloneDeep } from '../helpers/utility.helpers';
+import { FormValidationOptions, ROOT_FORM } from '../models/formz.model';
 
 /**
 Source: https://github.dev/simplifiedcourses/ngx-vest-forms

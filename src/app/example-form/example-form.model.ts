@@ -28,6 +28,7 @@ export interface User {
   hobby?: string;
   animal?: string;
   birthdate?: Date;
+  time?: Date;
   religion?: UserReligion;
   allergies?: string[];
   passwords: Password;
@@ -49,6 +50,7 @@ export const exampleFormShape: ExampleFormShape = {
   hobby: '',
   animal: '',
   birthdate: new Date(),
+  time: new Date(0, 0, 0, 0, 0, 0, 0),
   religion: 'hindu',
   allergies: [],
   passwords: {

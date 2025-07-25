@@ -164,6 +164,12 @@
     @include field-focused;
   }
 
+  // TODO true?
+  // field is always read-only, so a reset is needed
+  &:read-only {
+    @include field-colors;
+  }
+
   .wrapped-input {
     @include wrapped-input;
   }
@@ -180,6 +186,12 @@
 
 @mixin date-field {
   @include panel-field;
+  @include input-wrapper-field;
+}
+
+@mixin time-field {
+  @include input-field;
+
   @include input-wrapper-field;
 }
 

@@ -15,7 +15,7 @@ import {
   FORMZ_OPTION_FIELD,
   IFormzFieldOption,
   IFormzOptionField
-} from '../../formz.model';
+} from '../../models/formz.model';
 
 @Component({
   selector: 'formz-field-option',

@@ -152,13 +152,22 @@ export interface IFormzPikadayOptions
     | 'numberOfMonths'
   > {}
 
-export interface IFormzDateField extends IFormzField<Date>, IFormzPikadayOptions {
+export interface IFormzDateField extends IFormzField<Date | null>, IFormzPikadayOptions {
   name: string;
   placeholder?: string;
   required?: boolean;
   /** Must be a valid Unicode format. (Supported tokens: y, yy, yyy, yyyy, M, MM, MMM, MMMM, d, dd) */
   unicodeTokenFormat: string;
-  selectDate(date: string): void;
+  selectDate(date: Date | null): void;
+}
+
+export interface IFormzTimeField extends IFormzField<Date | null> {
+  name: string;
+  placeholder?: string;
+  required?: boolean;
+  /** Must be a valid Unicode format. */ // TODO
+  unicodeTokenFormat: string;
+  selectTime(time: Date | null): void;
 }
 
 export type FormzIconSize = 16 | 24 | 32 | 48 | 64 | 128; // TODO remove

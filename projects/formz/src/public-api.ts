@@ -15,6 +15,7 @@ export * from './lib/components/input-field/input-field.component';
 export * from './lib/components/radio-group-field/radio-group-field.component';
 export * from './lib/components/select-field/select-field.component';
 export * from './lib/components/textarea-field/textarea-field.component';
+export * from './lib/components/time-field/time-field.component';
 export * from './lib/formz.module';
 
 export * from './lib/directives/field-errors.directive';
@@ -27,5 +28,5 @@ export * from './lib/directives/form-model.directive';
 export * from './lib/directives/form-root-validate.directive';
 export * from './lib/directives/form.directive';
 
-export * from './lib/formz.model';
-export * from './lib/utility-types';
+export * from './lib/models/formz.model';
+export * from './lib/models/utility-types';

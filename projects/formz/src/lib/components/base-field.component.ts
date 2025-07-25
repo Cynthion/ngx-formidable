@@ -2,7 +2,7 @@ import { Directive, ElementRef, EventEmitter, inject, NgZone, OnDestroy, OnInit,
 import { ControlValueAccessor } from '@angular/forms';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { FieldDecoratorLayout, IFormzField } from '../formz.model';
+import { FieldDecoratorLayout, IFormzField } from '../models/formz.model';
 
 @Directive()
 export abstract class BaseFieldDirective<T = string>

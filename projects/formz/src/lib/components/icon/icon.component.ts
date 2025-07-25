@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { FormzIconSize } from '../../formz.model';
+import { FormzIconSize } from '../../models/formz.model';
 
 @Component({
   selector: 'formz-icon',
