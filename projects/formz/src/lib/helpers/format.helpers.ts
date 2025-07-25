@@ -1,3 +1,9 @@
+import { isValid } from 'date-fns';
+
+export function isValidDateObject(value: unknown): boolean {
+  return value instanceof Date && isValid(value);
+}
+
 //#region Date
 
 /**

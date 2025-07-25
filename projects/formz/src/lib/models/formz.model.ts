@@ -165,9 +165,7 @@ export interface IFormzTimeField extends IFormzField<Date | null> {
   name: string;
   placeholder?: string;
   required?: boolean;
-  /** Must be a valid Unicode format. */ // TODO
+  /** Must be a valid Unicode format. (Supported tokens:   'H', 'HH', 'h', 'hh', 'm', 'mm', 's', 'ss', 'a', 'aa') */
   unicodeTokenFormat: string;
   selectTime(time: Date | null): void;
 }
-
-export type FormzIconSize = 16 | 24 | 32 | 48 | 64 | 128; // TODO remove

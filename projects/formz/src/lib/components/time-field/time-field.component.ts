@@ -12,10 +12,11 @@ import {
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { isEqual, isValid, parse } from 'date-fns';
+import { isEqual, parse } from 'date-fns';
 import { NgxMaskConfig } from 'ngx-mask';
 import {
   formatToTimeTokenMask,
+  isValidDateObject,
   UNICODE_TIME_TOKENS,
   validateUnicodeTimeTokenFormat
 } from '../../helpers/format.helpers';
@@ -85,12 +86,11 @@ export class TimeFieldComponent
     const value = this.value;
     this.isFieldFilled = typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
 
-    // value changes are handled in selectDate method
+    // value changes are handled in selectTime method
   }
 
   protected doOnValueChange(): void {
     // No additional actions needed
-    // Only here to satisfy the abstract method
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
@@ -170,13 +170,24 @@ export class TimeFieldComponent
 
   //#endregion
 
+  //#region Time
+
+  /** Uses the entered string, parses it and returns the resulting Date. */
+  private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
+    const parsedDate = parse(dateString.trim(), unicodeTokenFormat, new Date());
+
+    if (!isValidDateObject(parsedDate)) {
+      return null;
+    }
+
+    return parsedDate;
+  }
+
+  //#endregion
+
   private updateMask(): void {
     this.ngxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.maskChar);
     this.emptyNgxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.emptyMaskChar);
-  }
-
-  private isValidDateObject(value: unknown): boolean {
-    return value instanceof Date && isValid(value);
   }
 
   private trySetTimeFromInput(value: Date | null | string): void {
@@ -185,7 +196,7 @@ export class TimeFieldComponent
       return;
     }
 
-    if (this.isValidDateObject(value)) {
+    if (isValidDateObject(value)) {
       this.setTime(value as Date);
       return;
     }
@@ -212,30 +223,11 @@ export class TimeFieldComponent
     this.selectTime(time);
 
     // ensure ngxMask is initialized before applying the value
-    // don't silent update to achieve valueChanged/focusChanged events
     setTimeout(() => {
       // write empty mask until ngxMask re-applies it on focus
       if (time == null) {
         this.inputRef.nativeElement.value = this.emptyNgxMask;
       }
     });
-  }
-
-  /** Uses the selected Date, formats it and writes the resulting string into the field. */
-  // private onFormat(date: Date | null, unicodeTokenFormat: string): string {
-  //   const formattedDate = date ? format(date, unicodeTokenFormat) : '';
-
-  //   return formattedDate;
-  // }
-
-  /** Uses the entered string, parses it and writes/selects the resulting Date into the picker. */
-  private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
-    const parsedDate = parse(dateString.trim(), unicodeTokenFormat, new Date());
-
-    if (!this.isValidDateObject(parsedDate)) {
-      return null;
-    }
-
-    return parsedDate;
   }
 }

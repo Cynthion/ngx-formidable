@@ -14,11 +14,12 @@ import {
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { addDays, format, isEqual, isValid, parse } from 'date-fns';
+import { addDays, format, isEqual, parse } from 'date-fns';
 import { NgxMaskConfig } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import {
   formatToDateTokenMask,
+  isValidDateObject,
   UNICODE_DATE_TOKENS,
   validateUnicodeDateTokenFormat
 } from '../../helpers/format.helpers';
@@ -143,7 +144,6 @@ export class DateFieldComponent
 
   protected doOnValueChange(): void {
     // No additional actions needed
-    // Only here to satisfy the abstract method
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
@@ -388,7 +388,7 @@ export class DateFieldComponent
   private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
     const parsedDate = parse(dateString.trim(), unicodeTokenFormat, new Date());
 
-    if (!this.isValidDateObject(parsedDate)) {
+    if (!isValidDateObject(parsedDate)) {
       return null;
     }
 
@@ -409,17 +409,13 @@ export class DateFieldComponent
     return initialDate;
   }
 
-  private isValidDateObject(value: unknown): boolean {
-    return value instanceof Date && isValid(value);
-  }
-
   private trySetDateFromInput(value: Date | null | string): void {
     if (value === null || value === undefined || value === '') {
       this.setDate(null);
       return;
     }
 
-    if (this.isValidDateObject(value)) {
+    if (isValidDateObject(value)) {
       this.setDate(value as Date);
       return;
     }
@@ -446,9 +442,9 @@ export class DateFieldComponent
     this.selectDate(date);
 
     // ensure ngxMask is initialized before applying the value
-    // don't silent update to achieve valueChanged/focusChanged events
     setTimeout(() => {
-      this.picker?.setDate(date, false);
+      this.picker?.setDate(date, false); // don't silent update to achieve valueChanged/focusChanged events
+
       // write empty mask until ngxMask re-applies it on focus
       if (date == null) {
         this.inputRef.nativeElement.value = this.emptyNgxMask;

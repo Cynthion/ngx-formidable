@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { FormzIconSize } from '../../models/formz.model';
 
 @Component({
   selector: 'formz-icon',
@@ -12,7 +11,7 @@ export class IconComponent {
   @Input() set svg(val: string) {
     this.sanitizedSvg = this.sanitizer.bypassSecurityTrustHtml(val);
   }
-  @Input() size: FormzIconSize = 32;
+  @Input() size = 32;
   @Input() color = 'currentColor';
 
   protected sanitizedSvg: SafeHtml = '';
