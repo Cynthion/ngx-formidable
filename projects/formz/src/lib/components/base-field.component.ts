@@ -139,8 +139,14 @@ export abstract class BaseFieldDirective<T = string>
         if (this.externalClickCallback) {
           fromEvent<MouseEvent>(document, 'click')
             .pipe(
-              debounceTime(50),
-              filter((event) => !this.elementRef.nativeElement.contains(event.target as Node)),
+              filter((event) => {
+                const path = event.composedPath?.() ?? [];
+
+                // accept clicks that bubble through any part of the field (like panel)
+                const isInside = path.some((el) => el instanceof Node && this.elementRef.nativeElement.contains(el));
+
+                return !isInside;
+              }),
               takeUntil(this.destroy$)
             )
             .subscribe(() => this.ngZone.run(() => this.externalClickCallback?.()));
