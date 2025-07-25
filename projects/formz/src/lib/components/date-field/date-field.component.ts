@@ -210,8 +210,9 @@ export class DateFieldComponent
 
   protected doOnFocusChange(isFocused: boolean): void {
     // try set date on blur
-    if (!isFocused) {
+    if (!isFocused && !this.ignoreNextBlur) {
       this.trySetDateFromInput(this.inputRef.nativeElement.value);
+      this.ignoreNextBlur = false;
     }
   }
 
@@ -412,11 +413,33 @@ export class DateFieldComponent
   @Input() panelPosition: FormzPanelPosition = 'right';
 
   private _isPanelOpen = false;
+  private ignoreNextBlur = false;
 
-  protected toggleClick(_event: MouseEvent): void {
-    // event.preventDefault(); // prevent input from losing focus
-    // this.inputRef.nativeElement.focus(); // ensure input remains focused
+  /** Mousedown is used to prevent sending focusChanged events. */
+  protected toggleMouseDown(event: MouseEvent): void {
+    event.preventDefault();
+    this.inputRef.nativeElement.focus(); // ensure input remains focused, so keyboard events work
     this.togglePanel(!this.isPanelOpen);
+  }
+
+  /**
+   * Workaround: Because the <input> element might have regained focus (for keyboard events), the focus needs to be set to the panel first.
+   * Otherwise, clicking the nested <select>, etc. would not work as expected.
+   */
+  protected panelMouseDown(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+
+    const isFocusable =
+      target instanceof HTMLInputElement ||
+      target instanceof HTMLSelectElement ||
+      target instanceof HTMLTextAreaElement ||
+      target instanceof HTMLButtonElement ||
+      target.hasAttribute('tabindex');
+
+    if (isFocusable) {
+      this.ignoreNextBlur = true;
+      this.panelRef?.nativeElement.focus();
+    }
   }
 
   protected togglePanel(isOpen: boolean): void {
@@ -424,6 +447,7 @@ export class DateFieldComponent
 
     // additional field specific behavior
     if (isOpen) {
+      this.panelRef?.nativeElement.focus();
       setTimeout(() => scrollIntoView(this.dateRef, this.panelRef));
       updatePanelPosition(this.dateRef, this.panelRef);
     }

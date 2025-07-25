@@ -126,7 +126,6 @@ export abstract class BaseFieldDirective<T = string>
                 if (event.key !== 'Tab' && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')
                   event.preventDefault();
               }),
-              // debounceTime(100),
               takeUntil(this.destroy$)
             )
             .subscribe((event: KeyboardEvent) =>

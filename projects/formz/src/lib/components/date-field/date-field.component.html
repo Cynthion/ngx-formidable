@@ -31,14 +31,16 @@
       [class.open]="isPanelOpen"
       [svg]="isPanelOpen ? toggleIconOpen : toggleIconClosed"
       [size]="32"
-      (mousedown)="toggleClick($event)" />
+      (mousedown)="toggleMouseDown($event)" />
   </div>
 
   <!-- Panel -->
   <div
     #panelRef
+    tabindex="-1"
     class="panel  panel-{{ panelPosition }}"
-    [class.open]="isPanelOpen">
+    [class.open]="isPanelOpen"
+    (mousedown)="panelMouseDown($event)">
     <div class="panel-scrollcontainer">
       <div class="picker-wrapper">
         <!-- Date Picker -->

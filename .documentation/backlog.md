@@ -25,4 +25,3 @@
 - use 'null' for empty values in all fields, instead of null
 - use arrow up/down css icons for dropdown
 - scrollIntoView upon panel close
-- date field: on clicking the toggle, gain focus for key navigation, but make sure the panel buttons can be used also
