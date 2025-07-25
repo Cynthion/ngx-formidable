@@ -123,6 +123,27 @@ export class ExampleFormComponent {
     return ['special', 'legend', 'epic', 'custom', 'random'].some((word) => word.includes(filterValue.toLowerCase()));
   };
 
+  protected I18N_CONFIG: Pikaday.PikadayI18nConfig = {
+    previousMonth: 'datepicker.previous-month',
+    nextMonth: 'datepicker.next-month',
+    months: [
+      'Janvier',
+      'Février',
+      'Mars',
+      'Avril',
+      'Mai',
+      'Juin',
+      'Juillet',
+      'Août',
+      'Septembre',
+      'Octobre',
+      'Novembre',
+      'Décembre'
+    ],
+    weekdays: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
+    weekdaysShort: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+  };
+
   // TODO add type for vm?
   private readonly viewModel = computed(() => {
     return {

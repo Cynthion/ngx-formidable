@@ -212,6 +212,10 @@
         [ngModel]="vm.formValue.birthdate"
         [disabled]="false"
         [required]="false"
+        [i18n]="I18N_CONFIG"
+        [yearRange]="2"
+        [showMonthAfterYear]="true"
+        [showDaysInNextAndPreviousMonths]="true"
         [unicodeTokenFormat]="'dd . MM . yyyy'"
         (valueChanged)="onValueChanged('birthdate', $event)"
         (focusChanged)="onFocusChanged('birthdate', $event)">
