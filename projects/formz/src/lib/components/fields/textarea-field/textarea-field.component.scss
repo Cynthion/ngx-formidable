@@ -4,6 +4,22 @@
   display: block;
 }
 
+.textarea-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+
+  &.length-indicator-enabled {
+    textarea.field {
+      padding-bottom: spacing(32); // ensure space for the indicator if needed
+    }
+  }
+}
+
 .field {
   @include textarea-field;
+}
+
+.length-indicator {
+  @include length-indicator;
 }

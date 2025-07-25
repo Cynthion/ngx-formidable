@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  forwardRef,
+  Input,
+  ViewChild
+} from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
 import { FieldDecoratorLayout, FORMZ_FIELD, IFormzTextareaField } from '../../../models/formz.model';
@@ -23,13 +31,18 @@ import { BaseFieldDirective } from '../base-field.component';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TextareaFieldComponent extends BaseFieldDirective implements IFormzTextareaField {
+export class TextareaFieldComponent extends BaseFieldDirective implements IFormzTextareaField, AfterViewInit {
   @ViewChild('textareaRef', { static: true }) textareaRef!: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('lengthIndicatorRef') lengthIndicatorRef?: ElementRef<HTMLDivElement>;
 
   protected keyboardCallback = null;
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
+
+  ngAfterViewInit(): void {
+    this.adjustLayout();
+  }
 
   protected doOnValueChange(): void {
     if (this.enableAutosize) {
@@ -62,6 +75,7 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormz
   @Input() required = false;
 
   @Input() enableAutosize = true;
+  @Input() showLengthIndicator = false;
 
   //#endregion
 
@@ -88,5 +102,20 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormz
 
     textarea.style.height = 'auto'; // reset height to recalculate
     textarea.style.height = `${textarea.scrollHeight}px`;
+  }
+
+  private adjustLayout(): void {
+    setTimeout(() => {
+      // adjust length indicator, so that it also aligns right even if a suffix is set
+      if (!this.textareaRef || !this.lengthIndicatorRef) return;
+
+      const textarea = this.textareaRef.nativeElement;
+      const indicator = this.lengthIndicatorRef.nativeElement;
+
+      const style = window.getComputedStyle(textarea);
+      const paddingRight = style.paddingRight;
+
+      indicator.style.right = paddingRight;
+    }, 50); // ensure this runs after the field decorators
   }
 }

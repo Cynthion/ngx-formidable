@@ -1,15 +1,25 @@
-<textarea
-  #textareaRef
-  class="field"
-  [id]="fieldId"
-  [placeholder]="placeholder"
-  [attr.name]="name"
-  [attr.autocomplete]="autocomplete"
-  [attr.minlength]="minLength > -1 ? minLength : null"
-  [attr.maxlength]="maxLength > -1 ? maxLength : null"
-  [attr.readonly]="readOnly ? '' : null"
-  [attr.disabled]="disabled ? '' : null"
-  [required]="required"
-  (input)="onValueChange()"
-  (focus)="onFocusChange(true)"
-  (blur)="onFocusChange(false)"></textarea>
+<div
+  class="textarea-wrapper"
+  [class.length-indicator-enabled]="showLengthIndicator">
+  <textarea
+    #textareaRef
+    class="field"
+    [id]="fieldId"
+    [placeholder]="placeholder"
+    [attr.name]="name"
+    [attr.autocomplete]="autocomplete"
+    [attr.minlength]="minLength > -1 ? minLength : null"
+    [attr.maxlength]="maxLength > -1 ? maxLength : null"
+    [attr.readonly]="readOnly ? '' : null"
+    [attr.disabled]="disabled ? '' : null"
+    [required]="required"
+    (input)="onValueChange()"
+    (focus)="onFocusChange(true)"
+    (blur)="onFocusChange(false)"></textarea>
+  <div
+    *ngIf="showLengthIndicator"
+    #lengthIndicatorRef
+    class="length-indicator">
+    {{ value.length || 0 }}<ng-container *ngIf="maxLength > -1"> / {{ maxLength }}</ng-container>
+  </div>
+</div>

@@ -256,7 +256,7 @@
   z-index: 1; // keep on top of field
 
   // animation
-  transform: translateY(tokens.$formz-field-label-floating-offset) scale(1);
+  transform: translateY(var(--formz-label-floating-offset, #{tokens.$formz-label-floating-offset})) scale(1);
 }
 
 @mixin field-tooltip {
@@ -515,4 +515,17 @@
     opacity: 1;
     background: var(--formz-color-field-hover, #{tokens.$formz-color-field-hovered});
   }
+}
+
+@mixin length-indicator {
+  position: absolute;
+  bottom: utils.spacing(8);
+
+  color: var(--formz-color-length-indicator, #{tokens.$formz-color-length-indicator});
+  pointer-events: none;
+  user-select: none;
+
+  font-size: var(--formz-length-indicator-font-size, #{tokens.$formz-length-indicator-font-size});
+  font-weight: var(--formz-length-indicator-font-weight, #{tokens.$formz-length-indicator-font-weight});
+  line-height: var(--formz-length-indicator-line-height, #{tokens.$formz-length-indicator-line-height});
 }

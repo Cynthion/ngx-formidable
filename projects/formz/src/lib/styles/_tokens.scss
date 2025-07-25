@@ -1,4 +1,49 @@
 @use 'sass:math';
+@use 'mixins/utils' as utils;
+
+//#region Font Sizes
+
+// font-size-xxxl: 32px;
+// font-size-xxl: 28px;
+// font-size-xl: 22px;
+// font-size-l: 18px;
+// font-size-m: 16px;
+// font-size-s: 14px;
+// font-size-xs: 12px;
+// font-size-xxs: 10px;
+
+// line-height-xxxl: math.div(38.4, 32);
+// line-height-xxl: math.div(39.2, 28);
+// line-height-xl: math.div(30.8, 22);
+// line-height-l: math.div(25.2, 18);
+// line-height-m: math.div(25.6, 16);
+// line-height-s: math.div(22.4, 14);
+// line-height-xs: math.div(19.2, 12);
+// line-height-xxs: math.div(16, 10);
+
+$formz-field-font-size: utils.spacing(16);
+$formz-field-font-weight: normal;
+$formz-field-line-height: math.div(25.6, 16); // 1.6
+
+$formz-label-font-size: utils.spacing(16);
+$formz-label-font-weight: bold;
+$formz-label-line-height: math.div(25.6, 16); // 1.6
+
+$formz-label-floating-font-size: utils.spacing(12);
+$formz-label-floating-font-weight: normal;
+$formz-label-floating-line-height: math.div(19.2, 12); // 1.6
+
+$formz-field-validation-error-font-size: utils.spacing(12);
+$formz-field-validation-error-font-weight: normal;
+$formz-field-validation-error-line-height: math.div(19.2, 12); // 1.6
+
+$formz-length-indicator-font-size: utils.spacing(12);
+$formz-length-indicator-font-weight: normal;
+$formz-length-indicator-line-height: math.div(19.2, 12); // 1.6
+
+//#endregion
+
+//#region Colors
 
 // 100: #f2faff
 // 200: #c7d7e2
@@ -40,14 +85,30 @@ $formz-color-field-background-required: $formz-color-field-background;
 $formz-color-field-disabled: rgba(114, 114, 114, 0.05);
 $formz-color-field-selected: rgba(0, 0, 0, 0.05);
 $formz-color-field-highlighted: rgba(0, 0, 0, 0.075);
-$formz-color-field-hovered: #5b7f9939; // #5b7f99
+$formz-color-field-hovered: rgba(91, 127, 153, 0.2); // #5b7f99
+
+$formz-color-date-field-panel-select: $formz-color-field-label;
+$formz-color-date-field-panel-select-hover: $formz-color-field-hovered;
+$formz-color-date-field-panel-date-highlighted-text: $formz-color-field-text;
+$formz-color-date-field-panel-date-highlighted: $formz-color-field-highlighted;
+$formz-color-date-field-panel-date-hovered: $formz-color-field-hovered;
+$formz-color-date-field-panel-date-out-of-range: $formz-color-field-background-disabled;
+$formz-color-date-field-panel-day-label: #255476;
+
+$formz-color-option-prefix-outer: $formz-color-field-border;
+$formz-color-option-prefix-inner: $formz-color-field-border;
+$formz-color-option-prefix-background: transparent;
+
+$formz-color-length-indicator: $formz-color-field-placeholder;
+
+//#endregion
 
 $formz-field-height: 66px; // even number
 $formz-field-border-thickness: 1px;
 $formz-field-border-radius: 6px;
-$formz-field-label-floating-offset: 35px;
+$formz-label-floating-offset: 33px; // TODO (formz-field-height / 2) - ((formz-label-floating-line-height * formz-label-floating-font-size ) / 2) + field-before.margin-bottom (8px) + $formz-field-border-thickness
 
-$formz-textarea-min-height: 5.7em; // about 2 lines
+$formz-textarea-min-height: 6rem; // ~2 lines
 $formz-textarea-max-height: none;
 $formz-textarea-padding-top: 20px;
 
@@ -65,55 +126,9 @@ $formz-flyout-z-index: 999;
 $formz-overlay-z-index: 9999;
 $formz-above-overlay-z-index: 99999;
 
-$formz-color-date-field-panel-select: $formz-color-field-label;
-$formz-color-date-field-panel-select-hover: $formz-color-field-hovered;
-$formz-color-date-field-panel-date-highlighted-text: $formz-color-field-text;
-$formz-color-date-field-panel-date-highlighted: $formz-color-field-highlighted;
-$formz-color-date-field-panel-date-hovered: $formz-color-field-hovered;
-$formz-color-date-field-panel-date-out-of-range: $formz-color-field-background-disabled;
-$formz-color-date-field-panel-day-label: #255476;
-
 $formz-date-field-panel-width: 300px;
 $formz-date-field-panel-border-radius: $formz-field-border-radius;
 $formz-date-field-panel-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);
 
 $formz-option-prefix-dimension-outer: 21px;
 $formz-option-prefix-dimension-inner: 7px;
-
-$formz-color-option-prefix-outer: $formz-color-field-border;
-$formz-color-option-prefix-inner: $formz-color-field-border;
-$formz-color-option-prefix-background: transparent;
-
-// font-size-xxxl: 32px;
-// font-size-xxl: 28px;
-// font-size-xl: 22px;
-// font-size-l: 18px;
-// font-size-m: 16px;
-// font-size-s: 14px;
-// font-size-xs: 12px;
-// font-size-xxs: 10px;
-
-// line-height-xxxl: math.div(38.4, 32);
-// line-height-xxl: math.div(39.2, 28);
-// line-height-xl: math.div(30.8, 22);
-// line-height-l: math.div(25.2, 18);
-// line-height-m: math.div(25.6, 16);
-// line-height-s: math.div(22.4, 14);
-// line-height-xs: math.div(19.2, 12);
-// line-height-xxs: math.div(16, 10);
-
-$formz-field-font-size: 16px;
-$formz-field-font-weight: normal;
-$formz-field-line-height: math.div(25.6, 16);
-
-$formz-label-font-size: $formz-field-font-size;
-$formz-label-font-weight: bold;
-$formz-label-line-height: $formz-field-line-height;
-
-$formz-label-floating-font-size: 12px;
-$formz-label-floating-font-weight: normal;
-$formz-label-floating-line-height: math.div(19.2, 12);
-
-$formz-field-validation-error-font-size: 12px;
-$formz-field-validation-error-font-weight: bold;
-$formz-field-validation-error-line-height: math.div(19.2, 12);

@@ -1,8 +1,8 @@
 # Backlog
 
+- resolve all TODOs
 - rename libary to `formidable`
 - support showing multiple errors
-- resolve all TODOs
 - dropdown: write towards selection
 - dropdown: with <input>, setCaretPosition
 - support disabled and readonly for all fields (dropdown, autocomplete, date):
@@ -10,7 +10,6 @@
     if (this.readOnly || this.disabled || option.disabled) return; }
 - browser errors/warnings:
   - The label's for attribute doesn't match any element id. This might prevent the browser from correctly autofilling the form and accessibility tools from working correctly.
-- textarea: show maxLength counter
 - suffixes: clear/reset, copy, validation state, loading
 - validation error: styling
 - styling for field options based on layout (single vs. group)
@@ -20,3 +19,4 @@
 - use 'null' for empty values in all fields, instead of null
 - use arrow up/down css icons for dropdown
 - scrollIntoView upon panel close
+- hold key -> doesn't write

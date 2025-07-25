@@ -2,6 +2,32 @@
 
 // CSS Variables for configuration and override
 :root {
+  //#region Font Sizes
+
+  --formz-field-font-size: #{tokens.$formz-field-font-size};
+  --formz-field-font-weight: #{tokens.$formz-field-font-weight};
+  --formz-field-line-height: #{tokens.$formz-field-line-height};
+
+  --formz-label-font-size: #{tokens.$formz-label-font-size};
+  --formz-label-font-weight: #{tokens.$formz-label-font-weight};
+  --formz-label-line-height: #{tokens.$formz-label-line-height};
+
+  --formz-label-floating-font-size: #{tokens.$formz-label-floating-font-size};
+  --formz-label-floating-font-weight: #{tokens.$formz-label-floating-font-weight};
+  --formz-label-floating-line-height: #{tokens.$formz-label-floating-line-height};
+
+  --formz-field-validation-error-font-size: #{tokens.$formz-field-validation-error-font-size};
+  --formz-field-validation-error-font-weight: #{tokens.$formz-field-validation-error-font-weight};
+  --formz-field-validation-error-line-height: #{tokens.$formz-field-validation-error-line-height};
+
+  --formz-length-indicator-font-size: #{tokens.$formz-length-indicator-font-size};
+  --formz-length-indicator-font-weight: #{tokens.$formz-length-indicator-font-weight};
+  --formz-length-indicator-line-height: #{tokens.$formz-length-indicator-line-height};
+
+  //#enregion
+
+  //#region Colors
+
   --formz-color-validation-error: #{tokens.$formz-color-validation-error};
   --formz-color-field-text: #{tokens.$formz-color-field-text};
   --formz-color-field-text-readonly: #{tokens.$formz-color-field-text-readonly};
@@ -23,10 +49,26 @@
   --formz-color-field-highlighted: #{tokens.$formz-color-field-highlighted};
   --formz-color-field-hover: #{tokens.$formz-color-field-hovered};
 
+  --formz-color-date-field-panel-select: #{tokens.$formz-color-date-field-panel-select};
+  --formz-color-date-field-panel-select-hover: #{tokens.$formz-color-date-field-panel-select-hover};
+  --formz-color-date-field-panel-date-highlighted-text: #{tokens.$formz-color-date-field-panel-date-highlighted-text};
+  --formz-color-date-field-panel-date-highlighted: #{tokens.$formz-color-date-field-panel-date-highlighted};
+  --formz-color-date-field-panel-date-hovered: #{tokens.$formz-color-date-field-panel-date-hovered};
+  --formz-color-date-field-panel-date-out-of-range: #{tokens.$formz-color-date-field-panel-date-out-of-range};
+  --formz-color-date-field-panel-day-label: #{tokens.$formz-color-date-field-panel-day-label};
+
+  --formz-color-option-prefix-outer: #{tokens.$formz-color-option-prefix-outer};
+  --formz-color-option-prefix-inner: #{tokens.$formz-color-option-prefix-inner};
+  --formz-color-option-prefix-background: #{tokens.$formz-color-option-prefix-background};
+
+  --formz-color-length-indicator: #{tokens.$formz-color-length-indicator};
+
+  //#enregion
+
   --formz-field-height: #{tokens.$formz-field-height};
   --formz-field-border-thickness: #{tokens.$formz-field-border-thickness};
   --formz-field-border-radius: #{tokens.$formz-field-border-radius};
-  --formz-field-label-floating-offset: #{tokens.$formz-field-label-floating-offset};
+  --formz-label-floating-offset: #{tokens.$formz-label-floating-offset};
 
   --formz-textarea-min-height: #{tokens.$formz-textarea-min-height};
   --formz-textarea-max-height: #{tokens.$formz-textarea-max-height};
@@ -46,38 +88,10 @@
   --formz-overlay-z-index: #{tokens.$formz-overlay-z-index};
   --formz-above-overlay-z-index: #{tokens.$formz-above-overlay-z-index};
 
-  --formz-color-date-field-panel-select: #{tokens.$formz-color-date-field-panel-select};
-  --formz-color-date-field-panel-select-hover: #{tokens.$formz-color-date-field-panel-select-hover};
-  --formz-color-date-field-panel-date-highlighted-text: #{tokens.$formz-color-date-field-panel-date-highlighted-text};
-  --formz-color-date-field-panel-date-highlighted: #{tokens.$formz-color-date-field-panel-date-highlighted};
-  --formz-color-date-field-panel-date-hovered: #{tokens.$formz-color-date-field-panel-date-hovered};
-  --formz-color-date-field-panel-date-out-of-range: #{tokens.$formz-color-date-field-panel-date-out-of-range};
-  --formz-color-date-field-panel-day-label: #{tokens.$formz-color-date-field-panel-day-label};
-
   --formz-date-field-panel-width: #{tokens.$formz-date-field-panel-width};
   --formz-date-field-panel-border-radius: #{tokens.$formz-date-field-panel-border-radius};
   --formz-date-field-panel-box-shadow: #{tokens.$formz-date-field-panel-box-shadow};
 
   --formz-option-prefix-dimension-outer: #{tokens.$formz-option-prefix-dimension-outer};
   --formz-option-prefix-dimension-inner: #{tokens.$formz-option-prefix-dimension-inner};
-
-  --formz-color-option-prefix-outer: #{tokens.$formz-color-option-prefix-outer};
-  --formz-color-option-prefix-inner: #{tokens.$formz-color-option-prefix-inner};
-  --formz-color-option-prefix-background: #{tokens.$formz-color-option-prefix-background};
-
-  --formz-field-font-size: #{tokens.$formz-field-font-size};
-  --formz-field-font-weight: #{tokens.$formz-field-font-weight};
-  --formz-field-line-height: #{tokens.$formz-field-line-height};
-
-  --formz-label-font-size: #{tokens.$formz-label-font-size};
-  --formz-label-font-weight: #{tokens.$formz-label-font-weight};
-  --formz-label-line-height: #{tokens.$formz-label-line-height};
-
-  --formz-label-floating-font-size: #{tokens.$formz-label-floating-font-size};
-  --formz-label-floating-font-weight: #{tokens.$formz-label-floating-font-weight};
-  --formz-label-floating-line-height: #{tokens.$formz-label-floating-line-height};
-
-  --formz-field-validation-error-font-size: #{tokens.$formz-field-validation-error-font-size};
-  --formz-field-validation-error-font-weight: #{tokens.$formz-field-validation-error-font-weight};
-  --formz-field-validation-error-line-height: #{tokens.$formz-field-validation-error-line-height};
 }

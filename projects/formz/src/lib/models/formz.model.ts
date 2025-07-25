@@ -110,6 +110,7 @@ export interface IFormzTextareaField extends Pick<HTMLTextAreaElement, FormzText
    * If true, the textarea will automatically adjust its height based on the content.
    */
   enableAutosize: boolean;
+  showLengthIndicator?: boolean;
 }
 
 /** The subset of `<select/>` properties that are supported. */
