@@ -103,17 +103,19 @@ $formz-color-length-indicator: $formz-color-field-placeholder;
 
 //#endregion
 
-$formz-field-height: 66px; // even number
-$formz-field-border-thickness: 1px;
-$formz-field-border-radius: 6px;
-$formz-label-floating-offset: 33px; // TODO (formz-field-height / 2) - ((formz-label-floating-line-height * formz-label-floating-font-size ) / 2) + field-before.margin-bottom (8px) + $formz-field-border-thickness
+$formz-field-height: utils.spacing(60); // even number
+$formz-field-border-thickness: utils.spacing(1);
+$formz-field-border-radius: utils.spacing(6);
+$formz-label-floating-offset: utils.spacing(32);
+// TODO (formz-field-height / 2) - ((formz-label-floating-line-height * formz-label-floating-font-size ) / 2) + field-before.margin-bottom (8px) + $formz-field-border-thickness
 
-$formz-textarea-min-height: 6rem; // ~2 lines
+$formz-textarea-min-height: utils.spacing(96); // ~2 lines
 $formz-textarea-max-height: none;
-$formz-textarea-padding-top: 20px;
+$formz-textarea-padding-top: utils.spacing(20);
 
 $formz-panel-background: #f2faff;
-$formz-panel-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);
+$formz-panel-box-shadow: utils.spacing(0) utils.spacing(12) utils.spacing(48) calc(utils.spacing(8) * -1)
+  rgb(0 0 0 / 12%);
 $formz-panel-max-height: 33vh; // 1/3 of viewport height
 
 $formz-animation-duration: 0.2s;
@@ -126,9 +128,9 @@ $formz-flyout-z-index: 999;
 $formz-overlay-z-index: 9999;
 $formz-above-overlay-z-index: 99999;
 
-$formz-date-field-panel-width: 300px;
+$formz-date-field-panel-width: utils.spacing(300);
 $formz-date-field-panel-border-radius: $formz-field-border-radius;
-$formz-date-field-panel-box-shadow: 0 12px 48px -8px rgb(0 0 0 / 12%);
+$formz-date-field-panel-box-shadow: $formz-panel-box-shadow;
 
-$formz-option-prefix-dimension-outer: 21px;
-$formz-option-prefix-dimension-inner: 7px;
+$formz-option-prefix-dimension-outer: utils.spacing(20);
+$formz-option-prefix-dimension-inner: utils.spacing(8);
