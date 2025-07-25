@@ -6,6 +6,11 @@ export function isValidDateObject(value: unknown): boolean {
 
 //#region Date
 
+/** Used for date normalization. Normalizes the time part to 00:00:00:00. */
+export function normalizeTimePart(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
+}
+
 /**
  * Validates that all alphabetic tokens in a format string are valid
  * date-related tokens (years, months, days only).
@@ -90,6 +95,11 @@ function isDateToken(token: string): token is DateToken {
 //#endregion
 
 //#region Time
+
+/** Used for time normalization. Normalizes the date part to 1970-01-01. */
+export function normalizeDatePart(date: Date): Date {
+  return new Date(1970, 0, 1, date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
+}
 
 /**
  * Validates that all alphabetic tokens in a format string are valid

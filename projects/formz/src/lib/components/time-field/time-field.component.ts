@@ -17,12 +17,52 @@ import { NgxMaskConfig } from 'ngx-mask';
 import {
   formatToTimeTokenMask,
   isValidDateObject,
+  normalizeDatePart,
   UNICODE_TIME_TOKENS,
   validateUnicodeTimeTokenFormat
 } from '../../helpers/format.helpers';
 import { FieldDecoratorLayout, FORMZ_FIELD, IFormzTimeField } from '../../models/formz.model';
 import { BaseFieldDirective } from '../base-field.component';
 
+/**
+ * A masked time-only input field using Unicode formatting.
+ *
+ * Provides a form-compatible field for entering time values like:
+ * - `'HH.mm'` (e.g. 13.45)
+ * - `'HH:mm:ss'`
+ * - `'hh:mm a'` (12-hour with AM/PM)
+ *
+ * ## Features
+ * - Unicode time format input (via `unicodeTokenFormat`)
+ * - Masked input with `ngx-mask`
+ * - Emits normalized `Date` values (with date set to `1970-01-01`)
+ *
+ * ## Normalization Behavior
+ * All emitted or compared values are normalized to remove the **date** portion:
+ * ```ts
+ * normalizeDatePart(date: Date): Date // date => 1970-01-01
+ * ```
+ * This allows consistent time-only comparison even though `Date` is used.
+ *
+ * ## Inputs
+ * - `name`: Field name
+ * - `placeholder`: Input placeholder text
+ * - `required`: Whether the field is required
+ * - `unicodeTokenFormat`: Time format string (default: `'HH.mm'`)
+ *
+ * ## Outputs
+ * - `valueChanged: EventEmitter<Date | null>`
+ *
+ * ## Usage Example:
+ * ```html
+ * <formz-time-field
+ *   name="startTime"
+ *   placeholder="Enter time"
+ *   [unicodeTokenFormat]="'HH:mm'"
+ *   [(ngModel)]="form.startTime">
+ * </formz-time-field>
+ * ```
+ */
 @Component({
   selector: 'formz-time-field',
   templateUrl: './time-field.component.html',
@@ -157,9 +197,9 @@ export class TimeFieldComponent
     // (panel could close without date change)
     if (this.selectedTime === null && time === null) return;
     if (this.selectedTime === undefined && time === undefined) return;
-    if (this.selectedTime && time && isEqual(this.selectedTime, time)) return;
+    if (this.selectedTime && time && isEqual(normalizeDatePart(this.selectedTime), normalizeDatePart(time))) return;
 
-    this.selectedTime = time ? time : null;
+    this.selectedTime = time ? normalizeDatePart(time) : null;
 
     this.valueChangeSubject$.next(this.selectedTime);
     this.valueChanged.emit(this.selectedTime);

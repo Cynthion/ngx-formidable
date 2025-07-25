@@ -20,6 +20,7 @@ import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import {
   formatToDateTokenMask,
   isValidDateObject,
+  normalizeTimePart,
   UNICODE_DATE_TOKENS,
   validateUnicodeDateTokenFormat
 } from '../../helpers/format.helpers';
@@ -28,6 +29,48 @@ import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition, IFormzDateField 
 import { calendarArrowDown, calendarArrowUp } from '../../models/icons';
 import { BaseFieldDirective } from '../base-field.component';
 
+/**
+ * A masked date input field with calendar panel support.
+ *
+ * Provides a form-compatible field for selecting calendar dates using:
+ * - Unicode token-based formatting (e.g. `'yyyy-MM-dd'`, `'dd.MM.yyyy'`)
+ * - `ngx-mask` integration for consistent user input
+ * - `Pikaday` for an inline calendar UI (positionable panel)
+ *
+ * ## Features
+ * - Unicode date format input (via `unicodeTokenFormat`)
+ * - Masked input with `ngx-mask`
+ * - Panel-based date selection with Pikaday
+ * - Emits normalized `Date` values (with time set to `00:00:00.000`)
+ *
+ * ## Normalization Behavior
+ * All emitted or compared dates are normalized to remove time components using:
+ * ```ts
+ * normalizeTimePart(date: Date): Date // time => 00:00:00.000
+ * ```
+ *  This allows consistent date-only comparison even though `Date` is used.
+ *
+ * ## Inputs
+ * - `name`: Field name
+ * - `placeholder`: Input placeholder text
+ * - `required`: Whether the field is required
+ * - `unicodeTokenFormat`: Date format string (default: `'yyyy-MM-dd'`)
+ * - Pikaday-related inputs: minDate, maxDate, etc.
+ * - `panelPosition`: `'left' | 'right'` (default: `'right'`)
+ *
+ * ## Outputs
+ * - `valueChanged: EventEmitter<Date | null>`
+ *
+ * ## Usage Example:
+ * ```html
+ * <formz-date-field
+ *   name="birthdate"
+ *   placeholder="Select a date"
+ *   [unicodeTokenFormat]="'dd.MM.yyyy'"
+ *   [(ngModel)]="form.birthdate">
+ * </formz-date-field>
+ * ```
+ */
 @Component({
   selector: 'formz-date-field',
   templateUrl: './date-field.component.html',
@@ -257,9 +300,9 @@ export class DateFieldComponent
     // (panel could close without date change)
     if (this.selectedDate === null && date === null) return;
     if (this.selectedDate === undefined && date === undefined) return;
-    if (this.selectedDate && date && isEqual(this.selectedDate, date)) return;
+    if (this.selectedDate && date && isEqual(normalizeTimePart(this.selectedDate), normalizeTimePart(date))) return;
 
-    this.selectedDate = date ? date : null;
+    this.selectedDate = date ? normalizeTimePart(date) : null;
 
     this.valueChangeSubject$.next(this.selectedDate);
     this.valueChanged.emit(this.selectedDate);
