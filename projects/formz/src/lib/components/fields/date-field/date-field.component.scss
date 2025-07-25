@@ -1,0 +1,31 @@
+@use '../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.field {
+  @include date-field;
+}
+
+.panel {
+  @include date-panel;
+}
+
+.panel-scrollcontainer {
+  @include panel-scrollcontainer();
+}
+
+.picker-wrapper {
+  @include date-picker-wrapper;
+}
+
+.wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.toggle-background {
+  @include toggle-background;
+}

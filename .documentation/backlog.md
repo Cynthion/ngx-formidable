@@ -4,7 +4,7 @@
 - support showing multiple errors
 - resolve all TODOs
 - dropdown: write towards selection
-- check safari/firefox/edge
+- dropdown: with <input>, setCaretPosition
 - support disabled and readonly for all fields (dropdown, autocomplete, date):
   - selectOption(option: IFormzFieldOption): void {
     if (this.readOnly || this.disabled || option.disabled) return; }

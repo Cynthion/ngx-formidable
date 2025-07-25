@@ -1,0 +1,13 @@
+@use '../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.field {
+  @include radio-button-group-field;
+}
+
+.legend {
+  @include legend;
+}

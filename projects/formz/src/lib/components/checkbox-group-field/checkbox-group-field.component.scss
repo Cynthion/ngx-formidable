@@ -1,9 +1,0 @@
-@use '../../styles/variables' as *;
-
-:host {
-  display: block;
-}
-
-.field {
-  @include checkbox-group-field;
-}

@@ -1,0 +1,21 @@
+@use '../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.field {
+  @include dropdown-field;
+}
+
+.trigger {
+  @include dropdown-trigger;
+}
+
+.panel {
+  @include panel();
+}
+
+.panel-scrollcontainer {
+  @include panel-scrollcontainer();
+}

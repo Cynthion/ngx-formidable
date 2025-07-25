@@ -1,0 +1,17 @@
+@use '../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.field {
+  @include autocomplete-field;
+}
+
+.panel {
+  @include autocomplete-panel;
+}
+
+.panel-scrollcontainer {
+  @include panel-scrollcontainer();
+}

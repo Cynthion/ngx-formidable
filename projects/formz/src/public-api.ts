@@ -2,20 +2,20 @@
  * Public API Surface of ngx-formz
  */
 
-export * from './lib/components/autocomplete-field/autocomplete-field.component';
-export * from './lib/components/checkbox-group-field/checkbox-group-field.component';
-export * from './lib/components/date-field/date-field.component';
-export * from './lib/components/dropdown-field/dropdown-field.component';
 export * from './lib/components/field-decorator/field-decorator.component';
 export * from './lib/components/field-errors/field-errors.component';
 export * from './lib/components/field-option/field-option.component';
+export * from './lib/components/fields/autocomplete-field/autocomplete-field.component';
+export * from './lib/components/fields/checkbox-group-field/checkbox-group-field.component';
+export * from './lib/components/fields/date-field/date-field.component';
+export * from './lib/components/fields/dropdown-field/dropdown-field.component';
+export * from './lib/components/fields/input-field/input-field.component';
+export * from './lib/components/fields/radio-group-field/radio-group-field.component';
+export * from './lib/components/fields/select-field/select-field.component';
+export * from './lib/components/fields/textarea-field/textarea-field.component';
+export * from './lib/components/fields/time-field/time-field.component';
 export * from './lib/components/form-submit/form-submit.component';
 export * from './lib/components/icon/icon.component';
-export * from './lib/components/input-field/input-field.component';
-export * from './lib/components/radio-group-field/radio-group-field.component';
-export * from './lib/components/select-field/select-field.component';
-export * from './lib/components/textarea-field/textarea-field.component';
-export * from './lib/components/time-field/time-field.component';
 export * from './lib/formz.module';
 
 export * from './lib/directives/field-errors.directive';
