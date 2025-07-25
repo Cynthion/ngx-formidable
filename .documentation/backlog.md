@@ -21,7 +21,6 @@
 - support patterns (ngx-mask)
 - <input> value & checked could be added to interface, if used withouth FormControl
 - sortFn for options
-- use rem instead of px
 - use 'null' for empty values in all fields, instead of null
 - use arrow up/down css icons for dropdown
 - scrollIntoView upon panel close
