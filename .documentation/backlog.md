@@ -13,4 +13,3 @@
 - suffixes: clear/reset, copy, validation state, loading
 - <input> value & checked could be added to interface, if used without FormControl
 - support patterns (ngx-mask)
-- use 'null' for empty values in all fields, instead of null

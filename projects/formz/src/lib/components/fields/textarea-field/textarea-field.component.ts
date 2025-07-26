@@ -81,15 +81,15 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormz
 
   //#region IFormzField
 
-  get value(): string {
-    return this.textareaRef.nativeElement.value;
+  get value(): string | null {
+    return this.textareaRef.nativeElement.value || null;
   }
 
   get isLabelFloating(): boolean {
     return !this.isFieldFocused && !this.isFieldFilled;
   }
 
-  get elementRef(): ElementRef<HTMLElement> {
+  get fieldRef(): ElementRef<HTMLElement> {
     return this.textareaRef as ElementRef<HTMLElement>;
   }
 

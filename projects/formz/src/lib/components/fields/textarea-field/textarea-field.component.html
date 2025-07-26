@@ -20,6 +20,6 @@
     *ngIf="showLengthIndicator"
     #lengthIndicatorRef
     class="length-indicator">
-    {{ value.length || 0 }}<ng-container *ngIf="maxLength > -1"> / {{ maxLength }}</ng-container>
+    {{ value?.length || 0 }}<ng-container *ngIf="maxLength > -1"> / {{ maxLength }}</ng-container>
   </div>
 </div>

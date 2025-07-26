@@ -131,7 +131,7 @@ export class CheckboxGroupFieldComponent
 
   readonly isLabelFloating = false;
 
-  get elementRef(): ElementRef<HTMLElement> {
+  get fieldRef(): ElementRef<HTMLElement> {
     return this.checkboxGroupRef as ElementRef<HTMLElement>;
   }
 
@@ -151,7 +151,7 @@ export class CheckboxGroupFieldComponent
   protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
   protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
 
-  private optionsState?: IFormzFieldOption[];
+  private optionsState?: IFormzFieldOption[] = undefined;
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;
@@ -194,7 +194,7 @@ export class CheckboxGroupFieldComponent
   }
 
   protected isChecked(value: string): boolean {
-    return this.value.includes(value);
+    return this.value?.includes(value);
   }
 
   //#endregion

@@ -86,13 +86,13 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormzSe
 
   //#region IFormzField
 
-  get value(): string {
-    return this.selectRef.nativeElement.value;
+  get value(): string | null {
+    return this.selectRef.nativeElement.value || null;
   }
 
   readonly isLabelFloating = false;
 
-  get elementRef(): ElementRef<HTMLElement> {
+  get fieldRef(): ElementRef<HTMLElement> {
     return this.selectRef as ElementRef<HTMLElement>;
   }
 

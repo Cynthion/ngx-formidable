@@ -279,15 +279,15 @@ export class DateFieldComponent
 
   //#region IFormzField
 
-  get value(): Date {
-    return this.selectedDate || new Date();
+  get value(): Date | null {
+    return this.selectedDate || null;
   }
 
   get isLabelFloating(): boolean {
     return !this.isFieldFocused && !this.isFieldFilled;
   }
 
-  get elementRef(): ElementRef<HTMLElement> {
+  get fieldRef(): ElementRef<HTMLElement> {
     return this.dateRef as ElementRef<HTMLElement>;
   }
 

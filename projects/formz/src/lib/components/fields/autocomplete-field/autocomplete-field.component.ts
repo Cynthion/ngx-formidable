@@ -172,15 +172,15 @@ export class AutocompleteFieldComponent
 
   //#region IFormzField
 
-  get value(): string {
-    return this.selectedOption?.value || '';
+  get value(): string | null {
+    return this.selectedOption?.value || null;
   }
 
   get isLabelFloating(): boolean {
     return !this.isFieldFocused && !this.isFieldFilled;
   }
 
-  get elementRef(): ElementRef<HTMLElement> {
+  get fieldRef(): ElementRef<HTMLElement> {
     return this.autocompleteRef as ElementRef<HTMLElement>;
   }
 
@@ -200,7 +200,7 @@ export class AutocompleteFieldComponent
   protected readonly filteredOptions$ = new BehaviorSubject<IFormzFieldOption[]>([]);
   protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
 
-  private selectedOption?: IFormzFieldOption;
+  private selectedOption?: IFormzFieldOption = undefined;
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;

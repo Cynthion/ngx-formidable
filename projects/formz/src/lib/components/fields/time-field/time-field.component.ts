@@ -159,15 +159,15 @@ export class TimeFieldComponent
 
   //#region IFormzField
 
-  get value(): Date {
-    return this.selectedTime || new Date();
+  get value(): Date | null {
+    return this.selectedTime || null;
   }
 
   get isLabelFloating(): boolean {
     return !this.isFieldFocused && !this.isFieldFilled;
   }
 
-  get elementRef(): ElementRef<HTMLElement> {
+  get fieldRef(): ElementRef<HTMLElement> {
     return this.timeRef as ElementRef<HTMLElement>;
   }
 

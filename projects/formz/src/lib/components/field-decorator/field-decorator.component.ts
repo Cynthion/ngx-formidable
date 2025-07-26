@@ -25,7 +25,7 @@ import { FieldDecoratorLayout, FORMZ_FIELD, IFormzField } from '../../models/for
   styleUrls: ['./field-decorator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit, OnDestroy, IFormzField {
+export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit, OnDestroy, IFormzField<unknown> {
   // View children are used to access the prefix and suffix wrappers
   @ViewChild('prefixWrapperRef') prefixWrapper?: ElementRef<HTMLDivElement>;
   @ViewChild('suffixWrapperRef') suffixWrapper?: ElementRef<HTMLDivElement>;
@@ -44,7 +44,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
-  private valueChangeSubject$ = new Subject<string>();
+  private valueChangeSubject$ = new Subject<unknown>();
   private focusChangeSubject$ = new Subject<boolean>();
   private destroy$ = new Subject<void>();
 
@@ -74,7 +74,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   valueChange$ = this.valueChangeSubject$.asObservable();
   focusChange$ = this.focusChangeSubject$.asObservable();
 
-  @Output() valueChanged = new EventEmitter<string>();
+  @Output() valueChanged = new EventEmitter<unknown>();
   @Output() focusChanged = new EventEmitter<boolean>();
 
   get fieldId(): string {
@@ -85,8 +85,8 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     return this.projectedField?.disabled ?? false;
   }
 
-  get value(): string {
-    return this.projectedField?.value ?? '';
+  get value(): unknown {
+    return this.projectedField?.value ?? null;
   }
 
   get isLabelFloating(): boolean {
@@ -98,11 +98,11 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     return isLabelConfiguredToFloat && isFieldLabelFloating;
   }
 
-  get elementRef(): ElementRef<HTMLElement> {
+  get fieldRef(): ElementRef<HTMLElement> {
     if (!this.projectedField) {
       throw new Error('FieldDecoratorComponent: projectedField is not available yet.');
     }
-    return this.projectedField?.elementRef;
+    return this.projectedField?.fieldRef;
   }
 
   get decoratorLayout(): FieldDecoratorLayout {
@@ -133,7 +133,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
     requestAnimationFrame(() => {
       // if prefix/suffix are projected, adjust the padding of the field
-      const field = this.elementRef.nativeElement;
+      const field = this.fieldRef.nativeElement;
       const prefixWrapper = this.prefixWrapper?.nativeElement;
       const suffixWrapper = this.suffixWrapper?.nativeElement;
 

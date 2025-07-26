@@ -128,13 +128,13 @@ export class RadioGroupFieldComponent
 
   //#region IFormzField
 
-  get value(): string {
-    return this.selectedOption?.value || '';
+  get value(): string | null {
+    return this.selectedOption?.value || null;
   }
 
   readonly isLabelFloating = false;
 
-  get elementRef(): ElementRef<HTMLElement> {
+  get fieldRef(): ElementRef<HTMLElement> {
     return this.radioGroupRef as ElementRef<HTMLElement>;
   }
 
@@ -153,7 +153,7 @@ export class RadioGroupFieldComponent
 
   protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
 
-  private selectedOption?: IFormzFieldOption;
+  private selectedOption?: IFormzFieldOption = undefined;
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;

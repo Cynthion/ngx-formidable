@@ -63,15 +63,15 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormzInp
 
   //#region IFormzField
 
-  get value(): string {
-    return this.inputRef.nativeElement.value;
+  get value(): string | null {
+    return this.inputRef.nativeElement.value || null;
   }
 
   get isLabelFloating(): boolean {
     return !this.isFieldFocused && !this.isFieldFilled;
   }
 
-  get elementRef(): ElementRef<HTMLElement> {
+  get fieldRef(): ElementRef<HTMLElement> {
     return this.inputRef as ElementRef<HTMLElement>;
   }
 

@@ -26,8 +26,8 @@ export interface FormValidationOptions {
 /**
  * Interface for all Formz fields.
  */
-export interface IFormzField<T = string> {
-  elementRef: ElementRef<HTMLElement>; // TODO rename to fieldRef
+export interface IFormzField<T = string | null> {
+  fieldRef: ElementRef<HTMLElement>;
   fieldId: string;
   disabled: boolean;
   value: T;

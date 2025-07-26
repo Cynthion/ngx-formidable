@@ -137,15 +137,15 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormz
 
   //#region IFormzField
 
-  get value(): string {
-    return this.selectedOption?.value || '';
+  get value(): string | null {
+    return this.selectedOption?.value || null;
   }
 
   get isLabelFloating(): boolean {
     return !this.isFieldFocused && !this.isFieldFilled;
   }
 
-  get elementRef(): ElementRef<HTMLElement> {
+  get fieldRef(): ElementRef<HTMLElement> {
     return this.dropdownRef as ElementRef<HTMLElement>;
   }
 
@@ -165,7 +165,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormz
   protected readonly options$ = new BehaviorSubject<IFormzFieldOption[]>([]);
   protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
 
-  protected selectedOption?: IFormzFieldOption; // TODO make private, use wrapped input
+  protected selectedOption?: IFormzFieldOption = undefined; // TODO make private, use wrapped input
 
   public selectOption(option: IFormzFieldOption): void {
     if (option.disabled) return;

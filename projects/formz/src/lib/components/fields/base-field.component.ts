@@ -5,7 +5,7 @@ import { v4 as uuid } from 'uuid';
 import { FieldDecoratorLayout, IFormzField } from '../../models/formz.model';
 
 @Directive()
-export abstract class BaseFieldDirective<T = string>
+export abstract class BaseFieldDirective<T = string | null>
   implements ControlValueAccessor, IFormzField<T>, OnInit, OnDestroy
 {
   protected abstract keyboardCallback: ((event: KeyboardEvent) => void) | null;
@@ -107,7 +107,7 @@ export abstract class BaseFieldDirective<T = string>
 
   abstract isLabelFloating: boolean;
 
-  abstract elementRef: ElementRef<HTMLElement>;
+  abstract fieldRef: ElementRef<HTMLElement>;
 
   abstract decoratorLayout: FieldDecoratorLayout;
 
@@ -117,7 +117,7 @@ export abstract class BaseFieldDirective<T = string>
     if (this.keyboardCallback || this.externalClickCallback || this.windowResizeScrollCallback) {
       this.ngZone.runOutsideAngular(() => {
         if (this.keyboardCallback && this.registeredKeys.length > 0) {
-          fromEvent<KeyboardEvent>(this.elementRef.nativeElement, 'keydown')
+          fromEvent<KeyboardEvent>(this.fieldRef.nativeElement, 'keydown')
             .pipe(
               filter(() => this.isFieldFocused && !this.disabled),
               filter((event) => this.registeredKeys.includes(event.key)),
@@ -142,7 +142,7 @@ export abstract class BaseFieldDirective<T = string>
                 const path = event.composedPath?.() ?? [];
 
                 // accept clicks that bubble through any part of the field (like panel)
-                const isInside = path.some((el) => el instanceof Node && this.elementRef.nativeElement.contains(el));
+                const isInside = path.some((el) => el instanceof Node && this.fieldRef.nativeElement.contains(el));
 
                 return !isInside;
               }),
