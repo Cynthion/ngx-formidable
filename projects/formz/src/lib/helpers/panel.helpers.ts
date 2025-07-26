@@ -22,25 +22,23 @@ export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef
   }
 }
 
-export function scrollIntoView(fieldRef?: ElementRef<HTMLElement>, panelRef?: ElementRef<HTMLElement>): void {
+export function scrollIntoView(
+  fieldRef?: ElementRef<HTMLElement>,
+  panelRef?: ElementRef<HTMLElement>,
+  scrollToPanel = true
+): void {
   const field = fieldRef?.nativeElement;
   const panel = panelRef?.nativeElement;
 
-  if (!field || !panel) return;
-
-  const fieldRect = field.getBoundingClientRect();
-  const panelRect = panel.getBoundingClientRect();
-
-  const fieldBottomEdge = fieldRect.bottom;
-  const fieldTopEdge = fieldRect.top;
-
-  const panelBottomEdge = panelRect.bottom;
-  const panelTopEdge = panelRect.top;
+  if (!field) return;
+  if (!panel && scrollToPanel) return;
 
   const viewportHeight = window.innerHeight;
 
+  const fieldRect = field.getBoundingClientRect();
+  const fieldBottomEdge = fieldRect.bottom;
+  const fieldTopEdge = fieldRect.top;
   const isFieldOutOfView = fieldBottomEdge > viewportHeight || fieldTopEdge < 0;
-  const isPanelOutOfView = panelBottomEdge > viewportHeight || panelTopEdge < 0;
 
   if (isFieldOutOfView) {
     field.scrollIntoView({
@@ -49,7 +47,14 @@ export function scrollIntoView(fieldRef?: ElementRef<HTMLElement>, panelRef?: El
     });
   }
 
-  if (isPanelOutOfView) {
+  if (!panel) return;
+
+  const panelRect = panel.getBoundingClientRect();
+  const panelBottomEdge = panelRect.bottom;
+  const panelTopEdge = panelRect.top;
+  const isPanelOutOfView = panelBottomEdge > viewportHeight || panelTopEdge < 0;
+
+  if (isPanelOutOfView && scrollToPanel) {
     panel.scrollIntoView({
       behavior: 'smooth',
       block: 'nearest'

@@ -217,14 +217,16 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormz
     this._isPanelOpen = isOpen;
 
     // additional field specific behavior
+    setTimeout(() => scrollIntoView(this.dropdownRef, this.panelRef, isOpen));
+
     if (isOpen) {
       this.highlightSelectedOption();
-      setTimeout(() => scrollIntoView(this.dropdownRef, this.panelRef));
       updatePanelPosition(this.dropdownRef, this.panelRef);
-      this.cdRef.markForCheck();
     } else {
       this.setHighlightedIndex(-1);
     }
+
+    this.cdRef.markForCheck();
   }
 
   private updatePanelPosition(): void {

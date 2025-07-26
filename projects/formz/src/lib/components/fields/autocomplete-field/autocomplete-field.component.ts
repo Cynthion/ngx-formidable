@@ -272,16 +272,18 @@ export class AutocompleteFieldComponent
 
   protected togglePanel(isOpen: boolean): void {
     this._isPanelOpen = isOpen;
-    this.cdRef.markForCheck();
 
     // additional field specific behavior
+    setTimeout(() => scrollIntoView(this.autocompleteRef, this.panelRef, isOpen));
+
     if (isOpen) {
       this.highlightSelectedOption();
-      setTimeout(() => scrollIntoView(this.autocompleteRef, this.panelRef));
       updatePanelPosition(this.autocompleteRef, this.panelRef);
     } else {
       this.setHighlightedIndex(-1);
     }
+
+    this.cdRef.markForCheck();
   }
 
   private updatePanelPosition(): void {

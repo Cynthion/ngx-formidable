@@ -14,5 +14,4 @@
 - <input> value & checked could be added to interface, if used without FormControl
 - support patterns (ngx-mask)
 - use 'null' for empty values in all fields, instead of null
-- scrollIntoView upon panel close
 - scrollIntoView (for option) if selection goes out of view

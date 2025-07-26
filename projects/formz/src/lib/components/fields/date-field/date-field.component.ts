@@ -448,13 +448,14 @@ export class DateFieldComponent
     this._isPanelOpen = isOpen;
 
     // additional field specific behavior
+    setTimeout(() => scrollIntoView(this.dateRef, this.panelRef, isOpen));
+
     if (isOpen) {
       this.panelRef?.nativeElement.focus();
-      setTimeout(() => scrollIntoView(this.dateRef, this.panelRef));
       updatePanelPosition(this.dateRef, this.panelRef);
     }
 
-    this.cdRef.markForCheck(); // TODO check if other field panels need this also for when open/closing with keys
+    this.cdRef.markForCheck();
   }
 
   private updatePanelPosition(): void {
