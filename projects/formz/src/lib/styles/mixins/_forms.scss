@@ -218,7 +218,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-bottom: utils.spacing(8);
+  margin-bottom: var(--formz-field-before-margin-bottom, #{tokens.$formz-field-before-margin-bottom});
 }
 
 @mixin field-label {

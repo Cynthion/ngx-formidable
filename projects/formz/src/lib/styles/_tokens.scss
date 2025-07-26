@@ -103,11 +103,17 @@ $formz-color-length-indicator: $formz-color-field-placeholder;
 
 //#endregion
 
+$formz-field-before-margin-bottom: utils.spacing(8);
+
 $formz-field-height: utils.spacing(60); // even number
 $formz-field-border-thickness: utils.spacing(1);
 $formz-field-border-radius: utils.spacing(6);
-$formz-label-floating-offset: utils.spacing(32);
-// TODO (formz-field-height / 2) - ((formz-label-floating-line-height * formz-label-floating-font-size ) / 2) + field-before.margin-bottom (8px) + $formz-field-border-thickness
+$formz-label-floating-offset: calc(
+  #{math.div($formz-field-height, 2)} - #{math.div(
+      $formz-label-floating-line-height * $formz-label-floating-font-size,
+      2
+    )} + #{$formz-field-before-margin-bottom} + #{$formz-field-border-thickness}
+);
 
 $formz-textarea-min-height: utils.spacing(96); // ~2 lines
 $formz-textarea-max-height: none;

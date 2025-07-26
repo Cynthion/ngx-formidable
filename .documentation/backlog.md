@@ -11,7 +11,6 @@
 - browser errors/warnings:
   - The label's for attribute doesn't match any element id. This might prevent the browser from correctly autofilling the form and accessibility tools from working correctly.
 - suffixes: clear/reset, copy, validation state, loading
-- validation error: styling
 - styling for field options based on layout (single vs. group)
 - <input> value & checked could be added to interface, if used without FormControl
 - sortFn for options
