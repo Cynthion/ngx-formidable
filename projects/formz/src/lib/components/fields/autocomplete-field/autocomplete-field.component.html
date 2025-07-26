@@ -28,6 +28,7 @@
       <!-- Option components are re-created in order to control and filter them. -->
       @for (option of filteredOptions$ | async; track option.value; let i = $index) {
         <formz-field-option
+          #optionRef
           [value]="option.value"
           [label]="option.label"
           [match]="option.match"
@@ -42,6 +43,7 @@
         </formz-field-option>
       } @empty {
         <formz-field-option
+          #optionRef
           [value]="emptyOption.value"
           [label]="emptyOption.label"
           [disabled]="true">

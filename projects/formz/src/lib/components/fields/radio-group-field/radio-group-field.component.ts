@@ -11,10 +11,12 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
-  ViewChild
+  ViewChild,
+  ViewChildren
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
+import { scrollHighlightedOptionIntoView } from '../../../helpers/position.helpers';
 import {
   EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
@@ -24,6 +26,7 @@ import {
   IFormzFieldOption,
   IFormzRadioGroupField
 } from '../../../models/formz.model';
+import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -55,6 +58,7 @@ export class RadioGroupFieldComponent
   implements IFormzRadioGroupField, OnInit, AfterContentInit, OnDestroy
 {
   @ViewChild('radioGroupRef', { static: true }) radioGroupRef!: ElementRef<HTMLDivElement>;
+  @ViewChildren('optionRef') optionRefs?: QueryList<FieldOptionComponent>;
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
@@ -200,6 +204,8 @@ export class RadioGroupFieldComponent
   private setHighlightedIndex(index: number): void {
     this.highlightedIndex = index;
 
-    this.cdRef.markForCheck();
+    this.cdRef.markForCheck(); // TODO required?
+
+    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }
 }

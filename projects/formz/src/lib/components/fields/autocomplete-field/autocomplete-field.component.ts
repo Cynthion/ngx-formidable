@@ -13,12 +13,17 @@ import {
   OnInit,
   Output,
   QueryList,
-  ViewChild
+  ViewChild,
+  ViewChildren
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
-import { scrollIntoView, updatePanelPosition } from '../../../helpers/panel.helpers';
+import {
+  scrollHighlightedOptionIntoView,
+  scrollIntoView,
+  updatePanelPosition
+} from '../../../helpers/position.helpers';
 import {
   EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
@@ -29,6 +34,7 @@ import {
   IFormzAutocompleteField,
   IFormzFieldOption
 } from '../../../models/formz.model';
+import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -61,6 +67,7 @@ export class AutocompleteFieldComponent
 {
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
+  @ViewChildren('optionRef') optionRefs?: QueryList<FieldOptionComponent>;
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = () => this.handleExternalClick();
@@ -300,6 +307,8 @@ export class AutocompleteFieldComponent
 
   private setHighlightedIndex(index: number): void {
     this.highlightedOptionIndex$.next(index);
+
+    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }
 
   private registerAutocomplete(): void {

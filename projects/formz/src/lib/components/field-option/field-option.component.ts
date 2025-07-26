@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   forwardRef,
   HostBinding,
   Inject,
@@ -66,7 +67,10 @@ export class FieldOptionComponent implements IFormzFieldOption {
 
   protected hasProjectedContent = true;
 
-  constructor(@Optional() @Inject(FORMZ_OPTION_FIELD) private parent: IFormzOptionField) {
+  constructor(
+    @Optional() @Inject(FORMZ_OPTION_FIELD) private parent: IFormzOptionField,
+    public readonly elementRef: ElementRef<HTMLElement>
+  ) {
     if (!this.parent) {
       throw new Error(
         'formz-field-option must be used inside a component that provides FORMZ_OPTION_FIELD (i.e. implements IFormzOptionField).'

@@ -25,7 +25,7 @@ import {
   validateUnicodeDateTokenFormat
 } from '../../../helpers/format.helpers';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
-import { scrollIntoView, updatePanelPosition } from '../../../helpers/panel.helpers';
+import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import { FieldDecoratorLayout, FORMZ_FIELD, FormzPanelPosition, IFormzDateField } from '../../../models/formz.model';
 import { calendarArrowDown, calendarArrowUp } from '../../../models/icons';
 import { BaseFieldDirective } from '../base-field.component';

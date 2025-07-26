@@ -9,10 +9,12 @@ import {
   OnDestroy,
   OnInit,
   QueryList,
-  ViewChild
+  ViewChild,
+  ViewChildren
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
+import { scrollHighlightedOptionIntoView } from '../../../helpers/position.helpers';
 import {
   EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
@@ -22,6 +24,7 @@ import {
   IFormzCheckboxGroupField,
   IFormzFieldOption
 } from '../../../models/formz.model';
+import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -53,6 +56,7 @@ export class CheckboxGroupFieldComponent
   implements IFormzCheckboxGroupField, OnInit, AfterContentInit, OnDestroy
 {
   @ViewChild('checkboxGroupRef', { static: true }) checkboxGroupRef!: ElementRef<HTMLDivElement>;
+  @ViewChildren('optionRef') optionRefs?: QueryList<FieldOptionComponent>;
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
@@ -197,5 +201,7 @@ export class CheckboxGroupFieldComponent
 
   private setHighlightedIndex(index: number): void {
     this.highlightedOptionIndex$.next(index);
+
+    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }
 }

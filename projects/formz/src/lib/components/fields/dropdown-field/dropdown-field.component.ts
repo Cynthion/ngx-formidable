@@ -9,11 +9,16 @@ import {
   inject,
   Input,
   QueryList,
-  ViewChild
+  ViewChild,
+  ViewChildren
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
-import { scrollIntoView, updatePanelPosition } from '../../../helpers/panel.helpers';
+import {
+  scrollHighlightedOptionIntoView,
+  scrollIntoView,
+  updatePanelPosition
+} from '../../../helpers/position.helpers';
 import {
   EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
@@ -24,6 +29,7 @@ import {
   IFormzDropdownField,
   IFormzFieldOption
 } from '../../../models/formz.model';
+import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseFieldDirective } from '../base-field.component';
 
 @Component({
@@ -52,6 +58,7 @@ import { BaseFieldDirective } from '../base-field.component';
 })
 export class DropdownFieldComponent extends BaseFieldDirective implements IFormzDropdownField, AfterContentInit {
   @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
+  @ViewChildren('optionRef') optionRefs?: QueryList<FieldOptionComponent>;
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = () => this.handleExternalClick();
@@ -243,5 +250,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormz
 
   private setHighlightedIndex(index: number): void {
     this.highlightedOptionIndex$.next(index);
+
+    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }
 }

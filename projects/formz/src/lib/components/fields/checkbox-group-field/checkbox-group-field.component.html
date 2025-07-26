@@ -21,6 +21,7 @@
         [required]="required"
         [checked]="isChecked(option.value)" />
       <formz-field-option
+        #optionRef
         [layout]="'checkbox-group'"
         [value]="option.value"
         [label]="option.label"
@@ -42,6 +43,7 @@
         [value]="emptyOption.value"
         [disabled]="emptyOption.disabled || disabled" />
       <formz-field-option
+        #optionRef
         [layout]="'checkbox-group'"
         [value]="emptyOption.value"
         [label]="emptyOption.label"
