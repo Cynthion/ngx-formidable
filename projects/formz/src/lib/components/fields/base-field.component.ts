@@ -63,7 +63,7 @@ export abstract class BaseFieldDirective<T = string>
   //#region ControlValueAccessor
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  protected onChange: (value: unknown) => void = () => {};
+  protected onChange: (value: T) => void = () => {};
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected onTouched: () => void = () => {};
 
@@ -73,11 +73,11 @@ export abstract class BaseFieldDirective<T = string>
     this.doWriteValue(value);
   }
 
-  registerOnChange(fn: never): void {
+  registerOnChange(fn: (value: T) => void): void {
     this.onChange = fn;
   }
 
-  registerOnTouched(fn: never): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
 
@@ -116,8 +116,8 @@ export abstract class BaseFieldDirective<T = string>
   private registerGlobalListeners(): void {
     if (this.keyboardCallback || this.externalClickCallback || this.windowResizeScrollCallback) {
       this.ngZone.runOutsideAngular(() => {
-        if (this.keyboardCallback) {
-          fromEvent<KeyboardEvent>(document, 'keydown')
+        if (this.keyboardCallback && this.registeredKeys.length > 0) {
+          fromEvent<KeyboardEvent>(this.elementRef.nativeElement, 'keydown')
             .pipe(
               filter(() => this.isFieldFocused && !this.disabled),
               filter((event) => this.registeredKeys.includes(event.key)),

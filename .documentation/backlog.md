@@ -16,4 +16,3 @@
 - use 'null' for empty values in all fields, instead of null
 - scrollIntoView upon panel close
 - scrollIntoView (for option) if selection goes out of view
-- hold key -> doesn't write
