@@ -42,11 +42,20 @@ export class ExampleFormComponent {
   ];
 
   protected nationalityOptions: IFormzFieldOption[] = [
-    { value: 'de', label: '🇩🇪  Germany' },
-    { value: 'fr', label: '🇫🇷  France' },
-    { value: 'jp', label: '🇯🇵  Japan' }
+    { value: 'jp', label: 'Japan 🇯🇵' },
+    { value: 'de', label: 'Germany 🇩🇪' },
+    { value: 'fr', label: 'France 🇫🇷' }
     // { value: 'uk (no label)', label: '' }
   ];
+
+  protected sortAlphabetically = (a: IFormzFieldOption, b: IFormzFieldOption): number => {
+    if (!a.label && !b.label) {
+      return a.value.localeCompare(b.value);
+    }
+    if (!a.label) return 1;
+    if (!b.label) return -1;
+    return a.label.localeCompare(b.label);
+  };
 
   protected nationalityEmptyOption: IFormzFieldOption = {
     value: 'empty',

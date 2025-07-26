@@ -44,6 +44,7 @@ export interface IFormzOptionField {
   options?: IFormzFieldOption[];
   emptyOption?: IFormzFieldOption;
   selectOption(option: IFormzFieldOption): void;
+  sortFn?: (a: IFormzFieldOption, b: IFormzFieldOption) => number;
 }
 
 /** Interface for all Formz options. */

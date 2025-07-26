@@ -74,6 +74,7 @@
         [disabled]="false"
         [required]="false"
         [options]="genderOptions"
+        [sortFn]="sortAlphabetically"
         (valueChanged)="onValueChanged('gender', $event)"
         (focusChanged)="onFocusChanged('gender', $event)">
         <formz-field-option
@@ -104,6 +105,7 @@
         [options]="nationalityOptions"
         [emptyOption]="nationalityEmptyOption"
         [panelPosition]="'left'"
+        [sortFn]="sortAlphabetically"
         (valueChanged)="onValueChanged('nationality', $event)"
         (focusChanged)="onFocusChanged('nationality', $event)">
         <formz-field-option
@@ -140,6 +142,7 @@
         [required]="false"
         [options]="hobbyOptions"
         [emptyOption]="hobbyEmptyOption"
+        [sortFn]="sortAlphabetically"
         (valueChanged)="onValueChanged('hobby', $event)"
         (focusChanged)="onFocusChanged('hobby', $event)">
         <formz-field-option
@@ -266,6 +269,7 @@
         [required]="false"
         [options]="religionOptions"
         [emptyOption]="religionEmptyOption"
+        [sortFn]="sortAlphabetically"
         (valueChanged)="onValueChanged('religion', $event)"
         (focusChanged)="onFocusChanged('religion', $event)">
         <formz-field-option
@@ -308,6 +312,7 @@
         [required]="false"
         [options]="allergiesOptions"
         [emptyOption]="allergiesEmptyOption"
+        [sortFn]="sortAlphabetically"
         (valueChanged)="onValueChanged('allergies', $event)"
         (focusChanged)="onFocusChanged('allergies', $event)">
         <formz-field-option

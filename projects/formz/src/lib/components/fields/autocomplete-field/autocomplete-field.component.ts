@@ -185,6 +185,7 @@ export class AutocompleteFieldComponent
 
   @Input() options?: IFormzFieldOption[] = [];
   @Input() emptyOption: IFormzFieldOption = EMPTY_FIELD_OPTION;
+  @Input() sortFn?: (a: IFormzFieldOption, b: IFormzFieldOption) => number;
 
   @ContentChildren(FORMZ_FIELD_OPTION)
   optionComponents?: QueryList<IFormzFieldOption>;
@@ -227,7 +228,13 @@ export class AutocompleteFieldComponent
     const inlineOptions = this.options ?? [];
     const projectedOptions = this.optionComponents?.toArray() ?? [];
 
-    return [...inlineOptions, ...projectedOptions];
+    let combined = [...inlineOptions, ...projectedOptions];
+
+    if (this.sortFn) {
+      combined = [...combined].sort(this.sortFn);
+    }
+
+    return combined;
   }
 
   private updateFilteredOptions(): void {

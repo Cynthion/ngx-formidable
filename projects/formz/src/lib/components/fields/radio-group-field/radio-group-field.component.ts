@@ -142,6 +142,7 @@ export class RadioGroupFieldComponent
 
   @Input() options?: IFormzFieldOption[] = [];
   @Input() emptyOption: IFormzFieldOption = EMPTY_FIELD_OPTION;
+  @Input() sortFn?: (a: IFormzFieldOption, b: IFormzFieldOption) => number;
 
   @ContentChildren(FORMZ_FIELD_OPTION)
   optionComponents?: QueryList<IFormzFieldOption>;
@@ -176,7 +177,13 @@ export class RadioGroupFieldComponent
       const inlineOptions = this.options ?? [];
       const projectedOptions = this.optionComponents?.toArray() ?? [];
 
-      this.options$.next([...inlineOptions, ...projectedOptions]);
+      let combined = [...inlineOptions, ...projectedOptions];
+
+      if (this.sortFn) {
+        combined = combined.sort(this.sortFn);
+      }
+
+      this.options$.next(combined);
 
       this.writeValue(this._value);
     });
