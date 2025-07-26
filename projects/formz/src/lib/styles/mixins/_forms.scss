@@ -1,5 +1,6 @@
-@use '../tokens' as tokens;
+@use 'css-icons' as icons;
 @use 'utils' as utils;
+@use '../tokens' as tokens;
 
 @mixin icon {
   display: inline-flex;
@@ -339,13 +340,23 @@
   user-select: none;
 
   .caret {
-    float: right;
-    transition: transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
-      var(--formz-animation-easing, #{tokens.$formz-animation-easing});
+    flex-shrink: 0;
+    width: utils.spacing(10);
+    height: utils.spacing(10);
+    position: relative;
+
+    &.arrow-up {
+      @include icons.css-icon('arrow-up', utils.spacing(10), utils.spacing(2));
+    }
+
+    &.arrow-down {
+      @include icons.css-icon('arrow-down', utils.spacing(10), utils.spacing(2));
+    }
   }
 
-  .caret.rotated {
-    transform: rotate(180deg);
+  .caret::before {
+    transition: transform var(--formz-animation-duration, #{tokens.$formz-animation-duration})
+      var(--formz-animation-easing, #{tokens.$formz-animation-easing});
   }
 }
 

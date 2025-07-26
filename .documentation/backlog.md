@@ -15,6 +15,5 @@
 - sortFn for options
 - support patterns (ngx-mask)
 - use 'null' for empty values in all fields, instead of null
-- use arrow up/down css icons for dropdown
 - scrollIntoView upon panel close
 - hold key -> doesn't write

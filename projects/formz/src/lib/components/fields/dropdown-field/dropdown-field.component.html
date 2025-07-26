@@ -10,9 +10,9 @@
     {{ selectedOption?.label || placeholder }}
     <span
       class="caret"
-      [class.rotated]="isPanelOpen"
-      >▼</span
-    >
+      [class.arrow-down]="!isPanelOpen"
+      [class.arrow-up]="isPanelOpen">
+    </span>
   </div>
 
   <!-- Panel -->
