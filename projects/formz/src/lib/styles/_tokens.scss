@@ -68,6 +68,7 @@ $formz-length-indicator-line-height: math.div(19.2, 12); // 1.6
 // SCSS Variables for internal (default) styling
 $formz-color-validation-error: #dc5858;
 $formz-color-field-text: #00345a;
+$formz-color-field-group-text: $formz-color-field-text;
 $formz-color-field-text-readonly: #255476;
 $formz-color-field-text-disabled: #646464;
 $formz-color-field-text-required: $formz-color-field-text;
@@ -77,8 +78,11 @@ $formz-color-field-tooltip: $formz-color-field-text;
 $formz-color-field-placeholder: #5b7f99;
 $formz-color-field-selection: #9fb7c7;
 $formz-color-field-border: #114367;
+$formz-color-field-group-border: transparent;
 $formz-color-field-border-focus: #5b7f99;
+$formz-color-field-group-border-focus: transparent;
 $formz-color-field-background: #f2faff;
+$formz-color-field-group-background: transparent;
 $formz-color-field-background-readonly: #c5c5c5;
 $formz-color-field-background-disabled: #c5c5c5;
 $formz-color-field-background-required: $formz-color-field-background;
@@ -105,9 +109,13 @@ $formz-color-length-indicator: $formz-color-field-placeholder;
 
 $formz-field-before-margin-bottom: utils.spacing(8);
 
-$formz-field-height: utils.spacing(60); // even number
 $formz-field-border-thickness: utils.spacing(1);
 $formz-field-border-radius: utils.spacing(6);
+
+$formz-field-group-border-thickness: utils.spacing(0);
+$formz-field-group-border-radius: utils.spacing(0);
+
+$formz-field-height: utils.spacing(60); // even number
 $formz-label-floating-offset: calc(
   #{math.div($formz-field-height, 2)} - #{math.div(
       $formz-label-floating-line-height * $formz-label-floating-font-size,

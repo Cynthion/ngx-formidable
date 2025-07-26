@@ -55,6 +55,11 @@
   color: var(--formz-color-field-text, #{tokens.$formz-color-field-text});
 }
 
+@mixin field-group-colors {
+  background: var(--formz-color-field-group-background, #{tokens.$formz-color-field-group-background});
+  color: var(--formz-color-field-group-text, #{tokens.$formz-color-field-group-text});
+}
+
 @mixin field-font {
   font-size: var(--formz-field-font-size, #{tokens.$formz-field-font-size});
   font-weight: var(--formz-field-font-weight, #{tokens.$formz-field-font-weight});
@@ -81,14 +86,26 @@
 
 @mixin field-focused {
   border-color: var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
-  box-shadow: inset 0 0 0 utils.spacing(1)
+  box-shadow: inset 0 0 0 var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness})
     var(--formz-color-field-border-focus, #{tokens.$formz-color-field-border-focus});
+}
+
+@mixin field-group-focused {
+  border-color: var(--formz-color-field-group-border-focus, #{tokens.$formz-color-field-group-border-focus});
+  box-shadow: inset 0 0 0 var(--formz-field-group-border-thickness, #{tokens.$formz-field-group-border-thickness})
+    var(--formz-color-field-group-border-focus, #{tokens.$formz-color-field-group-border-focus});
 }
 
 @mixin border {
   border: var(--formz-field-border-thickness, #{tokens.$formz-field-border-thickness}) solid
     var(--formz-color-field-border, #{tokens.$formz-color-field-border});
   border-radius: var(--formz-field-border-radius, #{tokens.$formz-field-border-radius});
+}
+
+@mixin border-group {
+  border: var(--formz-field-group-border-thickness, #{tokens.$formz-field-group-border-thickness}) solid
+    var(--formz-color-field-group-border, #{tokens.$formz-color-field-group-border});
+  border-radius: var(--formz-field-group-border-radius, #{tokens.$formz-field-group-border-radius});
 }
 
 @mixin field {
@@ -128,15 +145,15 @@
 @mixin group-field {
   @include field-reset;
   @include field-font;
-  // @include border; // TODO tokenize group border colors -> transparent default
-  // @include field-colors; // TODO tokenize group colors -> transparent default
+  @include border-group;
+  @include field-group-colors;
 
   &:focus {
-    @include field-focused;
+    @include field-group-focused;
   }
 
   &:focus-visible {
-    @include field-focused;
+    @include field-group-focused;
   }
 }
 
