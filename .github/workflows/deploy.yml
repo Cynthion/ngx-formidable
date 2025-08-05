@@ -33,7 +33,7 @@ jobs:
           npm install
 
       - name: Build Project
-        run: npm run build -- --base-href "/ngrx-formz/"
+        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
