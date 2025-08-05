@@ -348,13 +348,14 @@
     <!-- Passwords Group -->
     <!-- TODO add form group -->
 
+    <!-- Submit -->
     <div class="footer">
-      <!-- Submit -->
-      <!-- <formidable-form-submit
-        [submitLabel]="'Submit'"
-        [cancelLabel]="'Cancel'"
-        [isSubmitDisabled]="!vm.isValid">
-      </formidable-form-submit> -->
+      <button
+        type="submit"
+        class="submit-button"
+        [disabled]="!vm.isValid">
+        Submit
+      </button>
     </div>
   </fieldset>
 

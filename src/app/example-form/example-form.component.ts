@@ -153,7 +153,6 @@ export class ExampleFormComponent {
     weekdaysShort: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
   };
 
-  // TODO add type for vm?
   private readonly viewModel = computed(() => {
     return {
       formValue: this.formValue(),

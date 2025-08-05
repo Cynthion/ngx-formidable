@@ -14,7 +14,6 @@ export * from './lib/components/fields/radio-group-field/radio-group-field.compo
 export * from './lib/components/fields/select-field/select-field.component';
 export * from './lib/components/fields/textarea-field/textarea-field.component';
 export * from './lib/components/fields/time-field/time-field.component';
-export * from './lib/components/form-submit/form-submit.component';
 export * from './lib/components/icon/icon.component';
 
 export * from './lib/directives/field-errors.directive';

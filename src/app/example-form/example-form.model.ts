@@ -45,7 +45,7 @@ export type ExampleFormShape = DeepRequired<ExampleFormModel>;
 export const exampleFormShape: ExampleFormShape = {
   firstName: '',
   lastName: '',
-  gender: 'male', // TODO how to use undefined in shape?
+  gender: 'male',
   nationality: 'ch',
   hobby: '',
   animal: '',

@@ -8,12 +8,28 @@
   flex-direction: column;
 }
 
-// TODO implement footer to be sticky at the bottom of the form
 .footer {
-  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+}
 
-  &:empty {
-    display: none;
+.submit-button {
+  padding: 0.5rem 1rem;
+  background-color: #00345a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #5b7f99;
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
   }
 }
 
