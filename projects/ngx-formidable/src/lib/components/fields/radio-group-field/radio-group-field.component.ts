@@ -1,12 +1,10 @@
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ContentChildren,
   ElementRef,
   forwardRef,
-  inject,
   Input,
   OnDestroy,
   OnInit,
@@ -65,11 +63,7 @@ export class RadioGroupFieldComponent
   protected windowResizeScrollCallback = null;
   protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
-  protected highlightedIndex = -1;
-
   private _value = '';
-
-  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   ngAfterContentInit(): void {
     this.updateOptions();
@@ -90,17 +84,17 @@ export class RadioGroupFieldComponent
     switch (event.key) {
       case 'ArrowDown':
         if (count > 0) {
-          this.setHighlightedIndex((this.highlightedIndex + 1) % count);
+          this.setHighlightedIndex((this.highlightedOptionIndex$.value + 1) % count);
         }
         break;
       case 'ArrowUp':
         if (count > 0) {
-          this.setHighlightedIndex((this.highlightedIndex - 1 + count) % count);
+          this.setHighlightedIndex((this.highlightedOptionIndex$.value - 1 + count) % count);
         }
         break;
       case 'Enter':
-        if (options[this.highlightedIndex]) {
-          const option = options[this.highlightedIndex]!;
+        if (options[this.highlightedOptionIndex$.value]) {
+          const option = options[this.highlightedOptionIndex$.value]!;
           this.selectOption(option);
         }
         break;
@@ -152,6 +146,7 @@ export class RadioGroupFieldComponent
   optionComponents?: QueryList<IFormidableFieldOption>;
 
   protected readonly options$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
+  protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
 
   private selectedOption?: IFormidableFieldOption = undefined;
 
@@ -202,9 +197,7 @@ export class RadioGroupFieldComponent
   }
 
   private setHighlightedIndex(index: number): void {
-    this.highlightedIndex = index;
-
-    this.cdRef.markForCheck(); // TODO required?
+    this.highlightedOptionIndex$.next(index);
 
     setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }
