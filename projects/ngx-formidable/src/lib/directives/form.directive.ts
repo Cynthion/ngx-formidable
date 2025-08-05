@@ -53,7 +53,6 @@ export class FormDirective<T extends Record<string, unknown>> implements OnDestr
    */
   public readonly formShape = input<DeepRequired<T> | null>(null);
 
-  // TODO make this generic, so that any validation library can be used
   /**
    * Static vest suite that is used for form validation.
    */

@@ -1,6 +1,5 @@
 # Backlog
 
-- resolve all TODOs
 - support showing multiple errors
 - dropdown: write towards selection
 - dropdown: with <input>, setCaretPosition
@@ -12,3 +11,7 @@
 - suffixes: clear/reset, copy, validation state, loading
 - <input> value & checked could be added to interface, if used without FormControl
 - support patterns (ngx-mask)
+
+# Future Releases:
+
+- make validation interface generic, so that any validation library can be used (instead of vest)

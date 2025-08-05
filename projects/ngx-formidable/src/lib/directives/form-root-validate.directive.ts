@@ -95,7 +95,7 @@ export class FormRootValidateDirective<T> implements AsyncValidator, OnDestroy {
    * Whether the root form should be validated or not
    * This will use the field rootForm
    */
-  public readonly formidableValidateRootForm = input(false); // TODO does this do anything?
+  public readonly formidableValidateRootForm = input(false);
 
   // Used to debounce formValues to make sure the validation suite is not triggered all the time.
   private readonly formValueCache: Record<

@@ -51,11 +51,17 @@
 
 @mixin wrapped-input {
   @include field-reset;
+  @include field-colors;
 
   background: transparent;
   width: 100%;
   height: 100%;
   border: none;
+}
+
+@mixin field-colors {
+  background: var(--formidable-color-field-background, #{tokens.$formidable-color-field-background});
+  color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
 
   &::selection {
     background-color: var(--formidable-color-field-selection, #{tokens.$formidable-color-field-selection});
@@ -64,11 +70,31 @@
   &::placeholder {
     color: var(--formidable-color-field-placeholder, #{tokens.$formidable-color-field-placeholder});
   }
-}
 
-@mixin field-colors {
-  background: var(--formidable-color-field-background, #{tokens.$formidable-color-field-background});
-  color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
+  input[readonly],
+  textarea[readonly] {
+    background: var(
+      --formidable-color-field-background-readonly,
+      #{tokens.$formidable-color-field-background-readonly}
+    );
+    color: var(--formidable-color-field-text-readonly, #{tokens.$formidable-color-field-text-readonly});
+  }
+
+  &:required {
+    background: var(
+      --formidable-color-field-background-required,
+      #{tokens.$formidable-color-field-background-required}
+    );
+    color: var(--formidable-color-field-text-required, #{tokens.$formidable-color-field-text-required});
+  }
+
+  &:disabled {
+    background: var(
+      --formidable-color-field-background-disabled,
+      #{tokens.$formidable-color-field-background-disabled}
+    );
+    color: var(--formidable-color-field-text-disabled, #{tokens.$formidable-color-field-text-disabled});
+  }
 }
 
 @mixin field-group-colors {
@@ -80,24 +106,6 @@
   font-size: var(--formidable-field-font-size, #{tokens.$formidable-field-font-size});
   font-weight: var(--formidable-field-font-weight, #{tokens.$formidable-field-font-weight});
   line-height: var(--formidable-field-line-height, #{tokens.$formidable-field-line-height});
-}
-
-@mixin field-readonly {
-  background: var(--formidable-color-field-background-readonly, #{tokens.$formidable-color-field-background-readonly});
-  color: var(--formidable-color-field-text-readonly, #{tokens.$formidable-color-field-text-readonly});
-}
-
-@mixin field-disabled {
-  cursor: not-allowed;
-  pointer-events: none;
-
-  background: var(--formidable-color-field-background-disabled, #{tokens.$formidable-color-field-background-disabled});
-  color: var(--formidable-color-field-text-disabled, #{tokens.$formidable-color-field-text-disabled});
-}
-
-@mixin field-required {
-  background: var(--formidable-color-field-background-required, #{tokens.$formidable-color-field-background-required});
-  color: var(--formidable-color-field-text-required, #{tokens.$formidable-color-field-text-required});
 }
 
 @mixin field-focused {
@@ -134,28 +142,15 @@
   width: 100%;
   position: relative;
 
-  &:read-only {
-    @include field-readonly;
-  }
-
   &:disabled {
-    @include field-disabled;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 
-  &:required {
-    @include field-required;
-  }
-
-  &:focus {
+  &:focus,
+  &.focused,
+  &:focus-visible {
     @include field-focused;
-  }
-
-  &::selection {
-    background-color: var(--formidable-color-field-selection, #{tokens.$formidable-color-field-selection});
-  }
-
-  &::placeholder {
-    color: var(--formidable-color-field-placeholder, #{tokens.$formidable-color-field-placeholder});
   }
 }
 
@@ -165,10 +160,8 @@
   @include border-group;
   @include field-group-colors;
 
-  &:focus {
-    @include field-group-focused;
-  }
-
+  &:focus,
+  &.focused,
   &:focus-visible {
     @include field-group-focused;
   }
@@ -200,11 +193,6 @@
 
 @mixin select-field {
   @include input-field;
-
-  // select field is always read-only, so a reset is needed
-  &:read-only {
-    @include field-colors;
-  }
 }
 
 @mixin panel-field {
@@ -212,16 +200,6 @@
 }
 
 @mixin input-wrapper-field {
-  &.focused {
-    @include field-focused;
-  }
-
-  // TODO true?
-  // field is always read-only, so a reset is needed
-  &:read-only {
-    @include field-colors;
-  }
-
   .wrapped-input {
     @include wrapped-input;
   }
@@ -243,7 +221,6 @@
 
 @mixin time-field {
   @include input-field;
-
   @include input-wrapper-field;
 }
 

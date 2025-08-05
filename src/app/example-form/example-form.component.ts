@@ -175,15 +175,14 @@ export class ExampleFormComponent {
   }
 
   protected onValueChanged(_fieldName: string, _value: unknown): void {
-    // console.log(`Value changed on ${_fieldName} field:`, _value);
+    console.log(`Value changed on ${_fieldName} field:`, _value);
   }
 
   protected onFocusChanged(_fieldName: string, _isFocused: boolean): void {
-    // console.log(`Focus changed on ${_fieldName} field:`, _isFocused);
+    console.log(`Focus changed on ${_fieldName} field:`, _isFocused);
   }
 
   protected onSubmit(): void {
-    // TODO choose either formidable-form-submit.submitClick or form.ngSubmit
     if (this.isValid()) {
       console.log(this.formValue());
     }
