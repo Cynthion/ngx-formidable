@@ -1,0 +1,237 @@
+@use 'sass:math';
+@use 'css-icons' as icons;
+@use 'utils' as utils;
+@use '../tokens' as tokens;
+
+// These CSS classes customize the pikaday components.
+// Alternatively, the CSS classes provided by the pikaday library can be used and customized:
+// https://github.com/Pikaday/Pikaday#styles
+
+@keyframes animation-date-in {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+
+  99% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@mixin button-normalize {
+  background: transparent;
+  -webkit-appearance: button;
+  cursor: pointer;
+  border: 0;
+}
+
+.pika-single {
+  font-size: utils.spacing(14);
+  font-weight: bold;
+  line-height: math.div(22.4, 14);
+}
+
+.pika-lendar {
+  float: left;
+  width: var(--formidable-date-field-panel-width, #{tokens.$formidable-date-field-panel-width});
+
+  & + & {
+    margin-left: utils.spacing(16);
+  }
+}
+
+.pika-title {
+  display: flex;
+  align-items: center;
+  margin-bottom: utils.spacing(8);
+
+  select {
+    cursor: pointer;
+    position: absolute;
+    left: 0;
+    opacity: 0;
+  }
+}
+
+.pika-label {
+  position: relative;
+  overflow: hidden;
+  padding: 4px 10px;
+  border-radius: var(--formidable-date-field-panel-border-radius, #{tokens.$formidable-date-field-panel-border-radius});
+
+  & + & {
+    margin-left: utils.spacing(4);
+  }
+
+  // hover
+  &::before {
+    @include utils.absolute-cover;
+
+    content: '';
+    display: block;
+    background-color: var(
+      --formidable-color-date-field-panel-select-hover,
+      #{tokens.$formidable-color-date-field-panel-select-hover}
+    );
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  @include utils.hover {
+    &::before {
+      opacity: 1;
+    }
+  }
+}
+
+.pika-prev,
+.pika-next {
+  @include button-normalize;
+
+  width: 30px;
+  height: 30px;
+  font-size: 0;
+
+  &.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.2;
+  }
+
+  // hover
+  &::before {
+    color: var(--formidable-color-date-field-panel-select, #{tokens.$formidable-color-date-field-panel-select});
+  }
+
+  &::after {
+    @include utils.absolute-cover;
+
+    content: '';
+    background-color: var(
+      --formidable-color-date-field-panel-select-hover,
+      #{tokens.$formidable-color-date-field-panel-select-hover}
+    );
+    border-radius: var(
+      --formidable-date-field-panel-border-radius,
+      #{tokens.$formidable-date-field-panel-border-radius}
+    );
+    opacity: 0;
+    transform: opacity var(--formidable-hover-duration, #{tokens.$formidable-hover-duration})
+      var(--formidable-hover-easing, #{tokens.$formidable-hover-easing});
+  }
+
+  @include utils.hover {
+    &::after {
+      opacity: 1;
+    }
+  }
+}
+
+.pika-prev,
+.is-rtl .pika-next {
+  @include icons.css-icon(arrow-left, 8px);
+
+  order: -1; // flex position
+  margin-right: auto;
+}
+
+.pika-next,
+.is-rtl .pika-prev {
+  @include icons.css-icon(arrow-right, 8px);
+
+  margin-left: auto;
+}
+
+.pika-select {
+}
+
+.pika-table {
+  width: 100%;
+
+  th,
+  td {
+    width: math.div(100%, 7);
+  }
+
+  th {
+    text-align: center;
+    padding-bottom: utils.spacing(8);
+  }
+
+  td {
+    position: relative;
+    padding-bottom: math.div(100%, 7);
+
+    &::before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: calc(100% - 2px);
+      height: calc(100% - 2px);
+      max-width: 48px;
+      max-height: 48px;
+      transform: translate(-50%, -50%);
+      background-color: var(
+        --formidable-color-date-field-panel-date-hovered,
+        #{tokens.$formidable-color-date-field-panel-date-hovered}
+      );
+      border-radius: 100%;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+
+    &.is-outside-current-month {
+      color: var(
+        --formidable-color-date-field-panel-date-out-of-range,
+        #{tokens.$formidable-color-date-field-panel-date-out-of-range}
+      );
+    }
+
+    &.is-selected {
+      color: var(
+        --formidable-color-date-field-panel-date-highlighted-text,
+        #{tokens.$formidable-color-date-field-panel-date-highlighted-text}
+      );
+
+      &::before {
+        background-color: var(
+          --formidable-color-date-field-panel-date-highlighted,
+          #{tokens.$formidable-color-date-field-panel-date-highlighted}
+        );
+        opacity: 1;
+      }
+    }
+
+    &.is-disabled {
+      opacity: 0.3;
+
+      .pika-button {
+        cursor: not-allowed;
+      }
+    }
+
+    @include utils.hover {
+      &:not(.is-selected, .is-empty, .is-disabled)::before {
+        opacity: 1;
+      }
+    }
+  }
+
+  abbr {
+    color: var(--formidable-color-date-field-panel-day-label, #{tokens.$formidable-color-date-field-panel-day-label});
+  }
+}
+
+.pika-button {
+  @include utils.absolute-cover;
+  @include button-normalize;
+
+  display: block;
+}

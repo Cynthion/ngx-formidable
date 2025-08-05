@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
 import Fuse, { FuseResult } from 'fuse.js';
-import { FormValidationOptions, IFormzFieldOption } from 'projects/formz/src/lib/models/formz.model';
+import { FormValidationOptions, IFormidableFieldOption } from 'ngx-formidable';
 import { map, Observable, startWith, Subject } from 'rxjs';
 import {
   AnimalFormFieldOption,
@@ -11,7 +11,7 @@ import {
 } from './example-form.model';
 
 @Component({
-  selector: 'formz-example-form',
+  selector: 'example-form',
   templateUrl: './example-form.component.html',
   styleUrls: ['./example-form.component.scss']
 })
@@ -23,7 +23,7 @@ export class ExampleFormComponent {
     nationality: 'ch',
     hobby: 'reading',
     animal: 'cat',
-    birthdate: new Date(1989, 5, 29), // TODO also support strings
+    birthdate: new Date(1989, 5, 29),
     time: new Date(0, 0, 0, 12, 30, 15),
     religion: 'agnostic',
     allergies: ['dust', 'lactose']
@@ -36,19 +36,19 @@ export class ExampleFormComponent {
   protected readonly isValid = signal<boolean | null>(null);
   protected readonly errors = signal<Record<string, string>>({});
 
-  protected genderOptions: IFormzFieldOption[] = [
+  protected genderOptions: IFormidableFieldOption[] = [
     { value: 'male', label: 'Male' },
     { value: 'female', label: 'Female' }
   ];
 
-  protected nationalityOptions: IFormzFieldOption[] = [
+  protected nationalityOptions: IFormidableFieldOption[] = [
     { value: 'jp', label: 'Japan 🇯🇵' },
     { value: 'de', label: 'Germany 🇩🇪' },
     { value: 'fr', label: 'France 🇫🇷' }
     // { value: 'uk (no label)', label: '' }
   ];
 
-  protected sortAlphabetically = (a: IFormzFieldOption, b: IFormzFieldOption): number => {
+  protected sortAlphabetically = (a: IFormidableFieldOption, b: IFormidableFieldOption): number => {
     if (!a.label && !b.label) {
       return a.value.localeCompare(b.value);
     }
@@ -57,12 +57,12 @@ export class ExampleFormComponent {
     return a.label.localeCompare(b.label);
   };
 
-  protected nationalityEmptyOption: IFormzFieldOption = {
+  protected nationalityEmptyOption: IFormidableFieldOption = {
     value: 'empty',
     label: 'No nationality available.'
   };
 
-  protected hobbyOptions: IFormzFieldOption[] = [
+  protected hobbyOptions: IFormidableFieldOption[] = [
     { value: 'dev', label: 'Software Development' },
     { value: 'gaming (no label)', label: '' },
     { value: 'reading', label: 'Reading' },
@@ -76,12 +76,12 @@ export class ExampleFormComponent {
     { value: 'cooking', label: 'Cooking' }
   ];
 
-  protected hobbyEmptyOption: IFormzFieldOption = {
+  protected hobbyEmptyOption: IFormidableFieldOption = {
     value: 'empty',
     label: 'No hobby available.'
   };
 
-  protected animalOptionsDefault: IFormzFieldOption[] = [
+  protected animalOptionsDefault: IFormidableFieldOption[] = [
     { value: 'cat', label: 'Cat' },
     { value: 'dog', label: 'Dog' }
   ];
@@ -99,30 +99,30 @@ export class ExampleFormComponent {
     { value: 'maned_wolf', label: 'Maned Wolf', subtitle: 'Tall, long-legged canid' }
   ];
 
-  protected animalEmptyOption: IFormzFieldOption = {
+  protected animalEmptyOption: IFormidableFieldOption = {
     value: 'empty',
     label: 'No animal available.'
   };
 
-  protected religionOptions: IFormzFieldOption[] = [
+  protected religionOptions: IFormidableFieldOption[] = [
     { value: 'christian', label: 'Christianity' },
     { value: 'hindu', label: 'Hinduism' },
     { value: 'buddhist', label: 'Buddhism' }
   ];
 
-  protected religionEmptyOption: IFormzFieldOption = {
+  protected religionEmptyOption: IFormidableFieldOption = {
     value: 'empty',
     label: 'No religion available.'
   };
 
-  protected allergiesOptions: IFormzFieldOption[] = [
+  protected allergiesOptions: IFormidableFieldOption[] = [
     { value: 'pollen', label: 'Pollen' },
     { value: 'dust', label: 'Dust' },
     { value: 'peanuts', label: 'Peanuts' },
     { value: 'shellfish', label: 'Shellfish' }
   ];
 
-  protected allergiesEmptyOption: IFormzFieldOption = {
+  protected allergiesEmptyOption: IFormidableFieldOption = {
     value: 'empty',
     label: 'No allergies available.'
   };
@@ -184,7 +184,7 @@ export class ExampleFormComponent {
   }
 
   protected onSubmit(): void {
-    // TODO choose either formz-form-submit.submitClick or form.ngSubmit
+    // TODO choose either formidable-form-submit.submitClick or form.ngSubmit
     if (this.isValid()) {
       console.log(this.formValue());
     }

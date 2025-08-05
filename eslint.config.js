@@ -12,7 +12,7 @@ module.exports = tseslint.config(
     files: ['**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.app.json', './projects/formz/tsconfig.lib.json'] // enable type-aware linting
+        project: ['./tsconfig.app.json', './projects/ngx-formidable/tsconfig.lib.json'] // enable type-aware linting
       }
     },
     plugins: {
@@ -79,13 +79,13 @@ module.exports = tseslint.config(
     rules: {}
   },
   {
-    files: ['projects/formz/src/lib/**/*.ts'],
+    files: ['projects/formidable/src/lib/**/*.ts'],
     rules: {
       '@angular-eslint/component-selector': [
         'error',
         {
           type: 'element',
-          prefix: 'formz',
+          prefix: 'formidable',
           style: 'kebab-case'
         }
       ],
@@ -93,7 +93,7 @@ module.exports = tseslint.config(
         'error',
         {
           type: 'attribute',
-          prefix: 'formz',
+          prefix: 'formidable',
           style: 'camelCase'
         }
       ]

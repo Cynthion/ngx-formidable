@@ -1,0 +1,150 @@
+@use 'sass:math';
+@use 'mixins/utils' as utils;
+
+//#region Font Sizes
+
+// font-size-xxxl: 32px;
+// font-size-xxl: 28px;
+// font-size-xl: 22px;
+// font-size-l: 18px;
+// font-size-m: 16px;
+// font-size-s: 14px;
+// font-size-xs: 12px;
+// font-size-xxs: 10px;
+
+// line-height-xxxl: math.div(38.4, 32);
+// line-height-xxl: math.div(39.2, 28);
+// line-height-xl: math.div(30.8, 22);
+// line-height-l: math.div(25.2, 18);
+// line-height-m: math.div(25.6, 16);
+// line-height-s: math.div(22.4, 14);
+// line-height-xs: math.div(19.2, 12);
+// line-height-xxs: math.div(16, 10);
+
+$formidable-field-font-size: utils.spacing(16);
+$formidable-field-font-weight: normal;
+$formidable-field-line-height: math.div(25.6, 16); // 1.6
+
+$formidable-label-font-size: utils.spacing(16);
+$formidable-label-font-weight: bold;
+$formidable-label-line-height: math.div(25.6, 16); // 1.6
+
+$formidable-label-floating-font-size: utils.spacing(12);
+$formidable-label-floating-font-weight: normal;
+$formidable-label-floating-line-height: math.div(19.2, 12); // 1.6
+
+$formidable-field-validation-error-font-size: utils.spacing(12);
+$formidable-field-validation-error-font-weight: normal;
+$formidable-field-validation-error-line-height: math.div(19.2, 12); // 1.6
+
+$formidable-length-indicator-font-size: utils.spacing(12);
+$formidable-length-indicator-font-weight: normal;
+$formidable-length-indicator-line-height: math.div(19.2, 12); // 1.6
+
+//#endregion
+
+//#region Colors
+
+// 100: #f2faff
+// 200: #c7d7e2
+// 300: #9fb7c7
+// 400: #7b99af
+// 500: #5b7f99
+// 600: #3e6988
+// 700: #255476
+// 800: #114367
+// 900: #00345a
+
+// 100: #f5f5f5
+// 200: #dddddd
+// 300: #c5c5c5
+// 400: #acacac
+// 500: #949494
+// 600: #7c7c7c
+// 700: #646464
+// 800: #4b4b4b
+// 900: #333333
+
+// SCSS Variables for internal (default) styling
+$formidable-color-validation-error: #dc5858;
+$formidable-color-field-text: #00345a;
+$formidable-color-field-group-text: $formidable-color-field-text;
+$formidable-color-field-text-readonly: #255476;
+$formidable-color-field-text-disabled: #646464;
+$formidable-color-field-text-required: $formidable-color-field-text;
+$formidable-color-field-label: $formidable-color-field-text;
+$formidable-color-field-label-floating: #3e6988;
+$formidable-color-field-tooltip: $formidable-color-field-text;
+$formidable-color-field-placeholder: #5b7f99;
+$formidable-color-field-selection: #9fb7c7;
+$formidable-color-field-border: #114367;
+$formidable-color-field-group-border: transparent;
+$formidable-color-field-border-focus: #5b7f99;
+$formidable-color-field-group-border-focus: transparent;
+$formidable-color-field-background: #f2faff;
+$formidable-color-field-group-background: transparent;
+$formidable-color-field-background-readonly: #c5c5c5;
+$formidable-color-field-background-disabled: #c5c5c5;
+$formidable-color-field-background-required: $formidable-color-field-background;
+$formidable-color-field-disabled: rgba(114, 114, 114, 0.05);
+$formidable-color-field-selected: rgba(0, 0, 0, 0.05);
+$formidable-color-field-highlighted: rgba(0, 0, 0, 0.075);
+$formidable-color-field-hovered: rgba(91, 127, 153, 0.2); // #5b7f99
+
+$formidable-color-date-field-panel-select: $formidable-color-field-label;
+$formidable-color-date-field-panel-select-hover: $formidable-color-field-hovered;
+$formidable-color-date-field-panel-date-highlighted-text: $formidable-color-field-text;
+$formidable-color-date-field-panel-date-highlighted: $formidable-color-field-highlighted;
+$formidable-color-date-field-panel-date-hovered: $formidable-color-field-hovered;
+$formidable-color-date-field-panel-date-out-of-range: $formidable-color-field-background-disabled;
+$formidable-color-date-field-panel-day-label: #255476;
+
+$formidable-color-option-prefix-outer: $formidable-color-field-border;
+$formidable-color-option-prefix-inner: $formidable-color-field-border;
+$formidable-color-option-prefix-background: transparent;
+
+$formidable-color-length-indicator: $formidable-color-field-placeholder;
+
+//#endregion
+
+$formidable-field-before-margin-bottom: utils.spacing(8);
+
+$formidable-field-border-thickness: utils.spacing(1);
+$formidable-field-border-radius: utils.spacing(6);
+
+$formidable-field-group-border-thickness: utils.spacing(0);
+$formidable-field-group-border-radius: utils.spacing(0);
+
+$formidable-field-height: utils.spacing(60); // even number
+$formidable-label-floating-offset: calc(
+  #{math.div($formidable-field-height, 2)} - #{math.div(
+      $formidable-label-floating-line-height * $formidable-label-floating-font-size,
+      2
+    )} + #{$formidable-field-before-margin-bottom} + #{$formidable-field-border-thickness}
+);
+
+$formidable-textarea-min-height: utils.spacing(96); // ~2 lines
+$formidable-textarea-max-height: none;
+$formidable-textarea-padding-top: utils.spacing(20);
+
+$formidable-panel-background: #f2faff;
+$formidable-panel-box-shadow: utils.spacing(0) utils.spacing(12) utils.spacing(48) calc(utils.spacing(8) * -1)
+  rgb(0 0 0 / 12%);
+$formidable-panel-max-height: 33vh; // 1/3 of viewport height
+
+$formidable-animation-duration: 0.2s;
+$formidable-animation-easing: cubic-bezier(0.37, 0, 0.63, 1); // easeInOutSine
+
+$formidable-hover-duration: 0.25s;
+$formidable-hover-easing: cubic-bezier(0.4, 0.6, 0.6, 1);
+
+$formidable-flyout-z-index: 999;
+$formidable-overlay-z-index: 9999;
+$formidable-above-overlay-z-index: 99999;
+
+$formidable-date-field-panel-width: utils.spacing(300);
+$formidable-date-field-panel-border-radius: $formidable-field-border-radius;
+$formidable-date-field-panel-box-shadow: $formidable-panel-box-shadow;
+
+$formidable-option-prefix-dimension-outer: utils.spacing(20);
+$formidable-option-prefix-dimension-inner: utils.spacing(8);

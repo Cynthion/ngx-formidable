@@ -1,6 +1,6 @@
 <form
-  formzForm
-  formzRootValidate
+  formidableForm
+  formidableRootValidate
   class="form"
   [formValue]="formValue()"
   [formShape]="formShape"
@@ -13,9 +13,9 @@
   (ngSubmit)="onSubmit()">
   <fieldset>
     <!-- First Name -->
-    <formz-field-decorator>
-      <formz-input-field
-        formzFieldErrors
+    <formidable-field-decorator>
+      <formidable-input-field
+        formidableFieldErrors
         placeholder="Your first name"
         autocomplete="given-name"
         name="firstName"
@@ -27,21 +27,21 @@
         [required]="false"
         (valueChanged)="onValueChanged('firstName', $event)"
         (focusChanged)="onFocusChanged('firstName', $event)">
-      </formz-input-field>
+      </formidable-input-field>
       <div
-        formzFieldLabel
+        formidableFieldLabel
         [isFloating]="true">
         First Name
       </div>
-      <div formzFieldTooltip>(Input)</div>
-      <div formzFieldPrefix>Prefix</div>
-      <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+      <div formidableFieldTooltip>(Input)</div>
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>Suffix</div>
+    </formidable-field-decorator>
 
     <!-- Last Name -->
-    <formz-field-decorator>
-      <formz-textarea-field
-        formzFieldErrors
+    <formidable-field-decorator>
+      <formidable-textarea-field
+        formidableFieldErrors
         placeholder="Your last name"
         autocomplete="family-name"
         name="lastName"
@@ -54,21 +54,21 @@
         [required]="false"
         (valueChanged)="onValueChanged('lastName', $event)"
         (focusChanged)="onFocusChanged('lastName', $event)">
-      </formz-textarea-field>
+      </formidable-textarea-field>
       <div
-        formzFieldLabel
+        formidableFieldLabel
         [isFloating]="true">
         Last Name
       </div>
-      <div formzFieldTooltip>(Textarea)</div>
-      <div formzFieldPrefix>Prefix</div>
-      <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+      <div formidableFieldTooltip>(Textarea)</div>
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>Suffix</div>
+    </formidable-field-decorator>
 
     <!-- Gender -->
-    <formz-field-decorator>
-      <formz-select-field
-        formzFieldErrors
+    <formidable-field-decorator>
+      <formidable-select-field
+        formidableFieldErrors
         name="gender"
         [ngModel]="vm.formValue.gender"
         [disabled]="false"
@@ -77,26 +77,26 @@
         [sortFn]="sortAlphabetically"
         (valueChanged)="onValueChanged('gender', $event)"
         (focusChanged)="onFocusChanged('gender', $event)">
-        <formz-field-option
+        <formidable-field-option
           [value]="'other'"
           [label]="'Other'"
           [disabled]="true" />
-        <formz-field-option [value]="'trans'">Trans</formz-field-option>
-      </formz-select-field>
+        <formidable-field-option [value]="'trans'">Trans</formidable-field-option>
+      </formidable-select-field>
       <div
-        formzFieldLabel
+        formidableFieldLabel
         [isFloating]="true">
         Gender
       </div>
-      <div formzFieldTooltip>(Select)</div>
-      <div formzFieldPrefix>Prefix</div>
-      <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+      <div formidableFieldTooltip>(Select)</div>
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>Suffix</div>
+    </formidable-field-decorator>
 
     <!-- Nationality -->
-    <formz-field-decorator>
-      <formz-dropdown-field
-        formzFieldErrors
+    <formidable-field-decorator>
+      <formidable-dropdown-field
+        formidableFieldErrors
         placeholder="Select..."
         name="nationality"
         [ngModel]="vm.formValue.nationality"
@@ -108,33 +108,33 @@
         [sortFn]="sortAlphabetically"
         (valueChanged)="onValueChanged('nationality', $event)"
         (focusChanged)="onFocusChanged('nationality', $event)">
-        <formz-field-option
+        <formidable-field-option
           [value]="'ch'"
           [label]="'CH'"
-          >🇨🇭 Switzerland (other label)</formz-field-option
+          >🇨🇭 Switzerland (other label)</formidable-field-option
         >
-        <formz-field-option [value]="'it (no label)'">🇮🇹 Italia (no label)</formz-field-option>
-        <formz-field-option
+        <formidable-field-option [value]="'it (no label)'">🇮🇹 Italia (no label)</formidable-field-option>
+        <formidable-field-option
           [value]="'custom'"
           [label]="'The Special One'">
           <p>I'm a special item</p>
           <pre>And I can have any content</pre>
-        </formz-field-option>
-      </formz-dropdown-field>
+        </formidable-field-option>
+      </formidable-dropdown-field>
       <div
-        formzFieldLabel
+        formidableFieldLabel
         [isFloating]="true">
         Nationality
       </div>
-      <div formzFieldTooltip>(Dropdown)</div>
-      <div formzFieldPrefix>Prefix</div>
-      <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+      <div formidableFieldTooltip>(Dropdown)</div>
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>Suffix</div>
+    </formidable-field-decorator>
 
     <!-- Hobby -->
-    <formz-field-decorator>
-      <formz-autocomplete-field
-        formzFieldErrors
+    <formidable-field-decorator>
+      <formidable-autocomplete-field
+        formidableFieldErrors
         placeholder="Select..."
         name="hobby"
         [ngModel]="vm.formValue.hobby"
@@ -145,40 +145,40 @@
         [sortFn]="sortAlphabetically"
         (valueChanged)="onValueChanged('hobby', $event)"
         (focusChanged)="onFocusChanged('hobby', $event)">
-        <formz-field-option
+        <formidable-field-option
           [value]="'garden'"
           [label]="'Gardening'"
           [disabled]="true">
           Gardening
-        </formz-field-option>
-        <formz-field-option
+        </formidable-field-option>
+        <formidable-field-option
           [value]="'singing'"
           [label]="'SING'"
-          >Singing (other label)</formz-field-option
+          >Singing (other label)</formidable-field-option
         >
-        <formz-field-option [value]="'other'">Other (no label)</formz-field-option>
-        <formz-field-option
+        <formidable-field-option [value]="'other'">Other (no label)</formidable-field-option>
+        <formidable-field-option
           [value]="'custom'"
           [label]="'The Special One'"
           [match]="specialMatchFn">
           <p>I'm a special item</p>
           <pre>And I can have any content</pre>
-        </formz-field-option>
-      </formz-autocomplete-field>
+        </formidable-field-option>
+      </formidable-autocomplete-field>
       <div
-        formzFieldLabel
+        formidableFieldLabel
         [isFloating]="true">
         Hobby
       </div>
-      <div formzFieldTooltip>(Autocomplete)</div>
-      <div formzFieldPrefix>Prefix</div>
-      <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+      <div formidableFieldTooltip>(Autocomplete)</div>
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>Suffix</div>
+    </formidable-field-decorator>
 
     <!-- Animals -->
-    <formz-field-decorator>
-      <formz-autocomplete-field
-        formzFieldErrors
+    <formidable-field-decorator>
+      <formidable-autocomplete-field
+        formidableFieldErrors
         placeholder="Select..."
         name="animal"
         [ngModel]="vm.formValue.animal"
@@ -198,21 +198,21 @@
             [highlightedEntries]="option.highlightedEntries || { labelEntries: [], subtitleEntries: [] }">
           </fuzzy-field-option>
         }
-      </formz-autocomplete-field>
+      </formidable-autocomplete-field>
       <div
-        formzFieldLabel
+        formidableFieldLabel
         [isFloating]="true">
         Animal
       </div>
-      <div formzFieldTooltip>(Autocomplete [custom fuzzy options])</div>
-      <div formzFieldPrefix>Prefix</div>
-      <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+      <div formidableFieldTooltip>(Autocomplete [custom fuzzy options])</div>
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>Suffix</div>
+    </formidable-field-decorator>
 
     <!-- Birthdate -->
-    <formz-field-decorator>
-      <formz-date-field
-        formzFieldErrors
+    <formidable-field-decorator>
+      <formidable-date-field
+        formidableFieldErrors
         placeholder="?"
         name="birthdate"
         [ngModel]="vm.formValue.birthdate"
@@ -225,21 +225,21 @@
         [unicodeTokenFormat]="'dd . MM . yyyy'"
         (valueChanged)="onValueChanged('birthdate', $event)"
         (focusChanged)="onFocusChanged('birthdate', $event)">
-      </formz-date-field>
+      </formidable-date-field>
       <div
-        formzFieldLabel
+        formidableFieldLabel
         [isFloating]="true">
         Birthdate
       </div>
-      <div formzFieldTooltip>(Date)</div>
-      <div formzFieldPrefix>Prefix</div>
-      <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+      <div formidableFieldTooltip>(Date)</div>
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>Suffix</div>
+    </formidable-field-decorator>
 
     <!-- Time -->
-    <formz-field-decorator>
-      <formz-time-field
-        formzFieldErrors
+    <formidable-field-decorator>
+      <formidable-time-field
+        formidableFieldErrors
         placeholder="?"
         name="time"
         [ngModel]="vm.formValue.time"
@@ -248,21 +248,21 @@
         [unicodeTokenFormat]="'HH : mm'"
         (valueChanged)="onValueChanged('time', $event)"
         (focusChanged)="onFocusChanged('time', $event)">
-      </formz-time-field>
+      </formidable-time-field>
       <div
-        formzFieldLabel
+        formidableFieldLabel
         [isFloating]="true">
         Time
       </div>
-      <div formzFieldTooltip>(Time)</div>
-      <div formzFieldPrefix>Prefix</div>
-      <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+      <div formidableFieldTooltip>(Time)</div>
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>Suffix</div>
+    </formidable-field-decorator>
 
     <!-- Religion -->
-    <formz-field-decorator>
-      <formz-radio-group-field
-        formzFieldErrors
+    <formidable-field-decorator>
+      <formidable-radio-group-field
+        formidableFieldErrors
         name="religion"
         [ngModel]="vm.formValue.religion"
         [disabled]="false"
@@ -272,40 +272,40 @@
         [sortFn]="sortAlphabetically"
         (valueChanged)="onValueChanged('religion', $event)"
         (focusChanged)="onFocusChanged('religion', $event)">
-        <formz-field-option
+        <formidable-field-option
           [value]="'atheist'"
           [label]="'Atheist'"
           [disabled]="true">
           Atheist
-        </formz-field-option>
-        <formz-field-option
+        </formidable-field-option>
+        <formidable-field-option
           [value]="'agnostic'"
           [label]="'AGNOSTIC'"
-          >Agnostic (other label)</formz-field-option
+          >Agnostic (other label)</formidable-field-option
         >
-        <formz-field-option [value]="'other'">Other (no label)</formz-field-option>
-        <formz-field-option
+        <formidable-field-option [value]="'other'">Other (no label)</formidable-field-option>
+        <formidable-field-option
           [value]="'custom'"
           [label]="'The Special One'"
           [match]="specialMatchFn">
           <p>I'm a special item</p>
           <pre>And I can have any content</pre>
-        </formz-field-option>
-      </formz-radio-group-field>
+        </formidable-field-option>
+      </formidable-radio-group-field>
       <div
-        formzFieldLabel
+        formidableFieldLabel
         [isFloating]="true">
         Religion
       </div>
-      <div formzFieldTooltip>(Radio Group)</div>
-      <div formzFieldPrefix>Prefix</div>
-      <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+      <div formidableFieldTooltip>(Radio Group)</div>
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>Suffix</div>
+    </formidable-field-decorator>
 
     <!-- Allergies -->
-    <formz-field-decorator>
-      <formz-checkbox-group-field
-        formzFieldErrors
+    <formidable-field-decorator>
+      <formidable-checkbox-group-field
+        formidableFieldErrors
         name="allergies"
         [ngModel]="vm.formValue.allergies"
         [disabled]="false"
@@ -315,46 +315,46 @@
         [sortFn]="sortAlphabetically"
         (valueChanged)="onValueChanged('allergies', $event)"
         (focusChanged)="onFocusChanged('allergies', $event)">
-        <formz-field-option
+        <formidable-field-option
           [value]="'lactose'"
           [label]="'Lactose'"
           [disabled]="true">
           Lactose
-        </formz-field-option>
-        <formz-field-option
+        </formidable-field-option>
+        <formidable-field-option
           [value]="'gluten'"
           [label]="'GLUTEN'"
-          >Gluten (other label)</formz-field-option
+          >Gluten (other label)</formidable-field-option
         >
-        <formz-field-option [value]="'soy'">Soy (no label)</formz-field-option>
-        <formz-field-option
+        <formidable-field-option [value]="'soy'">Soy (no label)</formidable-field-option>
+        <formidable-field-option
           [value]="'custom'"
           [label]="'The Special One'"
           [match]="specialMatchFn">
           <p>I'm a special item</p>
           <pre>And I can have any content</pre>
-        </formz-field-option>
-      </formz-checkbox-group-field>
+        </formidable-field-option>
+      </formidable-checkbox-group-field>
       <div
-        formzFieldLabel
+        formidableFieldLabel
         [isFloating]="true">
         Allergies
       </div>
-      <div formzFieldTooltip>(Checkbox Group)</div>
-      <div formzFieldPrefix>Prefix</div>
-      <div formzFieldSuffix>Suffix</div>
-    </formz-field-decorator>
+      <div formidableFieldTooltip>(Checkbox Group)</div>
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>Suffix</div>
+    </formidable-field-decorator>
 
     <!-- Passwords Group -->
     <!-- TODO add form group -->
 
     <div class="footer">
       <!-- Submit -->
-      <!-- <formz-form-submit
+      <!-- <formidable-form-submit
         [submitLabel]="'Submit'"
         [cancelLabel]="'Cancel'"
         [isSubmitDisabled]="!vm.isValid">
-      </formz-form-submit> -->
+      </formidable-form-submit> -->
     </div>
   </fieldset>
 

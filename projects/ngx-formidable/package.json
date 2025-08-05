@@ -1,0 +1,37 @@
+{
+  "name": "ngx-formidable",
+  "version": "0.0.1",
+  "description": "ngx-formidable",
+  "license": "MIT LICENSE",
+  "author": "Christian Lüthold",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Cynthion/ngx-formidable.git",
+    "directory": "projects/formidable"
+  },
+  "engines": {
+    "node": ">=20.17.0",
+    "npm": ">=10.8.2"
+  },
+  "scripts": {
+    "build": "ng build formidable",
+    "test": "ng test formidable",
+    "lint": "ng lint formidable"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "peerDependencies": {
+    "@angular/common": "^18.2.0",
+    "@angular/core": "^18.2.0",
+    "@angular/forms": "^18.2.0",
+    "@types/uuid": "^10.0.0",
+    "@types/pikaday": "^1.7.9",
+    "date-fns": "^3.6.0",
+    "ngx-mask": "^19.0.7",
+    "pikaday": "^1.8.2",
+    "uuid": "^10.0.0",
+    "vest": "^5.4.6"
+  },
+  "sideEffects": false
+}

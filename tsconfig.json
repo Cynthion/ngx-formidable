@@ -18,7 +18,7 @@
     "removeComments": true,
     "sourceMap": true,
     "paths": {
-      "formz": ["projects/formz/src/public-api.ts"]
+      "ngx-formidable": ["projects/ngx-formidable/src/public-api.ts"]
     },
 
     /* JavaScript Support */

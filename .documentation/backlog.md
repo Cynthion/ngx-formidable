@@ -1,12 +1,11 @@
 # Backlog
 
 - resolve all TODOs
-- rename libary to `formidable`
 - support showing multiple errors
 - dropdown: write towards selection
 - dropdown: with <input>, setCaretPosition
 - support disabled and readonly for all fields (dropdown, autocomplete, date):
-  - selectOption(option: IFormzFieldOption): void {
+  - selectOption(option: IFormidableFieldOption): void {
     if (this.readOnly || this.disabled || option.disabled) return; }
 - browser errors/warnings:
   - The label's for attribute doesn't match any element id. This might prevent the browser from correctly autofilling the form and accessibility tools from working correctly.

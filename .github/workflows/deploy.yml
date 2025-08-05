@@ -33,13 +33,13 @@ jobs:
           npm install
 
       - name: Build Project
-        run: npm run build -- --base-href /ngx-formz/
+        run: npm run build -- --base-href /ngx-formidable/
 
       - name: Upload Pages Artifact
         id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/ngx-formz
+          path: dist/ngx-formidable
 
   deploy:
     needs: build

@@ -1,4 +1,5 @@
-# ngx-formz
+# ngx-formidable-demo
+
 Opinionated Angular Forms library.
 
 ## Project Setup

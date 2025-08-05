@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, forwardRef, Input } from '@angular/core';
-import { FieldOptionComponent, FORMZ_FIELD_OPTION } from 'formz';
+import { FieldOptionComponent, FORMIDABLE_FIELD_OPTION } from 'ngx-formidable';
 import { HighlightedEntries } from '../example-form/example-form.model';
 
 @Component({
@@ -9,8 +9,8 @@ import { HighlightedEntries } from '../example-form/example-form.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
-      // required to provide this component as IFormzFieldOption
-      provide: FORMZ_FIELD_OPTION,
+      // required to provide this component as IFormidableFieldOption
+      provide: FORMIDABLE_FIELD_OPTION,
       useExisting: forwardRef(() => FuzzyFieldOptionComponent)
     }
   ]

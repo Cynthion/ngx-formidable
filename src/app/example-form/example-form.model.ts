@@ -1,4 +1,4 @@
-import { DeepPartial, DeepRequired, IFormzFieldOption, ROOT_FORM } from 'formz';
+import { DeepPartial, DeepRequired, IFormidableFieldOption, ROOT_FORM } from 'ngx-formidable';
 import { enforce, omitWhen, only, staticSuite, test } from 'vest';
 
 //#region FormModel
@@ -107,7 +107,7 @@ export interface HighlightedEntries {
   subtitleEntries: HighlightEntry[];
 }
 
-export interface AnimalFormFieldOption extends IFormzFieldOption {
+export interface AnimalFormFieldOption extends IFormidableFieldOption {
   subtitle?: string;
   highlightedEntries?: HighlightedEntries;
 }

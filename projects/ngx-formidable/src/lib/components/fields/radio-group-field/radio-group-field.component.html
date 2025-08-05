@@ -1,0 +1,55 @@
+<div
+  #radioGroupRef
+  tabindex="0"
+  role="radiogroup"
+  class="field"
+  (focus)="onFocusChange(true)"
+  (blur)="onFocusChange(false)">
+  <fieldset>
+    <legend class="legend">{{ name }}</legend>
+
+    <!-- Options -->
+    <!-- Options are re-created in order to use native <input> elements. -->
+    @for (option of options$ | async; track option.value; let i = $index) {
+      <input
+        hidden
+        type="radio"
+        [id]="option.value"
+        [tabindex]="-1"
+        [attr.name]="name"
+        [attr.disabled]="option.disabled || disabled ? '' : null"
+        [required]="required"
+        [checked]="option.value === value" />
+      <formidable-field-option
+        #optionRef
+        [layout]="'radio-group'"
+        [value]="option.value"
+        [label]="option.label"
+        [disabled]="option.disabled || disabled"
+        [selected]="option.value === value"
+        [highlighted]="i === highlightedIndex">
+        <ng-container
+          *ngIf="option.template; else labelContent"
+          [ngTemplateOutlet]="option.template">
+        </ng-container>
+        <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
+      </formidable-field-option>
+    } @empty {
+      <input
+        type="radio"
+        [id]="emptyOption.value"
+        [tabindex]="-1"
+        [name]="name"
+        [value]="emptyOption.value"
+        [disabled]="emptyOption.disabled || disabled" />
+      <formidable-field-option
+        #optionRef
+        [layout]="'radio-group'"
+        [value]="emptyOption.value"
+        [label]="emptyOption.label"
+        [disabled]="true">
+        {{ emptyOption.label || emptyOption.value }}
+      </formidable-field-option>
+    }
+  </fieldset>
+</div>

@@ -1,0 +1,41 @@
+<!-- Before -->
+<div
+  class="before-wrapper"
+  [class.hidden]="!hasLabel && !hasTooltip">
+  <!-- Label -->
+  <label
+    class="label-wrapper"
+    [class.hidden]="!hasLabel"
+    [class.floating]="isLabelFloating"
+    [attr.for]="fieldId">
+    <ng-content select="[formidableFieldLabel]"></ng-content>
+  </label>
+
+  <!-- Tooltip -->
+  <div
+    class="tooltip-wrapper"
+    [class.hidden]="!hasTooltip">
+    <ng-content select="[formidableFieldTooltip]"></ng-content>
+  </div>
+</div>
+
+<div ngClass="container-{{ decoratorLayout }}">
+  <!-- Prefix -->
+  <div
+    #prefixWrapperRef
+    ngClass="prefix-wrapper-{{ decoratorLayout }}"
+    [class.hidden]="!hasPrefix">
+    <ng-content select="[formidableFieldPrefix]"></ng-content>
+  </div>
+
+  <!-- Content -->
+  <ng-content></ng-content>
+
+  <!-- Suffix -->
+  <div
+    #suffixWrapperRef
+    ngClass="suffix-wrapper-{{ decoratorLayout }}"
+    [class.hidden]="!hasSuffix">
+    <ng-content select="[formidableFieldSuffix]"></ng-content>
+  </div>
+</div>

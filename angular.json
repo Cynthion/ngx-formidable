@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ngx-formz-demo": {
+    "ngx-formidable-demo": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
-            "outputPath": "dist/ngx-formz",
+            "outputPath": "dist/ngx-formidable",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -32,7 +32,7 @@
             ],
             "styles": ["src/styles.scss"],
             "stylePreprocessorOptions": {
-              "includePaths": ["projects/formz/src/lib/styles"]
+              "includePaths": ["projects/ngx-formidable/src/lib/styles"]
             },
             "scripts": [],
             "allowedCommonJsDependencies": ["pikaday"]
@@ -65,10 +65,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "ngx-formz-demo:build:production"
+              "buildTarget": "ngx-formidable-demo:build:production"
             },
             "development": {
-              "buildTarget": "ngx-formz-demo:build:development"
+              "buildTarget": "ngx-formidable-demo:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -94,23 +94,23 @@
         }
       }
     },
-    "formz": {
+    "ngx-formidable": {
       "projectType": "library",
-      "root": "projects/formz",
-      "sourceRoot": "projects/formz/src",
+      "root": "projects/ngx-formidable",
+      "sourceRoot": "projects/ngx-formidable/src",
       "prefix": "lib",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "project": "projects/formz/ng-package.json"
+            "project": "projects/ngx-formidable/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "projects/formz/tsconfig.lib.prod.json"
+              "tsConfig": "projects/ngx-formidable/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "projects/formz/tsconfig.lib.json"
+              "tsConfig": "projects/ngx-formidable/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
@@ -118,7 +118,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "tsConfig": "projects/formz/tsconfig.spec.json",
+            "tsConfig": "projects/ngx-formidable/tsconfig.spec.json",
             "polyfills": ["zone.js", "zone.js/testing"]
           }
         }

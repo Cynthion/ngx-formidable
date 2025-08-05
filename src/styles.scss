@@ -3,19 +3,19 @@
 // use the /src/styles.scss
 @use 'styles/styles.scss';
 
-// use the formz styles
-// angular.json stylePreprocessorOptions: "projects/formz/src/lib/styles"
-// resolves to: 'projects/formz/src/lib/styles/_formz.scss'
-@use 'formz';
+// use the formidable styles
+// angular.json stylePreprocessorOptions: "projects/formidable/src/lib/styles"
+// resolves to: 'projects/formidable/src/lib/styles/_formidable.scss'
+@use 'ngx-formidable';
 
-// Formz Lib Overrides
+// Formidable Lib Overrides
 :root {
   // TODO use app theme variables
-  // --formz-field-height: 50px;
-  // --formz-color-validation-error: red;
-  // --formz-color-field-background: rgb(209, 143, 233);
-  // --formz-color-field-highlighted: rgba(170, 64, 237, 0.177);
-  // --formz-date-field-panel-width: 200px;
+  // --formidable-field-height: 50px;
+  // --formidable-color-validation-error: red;
+  // --formidable-color-field-background: rgb(209, 143, 233);
+  // --formidable-color-field-highlighted: rgba(170, 64, 237, 0.177);
+  // --formidable-date-field-panel-width: 200px;
 }
 
 body {

@@ -1,0 +1,103 @@
+@use './tokens';
+
+// CSS Variables for configuration and override
+:root {
+  //#region Font Sizes
+
+  --formidable-field-font-size: #{tokens.$formidable-field-font-size};
+  --formidable-field-font-weight: #{tokens.$formidable-field-font-weight};
+  --formidable-field-line-height: #{tokens.$formidable-field-line-height};
+
+  --formidable-label-font-size: #{tokens.$formidable-label-font-size};
+  --formidable-label-font-weight: #{tokens.$formidable-label-font-weight};
+  --formidable-label-line-height: #{tokens.$formidable-label-line-height};
+
+  --formidable-label-floating-font-size: #{tokens.$formidable-label-floating-font-size};
+  --formidable-label-floating-font-weight: #{tokens.$formidable-label-floating-font-weight};
+  --formidable-label-floating-line-height: #{tokens.$formidable-label-floating-line-height};
+
+  --formidable-field-validation-error-font-size: #{tokens.$formidable-field-validation-error-font-size};
+  --formidable-field-validation-error-font-weight: #{tokens.$formidable-field-validation-error-font-weight};
+  --formidable-field-validation-error-line-height: #{tokens.$formidable-field-validation-error-line-height};
+
+  --formidable-length-indicator-font-size: #{tokens.$formidable-length-indicator-font-size};
+  --formidable-length-indicator-font-weight: #{tokens.$formidable-length-indicator-font-weight};
+  --formidable-length-indicator-line-height: #{tokens.$formidable-length-indicator-line-height};
+
+  //#enregion
+
+  //#region Colors
+
+  --formidable-color-validation-error: #{tokens.$formidable-color-validation-error};
+  --formidable-color-field-text: #{tokens.$formidable-color-field-text};
+  --formidable-color-field-group-text: #{tokens.$formidable-color-field-group-text};
+  --formidable-color-field-text-readonly: #{tokens.$formidable-color-field-text-readonly};
+  --formidable-color-field-text-disabled: #{tokens.$formidable-color-field-text-disabled};
+  --formidable-color-field-text-required: #{tokens.$formidable-color-field-text-required};
+  --formidable-color-field-label: #{tokens.$formidable-color-field-label};
+  --formidable-color-field-label-floating: #{tokens.$formidable-color-field-label-floating};
+  --formidable-color-field-tooltip: #{tokens.$formidable-color-field-tooltip};
+  --formidable-color-field-placeholder: #{tokens.$formidable-color-field-placeholder};
+  --formidable-color-field-selection: #{tokens.$formidable-color-field-selection};
+  --formidable-color-field-border: #{tokens.$formidable-color-field-border};
+  --formidable-color-field-group-border: #{tokens.$formidable-color-field-group-border};
+  --formidable-color-field-border-focus: #{tokens.$formidable-color-field-border-focus};
+  --formidable-color-field-group-border-focus: #{tokens.$formidable-color-field-group-border-focus};
+  --formidable-color-field-background: #{tokens.$formidable-color-field-background};
+  --formidable-color-field-group-background: #{tokens.$formidable-color-field-group-background};
+  --formidable-color-field-background-readonly: #{tokens.$formidable-color-field-background-readonly};
+  --formidable-color-field-background-disabled: #{tokens.$formidable-color-field-background-disabled};
+  --formidable-color-field-background-required: #{tokens.$formidable-color-field-background-required};
+  --formidable-color-field-disabled: #{tokens.$formidable-color-field-disabled};
+  --formidable-color-field-selected: #{tokens.$formidable-color-field-selected};
+  --formidable-color-field-highlighted: #{tokens.$formidable-color-field-highlighted};
+  --formidable-color-field-hover: #{tokens.$formidable-color-field-hovered};
+
+  --formidable-color-date-field-panel-select: #{tokens.$formidable-color-date-field-panel-select};
+  --formidable-color-date-field-panel-select-hover: #{tokens.$formidable-color-date-field-panel-select-hover};
+  --formidable-color-date-field-panel-date-highlighted-text: #{tokens.$formidable-color-date-field-panel-date-highlighted-text};
+  --formidable-color-date-field-panel-date-highlighted: #{tokens.$formidable-color-date-field-panel-date-highlighted};
+  --formidable-color-date-field-panel-date-hovered: #{tokens.$formidable-color-date-field-panel-date-hovered};
+  --formidable-color-date-field-panel-date-out-of-range: #{tokens.$formidable-color-date-field-panel-date-out-of-range};
+  --formidable-color-date-field-panel-day-label: #{tokens.$formidable-color-date-field-panel-day-label};
+
+  --formidable-color-option-prefix-outer: #{tokens.$formidable-color-option-prefix-outer};
+  --formidable-color-option-prefix-inner: #{tokens.$formidable-color-option-prefix-inner};
+  --formidable-color-option-prefix-background: #{tokens.$formidable-color-option-prefix-background};
+
+  --formidable-color-length-indicator: #{tokens.$formidable-color-length-indicator};
+
+  //#enregion
+
+  --formidable-field-before-margin-bottom: #{tokens.$formidable-field-before-margin-bottom};
+
+  --formidable-field-height: #{tokens.$formidable-field-height};
+  --formidable-field-border-thickness: #{tokens.$formidable-field-border-thickness};
+  --formidable-field-border-radius: #{tokens.$formidable-field-border-radius};
+  --formidable-label-floating-offset: #{tokens.$formidable-label-floating-offset};
+
+  --formidable-textarea-min-height: #{tokens.$formidable-textarea-min-height};
+  --formidable-textarea-max-height: #{tokens.$formidable-textarea-max-height};
+  --formidable-textarea-padding-top: #{tokens.$formidable-textarea-padding-top};
+
+  --formidable-panel-background: #{tokens.$formidable-panel-background};
+  --formidable-panel-box-shadow: #{tokens.$formidable-panel-box-shadow};
+  --formidable-panel-max-height: #{tokens.$formidable-panel-max-height};
+
+  --formidable-animation-duration: #{tokens.$formidable-animation-duration};
+  --formidable-animation-easing: #{tokens.$formidable-animation-easing};
+
+  --formidable-hover-duration: #{tokens.$formidable-hover-duration};
+  --formidable-hover-easing: #{tokens.$formidable-hover-easing};
+
+  --formidable-flyout-z-index: #{tokens.$formidable-flyout-z-index};
+  --formidable-overlay-z-index: #{tokens.$formidable-overlay-z-index};
+  --formidable-above-overlay-z-index: #{tokens.$formidable-above-overlay-z-index};
+
+  --formidable-date-field-panel-width: #{tokens.$formidable-date-field-panel-width};
+  --formidable-date-field-panel-border-radius: #{tokens.$formidable-date-field-panel-border-radius};
+  --formidable-date-field-panel-box-shadow: #{tokens.$formidable-date-field-panel-box-shadow};
+
+  --formidable-option-prefix-dimension-outer: #{tokens.$formidable-option-prefix-dimension-outer};
+  --formidable-option-prefix-dimension-inner: #{tokens.$formidable-option-prefix-dimension-inner};
+}
