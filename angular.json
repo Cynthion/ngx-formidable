@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
-            "outputPath": "dist",
+            "outputPath": "dist/ngx-formz",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": ["zone.js"],

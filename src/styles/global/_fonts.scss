@@ -9,32 +9,32 @@
 
 @font-face {
   font-family: Mulish;
-  src: url('./assets/fonts/Mulish/Mulish-Medium.ttf') format('truetype');
+  src: url('/assets/fonts/Mulish/Mulish-Medium.ttf') format('truetype');
   font-display: swap;
-  font-weight: normal;
+  font-weight: 500;
   font-style: normal;
 }
 
 @font-face {
   font-family: Mulish;
-  src: url('./assets/fonts/Mulish/Mulish-MediumItalic.ttf') format('truetype');
+  src: url('/assets/fonts/Mulish/Mulish-MediumItalic.ttf') format('truetype');
   font-display: swap;
-  font-weight: normal;
+  font-weight: 500;
   font-style: italic;
 }
 
 @font-face {
   font-family: Mulish;
-  src: url('./assets/fonts/Mulish/Mulish-SemiBold.ttf') format('truetype');
+  src: url('/assets/fonts/Mulish/Mulish-SemiBold.ttf') format('truetype');
   font-display: swap;
-  font-weight: bold;
+  font-weight: 600;
   font-style: normal;
 }
 
 @font-face {
   font-family: Mulish;
-  src: url('./assets/fonts/Mulish/Mulish-SemiBoldItalic.ttf') format('truetype');
+  src: url('/assets/fonts/Mulish/Mulish-SemiBoldItalic.ttf') format('truetype');
   font-display: swap;
-  font-weight: bold;
+  font-weight: 600;
   font-style: italic;
 }
