@@ -29,12 +29,22 @@
   -webkit-appearance: button;
   cursor: pointer;
   border: 0;
+
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+  text-decoration: inherit;
 }
 
 .pika-single {
   font-size: utils.spacing(14);
   font-weight: bold;
   line-height: math.div(22.4, 14);
+
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+  text-decoration: inherit;
 }
 
 .pika-lendar {
@@ -225,6 +235,10 @@
   }
 
   abbr {
+    font: inherit;
+    color: inherit;
+    line-height: inherit;
+    text-decoration: inherit;
     color: var(--formidable-color-date-field-panel-day-label, #{tokens.$formidable-color-date-field-panel-day-label});
   }
 }
