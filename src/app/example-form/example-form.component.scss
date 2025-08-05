@@ -8,13 +8,6 @@
   flex-direction: column;
 }
 
-.fieldset {
-  // TODO bring reset options here
-  display: flex;
-  flex-direction: column;
-  // flex: 1 1 0;
-}
-
 // TODO implement footer to be sticky at the bottom of the form
 .footer {
   margin-top: auto;
@@ -26,4 +19,21 @@
 
 formz-field-decorator {
   margin-bottom: 16px;
+}
+
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-height: fit-content;
+}
+
+pre {
+  // Corrects font family set oddly in Safari 5 and Chrome.
+  font-family: monospace, serif;
+  font-size: 1em;
+  // Improves readability of pre-formatted text in all browsers.
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }

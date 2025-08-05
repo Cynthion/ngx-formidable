@@ -24,6 +24,13 @@
   }
 }
 
+@mixin button-normalize {
+  background: transparent;
+  -webkit-appearance: button;
+  cursor: pointer;
+  border: 0;
+}
+
 .pika-single {
   font-size: utils.spacing(14);
   font-weight: bold;
@@ -85,6 +92,8 @@
 
 .pika-prev,
 .pika-next {
+  @include button-normalize;
+
   width: 30px;
   height: 30px;
   font-size: 0;
@@ -219,7 +228,7 @@
 
 .pika-button {
   @include utils.absolute-cover;
+  @include button-normalize;
 
   display: block;
-  cursor: pointer;
 }

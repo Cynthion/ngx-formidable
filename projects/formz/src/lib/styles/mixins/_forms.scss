@@ -28,10 +28,25 @@
   border: 0;
 }
 
+@mixin fieldset-reset {
+  fieldset {
+    border: 0;
+    min-height: fit-content;
+    padding: 0;
+    margin: 0;
+  }
+}
+
 @mixin field-reset {
   outline: 0;
   hyphens: none;
   appearance: none;
+  box-sizing: border-box;
+
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+  text-decoration: inherit;
 }
 
 @mixin wrapped-input {

@@ -1,11 +1,4 @@
 // Source: https://fonts.google.com/specimen/Mulish
-// Black, BlackItalic
-// ExtraBold, ExtraBoldItalic
-// Bold, BoldItalic
-// Medium, MediumItalic
-// Regular, Italic
-// Light, LightItalic
-// ExtraLight, ExtraLightItalic
 
 @font-face {
   font-family: Mulish;
@@ -17,24 +10,8 @@
 
 @font-face {
   font-family: Mulish;
-  src: url('../../assets/fonts/Mulish/Mulish-MediumItalic.ttf') format('truetype');
-  font-display: swap;
-  font-weight: 500;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: Mulish;
   src: url('../../assets/fonts/Mulish/Mulish-SemiBold.ttf') format('truetype');
   font-display: swap;
   font-weight: 600;
   font-style: normal;
-}
-
-@font-face {
-  font-family: Mulish;
-  src: url('../../assets/fonts/Mulish/Mulish-SemiBoldItalic.ttf') format('truetype');
-  font-display: swap;
-  font-weight: 600;
-  font-style: italic;
 }
