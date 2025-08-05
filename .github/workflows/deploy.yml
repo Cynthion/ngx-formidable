@@ -35,7 +35,8 @@ jobs:
       - name: Build Project
         run: npm run build -- --base-href /ngx-formz/
 
-      - name: Upload artifact
+      - name: Upload Pages Artifact
+        id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist/ngx-formz-demo
