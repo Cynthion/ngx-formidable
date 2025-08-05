@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "app-demo": {
+    "ngx-formz-demo": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,7 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/app-demo",
+            "outputPath": "dist/ngx-formz-demo",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -34,20 +34,21 @@
             "stylePreprocessorOptions": {
               "includePaths": ["projects/formz/src/lib/styles"]
             },
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": ["pikaday"]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "900kB",
                   "maximumError": "1MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kB",
-                  "maximumError": "4kB"
+                  "maximumWarning": "10kB",
+                  "maximumError": "15kB"
                 }
               ],
               "outputHashing": "all"
@@ -64,10 +65,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "app-demo:build:production"
+              "buildTarget": "ngx-formz-demo:build:production"
             },
             "development": {
-              "buildTarget": "app-demo:build:development"
+              "buildTarget": "ngx-formz-demo:build:development"
             }
           },
           "defaultConfiguration": "development"
