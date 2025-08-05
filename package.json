@@ -33,6 +33,8 @@
     "@angular/cli": "^18.2.1",
     "@angular/compiler-cli": "^18.2.0",
     "@types/jasmine": "~5.1.0",
+    "@types/pikaday": "^1.7.9",
+    "@types/uuid": "^10.0.0",
     "angular-eslint": "18.3.0",
     "eslint": "9.9.1",
     "eslint-plugin-rxjs-x": "0.7.2",
