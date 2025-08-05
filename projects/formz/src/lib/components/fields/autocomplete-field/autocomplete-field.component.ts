@@ -256,7 +256,6 @@ export class AutocompleteFieldComponent
       : allOptions;
 
     this.filteredOptions$.next(filteredOptions);
-    console.log('Filtered options updated:', filteredOptions);
   }
 
   //#endregion
