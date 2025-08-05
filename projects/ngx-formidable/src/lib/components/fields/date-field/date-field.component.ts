@@ -306,12 +306,11 @@ export class DateFieldComponent
   @Input() placeholder = '';
   @Input() required = false;
   @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
+  @Input() toggleIconClosed = calendarArrowDown;
+  @Input() toggleIconOpen = calendarArrowUp;
 
   protected ngxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.maskChar);
   private emptyNgxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.emptyMaskChar);
-
-  protected toggleIconClosed = calendarArrowDown;
-  protected toggleIconOpen = calendarArrowUp;
 
   protected ngxMaskConfig: Partial<NgxMaskConfig> = {
     showMaskTyped: true,

@@ -167,6 +167,10 @@ export interface IFormidableDateField extends IFormidableField<Date | null>, IFo
   /** Must be a valid Unicode format. (Supported tokens: y, yy, yyy, yyyy, M, MM, MMM, MMMM, d, dd) */
   unicodeTokenFormat: string;
   selectDate(date: Date | null): void;
+  /** Must be a valid SVG icon string. */
+  toggleIconClosed?: string;
+  /** Must be a valid SVG icon string. */
+  toggleIconOpen?: string;
 }
 
 export interface IFormidableTimeField extends IFormidableField<Date | null> {
