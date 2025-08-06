@@ -2,20 +2,22 @@
   #autocompleteRef
   class="field"
   [class.focused]="isFieldFocused">
-  <!-- Input Field -->
-  <input
-    #inputRef
-    type="text"
-    autocomplete="off"
-    class="wrapped-input"
-    [id]="fieldId"
-    [placeholder]="placeholder"
-    [attr.name]="name"
-    [attr.disabled]="disabled ? '' : null"
-    [required]="required"
-    (input)="onValueChange()"
-    (focus)="onFocusChange(true)"
-    (blur)="onFocusChange(false)" />
+  <div class="input-wrapper">
+    <!-- Input Field -->
+    <input
+      #inputRef
+      type="text"
+      autocomplete="off"
+      class="wrapped-input"
+      [id]="fieldId"
+      [placeholder]="placeholder"
+      [attr.name]="name"
+      [attr.disabled]="disabled ? '' : null"
+      [required]="required"
+      (input)="onValueChange()"
+      (focus)="onFocusChange(true)"
+      (blur)="onFocusChange(false)" />
+  </div>
 
   <!-- Panel -->
   <div

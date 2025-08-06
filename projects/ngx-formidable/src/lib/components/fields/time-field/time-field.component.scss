@@ -7,3 +7,7 @@
 .field {
   @include time-field;
 }
+
+.input-wrapper {
+  @include input-wrapper;
+}

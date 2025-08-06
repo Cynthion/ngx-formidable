@@ -51,11 +51,11 @@
 
 @mixin wrapped-input {
   @include field-reset;
-  @include field-colors;
+  // @include field-colors;
 
   background: transparent;
   width: 100%;
-  height: 100%;
+  height: calc(100% - (2 * var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})));
   border: none;
 }
 
@@ -121,13 +121,13 @@
     var(--formidable-color-field-group-border-focus, #{tokens.$formidable-color-field-group-border-focus});
 }
 
-@mixin border {
+@mixin field-border {
   border: var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) solid
     var(--formidable-color-field-border, #{tokens.$formidable-color-field-border});
   border-radius: var(--formidable-field-border-radius, #{tokens.$formidable-field-border-radius});
 }
 
-@mixin border-group {
+@mixin field-group-border {
   border: var(--formidable-field-group-border-thickness, #{tokens.$formidable-field-group-border-thickness}) solid
     var(--formidable-color-field-group-border, #{tokens.$formidable-color-field-group-border});
   border-radius: var(--formidable-field-group-border-radius, #{tokens.$formidable-field-group-border-radius});
@@ -135,9 +135,9 @@
 
 @mixin field {
   @include field-reset;
-  @include border;
-  @include field-colors;
   @include field-font;
+  @include field-colors;
+  @include field-border;
 
   width: 100%;
   position: relative;
@@ -157,8 +157,8 @@
 @mixin group-field {
   @include field-reset;
   @include field-font;
-  @include border-group;
   @include field-group-colors;
+  @include field-group-border;
 
   &:focus,
   &.focused,
@@ -199,7 +199,11 @@
   @include select-field;
 }
 
-@mixin input-wrapper-field {
+@mixin input-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+
   .wrapped-input {
     @include wrapped-input;
   }
@@ -207,21 +211,28 @@
 
 @mixin dropdown-field {
   @include panel-field;
+  // @include input-wrapper-field;
+
+  // Reset readonly styling, since dropdown field is statically set to readonly
+  input[readonly] {
+    background: var(--formidable-color-field-background, #{tokens.$formidable-color-field-background});
+    color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
+  }
 }
 
 @mixin autocomplete-field {
   @include panel-field;
-  @include input-wrapper-field;
+  // @include input-wrapper-field;
 }
 
 @mixin date-field {
   @include panel-field;
-  @include input-wrapper-field;
+  // @include input-wrapper-field;
 }
 
 @mixin time-field {
   @include input-field;
-  @include input-wrapper-field;
+  // @include input-wrapper-field;
 }
 
 @mixin field-before {
@@ -327,36 +338,6 @@
 
   display: block;
   color: var(--formidable-color-validation-error, #{tokens.$formidable-color-validation-error});
-}
-
-@mixin dropdown-trigger {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 100%;
-  width: 100%;
-  cursor: pointer;
-  user-select: none;
-
-  .caret {
-    flex-shrink: 0;
-    width: utils.spacing(10);
-    height: utils.spacing(10);
-    position: relative;
-
-    &.arrow-up {
-      @include icons.css-icon('arrow-up', utils.spacing(10), utils.spacing(2));
-    }
-
-    &.arrow-down {
-      @include icons.css-icon('arrow-down', utils.spacing(10), utils.spacing(2));
-    }
-  }
-
-  .caret::before {
-    transition: transform var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
-      var(--formidable-animation-easing, #{tokens.$formidable-animation-easing});
-  }
 }
 
 @mixin panel-left-aligned {
@@ -542,6 +523,24 @@
   &.open::before {
     opacity: 1;
     background: var(--formidable-color-field-hover, #{tokens.$formidable-color-field-hovered});
+  }
+}
+
+@mixin dropdown-toggle {
+  cursor: pointer;
+  user-select: none;
+
+  width: utils.spacing(32);
+  height: utils.spacing(32);
+
+  &.arrow-up {
+    top: calc(utils.spacing(2));
+    @include icons.css-icon('arrow-up', utils.spacing(10), utils.spacing(2));
+  }
+
+  &.arrow-down {
+    top: calc(utils.spacing(2) * -1);
+    @include icons.css-icon('arrow-down', utils.spacing(10), utils.spacing(2));
   }
 }
 

@@ -8,14 +8,22 @@
   @include dropdown-field;
 }
 
-.trigger {
-  @include dropdown-trigger;
+.input-wrapper {
+  @include input-wrapper;
+}
+
+.toggle-background {
+  @include toggle-background;
+}
+
+.dropdown-toggle {
+  @include dropdown-toggle;
 }
 
 .panel {
-  @include panel();
+  @include dropdown-panel;
 }
 
 .panel-scrollcontainer {
-  @include panel-scrollcontainer();
+  @include panel-scrollcontainer;
 }

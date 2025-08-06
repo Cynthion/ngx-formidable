@@ -58,12 +58,15 @@ import { BaseFieldDirective } from '../base-field.component';
 })
 export class DropdownFieldComponent extends BaseFieldDirective implements IFormidableDropdownField, AfterContentInit {
   @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
+  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChildren('optionRef') optionRefs?: QueryList<FieldOptionComponent>;
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = () => this.handleExternalClick();
   protected windowResizeScrollCallback = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
+
+  private _value = '';
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
@@ -119,19 +122,12 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
 
   protected doWriteValue(value: string): void {
     // TODO use this.selectedOption to set the value?
+    this._value = value;
     const found = this.options$.value.find((opt) => opt.value === value);
 
     this.selectedOption = found ? { ...found } : undefined;
     this.isFieldFilled = found ? !!value : false;
   }
-
-  //#endregion
-
-  //#region IFormidableDropdownField
-
-  @Input() name = '';
-  @Input() placeholder = '';
-  @Input() required = false;
 
   //#endregion
 
@@ -153,6 +149,14 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
 
   //#endregion
 
+  //#region IFormidableDropdownField
+
+  @Input() name = '';
+  @Input() placeholder = '';
+  @Input() required = false;
+
+  //#endregion
+
   //#region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
@@ -165,7 +169,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
   protected readonly options$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
   protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
 
-  protected selectedOption?: IFormidableFieldOption = undefined; // TODO make private, use wrapped input
+  protected selectedOption?: IFormidableFieldOption = undefined;
 
   public selectOption(option: IFormidableFieldOption): void {
     if (option.disabled) return;
@@ -189,16 +193,22 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
   }
 
   private updateOptions(): void {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
+    // The projected options (option.template) might not be available immediately after content initialization,
+    // so we use setTimeout to ensure they are processed after the current change detection cycle.
+    setTimeout(() => {
+      const inlineOptions = this.options ?? [];
+      const projectedOptions = this.optionComponents?.toArray() ?? [];
 
-    let combined = [...inlineOptions, ...projectedOptions];
+      let combined = [...inlineOptions, ...projectedOptions];
 
-    if (this.sortFn) {
-      combined = combined.sort(this.sortFn);
-    }
+      if (this.sortFn) {
+        combined = combined.sort(this.sortFn);
+      }
 
-    this.options$.next(combined);
+      this.options$.next(combined);
+
+      this.writeValue(this._value);
+    });
   }
 
   //#endregion
@@ -219,6 +229,18 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
   @Input() panelPosition: FormidablePanelPosition = 'full';
 
   private _isPanelOpen = false;
+
+  /** Mousedown is used to prevent sending focusChanged events. */
+  protected toggleMouseDown(event: MouseEvent): void {
+    event.preventDefault();
+    this.inputRef.nativeElement.focus(); // ensure input remains focused, so keyboard events work
+    this.togglePanel(!this.isPanelOpen);
+  }
+
+  panelMouseDown(event: MouseEvent): void {
+    // Prevent blur when clicking inside the panel
+    event.preventDefault();
+  }
 
   protected togglePanel(isOpen: boolean): void {
     this._isPanelOpen = isOpen;

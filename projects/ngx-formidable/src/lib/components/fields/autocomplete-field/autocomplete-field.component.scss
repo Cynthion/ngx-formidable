@@ -8,6 +8,10 @@
   @include autocomplete-field;
 }
 
+.input-wrapper {
+  @include input-wrapper;
+}
+
 .panel {
   @include autocomplete-panel;
 }

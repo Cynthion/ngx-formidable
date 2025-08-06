@@ -2,7 +2,7 @@
   #dateRef
   class="field"
   [class.focused]="isFieldFocused">
-  <div class="wrapper">
+  <div class="input-wrapper">
     <!-- Input Field -->
     <input
       #inputRef
@@ -23,7 +23,7 @@
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
 
-    <!-- Toggle Trigger -->
+    <!-- Toggle -->
     <formidable-icon
       #toggleRef
       class="toggle-background"
@@ -37,7 +37,7 @@
   <div
     #panelRef
     tabindex="-1"
-    class="panel  panel-{{ panelPosition }}"
+    class="panel panel-{{ panelPosition }}"
     [class.open]="isPanelOpen"
     (mousedown)="panelMouseDown($event)">
     <div class="panel-scrollcontainer">

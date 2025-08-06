@@ -2,7 +2,7 @@
 
 - support showing multiple errors
 - dropdown: write towards selection
-- dropdown: with <input>, setCaretPosition
+- setCaretPosition
 - support disabled and readonly for all fields (dropdown, autocomplete, date):
   - selectOption(option: IFormidableFieldOption): void {
     if (this.readOnly || this.disabled || option.disabled) return; }

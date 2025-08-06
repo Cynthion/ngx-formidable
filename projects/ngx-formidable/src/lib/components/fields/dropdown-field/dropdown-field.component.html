@@ -1,15 +1,31 @@
 <div
   #dropdownRef
-  tabindex="0"
   class="field"
-  (focus)="onFocusChange(true)"
-  (blur)="onFocusChange(false)">
+  [class.focused]="isFieldFocused">
   <div
-    class="trigger"
-    (click)="togglePanel(!isPanelOpen)">
-    {{ selectedOption?.label || placeholder }}
+    class="input-wrapper"
+    (mousedown)="toggleMouseDown($event)">
+    <!-- Input Field -->
+    <input
+      #inputRef
+      type="text"
+      autocomplete="off"
+      class="wrapped-input"
+      [id]="fieldId"
+      [placeholder]="placeholder"
+      [value]="selectedOption?.label || placeholder"
+      [attr.name]="name"
+      [attr.disabled]="disabled ? '' : null"
+      [readonly]="true"
+      [required]="required"
+      (focus)="onFocusChange(true)"
+      (blur)="onFocusChange(false)" />
+
+    <!-- Toggle -->
     <span
-      class="caret"
+      #toggleRef
+      class="dropdown-toggle"
+      [class.open]="isPanelOpen"
       [class.arrow-down]="!isPanelOpen"
       [class.arrow-up]="isPanelOpen">
     </span>
@@ -17,10 +33,11 @@
 
   <!-- Panel -->
   <div
-    *ngIf="isPanelOpen"
     #panelRef
+    tabindex="-1"
     class="panel panel-{{ panelPosition }}"
-    [class.open]="isPanelOpen">
+    [class.open]="isPanelOpen"
+    (mousedown)="panelMouseDown($event)">
     <div class="panel-scrollcontainer">
       <!-- Options -->
       <!-- Option components are re-created in order to control them. -->
