@@ -64,21 +64,6 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
 
   //#endregion
 
-  //#region IFormidableTextareaField
-
-  @Input() name = '';
-  @Input() placeholder = '';
-  @Input() autocomplete: AutoFill = 'off';
-  @Input() minLength = -1;
-  @Input() maxLength = -1;
-  @Input() readOnly = false;
-  @Input() required = false;
-
-  @Input() enableAutosize = true;
-  @Input() showLengthIndicator = false;
-
-  //#endregion
-
   //#region IFormidableField
 
   get value(): string | null {
@@ -94,6 +79,16 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
   }
 
   decoratorLayout: FieldDecoratorLayout = 'single';
+
+  //#endregion
+
+  //#region IFormidableTextareaField
+
+  @Input() autocomplete: AutoFill = 'off';
+  @Input() minLength = -1;
+  @Input() maxLength = -1;
+  @Input() enableAutosize = true;
+  @Input() showLengthIndicator = false;
 
   //#endregion
 

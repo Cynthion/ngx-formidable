@@ -177,9 +177,6 @@ export class TimeFieldComponent
 
   //#region IFormidableTimeField
 
-  @Input() name = '';
-  @Input() placeholder = '';
-  @Input() required = false;
   @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
 
   protected ngxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.maskChar);

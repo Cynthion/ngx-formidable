@@ -1,15 +1,12 @@
 # Backlog
 
 - support showing multiple errors
-- dropdown: write towards selection
-- setCaretPosition
 - support disabled and readonly for all fields (dropdown, autocomplete, date):
   - selectOption(option: IFormidableFieldOption): void {
     if (this.readOnly || this.disabled || option.disabled) return; }
 - browser errors/warnings:
   - The label's for attribute doesn't match any element id. This might prevent the browser from correctly autofilling the form and accessibility tools from working correctly.
 - suffixes: clear/reset, copy, validation state, loading
-- <input> value & checked could be added to interface, if used without FormControl
 - support patterns (ngx-mask)
 
 # Future Releases:

@@ -158,18 +158,6 @@ export class AutocompleteFieldComponent
 
   //#endregion
 
-  //#region IFormidableAutocompleteField
-
-  public filterChange$ = this.filterChangeSubject$.asObservable();
-
-  @Input() name = '';
-  @Input() placeholder = '';
-  @Input() required = false;
-
-  @Output() filterChanged = new EventEmitter<string>();
-
-  //#endregion
-
   //#region IFormidableField
 
   get value(): string | null {
@@ -185,6 +173,14 @@ export class AutocompleteFieldComponent
   }
 
   decoratorLayout: FieldDecoratorLayout = 'single';
+
+  //#endregion
+
+  //#region IFormidableAutocompleteField
+
+  public filterChange$ = this.filterChangeSubject$.asObservable();
+
+  @Output() filterChanged = new EventEmitter<string>();
 
   //#endregion
 

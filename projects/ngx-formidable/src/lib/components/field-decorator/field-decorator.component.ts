@@ -81,8 +81,24 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     return this.projectedField?.fieldId ?? '';
   }
 
+  get name(): string {
+    return this.projectedField?.name ?? '';
+  }
+
+  get placeholder(): string {
+    return this.projectedField?.placeholder ?? '';
+  }
+
+  get readonly(): boolean {
+    return this.projectedField?.readonly ?? false;
+  }
+
   get disabled(): boolean {
     return this.projectedField?.disabled ?? false;
+  }
+
+  get required(): boolean {
+    return this.projectedField?.required ?? false;
   }
 
   get value(): unknown {

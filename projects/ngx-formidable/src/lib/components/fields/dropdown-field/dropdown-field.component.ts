@@ -13,7 +13,8 @@ import {
   ViewChildren
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, debounceTime } from 'rxjs';
+import { isPrintableCharacter } from '../../../helpers/input.helpers';
 import {
   scrollHighlightedOptionIntoView,
   scrollIntoView,
@@ -67,11 +68,13 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
   private _value = '';
+  private _typedBuffer = '';
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   ngAfterContentInit(): void {
     this.updateOptions();
+    this.subscriptToUserInput();
   }
 
   protected doOnValueChange(): void {
@@ -151,9 +154,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
 
   //#region IFormidableDropdownField
 
-  @Input() name = '';
-  @Input() placeholder = '';
-  @Input() required = false;
+  // empty
 
   //#endregion
 
@@ -168,6 +169,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
 
   protected readonly options$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
   protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
+  private readonly userInput$ = new BehaviorSubject<string>('');
 
   protected selectedOption?: IFormidableFieldOption = undefined;
 
@@ -209,6 +211,27 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
 
       this.writeValue(this._value);
     });
+  }
+
+  private subscriptToUserInput(): void {
+    this.userInput$.pipe(debounceTime(200)).subscribe((term) => {
+      this.highlightFirstMatchingOption(term);
+      this._typedBuffer = '';
+    });
+  }
+
+  protected onUserInput(event: KeyboardEvent): void {
+    if (isPrintableCharacter(event)) {
+      this._typedBuffer += event.key;
+      this.userInput$.next(this._typedBuffer);
+
+      if (!this.isPanelOpen) {
+        this.togglePanel(true);
+      }
+    } else if (event.key === 'Backspace') {
+      this._typedBuffer = this._typedBuffer.slice(0, -1);
+      this.userInput$.next(this._typedBuffer);
+    }
   }
 
   //#endregion
@@ -263,6 +286,16 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
   }
 
   //#endregion
+
+  private highlightFirstMatchingOption(term: string): void {
+    if (!term || !this.isPanelOpen) return;
+
+    const matchIndex = this.options$.value.findIndex((opt) =>
+      (opt.label || opt.value).toLowerCase().startsWith(term.toLowerCase())
+    );
+
+    this.setHighlightedIndex(matchIndex >= 0 ? matchIndex : -1);
+  }
 
   private highlightSelectedOption(): void {
     const selectedIndex = this.options$.value.findIndex((opt) => opt.value === this.selectedOption?.value);

@@ -23,7 +23,7 @@
         [maxLength]="15"
         [ngModel]="vm.formValue.firstName"
         [disabled]="false"
-        [readOnly]="false"
+        [readonly]="false"
         [required]="false"
         (valueChanged)="onValueChanged('firstName', $event)"
         (focusChanged)="onFocusChanged('firstName', $event)">
@@ -50,7 +50,7 @@
         [maxLength]="300"
         [ngModel]="vm.formValue.lastName"
         [disabled]="false"
-        [readOnly]="false"
+        [readonly]="false"
         [required]="false"
         (valueChanged)="onValueChanged('lastName', $event)"
         (focusChanged)="onFocusChanged('lastName', $event)">

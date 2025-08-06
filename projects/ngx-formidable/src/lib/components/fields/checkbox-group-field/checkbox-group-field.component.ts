@@ -116,13 +116,6 @@ export class CheckboxGroupFieldComponent
 
   //#endregion
 
-  //#region IFormidableCheckboxGroupField
-
-  @Input() name = '';
-  @Input() required = false;
-
-  //#endregion
-
   //#region IFormidableField
 
   get value(): string[] {
@@ -136,6 +129,12 @@ export class CheckboxGroupFieldComponent
   }
 
   decoratorLayout: FieldDecoratorLayout = 'group';
+
+  //#endregion
+
+  //#region IFormidableCheckboxGroupField
+
+  // empty
 
   //#endregion
 

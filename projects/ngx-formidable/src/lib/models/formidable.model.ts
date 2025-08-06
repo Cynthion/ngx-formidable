@@ -33,7 +33,11 @@ export interface FormValidationOptions {
 export interface IFormidableField<T = string | null> {
   fieldRef: ElementRef<HTMLElement>;
   fieldId: string;
+  name: string;
+  placeholder: string;
+  readonly: boolean;
   disabled: boolean;
+  required: boolean;
   value: T;
   isLabelFloating: boolean;
   valueChange$: Observable<T>;
@@ -77,24 +81,18 @@ type FormidableInputFieldsKeys =
   | 'autocomplete'
   | 'minLength'
   | 'maxLength'
-  | 'readOnly'
-  // | 'disabled'
+  // | 'readOnly' use 'readonly' of IFormidableField
+  | 'disabled'
   | 'required';
 
 type FormidableTextareaFieldsKeys = FormidableInputFieldsKeys;
 
-type FormidableSelectFieldsKeys =
-  | 'name'
-  //  | 'disabled'
-  | 'required';
+type FormidableSelectFieldsKeys = 'name' | 'disabled' | 'required';
 
 /** The subset of `<input/>` properties that are supported. */
 export interface IFormidableInputField extends Pick<HTMLInputElement, FormidableInputFieldsKeys>, IFormidableField {}
 
-type FormidableGroupFieldsKeys =
-  | 'name'
-  // | 'disabled'
-  | 'required';
+type FormidableGroupFieldsKeys = 'name' | 'disabled' | 'required';
 
 /** The subset of `<input type="radio"/> properties that are supported.` */
 export interface IFormidableRadioGroupField
@@ -126,11 +124,7 @@ export interface IFormidableSelectField
     IFormidableField,
     IFormidableOptionField {}
 
-export interface IFormidableDropdownField extends IFormidableField, IFormidableOptionField {
-  name: string;
-  placeholder?: string;
-  required?: boolean;
-}
+export interface IFormidableDropdownField extends IFormidableField, IFormidableOptionField {}
 
 export interface IFormidableAutocompleteField extends IFormidableDropdownField {
   filterChange$: Observable<string>;
@@ -161,9 +155,6 @@ export interface IFormidablePikadayOptions
   > {}
 
 export interface IFormidableDateField extends IFormidableField<Date | null>, IFormidablePikadayOptions {
-  name: string;
-  placeholder?: string;
-  required?: boolean;
   /** Must be a valid Unicode format. (Supported tokens: y, yy, yyy, yyyy, M, MM, MMM, MMMM, d, dd) */
   unicodeTokenFormat: string;
   selectDate(date: Date | null): void;
@@ -174,9 +165,6 @@ export interface IFormidableDateField extends IFormidableField<Date | null>, IFo
 }
 
 export interface IFormidableTimeField extends IFormidableField<Date | null> {
-  name: string;
-  placeholder?: string;
-  required?: boolean;
   /** Must be a valid Unicode format. (Supported tokens:   'H', 'HH', 'h', 'hh', 'm', 'mm', 's', 'ss', 'a', 'aa') */
   unicodeTokenFormat: string;
   selectTime(time: Date | null): void;

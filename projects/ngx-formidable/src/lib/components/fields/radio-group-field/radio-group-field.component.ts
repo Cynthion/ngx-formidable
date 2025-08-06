@@ -113,13 +113,6 @@ export class RadioGroupFieldComponent
 
   //#endregion
 
-  //#region IFormidableRadioGroupField
-
-  @Input() name = '';
-  @Input() required = false;
-
-  //#endregion
-
   //#region IFormidableField
 
   get value(): string | null {
@@ -133,6 +126,12 @@ export class RadioGroupFieldComponent
   }
 
   decoratorLayout: FieldDecoratorLayout = 'group';
+
+  //#endregion
+
+  //#region IFormidableRadioGroupField
+
+  // empty
 
   //#endregion
 

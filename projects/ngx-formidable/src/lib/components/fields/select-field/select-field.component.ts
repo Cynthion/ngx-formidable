@@ -77,13 +77,6 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
 
   //#endregion
 
-  //#region IFormidableSelectField
-
-  @Input() name = '';
-  @Input() required = false;
-
-  //#endregion
-
   //#region IFormidableField
 
   get value(): string | null {
@@ -97,6 +90,12 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
   }
 
   decoratorLayout: FieldDecoratorLayout = 'single';
+
+  //#endregion
+
+  //#region IFormidableSelectField
+
+  // empty
 
   //#endregion
 

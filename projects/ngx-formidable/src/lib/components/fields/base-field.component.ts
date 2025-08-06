@@ -1,4 +1,4 @@
-import { Directive, ElementRef, EventEmitter, inject, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
+import { Directive, ElementRef, EventEmitter, inject, Input, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
@@ -91,7 +91,11 @@ export abstract class BaseFieldDirective<T = string | null>
 
   //#region IFormidableField
 
-  public disabled = false;
+  @Input() name = '';
+  @Input() placeholder = '';
+  @Input() readonly = false;
+  @Input() disabled = false;
+  @Input() required = false;
 
   public valueChange$ = this.valueChangeSubject$.asObservable();
   public focusChange$ = this.focusChangeSubject$.asObservable();

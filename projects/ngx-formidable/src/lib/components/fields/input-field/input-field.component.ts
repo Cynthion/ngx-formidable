@@ -49,18 +49,6 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
 
   //#endregion
 
-  //#region IFormidableInputField
-
-  @Input() name = '';
-  @Input() placeholder = '';
-  @Input() autocomplete: AutoFill = 'off';
-  @Input() minLength = -1;
-  @Input() maxLength = -1;
-  @Input() readOnly = false;
-  @Input() required = false;
-
-  //#endregion
-
   //#region IFormidableField
 
   get value(): string | null {
@@ -76,6 +64,14 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   }
 
   decoratorLayout: FieldDecoratorLayout = 'single';
+
+  //#endregion
+
+  //#region IFormidableInputField
+
+  @Input() autocomplete: AutoFill = 'off';
+  @Input() minLength = -1;
+  @Input() maxLength = -1;
 
   //#endregion
 }

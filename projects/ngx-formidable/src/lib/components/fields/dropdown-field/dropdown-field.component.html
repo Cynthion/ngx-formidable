@@ -18,6 +18,7 @@
       [attr.disabled]="disabled ? '' : null"
       [readonly]="true"
       [required]="required"
+      (keydown)="onUserInput($event)"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
 

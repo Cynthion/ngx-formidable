@@ -302,9 +302,6 @@ export class DateFieldComponent
 
   //#region IFormidableDateField
 
-  @Input() name = '';
-  @Input() placeholder = '';
-  @Input() required = false;
   @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
   @Input() toggleIconClosed = calendarArrowDown;
   @Input() toggleIconOpen = calendarArrowUp;
