@@ -83,7 +83,7 @@ export class FieldOptionComponent implements IFormidableFieldOption {
   }
 
   protected onClick(): void {
-    if (this.readonly || !this.select) return;
+    if (this.readonly || this.disabled || !this.select) return;
 
     this.select();
   }

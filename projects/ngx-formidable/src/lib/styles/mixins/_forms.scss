@@ -58,6 +58,11 @@
   width: 100%;
   height: calc(100% - (2 * var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})));
   border: none;
+
+  &[disabled] {
+    cursor: not-allowed;
+    pointer-events: none;
+  }
 }
 
 @mixin selection-colors {
@@ -111,7 +116,7 @@
     @include readonly-colors;
   }
 
-  &:disabled {
+  &[disabled] {
     @include disabled-colors;
   }
 
@@ -152,9 +157,10 @@
   width: 100%;
   position: relative;
 
-  &:disabled {
+  &[disabled] {
     cursor: not-allowed;
     pointer-events: none;
+    user-select: none;
   }
 
   &.is-readonly {
@@ -219,6 +225,11 @@
 
 @mixin select-field {
   @include input-field;
+
+  &[disabled] {
+    // overwrite user agent styling
+    opacity: 1;
+  }
 }
 
 @mixin panel-field {

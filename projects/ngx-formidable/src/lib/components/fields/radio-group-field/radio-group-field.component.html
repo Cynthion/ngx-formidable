@@ -1,9 +1,10 @@
 <div
   #radioGroupRef
-  tabindex="0"
   role="radiogroup"
   class="field"
+  [tabindex]="disabled ? -1 : 0"
   [class.is-readonly]="readonly"
+  [class.is-disabled]="disabled"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <fieldset>
@@ -18,6 +19,7 @@
         [id]="option.value"
         [tabindex]="-1"
         [attr.name]="name"
+        [attr.readonly]="option.readonly || readonly ? '' : null"
         [attr.disabled]="option.disabled || disabled ? '' : null"
         [required]="required"
         [checked]="option.value === value" />

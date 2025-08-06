@@ -16,10 +16,11 @@
     (input)="onValueChange()"
     (focus)="onFocusChange(true)"
     (blur)="onFocusChange(false)"></textarea>
-  <div
-    *ngIf="showLengthIndicator"
-    #lengthIndicatorRef
-    class="length-indicator">
-    {{ value?.length || 0 }}<ng-container *ngIf="maxLength > -1"> / {{ maxLength }}</ng-container>
-  </div>
+  @if (showLengthIndicator && !readonly && !disabled) {
+    <div
+      #lengthIndicatorRef
+      class="length-indicator">
+      {{ value?.length || 0 }}<ng-container *ngIf="maxLength > -1"> / {{ maxLength }}</ng-container>
+    </div>
+  }
 </div>

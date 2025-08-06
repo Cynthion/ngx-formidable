@@ -2,6 +2,7 @@
   #timeRef
   class="field"
   [class.is-readonly]="readonly"
+  [class.is-disabled]="disabled"
   [class.focused]="isFieldFocused">
   <div class="input-wrapper">
     <!-- Input Field -->
@@ -19,6 +20,7 @@
       [attr.name]="name"
       [attr.disabled]="disabled ? '' : null"
       [readonly]="readonly"
+      [disabled]="disabled"
       [required]="required"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"

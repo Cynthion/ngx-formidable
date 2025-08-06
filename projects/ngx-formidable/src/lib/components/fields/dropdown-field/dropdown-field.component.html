@@ -2,12 +2,13 @@
   #dropdownRef
   class="field"
   [class.is-readonly]="readonly"
+  [class.is-disabled]="disabled"
   [class.focused]="isFieldFocused">
   <div
     class="input-wrapper"
-    (mousedown)="toggleMouseDown($event)"
-    (pointerdown)="readonly ? onReadonlyPointerDown($event, inputRef) : null"
-    (keydown)="readonly ? onReadonlyKeydown($event) : null">
+    (mousedown)="!readonly && !disabled ? toggleMouseDown($event) : null"
+    (pointerdown)="readonly || disabled ? preventPointerDown($event, inputRef) : null"
+    (keydown)="readonly || disabled ? preventKeydown($event) : null">
     <!-- Input Field -->
     <input
       #inputRef
@@ -20,13 +21,14 @@
       [attr.name]="name"
       [attr.disabled]="disabled ? '' : null"
       [readonly]="true"
+      [disabled]="disabled"
       [required]="required"
       (keydown)="onUserInput($event)"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
 
     <!-- Toggle -->
-    @if (!readonly) {
+    @if (!readonly && !disabled) {
       <span
         #toggleRef
         class="dropdown-toggle"

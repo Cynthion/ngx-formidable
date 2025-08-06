@@ -45,6 +45,8 @@ export abstract class BaseFieldDirective<T = string | null>
   }
 
   protected onFocusChange(isFocused: boolean): void {
+    if (this.disabled) return;
+
     this.isFieldFocused = isFocused;
 
     this.focusChangeSubject$.next(isFocused);
@@ -115,14 +117,14 @@ export abstract class BaseFieldDirective<T = string | null>
 
   abstract decoratorLayout: FieldDecoratorLayout;
 
-  protected onReadonlyPointerDown(event: PointerEvent, focusElementRef?: HTMLElement): void {
+  protected preventPointerDown(event: PointerEvent, focusElementRef?: HTMLElement): void {
     if (!this.readonly) return;
 
     event.preventDefault();
     setTimeout(() => (focusElementRef ? focusElementRef.focus() : this.fieldRef.nativeElement.focus()), 0);
   }
 
-  protected onReadonlyKeydown(event: KeyboardEvent): void {
+  protected preventKeydown(event: KeyboardEvent): void {
     if (!this.readonly) return;
 
     const blockedKeys = ['ArrowUp', 'ArrowDown', 'Enter', ' ', 'Home', 'End']; // TODO correct?
