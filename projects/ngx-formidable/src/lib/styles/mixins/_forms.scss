@@ -51,11 +51,25 @@
 
 @mixin wrapped-input {
   @include field-reset;
+  @include selection-colors;
+  @include placeholder-colors;
 
   background: transparent;
   width: 100%;
   height: calc(100% - (2 * var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})));
   border: none;
+}
+
+@mixin selection-colors {
+  &::selection {
+    background-color: var(--formidable-color-field-selection, #{tokens.$formidable-color-field-selection});
+  }
+}
+
+@mixin placeholder-colors {
+  &::placeholder {
+    color: var(--formidable-color-field-placeholder, #{tokens.$formidable-color-field-placeholder});
+  }
 }
 
 @mixin readonly-colors {
@@ -87,16 +101,11 @@
 }
 
 @mixin field-colors {
+  @include selection-colors;
+  @include placeholder-colors;
+
   background: var(--formidable-color-field-background, #{tokens.$formidable-color-field-background});
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
-
-  &::selection {
-    background-color: var(--formidable-color-field-selection, #{tokens.$formidable-color-field-selection});
-  }
-
-  &::placeholder {
-    color: var(--formidable-color-field-placeholder, #{tokens.$formidable-color-field-placeholder});
-  }
 
   &[readonly] {
     @include readonly-colors;
