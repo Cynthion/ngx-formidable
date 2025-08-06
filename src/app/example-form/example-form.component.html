@@ -19,12 +19,12 @@
         placeholder="Your first name"
         autocomplete="given-name"
         name="firstName"
+        [disabled]="false"
+        [readonly]="true"
+        [required]="false"
         [minLength]="10"
         [maxLength]="15"
         [ngModel]="vm.formValue.firstName"
-        [disabled]="false"
-        [readonly]="false"
-        [required]="false"
         (valueChanged)="onValueChanged('firstName', $event)"
         (focusChanged)="onFocusChanged('firstName', $event)">
       </formidable-input-field>
@@ -45,13 +45,13 @@
         placeholder="Your last name"
         autocomplete="family-name"
         name="lastName"
+        [disabled]="false"
+        [readonly]="true"
+        [required]="false"
         [enableAutosize]="true"
         [showLengthIndicator]="true"
         [maxLength]="300"
         [ngModel]="vm.formValue.lastName"
-        [disabled]="false"
-        [readonly]="false"
-        [required]="false"
         (valueChanged)="onValueChanged('lastName', $event)"
         (focusChanged)="onFocusChanged('lastName', $event)">
       </formidable-textarea-field>
@@ -70,9 +70,10 @@
       <formidable-select-field
         formidableFieldErrors
         name="gender"
-        [ngModel]="vm.formValue.gender"
         [disabled]="false"
+        [readonly]="true"
         [required]="false"
+        [ngModel]="vm.formValue.gender"
         [options]="genderOptions"
         [sortFn]="sortAlphabetically"
         (valueChanged)="onValueChanged('gender', $event)"
@@ -99,9 +100,10 @@
         formidableFieldErrors
         placeholder="Select..."
         name="nationality"
-        [ngModel]="vm.formValue.nationality"
         [disabled]="false"
+        [readonly]="true"
         [required]="false"
+        [ngModel]="vm.formValue.nationality"
         [options]="nationalityOptions"
         [emptyOption]="nationalityEmptyOption"
         [panelPosition]="'left'"
@@ -139,6 +141,7 @@
         name="hobby"
         [ngModel]="vm.formValue.hobby"
         [disabled]="false"
+        [readonly]="true"
         [required]="false"
         [options]="hobbyOptions"
         [emptyOption]="hobbyEmptyOption"
@@ -181,9 +184,10 @@
         formidableFieldErrors
         placeholder="Select..."
         name="animal"
-        [ngModel]="vm.formValue.animal"
         [disabled]="false"
+        [readonly]="true"
         [required]="false"
+        [ngModel]="vm.formValue.animal"
         [options]="animalOptionsDefault"
         [emptyOption]="animalEmptyOption"
         (valueChanged)="onValueChanged('animal', $event)"
@@ -215,9 +219,10 @@
         formidableFieldErrors
         placeholder="?"
         name="birthdate"
-        [ngModel]="vm.formValue.birthdate"
         [disabled]="false"
+        [readonly]="true"
         [required]="false"
+        [ngModel]="vm.formValue.birthdate"
         [i18n]="I18N_CONFIG"
         [yearRange]="2"
         [showMonthAfterYear]="true"
@@ -242,9 +247,10 @@
         formidableFieldErrors
         placeholder="?"
         name="time"
-        [ngModel]="vm.formValue.time"
         [disabled]="false"
+        [readonly]="true"
         [required]="false"
+        [ngModel]="vm.formValue.time"
         [unicodeTokenFormat]="'HH : mm'"
         (valueChanged)="onValueChanged('time', $event)"
         (focusChanged)="onFocusChanged('time', $event)">
@@ -264,9 +270,10 @@
       <formidable-radio-group-field
         formidableFieldErrors
         name="religion"
-        [ngModel]="vm.formValue.religion"
         [disabled]="false"
+        [readonly]="true"
         [required]="false"
+        [ngModel]="vm.formValue.religion"
         [options]="religionOptions"
         [emptyOption]="religionEmptyOption"
         [sortFn]="sortAlphabetically"
@@ -307,9 +314,10 @@
       <formidable-checkbox-group-field
         formidableFieldErrors
         name="allergies"
-        [ngModel]="vm.formValue.allergies"
         [disabled]="false"
+        [readonly]="true"
         [required]="false"
+        [ngModel]="vm.formValue.allergies"
         [options]="allergiesOptions"
         [emptyOption]="allergiesEmptyOption"
         [sortFn]="sortAlphabetically"

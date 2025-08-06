@@ -51,12 +51,39 @@
 
 @mixin wrapped-input {
   @include field-reset;
-  // @include field-colors;
 
   background: transparent;
   width: 100%;
   height: calc(100% - (2 * var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})));
   border: none;
+}
+
+@mixin readonly-colors {
+  background: var(--formidable-color-field-background-readonly, #{tokens.$formidable-color-field-background-readonly});
+  color: var(--formidable-color-field-text-readonly, #{tokens.$formidable-color-field-text-readonly});
+}
+
+@mixin disabled-colors {
+  background: var(--formidable-color-field-background-disabled, #{tokens.$formidable-color-field-background-disabled});
+  color: var(--formidable-color-field-text-disabled, #{tokens.$formidable-color-field-text-disabled});
+}
+
+@mixin required-colors {
+  background: var(--formidable-color-field-background-required, #{tokens.$formidable-color-field-background-required});
+  color: var(--formidable-color-field-text-required, #{tokens.$formidable-color-field-text-required});
+}
+
+@mixin focused-colors {
+  border-color: var(--formidable-color-field-border-focus, #{tokens.$formidable-color-field-border-focus});
+  box-shadow: inset 0 0 0 var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
+    var(--formidable-color-field-border-focus, #{tokens.$formidable-color-field-border-focus});
+}
+
+@mixin focused-group-colors {
+  border-color: var(--formidable-color-field-group-border-focus, #{tokens.$formidable-color-field-group-border-focus});
+  box-shadow: inset 0 0 0
+    var(--formidable-field-group-border-thickness, #{tokens.$formidable-field-group-border-thickness})
+    var(--formidable-color-field-group-border-focus, #{tokens.$formidable-color-field-group-border-focus});
 }
 
 @mixin field-colors {
@@ -71,29 +98,16 @@
     color: var(--formidable-color-field-placeholder, #{tokens.$formidable-color-field-placeholder});
   }
 
-  input[readonly],
-  textarea[readonly] {
-    background: var(
-      --formidable-color-field-background-readonly,
-      #{tokens.$formidable-color-field-background-readonly}
-    );
-    color: var(--formidable-color-field-text-readonly, #{tokens.$formidable-color-field-text-readonly});
-  }
-
-  &:required {
-    background: var(
-      --formidable-color-field-background-required,
-      #{tokens.$formidable-color-field-background-required}
-    );
-    color: var(--formidable-color-field-text-required, #{tokens.$formidable-color-field-text-required});
+  &[readonly] {
+    @include readonly-colors;
   }
 
   &:disabled {
-    background: var(
-      --formidable-color-field-background-disabled,
-      #{tokens.$formidable-color-field-background-disabled}
-    );
-    color: var(--formidable-color-field-text-disabled, #{tokens.$formidable-color-field-text-disabled});
+    @include disabled-colors;
+  }
+
+  &:required {
+    @include required-colors;
   }
 }
 
@@ -106,19 +120,6 @@
   font-size: var(--formidable-field-font-size, #{tokens.$formidable-field-font-size});
   font-weight: var(--formidable-field-font-weight, #{tokens.$formidable-field-font-weight});
   line-height: var(--formidable-field-line-height, #{tokens.$formidable-field-line-height});
-}
-
-@mixin field-focused {
-  border-color: var(--formidable-color-field-border-focus, #{tokens.$formidable-color-field-border-focus});
-  box-shadow: inset 0 0 0 var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
-    var(--formidable-color-field-border-focus, #{tokens.$formidable-color-field-border-focus});
-}
-
-@mixin field-group-focused {
-  border-color: var(--formidable-color-field-group-border-focus, #{tokens.$formidable-color-field-group-border-focus});
-  box-shadow: inset 0 0 0
-    var(--formidable-field-group-border-thickness, #{tokens.$formidable-field-group-border-thickness})
-    var(--formidable-color-field-group-border-focus, #{tokens.$formidable-color-field-group-border-focus});
 }
 
 @mixin field-border {
@@ -147,10 +148,22 @@
     pointer-events: none;
   }
 
+  &.is-readonly {
+    @include readonly-colors;
+  }
+
+  &.is-disabled {
+    @include disabled-colors;
+  }
+
+  &.is-required {
+    @include required-colors;
+  }
+
   &:focus,
   &.focused,
   &:focus-visible {
-    @include field-focused;
+    @include focused-colors;
   }
 }
 
@@ -160,10 +173,14 @@
   @include field-group-colors;
   @include field-group-border;
 
+  &.is-readonly {
+    @include readonly-colors;
+  }
+
   &:focus,
   &.focused,
   &:focus-visible {
-    @include field-group-focused;
+    @include focused-group-colors;
   }
 }
 
@@ -211,28 +228,18 @@
 
 @mixin dropdown-field {
   @include panel-field;
-  // @include input-wrapper-field;
-
-  // Reset readonly styling, since dropdown field is statically set to readonly
-  input[readonly] {
-    background: var(--formidable-color-field-background, #{tokens.$formidable-color-field-background});
-    color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
-  }
 }
 
 @mixin autocomplete-field {
   @include panel-field;
-  // @include input-wrapper-field;
 }
 
 @mixin date-field {
   @include panel-field;
-  // @include input-wrapper-field;
 }
 
 @mixin time-field {
   @include input-field;
-  // @include input-wrapper-field;
 }
 
 @mixin field-before {

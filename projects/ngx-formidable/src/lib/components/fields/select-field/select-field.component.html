@@ -1,6 +1,7 @@
 <select
   #selectRef
   class="field"
+  [class.is-readonly]="readonly"
   [id]="fieldId"
   [attr.name]="name"
   [attr.disabled]="disabled ? '' : null"
