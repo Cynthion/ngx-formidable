@@ -37,6 +37,10 @@ export class FieldOptionComponent implements IFormidableFieldOption {
   @Input({ required: true }) value!: string;
   @Input() label?: string;
 
+  @HostBinding('class.readonly')
+  @Input()
+  readonly = false;
+
   @HostBinding('class.disabled')
   @Input()
   disabled = false;
@@ -76,5 +80,11 @@ export class FieldOptionComponent implements IFormidableFieldOption {
         'formidable-field-option must be used inside a component that provides FORMIDABLE_OPTION_FIELD (i.e. implements IFormidableOptionField).'
       );
     }
+  }
+
+  protected onClick(): void {
+    if (this.readonly || !this.select) return;
+
+    this.select();
   }
 }

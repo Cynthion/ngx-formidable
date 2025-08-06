@@ -1,6 +1,6 @@
 <div
   ngClass="field-option-{{ layout }}"
-  (click)="select ? select() : null">
+  (click)="onClick()">
   <!-- Prefix for Radio Group -->
   <span
     *ngIf="layout === 'radio-group'"

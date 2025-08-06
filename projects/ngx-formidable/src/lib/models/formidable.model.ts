@@ -60,6 +60,7 @@ export interface IFormidableFieldOption<T = unknown> {
   value: string;
   label?: string;
   template?: TemplateRef<T>;
+  readonly?: boolean;
   disabled?: boolean;
   selected?: boolean;
   highlighted?: boolean;

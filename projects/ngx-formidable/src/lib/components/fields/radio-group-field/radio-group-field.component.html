@@ -26,6 +26,7 @@
         [layout]="'radio-group'"
         [value]="option.value"
         [label]="option.label"
+        [readonly]="option.readonly || readonly"
         [disabled]="option.disabled || disabled"
         [selected]="option.value === value"
         [highlighted]="i === (highlightedOptionIndex$ | async)">
@@ -48,6 +49,7 @@
         [layout]="'radio-group'"
         [value]="emptyOption.value"
         [label]="emptyOption.label"
+        [readonly]="true"
         [disabled]="true">
         {{ emptyOption.label || emptyOption.value }}
       </formidable-field-option>

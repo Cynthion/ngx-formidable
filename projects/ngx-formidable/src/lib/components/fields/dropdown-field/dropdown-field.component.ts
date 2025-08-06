@@ -246,7 +246,6 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
   }
   set isPanelOpen(val: boolean) {
     this.togglePanel(val);
-    this.cdRef.markForCheck();
   }
 
   @Input() panelPosition: FormidablePanelPosition = 'full';

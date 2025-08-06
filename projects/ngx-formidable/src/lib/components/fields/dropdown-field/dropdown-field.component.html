@@ -5,7 +5,9 @@
   [class.focused]="isFieldFocused">
   <div
     class="input-wrapper"
-    (mousedown)="toggleMouseDown($event)">
+    (mousedown)="toggleMouseDown($event)"
+    (pointerdown)="readonly ? onReadonlyPointerDown($event, inputRef) : null"
+    (keydown)="readonly ? onReadonlyKeydown($event) : null">
     <!-- Input Field -->
     <input
       #inputRef
@@ -24,13 +26,15 @@
       (blur)="onFocusChange(false)" />
 
     <!-- Toggle -->
-    <span
-      #toggleRef
-      class="dropdown-toggle"
-      [class.open]="isPanelOpen"
-      [class.arrow-down]="!isPanelOpen"
-      [class.arrow-up]="isPanelOpen">
-    </span>
+    @if (!readonly) {
+      <span
+        #toggleRef
+        class="dropdown-toggle"
+        [class.open]="isPanelOpen"
+        [class.arrow-down]="!isPanelOpen"
+        [class.arrow-up]="isPanelOpen">
+      </span>
+    }
   </div>
 
   <!-- Panel -->

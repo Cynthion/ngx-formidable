@@ -3,6 +3,10 @@
 :host {
   display: block;
 
+  &.readonly {
+    @include field-option-disabled;
+  }
+
   &.disabled {
     @include field-option-disabled;
   }

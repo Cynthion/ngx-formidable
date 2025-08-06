@@ -228,6 +228,10 @@
 
 @mixin dropdown-field {
   @include panel-field;
+
+  .wrapped-input {
+    pointer-events: none;
+  }
 }
 
 @mixin autocomplete-field {
@@ -434,7 +438,7 @@
 
 @mixin field-option-disabled {
   cursor: not-allowed;
-  pointer-events: auto;
+  pointer-events: none;
 
   background: var(--formidable-color-field-disabled, #{tokens.$formidable-color-field-disabled});
 }

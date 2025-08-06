@@ -115,6 +115,22 @@ export abstract class BaseFieldDirective<T = string | null>
 
   abstract decoratorLayout: FieldDecoratorLayout;
 
+  protected onReadonlyPointerDown(event: PointerEvent, focusElementRef?: HTMLElement): void {
+    if (!this.readonly) return;
+
+    event.preventDefault();
+    setTimeout(() => (focusElementRef ? focusElementRef.focus() : this.fieldRef.nativeElement.focus()), 0);
+  }
+
+  protected onReadonlyKeydown(event: KeyboardEvent): void {
+    if (!this.readonly) return;
+
+    const blockedKeys = ['ArrowUp', 'ArrowDown', 'Enter', ' ', 'Home', 'End']; // TODO correct?
+    if (blockedKeys.includes(event.key)) {
+      event.preventDefault();
+    }
+  }
+
   //#endregion
 
   private registerGlobalListeners(): void {
@@ -123,7 +139,7 @@ export abstract class BaseFieldDirective<T = string | null>
         if (this.keyboardCallback && this.registeredKeys.length > 0) {
           fromEvent<KeyboardEvent>(this.fieldRef.nativeElement, 'keydown')
             .pipe(
-              filter(() => this.isFieldFocused && !this.disabled),
+              filter(() => this.isFieldFocused && !this.readonly && !this.disabled),
               filter((event) => this.registeredKeys.includes(event.key)),
               tap((event) => {
                 // immediately prevent default, before debounceTime

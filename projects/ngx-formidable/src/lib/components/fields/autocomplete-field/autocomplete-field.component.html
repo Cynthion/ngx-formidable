@@ -14,6 +14,7 @@
       [placeholder]="placeholder"
       [attr.name]="name"
       [attr.disabled]="disabled ? '' : null"
+      [readonly]="readonly"
       [required]="required"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"

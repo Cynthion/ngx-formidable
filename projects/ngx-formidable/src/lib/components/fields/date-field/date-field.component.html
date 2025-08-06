@@ -18,20 +18,22 @@
       [placeholder]="placeholder"
       [attr.name]="name"
       [attr.disabled]="disabled ? '' : null"
-      [readonly]="null"
+      [readonly]="readonly"
       [required]="required"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
 
     <!-- Toggle -->
-    <formidable-icon
-      #toggleRef
-      class="toggle-background"
-      [class.open]="isPanelOpen"
-      [svg]="isPanelOpen ? toggleIconOpen : toggleIconClosed"
-      [size]="32"
-      (mousedown)="toggleMouseDown($event)" />
+    @if (!readonly) {
+      <formidable-icon
+        #toggleRef
+        class="toggle-background"
+        [class.open]="isPanelOpen"
+        [svg]="isPanelOpen ? toggleIconOpen : toggleIconClosed"
+        [size]="32"
+        (mousedown)="toggleMouseDown($event)" />
+    }
   </div>
 
   <!-- Panel -->

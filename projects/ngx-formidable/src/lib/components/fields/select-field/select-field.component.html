@@ -6,6 +6,8 @@
   [attr.name]="name"
   [attr.disabled]="disabled ? '' : null"
   [required]="required"
+  (pointerdown)="readonly ? onReadonlyPointerDown($event) : null"
+  (keydown)="readonly ? onReadonlyKeydown($event) : null"
   (change)="onValueChange()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
