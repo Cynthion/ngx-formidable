@@ -6,8 +6,26 @@ import { FormValidationOptions } from '../models/formidable.model';
 import { FormDirective } from './form.directive';
 
 /**
- * Hooks into Angular's 'ngModel' and creates an async validator.
- * Source: https://github.dev/simplifiedcourses/ngx-vest-forms
+ * Hooks into each `ngModel` control and wires up an async validator that will:
+ * 1. Locate the control’s path
+ * 2. Call `FormDirective.createAsyncValidator()` for that path
+ * 3. Debounce and run your Vest suite against the individual field
+ *
+ * Provides per-control validation feedback directly on `ngModel`.
+ *
+ * Inputs (inherited via DI from FormDirective):
+ * - `@Input() validationOptions: FormValidationOptions`
+ *
+ * @example
+ * ```html
+ * <input
+ *   name="email"
+ *   ngModel
+ *   [validationOptions]="{ debounceValidationInMs: 200 }"
+ *   (ngModelChange)="onEmailChange($event)"
+ * />
+ * <div *ngIf="form.errors['email']">{{ form.errors['email'] }}</div>
+ * ```
  */
 @Directive({
   selector: '[ngModel]',

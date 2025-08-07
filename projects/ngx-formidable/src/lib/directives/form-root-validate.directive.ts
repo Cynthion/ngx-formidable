@@ -13,62 +13,43 @@ import { cloneDeep } from '../helpers/utility.helpers';
 import { FormValidationOptions, ROOT_FORM } from '../models/formidable.model';
 
 /**
-Source: https://github.dev/simplifiedcourses/ngx-vest-forms
-When we want to validate multiple fields that are depending on each other,
-it is a best practice to wrap them in a parent form group.
-If `password`  and `confirmPassword` have to be equal, the validation should not happen on
-`password` nor on `confirmPassword`, it should happen on `passwords`:
-
-```typescript
-const form = {
-  // validation happens here
-  passwords: {
-    password: '',
-    confirmPassword: ''
-  }
-};
-```
-
-Sometimes we don't have the ability to create a form group for 2 depending fields, or sometimes we just
-want to create validation rules on portions of the form. For that we can use `validateRootForm`.
-Use the `errorsChange` output to keep the errors as state in a signal that we can use in the template
-wherever we want.
-
-```html
-{{ errors()?.['rootForm'] }} <!-- render the errors on the rootForm -->
-{{ errors() }} <!-- render all the errors -->
-<form formidableForm
-      [formValue]="formValue()"
-      [validateRootForm]="true"
-      [formShape]="shape"
-      [suite]="suite"
-      (errorsChange)="errors.set($event)"
-      ...>
-</form>
-```
-
-```typescript
-export class MyFormComponent {
-  protected readonly formValue = signal<MyFormModel>({});
-  protected readonly suite = myFormModelSuite;
-  // Keep the errors in state
-  protected readonly errors = signal<Record<string, string>>({ });
-}
-```
-
-When setting the `[validateRootForm]` directive to true, the form will
-also create an ngValidator on root level, that listens to the ROOT_FORM field.
-
-To make this work we need to use the field in the Vest suite like this:
-
-```typescript
-test(ROOT_FORM, 'Brecht is not 30 anymore', () => {
-  enforce(
-    model.firstName === 'Brecht' &&
-    model.lastName === 'Billiet' &&
-    model.age === 30).isFalsy();
-});
-```
+ * Attaches a root-level async validator to an Angular `<form>` to run Vest tests
+ * on composite or cross-field rules bound to the `ROOT_FORM` key. This is useful for validating
+ * complex forms with interdependent fields.
+ *
+ * When `[formidableValidateRootForm]="true"` is set,
+ * this directive registers itself in `NG_ASYNC_VALIDATORS` and will:
+ * 1. Listen to form value changes
+ * 2. Debounce per `validationOptions.debounceValidationInMs`
+ * 3. Invoke your Vest suite with `fieldPath = ROOT_FORM`
+ * 4. Emit any root-level errors under `control.errors['errors']`
+ *
+ * Inputs:
+ * - `@Input() formidableValidateRootForm: boolean`
+ *   Enable or disable root-level validation. Defaults to `false`.
+ *
+ * - `@Input() formValue: T | null`
+ *   The current model of your entire form.
+ *
+ * - `@Input() suite: StaticSuite<string, string, (model: T, field: string) => void> | null`
+ *   Your Vest `staticSuite` containing `test(ROOT_FORM, ...)` rules.
+ *
+ * - `@Input() validationOptions: FormValidationOptions`
+ *   Debounce settings for cross-field async validation.
+ *
+ * @example
+ * ```html
+ * <form
+ *   formidableForm
+ *   formidableValidateRootForm
+ *   [formValue]="user$ | async"
+ *   [suite]="userSuite"
+ *   [validationOptions]="{ debounceValidationInMs: 0 }"
+ *   (errorsChange$)="errors = $event"
+ * >
+ *   <!-- form fields here -->
+ * </form>
+ * ```
  */
 @Directive({
   selector: 'form[formidableRootValidate][formValue][suite]',
@@ -90,7 +71,7 @@ export class FormRootValidateDirective<T> implements AsyncValidator, OnDestroy {
 
   /**
    * Whether the root form should be validated or not
-   * This will use the field rootForm
+   * This will use the field ROOT_FORM.
    */
   public readonly formidableValidateRootForm = input(false);
 

@@ -33,8 +33,59 @@ import { FormValidationOptions } from '../models/formidable.model';
 import { DeepRequired } from '../models/utility-types';
 
 /**
- * Holds the formValue, the validation suite and some handy outputs.
- * Source: https://github.dev/simplifiedcourses/ngx-vest-forms
+ * Binds a Vest static suite to an Angular `<form>` and provides reactive form value, shape, validation, and error outputs.
+ *
+ * Inputs:
+ * - `@Input() formValue: T | null`
+ *   The current model value of the form (including disabled controls).
+ *
+ * - `@Input() formShape: DeepRequired<T> | null`
+ *   The “shape” of your form model, used to type-check and catch typos at build time.
+ *
+ * - `@Input() suite: StaticSuite<string, string, (model: T, field: string) => void> | null`
+ *   A Vest `staticSuite` that defines all your field and root‐level tests.
+ *
+ * - `@Input() validationConfig: Record<string, string[]> | null`
+ *   Optional mapping of control paths → array of dependent control paths.
+ *   When a source control value changes, each target in the array will have
+ *   `.updateValueAndValidity()` triggered so cross-field rules can re-run.
+ *
+ * Outputs:
+ * - `@Output() formValueChange$: Observable<T>`
+ *   Emits the merged value+rawValue on every control add/remove or value change.
+ *
+ * - `@Output() errorsChange$: Observable<Record<string,string>>`
+ *   Emits the flattened map of all control errors (including root form errors) whenever validation status changes.
+ *
+ * - `@Output() dirtyChange$: Observable<boolean>`
+ *   Emits `true` when any control becomes dirty, `false` when reset-to-pristine.
+ *
+ * - `@Output() validChange$: Observable<boolean>`
+ *   Emits `true` if the form is VALID, `false` if INVALID (filtering out PENDING).
+ *
+ * - `pending$: Observable<'PENDING'>` and `idle$: Observable<'VALID'|'INVALID'>`
+ *   Internal streams you can subscribe to to show spinners or block submissions.
+ *
+ * Methods:
+ * - `createAsyncValidator(fieldPath: string, validationOptions: FormValidationOptions): AsyncValidatorFn`
+ *   Returns an Angular async validator that will debounce and run your Vest suite
+ *   for the given field path within the form model.
+ *
+ * @example
+ * ```html
+ * <form
+ *   formidableForm
+ *   [formValue]="user$ | async"
+ *   [formShape]="userShape"
+ *   [suite]="userSuite"
+ *   (formValueChange$)="onModelChange($event)"
+ *   (errorsChange$)="errors = $event"
+ *   (validChange$)="isValid = $event"
+ *   (dirtyChange$)="isDirty = $event"
+ * >
+ *   <!-- form fields here -->
+ * </form>
+ * ```
  */
 @Directive({
   selector: 'form[formidableForm]'
@@ -199,8 +250,7 @@ export class FormDirective<T extends Record<string, unknown>> implements OnDestr
   }
 
   /**
-   * Feeds the formValueCache, debounces it until the next tick
-   * and creates an asynchronous validator which runs a validation suite.
+   * Feeds the formValueCache, debounces it until the next tick and creates an asynchronous validator which runs a validation suite.
    */
   public createAsyncValidator(fieldPath: string, validationOptions: FormValidationOptions): AsyncValidatorFn {
     if (!this.suite()) {

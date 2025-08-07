@@ -5,10 +5,24 @@ import { FieldErrorsComponent } from '../components/field-errors/field-errors.co
 import { FormDirective } from './form.directive';
 
 /**
- * Directive to display form field errors.
+ * Dynamically instantiates a `<formidable-field-errors>` component next to any form control
+ * decorated with this `formidableFieldErrors` directive, and synchronizes its display
+ * with the host `NgModel` or `NgModelGroup`.
  *
- * This directive creates an instance of `FieldErrorsComponent` and manages its lifecycle.
- * It listens to changes in the form control and updates the component accordingly.
+ * - Automatically picks up `NgModel` or `NgModelGroup` from DI
+ * - Subscribes to the parent FormDirective’s `idle$` stream to mark the errors component for check on every model change
+ * - Cleans up component instance on destroy
+ *
+ * @example
+ * ```html
+ * <input
+ *   ngModel
+ *   name="username"
+ *   placeholder="Enter username"
+ *   formControlName="username"
+ *   formidableFieldErrors
+ * />
+ * ```
  */
 @Directive({ selector: '[formidableFieldErrors]' })
 export class FieldErrorsDirective implements AfterViewInit, OnDestroy {

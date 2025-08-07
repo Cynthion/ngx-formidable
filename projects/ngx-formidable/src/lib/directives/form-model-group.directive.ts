@@ -6,8 +6,24 @@ import { FormValidationOptions } from '../models/formidable.model';
 import { FormDirective } from './form.directive';
 
 /**
- * Hooks into Angular's 'ngModelGroup' and creates an async validator.
- * Source: https://github.dev/simplifiedcourses/ngx-vest-forms
+ * Hooks into each `ngModelGroup` container and wires up an async validator that will:
+ * 1. Locate the group’s path
+ * 2. Call `FormDirective.createAsyncValidator()` for that group path
+ * 3. Debounce and run your Vest suite against the nested group value
+ *
+ * Useful when an entire sub-object (e.g. address group) has composite rules.
+ *
+ * Inputs (inherited via DI from FormDirective):
+ * - `@Input() validationOptions: FormValidationOptions`
+ *
+ * @example
+ * ```html
+ * <div ngModelGroup="passwords">
+ *   <input name="password" ngModel />
+ *   <input name="confirmPassword" ngModel />
+ * </div>
+ * <div *ngIf="form.errors['passwords']">{{ form.errors['passwords'] }}</div>
+ * ```
  */
 @Directive({
   selector: '[ngModelGroup]',
