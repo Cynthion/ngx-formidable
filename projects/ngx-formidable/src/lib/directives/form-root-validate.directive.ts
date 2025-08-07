@@ -16,7 +16,7 @@ import { FormValidationOptions, ROOT_FORM } from '../models/formidable.model';
 Source: https://github.dev/simplifiedcourses/ngx-vest-forms
 When we want to validate multiple fields that are depending on each other,
 it is a best practice to wrap them in a parent form group.
-If `password`  and `confirmPassword` have to be equal the validation should not happen on
+If `password`  and `confirmPassword` have to be equal, the validation should not happen on
 `password` nor on `confirmPassword`, it should happen on `passwords`:
 
 ```typescript
@@ -37,7 +37,7 @@ wherever we want.
 ```html
 {{ errors()?.['rootForm'] }} <!-- render the errors on the rootForm -->
 {{ errors() }} <!-- render all the errors -->
-<form scVestForm
+<form formidableForm
       [formValue]="formValue()"
       [validateRootForm]="true"
       [formShape]="shape"
@@ -48,7 +48,7 @@ wherever we want.
 ```
 
 ```typescript
-export class MyformComponent {
+export class MyFormComponent {
   protected readonly formValue = signal<MyFormModel>({});
   protected readonly suite = myFormModelSuite;
   // Keep the errors in state
@@ -59,11 +59,9 @@ export class MyformComponent {
 When setting the `[validateRootForm]` directive to true, the form will
 also create an ngValidator on root level, that listens to the ROOT_FORM field.
 
-To make this work we need to use the field in the vest suite like this:
+To make this work we need to use the field in the Vest suite like this:
 
 ```typescript
-import { ROOT_FORM } from 'ngx-vest-forms';
-
 test(ROOT_FORM, 'Brecht is not 30 anymore', () => {
   enforce(
     model.firstName === 'Brecht' &&
@@ -71,7 +69,6 @@ test(ROOT_FORM, 'Brecht is not 30 anymore', () => {
     model.age === 30).isFalsy();
 });
 ```
-
  */
 @Directive({
   selector: 'form[formidableRootValidate][formValue][suite]',

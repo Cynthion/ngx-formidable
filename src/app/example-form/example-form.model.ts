@@ -1,5 +1,5 @@
 import { DeepPartial, DeepRequired, IFormidableFieldOption, ROOT_FORM } from 'ngx-formidable';
-import { enforce, omitWhen, only, staticSuite, test } from 'vest';
+import { enforce, mode, Modes, omitWhen, only, StaticSuite, staticSuite, test } from 'vest';
 
 //#region FormModel
 
@@ -59,7 +59,13 @@ export const exampleFormShape: ExampleFormShape = {
   }
 };
 
-export const exampleFormValidationSuite = staticSuite((model: ExampleFormModel, field?: string) => {
+export const exampleFormValidationSuite: StaticSuite<
+  string,
+  string,
+  (model: ExampleFormModel, field?: string) => void
+> = staticSuite((model: ExampleFormModel, field?: string) => {
+  mode(Modes.ALL); // use EAGER to just use first
+
   if (field) {
     only(field);
   }
@@ -68,8 +74,16 @@ export const exampleFormValidationSuite = staticSuite((model: ExampleFormModel, 
     enforce(model.firstName === 'Test' && model.lastName === 'User' && model.passwords?.password === '1234').isFalsy();
   });
 
-  test('firstName', 'First name is required. (Vest)', () => {
+  test('firstName', 'First name is required.', () => {
     enforce(model.firstName).isNotBlank();
+  });
+
+  test('firstName', 'First name does not start with A.', () => {
+    enforce(model.firstName?.toLowerCase()).startsWith('a');
+  });
+
+  test('firstName', 'First name does not start with B.', () => {
+    enforce(model.firstName?.toLowerCase()).startsWith('b');
   });
 
   test('lastName', 'Last name is required.', () => {

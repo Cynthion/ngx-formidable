@@ -1,11 +1,11 @@
 <form
-  formidableForm
   formidableRootValidate
+  formidableForm
   class="form"
+  [validationOptions]="validationOptions"
   [formValue]="formValue()"
   [formShape]="formShape"
   [suite]="suite"
-  [validationOptions]="validationOptions"
   (dirtyChange$)="isDirty.set($event)"
   (validChange$)="isValid.set($event)"
   (errorsChange$)="errors.set($event)"

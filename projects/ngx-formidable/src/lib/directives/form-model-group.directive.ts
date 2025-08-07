@@ -10,7 +10,6 @@ import { FormDirective } from './form.directive';
  * Source: https://github.dev/simplifiedcourses/ngx-vest-forms
  */
 @Directive({
-  // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[ngModelGroup]',
   providers: [
     {

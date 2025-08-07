@@ -2,6 +2,7 @@ import { Component, computed, signal } from '@angular/core';
 import Fuse, { FuseResult } from 'fuse.js';
 import { FormValidationOptions, IFormidableFieldOption } from 'ngx-formidable';
 import { map, Observable, startWith, Subject } from 'rxjs';
+import { StaticSuite } from 'vest';
 import {
   AnimalFormFieldOption,
   ExampleFormModel,
@@ -29,7 +30,8 @@ export class ExampleFormComponent {
     allergies: undefined // ['dust', 'lactose']
   });
   protected readonly formShape = exampleFormShape;
-  protected readonly suite = exampleFormValidationSuite;
+  protected readonly suite: StaticSuite<string, string, (model: ExampleFormModel, field?: string) => void> =
+    exampleFormValidationSuite;
   protected readonly validationOptions: FormValidationOptions = { debounceValidationInMs: 0 };
 
   protected readonly isDirty = signal<boolean | null>(null);

@@ -50,21 +50,5 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
       .subscribe(() => {
         this.fieldErrorsComponentRef.instance.markForCheck();
       });
-
-    // 1) Did the user add *any* Angular sync validators?
-    const hasSync = control?.validator != null;
-
-    // 2) Did the form get wired up with a Vest suite?
-    //    `suite` is the `staticSuite` you passed into <form [suite]="suite">.
-    const hasAsyncSuite = !!this.formDirective.suite;
-
-    if (hasSync && hasAsyncSuite) {
-      console.error(
-        `[ngx-vest-forms] Field "${this.ngModel?.name}" is using both Angular sync validators ` +
-          `(required / minLength / maxLength) AND a Vest async suite on the form. ` +
-          `Angular will skip async validators if any sync validator fails, so your Vest messages ` +
-          `will never show. Either remove the sync validators or remove the Vest suite on this form.`
-      );
-    }
   }
 }

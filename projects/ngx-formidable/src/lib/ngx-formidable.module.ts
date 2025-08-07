@@ -26,11 +26,17 @@ import { FormRootValidateDirective } from './directives/form-root-validate.direc
 import { FormDirective } from './directives/form.directive';
 
 const components = [
-  // Ngx Vest Forms Directives
+  // Form Directives
   FormDirective,
   FormModelDirective,
   FormModelGroupDirective,
   FormRootValidateDirective,
+  // Field Directives
+  FieldTooltipDirective,
+  FieldLabelDirective,
+  FieldPrefixDirective,
+  FieldSuffixDirective,
+  FieldErrorsDirective,
   // Formidable Components
   IconComponent,
   FieldErrorsComponent,
@@ -44,13 +50,7 @@ const components = [
   TextareaFieldComponent,
   RadioGroupFieldComponent,
   CheckboxGroupFieldComponent,
-  TimeFieldComponent,
-  // Formidable Directives
-  FieldTooltipDirective,
-  FieldLabelDirective,
-  FieldPrefixDirective,
-  FieldSuffixDirective,
-  FieldErrorsDirective
+  TimeFieldComponent
 ];
 
 @NgModule({
