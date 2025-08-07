@@ -17,16 +17,16 @@ import {
 })
 export class ExampleFormComponent {
   protected readonly formValue = signal<ExampleFormModel>({
-    firstName: 'Cynthion',
-    lastName: 'Van Halen',
-    gender: 'male',
-    nationality: 'ch',
-    hobby: 'reading',
-    animal: 'cat',
-    birthdate: new Date(1989, 5, 29),
-    time: new Date(0, 0, 0, 12, 30, 15),
-    religion: 'agnostic',
-    allergies: ['dust', 'lactose']
+    firstName: undefined, // 'Cynthion',
+    lastName: undefined, //'Van Halen',
+    gender: undefined, //'male',
+    nationality: undefined, // 'ch',
+    hobby: undefined, //'reading',
+    animal: undefined, //'cat',
+    birthdate: undefined, // new Date(1989, 5, 29),
+    time: undefined, // new Date(0, 0, 0, 12, 30, 15),
+    religion: undefined, // 'agnostic',
+    allergies: undefined // ['dust', 'lactose']
   });
   protected readonly formShape = exampleFormShape;
   protected readonly suite = exampleFormValidationSuite;
@@ -282,7 +282,7 @@ export class ExampleFormComponent {
   protected logs: string[] = [];
 
   log(message: string): void {
-    this.logs.push(message);
+    this.logs.unshift(message);
   }
 
   clearLogs(): void {

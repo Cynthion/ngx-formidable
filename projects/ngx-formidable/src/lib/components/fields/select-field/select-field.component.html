@@ -11,6 +11,16 @@
   (change)="onValueChange()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
+  <!-- Placeholder -->
+  @if (placeholder && !value) {
+    <option
+      value=""
+      disabled
+      selected>
+      {{ placeholder }}
+    </option>
+  }
+
   <!-- Options -->
   <!-- Options are re-created in order to use native <option> elements. -->
   @for (option of options$ | async; track option.value) {
