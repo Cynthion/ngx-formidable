@@ -68,7 +68,7 @@ export const exampleFormValidationSuite = staticSuite((model: ExampleFormModel, 
     enforce(model.firstName === 'Test' && model.lastName === 'User' && model.passwords?.password === '1234').isFalsy();
   });
 
-  test('firstName', 'First name is required.', () => {
+  test('firstName', 'First name is required. (Vest)', () => {
     enforce(model.firstName).isNotBlank();
   });
 

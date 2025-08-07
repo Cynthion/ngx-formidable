@@ -5,7 +5,6 @@
   [tabindex]="disabled ? -1 : 0"
   [class.is-readonly]="readonly"
   [class.is-disabled]="disabled"
-  [class.is-required]="required"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <fieldset>
@@ -22,7 +21,6 @@
         [attr.name]="name"
         [attr.readonly]="option.readonly || readonly ? '' : null"
         [attr.disabled]="option.disabled || disabled ? '' : null"
-        [required]="required"
         [checked]="isChecked(option.value)" />
       <formidable-field-option
         #optionRef

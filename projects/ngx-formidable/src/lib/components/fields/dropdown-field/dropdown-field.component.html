@@ -3,7 +3,6 @@
   class="field"
   [class.is-readonly]="readonly"
   [class.is-disabled]="disabled"
-  [class.is-required]="required"
   [class.focused]="isFieldFocused">
   <div
     class="input-wrapper"
@@ -22,7 +21,6 @@
       [attr.name]="name"
       [attr.readonly]="true"
       [attr.disabled]="disabled ? '' : null"
-      [required]="required"
       (keydown)="onUserInput($event)"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />

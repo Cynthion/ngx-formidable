@@ -12,7 +12,6 @@
     [attr.maxlength]="maxLength > -1 ? maxLength : null"
     [attr.readonly]="readonly ? '' : null"
     [attr.disabled]="disabled ? '' : null"
-    [required]="required"
     (input)="onValueChange()"
     (focus)="onFocusChange(true)"
     (blur)="onFocusChange(false)"></textarea>

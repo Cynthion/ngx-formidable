@@ -87,11 +87,6 @@
   color: var(--formidable-color-field-text-disabled, #{tokens.$formidable-color-field-text-disabled});
 }
 
-@mixin required-colors {
-  background: var(--formidable-color-field-background-required, #{tokens.$formidable-color-field-background-required});
-  color: var(--formidable-color-field-text-required, #{tokens.$formidable-color-field-text-required});
-}
-
 @mixin focused-colors {
   border-color: var(--formidable-color-field-border-focus, #{tokens.$formidable-color-field-border-focus});
   box-shadow: inset 0 0 0 var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
@@ -118,10 +113,6 @@
 
   &[disabled] {
     @include disabled-colors;
-  }
-
-  &[required] {
-    @include required-colors;
   }
 }
 
@@ -169,10 +160,6 @@
 
   &.is-disabled {
     @include disabled-colors;
-  }
-
-  &.is-required {
-    @include required-colors;
   }
 
   &:focus,

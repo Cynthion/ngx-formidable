@@ -97,10 +97,6 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     return this.projectedField?.disabled ?? false;
   }
 
-  get required(): boolean {
-    return this.projectedField?.required ?? false;
-  }
-
   get value(): unknown {
     return this.projectedField?.value ?? null;
   }

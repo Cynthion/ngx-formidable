@@ -21,7 +21,6 @@
         name="firstName"
         [disabled]="false"
         [readonly]="false"
-        [required]="true"
         [minLength]="10"
         [maxLength]="15"
         [ngModel]="vm.formValue.firstName"
@@ -39,7 +38,7 @@
     </formidable-field-decorator>
 
     <!-- Last Name -->
-    <formidable-field-decorator>
+    <!-- <formidable-field-decorator>
       <formidable-textarea-field
         formidableFieldErrors
         placeholder="Your last name"
@@ -47,7 +46,6 @@
         name="lastName"
         [disabled]="false"
         [readonly]="false"
-        [required]="true"
         [enableAutosize]="true"
         [showLengthIndicator]="true"
         [maxLength]="300"
@@ -63,17 +61,16 @@
       <div formidableFieldTooltip>(Textarea)</div>
       <div formidableFieldPrefix>Prefix</div>
       <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+    </formidable-field-decorator> -->
 
     <!-- Gender -->
-    <formidable-field-decorator>
+    <!-- <formidable-field-decorator>
       <formidable-select-field
         formidableFieldErrors
         placeholder="Select..."
         name="gender"
         [disabled]="false"
         [readonly]="false"
-        [required]="true"
         [ngModel]="vm.formValue.gender"
         [options]="genderOptions"
         [sortFn]="sortAlphabetically"
@@ -93,17 +90,16 @@
       <div formidableFieldTooltip>(Select)</div>
       <div formidableFieldPrefix>Prefix</div>
       <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+    </formidable-field-decorator> -->
 
     <!-- Nationality -->
-    <formidable-field-decorator>
+    <!-- <formidable-field-decorator>
       <formidable-dropdown-field
         formidableFieldErrors
         placeholder="Select..."
         name="nationality"
         [disabled]="false"
         [readonly]="false"
-        [required]="true"
         [ngModel]="vm.formValue.nationality"
         [options]="nationalityOptions"
         [emptyOption]="nationalityEmptyOption"
@@ -132,10 +128,10 @@
       <div formidableFieldTooltip>(Dropdown)</div>
       <div formidableFieldPrefix>Prefix</div>
       <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+    </formidable-field-decorator> -->
 
     <!-- Hobby -->
-    <formidable-field-decorator>
+    <!-- <formidable-field-decorator>
       <formidable-autocomplete-field
         formidableFieldErrors
         placeholder="Select..."
@@ -143,7 +139,6 @@
         [ngModel]="vm.formValue.hobby"
         [disabled]="false"
         [readonly]="false"
-        [required]="true"
         [options]="hobbyOptions"
         [emptyOption]="hobbyEmptyOption"
         [sortFn]="sortAlphabetically"
@@ -177,17 +172,16 @@
       <div formidableFieldTooltip>(Autocomplete)</div>
       <div formidableFieldPrefix>Prefix</div>
       <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+    </formidable-field-decorator> -->
 
     <!-- Animals -->
-    <formidable-field-decorator>
+    <!-- <formidable-field-decorator>
       <formidable-autocomplete-field
         formidableFieldErrors
         placeholder="Select..."
         name="animal"
         [disabled]="false"
         [readonly]="false"
-        [required]="true"
         [ngModel]="vm.formValue.animal"
         [options]="animalOptionsDefault"
         [emptyOption]="animalEmptyOption"
@@ -212,17 +206,16 @@
       <div formidableFieldTooltip>(Autocomplete [custom fuzzy options])</div>
       <div formidableFieldPrefix>Prefix</div>
       <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+    </formidable-field-decorator> -->
 
     <!-- Birthdate -->
-    <formidable-field-decorator>
+    <!-- <formidable-field-decorator>
       <formidable-date-field
         formidableFieldErrors
         placeholder="?"
         name="birthdate"
         [disabled]="false"
         [readonly]="false"
-        [required]="true"
         [ngModel]="vm.formValue.birthdate"
         [i18n]="I18N_CONFIG"
         [yearRange]="2"
@@ -240,17 +233,16 @@
       <div formidableFieldTooltip>(Date)</div>
       <div formidableFieldPrefix>Prefix</div>
       <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+    </formidable-field-decorator> -->
 
     <!-- Time -->
-    <formidable-field-decorator>
+    <!-- <formidable-field-decorator>
       <formidable-time-field
         formidableFieldErrors
         placeholder="?"
         name="time"
         [disabled]="false"
         [readonly]="false"
-        [required]="true"
         [ngModel]="vm.formValue.time"
         [unicodeTokenFormat]="'HH : mm'"
         (valueChanged)="onValueChanged('time', $event)"
@@ -264,16 +256,15 @@
       <div formidableFieldTooltip>(Time)</div>
       <div formidableFieldPrefix>Prefix</div>
       <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+    </formidable-field-decorator> -->
 
     <!-- Religion -->
-    <formidable-field-decorator>
+    <!-- <formidable-field-decorator>
       <formidable-radio-group-field
         formidableFieldErrors
         name="religion"
         [disabled]="false"
         [readonly]="false"
-        [required]="true"
         [ngModel]="vm.formValue.religion"
         [options]="religionOptions"
         [emptyOption]="religionEmptyOption"
@@ -308,16 +299,15 @@
       <div formidableFieldTooltip>(Radio Group)</div>
       <div formidableFieldPrefix>Prefix</div>
       <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+    </formidable-field-decorator> -->
 
     <!-- Allergies -->
-    <formidable-field-decorator>
+    <!-- <formidable-field-decorator>
       <formidable-checkbox-group-field
         formidableFieldErrors
         name="allergies"
         [disabled]="false"
         [readonly]="false"
-        [required]="true"
         [ngModel]="vm.formValue.allergies"
         [options]="allergiesOptions"
         [emptyOption]="allergiesEmptyOption"
@@ -352,7 +342,7 @@
       <div formidableFieldTooltip>(Checkbox Group)</div>
       <div formidableFieldPrefix>Prefix</div>
       <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+    </formidable-field-decorator> -->
 
     <!-- Passwords Group -->
     <!-- TODO add form group -->

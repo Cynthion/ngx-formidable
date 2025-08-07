@@ -37,7 +37,6 @@ export interface IFormidableField<T = string | null> {
   placeholder: string;
   readonly: boolean;
   disabled: boolean;
-  required: boolean;
   value: T;
   isLabelFloating: boolean;
   valueChange$: Observable<T>;
@@ -83,17 +82,16 @@ type FormidableInputFieldsKeys =
   | 'minLength'
   | 'maxLength'
   // | 'readOnly' use 'readonly' of IFormidableField
-  | 'disabled'
-  | 'required';
+  | 'disabled';
 
 type FormidableTextareaFieldsKeys = FormidableInputFieldsKeys;
 
-type FormidableSelectFieldsKeys = 'name' | 'disabled' | 'required';
+type FormidableSelectFieldsKeys = 'name' | 'disabled';
 
 /** The subset of `<input/>` properties that are supported. */
 export interface IFormidableInputField extends Pick<HTMLInputElement, FormidableInputFieldsKeys>, IFormidableField {}
 
-type FormidableGroupFieldsKeys = 'name' | 'disabled' | 'required';
+type FormidableGroupFieldsKeys = 'name' | 'disabled';
 
 /** The subset of `<input type="radio"/> properties that are supported.` */
 export interface IFormidableRadioGroupField

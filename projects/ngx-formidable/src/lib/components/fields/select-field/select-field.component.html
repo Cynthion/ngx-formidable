@@ -5,7 +5,6 @@
   [id]="fieldId"
   [attr.name]="name"
   [attr.disabled]="disabled ? '' : null"
-  [required]="required"
   (pointerdown)="readonly || disabled ? preventPointerDown($event) : null"
   (keydown)="readonly || disabled ? preventKeydown($event) : null"
   (change)="onValueChange()"
