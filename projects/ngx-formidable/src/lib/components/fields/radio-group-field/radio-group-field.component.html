@@ -5,6 +5,7 @@
   [tabindex]="disabled ? -1 : 0"
   [class.is-readonly]="readonly"
   [class.is-disabled]="disabled"
+  [class.is-required]="required"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <fieldset>

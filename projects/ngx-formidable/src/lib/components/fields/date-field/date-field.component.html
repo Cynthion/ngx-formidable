@@ -3,6 +3,7 @@
   class="field"
   [class.is-readonly]="readonly"
   [class.is-disabled]="disabled"
+  [class.is-required]="required"
   [class.focused]="isFieldFocused">
   <div class="input-wrapper">
     <!-- Input Field -->
@@ -18,9 +19,8 @@
       [id]="fieldId"
       [placeholder]="placeholder"
       [attr.name]="name"
+      [attr.readonly]="readonly ? '' : null"
       [attr.disabled]="disabled ? '' : null"
-      [readonly]="readonly"
-      [disabled]="disabled"
       [required]="required"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"

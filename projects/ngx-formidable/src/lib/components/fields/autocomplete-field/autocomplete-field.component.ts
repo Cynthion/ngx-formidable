@@ -84,7 +84,11 @@ export class AutocompleteFieldComponent
   }
 
   ngAfterContentInit(): void {
-    this.updateFilteredOptions();
+    // The projected options (option.template) might not be available immediately after content initialization,
+    // so we use setTimeout to ensure they are processed after the current change detection cycle.
+    setTimeout(() => {
+      this.updateFilteredOptions();
+    });
   }
 
   override ngOnDestroy(): void {

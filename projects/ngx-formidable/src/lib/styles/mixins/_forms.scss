@@ -120,7 +120,7 @@
     @include disabled-colors;
   }
 
-  &:required {
+  &[required] {
     @include required-colors;
   }
 }

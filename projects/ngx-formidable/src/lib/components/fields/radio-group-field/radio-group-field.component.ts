@@ -66,7 +66,11 @@ export class RadioGroupFieldComponent
   private _value = '';
 
   ngAfterContentInit(): void {
-    this.updateOptions();
+    // The projected options (option.template) might not be available immediately after content initialization,
+    // so we use setTimeout to ensure they are processed after the current change detection cycle.
+    setTimeout(() => {
+      this.updateOptions();
+    });
   }
 
   protected doOnValueChange(): void {
@@ -169,22 +173,18 @@ export class RadioGroupFieldComponent
   }
 
   private updateOptions(): void {
-    // The projected options (option.template) might not be available immediately after content initialization,
-    // so we use setTimeout to ensure they are processed after the current change detection cycle.
-    setTimeout(() => {
-      const inlineOptions = this.options ?? [];
-      const projectedOptions = this.optionComponents?.toArray() ?? [];
+    const inlineOptions = this.options ?? [];
+    const projectedOptions = this.optionComponents?.toArray() ?? [];
 
-      let combined = [...inlineOptions, ...projectedOptions];
+    let combined = [...inlineOptions, ...projectedOptions];
 
-      if (this.sortFn) {
-        combined = combined.sort(this.sortFn);
-      }
+    if (this.sortFn) {
+      combined = combined.sort(this.sortFn);
+    }
 
-      this.options$.next(combined);
+    this.options$.next(combined);
 
-      this.writeValue(this._value);
-    });
+    this.writeValue(this._value);
   }
 
   //#endregion

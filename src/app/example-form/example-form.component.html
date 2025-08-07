@@ -21,7 +21,7 @@
         name="firstName"
         [disabled]="false"
         [readonly]="false"
-        [required]="false"
+        [required]="true"
         [minLength]="10"
         [maxLength]="15"
         [ngModel]="vm.formValue.firstName"
@@ -47,7 +47,7 @@
         name="lastName"
         [disabled]="false"
         [readonly]="false"
-        [required]="false"
+        [required]="true"
         [enableAutosize]="true"
         [showLengthIndicator]="true"
         [maxLength]="300"
@@ -72,7 +72,7 @@
         name="gender"
         [disabled]="false"
         [readonly]="false"
-        [required]="false"
+        [required]="true"
         [ngModel]="vm.formValue.gender"
         [options]="genderOptions"
         [sortFn]="sortAlphabetically"
@@ -81,7 +81,7 @@
         <formidable-field-option
           [value]="'other'"
           [label]="'Other'"
-          [disabled]="false" />
+          [disabled]="true" />
         <formidable-field-option [value]="'trans'">Trans</formidable-field-option>
       </formidable-select-field>
       <div
@@ -102,7 +102,7 @@
         name="nationality"
         [disabled]="false"
         [readonly]="false"
-        [required]="false"
+        [required]="true"
         [ngModel]="vm.formValue.nationality"
         [options]="nationalityOptions"
         [emptyOption]="nationalityEmptyOption"
@@ -142,7 +142,7 @@
         [ngModel]="vm.formValue.hobby"
         [disabled]="false"
         [readonly]="false"
-        [required]="false"
+        [required]="true"
         [options]="hobbyOptions"
         [emptyOption]="hobbyEmptyOption"
         [sortFn]="sortAlphabetically"
@@ -151,7 +151,7 @@
         <formidable-field-option
           [value]="'garden'"
           [label]="'Gardening'"
-          [disabled]="false">
+          [disabled]="true">
           Gardening
         </formidable-field-option>
         <formidable-field-option
@@ -186,7 +186,7 @@
         name="animal"
         [disabled]="false"
         [readonly]="false"
-        [required]="false"
+        [required]="true"
         [ngModel]="vm.formValue.animal"
         [options]="animalOptionsDefault"
         [emptyOption]="animalEmptyOption"
@@ -221,7 +221,7 @@
         name="birthdate"
         [disabled]="false"
         [readonly]="false"
-        [required]="false"
+        [required]="true"
         [ngModel]="vm.formValue.birthdate"
         [i18n]="I18N_CONFIG"
         [yearRange]="2"
@@ -249,7 +249,7 @@
         name="time"
         [disabled]="false"
         [readonly]="false"
-        [required]="false"
+        [required]="true"
         [ngModel]="vm.formValue.time"
         [unicodeTokenFormat]="'HH : mm'"
         (valueChanged)="onValueChanged('time', $event)"
@@ -272,7 +272,7 @@
         name="religion"
         [disabled]="false"
         [readonly]="false"
-        [required]="false"
+        [required]="true"
         [ngModel]="vm.formValue.religion"
         [options]="religionOptions"
         [emptyOption]="religionEmptyOption"
@@ -316,7 +316,7 @@
         name="allergies"
         [disabled]="false"
         [readonly]="false"
-        [required]="false"
+        [required]="true"
         [ngModel]="vm.formValue.allergies"
         [options]="allergiesOptions"
         [emptyOption]="allergiesEmptyOption"
