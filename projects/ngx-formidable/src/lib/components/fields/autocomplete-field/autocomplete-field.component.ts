@@ -228,7 +228,7 @@ export class AutocompleteFieldComponent
   private deselectOption(): void {
     this.setHighlightedIndex(-1);
     this.selectedOption = undefined;
-    this.onChange('');
+    this.onChange(null);
   }
 
   private combineAllOptions(): IFormidableFieldOption[] {
