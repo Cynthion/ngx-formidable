@@ -118,12 +118,12 @@ $formidable-label-floating-offset: calc(
   #{math.div($formidable-field-height, 2)} - #{math.div(
       $formidable-label-floating-line-height * $formidable-label-floating-font-size,
       2
-    )} + #{$formidable-field-before-margin-bottom} + #{$formidable-field-border-thickness}
+    )} + #{$formidable-field-before-margin-bottom} + #{$formidable-field-border-thickness} + utils.spacing(2)
 );
 
 $formidable-textarea-min-height: utils.spacing(96); // ~2 lines
 $formidable-textarea-max-height: none;
-$formidable-textarea-padding-top: utils.spacing(20);
+$formidable-textarea-padding-top: utils.spacing(16);
 
 $formidable-panel-background: #f2faff;
 $formidable-panel-box-shadow: utils.spacing(0) utils.spacing(12) utils.spacing(48) calc(utils.spacing(8) * -1)
