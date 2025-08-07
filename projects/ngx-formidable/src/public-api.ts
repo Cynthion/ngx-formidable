@@ -6,6 +6,7 @@ export * from './lib/components/field-decorator/field-decorator.component';
 export * from './lib/components/field-errors/field-errors.component';
 export * from './lib/components/field-option/field-option.component';
 export * from './lib/components/fields/autocomplete-field/autocomplete-field.component';
+export * from './lib/components/fields/base-field.component';
 export * from './lib/components/fields/checkbox-group-field/checkbox-group-field.component';
 export * from './lib/components/fields/date-field/date-field.component';
 export * from './lib/components/fields/dropdown-field/dropdown-field.component';

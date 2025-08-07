@@ -36,14 +36,12 @@ import { calendarArrowDown, calendarArrowUp } from '../../../models/icons';
 import { BaseFieldDirective } from '../base-field.component';
 
 /**
- * Component: DateFieldComponent
- *
- * An input field for selecting dates via text entry or a Pikaday calendar popup.
+ * An input field for selecting dates via masked text entry or a Pikaday calendar popup.
  * Provides:
  * - Masked input (ngx-mask) according to a Unicode date format (e.g. "yyyy-MM-dd").
- * - Calendar panel with keyboard navigation (arrows, Enter, Escape).
- * - Customizable Pikaday options: minDate, maxDate, firstDay, i18n labels, yearRange, etc.
- * - Automatic parsing/formatting via date-fns and format helpers.
+ * - Automatic parsing/formatting.
+ * - Simple keyboard handling.
+ * - Pikaday calendar panel (with customizable options: minDate, maxDate, firstDay, i18n labels, yearRange, etc.).
  *
  * @input unicodeTokenFormat?: string
  *   Unicode date format mask (defaults to "yyyy-MM-dd").

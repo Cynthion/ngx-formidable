@@ -32,6 +32,7 @@ export interface User {
   religion?: UserReligion;
   allergies?: string[];
   passwords: Password;
+  color: string;
 }
 
 export type ExampleFormModel = DeepPartial<User>;
@@ -56,7 +57,8 @@ export const exampleFormShape: ExampleFormShape = {
   passwords: {
     password: '',
     confirmPassword: ''
-  }
+  },
+  color: '#000000'
 };
 
 export const exampleFormValidationSuite: StaticSuite<
