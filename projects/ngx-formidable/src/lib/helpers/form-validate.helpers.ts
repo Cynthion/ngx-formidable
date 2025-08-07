@@ -1,25 +1,23 @@
 import { isDevMode } from '@angular/core';
 
-// Source: https://github.dev/simplifiedcourses/ngx-vest-forms
-
-export class FormShapeMismatchError extends Error {
+export class FormFrameMismatchError extends Error {
   constructor(errorList: string[]) {
-    super(`Form shape mismatch:\n\n${errorList.join('\n')}\n\n`);
+    super(`Form frame mismatch:\n\n${errorList.join('\n')}\n\n`);
   }
 }
 
 /**
- * Validates a form value against a form shape.
- * If value and shape do not match, an error is thrown.
+ * Validates a form value against a form frame.
+ * If value and frame do not match, an error is thrown.
  * Only in Angular Dev Mode.
  */
-export function validateFormShape(formValue: Record<string, unknown>, formShape: Record<string, unknown>): void {
+export function validateFormFrame(formValue: Record<string, unknown>, formFrame: Record<string, unknown>): void {
   // Only execute in dev mode
   if (isDevMode()) {
-    const errors = validateFormValue(formValue, formShape);
+    const errors = validateFormValue(formValue, formFrame);
 
     if (errors.length) {
-      throw new FormShapeMismatchError(errors);
+      throw new FormFrameMismatchError(errors);
     }
   }
 }
@@ -28,14 +26,14 @@ function validateFormValue(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formValue: Record<string, any>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  formShape: Record<string, any>,
+  formFrame: Record<string, any>,
   path = ''
 ): string[] {
   const errors: string[] = [];
   for (const key in formValue) {
     if (Object.keys(formValue).includes(key)) {
       // In form arrays we don't know how many items there are.
-      // This means that we always need to provide one record in the shape of our form array.
+      // This means that we always need to provide one record in the frame of our form array.
       // So every time reset the key to '0' when the key is a number and is bigger than 0.
       let keyToCompareWith = key;
 
@@ -47,14 +45,14 @@ function validateFormValue(
 
       if (typeof formValue[key] === 'object' && formValue[key] !== null) {
         if (
-          (typeof formShape[keyToCompareWith] !== 'object' || formShape[keyToCompareWith] === null) &&
+          (typeof formFrame[keyToCompareWith] !== 'object' || formFrame[keyToCompareWith] === null) &&
           isNaN(parseFloat(key))
         ) {
-          errors.push(`[ngModelGroup] Form Shape Mismatch: '${newPath}'`);
+          errors.push(`[ngModelGroup] Form Frame Mismatch: '${newPath}'`);
         }
-        errors.push(...validateFormValue(formValue[key], formShape[keyToCompareWith], newPath));
-      } else if ((formShape ? !(key in formShape) : true) && isNaN(parseFloat(key))) {
-        errors.push(`[ngModel] Form Shape Mismatch '${newPath}'`);
+        errors.push(...validateFormValue(formValue[key], formFrame[keyToCompareWith], newPath));
+      } else if ((formFrame ? !(key in formFrame) : true) && isNaN(parseFloat(key))) {
+        errors.push(`[ngModel] Form Frame Mismatch '${newPath}'`);
       }
     }
   }

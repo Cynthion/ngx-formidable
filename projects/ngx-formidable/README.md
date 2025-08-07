@@ -2,13 +2,13 @@
 
 A comprehensive Angular component library for building rich, validated forms using Vest for validation, Pikaday for date picking, and flexible field decorators.
 
-- **Zero Boilerplate** — Wire up form value, shape, and validation suite with a single `<form formidableForm>` directive.
+- **Zero Boilerplate** — Wire up form value, frame, and validation suite with a single `<form formidableForm>` directive.
 - **Async Validation** — Field- and root-level (cross-field) Vest suites run on every change with configurable debounce.
 - **Rich Field Components** — Inputs, textareas, selects, dropdowns, autocomplete, date & time pickers, radio & checkbox groups.
 - **Field Decorator** — Optionally project labels, tooltips, prefixes, suffixes around any field.
 - **Customizable Styling** — SCSS tokens for colors, typography, sizing, spacing, animations, shadows.
 - **Keyboard Navigation** — All form controls support full keyboard interaction (arrows to navigate options or calendar, Enter to select, Esc/Tab to close panels).
-- **Type Safety** — The "shape" concept provides a deep‐required blueprint of your form model that supplies default values for every field, enforces type safety, and catches typos in Dev Mode before runtime.
+- **Type Safety** — The "frame" concept provides a deep‐required blueprint of your form model that supplies default values for every field, enforces type safety, and catches typos in Dev Mode before runtime.
 - **Extensible** — You can add your own custom field components by implementing `IFormidableField` (and `IFormidableOptionField` for option-based controls) and providing them via the `FORMIDABLE_FIELD` (or `FORMIDABLE_OPTION_FIELD`) injection token.
 
 **🌐 Live Demo**
@@ -56,7 +56,7 @@ export class AppModule {}
 
 ## Quick Start
 
-1. Define your model, form model, shape, and Vest validation suite:
+1. Define your model, form model, frame, and Vest validation suite:
 
 ```ts
 import { DeepPartial, DeepRequired } from 'ngx-formidable';
@@ -68,7 +68,7 @@ export interface User {
 }
 
 export type UserFormModel = DeepPartial<User>;
-export type UserFormShape = DeepRequired<UserFormModel>;
+export type UserFormFrame = DeepRequired<UserFormModel>;
 
 export const userFormModel: UserFormModel = {
 	// set initial values here, if any
@@ -77,7 +77,7 @@ export const userFormModel: UserFormModel = {
 	birthdate: undefined // e.g., new Date(1989, 5, 29),
 };
 
-export const userFormShape: UserFormShape = {
+export const userFormFrame: UserFormFrame = {
 	name: '',
 	hobby: 'other',
 	birthdate: new Date()
@@ -105,7 +105,7 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
 <form
 	formidableForm
 	[formValue]="userFormModel"
-	[formShape]="userFormShape"
+	[formFrame]="userFormFrame"
 	[suite]="userFormValidationSuite"
 	[validationOptions]="{ debounceValidationInMs: 200 }"
 	(formValueChange$)="userFormModel = $event"
@@ -165,7 +165,7 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
 
 ### FormDirective (`formidableForm`)
 
-- Binds your form model, shape, and Vest suite.
+- Binds your form model, frame, and Vest suite.
 - Emits `formValueChange$`, `errorsChange$`, `dirtyChange$`, `validChange$`.
 
 ### FormRootValidateDirective (`formidableRootValidate`)
@@ -340,7 +340,7 @@ Sometimes your form needs rules that depend on more than one field — for examp
 	formidableForm
 	formidableRootValidate
 	[formValue]="userFormModel"
-	[formShape]="userFormShape"
+	[formFrame]="userFormFrame"
 	[suite]="userFormValidationSuite"
 	...>
 	<!-- ... -->

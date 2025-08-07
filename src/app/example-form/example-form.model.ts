@@ -41,9 +41,9 @@ export type ExampleFormModel = DeepPartial<User>;
 
 //#region FormModel Validation
 
-export type ExampleFormShape = DeepRequired<ExampleFormModel>;
+export type ExampleFormFrame = DeepRequired<ExampleFormModel>;
 
-export const exampleFormShape: ExampleFormShape = {
+export const exampleFormFrame: ExampleFormFrame = {
   firstName: '',
   lastName: '',
   gender: 'male',

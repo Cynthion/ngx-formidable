@@ -26,21 +26,21 @@ import {
   zip
 } from 'rxjs';
 import { StaticSuite } from 'vest';
-import { validateFormShape } from '../helpers/form-validate.helpers';
+import { validateFormFrame } from '../helpers/form-validate.helpers';
 import { getAllFormErrors, mergeValuesAndRawValues, set } from '../helpers/form.helpers';
 import { cloneDeep } from '../helpers/utility.helpers';
 import { FormValidationOptions } from '../models/formidable.model';
 import { DeepRequired } from '../models/utility-types';
 
 /**
- * Binds a Vest static suite to an Angular `<form>` and provides reactive form value, shape, validation, and error outputs.
+ * Binds a Vest static suite to an Angular `<form>` and provides reactive form value, frame, validation, and error outputs.
  *
  * Inputs:
  * - `@Input() formValue: T | null`
  *   The current model value of the form (including disabled controls).
  *
- * - `@Input() formShape: DeepRequired<T> | null`
- *   The “shape” of your form model, used to type-check and catch typos at build time.
+ * - `@Input() formFrame: DeepRequired<T> | null`
+ *   The “frame” of your form model, used to type-check and catch typos at build time.
  *
  * - `@Input() suite: StaticSuite<string, string, (model: T, field: string) => void> | null`
  *   A Vest `staticSuite` that defines all your field and root‐level tests.
@@ -76,7 +76,7 @@ import { DeepRequired } from '../models/utility-types';
  * <form
  *   formidableForm
  *   [formValue]="user$ | async"
- *   [formShape]="userShape"
+ *   [formFrame]="userFrame"
  *   [suite]="userSuite"
  *   (formValueChange$)="onModelChange($event)"
  *   (errorsChange$)="errors = $event"
@@ -99,10 +99,10 @@ export class FormDirective<T extends Record<string, unknown>> implements OnDestr
   public readonly formValue = input<T | null>(null);
 
   /**
-   * Represents the shape of the FormModel.
+   * Represents the frame of the FormModel.
    * It's a deep-required version of the FormModel so that typing/typos can be checked.
    */
-  public readonly formShape = input<DeepRequired<T> | null>(null);
+  public readonly formFrame = input<DeepRequired<T> | null>(null);
 
   /**
    * Static vest suite that is used for form validation.
@@ -233,10 +233,10 @@ export class FormDirective<T extends Record<string, unknown>> implements OnDestr
       )
       .subscribe();
 
-    // trigger form shape validation when the form gets updated
+    // trigger form frame validation when the form gets updated
     this.formValueChange$.pipe(takeUntil(this.destroy$)).subscribe((v) => {
-      if (this.formShape()) {
-        validateFormShape(v, this.formShape() as DeepRequired<T>);
+      if (this.formFrame()) {
+        validateFormFrame(v, this.formFrame() as DeepRequired<T>);
       }
     });
 

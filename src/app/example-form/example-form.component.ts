@@ -5,8 +5,8 @@ import { map, Observable, startWith, Subject } from 'rxjs';
 import { StaticSuite } from 'vest';
 import {
   AnimalFormFieldOption,
+  exampleFormFrame,
   ExampleFormModel,
-  exampleFormShape,
   exampleFormValidationSuite,
   HighlightedEntries
 } from './example-form.model';
@@ -21,7 +21,7 @@ export class ExampleFormComponent {
     firstName: undefined, // 'Cynthion',
     lastName: undefined, //'Van Halen',
     gender: undefined, //'male',
-    nationality: undefined, // 'ch',
+    nationality: 'ch',
     hobby: undefined, //'reading',
     animal: undefined, //'cat',
     birthdate: undefined, // new Date(1989, 5, 29),
@@ -29,7 +29,7 @@ export class ExampleFormComponent {
     religion: undefined, // 'agnostic',
     allergies: undefined // ['dust', 'lactose']
   });
-  protected readonly formShape = exampleFormShape;
+  protected readonly formFrame = exampleFormFrame;
   protected readonly suite: StaticSuite<string, string, (model: ExampleFormModel, field?: string) => void> =
     exampleFormValidationSuite;
   protected readonly validationOptions: FormValidationOptions = { debounceValidationInMs: 0 };
@@ -291,7 +291,7 @@ export class ExampleFormComponent {
     this.logs = [];
   }
 
-  debugExpanded = true;
+  debugExpanded = false;
 
   toggleDebug() {
     this.debugExpanded = !this.debugExpanded;
