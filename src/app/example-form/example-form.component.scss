@@ -58,6 +58,24 @@ fieldset {
     position: static;
   }
 
+  .debug-toggle {
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border: 1px solid #aaa;
+      background: #f4f4f4;
+      border-radius: 4px;
+      cursor: pointer;
+
+      &:hover {
+        background: #e0e0e0;
+      }
+    }
+  }
+
   .debug-columns {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.5fr) minmax(0, 1fr);

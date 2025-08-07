@@ -289,5 +289,11 @@ export class ExampleFormComponent {
     this.logs = [];
   }
 
+  debugExpanded = true;
+
+  toggleDebug() {
+    this.debugExpanded = !this.debugExpanded;
+  }
+
   //#endregion
 }

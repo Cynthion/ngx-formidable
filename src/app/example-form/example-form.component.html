@@ -370,8 +370,18 @@
 </form>
 
 <!-- Show Debugging Output -->
+<!-- Debugging Output Toggle -->
 <div class="debug-output">
-  <div class="debug-columns">
+  <div class="debug-toggle">
+    <button (click)="toggleDebug()">
+      {{ debugExpanded ? 'Hide Debug' : 'Show Debug' }}
+    </button>
+  </div>
+
+  <!-- Collapsible Debug Section -->
+  <div
+    *ngIf="debugExpanded"
+    class="debug-columns">
     <!-- Left Column -->
     <div class="column left">
       <pre>Value:<br />{{ vm.formValue | json }}</pre>
