@@ -2,10 +2,10 @@
   display: block;
 }
 
-// from form.component.scss
 .form {
   display: flex;
   flex-direction: column;
+  margin: 1rem;
 }
 
 .footer {
@@ -44,12 +44,93 @@ fieldset {
   min-height: fit-content;
 }
 
-pre {
-  // Corrects font family set oddly in Safari 5 and Chrome.
-  font-family: monospace, serif;
-  font-size: 1em;
-  // Improves readability of pre-formatted text in all browsers.
-  white-space: pre;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+.debug-output {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #f9f9f9;
+  font-family: monospace;
+  font-size: 0.85rem;
+  z-index: 1000;
+
+  @media (max-width: 768px) {
+    position: static;
+  }
+
+  .debug-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.5fr) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: flex-start;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0; // allows overflow wrap
+  }
+
+  pre {
+    margin: 0;
+    padding: 0.5rem;
+    background: #f0f0f0;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+
+  .log-panel {
+    margin-top: 0.5rem;
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+
+      h4 {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #444;
+      }
+
+      button {
+        font-size: 0.75rem;
+        background: #eee;
+        border: 1px solid #ccc;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+    }
+
+    .log-messages {
+      max-height: 150px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: #f4f4f4;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 0.8rem;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .log-entry {
+      padding: 2px 0;
+      border-bottom: 1px solid #e0e0e0;
+      white-space: pre-wrap;
+    }
+  }
 }

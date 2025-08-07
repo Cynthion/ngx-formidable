@@ -366,12 +366,38 @@
       </button>
     </div>
   </fieldset>
-
-  <!-- Show Debugging Data -->
-  <div style="margin-top: 20px">
-    <pre>Value:<br/>{{ vm.formValue | json }}</pre>
-    <pre>Dirty: {{ vm.isDirty }}</pre>
-    <pre>Valid: {{ vm.isValid }}</pre>
-    <pre>Errors:<br/>{{ vm.errors | json }}</pre>
-  </div>
 </form>
+
+<!-- Show Debugging Output -->
+<div class="debug-output">
+  <div class="debug-columns">
+    <!-- Left Column -->
+    <div class="column left">
+      <pre>Value:<br />{{ vm.formValue | json }}</pre>
+    </div>
+
+    <!-- Middle Column -->
+    <div class="column middle">
+      <pre>Errors:<br />{{ vm.errors | json }}</pre>
+      <pre>Dirty: {{ vm.isDirty }}</pre>
+      <pre>Valid: {{ vm.isValid }}</pre>
+    </div>
+
+    <!-- Right Column (Log) -->
+    <div class="column right">
+      <div class="log-panel">
+        <div class="log-header">
+          <h4>Log Output</h4>
+          <button (click)="clearLogs()">Clear</button>
+        </div>
+        <div class="log-messages">
+          <div
+            *ngFor="let message of logs"
+            class="log-entry">
+            {{ message }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

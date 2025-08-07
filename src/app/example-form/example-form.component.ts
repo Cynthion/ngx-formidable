@@ -175,16 +175,16 @@ export class ExampleFormComponent {
   }
 
   protected onValueChanged(_fieldName: string, _value: unknown): void {
-    console.log(`Value changed on ${_fieldName} field:`, _value);
+    this.log(`Value changed on ${_fieldName} field: ${_value}`);
   }
 
   protected onFocusChanged(_fieldName: string, _isFocused: boolean): void {
-    console.log(`Focus changed on ${_fieldName} field:`, _isFocused);
+    this.log(`Focus changed on ${_fieldName} field: ${_isFocused}`);
   }
 
   protected onSubmit(): void {
     if (this.isValid()) {
-      console.log(this.formValue());
+      this.log(JSON.stringify(this.formValue()));
     }
   }
 
@@ -276,4 +276,18 @@ export class ExampleFormComponent {
 
     return highlights;
   }
+
+  //#region Logging
+
+  protected logs: string[] = [];
+
+  log(message: string): void {
+    this.logs.push(message);
+  }
+
+  clearLogs(): void {
+    this.logs = [];
+  }
+
+  //#endregion
 }
