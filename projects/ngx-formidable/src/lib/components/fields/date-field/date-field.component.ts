@@ -36,45 +36,57 @@ import { calendarArrowDown, calendarArrowUp } from '../../../models/icons';
 import { BaseFieldDirective } from '../base-field.component';
 
 /**
- * A masked date input field with calendar panel support.
+ * Component: DateFieldComponent
  *
- * Provides a form-compatible field for selecting calendar dates using:
- * - Unicode token-based formatting (e.g. `'yyyy-MM-dd'`, `'dd.MM.yyyy'`)
- * - `ngx-mask` integration for consistent user input
- * - `Pikaday` for an inline calendar UI (positionable panel)
+ * An input field for selecting dates via text entry or a Pikaday calendar popup.
+ * Provides:
+ * - Masked input (ngx-mask) according to a Unicode date format (e.g. "yyyy-MM-dd").
+ * - Calendar panel with keyboard navigation (arrows, Enter, Escape).
+ * - Customizable Pikaday options: minDate, maxDate, firstDay, i18n labels, yearRange, etc.
+ * - Automatic parsing/formatting via date-fns and format helpers.
  *
- * ## Features
- * - Unicode date format input (via `unicodeTokenFormat`)
- * - Masked input with `ngx-mask`
- * - Panel-based date selection with Pikaday
- * - Emits normalized `Date` values (with time set to `00:00:00.000`)
+ * @input unicodeTokenFormat?: string
+ *   Unicode date format mask (defaults to "yyyy-MM-dd").
  *
- * ## Normalization Behavior
- * All emitted or compared dates are normalized to remove time components using:
- * ```ts
- * normalizeTimePart(date: Date): Date // time => 00:00:00.000
- * ```
- *  This allows consistent date-only comparison even though `Date` is used.
+ * @input toggleIconClosed?: string
+ * @input toggleIconOpen?: string
+ *   Icons for open/closed calendar toggle (SVG path data).
  *
- * ## Inputs
- * - `name`: Field name
- * - `placeholder`: Input placeholder text
- * - `required`: Whether the field is required
- * - `unicodeTokenFormat`: Date format string (default: `'yyyy-MM-dd'`)
- * - Pikaday-related inputs: minDate, maxDate, etc.
- * - `panelPosition`: `'left' | 'right'` (default: `'right'`)
+ * @input ariaLabel?: string
+ * @input defaultDate?: Date
+ * @input setDefaultDate?: boolean
+ * @input firstDay?: number
+ * @input minDate?: Date
+ * @input maxDate?: Date
+ * @input disableWeekends?: boolean
+ * @input disableDayFn?: (date: Date) => boolean
+ * @input yearRange?: number | number[]
+ * @input i18n?: PikadayI18nConfig
+ * @input yearSuffix?: string
+ * @input showMonthAfterYear?: boolean
+ * @input showDaysInNextAndPreviousMonths?: boolean
+ * @input enableSelectionDaysInNextAndPreviousMonths?: boolean
+ * @input numberOfMonths?: number
+ *   All map to PikadayOptions for calendar behavior.
  *
- * ## Outputs
- * - `valueChanged: EventEmitter<Date | null>`
+ * @input isPanelOpen: boolean
+ * @input panelPosition?: 'left' | 'right' | 'full'
+ *   Controls popup open state and positioning.
  *
- * ## Usage Example:
+ * @output valueChanged: EventEmitter<Date|null>
+ * @output focusChanged: EventEmitter<boolean>
+ *   Emitted when the date is selected/cleared or focus changes.
+ *
+ * Example:
  * ```html
  * <formidable-date-field
  *   name="birthdate"
- *   placeholder="Select a date"
+ *   ngModel
  *   [unicodeTokenFormat]="'dd.MM.yyyy'"
- *   [(ngModel)]="form.birthdate">
- * </formidable-date-field>
+ *   [minDate]="minDate"
+ *   [maxDate]="maxDate"
+ *   [yearRange]="[1900, 2025]"
+ * ></formidable-date-field>
  * ```
  */
 @Component({

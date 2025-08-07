@@ -12,6 +12,26 @@ import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
 import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableTextareaField } from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.component';
 
+/**
+ * A configurable multi-line textarea with optional autosizing and length indicator.
+ * Supports:
+ * - `name`, `placeholder`, `readonly`, `disabled`
+ * - `autocomplete` (`'off'|'on'|'given-name'|…`)
+ * - `minLength`, `maxLength`
+ * - `enableAutosize` (auto height)
+ * - `showLengthIndicator` (character count)
+ *
+ * @example
+ * ```html
+ * <formidable-textarea-field
+ *   name="bio"
+ *   ngModel
+ *   [maxLength]="200"
+ *   [enableAutosize]="true"
+ *   [showLengthIndicator]="true"
+ * ></formidable-textarea-field>
+ * ```
+ */
 @Component({
   selector: 'formidable-textarea-field',
   templateUrl: './textarea-field.component.html',

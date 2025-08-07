@@ -33,6 +33,30 @@ import {
 import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseFieldDirective } from '../base-field.component';
 
+/**
+ * A configurable dropdown input.
+ * Supports:
+ * - `name`, `placeholder`, `readonly`, `disabled`
+ * - `[options]`: IFormidableFieldOption[]
+ * - `<formidable-field-option>` children
+ * - `[emptyOption]`, `[sortFn]`
+ * - `isPanelOpen` two-way
+ * - `panelPosition: 'left'|'right'|'full'`
+
+ * @example
+ * ```html
+ * <formidable-dropdown-field
+ *   name="language"
+ *   ngModel
+ *   [options]="languageOptions"
+ *   panelPosition="left"
+ * >
+ *   <!-- Optional inline options -->
+ *   <formidable-field-option [value]="'en'" [label]="'English'"></formidable-field-option>
+ *   <formidable-field-option [value]="'fr'" [label]="'French'"></formidable-field-option>
+ * </formidable-dropdown-field>
+ * ```
+ */
 @Component({
   selector: 'formidable-dropdown-field',
   templateUrl: './dropdown-field.component.html',

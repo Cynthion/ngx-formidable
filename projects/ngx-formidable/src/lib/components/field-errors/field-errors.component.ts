@@ -1,6 +1,23 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
 import { AbstractControl, NgModel, NgModelGroup } from '@angular/forms';
 
+/**
+ * Renders the list of validation error messages for a single NgModel or NgModelGroup.
+ * - Automatically tracks previous errors while control is pending.
+ * - Exposes `invalid` flag once the control is touched and has errors.
+ *
+ * Inputs:
+ * - `@Input() ngModel?: NgModel`
+ * - `@Input() ngModelGroup?: NgModelGroup`
+ *
+ * Template displays `control.errors['errors']` array.
+ *
+ * @example
+ * ```html
+ * <input name="username" ngModel required />
+ * <formidable-field-errors [ngModel]="usernameModel"></formidable-field-errors>
+ * ```
+ */
 @Component({
   selector: 'formidable-field-errors',
   templateUrl: './field-errors.component.html',

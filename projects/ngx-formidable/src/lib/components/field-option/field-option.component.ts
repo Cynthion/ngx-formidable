@@ -18,6 +18,22 @@ import {
   IFormidableOptionField
 } from '../../models/formidable.model';
 
+/**
+ * Represents a single option in select, dropdown, autocomplete, radio or checkbox group.
+ * Provides template outlet for custom content, and handles:
+ * - `value: string`         (required)
+ * - `label?: string`        (display text fallback)
+ * - `disabled`, `readonly`, `selected`, `highlighted`
+ * - `match?(filter: string)` custom filter predicate
+ * - `select?()` custom select callback
+ *
+ * @example
+ * ```html
+ * <formidable-select-field name="gender">
+ *   <formidable-field-option [value]="'other'" [label]="'Other'"></formidable-field-option>
+ * </formidable-select-field>
+ * ```
+ */
 @Component({
   selector: 'formidable-field-option',
   templateUrl: './field-option.component.html',

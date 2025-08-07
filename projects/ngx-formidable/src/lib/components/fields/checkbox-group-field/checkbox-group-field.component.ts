@@ -27,6 +27,22 @@ import {
 import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseFieldDirective } from '../base-field.component';
 
+/**
+ * A configurable group of selectable checkbox options.
+ * Supports:
+ * - `name`, `readonly`, `disabled`
+ * - `[options]`: IFormidableFieldOption[]
+ * - `<formidable-field-option>` children
+ * - `[emptyOption]`, `[sortFn]`
+ *
+ * @example
+ * ```html
+ * <formidable-checkbox-group-field name="allergies" ngModel [options]="allergyOptions">
+ *   <!-- Optional inline options -->
+ *   <formidable-field-option [value]="'nuts'" [label]="'Nuts'"></formidable-field-option>
+ * </formidable-checkbox-group-field>
+ * ```
+ */
 @Component({
   selector: 'formidable-checkbox-group-field',
   templateUrl: './checkbox-group-field.component.html',

@@ -4,6 +4,23 @@ import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
 import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableInputField } from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.component';
 
+/**
+ * A configurable single-line text input.
+ * Supports:
+ * - `name`, `placeholder`, `readonly`, `disabled`
+ * - `autocomplete` (`'off'|'on'|'given-name'|…`)
+ * - `minLength`, `maxLength`
+ *
+ * @example
+ * ```html
+ * <formidable-input-field
+ *   name="firstName"
+ *   ngModel
+ *   placeholder="First Name"
+ *   [minLength]="2"
+ * ></formidable-input-field>
+ * ```
+ */
 @Component({
   selector: 'formidable-input-field',
   templateUrl: './input-field.component.html',

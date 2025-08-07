@@ -22,6 +22,22 @@ import {
 } from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.component';
 
+/**
+ * A configurable `<select>` element.
+ * Supports:
+ * - `name`, `placeholder`, `readonly`, `disabled`
+ * - `[options]`: IFormidableFieldOption[]
+ * - `<formidable-field-option>` children
+ * - `[emptyOption]`, `[sortFn]`
+ *
+ * @example
+ * ```html
+ * <formidable-select-field name="country" ngModel [options]="countryList">
+ *  <!-- Optional inline options -->
+ *  <formidable-field-option [value]="'us'" [label]="'United States'"></formidable-field-option>
+ * </formidable-select-field>
+ * ```
+ */
 @Component({
   selector: 'formidable-select-field',
   templateUrl: './select-field.component.html',

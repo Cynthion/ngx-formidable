@@ -37,6 +37,29 @@ import {
 import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseFieldDirective } from '../base-field.component';
 
+/**
+ * A configurable text input with an overlayed list of filtered options.
+ * Supports:
+ * - `name`, `placeholder`, `readonly`, `disabled`
+ * - `[options]`: IFormidableFieldOption[]
+ * - `<formidable-field-option>` children
+ * - `[emptyOption]`, `[sortFn]`
+ * - `isPanelOpen` two-way
+ * - `panelPosition: 'left'|'right'|'full'`
+ *
+ * @example
+ * ```html
+ * <formidable-autocomplete-field
+ *   name="hobby"
+ *   ngModel
+ *   [options]="hobbyOptions"
+ * >
+ *   <!-- Optional inline options -->
+ *   <formidable-field-option [value]="'reading'" [label]="'Reading'"></formidable-field-option>
+ *   <formidable-field-option [value]="'gaming'" [label]="'Gaming'"></formidable-field-option>
+ * </formidable-autocomplete-field>
+ * ```
+ */
 @Component({
   selector: 'formidable-autocomplete-field',
   templateUrl: './autocomplete-field.component.html',

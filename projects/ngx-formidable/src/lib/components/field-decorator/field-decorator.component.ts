@@ -19,6 +19,32 @@ import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
 import { FieldTooltipDirective } from '../../directives/field-tooltip.directive';
 import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableField } from '../../models/formidable.model';
 
+/**
+ * Wraps any form field and projects optional label, tooltip, prefix, and suffix.
+ * Forwards focus/value events from the wrapped field and adjusts layout for
+ * prefix/suffix padding.
+ *
+ * ContentChildren:
+ * - `FORMIDABLE_FIELD` (your IFormidableField component)
+ * - `FieldLabelDirective` (wrapped label element)
+ * - `FieldTooltipDirective` (wrapped tooltip element)
+ * - `FieldPrefixDirective` (wrapped prefix element)
+ * - `FieldSuffixDirective` (wrapped suffix element)
+ *
+ * Outputs (re-emitted from projected field):
+ * - `@Output() valueChanged: EventEmitter<unknown>`
+ * - `@Output() focusChanged: EventEmitter<boolean>`
+ *
+ * @example
+ * ```html
+ * <formidable-field-decorator>
+ *   <formidable-input-field name="email" ngModel></formidable-input-field>
+ *   <div formidableFieldLabel>Email address</div>
+ *   <div formidableFieldTooltip>Enter your work email</div>
+ *   <div formidableFieldPrefix>@</div>
+ * </formidable-field-decorator>
+ * ```
+ */
 @Component({
   selector: 'formidable-field-decorator',
   templateUrl: './field-decorator.component.html',

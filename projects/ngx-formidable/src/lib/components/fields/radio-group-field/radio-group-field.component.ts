@@ -27,6 +27,22 @@ import {
 import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseFieldDirective } from '../base-field.component';
 
+/**
+ * A configurable group of selectable radio options.
+ * Supports:
+ * - `name`, `readonly`, `disabled`
+ * - `[options]`: IFormidableFieldOption[]
+ * - `<formidable-field-option>` children
+ * - `[emptyOption]`, `[sortFn]`
+ *
+ * @example
+ * ```html
+ * <formidable-radio-group-field name="allergies" ngModel [options]="allergyOptions">
+ *   <!-- Optional inline options -->
+ *   <formidable-field-option [value]="'nuts'" [label]="'Nuts'"></formidable-field-option>
+ * </formidable-radio-group-field>
+ * ```
+ */
 @Component({
   selector: 'formidable-radio-group-field',
   templateUrl: './radio-group-field.component.html',

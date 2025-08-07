@@ -26,42 +26,26 @@ import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableTimeField } from '..
 import { BaseFieldDirective } from '../base-field.component';
 
 /**
- * A masked time-only input field using Unicode formatting.
+ * An input field for selecting times via masked text entry.
+ * Provides:
+ * - Masked input (ngx-mask) according to a Unicode time format (e.g. "HH.mm").
+ * - Automatic parsing/formatting.
+ * - Simple keyboard handling.
  *
- * Provides a form-compatible field for entering time values like:
- * - `'HH.mm'` (e.g. 13.45)
- * - `'HH:mm:ss'`
- * - `'hh:mm a'` (12-hour with AM/PM)
+ * @input unicodeTokenFormat?: string
+ *   Unicode time format mask (defaults to "HH.mm").
  *
- * ## Features
- * - Unicode time format input (via `unicodeTokenFormat`)
- * - Masked input with `ngx-mask`
- * - Emits normalized `Date` values (with date set to `1970-01-01`)
+ * @output valueChanged: EventEmitter<Date|null>
+ * @output focusChanged: EventEmitter<boolean>
+ *   Emitted when the time is parsed/selected or focus changes.
  *
- * ## Normalization Behavior
- * All emitted or compared values are normalized to remove the **date** portion:
- * ```ts
- * normalizeDatePart(date: Date): Date // date => 1970-01-01
- * ```
- * This allows consistent time-only comparison even though `Date` is used.
- *
- * ## Inputs
- * - `name`: Field name
- * - `placeholder`: Input placeholder text
- * - `required`: Whether the field is required
- * - `unicodeTokenFormat`: Time format string (default: `'HH.mm'`)
- *
- * ## Outputs
- * - `valueChanged: EventEmitter<Date | null>`
- *
- * ## Usage Example:
+ * Example:
  * ```html
  * <formidable-time-field
- *   name="startTime"
- *   placeholder="Enter time"
+ *   name="appointmentTime"
+ *   ngModel
  *   [unicodeTokenFormat]="'HH:mm'"
- *   [(ngModel)]="form.startTime">
- * </formidable-time-field>
+ * ></formidable-time-field>
  * ```
  */
 @Component({
