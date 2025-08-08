@@ -1,28 +1,103 @@
 <h1 align="center">ngx-formidable</h1>
 
 <p align="center">
-A comprehensive Angular component library for building rich, validated forms using Vest for validation, Pikaday for date picking, and flexible field decorators.
+A comprehensive Angular component library for building rich, validated forms.
 </p>
 
 <p align="center">
   Created with ❤️ by Cynthion
 </p>
 
-- **Zero Boilerplate** — Wire up form value, frame, and validation suite with a single `<form formidableForm>` directive.
-- **Async Validation** — Field- and root-level (cross-field) Vest suites run on every change with configurable debounce.
-- **Rich Field Components** — Inputs, textareas, selects, dropdowns, autocomplete, date & time pickers, radio & checkbox groups.
-- **Field Decorator** — Optionally project labels, tooltips, prefixes, suffixes around any field.
-- **Customizable Styling** — SCSS tokens for colors, typography, sizing, spacing, animations, shadows.
-- **Keyboard Navigation** — All form controls support full keyboard interaction (arrows to navigate options or calendar, Enter to select, Esc/Tab to close panels).
-- **Type Safety** — The "frame" concept provides a deep‐required blueprint of your form model that supplies default values for every field, enforces type safety, and catches typos in Dev Mode before runtime.
-- **Extensible** — You can add your own custom field components by implementing `IFormidableField` (and `IFormidableOptionField` for option-based controls) and providing them via the `FORMIDABLE_FIELD` (or `FORMIDABLE_OPTION_FIELD`) injection token.
+## Features
+
+<table>
+  <tr>
+    <td width="33%" valign="top">
+      <h5><a href="#quick-start">🚀 Zero Boilerplate</a></h5>
+      <ul>
+        <li><code>&lt;form formidableForm&gt;</code> (single directive)</li>
+        <li>Wires model + <code>Frame</code> + Vest</li>
+        <li>Streams/outputs: <code>value</code>/<code>valid</code>/<code>dirty</code>/<code>errors</code></li>
+      </ul>
+    </td>
+    <td width="33%" valign="top">
+      <h5><a href="#root-level--cross-field-validation">✅ Async Validation</a></h5>
+      <ul>
+        <li>Per-Field or Cross-Field / Root-Level</li>
+				<li>Powered by <code>Vest</code></li>
+        <li>Live errors &amp; validity</li>
+				<li>Simple <code>formidable-field-errors</code> directive
+      </ul>
+    </td>
+    <td width="33%" valign="top">
+      <h5><a href="#field-components">🧩 Rich Field Components</a></h5>
+      <ul>
+        <li>Input / Textarea</li>
+        <li>Select / Dropdown / Autocomplete</li>
+				<li>Radio Groups / Checkboxes</li>
+        <li>Date Picker / Time</li>
+				<li>Re-usable <code>formidable-field-option</code> for all option fields.
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td width="33%" valign="top">
+      <h5><a href="#field-decorator">🎀 Field Decorator</a></h5>
+      <ul>
+        <li>Label / Tooltip / Prefix / Suffix</li>
+        <li>Floating label transitions</li>
+        <li>Forwards <code>valueChanged</code>/<code>focusChanged</code></li>
+      </ul>
+    </td>
+    <td width="33%" valign="top">
+      <h5><a href="#theming--styles">🎨 Theming &amp; Styling</a></h5>
+      <ul>
+        <li>Overridable <code>CSS</code> variables</li>
+				<li>Overridable <code>Pikaday</code> classes</li>
+      </ul>
+    </td>
+    <td width="33%" valign="top">
+      <h5><a href="#keyboard-navigation">⌨️ Keyboard Navigation</a></h5>
+      <ul>
+        <li>Simple navigation (<code>Enter</code>/<code>Esc</code>/<code>Tab</code><code>Arrows</code>, etc.)</li>
+        <li>Type-ahead buffers</li>
+        <li>Managed focus &amp; scroll into view</li>
+      </ul>
+    </td>
+  </tr>
+
+  <tr>
+    <td width="33%" valign="top">
+      <h5><a href="#masking">🛡️ Masking</a></h5>
+      <ul>
+			<li>Powered by <code>ngx-mask</code></li>
+        <li>Per-field opt-in via <code>[mask]</code> and <code>[maskConfig]</code></li>
+        <li>Global app defaults with <code>FORMIDABLE_MASK_DEFAULTS</code></li>
+      </ul>
+    </td>
+    <td width="33%" valign="top">
+      <h5><a href="#quick-start">🧠 Type Safety (Frame)</a></h5>
+      <ul>
+				<li>Deep-required <code>Frame</code> concept</li>
+				<li>Shows model errors at build time</li>
+        <li>Strongly-typed templates/suites</li>
+      </ul>
+    </td>
+    <td width="33%" valign="top">
+      <h5><a href="#extending-with-custom-components--options">🛠️ Extensible</a></h5>
+      <ul>
+        <li><code>IFormidableField</code> for custom inputs</li>
+        <li>Options: <code>IFormidableOptionField</code> + <code>FORMIDABLE_FIELD_OPTION</code></li>
+        <li>Reuse <code>BaseFieldDirective</code></li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 **🌐 Live Demo**
 
 Explore live examples on our GitHub Pages: https://cynthion.github.io/ngx-formidable/
-
-// TODO add emojis
-// TODO add feature table with emojis
 
 ---
 
@@ -377,7 +452,30 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
 
 ## Keyboard Navigation
 
-// TODO
+All controls are keyboard-friendly.
+
+- Disabled/readonly fields ignore navigation.
+- `Panel` = Dropdown/Autocomplete/Date overlay.
+- Panels close on `Esc` or when focus leaves the field.
+
+| Key             | Inputs / Textareas | Select / Dropdown / Autocomplete                       | Radio / Checkbox Groups | Date Picker                      | Time Field          |
+| --------------- | ------------------ | ------------------------------------------------------ | ----------------------- | -------------------------------- | ------------------- |
+| `Tab`           | Move to next       | Close panel (if open), then move                       | Move to next            | Close panel (if open), then move | Move to next        |
+| `Shift` + `Tab` | Move to previous   | Close panel (if open), then move                       | Move to previous        | Close panel (if open), then move | Move to previous    |
+| `Enter`         | —                  | If panel open: choose highlighted option; if closed: — | —                       | Parse & accept date              | Parse & accept time |
+| `Esc`           | —                  | Close panel                                            | —                       | Close panel                      | —                   |
+| `Arrow Down`    | —                  | If closed: open panel; if open: next option (wrap)     | Next option             | Next day/week                    | —                   |
+| `Arrow Up`      | —                  | If open: previous option (wrap)                        | Previous option         | Previous day/week                | —                   |
+| `Arrow Left`    | —                  | —                                                      | —                       | Previous day/month               | —                   |
+| `Arrow Right`   | —                  | —                                                      | —                       | Next day/month                   | —                   |
+
+### Type-ahead (Dropdowns & Autocomplete)
+
+Typing builds a short type-ahead buffer; the first matching option is highlighted.
+
+- Backspace edits the buffer.
+- If the panel is closed, typing the first character opens it.
+- The buffer auto-clears after a brief pause.
 
 ## Masking
 
