@@ -1,3 +1,20 @@
+<!-- Control Center -->
+<div class="control-center debug-output">
+  <div class="control-toggle debug-toggle">
+    <button (click)="toggleControlCenter()">
+      {{ controlCenterExpanded ? 'Hide Control Center' : 'Show Control Center' }}
+    </button>
+  </div>
+
+  <div
+    *ngIf="controlCenterExpanded"
+    class="control-body">
+    <div class="control-content">
+      <p>Control Center</p>
+    </div>
+  </div>
+</div>
+
 <form
   formidableRootValidate
   formidableForm
@@ -419,9 +436,8 @@
   </fieldset>
 </form>
 
-<!-- Show Debugging Output -->
+<!-- Debugging Output -->
 @if (viewModel$ | async; as vm) {
-  <!-- Debugging Output Toggle -->
   <div class="debug-output">
     <div class="debug-toggle">
       <button (click)="toggleDebug()">

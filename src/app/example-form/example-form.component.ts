@@ -293,7 +293,7 @@ export class ExampleFormComponent {
     return highlights;
   }
 
-  //#region Logging
+  //#region Control Center & Debug Output
 
   protected logs: string[] = [];
 
@@ -305,7 +305,12 @@ export class ExampleFormComponent {
     this.logs = [];
   }
 
-  debugExpanded = false;
+  controlCenterExpanded = true;
+  debugExpanded = true;
+
+  toggleControlCenter(): void {
+    this.controlCenterExpanded = !this.controlCenterExpanded;
+  }
 
   toggleDebug() {
     this.debugExpanded = !this.debugExpanded;
