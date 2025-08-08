@@ -1,4 +1,5 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { ChangeDetectorRef, Component, Inject } from '@angular/core';
 import Fuse, { FuseResult } from 'fuse.js';
 import { FormValidationOptions, IFormidableFieldOption } from 'ngx-formidable';
 import { BehaviorSubject, combineLatest, map, Observable, startWith, Subject } from 'rxjs';
@@ -17,7 +18,10 @@ import {
   styleUrls: ['./example-form.component.scss']
 })
 export class ExampleFormComponent {
-  constructor(private cdRef: ChangeDetectorRef) {}
+  constructor(
+    @Inject(DOCUMENT) private doc: Document,
+    private cdRef: ChangeDetectorRef
+  ) {}
 
   protected readonly formValue$ = new BehaviorSubject<ExampleFormModel>({
     firstName: undefined, // 'Cynthion',
@@ -329,52 +333,100 @@ export class ExampleFormComponent {
 
   // Since all components are change-detection OnPush, we need to trigger a change detection cycle
   protected renderFlip = true;
+  private appliedKeys = new Set<string>(); // track what we’ve set on :root
 
   onToggle(key: ControlKey, checked: boolean): void {
     this.controlCenter[key] = checked;
     this.renderFlip = !this.renderFlip;
+    this.clearLogs();
     this.cdRef.markForCheck();
   }
 
   setTheme(key: ThemeKey): void {
     this.theme = key;
-    const root = document.documentElement;
 
-    // clear known vars first to avoid leftovers
-    const allKeys = Object.keys(this.themes.default);
-    for (const k of allKeys) root.style.removeProperty(k);
+    const root = this.doc.documentElement;
 
-    // apply new
+    // 1) Clear previously applied custom vars
+    this.appliedKeys.forEach((k) => root.style.removeProperty(k));
+    this.appliedKeys.clear();
+
+    // 2) Apply selected theme vars (default = {} → applies nothing)
     const vars = this.themes[key];
     for (const [k, v] of Object.entries(vars)) {
       root.style.setProperty(k, v);
+      this.appliedKeys.add(k);
     }
 
-    // persist
+    // 3) Persist + nudge CD if needed
     localStorage.setItem('example.theme', key);
+    this.cdRef.markForCheck();
   }
 
   private readonly themes: Record<ThemeKey, ThemeVars> = {
-    default: {
-      '--formidable-field-height': '50px',
-      '--formidable-color-validation-error': 'red',
-      '--formidable-color-field-background': 'rgb(209, 143, 233)',
-      '--formidable-color-field-highlighted': 'rgba(170, 64, 237, 0.177)',
-      '--formidable-date-field-panel-width': '200px'
-    },
+    default: {},
     theme2: {
-      '--formidable-field-height': '50px',
-      '--formidable-color-validation-error': '#ff6b6b',
-      '--formidable-color-field-background': '#2b2b2b',
-      '--formidable-color-field-highlighted': 'rgba(255,255,255,0.08)',
-      '--formidable-date-field-panel-width': '220px'
+      '--formidable-field-height': '64px',
+      '--formidable-field-border-thickness': '2px',
+      '--formidable-field-border-radius': '10px',
+      '--formidable-color-validation-error': '#d61f69',
+      '--formidable-color-field-text': '#1b1b1b',
+      '--formidable-color-field-label': '#1b1b1b',
+      '--formidable-color-field-label-floating': '#0e7490',
+      '--formidable-color-field-placeholder': '#6b7280',
+      '--formidable-color-field-selection': '#c084fc',
+      '--formidable-color-field-border': '#0ea5e9',
+      '--formidable-color-field-border-focus': '#3b82f6',
+      '--formidable-color-field-background': '#ecfeff',
+      '--formidable-color-field-background-readonly': '#bae6fd',
+      '--formidable-color-field-background-disabled': '#e5e7eb',
+      '--formidable-color-field-highlighted': 'rgba(14, 165, 233, 0.15)',
+      '--formidable-color-field-hovered': 'rgba(59, 130, 246, 0.2)',
+      '--formidable-date-field-panel-width': '260px',
+      '--formidable-panel-background': '#f0f9ff',
+      '--formidable-panel-box-shadow': '0 8px 32px rgba(0,0,0,0.15)'
     },
     theme3: {
-      '--formidable-field-height': '56px',
-      '--formidable-color-validation-error': '#e11d48',
-      '--formidable-color-field-background': '#fff7ed',
-      '--formidable-color-field-highlighted': 'rgba(245, 158, 11, 0.18)',
-      '--formidable-date-field-panel-width': '240px'
+      '--formidable-field-height': '60px',
+      '--formidable-field-border-thickness': '3px',
+      '--formidable-field-border-radius': '14px',
+      '--formidable-color-validation-error': '#ff4d6d',
+      '--formidable-color-field-text': '#1e293b',
+      '--formidable-color-field-label': '#1e293b',
+      '--formidable-color-field-label-floating': '#f97316',
+      '--formidable-color-field-placeholder': '#f59e0b',
+      '--formidable-color-field-selection': '#fde047',
+      '--formidable-color-field-border': '#f97316',
+      '--formidable-color-field-border-focus': '#ea580c',
+      '--formidable-color-field-background': '#fffbeb',
+      '--formidable-color-field-background-readonly': '#fde68a',
+      '--formidable-color-field-background-disabled': '#fcd34d',
+      '--formidable-color-field-highlighted': 'rgba(251, 191, 36, 0.25)',
+      '--formidable-color-field-hovered': 'rgba(249, 115, 22, 0.2)',
+      '--formidable-date-field-panel-width': '260px',
+      '--formidable-panel-background': '#fff7ed',
+      '--formidable-panel-box-shadow': '0 8px 32px rgba(255, 140, 0, 0.25)'
+    },
+    theme4: {
+      '--formidable-field-height': '42px',
+      '--formidable-field-border-thickness': '1px',
+      '--formidable-field-border-radius': '4px',
+      '--formidable-color-validation-error': '#b91c1c',
+      '--formidable-color-field-text': '#111827',
+      '--formidable-color-field-label': '#111827',
+      '--formidable-color-field-label-floating': '#374151',
+      '--formidable-color-field-placeholder': '#6b7280',
+      '--formidable-color-field-selection': '#93c5fd',
+      '--formidable-color-field-border': '#9ca3af',
+      '--formidable-color-field-border-focus': '#2563eb',
+      '--formidable-color-field-background': '#f9fafb',
+      '--formidable-color-field-background-readonly': '#e5e7eb',
+      '--formidable-color-field-background-disabled': '#e5e7eb',
+      '--formidable-color-field-highlighted': 'rgba(37, 99, 235, 0.08)',
+      '--formidable-color-field-hovered': 'rgba(37, 99, 235, 0.15)',
+      '--formidable-date-field-panel-width': '200px',
+      '--formidable-panel-background': '#ffffff',
+      '--formidable-panel-box-shadow': '0 4px 20px rgba(0,0,0,0.08)'
     }
   };
 
@@ -382,5 +434,5 @@ export class ExampleFormComponent {
 }
 
 type ControlKey = 'showPrefixes' | 'showSuffixes' | 'showTooltips' | 'showLabels' | 'floatingLabels';
-type ThemeKey = 'default' | 'theme2' | 'theme3';
+type ThemeKey = 'default' | 'theme2' | 'theme3' | 'theme4';
 type ThemeVars = Record<string, string>;

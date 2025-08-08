@@ -9,50 +9,49 @@
     *ngIf="controlCenterExpanded"
     class="control-body">
     <div class="control-content">
-      <label>
-        <input
-          type="checkbox"
-          [checked]="controlCenter.showPrefixes"
-          (change)="onToggle('showPrefixes', $any($event.target).checked)" />
-        Show Prefixes
-      </label>
-
-      <label>
-        <input
-          type="checkbox"
-          [checked]="controlCenter.showSuffixes"
-          (change)="onToggle('showSuffixes', $any($event.target).checked)" />
-        Show Suffixes
-      </label>
-
-      <label>
-        <input
-          type="checkbox"
-          [checked]="controlCenter.showTooltips"
-          (change)="onToggle('showTooltips', $any($event.target).checked)" />
-        Show Tooltips
-      </label>
-
-      <label>
-        <input
-          type="checkbox"
-          [checked]="controlCenter.showLabels"
-          (change)="onToggle('showLabels', $any($event.target).checked)" />
-        Show Labels
-      </label>
-
-      <label>
-        <input
-          type="checkbox"
-          [checked]="controlCenter.floatingLabels"
-          (change)="onToggle('floatingLabels', $any($event.target).checked)" />
-        Floating Labels
-      </label>
+      <!-- Decorators -->
+      <fieldset>
+        <legend>Decorators:</legend>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="controlCenter.showPrefixes"
+            (change)="onToggle('showPrefixes', $any($event.target).checked)" />
+          Show Prefixes
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="controlCenter.showSuffixes"
+            (change)="onToggle('showSuffixes', $any($event.target).checked)" />
+          Show Suffixes
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="controlCenter.showTooltips"
+            (change)="onToggle('showTooltips', $any($event.target).checked)" />
+          Show Tooltips
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="controlCenter.showLabels"
+            (change)="onToggle('showLabels', $any($event.target).checked)" />
+          Show Labels
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="controlCenter.floatingLabels"
+            (change)="onToggle('floatingLabels', $any($event.target).checked)" />
+          Floating Labels
+        </label>
+      </fieldset>
 
       <!-- Theme -->
-      <fieldset style="border: 0; padding: 0; margin: 0">
-        <legend style="font-weight: 600; margin-bottom: 0.25rem">Theme</legend>
-
+      <fieldset>
+        <legend>Theme:</legend>
         <label>
           <input
             type="radio"
@@ -61,7 +60,6 @@
             (change)="setTheme('default')" />
           Default
         </label>
-
         <label>
           <input
             type="radio"
@@ -70,7 +68,6 @@
             (change)="setTheme('theme2')" />
           Theme 2
         </label>
-
         <label>
           <input
             type="radio"
@@ -78,6 +75,14 @@
             [checked]="theme === 'theme3'"
             (change)="setTheme('theme3')" />
           Theme 3
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="theme"
+            [checked]="theme === 'theme4'"
+            (change)="setTheme('theme4')" />
+          Theme 4
         </label>
       </fieldset>
     </div>
