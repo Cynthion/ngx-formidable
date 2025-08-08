@@ -339,7 +339,7 @@ export class ExampleFormComponent {
     this.controlCenter[key] = checked;
     this.renderFlip = !this.renderFlip;
     this.clearLogs();
-    this.cdRef.markForCheck();
+    // this.cdRef.markForCheck();
   }
 
   setTheme(key: ThemeKey): void {
