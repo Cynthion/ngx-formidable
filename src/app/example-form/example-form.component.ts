@@ -316,5 +316,13 @@ export class ExampleFormComponent {
     this.debugExpanded = !this.debugExpanded;
   }
 
+  protected controlCenter = {
+    showPrefixes: true,
+    showSuffixes: true,
+    showTooltips: true,
+    showLabels: true,
+    floatingLabels: true
+  };
+
   //#endregion
 }

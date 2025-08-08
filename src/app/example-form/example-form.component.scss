@@ -44,13 +44,13 @@ fieldset {
   min-height: fit-content;
 }
 
-/* ===========================
-   Shared panel styles (DRY)
-   =========================== */
-.debug-panel {
+.panel {
   z-index: 1000;
   font-family: monospace;
   font-size: 0.85rem;
+
+  border-top: 1px solid #e5e7eb;
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.04);
 
   @media (max-width: 768px) {
     position: static;
@@ -154,33 +154,23 @@ fieldset {
   }
 }
 
-/* ===========================
-   Variants / placement
-   =========================== */
-
-/* Top sticky: Control Center */
 .control-center {
-  @extend .debug-panel;
+  @extend .panel;
 
   position: sticky;
   top: 0;
-  background: inherit; /* inherit page bg or set your own */
-  /* Optional subtle edge:
-     border-bottom: 1px solid #e5e7eb;
-     box-shadow: 0 1px 0 rgba(0,0,0,0.04);
-  */
+  background: inherit;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
 
-  /* Fixed-height content area for the control center */
   .control-body {
-    height: 300px;
-    overflow: auto; /* scroll if content grows */
-    /* padding: 0.75rem; */
+    height: auto;
+    overflow: auto;
   }
 }
 
-/* Bottom sticky: Debug Output */
 .debug-output {
-  @extend .debug-panel;
+  @extend .panel;
 
   position: sticky;
   bottom: 0;

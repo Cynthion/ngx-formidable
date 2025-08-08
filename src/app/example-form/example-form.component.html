@@ -10,7 +10,45 @@
     *ngIf="controlCenterExpanded"
     class="control-body">
     <div class="control-content">
-      <p>Control Center</p>
+      <label>
+        <input
+          type="checkbox"
+          [checked]="controlCenter.showPrefixes"
+          (change)="controlCenter.showPrefixes = $any($event.target).checked" />
+        Show Prefixes
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          [checked]="controlCenter.showSuffixes"
+          (change)="controlCenter.showSuffixes = $any($event.target).checked" />
+        Show Suffixes
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          [checked]="controlCenter.showTooltips"
+          (change)="controlCenter.showTooltips = $any($event.target).checked" />
+        Show Tooltips
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          [checked]="controlCenter.showLabels"
+          (change)="controlCenter.showLabels = $any($event.target).checked" />
+        Show Labels
+      </label>
+
+      <label>
+        <input
+          type="checkbox"
+          [checked]="controlCenter.floatingLabels"
+          (change)="controlCenter.floatingLabels = $any($event.target).checked" />
+        Floating Labels
+      </label>
     </div>
   </div>
 </div>
