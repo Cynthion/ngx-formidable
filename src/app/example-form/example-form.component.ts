@@ -287,7 +287,7 @@ export class ExampleFormComponent {
     this.logs = [];
   }
 
-  debugExpanded = true;
+  debugExpanded = false;
 
   toggleDebug() {
     this.debugExpanded = !this.debugExpanded;

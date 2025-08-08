@@ -16,6 +16,14 @@
   }
 }
 
+.fieldset {
+  @include fieldset;
+}
+
+.legend {
+  @include legend;
+}
+
 .tooltip-wrapper {
   @include field-tooltip;
 }

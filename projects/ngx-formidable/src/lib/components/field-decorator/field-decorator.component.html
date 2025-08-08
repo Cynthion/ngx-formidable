@@ -3,13 +3,25 @@
   class="before-wrapper"
   [class.hidden]="!hasLabel && !hasTooltip">
   <!-- Label -->
-  <label
-    class="label-wrapper"
-    [class.hidden]="!hasLabel"
-    [class.floating]="isLabelFloating"
-    [attr.for]="fieldId">
-    <ng-content select="[formidableFieldLabel]"></ng-content>
-  </label>
+  @switch (decoratorLayout) {
+    @case ('single') {
+      <label
+        class="label-wrapper"
+        [class.hidden]="!hasLabel"
+        [class.floating]="isLabelFloating"
+        [attr.for]="fieldId">
+        <ng-container [ngTemplateOutlet]="projectedLabel"></ng-container>
+      </label>
+    }
+    @case ('group') {
+      <div
+        class="label-wrapper"
+        [class.hidden]="!hasLabel"
+        [class.floating]="isLabelFloating">
+        <ng-container [ngTemplateOutlet]="projectedLabel"></ng-container>
+      </div>
+    }
+  }
 
   <!-- Tooltip -->
   <div
@@ -29,7 +41,18 @@
   </div>
 
   <!-- Content -->
-  <ng-content></ng-content>
+  @switch (decoratorLayout) {
+    @case ('single') {
+      <ng-container [ngTemplateOutlet]="projectedContent"></ng-container>
+    }
+    @case ('group') {
+      <fieldset class="fieldset">
+        <legend class="legend">{{ name }}</legend>
+
+        <ng-container [ngTemplateOutlet]="projectedContent"></ng-container>
+      </fieldset>
+    }
+  }
 
   <!-- Suffix -->
   <div
@@ -39,3 +62,11 @@
     <ng-content select="[formidableFieldSuffix]"></ng-content>
   </div>
 </div>
+
+<ng-template #projectedLabel>
+  <ng-content select="[formidableFieldLabel]"></ng-content>
+</ng-template>
+
+<ng-template #projectedContent>
+  <ng-content></ng-content>
+</ng-template>

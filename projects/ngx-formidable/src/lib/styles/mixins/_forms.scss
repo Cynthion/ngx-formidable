@@ -16,6 +16,10 @@
   }
 }
 
+@mixin fieldset {
+  @include fieldset-reset;
+}
+
 @mixin legend {
   position: absolute;
   width: utils.spacing(1);
@@ -29,12 +33,10 @@
 }
 
 @mixin fieldset-reset {
-  fieldset {
-    border: 0;
-    min-height: fit-content;
-    padding: 0;
-    margin: 0;
-  }
+  border: 0;
+  min-height: fit-content;
+  padding: 0;
+  margin: 0;
 }
 
 @mixin field-reset {

@@ -1,15 +1,9 @@
 @use '../../../styles/variables' as *;
 
 :host {
-  @include fieldset-reset;
-
   display: block;
 }
 
 .field {
   @include radio-button-group-field;
-}
-
-.legend {
-  @include legend;
 }
