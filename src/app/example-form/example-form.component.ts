@@ -1,7 +1,7 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import Fuse, { FuseResult } from 'fuse.js';
 import { FormValidationOptions, IFormidableFieldOption } from 'ngx-formidable';
-import { map, Observable, startWith, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Observable, startWith, Subject } from 'rxjs';
 import { StaticSuite } from 'vest';
 import {
   AnimalFormFieldOption,
@@ -17,7 +17,7 @@ import {
   styleUrls: ['./example-form.component.scss']
 })
 export class ExampleFormComponent {
-  protected readonly formValue = signal<ExampleFormModel>({
+  protected readonly formValue$ = new BehaviorSubject<ExampleFormModel>({
     firstName: undefined, // 'Cynthion',
     lastName: undefined, //'Van Halen',
     gender: undefined, //'male',
@@ -34,9 +34,26 @@ export class ExampleFormComponent {
     exampleFormValidationSuite;
   protected readonly validationOptions: FormValidationOptions = { debounceValidationInMs: 0 };
 
-  protected readonly isDirty = signal<boolean | null>(null);
-  protected readonly isValid = signal<boolean | null>(null);
-  protected readonly errors = signal<Record<string, string>>({});
+  protected readonly isDirty$ = new BehaviorSubject<boolean | null>(null);
+  protected readonly isValid$ = new BehaviorSubject<boolean | null>(null);
+  protected readonly errors$ = new BehaviorSubject<Record<string, string>>({});
+
+  protected readonly viewModel$ = combineLatest({
+    formValue$: this.formValue$,
+    isDirty$: this.isDirty$,
+    isValid$: this.isValid$,
+    errors$: this.errors$
+  }).pipe(
+    map(({ formValue$, isDirty$, isValid$, errors$ }) => ({
+      formValue$,
+      isDirty$,
+      isValid$,
+      errors$,
+      // custom vieModel properties
+      showPasswords: !!formValue$.firstName,
+      confirmPasswordDisabled: !formValue$.passwords?.password
+    }))
+  );
 
   protected genderOptions: IFormidableFieldOption[] = [
     { value: 'male', label: 'Male' },
@@ -155,27 +172,6 @@ export class ExampleFormComponent {
     weekdaysShort: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
   };
 
-  private readonly viewModel = computed(() => {
-    return {
-      formValue: this.formValue(),
-      isDirty: this.isDirty(),
-      isValid: this.isValid(),
-      errors: this.errors(),
-
-      // custom vieModel properties
-      showPasswords: this.formValue().firstName,
-      confirmPasswordDisabled: !this.formValue().passwords?.password
-    };
-  });
-
-  protected get vm() {
-    return this.viewModel();
-  }
-
-  protected setFormValue(formValue: ExampleFormModel): void {
-    this.formValue.set(formValue);
-  }
-
   protected onValueChanged(_fieldName: string, _value: unknown): void {
     this.log(`Value changed on ${_fieldName} field: ${_value}`);
   }
@@ -185,8 +181,8 @@ export class ExampleFormComponent {
   }
 
   protected onSubmit(): void {
-    if (this.isValid()) {
-      this.log(JSON.stringify(this.formValue()));
+    if (this.isValid$.value) {
+      this.log(JSON.stringify(this.formValue$.value));
     }
   }
 

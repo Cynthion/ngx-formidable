@@ -3,349 +3,350 @@
   formidableForm
   class="form"
   [validationOptions]="validationOptions"
-  [formValue]="formValue()"
+  [formValue]="formValue$ | async"
   [formFrame]="formFrame"
   [suite]="suite"
-  (dirtyChange$)="isDirty.set($event)"
-  (validChange$)="isValid.set($event)"
-  (errorsChange$)="errors.set($event)"
-  (formValueChange$)="setFormValue($event)"
+  (dirtyChange$)="isDirty$.next($event)"
+  (validChange$)="isValid$.next($event)"
+  (errorsChange$)="errors$.next($event)"
+  (formValueChange$)="formValue$.next($event)"
   (ngSubmit)="onSubmit()">
   <fieldset>
-    <!-- First Name -->
-    <formidable-field-decorator>
-      <formidable-input-field
-        formidableFieldErrors
-        placeholder="Your first name"
-        autocomplete="given-name"
-        name="firstName"
-        [disabled]="false"
-        [readonly]="false"
-        [minLength]="10"
-        [maxLength]="15"
-        [ngModel]="vm.formValue.firstName"
-        (valueChanged)="onValueChanged('firstName', $event)"
-        (focusChanged)="onFocusChanged('firstName', $event)">
-      </formidable-input-field>
-      <div
-        formidableFieldLabel
-        [isFloating]="true">
-        First Name
-      </div>
-      <div formidableFieldTooltip>(Input)</div>
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+    @if (viewModel$ | async; as vm) {
+      <!-- First Name -->
+      <formidable-field-decorator>
+        <formidable-input-field
+          formidableFieldErrors
+          placeholder="Your first name"
+          autocomplete="given-name"
+          name="firstName"
+          [disabled]="false"
+          [readonly]="false"
+          [minLength]="10"
+          [maxLength]="15"
+          [ngModel]="vm.formValue$.firstName"
+          (valueChanged)="onValueChanged('firstName', $event)"
+          (focusChanged)="onFocusChanged('firstName', $event)">
+        </formidable-input-field>
+        <div
+          formidableFieldLabel
+          [isFloating]="true">
+          First Name
+        </div>
+        <div formidableFieldTooltip>(Input)</div>
+        <div formidableFieldPrefix>Prefix</div>
+        <div formidableFieldSuffix>Suffix</div>
+      </formidable-field-decorator>
 
-    <!-- Last Name -->
-    <formidable-field-decorator>
-      <formidable-textarea-field
-        formidableFieldErrors
-        placeholder="Your last name"
-        autocomplete="family-name"
-        name="lastName"
-        [disabled]="false"
-        [readonly]="false"
-        [enableAutosize]="true"
-        [showLengthIndicator]="true"
-        [maxLength]="300"
-        [ngModel]="vm.formValue.lastName"
-        (valueChanged)="onValueChanged('lastName', $event)"
-        (focusChanged)="onFocusChanged('lastName', $event)">
-      </formidable-textarea-field>
-      <div
-        formidableFieldLabel
-        [isFloating]="true">
-        Last Name
-      </div>
-      <div formidableFieldTooltip>(Textarea)</div>
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+      <!-- Last Name -->
+      <formidable-field-decorator>
+        <formidable-textarea-field
+          formidableFieldErrors
+          placeholder="Your last name"
+          autocomplete="family-name"
+          name="lastName"
+          [disabled]="false"
+          [readonly]="false"
+          [enableAutosize]="true"
+          [showLengthIndicator]="true"
+          [maxLength]="300"
+          [ngModel]="vm.formValue$.lastName"
+          (valueChanged)="onValueChanged('lastName', $event)"
+          (focusChanged)="onFocusChanged('lastName', $event)">
+        </formidable-textarea-field>
+        <div
+          formidableFieldLabel
+          [isFloating]="true">
+          Last Name
+        </div>
+        <div formidableFieldTooltip>(Textarea)</div>
+        <div formidableFieldPrefix>Prefix</div>
+        <div formidableFieldSuffix>Suffix</div>
+      </formidable-field-decorator>
 
-    <!-- Gender -->
-    <formidable-field-decorator>
-      <formidable-select-field
-        formidableFieldErrors
-        placeholder="Select..."
-        name="gender"
-        [disabled]="false"
-        [readonly]="false"
-        [ngModel]="vm.formValue.gender"
-        [options]="genderOptions"
-        [sortFn]="sortAlphabetically"
-        (valueChanged)="onValueChanged('gender', $event)"
-        (focusChanged)="onFocusChanged('gender', $event)">
-        <formidable-field-option
-          [value]="'other'"
-          [label]="'Other'"
-          [disabled]="true" />
-        <formidable-field-option [value]="'trans'">Trans</formidable-field-option>
-      </formidable-select-field>
-      <div
-        formidableFieldLabel
-        [isFloating]="true">
-        Gender
-      </div>
-      <div formidableFieldTooltip>(Select)</div>
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+      <!-- Gender -->
+      <formidable-field-decorator>
+        <formidable-select-field
+          formidableFieldErrors
+          placeholder="Select..."
+          name="gender"
+          [disabled]="false"
+          [readonly]="false"
+          [ngModel]="vm.formValue$.gender"
+          [options]="genderOptions"
+          [sortFn]="sortAlphabetically"
+          (valueChanged)="onValueChanged('gender', $event)"
+          (focusChanged)="onFocusChanged('gender', $event)">
+          <formidable-field-option
+            [value]="'other'"
+            [label]="'Other'"
+            [disabled]="true" />
+          <formidable-field-option [value]="'trans'">Trans</formidable-field-option>
+        </formidable-select-field>
+        <div
+          formidableFieldLabel
+          [isFloating]="true">
+          Gender
+        </div>
+        <div formidableFieldTooltip>(Select)</div>
+        <div formidableFieldPrefix>Prefix</div>
+        <div formidableFieldSuffix>Suffix</div>
+      </formidable-field-decorator>
 
-    <!-- Nationality -->
-    <formidable-field-decorator>
-      <formidable-dropdown-field
-        formidableFieldErrors
-        placeholder="Select..."
-        name="nationality"
-        [disabled]="false"
-        [readonly]="false"
-        [ngModel]="vm.formValue.nationality"
-        [options]="nationalityOptions"
-        [emptyOption]="nationalityEmptyOption"
-        [panelPosition]="'left'"
-        [sortFn]="sortAlphabetically"
-        (valueChanged)="onValueChanged('nationality', $event)"
-        (focusChanged)="onFocusChanged('nationality', $event)">
-        <formidable-field-option
-          [value]="'ch'"
-          [label]="'CH'"
-          >🇨🇭 Switzerland (other label)</formidable-field-option
-        >
-        <formidable-field-option [value]="'it (no label)'">🇮🇹 Italia (no label)</formidable-field-option>
-        <formidable-field-option
-          [value]="'custom'"
-          [label]="'The Special One'">
-          <p>I'm a special item</p>
-          <pre>And I can have any content</pre>
-        </formidable-field-option>
-      </formidable-dropdown-field>
-      <div
-        formidableFieldLabel
-        [isFloating]="true">
-        Nationality
-      </div>
-      <div formidableFieldTooltip>(Dropdown)</div>
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+      <!-- Nationality -->
+      <formidable-field-decorator>
+        <formidable-dropdown-field
+          formidableFieldErrors
+          placeholder="Select..."
+          name="nationality"
+          [disabled]="false"
+          [readonly]="false"
+          [ngModel]="vm.formValue$.nationality"
+          [options]="nationalityOptions"
+          [emptyOption]="nationalityEmptyOption"
+          [panelPosition]="'left'"
+          [sortFn]="sortAlphabetically"
+          (valueChanged)="onValueChanged('nationality', $event)"
+          (focusChanged)="onFocusChanged('nationality', $event)">
+          <formidable-field-option
+            [value]="'ch'"
+            [label]="'CH'"
+            >🇨🇭 Switzerland (other label)</formidable-field-option
+          >
+          <formidable-field-option [value]="'it (no label)'">🇮🇹 Italia (no label)</formidable-field-option>
+          <formidable-field-option
+            [value]="'custom'"
+            [label]="'The Special One'">
+            <p>I'm a special item</p>
+            <pre>And I can have any content</pre>
+          </formidable-field-option>
+        </formidable-dropdown-field>
+        <div
+          formidableFieldLabel
+          [isFloating]="true">
+          Nationality
+        </div>
+        <div formidableFieldTooltip>(Dropdown)</div>
+        <div formidableFieldPrefix>Prefix</div>
+        <div formidableFieldSuffix>Suffix</div>
+      </formidable-field-decorator>
 
-    <!-- Hobby -->
-    <formidable-field-decorator>
-      <formidable-autocomplete-field
-        formidableFieldErrors
-        placeholder="Select..."
-        name="hobby"
-        [ngModel]="vm.formValue.hobby"
-        [disabled]="false"
-        [readonly]="false"
-        [options]="hobbyOptions"
-        [emptyOption]="hobbyEmptyOption"
-        [sortFn]="sortAlphabetically"
-        (valueChanged)="onValueChanged('hobby', $event)"
-        (focusChanged)="onFocusChanged('hobby', $event)">
-        <formidable-field-option
-          [value]="'garden'"
-          [label]="'Gardening'"
-          [disabled]="true">
-          Gardening
-        </formidable-field-option>
-        <formidable-field-option
-          [value]="'singing'"
-          [label]="'SING'"
-          >Singing (other label)</formidable-field-option
-        >
-        <formidable-field-option [value]="'other'">Other (no label)</formidable-field-option>
-        <formidable-field-option
-          [value]="'custom'"
-          [label]="'The Special One'"
-          [match]="specialMatchFn">
-          <p>I'm a special item</p>
-          <pre>And I can have any content</pre>
-        </formidable-field-option>
-      </formidable-autocomplete-field>
-      <div
-        formidableFieldLabel
-        [isFloating]="true">
-        Hobby
-      </div>
-      <div formidableFieldTooltip>(Autocomplete)</div>
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+      <!-- Hobby -->
+      <formidable-field-decorator>
+        <formidable-autocomplete-field
+          formidableFieldErrors
+          placeholder="Select..."
+          name="hobby"
+          [ngModel]="vm.formValue$.hobby"
+          [disabled]="false"
+          [readonly]="false"
+          [options]="hobbyOptions"
+          [emptyOption]="hobbyEmptyOption"
+          [sortFn]="sortAlphabetically"
+          (valueChanged)="onValueChanged('hobby', $event)"
+          (focusChanged)="onFocusChanged('hobby', $event)">
+          <formidable-field-option
+            [value]="'garden'"
+            [label]="'Gardening'"
+            [disabled]="true">
+            Gardening
+          </formidable-field-option>
+          <formidable-field-option
+            [value]="'singing'"
+            [label]="'SING'"
+            >Singing (other label)</formidable-field-option
+          >
+          <formidable-field-option [value]="'other'">Other (no label)</formidable-field-option>
+          <formidable-field-option
+            [value]="'custom'"
+            [label]="'The Special One'"
+            [match]="specialMatchFn">
+            <p>I'm a special item</p>
+            <pre>And I can have any content</pre>
+          </formidable-field-option>
+        </formidable-autocomplete-field>
+        <div
+          formidableFieldLabel
+          [isFloating]="true">
+          Hobby
+        </div>
+        <div formidableFieldTooltip>(Autocomplete)</div>
+        <div formidableFieldPrefix>Prefix</div>
+        <div formidableFieldSuffix>Suffix</div>
+      </formidable-field-decorator>
 
-    <!-- Animals -->
-    <formidable-field-decorator>
-      <formidable-autocomplete-field
-        formidableFieldErrors
-        placeholder="Select..."
-        name="animal"
-        [disabled]="false"
-        [readonly]="false"
-        [ngModel]="vm.formValue.animal"
-        [options]="animalOptionsDefault"
-        [emptyOption]="animalEmptyOption"
-        (valueChanged)="onValueChanged('animal', $event)"
-        (focusChanged)="onFocusChanged('animal', $event)"
-        (filterChanged)="onAnimalFilterChange($event)">
-        @for (option of animalOptionsFiltered$ | async; track option.value) {
-          <fuzzy-field-option
-            [value]="option.value"
-            [label]="option.label"
-            [disabled]="option.disabled || false"
-            [subtitle]="option.subtitle"
-            [highlightedEntries]="option.highlightedEntries || { labelEntries: [], subtitleEntries: [] }">
-          </fuzzy-field-option>
-        }
-      </formidable-autocomplete-field>
-      <div
-        formidableFieldLabel
-        [isFloating]="true">
-        Animal
-      </div>
-      <div formidableFieldTooltip>(Autocomplete [custom fuzzy options])</div>
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+      <!-- Animals -->
+      <formidable-field-decorator>
+        <formidable-autocomplete-field
+          formidableFieldErrors
+          placeholder="Select..."
+          name="animal"
+          [disabled]="false"
+          [readonly]="false"
+          [ngModel]="vm.formValue$.animal"
+          [options]="animalOptionsDefault"
+          [emptyOption]="animalEmptyOption"
+          (valueChanged)="onValueChanged('animal', $event)"
+          (focusChanged)="onFocusChanged('animal', $event)"
+          (filterChanged)="onAnimalFilterChange($event)">
+          @for (option of animalOptionsFiltered$ | async; track option.value) {
+            <fuzzy-field-option
+              [value]="option.value"
+              [label]="option.label"
+              [disabled]="option.disabled || false"
+              [subtitle]="option.subtitle"
+              [highlightedEntries]="option.highlightedEntries || { labelEntries: [], subtitleEntries: [] }">
+            </fuzzy-field-option>
+          }
+        </formidable-autocomplete-field>
+        <div
+          formidableFieldLabel
+          [isFloating]="true">
+          Animal
+        </div>
+        <div formidableFieldTooltip>(Autocomplete [custom fuzzy options])</div>
+        <div formidableFieldPrefix>Prefix</div>
+        <div formidableFieldSuffix>Suffix</div>
+      </formidable-field-decorator>
 
-    <!-- Birthdate -->
-    <formidable-field-decorator>
-      <formidable-date-field
-        formidableFieldErrors
-        placeholder="?"
-        name="birthdate"
-        [disabled]="false"
-        [readonly]="false"
-        [ngModel]="vm.formValue.birthdate"
-        [i18n]="I18N_CONFIG"
-        [yearRange]="2"
-        [showMonthAfterYear]="true"
-        [showDaysInNextAndPreviousMonths]="true"
-        [unicodeTokenFormat]="'dd . MM . yyyy'"
-        (valueChanged)="onValueChanged('birthdate', $event)"
-        (focusChanged)="onFocusChanged('birthdate', $event)">
-      </formidable-date-field>
-      <div
-        formidableFieldLabel
-        [isFloating]="true">
-        Birthdate
-      </div>
-      <div formidableFieldTooltip>(Date)</div>
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+      <!-- Birthdate -->
+      <formidable-field-decorator>
+        <formidable-date-field
+          formidableFieldErrors
+          placeholder="?"
+          name="birthdate"
+          [disabled]="false"
+          [readonly]="false"
+          [ngModel]="vm.formValue$.birthdate"
+          [i18n]="I18N_CONFIG"
+          [yearRange]="2"
+          [showMonthAfterYear]="true"
+          [showDaysInNextAndPreviousMonths]="true"
+          [unicodeTokenFormat]="'dd . MM . yyyy'"
+          (valueChanged)="onValueChanged('birthdate', $event)"
+          (focusChanged)="onFocusChanged('birthdate', $event)">
+        </formidable-date-field>
+        <div
+          formidableFieldLabel
+          [isFloating]="true">
+          Birthdate
+        </div>
+        <div formidableFieldTooltip>(Date)</div>
+        <div formidableFieldPrefix>Prefix</div>
+        <div formidableFieldSuffix>Suffix</div>
+      </formidable-field-decorator>
 
-    <!-- Time -->
-    <formidable-field-decorator>
-      <formidable-time-field
-        formidableFieldErrors
-        placeholder="?"
-        name="time"
-        [disabled]="false"
-        [readonly]="false"
-        [ngModel]="vm.formValue.time"
-        [unicodeTokenFormat]="'HH : mm'"
-        (valueChanged)="onValueChanged('time', $event)"
-        (focusChanged)="onFocusChanged('time', $event)">
-      </formidable-time-field>
-      <div
-        formidableFieldLabel
-        [isFloating]="true">
-        Time
-      </div>
-      <div formidableFieldTooltip>(Time)</div>
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+      <!-- Time -->
+      <formidable-field-decorator>
+        <formidable-time-field
+          formidableFieldErrors
+          placeholder="?"
+          name="time"
+          [disabled]="false"
+          [readonly]="false"
+          [ngModel]="vm.formValue$.time"
+          [unicodeTokenFormat]="'HH : mm'"
+          (valueChanged)="onValueChanged('time', $event)"
+          (focusChanged)="onFocusChanged('time', $event)">
+        </formidable-time-field>
+        <div
+          formidableFieldLabel
+          [isFloating]="true">
+          Time
+        </div>
+        <div formidableFieldTooltip>(Time)</div>
+        <div formidableFieldPrefix>Prefix</div>
+        <div formidableFieldSuffix>Suffix</div>
+      </formidable-field-decorator>
 
-    <!-- Religion -->
-    <formidable-field-decorator>
-      <formidable-radio-group-field
-        formidableFieldErrors
-        name="religion"
-        [disabled]="false"
-        [readonly]="false"
-        [ngModel]="vm.formValue.religion"
-        [options]="religionOptions"
-        [emptyOption]="religionEmptyOption"
-        [sortFn]="sortAlphabetically"
-        (valueChanged)="onValueChanged('religion', $event)"
-        (focusChanged)="onFocusChanged('religion', $event)">
-        <formidable-field-option
-          [value]="'atheist'"
-          [label]="'Atheist'"
-          [disabled]="false">
-          Atheist
-        </formidable-field-option>
-        <formidable-field-option
-          [value]="'agnostic'"
-          [label]="'AGNOSTIC'"
-          >Agnostic (other label)</formidable-field-option
-        >
-        <formidable-field-option [value]="'other'">Other (no label)</formidable-field-option>
-        <formidable-field-option
-          [value]="'custom'"
-          [label]="'The Special One'"
-          [match]="specialMatchFn">
-          <p>I'm a special item</p>
-          <pre>And I can have any content</pre>
-        </formidable-field-option>
-      </formidable-radio-group-field>
-      <div
-        formidableFieldLabel
-        [isFloating]="true">
-        Religion
-      </div>
-      <div formidableFieldTooltip>(Radio Group)</div>
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+      <!-- Religion -->
+      <formidable-field-decorator>
+        <formidable-radio-group-field
+          formidableFieldErrors
+          name="religion"
+          [disabled]="false"
+          [readonly]="false"
+          [ngModel]="vm.formValue$.religion"
+          [options]="religionOptions"
+          [emptyOption]="religionEmptyOption"
+          [sortFn]="sortAlphabetically"
+          (valueChanged)="onValueChanged('religion', $event)"
+          (focusChanged)="onFocusChanged('religion', $event)">
+          <formidable-field-option
+            [value]="'atheist'"
+            [label]="'Atheist'"
+            [disabled]="false">
+            Atheist
+          </formidable-field-option>
+          <formidable-field-option
+            [value]="'agnostic'"
+            [label]="'AGNOSTIC'"
+            >Agnostic (other label)</formidable-field-option
+          >
+          <formidable-field-option [value]="'other'">Other (no label)</formidable-field-option>
+          <formidable-field-option
+            [value]="'custom'"
+            [label]="'The Special One'"
+            [match]="specialMatchFn">
+            <p>I'm a special item</p>
+            <pre>And I can have any content</pre>
+          </formidable-field-option>
+        </formidable-radio-group-field>
+        <div
+          formidableFieldLabel
+          [isFloating]="true">
+          Religion
+        </div>
+        <div formidableFieldTooltip>(Radio Group)</div>
+        <div formidableFieldPrefix>Prefix</div>
+        <div formidableFieldSuffix>Suffix</div>
+      </formidable-field-decorator>
 
-    <!-- Allergies -->
-    <formidable-field-decorator>
-      <formidable-checkbox-group-field
-        formidableFieldErrors
-        name="allergies"
-        [disabled]="false"
-        [readonly]="false"
-        [ngModel]="vm.formValue.allergies"
-        [options]="allergiesOptions"
-        [emptyOption]="allergiesEmptyOption"
-        [sortFn]="sortAlphabetically"
-        (valueChanged)="onValueChanged('allergies', $event)"
-        (focusChanged)="onFocusChanged('allergies', $event)">
-        <formidable-field-option
-          [value]="'lactose'"
-          [label]="'Lactose'"
-          [disabled]="false">
-          Lactose
-        </formidable-field-option>
-        <formidable-field-option
-          [value]="'gluten'"
-          [label]="'GLUTEN'"
-          >Gluten (other label)</formidable-field-option
-        >
-        <formidable-field-option [value]="'soy'">Soy (no label)</formidable-field-option>
-        <formidable-field-option
-          [value]="'custom'"
-          [label]="'The Special One'"
-          [match]="specialMatchFn">
-          <p>I'm a special item</p>
-          <pre>And I can have any content</pre>
-        </formidable-field-option>
-      </formidable-checkbox-group-field>
-      <div
-        formidableFieldLabel
-        [isFloating]="true">
-        Allergies
-      </div>
-      <div formidableFieldTooltip>(Checkbox Group)</div>
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
+      <!-- Allergies -->
+      <formidable-field-decorator>
+        <formidable-checkbox-group-field
+          formidableFieldErrors
+          name="allergies"
+          [disabled]="false"
+          [readonly]="false"
+          [ngModel]="vm.formValue$.allergies"
+          [options]="allergiesOptions"
+          [emptyOption]="allergiesEmptyOption"
+          [sortFn]="sortAlphabetically"
+          (valueChanged)="onValueChanged('allergies', $event)"
+          (focusChanged)="onFocusChanged('allergies', $event)">
+          <formidable-field-option
+            [value]="'lactose'"
+            [label]="'Lactose'"
+            [disabled]="false">
+            Lactose
+          </formidable-field-option>
+          <formidable-field-option
+            [value]="'gluten'"
+            [label]="'GLUTEN'"
+            >Gluten (other label)</formidable-field-option
+          >
+          <formidable-field-option [value]="'soy'">Soy (no label)</formidable-field-option>
+          <formidable-field-option
+            [value]="'custom'"
+            [label]="'The Special One'"
+            [match]="specialMatchFn">
+            <p>I'm a special item</p>
+            <pre>And I can have any content</pre>
+          </formidable-field-option>
+        </formidable-checkbox-group-field>
+        <div
+          formidableFieldLabel
+          [isFloating]="true">
+          Allergies
+        </div>
+        <div formidableFieldTooltip>(Checkbox Group)</div>
+        <div formidableFieldPrefix>Prefix</div>
+        <div formidableFieldSuffix>Suffix</div>
+      </formidable-field-decorator>
 
-    <!-- Custom Color Picker -->
-    <!-- <formidable-field-decorator>
+      <!-- Custom Color Picker -->
+      <!-- <formidable-field-decorator>
       <formidable-input-field
         formidableFieldErrors
         placeholder="Color"
@@ -360,61 +361,64 @@
       <div formidableFieldPrefix>Prefix</div>
     </formidable-field-decorator> -->
 
-    <!-- Passwords Group -->
-    <!-- TODO add form group -->
+      <!-- Passwords Group -->
+      <!-- TODO add form group -->
 
-    <!-- Submit -->
-    <div class="footer">
-      <button
-        type="submit"
-        class="submit-button"
-        [disabled]="!vm.isValid">
-        Submit
-      </button>
-    </div>
+      <!-- Submit -->
+      <div class="footer">
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="!vm.isValid$">
+          Submit
+        </button>
+      </div>
+    }
   </fieldset>
 </form>
 
 <!-- Show Debugging Output -->
-<!-- Debugging Output Toggle -->
-<div class="debug-output">
-  <div class="debug-toggle">
-    <button (click)="toggleDebug()">
-      {{ debugExpanded ? 'Hide Debug' : 'Show Debug' }}
-    </button>
-  </div>
-
-  <!-- Collapsible Debug Section -->
-  <div
-    *ngIf="debugExpanded"
-    class="debug-columns">
-    <!-- Left Column -->
-    <div class="column left">
-      <pre>Value:<br />{{ vm.formValue | json }}</pre>
+@if (viewModel$ | async; as vm) {
+  <!-- Debugging Output Toggle -->
+  <div class="debug-output">
+    <div class="debug-toggle">
+      <button (click)="toggleDebug()">
+        {{ debugExpanded ? 'Hide Debug' : 'Show Debug' }}
+      </button>
     </div>
 
-    <!-- Middle Column -->
-    <div class="column middle">
-      <pre>Errors:<br />{{ vm.errors | json }}</pre>
-      <pre>Dirty: {{ vm.isDirty }}</pre>
-      <pre>Valid: {{ vm.isValid }}</pre>
-    </div>
+    <!-- Collapsible Debug Section -->
+    <div
+      *ngIf="debugExpanded"
+      class="debug-columns">
+      <!-- Left Column -->
+      <div class="column left">
+        <pre>Value:<br />{{ vm.formValue$ | json }}</pre>
+      </div>
 
-    <!-- Right Column (Log) -->
-    <div class="column right">
-      <div class="log-panel">
-        <div class="log-header">
-          <h4>Log Output</h4>
-          <button (click)="clearLogs()">Clear</button>
-        </div>
-        <div class="log-messages">
-          <div
-            *ngFor="let message of logs"
-            class="log-entry">
-            {{ message }}
+      <!-- Middle Column -->
+      <div class="column middle">
+        <pre>Errors:<br />{{ vm.errors$ | json }}</pre>
+        <pre>Dirty: {{ vm.isDirty$ | json }}</pre>
+        <pre>Valid: {{ vm.isValid$ | json }}</pre>
+      </div>
+
+      <!-- Right Column (Log) -->
+      <div class="column right">
+        <div class="log-panel">
+          <div class="log-header">
+            <h4>Log Output</h4>
+            <button (click)="clearLogs()">Clear</button>
+          </div>
+          <div class="log-messages">
+            <div
+              *ngFor="let message of logs"
+              class="log-entry">
+              {{ message }}
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+}
