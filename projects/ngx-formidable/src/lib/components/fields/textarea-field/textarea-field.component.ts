@@ -14,7 +14,12 @@ import {
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
-import { DEFAULT_PATTERNS, DEFAULT_SPECIAL_CHARACTERS, MaskConfigSubset } from '../../../helpers/mask.helpers';
+import {
+  analyzeMaskDisplayLength,
+  DEFAULT_PATTERNS,
+  DEFAULT_SPECIAL_CHARACTERS,
+  MaskConfigSubset
+} from '../../../helpers/mask.helpers';
 import {
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
@@ -84,11 +89,16 @@ export class TextareaFieldComponent
 
   ngAfterViewInit(): void {
     this.adjustLayout();
+    this.warnIfMaskConflictsWithMinMax();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['mask'] || changes['maskConfig']) {
-      this.doWriteValue(this.value ?? ''); // reapply mask if mask or maskConfig changed
+    if (changes['mask'] || changes['maskConfig'] || changes['minLength'] || changes['maxLength']) {
+      this.warnIfMaskConflictsWithMinMax();
+      if (changes['mask'] || changes['maskConfig']) {
+        // re-apply formatting if the mask changed
+        this.doWriteValue(this.value ?? '');
+      }
     }
   }
 
@@ -181,6 +191,34 @@ export class TextareaFieldComponent
       ...(this.maskDefaults ?? {}),
       ...(this.maskConfig ?? {})
     } as Required<MaskConfigSubset>;
+  }
+
+  private warnIfMaskConflictsWithMinMax(): void {
+    if (!this.mask) return;
+
+    const { prefix, suffix } = this.mergedMaskConfig;
+    const { min, max, variable } = analyzeMaskDisplayLength(this.mask, { prefix, suffix });
+
+    // Only emit hard errors when we have a deterministic range
+    if (!variable) {
+      if (this.minLength > -1 && this.minLength > max) {
+        console.error(
+          `[ngx-formidable] <${this.name || 'textarea'}>: minlength=${this.minLength} exceeds mask's max display length=${max} (mask="${this.mask}", prefix="${prefix ?? ''}", suffix="${suffix ?? ''}").`
+        );
+      }
+      if (this.maxLength > -1 && this.maxLength < min) {
+        console.error(
+          `[ngx-formidable] <${this.name || 'textarea'}>: maxlength=${this.maxLength} is below mask's min display length=${min} (mask="${this.mask}", prefix="${prefix ?? ''}", suffix="${suffix ?? ''}").`
+        );
+      }
+    } else {
+      // Optional: gentle heads-up for variable masks
+      if (this.minLength > -1 || this.maxLength > -1) {
+        console.warn(
+          `[ngx-formidable] <${this.name || 'textarea'}>: mask "${this.mask}" has variable length; exact comparison with minlength/maxlength is not deterministic.`
+        );
+      }
+    }
   }
 
   //#endregion

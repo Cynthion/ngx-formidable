@@ -93,7 +93,7 @@ export class FieldOptionComponent implements IFormidableFieldOption {
   ) {
     if (!this.parent) {
       throw new Error(
-        'formidable-field-option must be used inside a component that provides FORMIDABLE_OPTION_FIELD (i.e. implements IFormidableOptionField).'
+        '[ngx-formidable] formidable-field-option must be used inside a component that provides FORMIDABLE_OPTION_FIELD (i.e. implements IFormidableOptionField).'
       );
     }
   }
