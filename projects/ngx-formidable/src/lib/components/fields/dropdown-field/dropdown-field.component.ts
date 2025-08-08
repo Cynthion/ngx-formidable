@@ -153,12 +153,11 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
   //#region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
-    // TODO use this.selectedOption to set the value?
-    this._value = value;
-    const found = this.options$.value.find((opt) => opt.value === value);
+    this._value = value ?? '';
+    this.isFieldFilled = this._value.length > 0;
 
+    const found = this.options$.value.find((opt) => opt.value === value);
     this.selectedOption = found ? { ...found } : undefined;
-    this.isFieldFilled = found ? !!value : false;
   }
 
   //#endregion

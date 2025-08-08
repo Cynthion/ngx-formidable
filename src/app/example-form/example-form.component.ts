@@ -21,7 +21,7 @@ export class ExampleFormComponent {
     firstName: undefined, // 'Cynthion',
     lastName: undefined, //'Van Halen',
     gender: undefined, //'male',
-    nationality: 'ch',
+    nationality: undefined, //'ch',
     hobby: undefined, //'reading',
     animal: undefined, //'cat',
     birthdate: undefined, // new Date(1989, 5, 29),

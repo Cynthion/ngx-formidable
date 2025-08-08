@@ -173,7 +173,6 @@ export class AutocompleteFieldComponent
   //#region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
-    // TODO use this.selectedOption to set the value?
     const found = this.combineAllOptions().find((opt) => opt.value === value);
 
     this.selectedOption = found ? { ...found } : undefined;

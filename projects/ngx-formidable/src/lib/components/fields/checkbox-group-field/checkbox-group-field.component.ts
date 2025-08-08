@@ -124,7 +124,6 @@ export class CheckboxGroupFieldComponent
   //#region ControlValueAccessor
 
   protected doWriteValue(value: string[]): void {
-    // TODO use this.selectedOption to set the value?
     this._value = value;
     const values: string[] = Array.isArray(value) ? value : [];
 

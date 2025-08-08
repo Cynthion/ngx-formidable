@@ -124,7 +124,6 @@ export class RadioGroupFieldComponent
   //#region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
-    // TODO use this.selectedOption to set the value?
     this._value = value;
     const found = this.options$.value.find((opt) => opt.value === value);
 
