@@ -23,8 +23,8 @@
           [disabled]="false"
           [readonly]="false"
           [minLength]="10"
-          [maxLength]="15"
-          [mask]="'AAA 000'"
+          [maxLength]="10"
+          [mask]="'AAA AAA AAA AAA'"
           [ngModel]="vm.formValue$.firstName"
           (valueChanged)="onValueChanged('firstName', $event)"
           (focusChanged)="onFocusChanged('firstName', $event)">
@@ -52,7 +52,7 @@
           [showLengthIndicator]="true"
           [maxLength]="300"
           [mask]="'AAA 000'"
-          [maskConfig]="{ prefix: 'CHF ', showMaskTyped: true }"
+          [maskConfig]="{ showMaskTyped: true }"
           [ngModel]="vm.formValue$.lastName"
           (valueChanged)="onValueChanged('lastName', $event)"
           (focusChanged)="onFocusChanged('lastName', $event)">
@@ -366,7 +366,6 @@
 
       <!-- Passwords Group -->
       <!-- TODO add form group -->
-
       <!-- Submit -->
       <div class="footer">
         <button

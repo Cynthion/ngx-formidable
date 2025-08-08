@@ -5,11 +5,13 @@ import {
   forwardRef,
   Inject,
   Input,
+  OnChanges,
   Optional,
+  SimpleChanges,
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NgxMaskConfig } from 'ngx-mask';
+import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
 import { DEFAULT_PATTERNS, DEFAULT_SPECIAL_CHARACTERS, MaskConfigSubset } from '../../../helpers/mask.helpers';
 import {
@@ -18,7 +20,7 @@ import {
   FORMIDABLE_MASK_DEFAULTS,
   IFormidableInputField
 } from '../../../models/formidable.model';
-import { BaseFieldDirective } from '../base-field.component';
+import { BaseFieldDirective } from '../base-field.directive';
 
 /**
  * A configurable single-line text input.
@@ -52,11 +54,12 @@ import { BaseFieldDirective } from '../base-field.component';
     {
       provide: FORMIDABLE_FIELD,
       useExisting: InputFieldComponent
-    }
+    },
+    NgxMaskPipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class InputFieldComponent extends BaseFieldDirective implements IFormidableInputField {
+export class InputFieldComponent extends BaseFieldDirective implements IFormidableInputField, OnChanges {
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
   protected keyboardCallback = null;
@@ -64,8 +67,17 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
-  constructor(@Optional() @Inject(FORMIDABLE_MASK_DEFAULTS) private maskDefaults?: Partial<NgxMaskConfig>) {
+  constructor(
+    private maskPipe: NgxMaskPipe,
+    @Optional() @Inject(FORMIDABLE_MASK_DEFAULTS) private maskDefaults?: Partial<NgxMaskConfig>
+  ) {
     super();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['mask'] || changes['maskConfig']) {
+      this.doWriteValue(this.value ?? ''); // reapply mask if mask or maskConfig changed
+    }
   }
 
   protected doOnValueChange(): void {
@@ -79,8 +91,21 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   //#region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
-    // write to wrapped element
-    this.inputRef.nativeElement.value = value ?? '';
+    const newValue = value ?? '';
+
+    if (this.mask) {
+      // Ensure the mask is loaded before setting the value
+      setTimeout(() => {
+        const masked = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
+        this.inputRef.nativeElement.value = masked;
+
+        // notify the form control again (since usually done in base directive)
+        this.onValueChange();
+      });
+    } else {
+      this.inputRef.nativeElement.value = newValue;
+    }
+
     setCaretPositionToEnd(this.inputRef.nativeElement);
   }
 

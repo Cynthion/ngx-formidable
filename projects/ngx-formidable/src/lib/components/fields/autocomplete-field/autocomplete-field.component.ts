@@ -35,7 +35,7 @@ import {
   IFormidableFieldOption
 } from '../../../models/formidable.model';
 import { FieldOptionComponent } from '../../field-option/field-option.component';
-import { BaseFieldDirective } from '../base-field.component';
+import { BaseFieldDirective } from '../base-field.directive';
 
 /**
  * A configurable text input with an overlayed list of filtered options.

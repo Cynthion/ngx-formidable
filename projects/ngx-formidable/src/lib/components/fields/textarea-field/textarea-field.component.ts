@@ -6,11 +6,13 @@ import {
   forwardRef,
   Inject,
   Input,
+  OnChanges,
   Optional,
+  SimpleChanges,
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NgxMaskConfig } from 'ngx-mask';
+import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
 import { DEFAULT_PATTERNS, DEFAULT_SPECIAL_CHARACTERS, MaskConfigSubset } from '../../../helpers/mask.helpers';
 import {
@@ -19,7 +21,7 @@ import {
   FORMIDABLE_MASK_DEFAULTS,
   IFormidableTextareaField
 } from '../../../models/formidable.model';
-import { BaseFieldDirective } from '../base-field.component';
+import { BaseFieldDirective } from '../base-field.directive';
 
 /**
  * A configurable multi-line textarea with optional autosizing and length indicator.
@@ -56,11 +58,15 @@ import { BaseFieldDirective } from '../base-field.component';
     {
       provide: FORMIDABLE_FIELD,
       useExisting: TextareaFieldComponent
-    }
+    },
+    NgxMaskPipe
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TextareaFieldComponent extends BaseFieldDirective implements IFormidableTextareaField, AfterViewInit {
+export class TextareaFieldComponent
+  extends BaseFieldDirective
+  implements IFormidableTextareaField, AfterViewInit, OnChanges
+{
   @ViewChild('textareaRef', { static: true }) textareaRef!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('lengthIndicatorRef') lengthIndicatorRef?: ElementRef<HTMLDivElement>;
 
@@ -69,12 +75,21 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
-  constructor(@Optional() @Inject(FORMIDABLE_MASK_DEFAULTS) private maskDefaults?: Partial<NgxMaskConfig>) {
+  constructor(
+    private maskPipe: NgxMaskPipe,
+    @Optional() @Inject(FORMIDABLE_MASK_DEFAULTS) private maskDefaults?: Partial<NgxMaskConfig>
+  ) {
     super();
   }
 
   ngAfterViewInit(): void {
     this.adjustLayout();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['mask'] || changes['maskConfig']) {
+      this.doWriteValue(this.value ?? ''); // reapply mask if mask or maskConfig changed
+    }
   }
 
   protected doOnValueChange(): void {
@@ -90,8 +105,21 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
   //#region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
-    // write to wrapped element
-    this.textareaRef.nativeElement.value = value ?? '';
+    const newValue = value ?? '';
+
+    if (this.mask) {
+      // Ensure the mask is loaded before setting the value
+      setTimeout(() => {
+        const masked = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
+        this.textareaRef.nativeElement.value = masked;
+
+        // notify the form control again (since usually done in base directive)
+        this.onValueChange();
+      });
+    } else {
+      this.textareaRef.nativeElement.value = newValue;
+    }
+
     setCaretPositionToEnd(this.textareaRef.nativeElement);
   }
 

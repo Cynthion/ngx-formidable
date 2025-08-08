@@ -33,7 +33,7 @@ import {
   IFormidableDateField
 } from '../../../models/formidable.model';
 import { calendarArrowDown, calendarArrowUp } from '../../../models/icons';
-import { BaseFieldDirective } from '../base-field.component';
+import { BaseFieldDirective } from '../base-field.directive';
 
 /**
  * An input field for selecting dates via masked text entry or a Pikaday calendar popup.

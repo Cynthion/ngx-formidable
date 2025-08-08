@@ -23,7 +23,7 @@ import {
 } from '../../../helpers/format.helpers';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
 import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableTimeField } from '../../../models/formidable.model';
-import { BaseFieldDirective } from '../base-field.component';
+import { BaseFieldDirective } from '../base-field.directive';
 
 /**
  * An input field for selecting times via masked text entry.

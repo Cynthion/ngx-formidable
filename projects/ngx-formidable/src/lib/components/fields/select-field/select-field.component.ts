@@ -20,7 +20,7 @@ import {
   IFormidableFieldOption,
   IFormidableSelectField
 } from '../../../models/formidable.model';
-import { BaseFieldDirective } from '../base-field.component';
+import { BaseFieldDirective } from '../base-field.directive';
 
 /**
  * A configurable `<select>` element.

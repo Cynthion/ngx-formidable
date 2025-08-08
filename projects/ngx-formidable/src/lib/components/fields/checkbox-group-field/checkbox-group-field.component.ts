@@ -25,7 +25,7 @@ import {
   IFormidableFieldOption
 } from '../../../models/formidable.model';
 import { FieldOptionComponent } from '../../field-option/field-option.component';
-import { BaseFieldDirective } from '../base-field.component';
+import { BaseFieldDirective } from '../base-field.directive';
 
 /**
  * A configurable group of selectable checkbox options.

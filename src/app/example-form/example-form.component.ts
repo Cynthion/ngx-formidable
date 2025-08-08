@@ -19,7 +19,7 @@ import {
 export class ExampleFormComponent {
   protected readonly formValue$ = new BehaviorSubject<ExampleFormModel>({
     firstName: 'Cynthion',
-    lastName: undefined, //'Van Halen',
+    lastName: 'Morris', //'Morris',
     gender: undefined, //'male',
     nationality: undefined, //'ch',
     hobby: undefined, //'reading',
@@ -287,7 +287,7 @@ export class ExampleFormComponent {
     this.logs = [];
   }
 
-  debugExpanded = false;
+  debugExpanded = true;
 
   toggleDebug() {
     this.debugExpanded = !this.debugExpanded;
