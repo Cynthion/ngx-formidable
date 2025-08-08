@@ -5,7 +5,6 @@
       {{ controlCenterExpanded ? 'Hide Control Center' : 'Show Control Center' }}
     </button>
   </div>
-
   <div
     *ngIf="controlCenterExpanded"
     class="control-body">
@@ -83,16 +82,29 @@
           (focusChanged)="onFocusChanged('firstName', $event)">
         </formidable-input-field>
         <div
+          *ngIf="controlCenter.showLabels"
           formidableFieldLabel
-          [isFloating]="true">
+          [isFloating]="controlCenter.floatingLabels">
           First Name
         </div>
-        <div formidableFieldTooltip>
+        <div
+          *ngIf="controlCenter.showTooltips"
+          formidableFieldTooltip>
           <example-tooltip
             placement="right"
             trigger="hover"
             [text]="'This is a input field. It has a tooltip.'">
           </example-tooltip>
+        </div>
+        <div
+          *ngIf="controlCenter.showPrefixes"
+          formidableFieldPrefix>
+          Prefix
+        </div>
+        <div
+          *ngIf="controlCenter.showSuffixes"
+          formidableFieldSuffix>
+          Suffix
         </div>
       </formidable-field-decorator>
 
@@ -112,19 +124,30 @@
           (focusChanged)="onFocusChanged('middleName', $event)">
         </formidable-input-field>
         <div
+          *ngIf="controlCenter.showLabels"
           formidableFieldLabel
-          [isFloating]="true">
+          [isFloating]="controlCenter.floatingLabels">
           Middle Name
         </div>
-        <div formidableFieldTooltip>
+        <div
+          *ngIf="controlCenter.showTooltips"
+          formidableFieldTooltip>
           <example-tooltip
             placement="right"
             trigger="hover"
             [text]="'Fields can be masked, and have prefixes and suffixes.'">
           </example-tooltip>
         </div>
-        <div formidableFieldPrefix>Prefix</div>
-        <div formidableFieldSuffix>Suffix</div>
+        <div
+          *ngIf="controlCenter.showPrefixes"
+          formidableFieldPrefix>
+          Prefix
+        </div>
+        <div
+          *ngIf="controlCenter.showSuffixes"
+          formidableFieldSuffix>
+          Suffix
+        </div>
       </formidable-field-decorator>
 
       <!-- Last Name -->
@@ -146,16 +169,29 @@
           (focusChanged)="onFocusChanged('lastName', $event)">
         </formidable-textarea-field>
         <div
+          *ngIf="controlCenter.showLabels"
           formidableFieldLabel
-          [isFloating]="true">
+          [isFloating]="controlCenter.floatingLabels">
           Last Name
         </div>
-        <div formidableFieldTooltip>
+        <div
+          *ngIf="controlCenter.showTooltips"
+          formidableFieldTooltip>
           <example-tooltip
             placement="bottom"
             trigger="click"
             [text]="'It opens on click. Below.'">
           </example-tooltip>
+        </div>
+        <div
+          *ngIf="controlCenter.showPrefixes"
+          formidableFieldPrefix>
+          Prefix
+        </div>
+        <div
+          *ngIf="controlCenter.showSuffixes"
+          formidableFieldSuffix>
+          Suffix
         </div>
       </formidable-field-decorator>
 
@@ -179,17 +215,30 @@
           <formidable-field-option [value]="'trans'">Trans</formidable-field-option>
         </formidable-select-field>
         <div
+          *ngIf="controlCenter.showLabels"
           formidableFieldLabel
-          [isFloating]="true">
+          [isFloating]="controlCenter.floatingLabels">
           Gender
         </div>
-        <div formidableFieldTooltip>
+        <div
+          *ngIf="controlCenter.showTooltips"
+          formidableFieldTooltip>
           <example-tooltip
             placement="right"
             trigger="click"
             [icon]="exampleTooltipSvg"
             [text]="'This is a select field. And this tooltip has another content.'">
           </example-tooltip>
+        </div>
+        <div
+          *ngIf="controlCenter.showPrefixes"
+          formidableFieldPrefix>
+          Prefix
+        </div>
+        <div
+          *ngIf="controlCenter.showSuffixes"
+          formidableFieldSuffix>
+          Suffix
         </div>
       </formidable-field-decorator>
 
@@ -222,9 +271,30 @@
           </formidable-field-option>
         </formidable-dropdown-field>
         <div
+          *ngIf="controlCenter.showLabels"
           formidableFieldLabel
-          [isFloating]="true">
+          [isFloating]="controlCenter.floatingLabels">
           Nationality
+        </div>
+        <div
+          *ngIf="controlCenter.showTooltips"
+          formidableFieldTooltip>
+          <example-tooltip
+            placement="right"
+            trigger="click"
+            [icon]="exampleTooltipSvg"
+            [text]="'This is a dropdown field.'">
+          </example-tooltip>
+        </div>
+        <div
+          *ngIf="controlCenter.showPrefixes"
+          formidableFieldPrefix>
+          Prefix
+        </div>
+        <div
+          *ngIf="controlCenter.showSuffixes"
+          formidableFieldSuffix>
+          Suffix
         </div>
       </formidable-field-decorator>
 
@@ -263,11 +333,31 @@
           </formidable-field-option>
         </formidable-autocomplete-field>
         <div
+          *ngIf="controlCenter.showLabels"
           formidableFieldLabel
-          [isFloating]="true">
+          [isFloating]="controlCenter.floatingLabels">
           Hobby
         </div>
-        <div formidableFieldTooltip>(Autocomplete)</div>
+        <div
+          *ngIf="controlCenter.showTooltips"
+          formidableFieldTooltip>
+          <example-tooltip
+            placement="right"
+            trigger="click"
+            [icon]="exampleTooltipSvg"
+            [text]="'This is a autocomplete field.'">
+          </example-tooltip>
+        </div>
+        <div
+          *ngIf="controlCenter.showPrefixes"
+          formidableFieldPrefix>
+          Prefix
+        </div>
+        <div
+          *ngIf="controlCenter.showSuffixes"
+          formidableFieldSuffix>
+          Suffix
+        </div>
       </formidable-field-decorator>
 
       <!-- Animals -->
@@ -295,17 +385,30 @@
           }
         </formidable-autocomplete-field>
         <div
+          *ngIf="controlCenter.showLabels"
           formidableFieldLabel
-          [isFloating]="true">
+          [isFloating]="controlCenter.floatingLabels">
           Animal
         </div>
-        <div formidableFieldTooltip>
+        <div
+          *ngIf="controlCenter.showTooltips"
+          formidableFieldTooltip>
           <example-tooltip
             placement="right"
             trigger="click"
             [icon]="exampleTooltipSvg"
             [text]="'This field uses custom options. With fuzzy matching.'">
           </example-tooltip>
+        </div>
+        <div
+          *ngIf="controlCenter.showPrefixes"
+          formidableFieldPrefix>
+          Prefix
+        </div>
+        <div
+          *ngIf="controlCenter.showSuffixes"
+          formidableFieldSuffix>
+          Suffix
         </div>
       </formidable-field-decorator>
 
@@ -327,9 +430,30 @@
           (focusChanged)="onFocusChanged('birthdate', $event)">
         </formidable-date-field>
         <div
+          *ngIf="controlCenter.showLabels"
           formidableFieldLabel
-          [isFloating]="true">
+          [isFloating]="controlCenter.floatingLabels">
           Birthdate
+        </div>
+        <div
+          *ngIf="controlCenter.showTooltips"
+          formidableFieldTooltip>
+          <example-tooltip
+            placement="right"
+            trigger="click"
+            [icon]="exampleTooltipSvg"
+            [text]="'This is a date field.'">
+          </example-tooltip>
+        </div>
+        <div
+          *ngIf="controlCenter.showPrefixes"
+          formidableFieldPrefix>
+          Prefix
+        </div>
+        <div
+          *ngIf="controlCenter.showSuffixes"
+          formidableFieldSuffix>
+          Suffix
         </div>
       </formidable-field-decorator>
 
@@ -347,9 +471,30 @@
           (focusChanged)="onFocusChanged('time', $event)">
         </formidable-time-field>
         <div
+          *ngIf="controlCenter.showLabels"
           formidableFieldLabel
-          [isFloating]="true">
+          [isFloating]="controlCenter.floatingLabels">
           Time
+        </div>
+        <div
+          *ngIf="controlCenter.showTooltips"
+          formidableFieldTooltip>
+          <example-tooltip
+            placement="right"
+            trigger="click"
+            [icon]="exampleTooltipSvg"
+            [text]="'This is a time field.'">
+          </example-tooltip>
+        </div>
+        <div
+          *ngIf="controlCenter.showPrefixes"
+          formidableFieldPrefix>
+          Prefix
+        </div>
+        <div
+          *ngIf="controlCenter.showSuffixes"
+          formidableFieldSuffix>
+          Suffix
         </div>
       </formidable-field-decorator>
 
@@ -387,11 +532,14 @@
           </formidable-field-option>
         </formidable-radio-group-field>
         <div
+          *ngIf="controlCenter.showLabels"
           formidableFieldLabel
-          [isFloating]="true">
+          [isFloating]="controlCenter.floatingLabels">
           Religion
         </div>
-        <div formidableFieldTooltip>
+        <div
+          *ngIf="controlCenter.showTooltips"
+          formidableFieldTooltip>
           <example-tooltip
             placement="right"
             trigger="click"
@@ -399,8 +547,16 @@
             [text]="'This is a radio group field. It can have a tooltip, too.'">
           </example-tooltip>
         </div>
-        <div formidableFieldPrefix>Prefixes for groups show above the field.</div>
-        <div formidableFieldSuffix>Suffix for groups show below the field.</div>
+        <div
+          *ngIf="controlCenter.showPrefixes"
+          formidableFieldPrefix>
+          Prefix
+        </div>
+        <div
+          *ngIf="controlCenter.showSuffixes"
+          formidableFieldSuffix>
+          Suffix
+        </div>
       </formidable-field-decorator>
 
       <!-- Allergies -->
@@ -437,27 +593,32 @@
           </formidable-field-option>
         </formidable-checkbox-group-field>
         <div
+          *ngIf="controlCenter.showLabels"
           formidableFieldLabel
-          [isFloating]="true">
+          [isFloating]="controlCenter.floatingLabels">
           Allergies
         </div>
+        <div
+          *ngIf="controlCenter.showTooltips"
+          formidableFieldTooltip>
+          <example-tooltip
+            placement="right"
+            trigger="click"
+            [icon]="exampleTooltipSvg"
+            [text]="'This is a checkbox group field.'">
+          </example-tooltip>
+        </div>
+        <div
+          *ngIf="controlCenter.showPrefixes"
+          formidableFieldPrefix>
+          Prefix
+        </div>
+        <div
+          *ngIf="controlCenter.showSuffixes"
+          formidableFieldSuffix>
+          Suffix
+        </div>
       </formidable-field-decorator>
-
-      <!-- Custom Color Picker -->
-      <!-- <formidable-field-decorator>
-      <formidable-input-field
-        formidableFieldErrors
-        placeholder="Color"
-        name="color"
-        [ngModel]="vm.formValue.color">
-      </formidable-input-field>
-      <div
-        formidableFieldLabel
-        [isFloating]="true">
-        Color
-      </div>
-      <div formidableFieldPrefix>Prefix</div>
-    </formidable-field-decorator> -->
 
       <!-- Passwords Group -->
       <!-- TODO add form group -->
