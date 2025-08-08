@@ -88,7 +88,7 @@ export class TimeFieldComponent
 
     if (!validateUnicodeTimeTokenFormat(this.unicodeTokenFormat)) {
       console.warn(
-        `Invalid unicodeTokenFormat: "${this.unicodeTokenFormat}". ` +
+        `[ngx-formidable] Invalid unicodeTokenFormat: "${this.unicodeTokenFormat}". ` +
           `Falling back to default "${this.defaultUnicodeTokenFormat}". Supported tokens: ${UNICODE_TIME_TOKENS.join(', ')}.`
       );
 

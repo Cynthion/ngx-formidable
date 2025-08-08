@@ -144,7 +144,8 @@ export class DateFieldComponent
     toString: (date: Date, unicodeTokenFormat: string): string => this.onFormat(date, unicodeTokenFormat),
     parse: (dateString: string, unicodeTokenFormat: string): Date | null =>
       this.onParse(dateString, unicodeTokenFormat),
-    onSelect: (date: Date) => this.selectDate(date)
+    onSelect: (date: Date) => this.selectDate(date),
+    onDraw: () => this.decoratePikadayControls()
   };
 
   private readonly defaultOptions: PikadayOptions = {
@@ -192,7 +193,7 @@ export class DateFieldComponent
 
     if (!validateUnicodeDateTokenFormat(this.unicodeTokenFormat)) {
       console.warn(
-        `Invalid unicodeTokenFormat: "${this.unicodeTokenFormat}". ` +
+        `[ngx-formidable] Invalid unicodeTokenFormat: "${this.unicodeTokenFormat}". ` +
           `Falling back to default "${this.defaultUnicodeTokenFormat}". Supported tokens: ${UNICODE_DATE_TOKENS.join(', ')}.`
       );
 
@@ -552,4 +553,65 @@ export class DateFieldComponent
       }
     });
   }
+
+  //#region Pikaday fix
+
+  /**
+   * Developer Note:
+   * Pikaday’s internal <select> elements for month/year do not include `id` or `name`
+   * attributes by default. This triggers Chrome’s "A form field element should have
+   * an id or name" warning during audits. While it’s not strictly required for
+   * functionality, adding these attributes:
+   *   - Removes the Chrome warning.
+   *   - Improves accessibility (screen readers can target the controls).
+   *   - Produces predictable, unique IDs for easier testing/debugging.
+   *
+   * We hook into Pikaday’s `onDraw` (and run once on init) to set both `id` and `name`
+   * based on the field’s `name`/`fieldId`. A MutationObserver is also attached to catch
+   * any DOM rebuilds outside of `onDraw`.
+   *
+   * This is a cosmetic/accessibility fix — it does not affect Pikaday’s behavior.
+   */
+
+  private mo?: MutationObserver;
+
+  private decoratePikadayControls(): void {
+    const host = this.pickerRef?.nativeElement;
+    if (!host) return;
+
+    const monthSelects = Array.from(host.querySelectorAll<HTMLSelectElement>('select.pika-select-month'));
+    const yearSelects = Array.from(host.querySelectorAll<HTMLSelectElement>('select.pika-select-year'));
+
+    // Prefix with field info for uniqueness & readability
+    const prefix = `${this.name || 'date'}-${this.fieldId}`;
+
+    monthSelects.forEach((el, i) => {
+      const id = `${prefix}-month${monthSelects.length > 1 ? `-${i}` : ''}`;
+      el.id = id;
+      el.name = id; // name is what Chrome’s warning cares about, too
+      el.setAttribute('aria-label', this.i18n?.months ? 'Month' : 'Month');
+      el.setAttribute('autocomplete', 'off');
+    });
+
+    yearSelects.forEach((el, i) => {
+      const id = `${prefix}-year${yearSelects.length > 1 ? `-${i}` : ''}`;
+      el.id = id;
+      el.name = id;
+      el.setAttribute('aria-label', 'Year');
+      el.setAttribute('autocomplete', 'off');
+    });
+
+    // Optional: observe future redraws if UI mutates outside of onDraw
+    if (!this.mo) {
+      this.mo = new MutationObserver(() => this.decoratePikadayControls());
+      this.mo.observe(host, { subtree: true, childList: true });
+    }
+  }
+
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this.mo?.disconnect();
+  }
+
+  //#endregion
 }
