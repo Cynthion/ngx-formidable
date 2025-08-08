@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import Fuse, { FuseResult } from 'fuse.js';
 import { FormValidationOptions, IFormidableFieldOption } from 'ngx-formidable';
 import { BehaviorSubject, combineLatest, map, Observable, startWith, Subject } from 'rxjs';
@@ -17,6 +17,8 @@ import {
   styleUrls: ['./example-form.component.scss']
 })
 export class ExampleFormComponent {
+  constructor(private cdRef: ChangeDetectorRef) {}
+
   protected readonly formValue$ = new BehaviorSubject<ExampleFormModel>({
     firstName: undefined, // 'Cynthion',
     middleName: undefined, // 'Whatever',
@@ -296,6 +298,7 @@ export class ExampleFormComponent {
   //#region Control Center & Debug Output
 
   protected logs: string[] = [];
+  protected theme: ThemeKey = 'default';
 
   log(message: string): void {
     this.logs.unshift(message);
@@ -324,5 +327,60 @@ export class ExampleFormComponent {
     floatingLabels: true
   };
 
+  // Since all components are change-detection OnPush, we need to trigger a change detection cycle
+  protected renderFlip = true;
+
+  onToggle(key: ControlKey, checked: boolean): void {
+    this.controlCenter[key] = checked;
+    this.renderFlip = !this.renderFlip;
+    this.cdRef.markForCheck();
+  }
+
+  setTheme(key: ThemeKey): void {
+    this.theme = key;
+    const root = document.documentElement;
+
+    // clear known vars first to avoid leftovers
+    const allKeys = Object.keys(this.themes.default);
+    for (const k of allKeys) root.style.removeProperty(k);
+
+    // apply new
+    const vars = this.themes[key];
+    for (const [k, v] of Object.entries(vars)) {
+      root.style.setProperty(k, v);
+    }
+
+    // persist
+    localStorage.setItem('example.theme', key);
+  }
+
+  private readonly themes: Record<ThemeKey, ThemeVars> = {
+    default: {
+      '--formidable-field-height': '50px',
+      '--formidable-color-validation-error': 'red',
+      '--formidable-color-field-background': 'rgb(209, 143, 233)',
+      '--formidable-color-field-highlighted': 'rgba(170, 64, 237, 0.177)',
+      '--formidable-date-field-panel-width': '200px'
+    },
+    theme2: {
+      '--formidable-field-height': '50px',
+      '--formidable-color-validation-error': '#ff6b6b',
+      '--formidable-color-field-background': '#2b2b2b',
+      '--formidable-color-field-highlighted': 'rgba(255,255,255,0.08)',
+      '--formidable-date-field-panel-width': '220px'
+    },
+    theme3: {
+      '--formidable-field-height': '56px',
+      '--formidable-color-validation-error': '#e11d48',
+      '--formidable-color-field-background': '#fff7ed',
+      '--formidable-color-field-highlighted': 'rgba(245, 158, 11, 0.18)',
+      '--formidable-date-field-panel-width': '240px'
+    }
+  };
+
   //#endregion
 }
+
+type ControlKey = 'showPrefixes' | 'showSuffixes' | 'showTooltips' | 'showLabels' | 'floatingLabels';
+type ThemeKey = 'default' | 'theme2' | 'theme3';
+type ThemeVars = Record<string, string>;
