@@ -3,19 +3,19 @@ import { FieldOptionComponent, FORMIDABLE_FIELD_OPTION } from 'ngx-formidable';
 import { HighlightedEntries } from '../example-form/example-form.model';
 
 @Component({
-  selector: 'fuzzy-field-option',
-  templateUrl: './fuzzy-option.component.html',
-  styleUrls: ['./fuzzy-option.component.scss'],
+  selector: 'example-fuzzy-option',
+  templateUrl: './example-fuzzy-option.component.html',
+  styleUrls: ['./example-fuzzy-option.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       // required to provide this component as IFormidableFieldOption
       provide: FORMIDABLE_FIELD_OPTION,
-      useExisting: forwardRef(() => FuzzyFieldOptionComponent)
+      useExisting: forwardRef(() => ExampleFuzzyOptionComponent)
     }
   ]
 })
-export class FuzzyFieldOptionComponent extends FieldOptionComponent {
+export class ExampleFuzzyOptionComponent extends FieldOptionComponent {
   @Input() subtitle?: string = 'sub';
 
   @Input() highlightedEntries?: HighlightedEntries = {

@@ -37,8 +37,7 @@ const components = [
   FieldPrefixDirective,
   FieldSuffixDirective,
   FieldErrorsDirective,
-  // Formidable Components
-  IconComponent,
+  // Formidable Field Components
   FieldErrorsComponent,
   FieldDecoratorComponent,
   InputFieldComponent,
@@ -50,7 +49,9 @@ const components = [
   TextareaFieldComponent,
   RadioGroupFieldComponent,
   CheckboxGroupFieldComponent,
-  TimeFieldComponent
+  TimeFieldComponent,
+  // Formidable Components
+  IconComponent
 ];
 
 @NgModule({

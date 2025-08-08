@@ -2,6 +2,7 @@
  * Public API Surface of ngx-formidable
  */
 
+export * from '../../../src/app/example-tooltip/example-tooltip.component';
 export * from './lib/components/field-decorator/field-decorator.component';
 export * from './lib/components/field-errors/field-errors.component';
 export * from './lib/components/field-option/field-option.component';

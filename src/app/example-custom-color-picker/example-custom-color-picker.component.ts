@@ -14,17 +14,17 @@ import { BaseFieldDirective, FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidable
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => CustomColorPickerComponent),
+      useExisting: forwardRef(() => ExampleCustomColorPickerComponent),
       multi: true
     },
     {
       provide: FORMIDABLE_FIELD,
-      useExisting: forwardRef(() => CustomColorPickerComponent)
+      useExisting: forwardRef(() => ExampleCustomColorPickerComponent)
     }
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CustomColorPickerComponent extends BaseFieldDirective implements IFormidableField {
+export class ExampleCustomColorPickerComponent extends BaseFieldDirective implements IFormidableField {
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
   protected keyboardCallback = null;

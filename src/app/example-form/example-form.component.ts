@@ -18,12 +18,13 @@ import {
 })
 export class ExampleFormComponent {
   protected readonly formValue$ = new BehaviorSubject<ExampleFormModel>({
-    firstName: 'Cynthion',
-    lastName: 'Morris', //'Morris',
-    gender: undefined, //'male',
-    nationality: undefined, //'ch',
-    hobby: undefined, //'reading',
-    animal: undefined, //'cat',
+    firstName: undefined, // 'Cynthion',
+    middleName: undefined, // 'Whatever',
+    lastName: undefined, // 'Morris',
+    gender: undefined, // 'male',
+    nationality: undefined, // 'ch',
+    hobby: undefined, // 'reading',
+    animal: undefined, // 'cat',
     birthdate: undefined, // new Date(1989, 5, 29),
     time: undefined, // new Date(0, 0, 0, 12, 30, 15),
     religion: undefined, // 'agnostic',
@@ -171,6 +172,23 @@ export class ExampleFormComponent {
     weekdays: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
     weekdaysShort: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
   };
+
+  protected exampleTooltipSvg = `
+  <svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="16"
+  height="16"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" />
+  <line x1="12" y1="16" x2="12" y2="12" />
+  <line x1="12" y1="8" x2="12" y2="8" />
+</svg>
+`;
 
   protected onValueChanged(_fieldName: string, _value: unknown): void {
     this.log(`Value changed on ${_fieldName} field: ${_value}`);

@@ -1,0 +1,106 @@
+@use '../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.tooltip-host {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tooltip-trigger {
+  border: 0;
+  background: none;
+  cursor: help;
+  line-height: 1;
+  padding: 0;
+}
+
+.tooltip-panel {
+  position: absolute;
+  z-index: 1000;
+  width: max-content;
+  max-width: min(90vw, 40rem);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  background: #222222;
+  color: #ffffff;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+
+  white-space: normal;
+
+  opacity: 0;
+  transform: translateY(-4px);
+  pointer-events: none;
+  transition:
+    opacity 0.12s ease,
+    transform 0.12s ease;
+}
+
+.tooltip-panel.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Positions */
+.tooltip-host[data-placement='right'] .tooltip-panel {
+  top: 50%;
+  left: 100%;
+  transform: translate(8px, -50%);
+}
+
+.tooltip-host[data-placement='left'] .tooltip-panel {
+  top: 50%;
+  right: 100%;
+  transform: translate(-8px, -50%);
+}
+
+.tooltip-host[data-placement='top'] .tooltip-panel {
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, -8px);
+}
+
+.tooltip-host[data-placement='bottom'] .tooltip-panel {
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 8px);
+}
+
+/* Arrows */
+.tooltip-arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: inherit;
+  transform: rotate(45deg);
+}
+
+.tooltip-host[data-placement='right'] .tooltip-arrow {
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.tooltip-host[data-placement='left'] .tooltip-arrow {
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.tooltip-host[data-placement='top'] .tooltip-arrow {
+  left: 50%;
+  bottom: -4px;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.tooltip-host[data-placement='bottom'] .tooltip-arrow {
+  left: 50%;
+  top: -4px;
+  transform: translateX(-50%) rotate(45deg);
+}

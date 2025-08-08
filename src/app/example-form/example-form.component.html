@@ -22,9 +22,7 @@
           name="firstName"
           [disabled]="false"
           [readonly]="false"
-          [minLength]="15"
-          [maxLength]="15"
-          [mask]="'AAA AAA AAA AAA'"
+          [maxLength]="150"
           [ngModel]="vm.formValue$.firstName"
           (valueChanged)="onValueChanged('firstName', $event)"
           (focusChanged)="onFocusChanged('firstName', $event)">
@@ -34,7 +32,42 @@
           [isFloating]="true">
           First Name
         </div>
-        <div formidableFieldTooltip>(Input)</div>
+        <div formidableFieldTooltip>
+          <example-tooltip
+            placement="right"
+            trigger="hover"
+            [text]="'This is a input field. It has a tooltip.'">
+          </example-tooltip>
+        </div>
+      </formidable-field-decorator>
+
+      <!-- Middle Name -->
+      <formidable-field-decorator>
+        <formidable-input-field
+          formidableFieldErrors
+          placeholder="Your middle name"
+          name="middleName"
+          [disabled]="false"
+          [readonly]="false"
+          [minLength]="15"
+          [maxLength]="15"
+          [mask]="'AAA AAA AAA AAA'"
+          [ngModel]="vm.formValue$.middleName"
+          (valueChanged)="onValueChanged('middleName', $event)"
+          (focusChanged)="onFocusChanged('middleName', $event)">
+        </formidable-input-field>
+        <div
+          formidableFieldLabel
+          [isFloating]="true">
+          Middle Name
+        </div>
+        <div formidableFieldTooltip>
+          <example-tooltip
+            placement="right"
+            trigger="hover"
+            [text]="'Fields can be masked, and have prefixes and suffixes.'">
+          </example-tooltip>
+        </div>
         <div formidableFieldPrefix>Prefix</div>
         <div formidableFieldSuffix>Suffix</div>
       </formidable-field-decorator>
@@ -62,9 +95,13 @@
           [isFloating]="true">
           Last Name
         </div>
-        <div formidableFieldTooltip>(Textarea)</div>
-        <div formidableFieldPrefix>Prefix</div>
-        <div formidableFieldSuffix>Suffix</div>
+        <div formidableFieldTooltip>
+          <example-tooltip
+            placement="bottom"
+            trigger="click"
+            [text]="'It opens on click. Below.'">
+          </example-tooltip>
+        </div>
       </formidable-field-decorator>
 
       <!-- Gender -->
@@ -91,9 +128,14 @@
           [isFloating]="true">
           Gender
         </div>
-        <div formidableFieldTooltip>(Select)</div>
-        <div formidableFieldPrefix>Prefix</div>
-        <div formidableFieldSuffix>Suffix</div>
+        <div formidableFieldTooltip>
+          <example-tooltip
+            placement="right"
+            trigger="click"
+            [icon]="exampleTooltipSvg"
+            [text]="'This is a select field. And this tooltip has another content.'">
+          </example-tooltip>
+        </div>
       </formidable-field-decorator>
 
       <!-- Nationality -->
@@ -129,9 +171,6 @@
           [isFloating]="true">
           Nationality
         </div>
-        <div formidableFieldTooltip>(Dropdown)</div>
-        <div formidableFieldPrefix>Prefix</div>
-        <div formidableFieldSuffix>Suffix</div>
       </formidable-field-decorator>
 
       <!-- Hobby -->
@@ -174,8 +213,6 @@
           Hobby
         </div>
         <div formidableFieldTooltip>(Autocomplete)</div>
-        <div formidableFieldPrefix>Prefix</div>
-        <div formidableFieldSuffix>Suffix</div>
       </formidable-field-decorator>
 
       <!-- Animals -->
@@ -193,13 +230,13 @@
           (focusChanged)="onFocusChanged('animal', $event)"
           (filterChanged)="onAnimalFilterChange($event)">
           @for (option of animalOptionsFiltered$ | async; track option.value) {
-            <fuzzy-field-option
+            <example-fuzzy-option
               [value]="option.value"
               [label]="option.label"
               [disabled]="option.disabled || false"
               [subtitle]="option.subtitle"
               [highlightedEntries]="option.highlightedEntries || { labelEntries: [], subtitleEntries: [] }">
-            </fuzzy-field-option>
+            </example-fuzzy-option>
           }
         </formidable-autocomplete-field>
         <div
@@ -207,9 +244,14 @@
           [isFloating]="true">
           Animal
         </div>
-        <div formidableFieldTooltip>(Autocomplete [custom fuzzy options])</div>
-        <div formidableFieldPrefix>Prefix</div>
-        <div formidableFieldSuffix>Suffix</div>
+        <div formidableFieldTooltip>
+          <example-tooltip
+            placement="right"
+            trigger="click"
+            [icon]="exampleTooltipSvg"
+            [text]="'This field uses custom options. With fuzzy matching.'">
+          </example-tooltip>
+        </div>
       </formidable-field-decorator>
 
       <!-- Birthdate -->
@@ -234,9 +276,6 @@
           [isFloating]="true">
           Birthdate
         </div>
-        <div formidableFieldTooltip>(Date)</div>
-        <div formidableFieldPrefix>Prefix</div>
-        <div formidableFieldSuffix>Suffix</div>
       </formidable-field-decorator>
 
       <!-- Time -->
@@ -257,9 +296,6 @@
           [isFloating]="true">
           Time
         </div>
-        <div formidableFieldTooltip>(Time)</div>
-        <div formidableFieldPrefix>Prefix</div>
-        <div formidableFieldSuffix>Suffix</div>
       </formidable-field-decorator>
 
       <!-- Religion -->
@@ -300,9 +336,16 @@
           [isFloating]="true">
           Religion
         </div>
-        <div formidableFieldTooltip>(Radio Group)</div>
-        <div formidableFieldPrefix>Prefix</div>
-        <div formidableFieldSuffix>Suffix</div>
+        <div formidableFieldTooltip>
+          <example-tooltip
+            placement="right"
+            trigger="click"
+            [icon]="exampleTooltipSvg"
+            [text]="'This is a radio group field. It can have a tooltip, too.'">
+          </example-tooltip>
+        </div>
+        <div formidableFieldPrefix>Prefixes for groups show above the field.</div>
+        <div formidableFieldSuffix>Suffix for groups show below the field.</div>
       </formidable-field-decorator>
 
       <!-- Allergies -->
@@ -343,9 +386,6 @@
           [isFloating]="true">
           Allergies
         </div>
-        <div formidableFieldTooltip>(Checkbox Group)</div>
-        <div formidableFieldPrefix>Prefix</div>
-        <div formidableFieldSuffix>Suffix</div>
       </formidable-field-decorator>
 
       <!-- Custom Color Picker -->

@@ -1,0 +1,29 @@
+<span
+  class="tooltip-host"
+  [attr.data-placement]="placement"
+  (mouseenter)="onEnter()"
+  (mouseleave)="onLeave()">
+  <button
+    type="button"
+    class="tooltip-trigger"
+    aria-label="Help"
+    (click)="trigger === 'click' && toggle()">
+    <formidable-icon
+      [svg]="icon"
+      [size]="32" />
+  </button>
+
+  <div
+    role="tooltip"
+    tabindex="-1"
+    class="tooltip-panel"
+    [class.open]="open">
+    <ng-container *ngIf="text; else projected">{{ text }}</ng-container>
+    <ng-template #projected>
+      <ng-content></ng-content>
+    </ng-template>
+    <span
+      class="tooltip-arrow"
+      aria-hidden="true"></span>
+  </div>
+</span>

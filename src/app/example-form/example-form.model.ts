@@ -22,6 +22,7 @@ export type UserReligion =
 
 export interface User {
   firstName: string;
+  middleName: string;
   lastName: string;
   gender?: UserGender;
   nationality?: UserNationality;
@@ -45,6 +46,7 @@ export type ExampleFormFrame = DeepRequired<ExampleFormModel>;
 
 export const exampleFormFrame: ExampleFormFrame = {
   firstName: '',
+  middleName: '',
   lastName: '',
   gender: 'male',
   nationality: 'ch',
