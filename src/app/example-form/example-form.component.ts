@@ -18,7 +18,7 @@ import {
 })
 export class ExampleFormComponent {
   protected readonly formValue$ = new BehaviorSubject<ExampleFormModel>({
-    firstName: undefined, // 'Cynthion',
+    firstName: 'Cynthion',
     lastName: undefined, //'Van Halen',
     gender: undefined, //'male',
     nationality: undefined, //'ch',

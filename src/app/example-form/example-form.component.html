@@ -24,6 +24,7 @@
           [readonly]="false"
           [minLength]="10"
           [maxLength]="15"
+          [mask]="'AAA 000'"
           [ngModel]="vm.formValue$.firstName"
           (valueChanged)="onValueChanged('firstName', $event)"
           (focusChanged)="onFocusChanged('firstName', $event)">
@@ -50,6 +51,8 @@
           [enableAutosize]="true"
           [showLengthIndicator]="true"
           [maxLength]="300"
+          [mask]="'AAA 000'"
+          [maskConfig]="{ prefix: 'CHF ', showMaskTyped: true }"
           [ngModel]="vm.formValue$.lastName"
           (valueChanged)="onValueChanged('lastName', $event)"
           (focusChanged)="onFocusChanged('lastName', $event)">

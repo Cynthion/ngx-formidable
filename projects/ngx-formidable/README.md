@@ -1,6 +1,12 @@
-# ngx-formidable
+<h1 align="center">ngx-formidable</h1>
 
+<p align="center">
 A comprehensive Angular component library for building rich, validated forms using Vest for validation, Pikaday for date picking, and flexible field decorators.
+</p>
+
+<p align="center">
+  Created with ❤️ by Cynthion
+</p>
 
 - **Zero Boilerplate** — Wire up form value, frame, and validation suite with a single `<form formidableForm>` directive.
 - **Async Validation** — Field- and root-level (cross-field) Vest suites run on every change with configurable debounce.
@@ -15,6 +21,9 @@ A comprehensive Angular component library for building rich, validated forms usi
 
 Explore live examples on our GitHub Pages: https://cynthion.github.io/ngx-formidable/
 
+// TODO add emojis
+// TODO add feature table with emojis
+
 ---
 
 ## Table of Contents
@@ -26,6 +35,8 @@ Explore live examples on our GitHub Pages: https://cynthion.github.io/ngx-formid
 - [Field Components](#field-components)
 - [Theming & Styles](#theming--styles)
 - [Root-Level / Cross-Field Validation](#root-level--cross-field-validation)
+- [Keyboard Navigation](#keyboard-navigation)
+- [Masking](#masking)
 - [Extending with Custom Components / Options](#extending-with-custom-components--options)
 - [Contributing](#contributing)
 - [License](#license)
@@ -363,6 +374,57 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
 	// ...
 });
 ```
+
+## Keyboard Navigation
+
+// TODO
+
+## Masking
+
+Some fields support input masking. Under the hood this uses ngx-mask, and you can pass (almost) all of its options straight through.
+
+How config is applied:
+
+- Per-field overrides (via `[maskConfig]`) win over…
+- App-wide defaults (provided with `FORMIDABLE_MASK_DEFAULTS`), which win over…
+- Library fallbacks (sane defaults so nothing explodes).
+
+### App-wide defaults
+
+Provide global defaults once in your app (or a shared) module:
+
+```ts
+import { NgModule } from '@angular/core';
+import { FORMIDABLE_MASK_DEFAULTS } from 'ngx-formidable';
+import { NgxMaskConfig } from 'ngx-mask';
+
+const APP_MASK_DEFAULTS: Partial<NgxMaskConfig> = {
+	showMaskTyped: true,
+	dropSpecialCharacters: false,
+	thousandSeparator: '.',
+	decimalMarker: ',',
+	prefix: '',
+	suffix: ''
+};
+
+@NgModule({
+	providers: [{ provide: FORMIDABLE_MASK_DEFAULTS, useValue: APP_MASK_DEFAULTS }]
+})
+export class AppModule {}
+```
+
+### Per-field override
+
+```html
+<formidable-input-field
+	name="price"
+	[mask]="'separator.2'"
+	[maskConfig]="{ prefix: 'CHF ', allowNegativeNumbers: false, clearIfNotMatch: false }"
+	ngModel>
+</formidable-input-field>
+```
+
+That’s it: set a `[mask]` when you want masking, tweak behavior with `[maskConfig]`, and use the token for project-wide defaults.
 
 ## Extending with Custom Components / Options
 

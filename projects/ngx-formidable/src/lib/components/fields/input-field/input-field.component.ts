@@ -1,7 +1,23 @@
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  forwardRef,
+  Inject,
+  Input,
+  Optional,
+  ViewChild
+} from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NgxMaskConfig } from 'ngx-mask';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
-import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableInputField } from '../../../models/formidable.model';
+import { DEFAULT_PATTERNS, DEFAULT_SPECIAL_CHARACTERS, MaskConfigSubset } from '../../../helpers/mask.helpers';
+import {
+  FieldDecoratorLayout,
+  FORMIDABLE_FIELD,
+  FORMIDABLE_MASK_DEFAULTS,
+  IFormidableInputField
+} from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.component';
 
 /**
@@ -48,6 +64,10 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
+  constructor(@Optional() @Inject(FORMIDABLE_MASK_DEFAULTS) private maskDefaults?: Partial<NgxMaskConfig>) {
+    super();
+  }
+
   protected doOnValueChange(): void {
     // No additional actions needed
   }
@@ -90,6 +110,37 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   @Input() autocomplete: AutoFill = 'off';
   @Input() minLength = -1;
   @Input() maxLength = -1;
+
+  //#endregion
+
+  //#region IFormidableMaskField
+
+  @Input() mask?: string = undefined;
+  @Input() maskConfig?: Partial<NgxMaskConfig>;
+
+  private readonly LOCAL_MASK_DEFAULTS: Required<MaskConfigSubset> = {
+    validation: true,
+    showMaskTyped: false,
+    dropSpecialCharacters: true,
+    specialCharacters: DEFAULT_SPECIAL_CHARACTERS,
+    thousandSeparator: ' ', // ngx-mask default is a space
+    decimalMarker: '.', // can be string | string[]; default to '.'
+    prefix: '',
+    suffix: '',
+    allowNegativeNumbers: false,
+    leadZeroDateTime: false,
+    patterns: DEFAULT_PATTERNS,
+    clearIfNotMatch: false
+  };
+
+  /** Merged mask config (local defaults <- global defaults <- per-field) */
+  get mergedMaskConfig(): Required<MaskConfigSubset> {
+    return {
+      ...this.LOCAL_MASK_DEFAULTS,
+      ...(this.maskDefaults ?? {}),
+      ...(this.maskConfig ?? {})
+    } as Required<MaskConfigSubset>;
+  }
 
   //#endregion
 }

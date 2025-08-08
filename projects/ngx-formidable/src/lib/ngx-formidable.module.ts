@@ -71,9 +71,7 @@ const components = [
   ],
   providers: [
     // ngx-mask
-    provideNgxMask({
-      validation: false
-    })
+    provideNgxMask()
   ]
 })
 export class NgxFormidableModule {}

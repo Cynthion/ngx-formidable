@@ -12,9 +12,23 @@
     [attr.maxlength]="maxLength > -1 ? maxLength : null"
     [attr.readonly]="readonly ? '' : null"
     [attr.disabled]="disabled ? '' : null"
+    [mask]="mask"
+    [validation]="!!mask && mergedMaskConfig.validation && !readonly && !disabled"
+    [showMaskTyped]="mergedMaskConfig.showMaskTyped"
+    [dropSpecialCharacters]="mergedMaskConfig.dropSpecialCharacters"
+    [specialCharacters]="mergedMaskConfig.specialCharacters"
+    [thousandSeparator]="mergedMaskConfig.thousandSeparator"
+    [decimalMarker]="mergedMaskConfig.decimalMarker"
+    [prefix]="mergedMaskConfig.prefix"
+    [suffix]="mergedMaskConfig.suffix"
+    [allowNegativeNumbers]="mergedMaskConfig.allowNegativeNumbers"
+    [leadZeroDateTime]="mergedMaskConfig.leadZeroDateTime"
+    [patterns]="mergedMaskConfig.patterns"
+    [clearIfNotMatch]="mergedMaskConfig.clearIfNotMatch"
     (input)="onValueChange()"
     (focus)="onFocusChange(true)"
-    (blur)="onFocusChange(false)"></textarea>
+    (blur)="onFocusChange(false)">
+  </textarea>
   @if (showLengthIndicator && !readonly && !disabled) {
     <div
       #lengthIndicatorRef

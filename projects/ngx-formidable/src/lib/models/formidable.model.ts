@@ -1,4 +1,5 @@
 import { ElementRef, EventEmitter, InjectionToken, TemplateRef } from '@angular/core';
+import { NgxMaskConfig } from 'ngx-mask';
 import { PikadayOptions } from 'pikaday';
 import { Observable } from 'rxjs';
 
@@ -12,6 +13,9 @@ export const FORMIDABLE_OPTION_FIELD = new InjectionToken<IFormidableOptionField
 
 /** InjectionToken for option components that can be used in field components that support multiple options. */
 export const FORMIDABLE_FIELD_OPTION = new InjectionToken<IFormidableFieldOption>('FORMIDABLE_FIELD_OPTION');
+
+/** InjectionToken for providing global default options for input masking. */
+export const FORMIDABLE_MASK_DEFAULTS = new InjectionToken<Partial<NgxMaskConfig>>('FORMIDABLE_MASK_DEFAULTS');
 
 export const EMPTY_FIELD_OPTION: IFormidableFieldOption = {
   value: 'empty',
@@ -75,6 +79,14 @@ export interface IFormidablePanelField {
   panelPosition: FormidablePanelPosition;
 }
 
+/** Interface for all Formidable fields that support masking. */
+export interface IFormidableMaskField {
+  /** Must be a valid ngx-mask (see https://github.com/JsDaddy/ngx-mask). */
+  mask?: string;
+  /** Per-field overrides for ngx-mask. */
+  maskConfig?: Partial<NgxMaskConfig>;
+}
+
 type FormidableInputFieldsKeys =
   | 'name'
   | 'placeholder'
@@ -89,7 +101,10 @@ type FormidableTextareaFieldsKeys = FormidableInputFieldsKeys;
 type FormidableSelectFieldsKeys = 'name' | 'disabled';
 
 /** The subset of `<input/>` properties that are supported. */
-export interface IFormidableInputField extends Pick<HTMLInputElement, FormidableInputFieldsKeys>, IFormidableField {}
+export interface IFormidableInputField
+  extends Pick<HTMLInputElement, FormidableInputFieldsKeys>,
+    IFormidableField,
+    IFormidableMaskField {}
 
 type FormidableGroupFieldsKeys = 'name' | 'disabled';
 
@@ -108,7 +123,8 @@ export interface IFormidableCheckboxGroupField
 /** The subset of `<textarea/>` properties that are supported. */
 export interface IFormidableTextareaField
   extends Pick<HTMLTextAreaElement, FormidableTextareaFieldsKeys>,
-    IFormidableField {
+    IFormidableField,
+    IFormidableMaskField {
   /**
    * Enable or disable autosizing of the textarea.
    * If true, the textarea will automatically adjust its height based on the content.
@@ -154,7 +170,7 @@ export interface IFormidablePikadayOptions
   > {}
 
 export interface IFormidableDateField extends IFormidableField<Date | null>, IFormidablePikadayOptions {
-  /** Must be a valid Unicode format. (Supported tokens: y, yy, yyy, yyyy, M, MM, MMM, MMMM, d, dd) */
+  /** Must be a valid Unicode format (e.g. yyyy-MM-dd). Supported tokens: y, yy, yyy, yyyy, M, MM, MMM, MMMM, d, dd */
   unicodeTokenFormat: string;
   selectDate(date: Date | null): void;
   /** Must be a valid SVG icon string. */
@@ -164,7 +180,7 @@ export interface IFormidableDateField extends IFormidableField<Date | null>, IFo
 }
 
 export interface IFormidableTimeField extends IFormidableField<Date | null> {
-  /** Must be a valid Unicode format. (Supported tokens:   'H', 'HH', 'h', 'hh', 'm', 'mm', 's', 'ss', 'a', 'aa') */
+  /** Must be a valid Unicode format (e.g. HH:mm:ss). Supported tokens: H, HH, h, hh, m, mm, s, ss, a, aa */
   unicodeTokenFormat: string;
   selectTime(time: Date | null): void;
 }
