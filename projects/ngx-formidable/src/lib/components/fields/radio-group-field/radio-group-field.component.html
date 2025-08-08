@@ -13,7 +13,7 @@
     <input
       hidden
       type="radio"
-      [id]="option.value"
+      [id]="name + '-' + option.value"
       [tabindex]="-1"
       [attr.name]="name"
       [attr.readonly]="option.readonly || readonly ? '' : null"
@@ -37,7 +37,7 @@
   } @empty {
     <input
       type="radio"
-      [id]="emptyOption.value"
+      [id]="name + '-' + emptyOption.value"
       [tabindex]="-1"
       [name]="name"
       [value]="emptyOption.value"
