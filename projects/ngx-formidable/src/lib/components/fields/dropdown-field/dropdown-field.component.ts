@@ -103,7 +103,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
       this.updateOptions();
     });
 
-    this.subscriptToUserInput();
+    this.subscribeToUserInput();
   }
 
   protected doOnValueChange(): void {
@@ -169,7 +169,8 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
   }
 
   get isLabelFloating(): boolean {
-    return !this.isFieldFocused && !this.isFieldFilled;
+    const blocked = this.disabled || this.readonly;
+    return !blocked && !this.isFieldFocused && !this.isFieldFilled;
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
@@ -237,7 +238,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
     this.writeValue(this._value);
   }
 
-  private subscriptToUserInput(): void {
+  private subscribeToUserInput(): void {
     this.userInput$.pipe(debounceTime(200)).subscribe((term) => {
       this.highlightFirstMatchingOption(term);
       this._typedBuffer = '';
@@ -245,7 +246,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
   }
 
   protected onUserInput(event: KeyboardEvent): void {
-    if (isPrintableCharacter(event)) {
+    if (isPrintableCharacter(event) && !this.readonly && !this.disabled) {
       this._typedBuffer += event.key;
       this.userInput$.next(this._typedBuffer);
 

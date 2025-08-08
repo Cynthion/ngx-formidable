@@ -117,16 +117,29 @@ export abstract class BaseFieldDirective<T = string | null>
   abstract decoratorLayout: FieldDecoratorLayout;
 
   protected preventPointerDown(event: PointerEvent, focusElementRef?: HTMLElement): void {
-    if (!this.readonly) return;
+    if (!this.readonly && !this.disabled) return;
 
     event.preventDefault();
     setTimeout(() => (focusElementRef ? focusElementRef.focus() : this.fieldRef.nativeElement.focus()), 0);
   }
 
   protected preventKeydown(event: KeyboardEvent): void {
-    if (!this.readonly) return;
+    if (!this.readonly && !this.disabled) return;
 
-    const blockedKeys = ['ArrowUp', 'ArrowDown', 'Enter', ' ', 'Home', 'End']; // TODO correct?
+    const nativeSelectKeys = [
+      'ArrowUp',
+      'ArrowDown',
+      'ArrowLeft',
+      'ArrowRight',
+      'Enter',
+      ' ',
+      'Home',
+      'End',
+      'PageUp',
+      'PageDown',
+      'Space'
+    ];
+    const blockedKeys: string[] = [...nativeSelectKeys];
     if (blockedKeys.includes(event.key)) {
       event.preventDefault();
     }
