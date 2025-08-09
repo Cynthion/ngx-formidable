@@ -99,8 +99,10 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
     return this.selectRef.nativeElement.value || null;
   }
 
-  readonly isLabelFloating = false;
-
+  get isLabelFloating(): boolean {
+    const blocked = this.disabled || this.readonly;
+    return !blocked && !this.isFieldFocused && !this.isFieldFilled;
+  }
   get fieldRef(): ElementRef<HTMLElement> {
     return this.selectRef as ElementRef<HTMLElement>;
   }
