@@ -138,7 +138,15 @@ export class TextareaFieldComponent
   //#region IFormidableField
 
   get value(): string | null {
-    return this.textareaRef.nativeElement.value || null;
+    const textareaValue = this.textareaRef.nativeElement.value;
+
+    return this.mask && textareaValue
+      ? // remove mask characters if mask is applied
+        this.maskPipe.transform(textareaValue, this.mask!, {
+          ...this.mergedMaskConfig,
+          showMaskTyped: false
+        })
+      : textareaValue || null;
   }
 
   get isLabelFloating(): boolean {

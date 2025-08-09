@@ -47,7 +47,7 @@ fieldset {
 .panel {
   z-index: 1000;
   font-family: monospace;
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   padding: 1rem;
   background: #f9f9f9;
 
@@ -109,6 +109,7 @@ fieldset {
 
   pre {
     padding: 0.5rem;
+    margin: 0;
     background: #f0f0f0;
     border-radius: 4px;
     white-space: pre-wrap;

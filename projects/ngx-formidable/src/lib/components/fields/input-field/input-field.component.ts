@@ -128,7 +128,15 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   //#region IFormidableField
 
   get value(): string | null {
-    return this.inputRef.nativeElement.value || null;
+    const inputValue = this.inputRef.nativeElement.value;
+
+    return this.mask && inputValue
+      ? // remove mask characters if mask is applied
+        this.maskPipe.transform(inputValue, this.mask!, {
+          ...this.mergedMaskConfig,
+          showMaskTyped: false
+        })
+      : inputValue || null;
   }
 
   get isLabelFloating(): boolean {

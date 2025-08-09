@@ -37,6 +37,7 @@ export abstract class BaseFieldDirective<T = string | null>
 
     this.isFieldFilled = typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
 
+    // TODO only emit if value actually changed
     this.valueChangeSubject$.next(value);
     this.valueChanged.emit(value);
     this.onChange(value); // notify ControlValueAccessor of the change

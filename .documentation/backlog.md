@@ -4,4 +4,5 @@ Example:
 
 - suffixes: clear/reset, copy, validation state, loading
 - paddings on safari seem off
-- mask should not be in form value -> filter out
+- date/time fields: show mask that user provided, not 0
+- only emit if value actually changed
