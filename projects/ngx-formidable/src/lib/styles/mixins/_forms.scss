@@ -261,6 +261,7 @@
   align-items: center;
   justify-content: flex-start;
   margin-bottom: var(--formidable-field-before-margin-bottom, #{tokens.$formidable-field-before-margin-bottom});
+  height: 10px; // TODO find sensible value or make configurable, calc necessary height for
 }
 
 @mixin field-label {
@@ -475,7 +476,7 @@
   display: flex;
   align-items: center;
 
-  padding: utils.spacing(8) utils.spacing(16) utils.spacing(8) utils.spacing(0);
+  padding: utils.spacing(8) utils.spacing(0);
 }
 
 @mixin field-option-checkbox-group {

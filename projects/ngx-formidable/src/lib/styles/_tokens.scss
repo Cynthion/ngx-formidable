@@ -118,7 +118,7 @@ $formidable-label-floating-offset: calc(
   #{math.div($formidable-field-height, 2)} - #{math.div(
       $formidable-label-floating-line-height * $formidable-label-floating-font-size,
       2
-    )} + #{$formidable-field-before-margin-bottom} + #{$formidable-field-border-thickness} + utils.spacing(2)
+    )} + #{$formidable-field-before-margin-bottom} + #{$formidable-field-border-thickness}
 );
 
 $formidable-textarea-min-height: utils.spacing(96); // ~2 lines

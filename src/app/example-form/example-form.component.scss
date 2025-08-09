@@ -48,12 +48,25 @@ fieldset {
   z-index: 1000;
   font-family: monospace;
   font-size: 0.85rem;
-
-  border-top: 1px solid #e5e7eb;
-  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.04);
+  padding: 1rem;
+  background: #f9f9f9;
 
   @media (max-width: 768px) {
     position: static;
+  }
+
+  fieldset {
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #f0f0f0;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    margin-top: 0.5rem;
   }
 
   /* Toggle row */
@@ -95,7 +108,6 @@ fieldset {
   }
 
   pre {
-    margin: 0;
     padding: 0.5rem;
     background: #f0f0f0;
     border-radius: 4px;
@@ -136,14 +148,13 @@ fieldset {
       max-height: 300px;
       overflow-y: auto;
       overflow-x: hidden;
-      background: #f4f4f4;
-      padding: 8px;
+      background: #f0f0f0;
+      padding: 0.5rem;
       border-radius: 4px;
-      border: 1px solid #ccc;
-      font-size: 0.8rem;
       font-family: monospace;
       white-space: pre-wrap;
       word-wrap: break-word;
+      overflow-wrap: break-word;
     }
 
     .log-entry {
@@ -159,9 +170,7 @@ fieldset {
 
   position: sticky;
   top: 0;
-  background: inherit;
   border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
 
   .control-body {
     height: auto;
@@ -174,7 +183,5 @@ fieldset {
 
   position: sticky;
   bottom: 0;
-  left: 0;
-  right: 0;
-  background: #f9f9f9;
+  border-top: 1px solid #e5e7eb;
 }
