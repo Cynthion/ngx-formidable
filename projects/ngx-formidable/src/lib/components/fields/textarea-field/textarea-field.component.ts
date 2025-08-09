@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -12,7 +13,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
+import { NgxMaskConfig, NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
 import {
   analyzeMaskDisplayLength,
@@ -52,6 +53,9 @@ import { BaseFieldDirective } from '../base-field.directive';
   selector: 'formidable-textarea-field',
   templateUrl: './textarea-field.component.html',
   styleUrls: ['./textarea-field.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule, NgxMaskDirective],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -65,8 +69,7 @@ import { BaseFieldDirective } from '../base-field.directive';
       useExisting: TextareaFieldComponent
     },
     NgxMaskPipe
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
 export class TextareaFieldComponent
   extends BaseFieldDirective

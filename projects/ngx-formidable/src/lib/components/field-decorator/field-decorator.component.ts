@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   AfterViewInit,
@@ -49,7 +50,9 @@ import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableField } from '../../
   selector: 'formidable-field-decorator',
   templateUrl: './field-decorator.component.html',
   styleUrls: ['./field-decorator.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule]
 })
 export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit, OnDestroy, IFormidableField<unknown> {
   // View children are used to access the prefix and suffix wrappers

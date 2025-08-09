@@ -27,6 +27,7 @@ import { FormDirective } from './form.directive';
  */
 @Directive({
   selector: '[ngModelGroup]',
+  standalone: true,
   providers: [
     {
       provide: NG_ASYNC_VALIDATORS,

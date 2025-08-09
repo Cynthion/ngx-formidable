@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -15,7 +16,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { addDays, format, isEqual, parse } from 'date-fns';
-import { NgxMaskConfig } from 'ngx-mask';
+import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import {
   formatToDateTokenMask,
@@ -33,6 +34,7 @@ import {
   IFormidableDateField
 } from '../../../models/formidable.model';
 import { calendarArrowDown, calendarArrowUp } from '../../../models/icons';
+import { IconComponent } from '../../icon/icon.component';
 import { BaseFieldDirective } from '../base-field.directive';
 
 /**
@@ -91,6 +93,9 @@ import { BaseFieldDirective } from '../base-field.directive';
   selector: 'formidable-date-field',
   templateUrl: './date-field.component.html',
   styleUrls: ['./date-field.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule, NgxMaskDirective, IconComponent],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -103,8 +108,7 @@ import { BaseFieldDirective } from '../base-field.directive';
       provide: FORMIDABLE_FIELD,
       useExisting: DateFieldComponent
     }
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
 export class DateFieldComponent
   extends BaseFieldDirective<Date | null>

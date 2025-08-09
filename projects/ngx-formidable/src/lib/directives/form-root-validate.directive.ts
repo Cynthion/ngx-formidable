@@ -53,6 +53,7 @@ import { FormValidationOptions, ROOT_FORM } from '../models/formidable.model';
  */
 @Directive({
   selector: 'form[formidableRootValidate][formValue][suite]',
+  standalone: true,
   providers: [
     {
       provide: NG_ASYNC_VALIDATORS,

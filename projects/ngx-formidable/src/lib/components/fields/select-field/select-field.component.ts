@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
@@ -42,6 +43,9 @@ import { BaseFieldDirective } from '../base-field.directive';
   selector: 'formidable-select-field',
   templateUrl: './select-field.component.html',
   styleUrls: ['./select-field.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -59,8 +63,7 @@ import { BaseFieldDirective } from '../base-field.directive';
       provide: FORMIDABLE_OPTION_FIELD,
       useExisting: SelectFieldComponent
     }
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
 export class SelectFieldComponent extends BaseFieldDirective implements IFormidableSelectField, AfterContentInit {
   @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLInputElement>;

@@ -24,7 +24,7 @@ import { FormDirective } from './form.directive';
  * />
  * ```
  */
-@Directive({ selector: '[formidableFieldErrors]' })
+@Directive({ selector: '[formidableFieldErrors]', standalone: true })
 export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly injector = inject(Injector);

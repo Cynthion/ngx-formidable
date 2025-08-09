@@ -1,7 +1,6 @@
-import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
+import { provideNgxMask } from 'ngx-mask';
 import { FieldDecoratorComponent } from './components/field-decorator/field-decorator.component';
 import { FieldErrorsComponent } from './components/field-errors/field-errors.component';
 import { FieldOptionComponent } from './components/field-option/field-option.component';
@@ -55,24 +54,8 @@ const components = [
 ];
 
 @NgModule({
-  declarations: [components],
-  imports: [
-    CommonModule,
-    FormsModule,
-    // ngx-mask
-    NgxMaskDirective,
-    NgxMaskPipe
-  ],
-  exports: [
-    components,
-    FormsModule,
-    // ngx-mask
-    NgxMaskDirective,
-    NgxMaskPipe
-  ],
-  providers: [
-    // ngx-mask
-    provideNgxMask()
-  ]
+  imports: [...components],
+  exports: [components, FormsModule],
+  providers: [provideNgxMask()]
 })
 export class NgxFormidableModule {}

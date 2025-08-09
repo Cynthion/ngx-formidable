@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
@@ -64,6 +65,9 @@ import { BaseFieldDirective } from '../base-field.directive';
   selector: 'formidable-autocomplete-field',
   templateUrl: './autocomplete-field.component.html',
   styleUrls: ['./autocomplete-field.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule, FieldOptionComponent],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -81,8 +85,7 @@ import { BaseFieldDirective } from '../base-field.directive';
       provide: FORMIDABLE_OPTION_FIELD,
       useExisting: AutocompleteFieldComponent
     }
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
 export class AutocompleteFieldComponent
   extends BaseFieldDirective

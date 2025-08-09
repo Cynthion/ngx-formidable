@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -13,7 +14,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { isEqual, parse } from 'date-fns';
-import { NgxMaskConfig } from 'ngx-mask';
+import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import {
   formatToTimeTokenMask,
   isValidDateObject,
@@ -52,6 +53,9 @@ import { BaseFieldDirective } from '../base-field.directive';
   selector: 'formidable-time-field',
   templateUrl: './time-field.component.html',
   styleUrls: ['./time-field.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule, NgxMaskDirective],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -64,8 +68,7 @@ import { BaseFieldDirective } from '../base-field.directive';
       provide: FORMIDABLE_FIELD,
       useExisting: TimeFieldComponent
     }
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
 export class TimeFieldComponent
   extends BaseFieldDirective<Date | null>

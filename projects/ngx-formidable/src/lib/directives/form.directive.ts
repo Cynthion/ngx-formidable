@@ -88,7 +88,8 @@ import { DeepRequired } from '../models/utility-types';
  * ```
  */
 @Directive({
-  selector: 'form[formidableForm]'
+  selector: 'form[formidableForm]',
+  standalone: true
 })
 export class FormDirective<T extends Record<string, unknown>> implements OnDestroy {
   public readonly ngForm = inject(NgForm, { self: true, optional: false });

@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
 import { AbstractControl, NgModel, NgModelGroup } from '@angular/forms';
 
@@ -22,7 +23,9 @@ import { AbstractControl, NgModel, NgModelGroup } from '@angular/forms';
   selector: 'formidable-field-errors',
   templateUrl: './field-errors.component.html',
   styleUrls: ['./field-errors.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule]
 })
 export class FieldErrorsComponent {
   @Input() ngModel?: NgModel;

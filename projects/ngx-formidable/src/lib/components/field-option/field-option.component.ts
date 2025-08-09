@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -6,6 +7,7 @@ import {
   HostBinding,
   Inject,
   Input,
+  OnInit,
   Optional,
   TemplateRef,
   ViewChild
@@ -39,6 +41,8 @@ import {
   templateUrl: './field-option.component.html',
   styleUrls: ['./field-option.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule],
   providers: [
     {
       // required to provide this component as IFormidableFieldOption
@@ -47,7 +51,7 @@ import {
     }
   ]
 })
-export class FieldOptionComponent implements IFormidableFieldOption {
+export class FieldOptionComponent implements IFormidableFieldOption, OnInit {
   @ViewChild('contentTemplate', { static: true }) private contentTemplate!: TemplateRef<unknown>;
 
   @Input({ required: true }) value!: string;
@@ -85,12 +89,12 @@ export class FieldOptionComponent implements IFormidableFieldOption {
     return this.contentTemplate;
   }
 
-  protected hasProjectedContent = true;
-
   constructor(
     @Optional() @Inject(FORMIDABLE_OPTION_FIELD) private parent: IFormidableOptionField,
     public readonly elementRef: ElementRef<HTMLElement>
-  ) {
+  ) {}
+
+  ngOnInit() {
     if (!this.parent) {
       throw new Error(
         '[ngx-formidable] formidable-field-option must be used inside a component that provides FORMIDABLE_OPTION_FIELD (i.e. implements IFormidableOptionField).'

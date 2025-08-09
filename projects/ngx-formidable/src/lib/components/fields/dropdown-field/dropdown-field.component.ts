@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
@@ -61,6 +62,9 @@ import { BaseFieldDirective } from '../base-field.directive';
   selector: 'formidable-dropdown-field',
   templateUrl: './dropdown-field.component.html',
   styleUrls: ['./dropdown-field.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule, FieldOptionComponent],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -78,8 +82,7 @@ import { BaseFieldDirective } from '../base-field.directive';
       provide: FORMIDABLE_OPTION_FIELD,
       useExisting: DropdownFieldComponent
     }
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
 export class DropdownFieldComponent extends BaseFieldDirective implements IFormidableDropdownField, AfterContentInit {
   @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;

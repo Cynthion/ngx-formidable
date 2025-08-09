@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -12,7 +13,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
+import { NgxMaskConfig, NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
 import {
   analyzeMaskDisplayLength,
@@ -49,6 +50,9 @@ import { BaseFieldDirective } from '../base-field.directive';
   selector: 'formidable-input-field',
   templateUrl: './input-field.component.html',
   styleUrls: ['./input-field.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule, NgxMaskDirective],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -62,8 +66,7 @@ import { BaseFieldDirective } from '../base-field.directive';
       useExisting: InputFieldComponent
     },
     NgxMaskPipe
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
 export class InputFieldComponent extends BaseFieldDirective implements IFormidableInputField, AfterViewInit, OnChanges {
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;

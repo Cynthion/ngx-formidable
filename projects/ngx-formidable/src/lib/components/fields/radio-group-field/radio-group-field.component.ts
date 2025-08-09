@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
@@ -47,6 +48,9 @@ import { BaseFieldDirective } from '../base-field.directive';
   selector: 'formidable-radio-group-field',
   templateUrl: './radio-group-field.component.html',
   styleUrls: ['./radio-group-field.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule, FieldOptionComponent],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -64,8 +68,7 @@ import { BaseFieldDirective } from '../base-field.directive';
       provide: FORMIDABLE_OPTION_FIELD,
       useExisting: RadioGroupFieldComponent
     }
-  ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  ]
 })
 export class RadioGroupFieldComponent
   extends BaseFieldDirective
