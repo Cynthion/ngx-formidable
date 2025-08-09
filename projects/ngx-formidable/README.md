@@ -357,8 +357,8 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-field-placeholder`                      | Color of placeholder text.                                                     |
 | `--formidable-color-field-selection`                        | Background color for text selection.                                           |
 | `--formidable-color-field-border`                           | Border color for fields.                                                       |
-| `--formidable-color-field-group-border`                     | Border color for grouped fields.                                               |
 | `--formidable-color-field-border-focus`                     | Border color when a field is focused.                                          |
+| `--formidable-color-field-group-border`                     | Border color for grouped fields.                                               |
 | `--formidable-color-field-group-border-focus`               | Border color when a group field is focused.                                    |
 | `--formidable-color-field-background`                       | Background color for fields.                                                   |
 | `--formidable-color-field-group-background`                 | Background color for grouped fields.                                           |
@@ -378,24 +378,26 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-date-field-panel-day-label`             | Color for weekday labels in the calendar header.                               |
 | **Option Prefix**                                           |                                                                                |
 | `--formidable-color-option-prefix-outer`                    | Border color for the outer wrapper of custom option prefixes (checkbox/radio). |
-| `--formidable-color-option-prefix-inner`                    | Background color for the inner element of custom option prefixes.              |
+| `--formidable-color-option-prefix-inner`                    | Border color for the inner element of custom option prefixes.                  |
 | `--formidable-color-option-prefix-background`               | Background color behind option prefix elements.                                |
 | **Length Indicator**                                        |                                                                                |
 | `--formidable-color-length-indicator`                       | Text color for the textarea length indicator.                                  |
-| **Layout & Spacing**                                        |                                                                                |
+| **Field Dimensions**                                        |                                                                                |
 | `--formidable-field-before-margin-bottom`                   | Vertical margin below each field container.                                    |
-| `--formidable-field-height`                                 | Default height for single-line fields.                                         |
 | `--formidable-field-border-thickness`                       | Thickness of field borders.                                                    |
 | `--formidable-field-border-radius`                          | Border-radius for field corners.                                               |
+| `--formidable-label-height`                                 | Computed height of the label text line box.                                    |
+| `--formidable-field-height`                                 | Default height for single-line fields.                                         |
 | `--formidable-label-floating-offset`                        | Vertical offset applied when a label floats above its field.                   |
+| **Textarea**                                                |                                                                                |
 | `--formidable-textarea-min-height`                          | Minimum height for textareas.                                                  |
 | `--formidable-textarea-max-height`                          | Maximum height for textareas.                                                  |
 | `--formidable-textarea-padding-top`                         | Top padding for textareas when autosizing is enabled.                          |
-| **Panels & Flyouts**                                        |                                                                                |
+| **Panels**                                                  |                                                                                |
 | `--formidable-panel-background`                             | Background color for dropdown/autocomplete/date panels.                        |
 | `--formidable-panel-box-shadow`                             | Box-shadow for all panels.                                                     |
 | `--formidable-panel-max-height`                             | Maximum vertical height for panels (before scrolling).                         |
-| **Animation & Hover**                                       |                                                                                |
+| **Animations**                                              |                                                                                |
 | `--formidable-animation-duration`                           | Duration for label/flyout/open/close animations.                               |
 | `--formidable-animation-easing`                             | Easing curve for animations.                                                   |
 | `--formidable-hover-duration`                               | Transition duration for hover effects.                                         |
@@ -411,8 +413,6 @@ You can also tweak Pikaday CSS.
 | **Option Prefix Dimensions**                                |                                                                                |
 | `--formidable-option-prefix-dimension-outer`                | Size of the outer circle/box for radio/checkbox prefixes.                      |
 | `--formidable-option-prefix-dimension-inner`                | Size of the inner indicator for selected radio/checkbox prefixes.              |
-
----
 
 ## Root-Level / Cross-Field Validation
 
