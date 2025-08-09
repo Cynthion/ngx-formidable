@@ -1,37 +1,69 @@
 {
   "name": "ngx-formidable",
-  "version": "0.0.1",
-  "description": "ngx-formidable",
-  "license": "MIT LICENSE",
+  "version": "1.0.0",
+  "description": "A comprehensive Angular component library for building rich, validated forms.",
+  "license": "MIT",
   "author": "Christian Lüthold",
   "repository": {
     "type": "git",
     "url": "https://github.com/Cynthion/ngx-formidable.git",
-    "directory": "projects/formidable"
+    "directory": "projects/ngx-formidable"
   },
+  "homepage": "https://github.com/Cynthion/ngx-formidable#readme",
+  "bugs": {
+    "url": "https://github.com/Cynthion/ngx-formidable/issues"
+  },
+  "keywords": [
+    "angular",
+    "forms",
+    "validation",
+    "fields",
+    "mask",
+    "keyboard",
+    "styling",
+    "input",
+    "textarea",
+    "select",
+    "dropdown",
+    "autocomplete",
+    "radio",
+    "checkbox",
+    "date",
+    "time"
+  ],
   "engines": {
     "node": ">=20.17.0",
     "npm": ">=10.8.2"
   },
-  "scripts": {
-    "build": "ng build formidable",
-    "test": "ng test formidable",
-    "lint": "ng lint formidable"
+  "publishConfig": {
+    "access": "public"
   },
+  "scripts": {
+    "build": "ng build ngx-formidable",
+    "test": "ng test ngx-formidable",
+    "lint": "ng lint ngx-formidable"
+  },
+  "sideEffects": false,
   "dependencies": {
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@angular/common": "^18.2.0",
-    "@angular/core": "^18.2.0",
-    "@angular/forms": "^18.2.0",
-    "@types/uuid": "^10.0.0",
-    "@types/pikaday": "^1.7.9",
-    "date-fns": "^3.6.0",
-    "ngx-mask": "^19.0.7",
-    "pikaday": "^1.8.2",
+    "@angular/common": "^18.0.0",
+    "@angular/core": "^18.0.0",
+    "@angular/forms": "^18.0.0",
+    "date-fns": "^3.0.0",
+    "ngx-mask": "^19.0.0",
+    "pikaday": "^1.8.0",
+    "rxjs": "^7.8.0",
     "uuid": "^10.0.0",
-    "vest": "^5.4.6"
+    "vest": "^5.0.0"
   },
-  "sideEffects": false
+  "peerDependenciesMeta": {
+    "date-fns": {
+      "optional": false
+    },
+    "pikaday": {
+      "optional": false
+    }
+  }
 }

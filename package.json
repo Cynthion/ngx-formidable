@@ -6,7 +6,10 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "prebuild:lib": "cp README.md projects/ngx-formidable/README.md && cp LICENSE projects/ngx-formidable/LICENSE",
+    "build:lib": "ng build ngx-formidable",
+    "publish:lib": "npm publish dist/ngx-formidable --access public"
   },
   "private": true,
   "dependencies": {
