@@ -4,3 +4,18 @@ Example:
 
 - suffixes: clear/reset, copy, validation state, loading
 - date/time fields: show mask that user provided, not 0
+- fromGroup example
+- complex example
+- theme 4 should be tweked to be tiny, and border-radius 0
+- add badges to readme
+- proof-read readme
+- exact feature list (per field and component) in readme
+- update all dependencies (angular 20)
+- tag release commit
+- add CONTRIBUTING.md
+- logo for ngx-formidable
+
+# Bugs:
+
+- datefield: when panel open, arrow/left/right moves caret in field
+- ios: inspect padding when prefix is missing

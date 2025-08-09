@@ -1,7 +1,7 @@
 {
   "name": "ngx-formidable",
   "version": "1.0.0",
-  "description": "A comprehensive Angular component library for building rich, validated forms.",
+  "description": "A powerful Angular component library for building rich, validated forms.",
   "license": "MIT",
   "author": "Christian Lüthold",
   "repository": {

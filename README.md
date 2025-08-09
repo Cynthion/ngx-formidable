@@ -1,109 +1,35 @@
 <h1 align="center">ngx-formidable</h1>
 
 <p align="center">
-A comprehensive Angular component library for building rich, validated forms.
+A powerful Angular component library for building rich, validated forms.
 </p>
 
 <p align="center">
-  Created with ❤️ by Cynthion
+  Created with ❤️ by <a href="https://github.com/Cynthion">Cynthion</a>
 </p>
 
-## Features
-
-<table>
-  <tr>
-    <td width="33%" valign="top">
-      <h5><a href="#quick-start">🚀 Zero Boilerplate</a></h5>
-      <ul>
-        <li><code>&lt;form formidableForm&gt;</code> (single directive)</li>
-        <li>Wires model + <code>Frame</code> + Vest</li>
-        <li>Streams/outputs: <code>value</code>/<code>valid</code>/<code>dirty</code>/<code>errors</code></li>
-      </ul>
-    </td>
-    <td width="33%" valign="top">
-      <h5><a href="#root-level--cross-field-validation">✅ Async Validation</a></h5>
-      <ul>
-        <li>Per-Field or Cross-Field / Root-Level</li>
-		<li>Powered by <code>Vest</code></li>
-        <li>Live errors &amp; validity</li>
-		<li>Simple <code>formidable-field-errors</code> directive</li>
-      </ul>
-    </td>
-    <td width="33%" valign="top">
-      <h5><a href="#field-components">🧩 Rich Field Components</a></h5>
-      <ul>
-        <li>Input / Textarea</li>
-        <li>Select / Dropdown / Autocomplete</li>
-		<li>Radio Groups / Checkboxes</li>
-        <li>Date Picker / Time</li>
-		<li>Re-usable <code>formidable-field-option</code> for all option fields.</li>
-      </ul>
-    </td>
-  </tr>
-
-  <tr>
-    <td width="33%" valign="top">
-      <h5><a href="#field-decorator">🎀 Field Decorator</a></h5>
-      <ul>
-        <li>Label / Tooltip / Prefix / Suffix</li>
-        <li>Floating label transitions</li>
-        <li>Forwards <code>valueChanged</code>/<code>focusChanged</code></li>
-      </ul>
-    </td>
-    <td width="33%" valign="top">
-      <h5><a href="#theming--styles">🎨 Theming &amp; Styling</a></h5>
-      <ul>
-        <li>Overridable <code>CSS</code> variables</li>
-		<li>Overridable <code>Pikaday</code> classes</li>
-      </ul>
-    </td>
-    <td width="33%" valign="top">
-      <h5><a href="#keyboard-navigation">⌨️ Keyboard Navigation</a></h5>
-      <ul>
-        <li>Simple navigation (<code>Enter</code>/<code>Esc</code>/<code>Tab</code>/<code>Arrows</code>
-, etc.)</li>
-        <li>Type-ahead buffers</li>
-        <li>Managed focus &amp; scroll into view</li>
-      </ul>
-    </td>
-  </tr>
-
-  <tr>
-    <td width="33%" valign="top">
-      <h5><a href="#masking">🛡️ Masking</a></h5>
-      <ul>
-		<li>Powered by <code>ngx-mask</code></li>
-        <li>Per-field opt-in via <code>[mask]</code> and <code>[maskConfig]</code></li>
-        <li>Global app defaults with <code>FORMIDABLE_MASK_DEFAULTS</code></li>
-      </ul>
-    </td>
-    <td width="33%" valign="top">
-      <h5><a href="#quick-start">🧠 Type Safety (Frame)</a></h5>
-      <ul>
-		<li>Deep-required <code>Frame</code> concept</li>
-		<li>Shows model errors at build time</li>
-        <li>Strongly-typed templates/suites</li>
-      </ul>
-    </td>
-    <td width="33%" valign="top">
-      <h5><a href="#extending-with-custom-components--options">🛠️ Extensible</a></h5>
-      <ul>
-        <li><code>IFormidableField</code> for custom inputs</li>
-        <li>Options: <code>IFormidableOptionField</code> + <code>FORMIDABLE_FIELD_OPTION</code></li>
-        <li>Reuse <code>BaseFieldDirective</code></li>
-      </ul>
-    </td>
-  </tr>
-</table>
-
-**🌐 Live Demo**
-
-Explore live examples on our GitHub Pages: https://cynthion.github.io/ngx-formidable/
-
----
+<p align="center">
+  <!-- TODO -->
+  <!-- <a href="https://github.com/JsDaddy/ngx-mask/actions/workflows/quality-check.yml">
+    <img src="https://github.com/JsDaddy/ngx-mask/actions/workflows/quality-check.yml/badge.svg?branch=develop" alt="CI">
+  </a>
+  <a href="https://www.npmjs.com/package/ngx-mask">
+    <img src="https://img.shields.io/npm/v/ngx-mask.svg" alt="npm version">
+  </a>
+  <a href="https://npmjs.org/ngx-mask">
+    <img src="https://img.shields.io/npm/dt/ngx-mask.svg" alt="npm downloads">
+  </a>
+  <a href="https://www.npmjs.com/package/ngx-mask">
+    <img src="https://img.shields.io/npm/dm/ngx-mask.svg" alt="npm monthly downloads">
+  </a>
+  <a href="https://github.com/JSDaddy/ngx-mask">
+    <img src="https://img.shields.io/github/stars/JSDaddy/ngx-mask.svg?label=GitHub%20Stars&style=flat" alt="GitHub Stars">
+  </a> -->
+</p>
 
 ## Table of Contents
 
+- [Features](#features)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Core Directives](#core-directives)
@@ -117,7 +43,108 @@ Explore live examples on our GitHub Pages: https://cynthion.github.io/ngx-formid
 - [Contributing](#contributing)
 - [License](#license)
 
----
+## Features
+
+`ngx-fromidable` is a comprehensive Angular component and directive library designed to simplify the creation of rich, validated forms. It provides a wide range of features that enhance form development:
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+### <h5><a href="#zero-boilerplate">🚀 Zero Boilerplate</a></h5>
+
+• Simple directives to define form behavior
+• Automatically wire model, frame, and validation
+• Streams for value, validity, dirty state, and errors
+
+</td>
+<td width="33%" valign="top">
+
+### <h5><a href="#root-level--cross-field-validation">✅ Async Validation</a></h5>
+
+• Per-Field or Cross-Field / Root-Level
+• Powered by <code>Vest</code>
+• Live errors &amp; validity
+• Simple <code>formidable-field-errors</code> directive
+
+</td>
+<td width="33%" valign="top">
+
+### <h5><a href="#field-components">🧩 Rich Field Components</a></h5>
+
+• Input / Textarea
+• Select / Dropdown / Autocomplete
+• Radio Groups / Checkboxes
+• Date Picker / Time
+• Re-usable <code>formidable-field-option</code> for all option fields
+
+</td>
+</tr>
+
+<tr>
+<td width="33%" valign="top">
+
+### <h5><a href="#field-decorator">🎀 Field Decorator</a></h5>
+
+• Label / Tooltip / Prefix / Suffix
+• Floating label transitions
+• Forwards <code>valueChanged</code>/<code>focusChanged</code>
+
+</td>
+<td width="33%" valign="top">
+
+### <h5><a href="#theming--styles">🎨 Theming &amp; Styling</a></h5>
+
+• Overridable <code>CSS</code> variables
+• Overridable <code>Pikaday</code> classes
+
+</td>
+<td width="33%" valign="top">
+
+### <h5><a href="#keyboard-navigation">⌨️ Keyboard Navigation</a></h5>
+
+• Simple navigation (<code>Enter</code>/<code>Esc</code>/<code>Tab</code>/<code>Arrows</code>, etc.)
+• Type-ahead buffers
+• Managed focus &amp; scroll into view
+
+</td>
+</tr>
+
+<tr>
+<td width="33%" valign="top">
+
+### <h5><a href="#masking">🛡️ Masking</a></h5>
+
+• Powered by <code>ngx-mask</code>
+• Per-field opt-in via <code>[mask]</code> and <code>[maskConfig]</code>
+• Global app defaults with <code>FORMIDABLE_MASK_DEFAULTS</code>
+
+</td>
+<td width="33%" valign="top">
+
+### <h5><a href="#quick-start">🧠 Type Safety (Frame)</a></h5>
+
+• Deep-required <code>Frame</code> concept
+• Shows model errors at build time
+• Strongly-typed templates/suites
+
+</td>
+<td width="33%" valign="top">
+
+### <h5><a href="#extending-with-custom-components--options">🛠️ Extensible</a></h5>
+
+• <code>IFormidableField</code> for custom inputs
+• Options: <code>IFormidableOptionField</code> + <code>FORMIDABLE_FIELD_OPTION</code>
+• Reuse <code>BaseFieldDirective</code>
+
+</td>
+</tr>
+</table>
+
+## Demo
+
+Explore and play with live examples on our GitHub Pages:
+🌐 https://cynthion.github.io/ngx-formidable/
 
 ## Installation
 
@@ -126,6 +153,8 @@ Install the package and its peer dependencies:
 ```bash
 npm install ngx-formidable vest pikaday date-fns ngx-mask
 ```
+
+## Quick Start
 
 ### Standalone Usage
 
@@ -137,7 +166,7 @@ import { AppComponent } from './app/app.component';
 import { provideNgxFormidable } from 'ngx-formidable';
 
 bootstrapApplication(AppComponent, {
-	providers: [...provideNgxFormidable()]
+  providers: [...provideNgxFormidable()]
 }).catch(console.error);
 ```
 
@@ -153,15 +182,15 @@ import { AppComponent } from './app.component';
 import { NgxFormidableModule } from 'ngx-formidable';
 
 @NgModule({
-	imports: [BrowserModule, NgxFormidableModule.forRoot()],
-	bootstrap: [AppComponent]
+  imports: [BrowserModule, NgxFormidableModule.forRoot()],
+  bootstrap: [AppComponent]
 })
 export class AppModule {}
 ```
 
 ---
 
-## Quick Start
+## Setup Your Form
 
 1. Define your model, form model, frame, and Vest validation suite:
 
@@ -169,40 +198,40 @@ export class AppModule {}
 import { DeepPartial, DeepRequired } from 'ngx-formidable';
 
 export interface User {
-	name: string;
-	hobby: 'reading' | 'gaming' | 'swimming' | 'other';
-	birthdate: Date;
+  name: string;
+  hobby: 'reading' | 'gaming' | 'swimming' | 'other';
+  birthdate: Date;
 }
 
 export type UserFormModel = DeepPartial<User>;
 export type UserFormFrame = DeepRequired<UserFormModel>;
 
 export const userFormModel: UserFormModel = {
-	// set initial values here, if any
-	name: undefined, // e.g., 'Cynthion',
-	hobby: undefined, // e.g., 'reading',
-	birthdate: undefined // e.g., new Date(1989, 5, 29),
+  // set initial values here, if any
+  name: undefined, // e.g., 'Cynthion',
+  hobby: undefined, // e.g., 'reading',
+  birthdate: undefined // e.g., new Date(1989, 5, 29),
 };
 
 export const userFormFrame: UserFormFrame = {
-	name: '',
-	hobby: 'other',
-	birthdate: new Date()
+  name: '',
+  hobby: 'other',
+  birthdate: new Date()
 };
 
 export const userFormValidationSuite = staticSuite((model: UserFormModel, field?: string) => {
-	mode(Modes.ALL); // or use Modes.EAGER to just use first
-	if (field) only(field);
+  mode(Modes.ALL); // or use Modes.EAGER to just use first
+  if (field) only(field);
 
-	test('name', 'First name is required.', () => {
-		enforce(model.name).isNotBlank();
-	});
+  test('name', 'First name is required.', () => {
+    enforce(model.name).isNotBlank();
+  });
 
-	test('name', 'First name does not start with A.', () => {
-		enforce(model.name?.toLowerCase()).startsWith('a');
-	});
+  test('name', 'First name does not start with A.', () => {
+    enforce(model.name?.toLowerCase()).startsWith('a');
+  });
 
-	// further Vest validators
+  // further Vest validators
 });
 ```
 
@@ -210,59 +239,59 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
 
 ```html
 <form
-	formidableForm
-	[formValue]="userFormModel"
-	[formFrame]="userFormFrame"
-	[suite]="userFormValidationSuite"
-	[validationOptions]="{ debounceValidationInMs: 200 }"
-	(formValueChange$)="userFormModel = $event"
-	(validChange$)="isValid = $event"
-	(dirtyChange$)="isDirty = $event"
-	(errorsChange$)="errors = $event"
-	(ngSubmit)="onSubmit()">
-	<formidable-field-decorator>
-		<formidable-input-field
-			formidableFieldErrors
-			name="name"
-			ngModel
-			placeholder="Name"></formidable-input-field>
-		<div formidableFieldLabel>Name</div>
-		<div formidableFieldTooltip>Enter your name</div>
-	</formidable-field-decorator>
+  formidableForm
+  [formValue]="userFormModel"
+  [formFrame]="userFormFrame"
+  [suite]="userFormValidationSuite"
+  [validationOptions]="{ debounceValidationInMs: 200 }"
+  (formValueChange$)="userFormModel = $event"
+  (validChange$)="isValid = $event"
+  (dirtyChange$)="isDirty = $event"
+  (errorsChange$)="errors = $event"
+  (ngSubmit)="onSubmit()">
+  <formidable-field-decorator>
+    <formidable-input-field
+      formidableFieldErrors
+      name="name"
+      ngModel
+      placeholder="Name"></formidable-input-field>
+    <div formidableFieldLabel>Name</div>
+    <div formidableFieldTooltip>Enter your name</div>
+  </formidable-field-decorator>
 
-	<formidable-field-decorator>
-		<formidable-select-field
-			placeholder="Select..."
-			name="hobby"
-			[disabled]="false"
-			[readonly]="false"
-			[ngModel]="vm.formValue.hobby"
-			[options]="hobbyOptions">
-			<!-- optional inline options -->
-			<formidable-field-option [value]="'gardening'">Gardening</formidable-field-option>
-		</formidable-select-field>
-		<div
-			formidableFieldLabel
-			[isFloating]="true">
-			Hobby
-		</div>
-	</formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-select-field
+      placeholder="Select..."
+      name="hobby"
+      [disabled]="false"
+      [readonly]="false"
+      [ngModel]="vm.formValue.hobby"
+      [options]="hobbyOptions">
+      <!-- optional inline options -->
+      <formidable-field-option [value]="'gardening'">Gardening</formidable-field-option>
+    </formidable-select-field>
+    <div
+      formidableFieldLabel
+      [isFloating]="true">
+      Hobby
+    </div>
+  </formidable-field-decorator>
 
-	<formidable-field-decorator>
-		<formidable-date-field
-			name="birthdate"
-			ngModel
-			[minDate]="minDate"
-			[maxDate]="maxDate"
-			[unicodeTokenFormat]="'dd.MM.yyyy'"></formidable-date-field>
-		<div formidableFieldLabel>Birthdate</div>
-	</formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-date-field
+      name="birthdate"
+      ngModel
+      [minDate]="minDate"
+      [maxDate]="maxDate"
+      [unicodeTokenFormat]="'dd.MM.yyyy'"></formidable-date-field>
+    <div formidableFieldLabel>Birthdate</div>
+  </formidable-field-decorator>
 
-	<button
-		type="submit"
-		[disabled]="!isValid">
-		Submit
-	</button>
+  <button
+    type="submit"
+    [disabled]="!isValid">
+    Submit
+  </button>
 </form>
 ```
 
@@ -317,8 +346,6 @@ The decorator adjusts padding and forwards the wrapped field’s properties and 
 | **Date & Time**   | `<formidable-date-field>`           | A masked date input with a calendar popup.         |
 |                   | `<formidable-time-field>`           | A masked time-only input field.                    |
 
----
-
 ## Theming & Styles
 
 Various styling variables allow to customize the theming. Override any supported CSS variable.
@@ -331,18 +358,18 @@ You can also tweak Pikaday CSS.
 
 // ngx-formidable overrides
 :root {
-	--formidable-field-height: 50px;
-	--formidable-color-validation-error: pink;
-	--formidable-color-field-background: #d18fe9ff;
-	--formidable-color-field-highlighted: #aa40ed2d;
-	--formidable-date-field-panel-width: 200px;
-	// add more
+  --formidable-field-height: 50px;
+  --formidable-color-validation-error: pink;
+  --formidable-color-field-background: #d18fe9ff;
+  --formidable-color-field-highlighted: #aa40ed2d;
+  --formidable-date-field-panel-width: 200px;
+  // add more
 }
 
 // Pikaday style overwrites
 .pika-lendar {
-	background-color: #8a2b75ff;
-	// add more
+  background-color: #8a2b75ff;
+  // add more
 }
 ```
 
@@ -444,13 +471,13 @@ Sometimes your form needs rules that depend on more than one field — for examp
 
 ```html
 <form
-	formidableForm
-	formidableRootValidate
-	[formValue]="userFormModel"
-	[formFrame]="userFormFrame"
-	[suite]="userFormValidationSuite"
-	...>
-	<!-- ... -->
+  formidableForm
+  formidableRootValidate
+  [formValue]="userFormModel"
+  [formFrame]="userFormFrame"
+  [suite]="userFormValidationSuite"
+  ...>
+  <!-- ... -->
 </form>
 ```
 
@@ -459,15 +486,15 @@ import { staticSuite, test, Modes, only, enforce } from 'vest';
 import { ROOT_FORM } from 'ngx-formidable';
 
 export const userFormValidationSuite = staticSuite((model: UserFormModel, field?: string) => {
-	mode(Modes.ALL);
-	if (field) only(field);
+  mode(Modes.ALL);
+  if (field) only(field);
 
-	// Root-Level / Cross‐field rule: name AND birthdate must both be filled
-	test(ROOT_FORM, 'Please enter both name and birthdate.', () => {
-		enforce(!!model.name && !!model.birthdate).isTruthy();
-	});
+  // Root-Level / Cross‐field rule: name AND birthdate must both be filled
+  test(ROOT_FORM, 'Please enter both name and birthdate.', () => {
+    enforce(!!model.name && !!model.birthdate).isTruthy();
+  });
 
-	// ...
+  // ...
 });
 ```
 
@@ -522,12 +549,12 @@ import { AppComponent } from './app/app.component';
 import { provideNgxFormidable } from 'ngx-formidable';
 
 bootstrapApplication(AppComponent, {
-	providers: [
-		...provideNgxFormidable({
-			// global defaults for ngx-mask
-			globalMaskConfig: { validation: true, dropSpecialCharacters: true }
-		})
-	]
+  providers: [
+    ...provideNgxFormidable({
+      // global defaults for ngx-mask
+      globalMaskConfig: { validation: true, dropSpecialCharacters: true }
+    })
+  ]
 }).catch(console.error);
 ```
 
@@ -543,14 +570,14 @@ import { AppComponent } from './app.component';
 import { NgxFormidableModule } from 'ngx-formidable';
 
 @NgModule({
-	imports: [
-		BrowserModule,
-		NgxFormidableModule.forRoot({
-			// global defaults for ngx-mask
-			globalMaskConfig: { validation: true, dropSpecialCharacters: true }
-		})
-	],
-	bootstrap: [AppComponent]
+  imports: [
+    BrowserModule,
+    NgxFormidableModule.forRoot({
+      // global defaults for ngx-mask
+      globalMaskConfig: { validation: true, dropSpecialCharacters: true }
+    })
+  ],
+  bootstrap: [AppComponent]
 })
 export class AppModule {}
 ```
@@ -559,14 +586,14 @@ export class AppModule {}
 
 ```html
 <formidable-input-field
-	name="price"
-	[mask]="'separator.2'"
-	[maskConfig]="{ prefix: 'CHF ', allowNegativeNumbers: false, clearIfNotMatch: false }"
-	ngModel>
+  name="price"
+  [mask]="'000.00'"
+  [maskConfig]="{ prefix: 'CHF ', decimalMarker: ',' }"
+  ngModel>
 </formidable-input-field>
 ```
 
-That’s it: set a `[mask]` when you want masking, tweak behavior with `[maskConfig]`, and use the token for project-wide defaults.
+That’s it: Set a `[mask]` when you want masking and optionally tweak behavior with `[maskConfig]`.
 
 ## Extending with Custom Components / Options
 
@@ -579,8 +606,6 @@ When you add your own field component (by implementing `IFormidableField` or `IF
 
 You don’t need any extra wiring; just implement the interface, extend `BaseFieldDirective`, and register the provider.
 
----
-
 ### Example Component: A Custom Color Picker
 
 ```ts
@@ -589,160 +614,154 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BaseFieldDirective, FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableField } from 'ngx-formidable';
 
 @Component({
-	selector: 'custom-color-picker',
-	template: `
-		<input
-			#inputRef
-			type="color"
-			[value]="value || '#000000'"
-			(input)="onNativeInput($event)" />
-	`,
-	providers: [
-		{
-			provide: NG_VALUE_ACCESSOR,
-			useExisting: forwardRef(() => CustomColorPickerComponent),
-			multi: true
-		},
-		{
-			provide: FORMIDABLE_FIELD,
-			useExisting: forwardRef(() => CustomColorPickerComponent)
-		}
-	],
-	changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'custom-color-picker',
+  template: `
+    <input
+      #inputRef
+      type="color"
+      [value]="value || '#000000'"
+      (input)="onNativeInput($event)" />
+  `,
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => CustomColorPickerComponent),
+      multi: true
+    },
+    {
+      provide: FORMIDABLE_FIELD,
+      useExisting: forwardRef(() => CustomColorPickerComponent)
+    }
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomColorPickerComponent extends BaseFieldDirective implements IFormidableField {
-	@ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
 
-	protected keyboardCallback = null;
-	protected externalClickCallback = null;
-	protected windowResizeScrollCallback = null;
-	protected registeredKeys: string[] = [];
+  protected keyboardCallback = null;
+  protected externalClickCallback = null;
+  protected windowResizeScrollCallback = null;
+  protected registeredKeys: string[] = [];
 
-	protected doOnValueChange(): void {
-		// No additional actions needed
-	}
+  protected doOnValueChange(): void {
+    // No additional actions needed
+  }
 
-	protected doOnFocusChange(_isFocused: boolean): void {
-		// No additional actions needed
-	}
+  protected doOnFocusChange(_isFocused: boolean): void {
+    // No additional actions needed
+  }
 
-	//#region ControlValueAccessor
+  //#region ControlValueAccessor
 
-	// Called when Angular writes to the form control
-	protected doWriteValue(value: string): void {
-		this.inputRef.nativeElement.value = value || '#000000';
-	}
+  // Called when Angular writes to the form control
+  protected doWriteValue(value: string): void {
+    this.inputRef.nativeElement.value = value || '#000000';
+  }
 
-	//#endregion
+  //#endregion
 
-	//#region IFormidableField
+  //#region IFormidableField
 
-	get value(): string | null {
-		return this.inputRef.nativeElement.value || null;
-	}
+  get value(): string | null {
+    return this.inputRef.nativeElement.value || null;
+  }
 
-	get isLabelFloating(): boolean {
-		return !this.isFieldFocused && !this.isFieldFilled;
-	}
+  get isLabelFloating(): boolean {
+    return !this.isFieldFocused && !this.isFieldFilled;
+  }
 
-	get fieldRef(): ElementRef<HTMLElement> {
-		return this.inputRef as ElementRef<HTMLElement>;
-	}
+  get fieldRef(): ElementRef<HTMLElement> {
+    return this.inputRef as ElementRef<HTMLElement>;
+  }
 
-	decoratorLayout: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'single';
 
-	//#endregion
+  //#endregion
 
-	//#region Custom Input Properties
+  //#region Custom Input Properties
 
-	// ...
+  // ...
 
-	//#endregion
+  //#endregion
 
-	// Called when the native input fires
-	onNativeInput(event: Event): void {
-		const v = (event.target as HTMLInputElement).value;
-		this.valueChangeSubject$.next(v);
-		this.valueChanged.emit(v);
-		this.onChange(v);
-	}
+  // Called when the native input fires
+  onNativeInput(event: Event): void {
+    const v = (event.target as HTMLInputElement).value;
+    this.valueChangeSubject$.next(v);
+    this.valueChanged.emit(v);
+    this.onChange(v);
+  }
 }
 ```
 
 ### Example Option: A Fuzzy Option
 
 ```ts
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, forwardRef, Input } from '@angular/core';
 import { FieldOptionComponent, FORMIDABLE_FIELD_OPTION } from 'ngx-formidable';
-
-export interface HighlightEntry {
-	text: string;
-	isHighlighted: boolean;
-}
-
-export interface HighlightedEntries {
-	labelEntries: HighlightEntry[];
-	subtitleEntries: HighlightEntry[];
-}
+import { HighlightedEntries } from '../example-form/example-form.model';
 
 @Component({
-	selector: 'fuzzy-field-option',
-	templateUrl: './fuzzy-option.component.html',
-	styleUrls: ['./fuzzy-option.component.scss'],
-	changeDetection: ChangeDetectionStrategy.OnPush,
-	providers: [
-		{
-			// required to provide this component as IFormidableFieldOption
-			provide: FORMIDABLE_FIELD_OPTION,
-			useExisting: forwardRef(() => FuzzyFieldOptionComponent)
-		}
-	]
+  selector: 'example-fuzzy-option',
+  templateUrl: './example-fuzzy-option.component.html',
+  styleUrls: ['./example-fuzzy-option.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [CommonModule],
+  providers: [
+    {
+      // required to provide this component as IFormidableFieldOption
+      provide: FORMIDABLE_FIELD_OPTION,
+      useExisting: forwardRef(() => ExampleFuzzyOptionComponent)
+    }
+  ]
 })
-export class FuzzyFieldOptionComponent extends FieldOptionComponent {
-	@Input() subtitle?: string = 'sub';
+export class ExampleFuzzyOptionComponent extends FieldOptionComponent {
+  @Input() subtitle?: string = 'sub';
 
-	@Input() highlightedEntries?: HighlightedEntries = {
-		labelEntries: [],
-		subtitleEntries: []
-	};
+  @Input() highlightedEntries?: HighlightedEntries = {
+    labelEntries: [],
+    subtitleEntries: []
+  };
 }
 ```
 
 ```html
 <div (click)="select ? select() : null">
-	<ng-template #contentTemplate>
-		<!-- Custom Template -->
-		<p class="option-label">
-			@if (highlightedEntries?.labelEntries?.length) { @for (entry of highlightedEntries?.labelEntries; track entry.text) {
-			<span [class.option-highlight]="entry.isHighlighted">{{ entry.text }}</span>
-			} } @else { {{ label }} }
-		</p>
-		<p class="option-subtitle">
-			@if (highlightedEntries?.subtitleEntries?.length) { @for (entry of highlightedEntries?.subtitleEntries; track entry.text) {
-			<span [class.option-highlight]="entry.isHighlighted">{{ entry.text }}</span>
-			} } @else { {{ subtitle }} }
-		</p>
-	</ng-template>
+  <ng-template #contentTemplate>
+    <!-- Custom Template -->
+    <p class="option-label">
+      @if (highlightedEntries?.labelEntries?.length) { @for (entry of highlightedEntries?.labelEntries; track entry.text) {
+      <span [class.option-highlight]="entry.isHighlighted">{{ entry.text }}</span>
+      } } @else { {{ label }} }
+    </p>
+    <p class="option-subtitle">
+      @if (highlightedEntries?.subtitleEntries?.length) { @for (entry of highlightedEntries?.subtitleEntries; track entry.text) {
+      <span [class.option-highlight]="entry.isHighlighted">{{ entry.text }}</span>
+      } } @else { {{ subtitle }} }
+    </p>
+  </ng-template>
 </div>
 ```
 
 ```scss
 :host {
-	display: block;
+  display: block;
 }
 
 .option-label {
-	font-weight: normal;
-	font-size: 16px;
+  font-weight: normal;
+  font-size: 16px;
 }
 
 .option-subtitle {
-	font-weight: bold;
-	font-size: 12px;
+  font-weight: bold;
+  font-size: 12px;
 }
 
 .option-highlight {
-	color: orange;
+  color: orange;
 }
 ```
 
@@ -757,8 +776,6 @@ Contributions are welcome!
 3. **Add tests** under `src/**/*.spec.ts` and update existing ones as needed.
 4. **Document** any new public APIs or styles in the `README.md` and link to the live docs.
 5. Open a **Pull Request** describing your changes.
-
----
 
 ## License
 
