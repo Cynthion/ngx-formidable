@@ -261,13 +261,14 @@
   align-items: center;
   justify-content: flex-start;
   margin-bottom: var(--formidable-field-before-margin-bottom, #{tokens.$formidable-field-before-margin-bottom});
-  height: 10px; // TODO find sensible value or make configurable, calc necessary height for
+  height: var(--formidable-label-height, #{tokens.$formidable-label-height});
 }
 
 @mixin field-label {
   font-size: var(--formidable-label-font-size, #{tokens.$formidable-label-font-size});
   font-weight: var(--formidable-label-font-weight, #{tokens.$formidable-label-font-weight});
-  line-height: var(--formidable-label-line-height, #{tokens.$formidable-label-line-height});
+  line-height: var(--formidable-label-height, #{tokens.$formidable-label-height});
+  height: var(--formidable-label-height, #{tokens.$formidable-label-height});
 
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
   pointer-events: none;

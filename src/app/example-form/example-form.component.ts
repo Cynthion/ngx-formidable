@@ -312,8 +312,8 @@ export class ExampleFormComponent {
     this.logs = [];
   }
 
-  controlCenterExpanded = true;
-  debugExpanded = true;
+  controlCenterExpanded = false;
+  debugExpanded = false;
 
   toggleControlCenter(): void {
     this.controlCenterExpanded = !this.controlCenterExpanded;
