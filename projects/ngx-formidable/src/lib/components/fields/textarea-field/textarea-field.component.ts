@@ -120,11 +120,13 @@ export class TextareaFieldComponent
     if (this.mask) {
       // Ensure the mask is loaded before setting the value
       setTimeout(() => {
-        const masked = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
-        this.textareaRef.nativeElement.value = masked;
+        const maskedValue = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
+        this.textareaRef.nativeElement.value = maskedValue;
 
         // notify the form control again (since usually done in base directive)
-        this.onValueChange();
+        if (newValue) {
+          this.onValueChange();
+        }
       });
     } else {
       this.textareaRef.nativeElement.value = newValue;
@@ -140,13 +142,17 @@ export class TextareaFieldComponent
   get value(): string | null {
     const textareaValue = this.textareaRef.nativeElement.value;
 
-    return this.mask && textareaValue
-      ? // remove mask characters if mask is applied
-        this.maskPipe.transform(textareaValue, this.mask!, {
-          ...this.mergedMaskConfig,
-          showMaskTyped: false
-        })
-      : textareaValue || null;
+    if (this.mask) {
+      // remove mask characters if mask is applied
+      const valueNoMaskTyped = this.maskPipe.transform(textareaValue, this.mask!, {
+        ...this.mergedMaskConfig,
+        showMaskTyped: false
+      });
+
+      return valueNoMaskTyped || null;
+    } else {
+      return textareaValue || null;
+    }
   }
 
   get isLabelFloating(): boolean {

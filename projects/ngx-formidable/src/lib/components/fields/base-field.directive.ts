@@ -23,6 +23,8 @@ export abstract class BaseFieldDirective<T = string | null>
 
   protected readonly destroy$ = new Subject<void>();
 
+  private _valuePrevious: T | null = null;
+
   ngOnInit(): void {
     this.registerGlobalListeners();
   }
@@ -35,9 +37,11 @@ export abstract class BaseFieldDirective<T = string | null>
   protected onValueChange(): void {
     const value = this.value;
 
+    if (value == this._valuePrevious) return;
+    this._valuePrevious = value;
+
     this.isFieldFilled = typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
 
-    // TODO only emit if value actually changed
     this.valueChangeSubject$.next(value);
     this.valueChanged.emit(value);
     this.onChange(value); // notify ControlValueAccessor of the change

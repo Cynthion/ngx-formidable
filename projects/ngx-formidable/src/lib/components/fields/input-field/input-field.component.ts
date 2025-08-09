@@ -110,11 +110,13 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     if (this.mask) {
       // Ensure the mask is loaded before setting the value
       setTimeout(() => {
-        const masked = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
-        this.inputRef.nativeElement.value = masked;
+        const maskedValue = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
+        this.inputRef.nativeElement.value = maskedValue;
 
         // notify the form control again (since usually done in base directive)
-        this.onValueChange();
+        if (newValue) {
+          this.onValueChange();
+        }
       });
     } else {
       this.inputRef.nativeElement.value = newValue;
@@ -130,13 +132,17 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   get value(): string | null {
     const inputValue = this.inputRef.nativeElement.value;
 
-    return this.mask && inputValue
-      ? // remove mask characters if mask is applied
-        this.maskPipe.transform(inputValue, this.mask!, {
-          ...this.mergedMaskConfig,
-          showMaskTyped: false
-        })
-      : inputValue || null;
+    if (this.mask) {
+      // remove mask characters if mask is applied
+      const valueNoMaskTyped = this.maskPipe.transform(inputValue, this.mask!, {
+        ...this.mergedMaskConfig,
+        showMaskTyped: false
+      });
+
+      return valueNoMaskTyped || null;
+    } else {
+      return inputValue || null;
+    }
   }
 
   get isLabelFloating(): boolean {
