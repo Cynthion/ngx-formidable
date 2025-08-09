@@ -1,9 +1,34 @@
-import { DOCUMENT } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { ChangeDetectorRef, Component, Inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import Fuse, { FuseResult } from 'fuse.js';
-import { FormValidationOptions, IFormidableFieldOption } from 'ngx-formidable';
+import {
+  AutocompleteFieldComponent,
+  CheckboxGroupFieldComponent,
+  DateFieldComponent,
+  DropdownFieldComponent,
+  FieldDecoratorComponent,
+  FieldErrorsDirective,
+  FieldLabelDirective,
+  FieldOptionComponent,
+  FieldPrefixDirective,
+  FieldSuffixDirective,
+  FieldTooltipDirective,
+  FormDirective,
+  FormModelDirective,
+  FormRootValidateDirective,
+  FormValidationOptions,
+  IFormidableFieldOption,
+  InputFieldComponent,
+  RadioGroupFieldComponent,
+  SelectFieldComponent,
+  TextareaFieldComponent,
+  TimeFieldComponent
+} from 'ngx-formidable';
 import { BehaviorSubject, combineLatest, map, Observable, startWith, Subject } from 'rxjs';
 import { StaticSuite } from 'vest';
+import { ExampleFuzzyOptionComponent } from '../example-fuzzy-option/example-fuzzy-option.component';
+import { ExampleTooltipComponent } from '../example-tooltip/example-tooltip.component';
 import {
   AnimalFormFieldOption,
   exampleFormFrame,
@@ -15,7 +40,35 @@ import {
 @Component({
   selector: 'example-form',
   templateUrl: './example-form.component.html',
-  styleUrls: ['./example-form.component.scss']
+  styleUrls: ['./example-form.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    FieldDecoratorComponent,
+    InputFieldComponent,
+    DropdownFieldComponent,
+    AutocompleteFieldComponent,
+    DateFieldComponent,
+    FieldOptionComponent,
+    SelectFieldComponent,
+    TextareaFieldComponent,
+    RadioGroupFieldComponent,
+    CheckboxGroupFieldComponent,
+    TimeFieldComponent,
+    FormDirective,
+    FormModelDirective,
+    // FormModelGroupDirective,
+    FormRootValidateDirective,
+    FieldTooltipDirective,
+    FieldLabelDirective,
+    FieldPrefixDirective,
+    FieldSuffixDirective,
+    FieldErrorsDirective,
+    // Example
+    ExampleTooltipComponent,
+    ExampleFuzzyOptionComponent
+  ]
 })
 export class ExampleFormComponent {
   constructor(

@@ -1,4 +1,13 @@
-import { AfterViewInit, Directive, inject, Injector, OnDestroy, Optional, ViewContainerRef } from '@angular/core';
+import {
+  AfterViewInit,
+  Directive,
+  EnvironmentInjector,
+  inject,
+  Injector,
+  OnDestroy,
+  Optional,
+  ViewContainerRef
+} from '@angular/core';
 import { NgModel, NgModelGroup } from '@angular/forms';
 import { of, Subject, switchMap, takeUntil } from 'rxjs';
 import { FieldErrorsComponent } from '../components/field-errors/field-errors.component';
@@ -28,11 +37,13 @@ import { FormDirective } from './form.directive';
 export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
+  private readonly environmentInjector = inject(EnvironmentInjector);
   private readonly formDirective = inject(FormDirective);
   private readonly destroy$ = new Subject<void>();
 
   private fieldErrorsComponentRef = this.viewContainerRef.createComponent(FieldErrorsComponent, {
-    injector: this.injector
+    injector: this.injector,
+    environmentInjector: this.environmentInjector
   });
 
   @Optional() private readonly ngModel = inject(NgModel, { optional: true });

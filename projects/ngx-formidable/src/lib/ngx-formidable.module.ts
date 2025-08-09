@@ -36,7 +36,7 @@ const components = [
   FieldPrefixDirective,
   FieldSuffixDirective,
   FieldErrorsDirective,
-  // Formidable Field Components
+  // Field Components
   FieldErrorsComponent,
   FieldDecoratorComponent,
   InputFieldComponent,
@@ -49,7 +49,7 @@ const components = [
   RadioGroupFieldComponent,
   CheckboxGroupFieldComponent,
   TimeFieldComponent,
-  // Formidable Components
+  // Utility Components
   IconComponent
 ];
 
