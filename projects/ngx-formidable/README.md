@@ -24,9 +24,9 @@ A comprehensive Angular component library for building rich, validated forms.
       <h5><a href="#root-level--cross-field-validation">✅ Async Validation</a></h5>
       <ul>
         <li>Per-Field or Cross-Field / Root-Level</li>
-				<li>Powered by <code>Vest</code></li>
+		<li>Powered by <code>Vest</code></li>
         <li>Live errors &amp; validity</li>
-				<li>Simple <code>formidable-field-errors</code> directive
+		<li>Simple <code>formidable-field-errors</code> directive</li>
       </ul>
     </td>
     <td width="33%" valign="top">
@@ -34,9 +34,9 @@ A comprehensive Angular component library for building rich, validated forms.
       <ul>
         <li>Input / Textarea</li>
         <li>Select / Dropdown / Autocomplete</li>
-				<li>Radio Groups / Checkboxes</li>
+		<li>Radio Groups / Checkboxes</li>
         <li>Date Picker / Time</li>
-				<li>Re-usable <code>formidable-field-option</code> for all option fields.
+		<li>Re-usable <code>formidable-field-option</code> for all option fields.</li>
       </ul>
     </td>
   </tr>
@@ -54,13 +54,14 @@ A comprehensive Angular component library for building rich, validated forms.
       <h5><a href="#theming--styles">🎨 Theming &amp; Styling</a></h5>
       <ul>
         <li>Overridable <code>CSS</code> variables</li>
-				<li>Overridable <code>Pikaday</code> classes</li>
+		<li>Overridable <code>Pikaday</code> classes</li>
       </ul>
     </td>
     <td width="33%" valign="top">
       <h5><a href="#keyboard-navigation">⌨️ Keyboard Navigation</a></h5>
       <ul>
-        <li>Simple navigation (<code>Enter</code>/<code>Esc</code>/<code>Tab</code><code>Arrows</code>, etc.)</li>
+        <li>Simple navigation (<code>Enter</code>/<code>Esc</code>/<code>Tab</code>/<code>Arrows</code>
+, etc.)</li>
         <li>Type-ahead buffers</li>
         <li>Managed focus &amp; scroll into view</li>
       </ul>
@@ -71,7 +72,7 @@ A comprehensive Angular component library for building rich, validated forms.
     <td width="33%" valign="top">
       <h5><a href="#masking">🛡️ Masking</a></h5>
       <ul>
-			<li>Powered by <code>ngx-mask</code></li>
+		<li>Powered by <code>ngx-mask</code></li>
         <li>Per-field opt-in via <code>[mask]</code> and <code>[maskConfig]</code></li>
         <li>Global app defaults with <code>FORMIDABLE_MASK_DEFAULTS</code></li>
       </ul>
@@ -79,8 +80,8 @@ A comprehensive Angular component library for building rich, validated forms.
     <td width="33%" valign="top">
       <h5><a href="#quick-start">🧠 Type Safety (Frame)</a></h5>
       <ul>
-				<li>Deep-required <code>Frame</code> concept</li>
-				<li>Shows model errors at build time</li>
+		<li>Deep-required <code>Frame</code> concept</li>
+		<li>Shows model errors at build time</li>
         <li>Strongly-typed templates/suites</li>
       </ul>
     </td>
@@ -126,14 +127,34 @@ Install the package and its peer dependencies:
 npm install ngx-formidable vest pikaday date-fns ngx-mask
 ```
 
+### Standalone Usage
+
 ```ts
+// main.ts
+
+import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
+import { provideNgxFormidable } from 'ngx-formidable';
+
+bootstrapApplication(AppComponent, {
+	providers: [...provideNgxFormidable()]
+}).catch(console.error);
+```
+
+### Module Usage
+
+```ts
+// app.module.ts
+
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+
 import { NgxFormidableModule } from 'ngx-formidable';
 
 @NgModule({
-	imports: [
-		// ...
-		NgxFormidableModule
-	]
+	imports: [BrowserModule, NgxFormidableModule.forRoot()],
+	bootstrap: [AppComponent]
 })
 export class AppModule {}
 ```
@@ -149,7 +170,7 @@ import { DeepPartial, DeepRequired } from 'ngx-formidable';
 
 export interface User {
 	name: string;
-	hobby: 'reading' | 'gaming' | 'swimming';
+	hobby: 'reading' | 'gaming' | 'swimming' | 'other';
 	birthdate: Date;
 }
 
@@ -483,30 +504,53 @@ Some fields support input masking. Under the hood this uses ngx-mask, and you ca
 
 How config is applied:
 
-- Per-field overrides (via `[maskConfig]`) win over…
-- App-wide defaults (provided with `FORMIDABLE_MASK_DEFAULTS`), which win over…
-- Library fallbacks (sane defaults so nothing explodes).
+- Per-field overrides (via `[maskConfig]`)
+- App-wide defaults (provided with `FORMIDABLE_MASK_DEFAULTS`)
+- Library fallbacks (sane defaults)
 
 ### App-wide defaults
 
-Provide global defaults once in your app (or a shared) module:
+Provide global defaults once in your app:
+
+**Standalone Usage**
 
 ```ts
-import { NgModule } from '@angular/core';
-import { FORMIDABLE_MASK_DEFAULTS } from 'ngx-formidable';
-import { NgxMaskConfig } from 'ngx-mask';
+// main.ts
 
-const APP_MASK_DEFAULTS: Partial<NgxMaskConfig> = {
-	showMaskTyped: true,
-	dropSpecialCharacters: false,
-	thousandSeparator: '.',
-	decimalMarker: ',',
-	prefix: '',
-	suffix: ''
-};
+import { bootstrapApplication } from '@angular/platform-browser';
+import { AppComponent } from './app/app.component';
+import { provideNgxFormidable } from 'ngx-formidable';
+
+bootstrapApplication(AppComponent, {
+	providers: [
+		...provideNgxFormidable({
+			// global defaults for ngx-mask
+			globalMaskConfig: { validation: true, dropSpecialCharacters: true }
+		})
+	]
+}).catch(console.error);
+```
+
+**Module Usage**
+
+```ts
+// app.module.ts
+
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+
+import { NgxFormidableModule } from 'ngx-formidable';
 
 @NgModule({
-	providers: [{ provide: FORMIDABLE_MASK_DEFAULTS, useValue: APP_MASK_DEFAULTS }]
+	imports: [
+		BrowserModule,
+		NgxFormidableModule.forRoot({
+			// global defaults for ngx-mask
+			globalMaskConfig: { validation: true, dropSpecialCharacters: true }
+		})
+	],
+	bootstrap: [AppComponent]
 })
 export class AppModule {}
 ```

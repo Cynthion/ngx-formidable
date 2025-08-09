@@ -1,6 +1,5 @@
-import { NgModule } from '@angular/core';
+import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
 import { FieldDecoratorComponent } from './components/field-decorator/field-decorator.component';
 import { FieldErrorsComponent } from './components/field-errors/field-errors.component';
 import { FieldOptionComponent } from './components/field-option/field-option.component';
@@ -23,6 +22,7 @@ import { FormModelGroupDirective } from './directives/form-model-group.directive
 import { FormModelDirective } from './directives/form-model.directive';
 import { FormRootValidateDirective } from './directives/form-root-validate.directive';
 import { FormDirective } from './directives/form.directive';
+import { NgxFormidableConfig, provideNgxFormidable } from './provide-ngx-formidable';
 
 const components = [
   // Form Directives
@@ -54,8 +54,14 @@ const components = [
 ];
 
 @NgModule({
-  imports: [...components],
-  exports: [components, FormsModule],
-  providers: [provideNgxMask()]
+  imports: [...components, FormsModule],
+  exports: [...components, FormsModule]
 })
-export class NgxFormidableModule {}
+export class NgxFormidableModule {
+  static forRoot(config: NgxFormidableConfig = {}): ModuleWithProviders<NgxFormidableModule> {
+    return {
+      ngModule: NgxFormidableModule,
+      providers: [...provideNgxFormidable(config)]
+    };
+  }
+}

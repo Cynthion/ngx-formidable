@@ -32,3 +32,4 @@ export * from './lib/models/formidable.model';
 export * from './lib/models/utility-types';
 
 export * from './lib/ngx-formidable.module';
+export * from './lib/provide-ngx-formidable';

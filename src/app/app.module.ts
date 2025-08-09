@@ -16,8 +16,7 @@ import { ExampleFuzzyOptionComponent } from './example-fuzzy-option/example-fuzz
     ExampleFuzzyOptionComponent,
     ExampleCustomColorPickerComponent
   ],
-  imports: [CommonModule, BrowserModule, BrowserAnimationsModule, NgxFormidableModule],
-  providers: [],
+  imports: [CommonModule, BrowserModule, BrowserAnimationsModule, NgxFormidableModule.forRoot()],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
