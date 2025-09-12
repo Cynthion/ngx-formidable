@@ -86,8 +86,8 @@
     content: '';
     display: block;
     background-color: var(
-      --formidable-color-date-field-panel-select-hover,
-      #{tokens.$formidable-color-date-field-panel-select-hover}
+      --formidable-color-date-field-panel-select-hovered,
+      #{tokens.$formidable-color-date-field-panel-select-hovered}
     );
     opacity: 0;
     transition: opacity 0.2s;
@@ -123,8 +123,8 @@
 
     content: '';
     background-color: var(
-      --formidable-color-date-field-panel-select-hover,
-      #{tokens.$formidable-color-date-field-panel-select-hover}
+      --formidable-color-date-field-panel-select-hovered,
+      #{tokens.$formidable-color-date-field-panel-select-hovered}
     );
     border-radius: var(
       --formidable-date-field-panel-border-radius,

@@ -418,7 +418,7 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-field-hovered`                          | Background color when hovering over option items.                              |
 | **Date-Field Panel**                                        |                                                                                |
 | `--formidable-color-date-field-panel-select`                | Text color for “Today” / selected date toggle in calendar.                     |
-| `--formidable-color-date-field-panel-select-hover`          | Hover color for the “Today” toggle.                                            |
+| `--formidable-color-date-field-panel-select-hovered`        | Hover color for the “Today” toggle.                                            |
 | `--formidable-color-date-field-panel-date-highlighted-text` | Text color for highlighted dates inside the calendar.                          |
 | `--formidable-color-date-field-panel-date-highlighted`      | Background color for highlighted dates.                                        |
 | `--formidable-color-date-field-panel-date-hovered`          | Background color when hovering a date.                                         |
