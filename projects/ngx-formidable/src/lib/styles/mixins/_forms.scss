@@ -467,7 +467,7 @@
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
 
   &:hover {
-    background: var(--formidable-color-field-hover, #{tokens.$formidable-color-field-hovered});
+    background: var(--formidable-color-field-hovered, #{tokens.$formidable-color-field-hovered});
   }
 }
 
@@ -544,7 +544,7 @@
   &:hover::before,
   &.open::before {
     opacity: 1;
-    background: var(--formidable-color-field-hover, #{tokens.$formidable-color-field-hovered});
+    background: var(--formidable-color-field-hovered, #{tokens.$formidable-color-field-hovered});
   }
 }
 

@@ -6,9 +6,10 @@
 @use 'ngx-formidable';
 
 // Formidable Lib Overrides
-// :root {
-//   --formidable-field-height: 50px;
-// }
+:root {
+  //   --formidable-field-height: 50px;
+  --formidable-color-field-hovered: red;
+}
 
 // Pikaday Overrides
 // .pika-lendar {

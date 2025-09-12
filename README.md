@@ -415,7 +415,7 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-field-disabled`                         | Overlay color for disabled option elements.                                    |
 | `--formidable-color-field-selected`                         | Background color for selected option items.                                    |
 | `--formidable-color-field-highlighted`                      | Background color for highlighted (hovered or keyboard-focused) option items.   |
-| `--formidable-color-field-hover`                            | Background color when hovering over option items.                              |
+| `--formidable-color-field-hovered`                          | Background color when hovering over option items.                              |
 | **Date-Field Panel**                                        |                                                                                |
 | `--formidable-color-date-field-panel-select`                | Text color for “Today” / selected date toggle in calendar.                     |
 | `--formidable-color-date-field-panel-select-hover`          | Hover color for the “Today” toggle.                                            |
