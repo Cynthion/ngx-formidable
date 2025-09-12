@@ -10,8 +10,8 @@
   svg {
     width: 100%;
     height: 100%;
-    fill: currentColor;
-    stroke: currentColor;
+    fill: currentcolor;
+    stroke: currentcolor;
     display: block;
   }
 }
@@ -270,7 +270,7 @@
   line-height: var(--formidable-label-height, #{tokens.$formidable-label-height});
   height: var(--formidable-label-height, #{tokens.$formidable-label-height});
 
-  color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
+  color: var(--formidable-color-field-label, #{tokens.$formidable-color-field-label});
   pointer-events: none;
   margin-right: utils.spacing(8);
 
