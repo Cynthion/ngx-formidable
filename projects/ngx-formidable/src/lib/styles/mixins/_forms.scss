@@ -455,7 +455,7 @@
 }
 
 @mixin field-option-selected {
-  background: pink; // var(--formidable-color-field-selected, #{tokens.$formidable-color-field-selected});
+  background: var(--formidable-color-field-selected, #{tokens.$formidable-color-field-selected});
 }
 
 @mixin field-option-highlighted {
@@ -463,6 +463,7 @@
 }
 
 @mixin field-option-inline {
+  cursor: pointer;
   padding: utils.spacing(8) utils.spacing(16);
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
 
