@@ -465,7 +465,6 @@
 @mixin field-option-inline {
   cursor: pointer;
   padding: utils.spacing(8) utils.spacing(16);
-  color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
 
   &:hover {
     background: var(--formidable-color-field-hovered, #{tokens.$formidable-color-field-hovered});
