@@ -15,6 +15,10 @@ Example:
 - add CONTRIBUTING.md
 - logo for ngx-formidable
 
+Improvements:
+
+- rename FormDirective to NgxFormidableFormDirective. (no naming clash with Angular)
+
 # Bugs:
 
 - datefield: when panel open, arrow/left/right moves caret in field

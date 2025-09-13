@@ -69,7 +69,7 @@ import { BaseFieldDirective } from '../base-field.directive';
   ]
 })
 export class InputFieldComponent extends BaseFieldDirective implements IFormidableInputField, AfterViewInit, OnChanges {
-  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
+  @ViewChild('inputRef', { static: false }) inputRef!: ElementRef<HTMLInputElement>;
 
   protected keyboardCallback = null;
   protected externalClickCallback = null;
@@ -90,9 +90,10 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['mask'] || changes['maskConfig'] || changes['minLength'] || changes['maxLength']) {
       this.warnIfMaskConflictsWithMinMax();
+
       if (changes['mask'] || changes['maskConfig']) {
         // re-apply formatting if the mask changed
-        this.doWriteValue(this.value ?? '');
+        queueMicrotask(() => this.doWriteValue(this.value ?? ''));
       }
     }
   }

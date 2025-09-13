@@ -75,7 +75,9 @@ export class TextareaFieldComponent
   extends BaseFieldDirective
   implements IFormidableTextareaField, AfterViewInit, OnChanges
 {
-  @ViewChild('textareaRef', { static: true }) textareaRef!: ElementRef<HTMLTextAreaElement>;
+  // @ViewChild('textareaRef', { static: false }) textareaRef!: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('maskedTextareaRef', { static: false }) maskedTextareaRef?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('plainTextareaRef', { static: false }) plainTextareaRef?: ElementRef<HTMLTextAreaElement>;
   @ViewChild('lengthIndicatorRef') lengthIndicatorRef?: ElementRef<HTMLDivElement>;
 
   protected keyboardCallback = null;
@@ -98,17 +100,20 @@ export class TextareaFieldComponent
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['mask'] || changes['maskConfig'] || changes['minLength'] || changes['maxLength']) {
       this.warnIfMaskConflictsWithMinMax();
+
       if (changes['mask'] || changes['maskConfig']) {
         // re-apply formatting if the mask changed
-        this.doWriteValue(this.value ?? '');
+        queueMicrotask(() => {
+          this.doWriteValue(this.value ?? '');
+          this.adjustLayout();
+          this.autoResize();
+        });
       }
     }
   }
 
   protected doOnValueChange(): void {
-    if (this.enableAutosize) {
-      this.autoResize();
-    }
+    this.autoResize();
   }
 
   protected doOnFocusChange(_isFocused: boolean): void {
@@ -119,12 +124,14 @@ export class TextareaFieldComponent
 
   protected doWriteValue(value: string): void {
     const newValue = value ?? '';
+    const el = this.textareaElement;
+    if (!el) return;
 
     if (this.mask) {
       // Ensure the mask is loaded before setting the value
       setTimeout(() => {
         const maskedValue = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
-        this.textareaRef.nativeElement.value = maskedValue;
+        el.value = maskedValue;
 
         // notify the form control again (since usually done in base directive)
         if (newValue) {
@@ -132,10 +139,10 @@ export class TextareaFieldComponent
         }
       });
     } else {
-      this.textareaRef.nativeElement.value = newValue;
+      el.value = newValue;
     }
 
-    setCaretPositionToEnd(this.textareaRef.nativeElement);
+    setCaretPositionToEnd(el);
   }
 
   //#endregion
@@ -143,7 +150,9 @@ export class TextareaFieldComponent
   //#region IFormidableField
 
   get value(): string | null {
-    const textareaValue = this.textareaRef.nativeElement.value;
+    const el = this.textareaElement;
+    if (!el) return null;
+    const textareaValue = el.value;
 
     if (this.mask) {
       // remove mask characters if mask is applied
@@ -164,7 +173,7 @@ export class TextareaFieldComponent
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.textareaRef as ElementRef<HTMLElement>;
+    return (this.mask ? this.maskedTextareaRef! : this.plainTextareaRef!) as ElementRef<HTMLElement>;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'single';
@@ -238,27 +247,30 @@ export class TextareaFieldComponent
     }
   }
 
+  private get textareaElement(): HTMLTextAreaElement | null {
+    return (this.mask ? this.maskedTextareaRef?.nativeElement : this.maskedTextareaRef?.nativeElement) ?? null;
+  }
+
   //#endregion
 
   private autoResize(): void {
-    const textarea = this.textareaRef.nativeElement;
+    if (!this.enableAutosize) return;
 
-    textarea.style.height = 'auto'; // reset height to recalculate
-    textarea.style.height = `${textarea.scrollHeight}px`;
+    const el = this.textareaElement;
+    if (!el) return;
+
+    el.style.height = 'auto'; // reset height to recalculate
+    el.style.height = `${el.scrollHeight}px`;
   }
 
   private adjustLayout(): void {
     setTimeout(() => {
       // adjust length indicator, so that it also aligns right even if a suffix is set
-      if (!this.textareaRef || !this.lengthIndicatorRef) return;
-
-      const textarea = this.textareaRef.nativeElement;
-      const indicator = this.lengthIndicatorRef.nativeElement;
-
-      const style = window.getComputedStyle(textarea);
-      const paddingRight = style.paddingRight;
-
-      indicator.style.right = paddingRight;
+      const el = this.textareaElement;
+      const indicator = this.lengthIndicatorRef?.nativeElement;
+      if (!el || !indicator) return;
+      const style = window.getComputedStyle(el);
+      indicator.style.right = style.paddingRight;
     });
   }
 }
