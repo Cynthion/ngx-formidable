@@ -195,6 +195,7 @@ export class AppModule {}
 1. Define your model, form model, frame, and Vest validation suite:
 
 ```ts
+import { enforce, mode, Modes, only, StaticSuite, staticSuite, test } from 'vest';
 import { DeepPartial, DeepRequired } from 'ngx-formidable';
 
 export interface User {
