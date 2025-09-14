@@ -3,18 +3,18 @@
 :host {
   display: block;
 
-  &.selected {
-    @include field-option-selected;
-  }
-
-  &.highlighted {
-    @include field-option-highlighted;
+  &:not(.disabled):not(.readonly) {
+    &.selected {
+      @include field-option-selected;
+    }
+    &.highlighted {
+      @include field-option-highlighted;
+    }
   }
 
   &.readonly {
     @include field-option-readonly;
   }
-
   &.disabled {
     @include field-option-disabled;
   }

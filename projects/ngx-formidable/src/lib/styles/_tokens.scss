@@ -3,24 +3,6 @@
 
 //#region Font Sizes & Line Heights
 
-// font-size-xxxl: 32px;
-// font-size-xxl: 28px;
-// font-size-xl: 22px;
-// font-size-l: 18px;
-// font-size-m: 16px;
-// font-size-s: 14px;
-// font-size-xs: 12px;
-// font-size-xxs: 10px;
-
-// line-height-xxxl: math.div(38.4, 32);
-// line-height-xxl: math.div(39.2, 28);
-// line-height-xl: math.div(30.8, 22);
-// line-height-l: math.div(25.2, 18);
-// line-height-m: math.div(25.6, 16);
-// line-height-s: math.div(22.4, 14);
-// line-height-xs: math.div(19.2, 12);
-// line-height-xxs: math.div(16, 10);
-
 $formidable-field-font-size: utils.spacing(16);
 $formidable-field-font-weight: normal;
 $formidable-field-line-height: math.div(25.6, 16); // 1.6
@@ -84,9 +66,9 @@ $formidable-color-field-background-disabled: $formidable-color-field-background-
 
 $formidable-color-field-option-text-readonly: $formidable-color-field-text-readonly;
 $formidable-color-field-option-text-disabled: $formidable-color-field-text-disabled;
-$formidable-color-field-option-background-selected: blue; // TODO rgba(0, 0, 0, 0.05);
-$formidable-color-field-option-background-highlighted: lime; // TODO rgba(0, 0, 0, 0.075);
-$formidable-color-field-option-background-hovered: pink; // rgba(91, 127, 153, 0.2); // #5b7f99 // 500
+$formidable-color-field-option-background-selected: rgba(0, 0, 0, 0.05);
+$formidable-color-field-option-background-highlighted: rgba(0, 0, 0, 0.075);
+$formidable-color-field-option-background-hovered: rgba(91, 127, 153, 0.25); // 500, 25%
 
 // Date Field Panel
 $formidable-color-date-field-panel-select: $formidable-color-field-label;

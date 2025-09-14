@@ -468,7 +468,7 @@ You can also tweak Pikaday CSS.
 | `--formidable-flyout-z-index`                               | z-index applied to dropdown/flyout panels.                                                                              |
 | `--formidable-overlay-z-index`                              | z-index applied to any full-screen overlays.                                                                            |
 | `--formidable-above-overlay-z-index`                        | z-index for elements that must sit above overlays.                                                                      |
-| **Date-Field Panel Layout**                                 |                                                                                                                         |
+| **Date-Field Panel**                                        |                                                                                                                         |
 | `--formidable-date-field-panel-width`                       | Fixed width for the date-picker panel.                                                                                  |
 | `--formidable-date-field-panel-border-radius`               | Border-radius for the date-picker panel.                                                                                |
 | `--formidable-date-field-panel-box-shadow`                  | Box-shadow override for the date-picker panel.                                                                          |
