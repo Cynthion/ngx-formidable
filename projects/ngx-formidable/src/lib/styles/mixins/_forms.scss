@@ -118,27 +118,11 @@
 
   background: var(--formidable-color-field-background, #{tokens.$formidable-color-field-background});
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
-
-  &[readonly] {
-    @include readonly-colors;
-  }
-
-  &[disabled] {
-    @include disabled-colors;
-  }
 }
 
 @mixin field-group-colors {
   background: var(--formidable-color-field-group-background, #{tokens.$formidable-color-field-group-background});
   color: var(--formidable-color-field-group-text, #{tokens.$formidable-color-field-group-text});
-
-  &[readonly] {
-    @include readonly-colors;
-  }
-
-  &[disabled] {
-    @include disabled-colors;
-  }
 }
 
 @mixin field-font {
@@ -168,24 +152,20 @@
   width: 100%;
   position: relative;
 
+  // use native [readonly] and [disabled] attributes
   &[readonly] {
+    @include readonly-colors;
+
     pointer-events: auto;
   }
 
   &[disabled] {
+    @include disabled-colors;
+
     pointer-events: none;
     user-select: none;
   }
 
-  &.is-readonly {
-    @include readonly-colors;
-  }
-
-  &.is-disabled {
-    @include disabled-colors;
-  }
-
-  // use native [readonly] and [disabled] attributes
   &:not([readonly]):not([disabled]) {
     &:focus,
     &.focused,
@@ -201,15 +181,20 @@
   @include field-group-colors;
   @include field-group-border;
 
+  // use custom .is-readonly and .is-disabled classes
   &.is-readonly {
     @include readonly-colors;
+
+    pointer-events: auto;
   }
 
   &.is-disabled {
     @include disabled-colors;
+
+    pointer-events: none;
+    user-select: none;
   }
 
-  // use custom .is-readonly and .is-disabled classes
   &:not(.is-readonly):not(.is-disabled) {
     &:focus,
     &.focused,
