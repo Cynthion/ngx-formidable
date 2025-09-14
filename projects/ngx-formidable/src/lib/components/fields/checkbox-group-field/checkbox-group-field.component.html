@@ -2,9 +2,9 @@
   #checkboxGroupRef
   role="group"
   class="field"
-  [tabindex]="disabled ? -1 : 0"
   [class.is-readonly]="readonly"
   [class.is-disabled]="disabled"
+  [tabindex]="readonly || disabled ? -1 : null"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <!-- Options -->

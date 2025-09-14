@@ -21,6 +21,7 @@
       [attr.name]="name"
       [attr.readonly]="true"
       [attr.disabled]="disabled ? '' : null"
+      [attr.tabindex]="readonly || disabled ? -1 : null"
       (keydown)="onUserInput($event)"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />

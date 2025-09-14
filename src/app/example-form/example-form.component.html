@@ -47,6 +47,20 @@
             (change)="onToggle('floatingLabels', $any($event.target).checked)" />
           Floating Labels
         </label>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="controlCenter.showAsReadonly"
+            (change)="onToggle('showAsReadonly', $any($event.target).checked)" />
+          Show as Readonly
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            [checked]="controlCenter.showAsDisabled"
+            (change)="onToggle('showAsDisabled', $any($event.target).checked)" />
+          Show as Disabled
+        </label>
       </fieldset>
 
       <!-- Theme -->
@@ -165,8 +179,8 @@
             placeholder="Your first name"
             autocomplete="given-name"
             name="firstName"
-            [readonly]="true"
-            [disabled]="false"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
             [maxLength]="150"
             [ngModel]="vm.formValue$.firstName"
             (valueChanged)="onValueChanged('firstName', $event)"
@@ -205,8 +219,8 @@
             formidableFieldErrors
             placeholder="Your middle name"
             name="middleName"
-            [readonly]="false"
-            [disabled]="true"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
             [minLength]="15"
             [maxLength]="15"
             [ngModel]="vm.formValue$.middleName"
@@ -242,54 +256,13 @@
 
         <!-- Last Name -->
         <formidable-field-decorator>
-          <formidable-input-field
-            formidableFieldErrors
-            placeholder="Your last name"
-            name="lastName"
-            [readonly]="false"
-            [disabled]="false"
-            [minLength]="15"
-            [maxLength]="15"
-            [ngModel]="vm.formValue$.lastName"
-            (valueChanged)="onValueChanged('lastName', $event)"
-            (focusChanged)="onFocusChanged('lastName', $event)">
-          </formidable-input-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
-            Last Name
-          </div>
-          <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
-            <example-tooltip
-              placement="right"
-              trigger="hover"
-              [text]="'Fields can be masked, and have prefixes and suffixes.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
-            Suffix
-          </div>
-        </formidable-field-decorator>
-
-        <!-- Last Name -->
-        <!-- <formidable-field-decorator>
           <formidable-textarea-field
             formidableFieldErrors
             placeholder="Your last name"
             autocomplete="family-name"
             name="lastName"
-            [readonly]="false"
-            [disabled]="false"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
             [enableAutosize]="true"
             [showLengthIndicator]="true"
             [maxLength]="300"
@@ -324,16 +297,16 @@
             formidableFieldSuffix>
             Suffix
           </div>
-        </formidable-field-decorator> -->
+        </formidable-field-decorator>
 
         <!-- Gender -->
-        <!-- <formidable-field-decorator>
+        <formidable-field-decorator>
           <formidable-select-field
             formidableFieldErrors
             placeholder="Select..."
             name="gender"
-            [readonly]="false"
-            [disabled]="false"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.gender"
             [options]="genderOptions"
             [sortFn]="sortAlphabetically"
@@ -371,7 +344,7 @@
             formidableFieldSuffix>
             Suffix
           </div>
-        </formidable-field-decorator> -->
+        </formidable-field-decorator>
 
         <!-- Nationality -->
         <formidable-field-decorator>
@@ -379,8 +352,8 @@
             formidableFieldErrors
             placeholder="Select..."
             name="nationality"
-            [readonly]="false"
-            [disabled]="false"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.nationality"
             [options]="nationalityOptions"
             [emptyOption]="nationalityEmptyOption"
@@ -442,14 +415,14 @@
         </formidable-field-decorator>
 
         <!-- Hobby -->
-        <!-- <formidable-field-decorator>
+        <formidable-field-decorator>
           <formidable-autocomplete-field
             formidableFieldErrors
             placeholder="Select..."
             name="hobby"
             [ngModel]="vm.formValue$.hobby"
-            [readonly]="false"
-            [disabled]="false"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
             [options]="hobbyOptions"
             [emptyOption]="hobbyEmptyOption"
             [sortFn]="sortAlphabetically"
@@ -501,16 +474,16 @@
             formidableFieldSuffix>
             Suffix
           </div>
-        </formidable-field-decorator> -->
+        </formidable-field-decorator>
 
         <!-- Animals -->
-        <!-- <formidable-field-decorator>
+        <formidable-field-decorator>
           <formidable-autocomplete-field
             formidableFieldErrors
             placeholder="Select..."
             name="animal"
-            [readonly]="false"
-            [disabled]="false"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.animal"
             [options]="animalOptionsDefault"
             [emptyOption]="animalEmptyOption"
@@ -553,16 +526,16 @@
             formidableFieldSuffix>
             Suffix
           </div>
-        </formidable-field-decorator> -->
+        </formidable-field-decorator>
 
         <!-- Birthdate -->
-        <!-- <formidable-field-decorator>
+        <formidable-field-decorator>
           <formidable-date-field
             formidableFieldErrors
             placeholder="?"
             name="birthdate"
-            [readonly]="false"
-            [disabled]="false"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.birthdate"
             [i18n]="I18N_CONFIG"
             [yearRange]="2"
@@ -598,16 +571,16 @@
             formidableFieldSuffix>
             Suffix
           </div>
-        </formidable-field-decorator> -->
+        </formidable-field-decorator>
 
         <!-- Time -->
-        <!-- <formidable-field-decorator>
+        <formidable-field-decorator>
           <formidable-time-field
             formidableFieldErrors
             placeholder="?"
             name="time"
-            [readonly]="false"
-            [disabled]="false"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.time"
             [unicodeTokenFormat]="'HH : mm'"
             (valueChanged)="onValueChanged('time', $event)"
@@ -639,15 +612,15 @@
             formidableFieldSuffix>
             Suffix
           </div>
-        </formidable-field-decorator> -->
+        </formidable-field-decorator>
 
         <!-- Religion -->
         <formidable-field-decorator>
           <formidable-radio-group-field
             formidableFieldErrors
             name="religion"
-            [readonly]="true"
-            [disabled]="false"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.religion"
             [options]="religionOptions"
             [emptyOption]="religionEmptyOption"
@@ -707,8 +680,8 @@
           <formidable-checkbox-group-field
             formidableFieldErrors
             name="allergies"
-            [readonly]="false"
-            [disabled]="true"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.allergies"
             [options]="allergiesOptions"
             [emptyOption]="allergiesEmptyOption"

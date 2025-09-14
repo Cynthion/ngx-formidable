@@ -381,7 +381,9 @@ export class ExampleFormComponent {
     showSuffixes: true,
     showTooltips: true,
     showLabels: true,
-    floatingLabels: true
+    floatingLabels: true,
+    showAsReadonly: false,
+    showAsDisabled: false
   };
 
   // Since all components are change-detection OnPush, we need to trigger a change detection cycle
@@ -486,6 +488,13 @@ export class ExampleFormComponent {
   //#endregion
 }
 
-type ControlKey = 'showPrefixes' | 'showSuffixes' | 'showTooltips' | 'showLabels' | 'floatingLabels';
+type ControlKey =
+  | 'showPrefixes'
+  | 'showSuffixes'
+  | 'showTooltips'
+  | 'showLabels'
+  | 'floatingLabels'
+  | 'showAsReadonly'
+  | 'showAsDisabled';
 type ThemeKey = 'default' | 'theme2' | 'theme3' | 'theme4';
 type ThemeVars = Record<string, string>;

@@ -5,6 +5,7 @@
   [id]="fieldId"
   [attr.name]="name"
   [attr.disabled]="disabled ? '' : null"
+  [attr.tabindex]="readonly || disabled ? -1 : null"
   (pointerdown)="readonly || disabled ? preventPointerDown($event) : null"
   (keydown)="readonly || disabled ? preventKeydown($event) : null"
   (change)="onValueChange()"

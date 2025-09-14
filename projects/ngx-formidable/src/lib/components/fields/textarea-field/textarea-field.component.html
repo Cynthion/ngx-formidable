@@ -15,6 +15,7 @@
       [attr.maxlength]="maxLength > -1 ? maxLength : null"
       [attr.readonly]="readonly ? '' : null"
       [attr.disabled]="disabled ? '' : null"
+      [attr.tabindex]="readonly || disabled ? -1 : null"
       [mask]="mask"
       [validation]="!!mask && mergedMaskConfig.validation && !readonly && !disabled"
       [showMaskTyped]="mergedMaskConfig.showMaskTyped"
@@ -44,6 +45,7 @@
       [attr.maxlength]="maxLength > -1 ? maxLength : null"
       [attr.readonly]="readonly ? '' : null"
       [attr.disabled]="disabled ? '' : null"
+      [attr.tabindex]="readonly || disabled ? -1 : null"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)">
