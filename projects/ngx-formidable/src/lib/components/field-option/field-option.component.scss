@@ -12,7 +12,7 @@
   }
 
   &.readonly {
-    @include field-option-disabled;
+    @include field-option-readonly;
   }
 
   &.disabled {

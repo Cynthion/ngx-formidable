@@ -19,8 +19,13 @@ Example:
 Improvements:
 
 - rename FormDirective to NgxFormidableFormDirective. (no naming clash with Angular)
+- in tokens, use var(--formidable-...) instead of $formidable...?
+- keyboard-navigation: skip disabled/readonly options
+- don't show field (group) focus border when field is readonly or disabled
+- - make @empty options readonly, not disabled
 
 # Bugs:
 
 - datefield: when panel open, arrow/left/right moves caret in field
 - ios: inspect padding when prefix is missing
+- set formidable-color-option-prefixes

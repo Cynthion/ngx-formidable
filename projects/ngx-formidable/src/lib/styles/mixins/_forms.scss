@@ -80,13 +80,23 @@
 }
 
 @mixin readonly-colors {
-  background: var(--formidable-color-field-background-readonly, #{tokens.$formidable-color-field-background-readonly});
-  color: var(--formidable-color-field-text-readonly, #{tokens.$formidable-color-field-text-readonly});
+  --formidable-color-field-border: var(--formidable-color-field-border-readonly);
+  --formidable-color-field-group-border: var(--formidable-color-field-group-border-readonly);
+
+  --formidable-color-field-background: var(--formidable-color-field-background-readonly);
+  --formidable-color-field-group-background: var(--formidable-color-field-background-readonly);
+  --formidable-color-field-text: var(--formidable-color-field-text-readonly);
+  --formidable-color-field-group-text: var(--formidable-color-field-text-readonly);
 }
 
 @mixin disabled-colors {
-  background: var(--formidable-color-field-background-disabled, #{tokens.$formidable-color-field-background-disabled});
-  color: var(--formidable-color-field-text-disabled, #{tokens.$formidable-color-field-text-disabled});
+  --formidable-color-field-border: var(--formidable-color-field-border-disabled);
+  --formidable-color-field-group-border: var(--formidable-color-field-group-border-disabled);
+
+  --formidable-color-field-background: var(--formidable-color-field-background-disabled);
+  --formidable-color-field-group-background: var(--formidable-color-field-background-disabled);
+  --formidable-color-field-text: var(--formidable-color-field-text-disabled);
+  --formidable-color-field-group-text: var(--formidable-color-field-text-disabled);
 }
 
 @mixin focused-colors {
@@ -121,6 +131,14 @@
 @mixin field-group-colors {
   background: var(--formidable-color-field-group-background, #{tokens.$formidable-color-field-group-background});
   color: var(--formidable-color-field-group-text, #{tokens.$formidable-color-field-group-text});
+
+  &[readonly] {
+    @include readonly-colors;
+  }
+
+  &[disabled] {
+    @include disabled-colors;
+  }
 }
 
 @mixin field-font {
@@ -179,6 +197,10 @@
 
   &.is-readonly {
     @include readonly-colors;
+  }
+
+  &.is-disabled {
+    @include disabled-colors;
   }
 
   &:focus,
@@ -447,19 +469,49 @@
   @include panel();
 }
 
-@mixin field-option-disabled {
-  cursor: not-allowed;
+@mixin field-option-readonly {
+  --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-readonly);
+  --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-readonly);
+
   pointer-events: none;
 
-  background: var(--formidable-color-field-disabled, #{tokens.$formidable-color-field-disabled});
+  background: var(
+    --formidable-color-field-option-background-readonly,
+    #{tokens.$formidable-color-field-option-background-readonly}
+  );
+}
+
+@mixin field-option-disabled {
+  --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-disabled);
+  --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-disabled);
+
+  pointer-events: none;
+  user-select: none;
+
+  background: var(
+    --formidable-color-field-option-background-disabled,
+    #{tokens.$formidable-color-field-option-background-disabled}
+  );
 }
 
 @mixin field-option-selected {
-  background: var(--formidable-color-field-selected, #{tokens.$formidable-color-field-selected});
+  --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-selected);
+  --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-selected);
+
+  background: var(
+    --formidable-color-field-option-background-selected,
+    #{tokens.$formidable-color-field-option-background-selected}
+  );
 }
 
 @mixin field-option-highlighted {
-  background: var(--formidable-color-field-highlighted, #{tokens.$formidable-color-field-highlighted});
+  --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-highlighted);
+  --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-highlighted);
+
+  background: var(
+    --formidable-color-field-option-background-highlighted,
+    #{tokens.$formidable-color-field-option-background-highlighted}
+  );
 }
 
 @mixin field-option-inline {
@@ -467,7 +519,10 @@
   padding: utils.spacing(8) utils.spacing(16);
 
   &:hover {
-    background: var(--formidable-color-field-hovered, #{tokens.$formidable-color-field-hovered});
+    background: var(
+      --formidable-color-field-option-background-hovered,
+      #{tokens.$formidable-color-field-option-background-hovered}
+    );
   }
 }
 
@@ -544,7 +599,10 @@
   &:hover::before,
   &.open::before {
     opacity: 1;
-    background: var(--formidable-color-field-hovered, #{tokens.$formidable-color-field-hovered});
+    background: var(
+      --formidable-color-field-option-background-hovered,
+      #{tokens.$formidable-color-field-option-background-hovered}
+    );
   }
 }
 

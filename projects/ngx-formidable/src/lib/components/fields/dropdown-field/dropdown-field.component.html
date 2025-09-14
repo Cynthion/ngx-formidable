@@ -52,6 +52,7 @@
           #optionRef
           [value]="option.value"
           [label]="option.label"
+          [readonly]="option.readonly || false"
           [disabled]="option.disabled || false"
           [selected]="option.value === value"
           [highlighted]="i === (highlightedOptionIndex$ | async)">

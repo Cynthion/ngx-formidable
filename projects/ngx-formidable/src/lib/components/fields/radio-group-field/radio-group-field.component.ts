@@ -186,8 +186,6 @@ export class RadioGroupFieldComponent
     this.valueChanged.emit(this.selectedOption.value);
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.onTouched();
-
-    this.highlightSelectedOption();
   }
 
   private updateOptions(): void {
@@ -206,12 +204,6 @@ export class RadioGroupFieldComponent
   }
 
   //#endregion
-
-  private highlightSelectedOption(): void {
-    const selectedIndex = this.options$.value.findIndex((opt) => opt.value === this.selectedOption?.value);
-
-    this.setHighlightedIndex(selectedIndex);
-  }
 
   private setHighlightedIndex(index: number): void {
     this.highlightedOptionIndex$.next(index);

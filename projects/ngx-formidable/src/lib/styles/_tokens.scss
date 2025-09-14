@@ -45,7 +45,6 @@ $formidable-length-indicator-line-height: math.div(19.2, 12); // 1.6
 
 //#region Colors
 
-// Primary scale
 // 100: #f2faff
 // 200: #c7d7e2
 // 300: #9fb7c7
@@ -56,57 +55,59 @@ $formidable-length-indicator-line-height: math.div(19.2, 12); // 1.6
 // 800: #114367
 // 900: #00345a
 
-// Neutral scale
-// 100: #f5f5f5
-// 200: #dddddd
-// 300: #c5c5c5
-// 400: #acacac
-// 500: #949494
-// 600: #7c7c7c
-// 700: #646464
-// 800: #4b4b4b
-// 900: #333333
-
 $formidable-color-validation-error: #dc5858;
 
-$formidable-color-field-text: #00345a;
-$formidable-color-field-group-text: $formidable-color-field-text;
-$formidable-color-field-text-readonly: #255476;
-$formidable-color-field-text-disabled: #646464;
+$formidable-color-field-text: #00345a; // 900
+$formidable-color-field-group-text: $formidable-color-field-text; // 900
+$formidable-color-field-text-readonly: $formidable-color-field-text; // 900
+$formidable-color-field-text-disabled: rgb(0 52 90 / 50%); // 900, 50%
 
-$formidable-color-field-label: $formidable-color-field-text;
-$formidable-color-field-label-floating: #3e6988;
-$formidable-color-field-tooltip: $formidable-color-field-text;
-$formidable-color-field-placeholder: #5b7f99;
-$formidable-color-field-selection: #9fb7c7;
+$formidable-color-field-label: $formidable-color-field-text; // 900
+$formidable-color-field-label-floating: #3e6988; // 600
+$formidable-color-field-tooltip: $formidable-color-field-text; // 900
+$formidable-color-field-placeholder: #5b7f99; // 500
+$formidable-color-field-selection: #9fb7c7; // 300
 
-$formidable-color-field-border: #114367;
-$formidable-color-field-border-focus: #5b7f99;
-$formidable-color-field-group-border: transparent;
-$formidable-color-field-group-border-focus: transparent;
+$formidable-color-field-border: $formidable-color-field-text; // 900
+$formidable-color-field-border-focus: #5b7f99; // 500
+$formidable-color-field-border-readonly: transparent;
+$formidable-color-field-border-disabled: rgb(0 52 90 / 50%); // 900, 50%
+$formidable-color-field-group-border: $formidable-color-field-border;
+$formidable-color-field-group-border-focus: $formidable-color-field-border-focus;
+$formidable-color-field-group-border-readonly: $formidable-color-field-border-readonly;
+$formidable-color-field-group-border-disabled: $formidable-color-field-border-disabled;
 
-$formidable-color-field-background: #f2faff;
-$formidable-color-field-group-background: transparent;
-$formidable-color-field-background-readonly: #c5c5c5;
-$formidable-color-field-background-disabled: #c5c5c5;
+$formidable-color-field-background: #f2faff; // 100
+$formidable-color-field-group-background: $formidable-color-field-background;
+$formidable-color-field-background-readonly: rgb(242 250 255 / 50%); // 100, 50%
+$formidable-color-field-background-disabled: $formidable-color-field-background-readonly;
 
-$formidable-color-field-disabled: rgba(114, 114, 114, 0.05);
-$formidable-color-field-selected: rgba(0, 0, 0, 0.05);
-$formidable-color-field-highlighted: rgba(0, 0, 0, 0.075);
-$formidable-color-field-hovered: rgba(91, 127, 153, 0.2); // #5b7f99
+$formidable-color-field-option-background-readonly: $formidable-color-field-background-readonly; // TODO rgba(114, 114, 114, 0.05);
+$formidable-color-field-option-background-disabled: $formidable-color-field-background-disabled; // TODO black; // rgba(114, 114, 114, 0.05);
+$formidable-color-field-option-background-selected: blue; // TODO rgba(0, 0, 0, 0.05);
+$formidable-color-field-option-background-highlighted: lime; // TODO rgba(0, 0, 0, 0.075);
+$formidable-color-field-option-background-hovered: pink; // rgba(91, 127, 153, 0.2); // #5b7f99 // 500
 
-// Date field panel
+// Date Field Panel
 $formidable-color-date-field-panel-select: $formidable-color-field-label;
-$formidable-color-date-field-panel-select-hovered: $formidable-color-field-hovered;
+$formidable-color-date-field-panel-select-hovered: $formidable-color-field-option-background-hovered;
 $formidable-color-date-field-panel-date-highlighted-text: $formidable-color-field-text;
-$formidable-color-date-field-panel-date-highlighted: $formidable-color-field-highlighted;
-$formidable-color-date-field-panel-date-hovered: $formidable-color-field-hovered;
+$formidable-color-date-field-panel-date-highlighted: $formidable-color-field-option-background-highlighted;
+$formidable-color-date-field-panel-date-hovered: $formidable-color-field-option-background-hovered;
 $formidable-color-date-field-panel-date-out-of-range: $formidable-color-field-background-disabled;
 $formidable-color-date-field-panel-day-label: #255476;
 
-// Option prefix
+// Option Prefix
 $formidable-color-option-prefix-outer: $formidable-color-field-border;
+$formidable-color-option-prefix-outer-readonly: $formidable-color-field-text-readonly;
+$formidable-color-option-prefix-outer-disabled: $formidable-color-field-text-disabled;
+$formidable-color-option-prefix-outer-selected: $formidable-color-field-border;
+$formidable-color-option-prefix-outer-highlighted: $formidable-color-field-group-border-focus;
 $formidable-color-option-prefix-inner: $formidable-color-field-border;
+$formidable-color-option-prefix-inner-readonly: $formidable-color-option-prefix-outer-readonly;
+$formidable-color-option-prefix-inner-disabled: $formidable-color-option-prefix-outer-disabled;
+$formidable-color-option-prefix-inner-selected: $formidable-color-option-prefix-outer-selected;
+$formidable-color-option-prefix-inner-highlighted: $formidable-color-option-prefix-outer-highlighted;
 $formidable-color-option-prefix-background: transparent;
 
 // Length Indicator
@@ -121,8 +122,8 @@ $formidable-field-before-margin-bottom: utils.spacing(8);
 $formidable-field-border-thickness: utils.spacing(1);
 $formidable-field-border-radius: utils.spacing(6);
 
-$formidable-field-group-border-thickness: utils.spacing(0);
-$formidable-field-group-border-radius: utils.spacing(0);
+$formidable-field-group-border-thickness: $formidable-field-border-thickness;
+$formidable-field-group-border-radius: $formidable-field-border-radius;
 
 $formidable-label-height: $formidable-label-line-height * $formidable-label-font-size;
 $formidable-field-height: utils.spacing(60); // even number
@@ -142,7 +143,7 @@ $formidable-textarea-padding-top: utils.spacing(16);
 
 //#region Panels
 
-$formidable-panel-background: #f2faff;
+$formidable-panel-background: $formidable-color-field-background;
 $formidable-panel-box-shadow: utils.spacing(0) utils.spacing(12) utils.spacing(48) calc(utils.spacing(8) * -1)
   rgb(0 0 0 / 12%);
 $formidable-panel-max-height: 33vh; // 1/3 of viewport height

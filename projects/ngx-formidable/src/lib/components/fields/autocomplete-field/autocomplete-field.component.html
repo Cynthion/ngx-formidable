@@ -36,6 +36,7 @@
           [value]="option.value"
           [label]="option.label"
           [match]="option.match"
+          [readonly]="option.readonly || false"
           [disabled]="option.disabled || false"
           [selected]="option.value === value"
           [highlighted]="i === (highlightedOptionIndex$ | async)">

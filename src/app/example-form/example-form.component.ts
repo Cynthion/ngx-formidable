@@ -77,17 +77,17 @@ export class ExampleFormComponent {
   ) {}
 
   protected readonly formValue$ = new BehaviorSubject<ExampleFormModel>({
-    firstName: undefined, // 'Cynthion',
+    firstName: 'Cynthion',
     middleName: 'Initial Value',
     lastName: undefined, // 'Morris',
     gender: undefined, // 'male',
-    nationality: undefined, // 'ch',
+    nationality: 'ch',
     hobby: undefined, // 'reading',
     animal: undefined, // 'cat',
     birthdate: undefined, // new Date(1989, 5, 29),
     time: undefined, // new Date(0, 0, 0, 12, 30, 15),
-    religion: undefined, // 'agnostic',
-    allergies: undefined // ['dust', 'lactose']
+    religion: 'agnostic',
+    allergies: ['dust', 'lactose']
   });
   protected readonly formFrame = exampleFormFrame;
   protected readonly suite: StaticSuite<string, string, (model: ExampleFormModel, field?: string) => void> =
@@ -433,8 +433,8 @@ export class ExampleFormComponent {
       '--formidable-color-field-background': '#ecfeff',
       '--formidable-color-field-background-readonly': '#bae6fd',
       '--formidable-color-field-background-disabled': '#e5e7eb',
-      '--formidable-color-field-highlighted': 'rgba(14, 165, 233, 0.15)',
-      '--formidable-color-field-hovered': 'rgba(59, 130, 246, 0.2)',
+      '--formidable-color-field-option-background-highlighted': 'rgba(14, 165, 233, 0.15)',
+      '--formidable-color-field-option-background-hovered': 'rgba(59, 130, 246, 0.2)',
       '--formidable-date-field-panel-width': '260px',
       '--formidable-panel-background': '#f0f9ff',
       '--formidable-panel-box-shadow': '0 8px 32px rgba(0,0,0,0.15)'
@@ -454,8 +454,8 @@ export class ExampleFormComponent {
       '--formidable-color-field-background': '#fffbeb',
       '--formidable-color-field-background-readonly': '#fde68a',
       '--formidable-color-field-background-disabled': '#fcd34d',
-      '--formidable-color-field-highlighted': 'rgba(251, 191, 36, 0.25)',
-      '--formidable-color-field-hovered': 'rgba(249, 115, 22, 0.2)',
+      '--formidable-color-field-option-background-highlighted': 'rgba(251, 191, 36, 0.25)',
+      '--formidable-color-field-option-background-hovered': 'rgba(249, 115, 22, 0.2)',
       '--formidable-date-field-panel-width': '260px',
       '--formidable-panel-background': '#fff7ed',
       '--formidable-panel-box-shadow': '0 8px 32px rgba(255, 140, 0, 0.25)'
@@ -475,8 +475,8 @@ export class ExampleFormComponent {
       '--formidable-color-field-background': '#f9fafb',
       '--formidable-color-field-background-readonly': '#e5e7eb',
       '--formidable-color-field-background-disabled': '#e5e7eb',
-      '--formidable-color-field-highlighted': 'rgba(37, 99, 235, 0.08)',
-      '--formidable-color-field-hovered': 'rgba(37, 99, 235, 0.15)',
+      '--formidable-color-field-option-background-highlighted': 'rgba(37, 99, 235, 0.08)',
+      '--formidable-color-field-option-background-hovered': 'rgba(37, 99, 235, 0.15)',
       '--formidable-date-field-panel-width': '200px',
       '--formidable-panel-background': '#ffffff',
       '--formidable-panel-box-shadow': '0 4px 20px rgba(0,0,0,0.08)'
