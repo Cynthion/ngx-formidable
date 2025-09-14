@@ -16,6 +16,7 @@ import {
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime } from 'rxjs';
 import { isPrintableCharacter } from '../../../helpers/input.helpers';
+import { getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
 import {
   scrollHighlightedOptionIntoView,
   scrollIntoView,
@@ -130,12 +131,12 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
         if (!this.isPanelOpen) {
           this.togglePanel(true);
         } else if (count > 0) {
-          this.setHighlightedIndex((this.highlightedOptionIndex$.value + 1) % count);
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'down'));
         }
         break;
       case 'ArrowUp':
         if (this.isPanelOpen && count > 0) {
-          this.setHighlightedIndex((this.highlightedOptionIndex$.value - 1 + count) % count);
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'up'));
         }
         break;
       case 'Enter':

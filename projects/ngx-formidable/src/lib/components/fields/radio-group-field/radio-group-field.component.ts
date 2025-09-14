@@ -15,6 +15,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
+import { getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
 import { scrollHighlightedOptionIntoView } from '../../../helpers/position.helpers';
 import {
   EMPTY_FIELD_OPTION,
@@ -107,12 +108,12 @@ export class RadioGroupFieldComponent
     switch (event.key) {
       case 'ArrowDown':
         if (count > 0) {
-          this.setHighlightedIndex((this.highlightedOptionIndex$.value + 1) % count);
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'down'));
         }
         break;
       case 'ArrowUp':
         if (count > 0) {
-          this.setHighlightedIndex((this.highlightedOptionIndex$.value - 1 + count) % count);
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'up'));
         }
         break;
       case 'Enter':

@@ -22,7 +22,6 @@ Improvements:
 - ARIA attributes
 - rename FormDirective to NgxFormidableFormDirective. (no naming clash with Angular)
 - in tokens, use var(--formidable-...) instead of $formidable...?
-- keyboard-navigation: skip disabled/readonly options
 - don't show option as selected when unfocused (see radio/checkbox)
 
 # Bugs:
