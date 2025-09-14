@@ -241,6 +241,47 @@
         </formidable-field-decorator>
 
         <!-- Last Name -->
+        <formidable-field-decorator>
+          <formidable-input-field
+            formidableFieldErrors
+            placeholder="Your last name"
+            name="lastName"
+            [readonly]="false"
+            [disabled]="false"
+            [minLength]="15"
+            [maxLength]="15"
+            [ngModel]="vm.formValue$.lastName"
+            (valueChanged)="onValueChanged('lastName', $event)"
+            (focusChanged)="onFocusChanged('lastName', $event)">
+          </formidable-input-field>
+          <div
+            *ngIf="controlCenter.showLabels"
+            formidableFieldLabel
+            [isFloating]="controlCenter.floatingLabels">
+            Last Name
+          </div>
+          <div
+            *ngIf="controlCenter.showTooltips"
+            formidableFieldTooltip>
+            <example-tooltip
+              placement="right"
+              trigger="hover"
+              [text]="'Fields can be masked, and have prefixes and suffixes.'">
+            </example-tooltip>
+          </div>
+          <div
+            *ngIf="controlCenter.showPrefixes"
+            formidableFieldPrefix>
+            Prefix
+          </div>
+          <div
+            *ngIf="controlCenter.showSuffixes"
+            formidableFieldSuffix>
+            Suffix
+          </div>
+        </formidable-field-decorator>
+
+        <!-- Last Name -->
         <!-- <formidable-field-decorator>
           <formidable-textarea-field
             formidableFieldErrors

@@ -22,7 +22,7 @@ Improvements:
 - rename FormDirective to NgxFormidableFormDirective. (no naming clash with Angular)
 - in tokens, use var(--formidable-...) instead of $formidable...?
 - keyboard-navigation: skip disabled/readonly options
-- don't show field (group) focus border when field is readonly or disabled
+- don't make fields tabbable when readonly/disabled
 
 # Bugs:
 

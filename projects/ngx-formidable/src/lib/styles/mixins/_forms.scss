@@ -168,8 +168,11 @@
   width: 100%;
   position: relative;
 
+  &[readonly] {
+    pointer-events: auto;
+  }
+
   &[disabled] {
-    cursor: not-allowed;
     pointer-events: none;
     user-select: none;
   }
@@ -182,10 +185,13 @@
     @include disabled-colors;
   }
 
-  &:focus,
-  &.focused,
-  &:focus-visible {
-    @include focused-colors;
+  // use native [readonly] and [disabled] attributes
+  &:not([readonly]):not([disabled]) {
+    &:focus,
+    &.focused,
+    &:focus-visible {
+      @include focused-colors;
+    }
   }
 }
 
@@ -203,10 +209,13 @@
     @include disabled-colors;
   }
 
-  &:focus,
-  &.focused,
-  &:focus-visible {
-    @include focused-group-colors;
+  // use custom .is-readonly and .is-disabled classes
+  &:not(.is-readonly):not(.is-disabled) {
+    &:focus,
+    &.focused,
+    &:focus-visible {
+      @include focused-group-colors;
+    }
   }
 }
 

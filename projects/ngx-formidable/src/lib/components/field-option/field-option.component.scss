@@ -3,7 +3,7 @@
 :host {
   display: block;
 
-  &:not(.disabled):not(.readonly) {
+  &:not(.readonly):not(.disabled) {
     &.selected {
       @include field-option-selected;
     }
