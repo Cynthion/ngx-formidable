@@ -1,9 +1,9 @@
 <select
   #selectRef
   class="field"
-  [class.is-readonly]="readonly"
   [id]="fieldId"
   [attr.name]="name"
+  [attr.readonly]="readonly ? '' : null"
   [attr.disabled]="disabled ? '' : null"
   [attr.tabindex]="readonly || disabled ? -1 : null"
   (pointerdown)="readonly || disabled ? preventPointerDown($event) : null"

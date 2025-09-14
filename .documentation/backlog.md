@@ -23,10 +23,10 @@ Improvements:
 - rename FormDirective to NgxFormidableFormDirective. (no naming clash with Angular)
 - in tokens, use var(--formidable-...) instead of $formidable...?
 - keyboard-navigation: skip disabled/readonly options
-- fix representation of readonly/disabled state (dropdown, autocomplete, date, time)
 - don't show option as selected when unfocused (see radio/checkbox)
 
 # Bugs:
 
+- autocomplete: not opening anymore when writing
 - datefield: when panel open, arrow/left/right moves caret in field
 - ios: inspect padding when prefix is missing

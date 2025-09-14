@@ -152,21 +152,24 @@
   width: 100%;
   position: relative;
 
-  // use native [readonly] and [disabled] attributes
-  &[readonly] {
+  &[readonly], // use native [readonly] and [disabled] attributes for native elements (input, textarea, select)
+  &.is-readonly // use custom .is-readonly class for non-native elements (e.g. dropdown, autocomplete, date, time)
+  {
     @include readonly-colors;
 
     pointer-events: auto;
   }
 
-  &[disabled] {
+  &[disabled], // use native [disabled] and [disabled] attributes for native elements (input, textarea, select)
+  &.is-disabled // use custom .is-disabled class for non-native elements (dropdown, autocomplete, date, time)
+  {
     @include disabled-colors;
 
     pointer-events: none;
     user-select: none;
   }
 
-  &:not([readonly]):not([disabled]) {
+  &:not([readonly]):not([disabled]):not(.is-readonly):not(.is-disabled) {
     &:focus,
     &.focused,
     &:focus-visible {
@@ -181,13 +184,14 @@
   @include field-group-colors;
   @include field-group-border;
 
-  // use custom .is-readonly and .is-disabled classes
+  // use custom .is-readonly class for non-native elements (radio group, checkbox group)
   &.is-readonly {
     @include readonly-colors;
 
     pointer-events: auto;
   }
 
+  // use custom .is-disabled class for non-native elements (radio group, checkbox group)
   &.is-disabled {
     @include disabled-colors;
 
