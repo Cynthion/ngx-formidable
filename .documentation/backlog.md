@@ -23,7 +23,6 @@ Improvements:
 - in tokens, use var(--formidable-...) instead of $formidable...?
 - keyboard-navigation: skip disabled/readonly options
 - don't show field (group) focus border when field is readonly or disabled
-- make @empty options readonly, not disabled
 
 # Bugs:
 
