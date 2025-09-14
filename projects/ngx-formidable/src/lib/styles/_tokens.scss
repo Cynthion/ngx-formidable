@@ -59,19 +59,19 @@ $formidable-color-validation-error: #dc5858;
 
 $formidable-color-field-text: #00345a; // 900
 $formidable-color-field-group-text: $formidable-color-field-text; // 900
-$formidable-color-field-text-readonly: $formidable-color-field-text; // 900
+$formidable-color-field-text-readonly: rgb(0 52 90 / 75%); // 900, 75%
 $formidable-color-field-text-disabled: rgb(0 52 90 / 50%); // 900, 50%
 
 $formidable-color-field-label: $formidable-color-field-text; // 900
-$formidable-color-field-label-floating: #3e6988; // 600
-$formidable-color-field-tooltip: $formidable-color-field-text; // 900
+$formidable-color-field-label-floating: #255476; // 700
+$formidable-color-field-tooltip: $formidable-color-field-text;
 $formidable-color-field-placeholder: #5b7f99; // 500
 $formidable-color-field-selection: #9fb7c7; // 300
 
-$formidable-color-field-border: $formidable-color-field-text; // 900
+$formidable-color-field-border: $formidable-color-field-text;
 $formidable-color-field-border-focus: #5b7f99; // 500
 $formidable-color-field-border-readonly: transparent;
-$formidable-color-field-border-disabled: rgb(0 52 90 / 50%); // 900, 50%
+$formidable-color-field-border-disabled: $formidable-color-field-text-disabled;
 $formidable-color-field-group-border: $formidable-color-field-border;
 $formidable-color-field-group-border-focus: $formidable-color-field-border-focus;
 $formidable-color-field-group-border-readonly: $formidable-color-field-border-readonly;
@@ -82,8 +82,8 @@ $formidable-color-field-group-background: $formidable-color-field-background;
 $formidable-color-field-background-readonly: rgb(242 250 255 / 50%); // 100, 50%
 $formidable-color-field-background-disabled: $formidable-color-field-background-readonly;
 
-$formidable-color-field-option-background-readonly: $formidable-color-field-background-readonly; // TODO rgba(114, 114, 114, 0.05);
-$formidable-color-field-option-background-disabled: $formidable-color-field-background-disabled; // TODO black; // rgba(114, 114, 114, 0.05);
+$formidable-color-field-option-text-readonly: $formidable-color-field-text-readonly;
+$formidable-color-field-option-text-disabled: $formidable-color-field-text-disabled;
 $formidable-color-field-option-background-selected: blue; // TODO rgba(0, 0, 0, 0.05);
 $formidable-color-field-option-background-highlighted: lime; // TODO rgba(0, 0, 0, 0.075);
 $formidable-color-field-option-background-hovered: pink; // rgba(91, 127, 153, 0.2); // #5b7f99 // 500

@@ -475,10 +475,7 @@
 
   pointer-events: none;
 
-  background: var(
-    --formidable-color-field-option-background-readonly,
-    #{tokens.$formidable-color-field-option-background-readonly}
-  );
+  color: var(--formidable-color-field-option-text-readonly, #{tokens.$formidable-color-field-option-text-readonly});
 }
 
 @mixin field-option-disabled {
@@ -488,10 +485,7 @@
   pointer-events: none;
   user-select: none;
 
-  background: var(
-    --formidable-color-field-option-background-disabled,
-    #{tokens.$formidable-color-field-option-background-disabled}
-  );
+  color: var(--formidable-color-field-option-text-disabled, #{tokens.$formidable-color-field-option-text-disabled});
 }
 
 @mixin field-option-selected {

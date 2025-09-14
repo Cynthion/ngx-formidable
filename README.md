@@ -417,8 +417,8 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-field-group-background`                 | Background color for field groups.                                                                                      |
 | `--formidable-color-field-background-readonly`              | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when field is readonly. |
 | `--formidable-color-field-background-disabled`              | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when field is disabled. |
-| `--formidable-color-field-option-background-readonly`       | Background color for option items that are readonly.                                                                    |
-| `--formidable-color-field-option-background-disabled`       | Background color for option items that are disabled.                                                                    |
+| `--formidable-color-field-option-text-readonly`             | Text color for option items that are readonly.                                                                          |
+| `--formidable-color-field-option-text-disabled`             | Text color for option items that are disabled.                                                                          |
 | `--formidable-color-field-option-background-selected`       | Background color for option items that are selected.                                                                    |
 | `--formidable-color-field-option-background-highlighted`    | Background color for option items that are highlighted.                                                                 |
 | `--formidable-color-field-option-background-hovered`        | Background color for option items that are hovered.                                                                     |
