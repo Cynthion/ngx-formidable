@@ -25,6 +25,24 @@ $formidable-length-indicator-line-height: math.div(19.2, 12); // 1.6
 
 //#endregion
 
+//#region Field Dimensions
+
+$formidable-field-before-margin-bottom: utils.spacing(8);
+
+$formidable-field-border-thickness: utils.spacing(1);
+$formidable-field-border-radius: utils.spacing(6);
+
+$formidable-field-group-border-thickness: $formidable-field-border-thickness;
+$formidable-field-group-border-radius: $formidable-field-border-radius;
+
+$formidable-label-height: $formidable-label-line-height * $formidable-label-font-size;
+$formidable-field-height: utils.spacing(60); // even number
+
+$formidable-label-floating-offset: $formidable-label-height + $formidable-field-before-margin-bottom +
+  $formidable-field-border-thickness;
+
+//#endregion
+
 //#region Colors
 
 // 100: #f2faff
@@ -70,6 +88,11 @@ $formidable-color-field-option-background-selected: rgba(0, 0, 0, 0.05);
 $formidable-color-field-option-background-highlighted: rgba(0, 0, 0, 0.075);
 $formidable-color-field-option-background-hovered: rgba(91, 127, 153, 0.25); // 500, 25%
 
+$formidable-color-field-focus-box-shadow: inset 0 0 0 $formidable-field-border-thickness
+  $formidable-color-field-border-focus;
+$formidable-color-field-group-focus-box-shadow: inset 0 0 0 $formidable-field-group-border-thickness
+  $formidable-color-field-group-border-focus;
+
 // Date Field Panel
 $formidable-color-date-field-panel-select: $formidable-color-field-label;
 $formidable-color-date-field-panel-select-hovered: $formidable-color-field-option-background-hovered;
@@ -84,7 +107,7 @@ $formidable-color-option-prefix-outer: $formidable-color-field-border;
 $formidable-color-option-prefix-outer-readonly: $formidable-color-field-text-readonly;
 $formidable-color-option-prefix-outer-disabled: $formidable-color-field-text-disabled;
 $formidable-color-option-prefix-outer-selected: $formidable-color-field-border;
-$formidable-color-option-prefix-outer-highlighted: $formidable-color-field-group-border-focus;
+$formidable-color-option-prefix-outer-highlighted: $formidable-color-field-border;
 $formidable-color-option-prefix-inner: $formidable-color-field-border;
 $formidable-color-option-prefix-inner-readonly: $formidable-color-option-prefix-outer-readonly;
 $formidable-color-option-prefix-inner-disabled: $formidable-color-option-prefix-outer-disabled;
@@ -94,24 +117,6 @@ $formidable-color-option-prefix-background: transparent;
 
 // Length Indicator
 $formidable-color-length-indicator: $formidable-color-field-placeholder;
-
-//#endregion
-
-//#region Field Dimensions
-
-$formidable-field-before-margin-bottom: utils.spacing(8);
-
-$formidable-field-border-thickness: utils.spacing(1);
-$formidable-field-border-radius: utils.spacing(6);
-
-$formidable-field-group-border-thickness: $formidable-field-border-thickness;
-$formidable-field-group-border-radius: $formidable-field-border-radius;
-
-$formidable-label-height: $formidable-label-line-height * $formidable-label-font-size;
-$formidable-field-height: utils.spacing(60); // even number
-
-$formidable-label-floating-offset: $formidable-label-height + $formidable-field-before-margin-bottom +
-  $formidable-field-border-thickness;
 
 //#endregion
 

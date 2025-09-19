@@ -25,6 +25,20 @@
 
   //#endregion
 
+  //#region Field Dimensions
+
+  --formidable-field-before-margin-bottom: #{tokens.$formidable-field-before-margin-bottom};
+
+  --formidable-field-border-thickness: #{tokens.$formidable-field-border-thickness};
+  --formidable-field-border-radius: #{tokens.$formidable-field-border-radius};
+
+  --formidable-label-height: #{tokens.$formidable-label-height};
+  --formidable-field-height: #{tokens.$formidable-field-height};
+
+  --formidable-label-floating-offset: #{tokens.$formidable-label-floating-offset};
+
+  //#endregion
+
   //#region Colors
 
   --formidable-color-validation-error: #{tokens.$formidable-color-validation-error};
@@ -60,6 +74,9 @@
   --formidable-color-field-option-background-highlighted: #{tokens.$formidable-color-field-option-background-highlighted};
   --formidable-color-field-option-background-hovered: #{tokens.$formidable-color-field-option-background-hovered};
 
+  --formidable-color-field-focus-box-shadow: #{tokens.$formidable-color-field-focus-box-shadow};
+  --formidable-color-field-group-focus-box-shadow: #{tokens.$formidable-color-field-group-focus-box-shadow};
+
   // Date Field Panel
   --formidable-color-date-field-panel-select: #{tokens.$formidable-color-date-field-panel-select};
   --formidable-color-date-field-panel-select-hovered: #{tokens.$formidable-color-date-field-panel-select-hovered};
@@ -84,20 +101,6 @@
 
   // Length Indicator
   --formidable-color-length-indicator: #{tokens.$formidable-color-length-indicator};
-
-  //#endregion
-
-  //#region Field Dimensions
-
-  --formidable-field-before-margin-bottom: #{tokens.$formidable-field-before-margin-bottom};
-
-  --formidable-field-border-thickness: #{tokens.$formidable-field-border-thickness};
-  --formidable-field-border-radius: #{tokens.$formidable-field-border-radius};
-
-  --formidable-label-height: #{tokens.$formidable-label-height};
-  --formidable-field-height: #{tokens.$formidable-field-height};
-
-  --formidable-label-floating-offset: #{tokens.$formidable-label-floating-offset};
 
   //#endregion
 

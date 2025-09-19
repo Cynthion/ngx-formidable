@@ -394,6 +394,13 @@ You can also tweak Pikaday CSS.
 | `--formidable-length-indicator-font-size`                   | Font size for the textarea length indicator.                                                                            |
 | `--formidable-length-indicator-font-weight`                 | Font weight for the textarea length indicator.                                                                          |
 | `--formidable-length-indicator-line-height`                 | Line height for the textarea length indicator.                                                                          |
+| **Field Dimensions**                                        |                                                                                                                         |
+| `--formidable-field-before-margin-bottom`                   | Vertical margin below each field container.                                                                             |
+| `--formidable-field-border-thickness`                       | Thickness of field borders.                                                                                             |
+| `--formidable-field-border-radius`                          | Border-radius for field corners.                                                                                        |
+| `--formidable-label-height`                                 | Computed height of the label text line box.                                                                             |
+| `--formidable-field-height`                                 | Default height for single-line fields.                                                                                  |
+| `--formidable-label-floating-offset`                        | Vertical offset applied when a label floats above its field.                                                            |
 | **Colors**                                                  |                                                                                                                         |
 | `--formidable-color-validation-error`                       | Text color for validation errors.                                                                                       |
 | `--formidable-color-field-text`                             | Text color for fields.                                                                                                  |
@@ -410,9 +417,9 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-field-border-readonly`                  | Overrides `--formidable-color-field-border` when field is readonly.                                                     |
 | `--formidable-color-field-border-disabled`                  | Overrides `--formidable-color-field-border` when field is disabled.                                                     |
 | `--formidable-color-field-group-border`                     | Border color for field groups.                                                                                          |
-| `--formidable-color-field-group-border-readonly`            | Border color for field groups that are focused.                                                                         |
-| `--formidable-color-field-group-border-disabled`            | Overrides `--formidable-color-field-group-border` when field is readonly.                                               |
-| `--formidable-color-field-group-border-focus`               | Overrides `--formidable-color-field-group-border` when field is disabled.                                               |
+| `--formidable-color-field-group-border-focus`               | Border color for field groups that are focused.                                                                         |
+| `--formidable-color-field-group-border-readonly`            | Overrides `--formidable-color-field-group-border` when field is readonly.                                               |
+| `--formidable-color-field-group-border-disabled`            | Overrides `--formidable-color-field-group-border` when field is disabled.                                               |
 | `--formidable-color-field-background`                       | Background color for fields.                                                                                            |
 | `--formidable-color-field-group-background`                 | Background color for field groups.                                                                                      |
 | `--formidable-color-field-background-readonly`              | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when field is readonly. |
@@ -422,6 +429,8 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-field-option-background-selected`       | Background color for option items that are selected.                                                                    |
 | `--formidable-color-field-option-background-highlighted`    | Background color for option items that are highlighted.                                                                 |
 | `--formidable-color-field-option-background-hovered`        | Background color for option items that are hovered.                                                                     |
+| `--formidable-color-field-focus-box-shadow`                 | Box shadow for fields that are focused.                                                                                 |
+| `--formidable-color-field-group-focus-box-shadow`           | Box shadow for field groups that are focused.                                                                           |
 | **Date-Field Panel**                                        |                                                                                                                         |
 | `--formidable-color-date-field-panel-select`                | Text color for “Today” / selected date toggle in calendar.                                                              |
 | `--formidable-color-date-field-panel-select-hovered`        | Hover color for the “Today” toggle.                                                                                     |
@@ -444,13 +453,6 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-option-prefix-background`               | Background color behind option prefix elements.                                                                         |
 | **Length Indicator**                                        |                                                                                                                         |
 | `--formidable-color-length-indicator`                       | Text color for the textarea length indicator.                                                                           |
-| **Field Dimensions**                                        |                                                                                                                         |
-| `--formidable-field-before-margin-bottom`                   | Vertical margin below each field container.                                                                             |
-| `--formidable-field-border-thickness`                       | Thickness of field borders.                                                                                             |
-| `--formidable-field-border-radius`                          | Border-radius for field corners.                                                                                        |
-| `--formidable-label-height`                                 | Computed height of the label text line box.                                                                             |
-| `--formidable-field-height`                                 | Default height for single-line fields.                                                                                  |
-| `--formidable-label-floating-offset`                        | Vertical offset applied when a label floats above its field.                                                            |
 | **Textarea**                                                |                                                                                                                         |
 | `--formidable-textarea-min-height`                          | Minimum height for textareas.                                                                                           |
 | `--formidable-textarea-max-height`                          | Maximum height for textareas.                                                                                           |
