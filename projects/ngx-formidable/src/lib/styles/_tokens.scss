@@ -84,13 +84,12 @@ $formidable-color-field-background-disabled: $formidable-color-field-background-
 
 $formidable-color-field-option-text-readonly: $formidable-color-field-text-readonly;
 $formidable-color-field-option-text-disabled: $formidable-color-field-text-disabled;
-$formidable-color-field-option-background-selected: rgba(0, 0, 0, 0.05);
-$formidable-color-field-option-background-highlighted: rgba(0, 0, 0, 0.075);
+$formidable-color-field-option-background-selected: rgba(0, 0, 0, 0.025);
+$formidable-color-field-option-background-highlighted: rgba(0, 0, 0, 0.05);
 $formidable-color-field-option-background-hovered: rgba(91, 127, 153, 0.25); // 500, 25%
 
-$formidable-color-field-focus-box-shadow: inset 0 0 0 $formidable-field-border-thickness
-  $formidable-color-field-border-focus;
-$formidable-color-field-group-focus-box-shadow: inset 0 0 0 $formidable-field-group-border-thickness
+$formidable-color-field-focus-box-shadow: 0 0 0 $formidable-field-border-thickness $formidable-color-field-border-focus;
+$formidable-color-field-group-focus-box-shadow: 0 0 0 $formidable-field-group-border-thickness
   $formidable-color-field-group-border-focus;
 
 // Date Field Panel

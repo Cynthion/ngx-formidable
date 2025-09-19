@@ -511,7 +511,7 @@
   padding: utils.spacing(8) utils.spacing(16);
 
   :host-context(.field:focus) & {
-    &:not(.is-readonly):not(.is-disabled) {
+    &:not(.is-readonly):not(.is-disabled):not(:hover) {
       &.is-selected {
         @include field-option-selected;
       }
