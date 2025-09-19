@@ -510,18 +510,21 @@
   cursor: pointer;
   padding: utils.spacing(8) utils.spacing(16);
 
-  &:not(.is-readonly):not(.is-disabled) {
-    &.is-selected {
-      @include field-option-selected;
-    }
-    &.is-highlighted {
-      @include field-option-highlighted;
+  :host-context(.field:focus) & {
+    &:not(.is-readonly):not(.is-disabled) {
+      &.is-selected {
+        @include field-option-selected;
+      }
+      &.is-highlighted {
+        @include field-option-highlighted;
+      }
     }
   }
 
   &.is-readonly {
     @include field-option-readonly;
   }
+
   &.is-disabled {
     @include field-option-disabled;
   }
