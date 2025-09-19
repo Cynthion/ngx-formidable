@@ -1,5 +1,9 @@
 <div
   ngClass="field-option-{{ layout }}"
+  [class.is-readonly]="readonly"
+  [class.is-disabled]="disabled"
+  [class.is-selected]="selected"
+  [class.is-highlighted]="highlighted"
   (click)="onClick()">
   <!-- Option Prefix for Radio Group -->
   <span

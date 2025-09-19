@@ -4,7 +4,6 @@ import {
   Component,
   ElementRef,
   forwardRef,
-  HostBinding,
   Inject,
   Input,
   OnInit,
@@ -57,19 +56,15 @@ export class FieldOptionComponent implements IFormidableFieldOption, OnInit {
   @Input({ required: true }) value!: string;
   @Input() label?: string;
 
-  @HostBinding('class.readonly')
   @Input()
   readonly = false;
 
-  @HostBinding('class.disabled')
   @Input()
   disabled = false;
 
-  @HostBinding('class.selected')
   @Input()
   selected = false;
 
-  @HostBinding('class.highlighted')
   @Input()
   highlighted = false;
 

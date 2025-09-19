@@ -2,22 +2,6 @@
 
 :host {
   display: block;
-
-  &:not(.readonly):not(.disabled) {
-    &.selected {
-      @include field-option-selected;
-    }
-    &.highlighted {
-      @include field-option-highlighted;
-    }
-  }
-
-  &.readonly {
-    @include field-option-readonly;
-  }
-  &.disabled {
-    @include field-option-disabled;
-  }
 }
 
 .field-option-inline {
