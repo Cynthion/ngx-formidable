@@ -506,20 +506,20 @@
   );
 }
 
-@mixin field-option-inline {
-  cursor: pointer;
-  padding: utils.spacing(8) utils.spacing(16);
-
-  :host-context(.field:focus) & {
-    &:not(.is-readonly):not(.is-disabled):not(:hover) {
-      &.is-selected {
-        @include field-option-selected;
-      }
-      &.is-highlighted {
-        @include field-option-highlighted;
-      }
+@mixin field-option-selected-highlighted-logic {
+  &:not(.is-readonly):not(.is-disabled):not(:hover) {
+    &.is-selected {
+      @include field-option-selected;
+    }
+    &.is-highlighted {
+      @include field-option-highlighted;
     }
   }
+}
+
+@mixin field-option {
+  cursor: pointer;
+  padding: utils.spacing(8) utils.spacing(16);
 
   &.is-readonly {
     @include field-option-readonly;
@@ -537,8 +537,18 @@
   }
 }
 
+@mixin field-option-inline {
+  @include field-option;
+  @include field-option-selected-highlighted-logic;
+}
+
 @mixin field-option-radio-group {
-  @include field-option-inline;
+  @include field-option;
+
+  :host-context(.field:focus) & {
+    // only apply when the parent field is focused
+    @include field-option-selected-highlighted-logic;
+  }
 
   display: flex;
   align-items: center;

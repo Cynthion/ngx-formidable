@@ -17,7 +17,7 @@
       [attr.readonly]="readonly ? '' : null"
       [attr.disabled]="disabled ? '' : null"
       [attr.tabindex]="readonly || disabled ? -1 : null"
-      (input)="onValueChange()"
+      (input)="onInput($event)"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
   </div>

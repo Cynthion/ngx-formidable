@@ -43,18 +43,16 @@
     #{tokens.$formidable-field-group-border-radius}
   );
 
-  --formidable-label-height: var(
-    calc(var(--formidable-label-height) * var(--formidable-label-font-size)),
-    #{tokens.$formidable-label-height}
+  --formidable-label-height: calc(
+    var(--formidable-label-line-height, #{tokens.$formidable-label-line-height}) *
+      var(--formidable-label-font-size, #{tokens.$formidable-label-font-size})
   );
   --formidable-field-height: #{tokens.$formidable-field-height};
 
-  --formidable-label-floating-offset: var(
-    calc(
-      var(--formidable-label-height) + var(--formidable-field-before-margin-bottom) +
-        var(--formidable-field-border-thickness)
-    ),
-    #{tokens.$formidable-label-floating-offset}
+  --formidable-label-floating-offset: calc(
+    var(--formidable-label-height, #{tokens.$formidable-label-height}) +
+      var(--formidable-field-before-margin-bottom, #{tokens.$formidable-field-before-margin-bottom}) +
+      var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
   );
 
   //#endregion
@@ -65,13 +63,15 @@
 
   --formidable-color-field-text: #{tokens.$formidable-color-field-text};
   --formidable-color-field-group-text: var(--formidable-color-field-text, #{tokens.$formidable-color-field-group-text});
-  --formidable-color-field-text-readonly: var(
-    rgba(var(--formidable-color-field-text), 75%),
-    #{tokens.$formidable-color-field-text-readonly}
+  --formidable-color-field-text-readonly: color-mix(
+    in srgb,
+    var(--formidable-color-field-text, #{tokens.$formidable-color-field-text}) 75%,
+    transparent
   );
-  --formidable-color-field-text-disabled: var(
-    rgba(var(--formidable-color-field-text), 50%),
-    #{tokens.$formidable-color-field-text-disabled}
+  --formidable-color-field-text-disabled: color-mix(
+    in srgb,
+    var(--formidable-color-field-text, #{tokens.$formidable-color-field-text}) 50%,
+    transparent
   );
 
   --formidable-color-field-label: var(--formidable-color-field-text, #{tokens.$formidable-color-field-label});
@@ -109,9 +109,10 @@
     --formidable-color-field-background,
     #{tokens.$formidable-color-field-group-background}
   );
-  --formidable-color-field-background-readonly: var(
-    rgba(var(--formidable-color-field-background), 50%),
-    #{tokens.$formidable-color-field-background-readonly}
+  --formidable-color-field-background-readonly: color-mix(
+    in srgb,
+    var(--formidable-color-field-background, #{tokens.$formidable-color-field-background}) 75%,
+    transparent
   );
   --formidable-color-field-background-disabled: var(
     --formidable-color-field-background-readonly,
@@ -128,19 +129,19 @@
   );
   --formidable-color-field-option-background-selected: #{tokens.$formidable-color-field-option-background-selected};
   --formidable-color-field-option-background-highlighted: #{tokens.$formidable-color-field-option-background-highlighted};
-  --formidable-color-field-option-background-hovered: var(
-    rgba(var(--formidable-color-field-placeholder), 25%),
-    #{tokens.$formidable-color-field-option-background-hovered}
+  --formidable-color-field-option-background-hovered: color-mix(
+    in srgb,
+    var(--formidable-color-field-placeholder, #{tokens.$formidable-color-field-placeholder}) 25%,
+    transparent
   );
 
-  --formidable-color-field-focus-box-shadow: var(
-    0 0 0 var(--formidable-field-border-thickness) var(--formidable-color-field-border-focus),
-    #{tokens.$formidable-color-field-focus-box-shadow}
-  );
-  --formidable-color-field-group-focus-box-shadow: var(
-    0 0 0 var(--formidable-field-group-border-thickness) var(--formidable-color-field-group-border-focus),
-    #{tokens.$formidable-color-field-group-focus-box-shadow}
-  );
+  --formidable-color-field-focus-box-shadow: 0 0 0
+    var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
+    var(--formidable-color-field-border-focus, #{tokens.$formidable-color-field-border-focus});
+
+  --formidable-color-field-group-focus-box-shadow: 0 0 0
+    var(--formidable-field-group-border-thickness, #{tokens.$formidable-field-group-border-thickness})
+    var(--formidable-color-field-group-border-focus, #{tokens.$formidable-color-field-group-border-focus});
 
   // Date Field Panel
   --formidable-color-date-field-panel-select: var(
@@ -156,7 +157,7 @@
     #{tokens.$formidable-color-date-field-panel-date-highlighted-text}
   );
   --formidable-color-date-field-panel-date-highlighted: var(
-    --formidable-color-field-option-background-hightlighted,
+    --formidable-color-field-option-background-highlighted,
     #{tokens.$formidable-color-date-field-panel-date-highlighted}
   );
   --formidable-color-date-field-panel-date-hovered: var(

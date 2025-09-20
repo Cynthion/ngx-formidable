@@ -101,7 +101,7 @@ export class AutocompleteFieldComponent
   protected windowResizeScrollCallback = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
-  protected filterChangeSubject$ = new BehaviorSubject<string>(this.value || '');
+  protected filterChangeSubject$ = new BehaviorSubject<string>('');
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
@@ -125,13 +125,17 @@ export class AutocompleteFieldComponent
     this.destroy$.complete();
   }
 
-  protected doOnValueChange(): void {
-    const value = this.inputRef.nativeElement.value;
+  protected onInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value ?? '';
 
     this.filterChangeSubject$.next(value);
     this.filterChanged.emit(value);
 
     this.isFieldFilled = value.length > 0;
+  }
+
+  protected doOnValueChange(): void {
+    // No additional actions needed
   }
 
   protected doOnFocusChange(_isFocused: boolean): void {
