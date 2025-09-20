@@ -1,5 +1,7 @@
 @use './tokens';
 
+// This file defines the exposed CSS variables (run-time), which keep track of relationships/calculations between each other.
+
 :root {
   //#region Font Sizes & Line Heights
 
@@ -32,10 +34,28 @@
   --formidable-field-border-thickness: #{tokens.$formidable-field-border-thickness};
   --formidable-field-border-radius: #{tokens.$formidable-field-border-radius};
 
-  --formidable-label-height: #{tokens.$formidable-label-height};
+  --formidable-field-group-border-thickness: var(
+    --formidable-field-border-thickness,
+    #{tokens.$formidable-field-group-border-thickness}
+  );
+  --formidable-field-group-border-radius: var(
+    --formidable-field-border-radius,
+    #{tokens.$formidable-field-group-border-radius}
+  );
+
+  --formidable-label-height: var(
+    calc(var(--formidable-label-height) * var(--formidable-label-font-size)),
+    #{tokens.$formidable-label-height}
+  );
   --formidable-field-height: #{tokens.$formidable-field-height};
 
-  --formidable-label-floating-offset: #{tokens.$formidable-label-floating-offset};
+  --formidable-label-floating-offset: var(
+    calc(
+      var(--formidable-label-height) + var(--formidable-field-before-margin-bottom) +
+        var(--formidable-field-border-thickness)
+    ),
+    #{tokens.$formidable-label-floating-offset}
+  );
 
   //#endregion
 
@@ -44,63 +64,159 @@
   --formidable-color-validation-error: #{tokens.$formidable-color-validation-error};
 
   --formidable-color-field-text: #{tokens.$formidable-color-field-text};
-  --formidable-color-field-group-text: #{tokens.$formidable-color-field-group-text};
-  --formidable-color-field-text-readonly: #{tokens.$formidable-color-field-text-readonly};
-  --formidable-color-field-text-disabled: #{tokens.$formidable-color-field-text-disabled};
+  --formidable-color-field-group-text: var(--formidable-color-field-text, #{tokens.$formidable-color-field-group-text});
+  --formidable-color-field-text-readonly: var(
+    rgba(var(--formidable-color-field-text), 75%),
+    #{tokens.$formidable-color-field-text-readonly}
+  );
+  --formidable-color-field-text-disabled: var(
+    rgba(var(--formidable-color-field-text), 50%),
+    #{tokens.$formidable-color-field-text-disabled}
+  );
 
-  --formidable-color-field-label: #{tokens.$formidable-color-field-label};
+  --formidable-color-field-label: var(--formidable-color-field-text, #{tokens.$formidable-color-field-label});
   --formidable-color-field-label-floating: #{tokens.$formidable-color-field-label-floating};
-  --formidable-color-field-tooltip: #{tokens.$formidable-color-field-tooltip};
+  --formidable-color-field-tooltip: var(--formidable-color-field-text, #{tokens.$formidable-color-field-tooltip});
   --formidable-color-field-placeholder: #{tokens.$formidable-color-field-placeholder};
   --formidable-color-field-selection: #{tokens.$formidable-color-field-selection};
 
-  --formidable-color-field-border: #{tokens.$formidable-color-field-border};
+  --formidable-color-field-border: var(--formidable-color-field-text, #{tokens.$formidable-color-field-border});
   --formidable-color-field-border-focus: #{tokens.$formidable-color-field-border-focus};
   --formidable-color-field-border-readonly: #{tokens.$formidable-color-field-border-readonly};
-  --formidable-color-field-border-disabled: #{tokens.$formidable-color-field-border-disabled};
-  --formidable-color-field-group-border: #{tokens.$formidable-color-field-group-border};
-  --formidable-color-field-group-border-focus: #{tokens.$formidable-color-field-group-border-focus};
-  --formidable-color-field-group-border-readonly: #{tokens.$formidable-color-field-group-border-readonly};
-  --formidable-color-field-group-border-disabled: #{tokens.$formidable-color-field-group-border-disabled};
+  --formidable-color-field-border-disabled: var(
+    --formidable-color-field-text-disabled,
+    #{tokens.$formidable-color-field-border-disabled}
+  );
+  --formidable-color-field-group-border: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-field-group-border}
+  );
+  --formidable-color-field-group-border-focus: var(
+    --formidable-color-field-border-focus,
+    #{tokens.$formidable-color-field-group-border-focus}
+  );
+  --formidable-color-field-group-border-readonly: var(
+    --formidable-color-field-border-readonly,
+    #{tokens.$formidable-color-field-group-border-readonly}
+  );
+  --formidable-color-field-group-border-disabled: var(
+    --formidable-color-field-border-disabled,
+    #{tokens.$formidable-color-field-group-border-disabled}
+  );
 
   --formidable-color-field-background: #{tokens.$formidable-color-field-background};
-  --formidable-color-field-group-background: #{tokens.$formidable-color-field-group-background};
-  --formidable-color-field-background-readonly: #{tokens.$formidable-color-field-background-readonly};
-  --formidable-color-field-background-disabled: #{tokens.$formidable-color-field-background-disabled};
+  --formidable-color-field-group-background: var(
+    --formidable-color-field-background,
+    #{tokens.$formidable-color-field-group-background}
+  );
+  --formidable-color-field-background-readonly: var(
+    rgba(var(--formidable-color-field-background), 50%),
+    #{tokens.$formidable-color-field-background-readonly}
+  );
+  --formidable-color-field-background-disabled: var(
+    --formidable-color-field-background-readonly,
+    #{tokens.$formidable-color-field-background-disabled}
+  );
 
-  --formidable-color-field-option-text-readonly: #{tokens.$formidable-color-field-option-text-readonly};
-  --formidable-color-field-option-text-disabled: #{tokens.$formidable-color-field-option-text-disabled};
+  --formidable-color-field-option-text-readonly: var(
+    --formidable-color-field-text-readonly,
+    #{tokens.$formidable-color-field-option-text-readonly}
+  );
+  --formidable-color-field-option-text-disabled: var(
+    --formidable-color-field-text-disabled,
+    #{tokens.$formidable-color-field-option-text-disabled}
+  );
   --formidable-color-field-option-background-selected: #{tokens.$formidable-color-field-option-background-selected};
   --formidable-color-field-option-background-highlighted: #{tokens.$formidable-color-field-option-background-highlighted};
-  --formidable-color-field-option-background-hovered: #{tokens.$formidable-color-field-option-background-hovered};
+  --formidable-color-field-option-background-hovered: var(
+    rgba(var(--formidable-color-field-placeholder), 25%),
+    #{tokens.$formidable-color-field-option-background-hovered}
+  );
 
-  --formidable-color-field-focus-box-shadow: #{tokens.$formidable-color-field-focus-box-shadow};
-  --formidable-color-field-group-focus-box-shadow: #{tokens.$formidable-color-field-group-focus-box-shadow};
+  --formidable-color-field-focus-box-shadow: var(
+    0 0 0 var(--formidable-field-border-thickness) var(--formidable-color-field-border-focus),
+    #{tokens.$formidable-color-field-focus-box-shadow}
+  );
+  --formidable-color-field-group-focus-box-shadow: var(
+    0 0 0 var(--formidable-field-group-border-thickness) var(--formidable-color-field-group-border-focus),
+    #{tokens.$formidable-color-field-group-focus-box-shadow}
+  );
 
   // Date Field Panel
-  --formidable-color-date-field-panel-select: #{tokens.$formidable-color-date-field-panel-select};
-  --formidable-color-date-field-panel-select-hovered: #{tokens.$formidable-color-date-field-panel-select-hovered};
-  --formidable-color-date-field-panel-date-highlighted-text: #{tokens.$formidable-color-date-field-panel-date-highlighted-text};
-  --formidable-color-date-field-panel-date-highlighted: #{tokens.$formidable-color-date-field-panel-date-highlighted};
-  --formidable-color-date-field-panel-date-hovered: #{tokens.$formidable-color-date-field-panel-date-hovered};
+  --formidable-color-date-field-panel-select: var(
+    --formidable-color-field-label,
+    #{tokens.$formidable-color-date-field-panel-select}
+  );
+  --formidable-color-date-field-panel-select-hovered: var(
+    --formidable-color-field-option-background-hovered,
+    #{tokens.$formidable-color-date-field-panel-select-hovered}
+  );
+  --formidable-color-date-field-panel-date-highlighted-text: var(
+    --formidable-color-field-text,
+    #{tokens.$formidable-color-date-field-panel-date-highlighted-text}
+  );
+  --formidable-color-date-field-panel-date-highlighted: var(
+    --formidable-color-field-option-background-hightlighted,
+    #{tokens.$formidable-color-date-field-panel-date-highlighted}
+  );
+  --formidable-color-date-field-panel-date-hovered: var(
+    --formidable-color-field-background-disabled,
+    #{tokens.$formidable-color-date-field-panel-date-hovered}
+  );
   --formidable-color-date-field-panel-date-out-of-range: #{tokens.$formidable-color-date-field-panel-date-out-of-range};
-  --formidable-color-date-field-panel-day-label: #{tokens.$formidable-color-date-field-panel-day-label};
+  --formidable-color-date-field-panel-day-label: var(
+    --formidable-color-field-label-floating,
+    #{tokens.$formidable-color-date-field-panel-day-label}
+  );
 
   // Option Prefix
-  --formidable-color-option-prefix-outer: #{tokens.$formidable-color-option-prefix-outer};
-  --formidable-color-option-prefix-outer-readonly: #{tokens.$formidable-color-option-prefix-outer-readonly};
-  --formidable-color-option-prefix-outer-disabled: #{tokens.$formidable-color-option-prefix-outer-disabled};
-  --formidable-color-option-prefix-outer-selected: #{tokens.$formidable-color-option-prefix-outer-selected};
-  --formidable-color-option-prefix-outer-highlighted: #{tokens.$formidable-color-option-prefix-outer-highlighted};
-  --formidable-color-option-prefix-inner: #{tokens.$formidable-color-option-prefix-inner};
-  --formidable-color-option-prefix-inner-readonly: #{tokens.$formidable-color-option-prefix-inner-readonly};
-  --formidable-color-option-prefix-inner-disabled: #{tokens.$formidable-color-option-prefix-inner-disabled};
-  --formidable-color-option-prefix-inner-selected: #{tokens.$formidable-color-option-prefix-inner-selected};
-  --formidable-color-option-prefix-inner-highlighted: #{tokens.$formidable-color-option-prefix-inner-highlighted};
+  --formidable-color-option-prefix-outer: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-option-prefix-outer}
+  );
+  --formidable-color-option-prefix-outer-readonly: var(
+    --formidable-color-field-text-readonly,
+    #{tokens.$formidable-color-option-prefix-outer-readonly}
+  );
+  --formidable-color-option-prefix-outer-disabled: var(
+    --formidable-color-field-text-disabled,
+    #{tokens.$formidable-color-option-prefix-outer-disabled}
+  );
+  --formidable-color-option-prefix-outer-selected: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-option-prefix-outer-selected}
+  );
+  --formidable-color-option-prefix-outer-highlighted: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-option-prefix-outer-highlighted}
+  );
+  --formidable-color-option-prefix-inner: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-option-prefix-inner}
+  );
+  --formidable-color-option-prefix-inner-readonly: var(
+    --formidable-color-option-prefix-outer-readonly,
+    #{tokens.$formidable-color-option-prefix-inner-readonly}
+  );
+  --formidable-color-option-prefix-inner-disabled: var(
+    --formidable-color-option-prefix-outer-disabled,
+    #{tokens.$formidable-color-option-prefix-inner-disabled}
+  );
+  --formidable-color-option-prefix-inner-selected: var(
+    --formidable-color-option-prefix-outer-selected,
+    #{tokens.$formidable-color-option-prefix-inner-selected}
+  );
+  --formidable-color-option-prefix-inner-highlighted: var(
+    --formidable-color-option-prefix-outer-highlighted,
+    #{tokens.$formidable-color-option-prefix-inner-highlighted}
+  );
   --formidable-color-option-prefix-background: #{tokens.$formidable-color-option-prefix-background};
 
   // Length Indicator
-  --formidable-color-length-indicator: #{tokens.$formidable-color-length-indicator};
+  --formidable-color-length-indicator: var(
+    --formidable-color-field-placeholder,
+    #{tokens.$formidable-color-length-indicator}
+  );
 
   //#endregion
 
@@ -114,7 +230,7 @@
 
   //#region Panels
 
-  --formidable-panel-background: #{tokens.$formidable-panel-background};
+  --formidable-panel-background: var(--formidable-color-field-background, #{tokens.$formidable-panel-background});
   --formidable-panel-box-shadow: #{tokens.$formidable-panel-box-shadow};
   --formidable-panel-max-height: #{tokens.$formidable-panel-max-height};
 
@@ -141,8 +257,14 @@
   //#region Date Field Panel
 
   --formidable-date-field-panel-width: #{tokens.$formidable-date-field-panel-width};
-  --formidable-date-field-panel-border-radius: #{tokens.$formidable-date-field-panel-border-radius};
-  --formidable-date-field-panel-box-shadow: #{tokens.$formidable-date-field-panel-box-shadow};
+  --formidable-date-field-panel-border-radius: var(
+    --formidable-field-border-radius,
+    #{tokens.$formidable-date-field-panel-border-radius}
+  );
+  --formidable-date-field-panel-box-shadow: var(
+    --formidable-panel-box-shadow,
+    #{tokens.$formidable-date-field-panel-box-shadow}
+  );
 
   //#endregion
 

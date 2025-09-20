@@ -398,6 +398,8 @@ You can also tweak Pikaday CSS.
 | `--formidable-field-before-margin-bottom`                   | Vertical margin below each field container.                                                                             |
 | `--formidable-field-border-thickness`                       | Thickness of field borders.                                                                                             |
 | `--formidable-field-border-radius`                          | Border-radius for field corners.                                                                                        |
+| `--formidable-field-group-border-thickness`                 | Thickness of field group borders.                                                                                       |
+| `--formidable-field-group-border-radius`                    | Border-radius for field group corners.                                                                                  |
 | `--formidable-label-height`                                 | Computed height of the label text line box.                                                                             |
 | `--formidable-field-height`                                 | Default height for single-line fields.                                                                                  |
 | `--formidable-label-floating-offset`                        | Vertical offset applied when a label floats above its field.                                                            |

@@ -1,6 +1,8 @@
 @use 'sass:math';
 @use 'mixins/utils' as utils;
 
+// This file defines the primitive SASS variables (compile-time).
+
 //#region Font Sizes & Line Heights
 
 $formidable-field-font-size: utils.spacing(16);
@@ -59,8 +61,8 @@ $formidable-color-validation-error: #dc5858;
 
 $formidable-color-field-text: #00345a; // 900
 $formidable-color-field-group-text: $formidable-color-field-text; // 900
-$formidable-color-field-text-readonly: rgb(0 52 90 / 75%); // 900, 75%
-$formidable-color-field-text-disabled: rgb(0 52 90 / 50%); // 900, 50%
+$formidable-color-field-text-readonly: rgba($formidable-color-field-text, 75%);
+$formidable-color-field-text-disabled: rgba($formidable-color-field-text, 50%);
 
 $formidable-color-field-label: $formidable-color-field-text; // 900
 $formidable-color-field-label-floating: #255476; // 700
@@ -79,14 +81,14 @@ $formidable-color-field-group-border-disabled: $formidable-color-field-border-di
 
 $formidable-color-field-background: #f2faff; // 100
 $formidable-color-field-group-background: $formidable-color-field-background;
-$formidable-color-field-background-readonly: rgb(242 250 255 / 50%); // 100, 50%
+$formidable-color-field-background-readonly: rgba($formidable-color-field-background, 50%);
 $formidable-color-field-background-disabled: $formidable-color-field-background-readonly;
 
 $formidable-color-field-option-text-readonly: $formidable-color-field-text-readonly;
 $formidable-color-field-option-text-disabled: $formidable-color-field-text-disabled;
 $formidable-color-field-option-background-selected: rgba(0, 0, 0, 0.025);
 $formidable-color-field-option-background-highlighted: rgba(0, 0, 0, 0.05);
-$formidable-color-field-option-background-hovered: rgba(91, 127, 153, 0.25); // 500, 25%
+$formidable-color-field-option-background-hovered: rgba($formidable-color-field-placeholder, 25%);
 
 $formidable-color-field-focus-box-shadow: 0 0 0 $formidable-field-border-thickness $formidable-color-field-border-focus;
 $formidable-color-field-group-focus-box-shadow: 0 0 0 $formidable-field-group-border-thickness
@@ -99,7 +101,7 @@ $formidable-color-date-field-panel-date-highlighted-text: $formidable-color-fiel
 $formidable-color-date-field-panel-date-highlighted: $formidable-color-field-option-background-highlighted;
 $formidable-color-date-field-panel-date-hovered: $formidable-color-field-option-background-hovered;
 $formidable-color-date-field-panel-date-out-of-range: $formidable-color-field-background-disabled;
-$formidable-color-date-field-panel-day-label: #255476;
+$formidable-color-date-field-panel-day-label: $formidable-color-field-label-floating;
 
 // Option Prefix
 $formidable-color-option-prefix-outer: $formidable-color-field-border;
