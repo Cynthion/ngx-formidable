@@ -163,7 +163,10 @@
     --formidable-color-field-background-disabled,
     #{tokens.$formidable-color-date-field-panel-date-hovered}
   );
-  --formidable-color-date-field-panel-date-out-of-range: #{tokens.$formidable-color-date-field-panel-date-out-of-range};
+  --formidable-color-date-field-panel-date-out-of-range: var(
+    --formidable-color-field-option-text-disabled,
+    #{tokens.$formidable-color-date-field-panel-date-out-of-range}
+  );
   --formidable-color-date-field-panel-day-label: var(
     --formidable-color-field-label-floating,
     #{tokens.$formidable-color-date-field-panel-day-label}
