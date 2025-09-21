@@ -353,11 +353,24 @@ export class AutocompleteFieldComponent
         this.deselectOption();
         this.updateFilteredOptions();
 
+        this.tryAutoSelectExactValue();
+
         if (!this.isPanelOpen) {
           this.togglePanel(true);
         } else {
           this.updatePanelPosition();
         }
       });
+  }
+
+  private tryAutoSelectExactValue() {
+    const typed = this.inputRef.nativeElement.value;
+    if (!typed) return;
+
+    const options = this.combineAllOptions();
+    const match = options.find((o) => !o.disabled && o.label === typed);
+    if (!match) return;
+
+    this.selectOption(match);
   }
 }

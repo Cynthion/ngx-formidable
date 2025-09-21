@@ -22,6 +22,5 @@ Improvements:
 
 # Bugs:
 
-- autocomplete: when user types the exact value of an option, it should select it
 - datefield: when panel open, arrow/left/right moves caret in field
 - ios: inspect padding when prefix is missing
