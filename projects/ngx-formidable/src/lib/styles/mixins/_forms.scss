@@ -519,7 +519,6 @@
 
 @mixin field-option {
   cursor: pointer;
-  padding: utils.spacing(8) utils.spacing(16);
 
   &.is-readonly {
     @include field-option-readonly;
@@ -540,6 +539,8 @@
 @mixin field-option-inline {
   @include field-option;
   @include field-option-selected-highlighted-logic;
+
+  padding: utils.spacing(8) utils.spacing(16);
 }
 
 @mixin field-option-radio-group {
@@ -553,7 +554,7 @@
   display: flex;
   align-items: center;
 
-  padding: utils.spacing(8) utils.spacing(0);
+  padding: var(--formidable-field-group-option-padding, #{tokens.$formidable-field-group-option-padding});
 }
 
 @mixin field-option-checkbox-group {

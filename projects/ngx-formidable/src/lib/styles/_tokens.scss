@@ -43,6 +43,8 @@ $formidable-field-height: utils.spacing(60); // even number
 $formidable-label-floating-offset: $formidable-label-height + $formidable-field-before-margin-bottom +
   $formidable-field-border-thickness;
 
+$formidable-field-group-option-padding: utils.spacing(8) utils.spacing(0);
+
 //#endregion
 
 //#region Colors

@@ -55,6 +55,8 @@
       var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
   );
 
+  --formidable-field-group-option-padding: #{tokens.$formidable-field-group-option-padding};
+
   //#endregion
 
   //#region Colors
