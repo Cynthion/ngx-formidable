@@ -22,5 +22,6 @@ Improvements:
 
 # Bugs:
 
+- add --formidable-color-field-group-background-readonly and -disabled
 - datefield: when panel open, arrow/left/right moves caret in field
 - ios: inspect padding when prefix is missing

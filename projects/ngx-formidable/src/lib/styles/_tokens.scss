@@ -62,11 +62,11 @@ $formidable-field-group-option-padding: utils.spacing(8) utils.spacing(0);
 $formidable-color-validation-error: #dc5858;
 
 $formidable-color-field-text: #00345a; // 900
-$formidable-color-field-group-text: $formidable-color-field-text; // 900
+$formidable-color-field-group-text: $formidable-color-field-text;
 $formidable-color-field-text-readonly: rgb($formidable-color-field-text, 75%);
 $formidable-color-field-text-disabled: rgb($formidable-color-field-text, 50%);
 
-$formidable-color-field-label: $formidable-color-field-text; // 900
+$formidable-color-field-label: $formidable-color-field-text;
 $formidable-color-field-label-floating: #255476; // 700
 $formidable-color-field-tooltip: $formidable-color-field-text;
 $formidable-color-field-placeholder: #5b7f99; // 500
