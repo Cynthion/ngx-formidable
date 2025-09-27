@@ -498,7 +498,8 @@
 }
 
 @mixin field-option-selected-highlighted-logic {
-  &:not(.is-readonly, .is-disabled, :hover) {
+  /* stylelint-disable-next-line selector-not-notation */
+  &:not(.is-readonly):not(.is-disabled):not(:hover) {
     &.is-selected {
       @include field-option-selected;
     }
