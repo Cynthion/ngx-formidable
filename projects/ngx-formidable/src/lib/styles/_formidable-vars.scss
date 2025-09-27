@@ -163,7 +163,7 @@
     #{tokens.$formidable-color-date-field-panel-date-highlighted}
   );
   --formidable-color-date-field-panel-date-hovered: var(
-    --formidable-color-field-background-disabled,
+    --formidable-color-field-option-background-hovered,
     #{tokens.$formidable-color-date-field-panel-date-hovered}
   );
   --formidable-color-date-field-panel-date-out-of-range: var(

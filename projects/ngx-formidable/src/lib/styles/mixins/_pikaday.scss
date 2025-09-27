@@ -173,6 +173,7 @@
     position: relative;
     padding-bottom: math.div(100%, 7);
 
+    // hover
     &::before {
       content: '';
       display: block;
