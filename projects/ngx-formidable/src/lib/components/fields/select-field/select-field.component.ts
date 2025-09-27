@@ -85,7 +85,7 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
     // No additional actions needed
   }
 
-  //#region ControlValueAccessor
+  // #region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
     const found = this.options$.value.find((opt) => opt.value === value);
@@ -94,9 +94,9 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
     this.selectRef.nativeElement.value = found ? found.value : '';
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   get value(): string | null {
     return this.selectRef.nativeElement.value || null;
@@ -112,15 +112,15 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
 
   decoratorLayout: FieldDecoratorLayout = 'single';
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableSelectField
+  // #region IFormidableSelectField
 
   // empty
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableOptionField
+  // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
   @Input() emptyOption: IFormidableFieldOption = EMPTY_FIELD_OPTION;
@@ -149,5 +149,5 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
     this.options$.next(combined);
   }
 
-  //#endregion
+  // #endregion
 }

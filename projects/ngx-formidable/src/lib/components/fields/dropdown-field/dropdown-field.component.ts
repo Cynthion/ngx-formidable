@@ -154,7 +154,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
     this.togglePanel(false);
   }
 
-  //#region ControlValueAccessor
+  // #region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
     this._value = value ?? '';
@@ -164,9 +164,9 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
     this.selectedOption = found ? { ...found } : undefined;
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   get value(): string | null {
     return this.selectedOption?.value || null;
@@ -183,15 +183,15 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
 
   decoratorLayout: FieldDecoratorLayout = 'single';
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableDropdownField
+  // #region IFormidableDropdownField
 
   // empty
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableOptionField
+  // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
   @Input() emptyOption: IFormidableFieldOption = EMPTY_FIELD_OPTION;
@@ -263,9 +263,9 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
     }
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidablePanelField
+  // #region IFormidablePanelField
 
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
@@ -313,7 +313,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
     setTimeout(() => updatePanelPosition(this.dropdownRef, this.panelRef));
   }
 
-  //#endregion
+  // #endregion
 
   private highlightFirstMatchingOption(term: string): void {
     if (!term || !this.isPanelOpen) return;

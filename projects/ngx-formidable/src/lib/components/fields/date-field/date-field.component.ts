@@ -289,15 +289,15 @@ export class DateFieldComponent
     this.togglePanel(false);
   }
 
-  //#region ControlValueAccessor
+  // #region ControlValueAccessor
 
   protected doWriteValue(value: Date): void {
     this.trySetDateFromInput(value);
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   get value(): Date | null {
     return this.selectedDate || null;
@@ -314,9 +314,9 @@ export class DateFieldComponent
 
   decoratorLayout: FieldDecoratorLayout = 'single';
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableDateField
+  // #region IFormidableDateField
 
   @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
   @Input() toggleIconClosed = calendarArrowDown;
@@ -351,9 +351,9 @@ export class DateFieldComponent
     setCaretPositionToEnd(this.inputRef.nativeElement);
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidablePikadayOptions
+  // #region IFormidablePikadayOptions
 
   @Input() ariaLabel?: string;
   @Input() defaultDate?: Date;
@@ -415,9 +415,9 @@ export class DateFieldComponent
     this.emptyNgxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.emptyMaskChar);
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidablePanelField
+  // #region IFormidablePanelField
 
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
@@ -479,9 +479,9 @@ export class DateFieldComponent
     setTimeout(() => updatePanelPosition(this.dateRef, this.panelRef));
   }
 
-  //#endregion
+  // #endregion
 
-  //#region Pikaday
+  // #region Pikaday
 
   /** Uses the selected Date, formats it and writes the resulting string into the field. */
   private onFormat(date: Date | null, unicodeTokenFormat: string): string {
@@ -501,7 +501,7 @@ export class DateFieldComponent
     return parsedDate;
   }
 
-  //#endregion
+  // #endregion
 
   private getDefaultDate(minDate?: Date, maxDate?: Date, initialDate: Date = new Date()): Date {
     const initialDateMs = initialDate.getTime();
@@ -558,7 +558,7 @@ export class DateFieldComponent
     });
   }
 
-  //#region Pikaday fix
+  // #region Pikaday fix
 
   /**
    * Developer Note:
@@ -617,5 +617,5 @@ export class DateFieldComponent
     this.mo?.disconnect();
   }
 
-  //#endregion
+  // #endregion
 }

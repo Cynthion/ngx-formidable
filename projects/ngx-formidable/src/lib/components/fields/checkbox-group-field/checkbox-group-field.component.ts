@@ -125,7 +125,7 @@ export class CheckboxGroupFieldComponent
     }
   }
 
-  //#region ControlValueAccessor
+  // #region ControlValueAccessor
 
   protected doWriteValue(value: string[]): void {
     this._value = value;
@@ -137,9 +137,9 @@ export class CheckboxGroupFieldComponent
     }));
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   get value(): string[] {
     return this.optionsState?.filter((opt) => opt.selected).map((opt) => opt.value) || [];
@@ -153,15 +153,15 @@ export class CheckboxGroupFieldComponent
 
   decoratorLayout: FieldDecoratorLayout = 'group';
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableCheckboxGroupField
+  // #region IFormidableCheckboxGroupField
 
   // empty
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableOptionField
+  // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
   @Input() emptyOption: IFormidableFieldOption = EMPTY_FIELD_OPTION;
@@ -215,7 +215,7 @@ export class CheckboxGroupFieldComponent
     return this.value?.includes(value);
   }
 
-  //#endregion
+  // #endregion
 
   private setHighlightedIndex(index: number): void {
     this.highlightedOptionIndex$.next(index);

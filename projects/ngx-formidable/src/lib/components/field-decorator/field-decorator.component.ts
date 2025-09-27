@@ -98,7 +98,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     this.destroy$.complete();
   }
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   valueChange$ = this.valueChangeSubject$.asObservable();
   focusChange$ = this.focusChangeSubject$.asObservable();
@@ -167,7 +167,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     }
   }
 
-  //#endregion
+  // #endregion
 
   private adjustLayout(): void {
     if (this.decoratorLayout !== 'single') return;

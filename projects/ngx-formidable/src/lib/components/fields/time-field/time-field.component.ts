@@ -136,15 +136,15 @@ export class TimeFieldComponent
     }
   }
 
-  //#region ControlValueAccessor
+  // #region ControlValueAccessor
 
   protected doWriteValue(value: Date): void {
     this.trySetTimeFromInput(value);
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   get value(): Date | null {
     return this.selectedTime || null;
@@ -161,9 +161,9 @@ export class TimeFieldComponent
 
   decoratorLayout: FieldDecoratorLayout = 'single';
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableTimeField
+  // #region IFormidableTimeField
 
   @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
 
@@ -195,9 +195,9 @@ export class TimeFieldComponent
     setCaretPositionToEnd(this.inputRef.nativeElement);
   }
 
-  //#endregion
+  // #endregion
 
-  //#region Time
+  // #region Time
 
   /** Uses the entered string, parses it and returns the resulting Date. */
   private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
@@ -210,7 +210,7 @@ export class TimeFieldComponent
     return parsedDate;
   }
 
-  //#endregion
+  // #endregion
 
   private updateMask(): void {
     this.ngxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.maskChar);

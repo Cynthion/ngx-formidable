@@ -4,7 +4,7 @@ export function isValidDateObject(value: unknown): boolean {
   return value instanceof Date && isValid(value);
 }
 
-//#region Date
+// #region Date
 
 /** Used for date normalization. Normalizes the time part to 00:00:00:00. */
 export function normalizeTimePart(date: Date): Date {
@@ -92,9 +92,9 @@ function isDateToken(token: string): token is DateToken {
   return (UNICODE_DATE_TOKENS as readonly string[]).includes(token);
 }
 
-//#endregion
+// #endregion
 
-//#region Time
+// #region Time
 
 /** Used for time normalization. Normalizes the date part to 1970-01-01. */
 export function normalizeDatePart(date: Date): Date {
@@ -172,7 +172,7 @@ function isTimeToken(token: string): token is TimeToken {
   return (UNICODE_TIME_TOKENS as readonly string[]).includes(token);
 }
 
-//#endregion
+// #endregion
 
 /**
  * - Parses a format string like "dd/MM/yyyy" or "HH:mm" into its letter-based tokens: ["dd", "MM", "yyyy", "HH", "mm"].

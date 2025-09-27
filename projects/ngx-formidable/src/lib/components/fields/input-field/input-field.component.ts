@@ -106,7 +106,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     // No additional actions needed
   }
 
-  //#region ControlValueAccessor
+  // #region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
     const newValue = value ?? '';
@@ -129,9 +129,9 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     setCaretPositionToEnd(this.inputRef.nativeElement);
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   get value(): string | null {
     const inputValue = this.inputRef.nativeElement.value;
@@ -160,17 +160,17 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
 
   decoratorLayout: FieldDecoratorLayout = 'single';
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableInputField
+  // #region IFormidableInputField
 
   @Input() autocomplete: AutoFill = 'off';
   @Input() minLength = -1;
   @Input() maxLength = -1;
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableMaskField
+  // #region IFormidableMaskField
 
   @Input() mask?: string = undefined;
   @Input() maskConfig?: Partial<NgxMaskConfig>;
@@ -227,5 +227,5 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     }
   }
 
-  //#endregion
+  // #endregion
 }

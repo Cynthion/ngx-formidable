@@ -67,7 +67,7 @@ export abstract class BaseFieldDirective<T = string | null>
   protected abstract doOnValueChange(): void;
   protected abstract doOnFocusChange(isFocused: boolean): void;
 
-  //#region ControlValueAccessor
+  // #region ControlValueAccessor
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected onChange: (value: T) => void = () => {};
@@ -94,9 +94,9 @@ export abstract class BaseFieldDirective<T = string | null>
 
   protected abstract doWriteValue(value: T): void;
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   @Input() name = '';
   @Input() placeholder = '';
@@ -150,7 +150,7 @@ export abstract class BaseFieldDirective<T = string | null>
     }
   }
 
-  //#endregion
+  // #endregion
 
   private registerGlobalListeners(): void {
     if (this.keyboardCallback || this.externalClickCallback || this.windowResizeScrollCallback) {

@@ -178,7 +178,7 @@ export class AutocompleteFieldComponent
     this.togglePanel(false);
   }
 
-  //#region ControlValueAccessor
+  // #region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
     const found = this.combineAllOptions().find((opt) => opt.value === value);
@@ -190,9 +190,9 @@ export class AutocompleteFieldComponent
     this.inputRef.nativeElement.value = found ? found.label || found.value : '';
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   get value(): string | null {
     return this.selectedOption?.value || null;
@@ -209,17 +209,17 @@ export class AutocompleteFieldComponent
 
   decoratorLayout: FieldDecoratorLayout = 'single';
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableAutocompleteField
+  // #region IFormidableAutocompleteField
 
   public filterChange$ = this.filterChangeSubject$.asObservable();
 
   @Output() filterChanged = new EventEmitter<string>();
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableOptionField
+  // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
   @Input() emptyOption: IFormidableFieldOption = EMPTY_FIELD_OPTION;
@@ -289,9 +289,9 @@ export class AutocompleteFieldComponent
     this.filteredOptions$.next(filteredOptions);
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidablePanelField
+  // #region IFormidablePanelField
 
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
@@ -327,7 +327,7 @@ export class AutocompleteFieldComponent
     setTimeout(() => updatePanelPosition(this.autocompleteRef, this.panelRef));
   }
 
-  //#endregion
+  // #endregion
 
   private highlightSelectedOption(): void {
     const selectedIndex = this.filteredOptions$.value.findIndex((opt) => opt.value === this.selectedOption?.value);

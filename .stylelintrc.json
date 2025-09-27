@@ -1,0 +1,21 @@
+{
+  "extends": ["stylelint-config-standard-scss", "stylelint-config-prettier-scss"],
+  "rules": {
+    "declaration-block-no-redundant-longhand-properties": null,
+    "shorthand-property-no-redundant-values": null,
+    "no-descending-specificity": null,
+    "color-hex-length": "long",
+    "color-no-invalid-hex": true,
+    "color-function-notation": "modern",
+    "length-zero-no-unit": [true, { "ignore": ["custom-properties"] }],
+    "custom-property-empty-line-before": null,
+    "scss/dollar-variable-empty-line-before": null,
+    "scss/double-slash-comment-empty-line-before": [
+      "always",
+      {
+        "except": ["first-nested", "inside-block"],
+        "ignore": ["between-comments", "inside-block", "stylelint-commands"]
+      }
+    ]
+  }
+}

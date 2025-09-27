@@ -352,7 +352,7 @@ export class ExampleFormComponent {
     return highlights;
   }
 
-  //#region Control Center & Debug Output
+  // #region Control Center & Debug Output
 
   protected logs: string[] = [];
   protected theme: ThemeKey = 'default';
@@ -485,7 +485,7 @@ export class ExampleFormComponent {
     }
   };
 
-  //#endregion
+  // #endregion
 }
 
 type ControlKey =

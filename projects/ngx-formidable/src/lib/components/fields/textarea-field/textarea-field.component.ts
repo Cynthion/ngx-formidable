@@ -120,7 +120,7 @@ export class TextareaFieldComponent
     // No additional actions needed
   }
 
-  //#region ControlValueAccessor
+  // #region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
     const newValue = value ?? '';
@@ -145,9 +145,9 @@ export class TextareaFieldComponent
     setCaretPositionToEnd(el);
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   get value(): string | null {
     const el = this.textareaElement;
@@ -178,9 +178,9 @@ export class TextareaFieldComponent
 
   decoratorLayout: FieldDecoratorLayout = 'single';
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableTextareaField
+  // #region IFormidableTextareaField
 
   @Input() autocomplete: AutoFill = 'off';
   @Input() minLength = -1;
@@ -188,9 +188,9 @@ export class TextareaFieldComponent
   @Input() enableAutosize = true;
   @Input() showLengthIndicator = false;
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableMaskField
+  // #region IFormidableMaskField
 
   @Input() mask?: string = undefined;
   @Input() maskConfig?: Partial<NgxMaskConfig>;
@@ -251,7 +251,7 @@ export class TextareaFieldComponent
     return (this.mask ? this.maskedTextareaRef?.nativeElement : this.maskedTextareaRef?.nativeElement) ?? null;
   }
 
-  //#endregion
+  // #endregion
 
   private autoResize(): void {
     if (!this.enableAutosize) return;

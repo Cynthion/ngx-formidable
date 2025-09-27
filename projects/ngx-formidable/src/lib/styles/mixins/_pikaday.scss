@@ -26,10 +26,10 @@
 
 @mixin button-normalize {
   background: transparent;
+  /* stylelint-disable-next-line property-no-vendor-prefix */
   -webkit-appearance: button;
   cursor: pointer;
   border: 0;
-
   font: inherit;
   color: inherit;
   line-height: inherit;
@@ -156,9 +156,6 @@
   margin-left: auto;
 }
 
-.pika-select {
-}
-
 .pika-table {
   width: 100%;
 
@@ -235,7 +232,6 @@
 
   abbr {
     font: inherit;
-    color: inherit;
     line-height: inherit;
     text-decoration: inherit;
     color: var(--formidable-color-date-field-panel-day-label, #{tokens.$formidable-color-date-field-panel-day-label});

@@ -40,16 +40,16 @@ export class ExampleCustomColorPickerComponent extends BaseFieldDirective implem
     // No additional actions needed
   }
 
-  //#region ControlValueAccessor
+  // #region ControlValueAccessor
 
   // Called when Angular writes to the form control
   protected doWriteValue(value: string): void {
     this.inputRef.nativeElement.value = value || '#000000';
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   get value(): string | null {
     return this.inputRef.nativeElement.value || null;
@@ -66,13 +66,13 @@ export class ExampleCustomColorPickerComponent extends BaseFieldDirective implem
 
   decoratorLayout: FieldDecoratorLayout = 'single';
 
-  //#endregion
+  // #endregion
 
-  //#region Custom Input Properties
+  // #region Custom Input Properties
 
   // ...
 
-  //#endregion
+  // #endregion
 
   // Called when the native input fires
   onNativeInput(event: Event): void {

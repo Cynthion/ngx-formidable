@@ -1,6 +1,6 @@
 import { NgxMaskConfig } from 'ngx-mask';
 
-//#region Configuration
+// #region Configuration
 
 export type MaskPatterns = Record<string, { pattern: RegExp; optional?: boolean; symbol?: string }>;
 
@@ -51,9 +51,9 @@ export type MaskConfigSubset = Partial<
   >
 >;
 
-//#endregion
+// #endregion
 
-//#region MinLeght/MaxLength Validation
+// #region MinLeght/MaxLength Validation
 
 export interface MaskLengthInfo {
   min: number;
@@ -127,4 +127,4 @@ export function analyzeMaskDisplayLength(mask: string, opts?: { prefix?: string;
   };
 }
 
-//#endregion
+// #endregion

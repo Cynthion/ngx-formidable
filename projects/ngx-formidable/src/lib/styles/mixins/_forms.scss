@@ -44,7 +44,6 @@
   hyphens: none;
   appearance: none;
   box-sizing: border-box;
-
   font: inherit;
   color: inherit;
   line-height: inherit;
@@ -169,7 +168,7 @@
     user-select: none;
   }
 
-  &:not([readonly]):not([disabled]):not(.is-readonly):not(.is-disabled) {
+  &:not([readonly], [disabled], .is-readonly, .is-disabled) {
     &:focus,
     &.focused,
     &:focus-visible {
@@ -199,7 +198,7 @@
     user-select: none;
   }
 
-  &:not(.is-readonly):not(.is-disabled) {
+  &:not(.is-readonly, .is-disabled) {
     &:focus,
     &.focused,
     &:focus-visible {
@@ -289,7 +288,6 @@
   font-weight: var(--formidable-label-font-weight, #{tokens.$formidable-label-font-weight});
   line-height: var(--formidable-label-height, #{tokens.$formidable-label-height});
   height: var(--formidable-label-height, #{tokens.$formidable-label-height});
-
   color: var(--formidable-color-field-label, #{tokens.$formidable-color-field-label});
   pointer-events: none;
   margin-right: utils.spacing(8);
@@ -312,7 +310,6 @@
   font-size: var(--formidable-label-floating-font-size, #{tokens.$formidable-label-floating-font-size});
   font-weight: var(--formidable-label-floating-font-weight, #{tokens.$formidable-label-floating-font-weight});
   line-height: var(--formidable-label-floating-line-height, #{tokens.$formidable-label-floating-line-height});
-
   position: absolute;
   left: utils.spacing(16);
   margin-right: 0;
@@ -377,7 +374,6 @@
     --formidable-field-validation-error-line-height,
     #{tokens.$formidable-field-validation-error-line-height}
   );
-
   display: block;
   color: var(--formidable-color-validation-error, #{tokens.$formidable-color-validation-error});
 }
@@ -425,13 +421,10 @@
   display: flex;
   flex-direction: column;
   max-height: var(--formidable-panel-max-height, #{tokens.$formidable-panel-max-height});
-
   top: calc(100% + var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}));
-
   visibility: hidden;
   pointer-events: none;
   transform: translateY(calc(utils.spacing(4) * -1));
-
   transition: transform var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
     var(--formidable-animation-easing, #{tokens.$formidable-animation-easing});
 
@@ -453,18 +446,18 @@
 }
 
 @mixin dropdown-panel() {
-  @include panel();
+  @include panel;
 }
 
 @mixin autocomplete-panel() {
-  @include panel();
+  @include panel;
 }
 
 @mixin date-panel() {
   // overwrite panel max height
   --formidable-panel-max-height: 100vh;
 
-  @include panel();
+  @include panel;
 }
 
 @mixin field-option-readonly {
@@ -472,7 +465,6 @@
   --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-readonly);
 
   pointer-events: none;
-
   color: var(--formidable-color-field-option-text-readonly, #{tokens.$formidable-color-field-option-text-readonly});
 }
 
@@ -482,7 +474,6 @@
 
   pointer-events: none;
   user-select: none;
-
   color: var(--formidable-color-field-option-text-disabled, #{tokens.$formidable-color-field-option-text-disabled});
 }
 
@@ -507,10 +498,11 @@
 }
 
 @mixin field-option-selected-highlighted-logic {
-  &:not(.is-readonly):not(.is-disabled):not(:hover) {
+  &:not(.is-readonly, .is-disabled, :hover) {
     &.is-selected {
       @include field-option-selected;
     }
+
     &.is-highlighted {
       @include field-option-highlighted;
     }
@@ -553,7 +545,6 @@
 
   display: flex;
   align-items: center;
-
   padding: var(--formidable-field-group-option-padding, #{tokens.$formidable-field-group-option-padding});
 }
 
@@ -599,7 +590,6 @@
 @mixin date-picker-wrapper {
   display: flex;
   justify-content: center;
-
   margin: utils.spacing(16);
 }
 
@@ -631,7 +621,6 @@
 @mixin dropdown-toggle {
   cursor: pointer;
   user-select: none;
-
   width: utils.spacing(32);
   height: utils.spacing(32);
 
@@ -649,11 +638,9 @@
 @mixin length-indicator {
   position: absolute;
   bottom: utils.spacing(8);
-
   color: var(--formidable-color-length-indicator, #{tokens.$formidable-color-length-indicator});
   pointer-events: none;
   user-select: none;
-
   font-size: var(--formidable-length-indicator-font-size, #{tokens.$formidable-length-indicator-font-size});
   font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
   line-height: var(--formidable-length-indicator-line-height, #{tokens.$formidable-length-indicator-line-height});

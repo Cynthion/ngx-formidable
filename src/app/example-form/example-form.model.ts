@@ -1,7 +1,7 @@
 import { DeepPartial, DeepRequired, IFormidableFieldOption, ROOT_FORM } from 'ngx-formidable';
 import { enforce, mode, Modes, omitWhen, only, StaticSuite, staticSuite, test } from 'vest';
 
-//#region FormModel
+// #region FormModel
 
 export interface Password {
   password: string;
@@ -38,9 +38,9 @@ export interface User {
 
 export type ExampleFormModel = DeepPartial<User>;
 
-//#endregion
+// #endregion
 
-//#region FormModel Validation
+// #region FormModel Validation
 
 export type ExampleFormFrame = DeepRequired<ExampleFormModel>;
 
@@ -111,9 +111,9 @@ export const exampleFormValidationSuite: StaticSuite<
   });
 });
 
-//#endregion
+// #endregion
 
-//#region Custom Models, etc.
+// #region Custom Models, etc.
 
 export interface HighlightEntry {
   text: string;
@@ -130,4 +130,4 @@ export interface AnimalFormFieldOption extends IFormidableFieldOption {
   highlightedEntries?: HighlightedEntries;
 }
 
-//#endregion
+// #endregion

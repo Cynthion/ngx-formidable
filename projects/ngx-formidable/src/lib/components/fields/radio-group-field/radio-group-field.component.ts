@@ -125,7 +125,7 @@ export class RadioGroupFieldComponent
     }
   }
 
-  //#region ControlValueAccessor
+  // #region ControlValueAccessor
 
   protected doWriteValue(value: string): void {
     this._value = value;
@@ -134,9 +134,9 @@ export class RadioGroupFieldComponent
     this.selectedOption = found ? { ...found } : undefined;
   }
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableField
+  // #region IFormidableField
 
   get value(): string | null {
     return this.selectedOption?.value || null;
@@ -150,15 +150,15 @@ export class RadioGroupFieldComponent
 
   decoratorLayout: FieldDecoratorLayout = 'group';
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableRadioGroupField
+  // #region IFormidableRadioGroupField
 
   // empty
 
-  //#endregion
+  // #endregion
 
-  //#region IFormidableOptionField
+  // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
   @Input() emptyOption: IFormidableFieldOption = EMPTY_FIELD_OPTION;
@@ -204,7 +204,7 @@ export class RadioGroupFieldComponent
     this.writeValue(this._value);
   }
 
-  //#endregion
+  // #endregion
 
   private setHighlightedIndex(index: number): void {
     this.highlightedOptionIndex$.next(index);

@@ -3,7 +3,7 @@
 // This file defines the exposed CSS variables (run-time), which keep track of relationships/calculations between each other.
 
 :root {
-  //#region Font Sizes & Line Heights
+  // #region Font Sizes & Line Heights
 
   --formidable-field-font-size: #{tokens.$formidable-field-font-size};
   --formidable-field-font-weight: #{tokens.$formidable-field-font-weight};
@@ -25,9 +25,9 @@
   --formidable-length-indicator-font-weight: #{tokens.$formidable-length-indicator-font-weight};
   --formidable-length-indicator-line-height: #{tokens.$formidable-length-indicator-line-height};
 
-  //#endregion
+  // #endregion
 
-  //#region Field Dimensions
+  // #region Field Dimensions
 
   --formidable-field-before-margin-bottom: #{tokens.$formidable-field-before-margin-bottom};
 
@@ -57,9 +57,9 @@
 
   --formidable-field-group-option-padding: #{tokens.$formidable-field-group-option-padding};
 
-  //#endregion
+  // #endregion
 
-  //#region Colors
+  // #region Colors
 
   --formidable-color-validation-error: #{tokens.$formidable-color-validation-error};
 
@@ -224,25 +224,25 @@
     #{tokens.$formidable-color-length-indicator}
   );
 
-  //#endregion
+  // #endregion
 
-  //#region Textarea
+  // #region Textarea
 
   --formidable-textarea-min-height: #{tokens.$formidable-textarea-min-height};
   --formidable-textarea-max-height: #{tokens.$formidable-textarea-max-height};
   --formidable-textarea-padding-top: #{tokens.$formidable-textarea-padding-top};
 
-  //#endregion
+  // #endregion
 
-  //#region Panels
+  // #region Panels
 
   --formidable-panel-background: var(--formidable-color-field-background, #{tokens.$formidable-panel-background});
   --formidable-panel-box-shadow: #{tokens.$formidable-panel-box-shadow};
   --formidable-panel-max-height: #{tokens.$formidable-panel-max-height};
 
-  //#endregion
+  // #endregion
 
-  //#region Animations
+  // #region Animations
 
   --formidable-animation-duration: #{tokens.$formidable-animation-duration};
   --formidable-animation-easing: #{tokens.$formidable-animation-easing};
@@ -250,17 +250,17 @@
   --formidable-hover-duration: #{tokens.$formidable-hover-duration};
   --formidable-hover-easing: #{tokens.$formidable-hover-easing};
 
-  //#endregion
+  // #endregion
 
-  //#region Z-Index
+  // #region Z-Index
 
   --formidable-flyout-z-index: #{tokens.$formidable-flyout-z-index};
   --formidable-overlay-z-index: #{tokens.$formidable-overlay-z-index};
   --formidable-above-overlay-z-index: #{tokens.$formidable-above-overlay-z-index};
 
-  //#endregion
+  // #endregion
 
-  //#region Date Field Panel
+  // #region Date Field Panel
 
   --formidable-date-field-panel-width: #{tokens.$formidable-date-field-panel-width};
   --formidable-date-field-panel-border-radius: var(
@@ -272,12 +272,12 @@
     #{tokens.$formidable-date-field-panel-box-shadow}
   );
 
-  //#endregion
+  // #endregion
 
-  //#region Option Prefix Dimensions
+  // #region Option Prefix Dimensions
 
   --formidable-option-prefix-dimension-outer: #{tokens.$formidable-option-prefix-dimension-outer};
   --formidable-option-prefix-dimension-inner: #{tokens.$formidable-option-prefix-dimension-inner};
 
-  //#endregion
+  // #endregion
 }
