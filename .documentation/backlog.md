@@ -19,6 +19,11 @@ Improvements:
 - remove validation from the library, only provide ui components
 - rename FormDirective to NgxFormidableFormDirective. (no naming clash with Angular)
 - ARIA attributes
+- update ngx-formidable from EnerQi:
+  - add form.model.ts (NEW)
+  - form-root-valudate.directive.ts
+  - form.direvtive.ts
+  - form-validate.helpers.ts
 
 # Bugs:
 
