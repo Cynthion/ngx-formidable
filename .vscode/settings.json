@@ -61,5 +61,25 @@
   "scss.validate": false,
 
   // Draw.io
-  "hediet.vscode-drawio.theme": "min"
+  "hediet.vscode-drawio.theme": "min",
+
+  // Peacock
+  "peacock.color": "#dd0531",
+  "peacock.affectActivityBar": false,
+  "peacock.affectStatusBar": false,
+  "peacock.affectDebuggingStatusBar": true,
+  "peacock.affectTitleBar": true,
+  "peacock.affectEditorGroupBorder": false,
+  "peacock.affectPanelBorder": false,
+  "peacock.affectSideBarBorder": false,
+  "peacock.affectSashHover": false,
+  "peacock.affectStatusAndTitleBorders": false,
+  "peacock.affectTabActiveBorder": false,
+  "workbench.colorCustomizations": {
+    "commandCenter.border": "#e7e7e799",
+    "titleBar.activeBackground": "#dd0531",
+    "titleBar.activeForeground": "#e7e7e7",
+    "titleBar.inactiveBackground": "#dd053199",
+    "titleBar.inactiveForeground": "#e7e7e799"
+  }
 }
