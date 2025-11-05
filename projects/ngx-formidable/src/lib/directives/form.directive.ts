@@ -42,7 +42,7 @@ import { DeepRequired } from '../models/utility-types';
  * - `@Input() formFrame: DeepRequired<T> | null`
  *   The “frame” of your form model, used to type-check and catch typos at build time.
  *
- * - `@Input() suite: StaticSuite<string, string, (model: T, field: string) => void> | null`
+ * - `@Input() formSuite: StaticSuite<string, string, (model: T, field: string) => void> | null`
  *   A Vest `staticSuite` that defines all your field and root‐level tests.
  *
  * - `@Input() validationConfig: Record<string, string[]> | null`
@@ -77,7 +77,7 @@ import { DeepRequired } from '../models/utility-types';
  *   formidableForm
  *   [formValue]="user$ | async"
  *   [formFrame]="userFrame"
- *   [suite]="userSuite"
+ *   [formSuite]="userSuite"
  *   (formValueChange$)="onModelChange($event)"
  *   (errorsChange$)="errors = $event"
  *   (validChange$)="isValid = $event"
@@ -108,7 +108,7 @@ export class FormDirective<T extends Record<string, unknown>> implements OnDestr
   /**
    * Static vest suite that is used for form validation.
    */
-  public readonly suite = input<StaticSuite<string, string, (model: T, field: string) => void> | null>(null);
+  public readonly formSuite = input<StaticSuite<string, string, (model: T, field: string) => void> | null>(null);
 
   /**
    * Updates the validation config which is a dynamic object that is used to trigger form validation on the dependant fields.
@@ -254,7 +254,7 @@ export class FormDirective<T extends Record<string, unknown>> implements OnDestr
    * Feeds the formValueCache, debounces it until the next tick and creates an asynchronous validator which runs a validation suite.
    */
   public createAsyncValidator(fieldPath: string, validationOptions: FormValidationOptions): AsyncValidatorFn {
-    if (!this.suite()) {
+    if (!this.formSuite()) {
       return () => of(null);
     }
 
@@ -287,7 +287,7 @@ export class FormDirective<T extends Record<string, unknown>> implements OnDestr
         take(1),
         switchMap(() => {
           return new Observable((observer) => {
-            this.suite()!(mod, fieldPath).done((result) => {
+            this.formSuite()!(mod, fieldPath).done((result) => {
               const errors = result.getErrors()[fieldPath];
 
               observer.next(errors ? { error: errors[0], errors } : null);

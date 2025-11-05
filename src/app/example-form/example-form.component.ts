@@ -90,7 +90,7 @@ export class ExampleFormComponent {
     allergies: ['dust', 'lactose']
   });
   protected readonly formFrame = exampleFormFrame;
-  protected readonly suite: StaticSuite<string, string, (model: ExampleFormModel, field?: string) => void> =
+  protected readonly formSuite: StaticSuite<string, string, (model: ExampleFormModel, field?: string) => void> =
     exampleFormValidationSuite;
   protected readonly validationOptions: FormValidationOptions = { debounceValidationInMs: 0 };
 

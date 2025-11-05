@@ -243,7 +243,7 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
   formidableForm
   [formValue]="userFormModel"
   [formFrame]="userFormFrame"
-  [suite]="userFormValidationSuite"
+  [formSuite]="userFormValidationSuite"
   [validationOptions]="{ debounceValidationInMs: 200 }"
   (formValueChange$)="userFormModel = $event"
   (validChange$)="isValid = $event"
@@ -494,7 +494,7 @@ Sometimes your form needs rules that depend on more than one field — for examp
   formidableRootValidate
   [formValue]="userFormModel"
   [formFrame]="userFormFrame"
-  [suite]="userFormValidationSuite"
+  [formSuite]="userFormValidationSuite"
   ...>
   <!-- ... -->
 </form>

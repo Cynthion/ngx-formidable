@@ -31,7 +31,7 @@ import { FormValidationOptions, ROOT_FORM } from '../models/formidable.model';
  * - `@Input() formValue: T | null`
  *   The current model of your entire form.
  *
- * - `@Input() suite: StaticSuite<string, string, (model: T, field: string) => void> | null`
+ * - `@Input() formSuite: StaticSuite<string, string, (model: T, field: string) => void> | null`
  *   Your Vest `staticSuite` containing `test(ROOT_FORM, ...)` rules.
  *
  * - `@Input() validationOptions: FormValidationOptions`
@@ -43,7 +43,7 @@ import { FormValidationOptions, ROOT_FORM } from '../models/formidable.model';
  *   formidableForm
  *   formidableValidateRootForm
  *   [formValue]="user$ | async"
- *   [suite]="userSuite"
+ *   [formSuite]="userSuite"
  *   [validationOptions]="{ debounceValidationInMs: 0 }"
  *   (errorsChange$)="errors = $event"
  * >
@@ -52,7 +52,7 @@ import { FormValidationOptions, ROOT_FORM } from '../models/formidable.model';
  * ```
  */
 @Directive({
-  selector: 'form[formidableRootValidate][formValue][suite]',
+  selector: 'form[formidableRootValidate][formValue][formSuite]',
   standalone: true,
   providers: [
     {
@@ -68,7 +68,7 @@ export class FormRootValidateDirective<T> implements AsyncValidator, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   public readonly formValue = input<T | null>(null);
-  public readonly suite = input<StaticSuite<string, string, (model: T, field: string) => void> | null>(null);
+  public readonly formSuite = input<StaticSuite<string, string, (model: T, field: string) => void> | null>(null);
 
   /**
    * Whether the root form should be validated or not
@@ -95,7 +95,7 @@ export class FormRootValidateDirective<T> implements AsyncValidator, OnDestroy {
    * and creates an asynchronous validator which runs a validation suite.
    */
   public createAsyncValidator(fieldPath: string, validationOptions: FormValidationOptions): AsyncValidatorFn {
-    if (!this.suite()) {
+    if (!this.formSuite()) {
       return () => of(null);
     }
 
@@ -128,7 +128,7 @@ export class FormRootValidateDirective<T> implements AsyncValidator, OnDestroy {
         take(1),
         switchMap(() => {
           return new Observable((observer) => {
-            this.suite()!(mod, fieldPath).done((result) => {
+            this.formSuite()!(mod, fieldPath).done((result) => {
               const errors = result.getErrors()[fieldPath];
 
               observer.next(errors ? { error: errors[0], errors } : null);
@@ -142,7 +142,7 @@ export class FormRootValidateDirective<T> implements AsyncValidator, OnDestroy {
   }
 
   public validate(control: AbstractControl<unknown, unknown>): Observable<ValidationErrors | null> {
-    if (!this.suite() || !this.formValue()) {
+    if (!this.formSuite() || !this.formValue()) {
       return of(null);
     }
 
