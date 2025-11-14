@@ -280,4 +280,10 @@
   --formidable-option-prefix-dimension-inner: #{tokens.$formidable-option-prefix-dimension-inner};
 
   // #endregion
+
+  // # region Toggle Dimensions
+
+  --formidable-toggle-field-height: #{tokens.$formidable-toggle-field-height};
+
+  // # endregion
 }

@@ -275,8 +275,13 @@
 }
 
 @mixin toggle-field {
+  @include field-reset;
+  @include field-font;
+
+  height: var(--formidable-toggle-field-height, #{tokens.$formidable-toggle-field-height});
+
   // Toggle is a single inline control with label to the right
-  // display: inline-flex;
+  display: inline-flex;
   align-items: center;
   justify-content: flex-start;
   column-gap: utils.spacing(8);
@@ -412,15 +417,10 @@
 }
 
 @mixin field-suffix-single {
-  position: absolute;
-  top: calc(var(--formidable-field-height, #{formidable-field-height}) / 2);
+  @include field-prefix-single;
+
+  left: unset;
   right: 0;
-  padding-left: utils.spacing(16);
-  padding-right: utils.spacing(16);
-  color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
-  transform: translateY(-50%);
-  pointer-events: none;
-  z-index: 1; // keep on top of field
 }
 
 @mixin field-prefix-group {
