@@ -17,5 +17,5 @@
 }
 
 .panel-scrollcontainer {
-  @include panel-scrollcontainer();
+  @include panel-scrollcontainer;
 }

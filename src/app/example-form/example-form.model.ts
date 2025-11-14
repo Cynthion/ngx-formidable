@@ -32,6 +32,7 @@ export interface User {
   time?: Date;
   religion?: UserReligion;
   allergies?: string[];
+  isSingle?: boolean;
   passwords: Password;
   color: string;
 }
@@ -56,6 +57,7 @@ export const exampleFormFrame: ExampleFormFrame = {
   time: new Date(0, 0, 0, 0, 0, 0, 0),
   religion: 'hindu',
   allergies: [],
+  isSingle: false,
   passwords: {
     password: '',
     confirmPassword: ''

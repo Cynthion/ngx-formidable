@@ -87,7 +87,8 @@ export class ExampleFormComponent {
     birthdate: undefined, // new Date(1989, 5, 29),
     time: undefined, // new Date(0, 0, 0, 12, 30, 15),
     religion: 'agnostic',
-    allergies: ['dust', 'lactose']
+    allergies: ['dust', 'lactose'],
+    isSingle: undefined // true
   });
   protected readonly formFrame = exampleFormFrame;
   protected readonly formSuite: StaticSuite<string, string, (model: ExampleFormModel, field?: string) => void> =

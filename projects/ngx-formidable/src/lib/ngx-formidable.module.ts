@@ -12,6 +12,7 @@ import { RadioGroupFieldComponent } from './components/fields/radio-group-field/
 import { SelectFieldComponent } from './components/fields/select-field/select-field.component';
 import { TextareaFieldComponent } from './components/fields/textarea-field/textarea-field.component';
 import { TimeFieldComponent } from './components/fields/time-field/time-field.component';
+import { ToggleFieldComponent } from './components/fields/toggle-field/toggle-field.component';
 import { IconComponent } from './components/icon/icon.component';
 import { FieldErrorsDirective } from './directives/field-errors.directive';
 import { FieldLabelDirective } from './directives/field-label.directive';
@@ -49,6 +50,7 @@ const components = [
   RadioGroupFieldComponent,
   CheckboxGroupFieldComponent,
   TimeFieldComponent,
+  ToggleFieldComponent,
   // Utility Components
   IconComponent
 ];

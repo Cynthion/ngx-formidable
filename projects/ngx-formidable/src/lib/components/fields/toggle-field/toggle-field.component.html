@@ -1,0 +1,41 @@
+<!-- TODO preventPointerDown? -->
+<!-- TODO test internalLabel -->
+<!--TODO hidden-->
+
+<div
+  #toggleRef
+  role="switch"
+  class="field"
+  [class.is-readonly]="readonly"
+  [class.is-disabled]="disabled"
+  [class.focused]="isFieldFocused"
+  [class.checked]="value"
+  [tabindex]="readonly || disabled ? -1 : null"
+  (focus)="onFocusChange(true)"
+  (blur)="onFocusChange(false)"
+  (click)="onToggleClick($event)">
+  <input
+    type="checkbox"
+    class="toggle-input"
+    [id]="fieldId"
+    [tabindex]="-1"
+    [attr.name]="name"
+    [attr.readonly]="readonly ? '' : null"
+    [attr.disabled]="disabled ? '' : null"
+    [checked]="value" />
+
+  <div class="toggle-track">
+    <div class="toggle-thumb"></div>
+  </div>
+
+  <div class="toggle-label">
+    <ng-container *ngIf="internalLabel; else projectedLabel">
+      {{ internalLabel }}
+    </ng-container>
+
+    <ng-template #projectedLabel>
+      <!-- Optional projected label content inside the field, if desired -->
+      <ng-content></ng-content>
+    </ng-template>
+  </div>
+</div>

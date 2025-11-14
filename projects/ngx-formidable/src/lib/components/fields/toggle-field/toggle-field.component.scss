@@ -1,0 +1,33 @@
+@use '../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.field {
+  @include toggle-field;
+}
+
+.toggle-input {
+  // tbd
+}
+
+.toggle-track {
+  position: relative;
+  flex-shrink: 0;
+  width: 2.5rem; // ~40px
+  height: 1.25rem; // ~20px
+  border-radius: 9999px;
+  background-color: var(--formidable-toggle-track-off, #d1d5db);
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.toggle-thumb {
+  // tbd
+}
+
+.toggle-label {
+  // tbd
+}

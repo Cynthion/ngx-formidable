@@ -87,14 +87,7 @@ export interface IFormidableMaskField {
   maskConfig?: Partial<NgxMaskConfig>;
 }
 
-type FormidableInputFieldsKeys =
-  | 'name'
-  | 'placeholder'
-  | 'autocomplete'
-  | 'minLength'
-  | 'maxLength'
-  // | 'readOnly' use 'readonly' of IFormidableField
-  | 'disabled';
+type FormidableInputFieldsKeys = 'name' | 'placeholder' | 'autocomplete' | 'minLength' | 'maxLength';
 
 type FormidableTextareaFieldsKeys = FormidableInputFieldsKeys;
 
@@ -183,4 +176,10 @@ export interface IFormidableTimeField extends IFormidableField<Date | null> {
   /** Must be a valid Unicode format (e.g. HH:mm:ss). Supported tokens: H, HH, h, hh, m, mm, s, ss, a, aa */
   unicodeTokenFormat: string;
   selectTime(time: Date | null): void;
+}
+
+export interface IFormidableToggleField extends IFormidableField<boolean | null> {
+  onLabel?: string;
+  offLabel?: string;
+  toggle(): void;
 }
