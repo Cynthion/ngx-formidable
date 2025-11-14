@@ -177,11 +177,14 @@
           <formidable-toggle-field
             formidableFieldErrors
             name="isSingle"
+            [onLabel]="'YES'"
+            [offLabel]="'NO'"
             [readonly]="controlCenter.showAsReadonly"
             [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.isSingle"
             (valueChanged)="onValueChanged('isSingle', $event)"
             (focusChanged)="onFocusChanged('isSingle', $event)">
+            {{ 'Content Label' }}
           </formidable-toggle-field>
           <div
             *ngIf="controlCenter.showLabels"

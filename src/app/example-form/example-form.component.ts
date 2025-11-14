@@ -27,6 +27,7 @@ import {
 } from 'ngx-formidable';
 import { BehaviorSubject, combineLatest, map, Observable, startWith, Subject } from 'rxjs';
 import { StaticSuite } from 'vest';
+import { ToggleFieldComponent } from '../../../projects/ngx-formidable/src/lib/components/fields/toggle-field/toggle-field.component';
 import { ExampleFuzzyOptionComponent } from '../example-fuzzy-option/example-fuzzy-option.component';
 import { ExampleTooltipComponent } from '../example-tooltip/example-tooltip.component';
 import {
@@ -56,6 +57,7 @@ import {
     RadioGroupFieldComponent,
     CheckboxGroupFieldComponent,
     TimeFieldComponent,
+    ToggleFieldComponent,
     FormDirective,
     FormModelDirective,
     // FormModelGroupDirective,
