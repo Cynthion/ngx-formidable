@@ -10,17 +10,31 @@
 <!-- Layout -->
 <div ngClass="container-{{ decoratorLayout }}">
   @if (decoratorLayout === 'inline') {
-    <ng-container [ngTemplateOutlet]="labelTooltip" />
+    <div class="inline-wrapper">
+      <!-- Label & Tooltip -->
+      <ng-container [ngTemplateOutlet]="labelTooltip" />
+
+      <div class="inline-prefix-content-suffix-wrapper">
+        <!-- Prefix -->
+        <ng-container [ngTemplateOutlet]="prefix" />
+
+        <!-- Content -->
+        <ng-container [ngTemplateOutlet]="content" />
+
+        <!-- Suffix -->
+        <ng-container [ngTemplateOutlet]="suffix" />
+      </div>
+    </div>
+  } @else {
+    <!-- Prefix -->
+    <ng-container [ngTemplateOutlet]="prefix" />
+
+    <!-- Content -->
+    <ng-container [ngTemplateOutlet]="content" />
+
+    <!-- Suffix -->
+    <ng-container [ngTemplateOutlet]="suffix" />
   }
-
-  <!-- Prefix -->
-  <ng-container [ngTemplateOutlet]="prefix" />
-
-  <!-- Content -->
-  <ng-container [ngTemplateOutlet]="content" />
-
-  <!-- Suffix -->
-  <ng-container [ngTemplateOutlet]="suffix" />
 </div>
 
 <!-- Label & Tooltip Template -->

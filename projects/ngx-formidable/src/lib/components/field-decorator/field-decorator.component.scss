@@ -12,6 +12,14 @@
   @include label-tooltip-wrapper;
 }
 
+.inline-wrapper {
+  @include inline-wrapper;
+}
+
+.inline-prefix-content-suffix-wrapper {
+  @include inline-prefix-content-suffix-wrapper;
+}
+
 .label-wrapper {
   @include field-label;
 

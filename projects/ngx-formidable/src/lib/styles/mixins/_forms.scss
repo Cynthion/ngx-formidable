@@ -370,6 +370,18 @@
   column-gap: utils.spacing(4);
 }
 
+@mixin inline-wrapper {
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+}
+
+@mixin inline-prefix-content-suffix-wrapper {
+  display: flex;
+  align-items: center;
+  column-gap: utils.spacing(8);
+}
+
 @mixin field-label {
   font-size: var(--formidable-label-font-size, #{tokens.$formidable-label-font-size});
   font-weight: var(--formidable-label-font-weight, #{tokens.$formidable-label-font-weight});
