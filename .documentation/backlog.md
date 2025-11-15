@@ -16,6 +16,7 @@ Example:
 
 Improvements:
 
+- Move the FieldErrorsComponent rendering into Decorator (doesn't work for inline)
 - Toggle: allow setting layout to 'inline' or 'group'
 - remove validation from the library, only provide ui components
 - rename FormDirective to NgxFormidableFormDirective. (no naming clash with Angular)
