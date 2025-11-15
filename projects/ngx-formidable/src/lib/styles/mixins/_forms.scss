@@ -363,6 +363,13 @@
   height: var(--formidable-label-height, #{tokens.$formidable-label-height});
 }
 
+@mixin label-tooltip-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  column-gap: utils.spacing(4);
+}
+
 @mixin field-label {
   font-size: var(--formidable-label-font-size, #{tokens.$formidable-label-font-size});
   font-weight: var(--formidable-label-font-weight, #{tokens.$formidable-label-font-weight});
@@ -370,7 +377,6 @@
   height: var(--formidable-label-height, #{tokens.$formidable-label-height});
   color: var(--formidable-color-field-label, #{tokens.$formidable-color-field-label});
   pointer-events: none;
-  margin-right: utils.spacing(8);
 
   // animation
   transform: translateY(0);
@@ -404,6 +410,20 @@
   color: var(--formidable-color-field-tooltip, #{tokens.$formidable-color-field-tooltip});
 }
 
+@mixin decorator-container-single {
+  position: relative;
+}
+
+@mixin decorator-container-group {
+  // no additional styles
+}
+
+@mixin decorator-container-inline {
+  display: flex;
+  align-items: center;
+  column-gap: utils.spacing(8);
+}
+
 @mixin field-prefix-single {
   position: absolute;
   top: calc(var(--formidable-field-height, #{formidable-field-height}) / 2);
@@ -431,6 +451,14 @@
 @mixin field-suffix-group {
   padding-top: utils.spacing(16);
   padding-bottom: utils.spacing(16);
+  color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
+}
+
+@mixin field-prefix-inline {
+  color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
+}
+
+@mixin field-suffix-inline {
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
 }
 

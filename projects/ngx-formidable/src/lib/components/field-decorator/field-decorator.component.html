@@ -1,48 +1,59 @@
 <!-- Before -->
-<div
-  class="before-wrapper"
-  [class.hidden]="!hasLabel && !hasTooltip">
-  <!-- Label -->
-  <ng-container [ngTemplateOutlet]="label"></ng-container>
-  <!-- Tooltip -->
-  <ng-container [ngTemplateOutlet]="tooltip"></ng-container>
-</div>
+@if (decoratorLayout !== 'inline') {
+  <div
+    class="before-wrapper"
+    [class.hidden]="!hasLabel && !hasTooltip">
+    <ng-container [ngTemplateOutlet]="labelTooltip" />
+  </div>
+}
 
+<!-- Layout -->
 <div ngClass="container-{{ decoratorLayout }}">
+  @if (decoratorLayout === 'inline') {
+    <ng-container [ngTemplateOutlet]="labelTooltip" />
+  }
+
   <!-- Prefix -->
-  <ng-container [ngTemplateOutlet]="prefix"></ng-container>
+  <ng-container [ngTemplateOutlet]="prefix" />
 
   <!-- Content -->
-  <ng-container [ngTemplateOutlet]="content"></ng-container>
+  <ng-container [ngTemplateOutlet]="content" />
 
   <!-- Suffix -->
-  <ng-container [ngTemplateOutlet]="suffix"></ng-container>
+  <ng-container [ngTemplateOutlet]="suffix" />
 </div>
+
+<!-- Label & Tooltip Template -->
+<ng-template #labelTooltip>
+  <div class="label-tooltip-wrapper">
+    <!-- Label -->
+    <ng-container [ngTemplateOutlet]="label" />
+    <!-- Tooltip -->
+    <ng-container [ngTemplateOutlet]="tooltip" />
+  </div>
+</ng-template>
 
 <!-- Label Template -->
 <ng-template #label>
-  @switch (decoratorLayout) {
-    @case ('single') {
-      <label
-        class="label-wrapper"
-        [class.hidden]="!hasLabel"
-        [class.floating]="isLabelFloating"
-        [attr.for]="fieldId">
-        <ng-container [ngTemplateOutlet]="projectedLabel"></ng-container>
-      </label>
-    }
-    @case ('group') {
-      <div
-        class="label-wrapper"
-        [class.hidden]="!hasLabel"
-        [class.floating]="isLabelFloating">
-        <ng-container [ngTemplateOutlet]="projectedLabel"></ng-container>
-      </div>
-    }
+  @if (decoratorLayout === 'group') {
+    <div
+      class="label-wrapper"
+      [class.hidden]="!hasLabel"
+      [class.floating]="isLabelFloating">
+      <ng-container [ngTemplateOutlet]="projectedLabel" />
+    </div>
+  } @else {
+    <label
+      class="label-wrapper"
+      [class.hidden]="!hasLabel"
+      [class.floating]="isLabelFloating"
+      [attr.for]="fieldId">
+      <ng-container [ngTemplateOutlet]="projectedLabel" />
+    </label>
   }
 
   <ng-template #projectedLabel>
-    <ng-content select="[formidableFieldLabel]"></ng-content>
+    <ng-content select="[formidableFieldLabel]" />
   </ng-template>
 </ng-template>
 
@@ -57,17 +68,14 @@
 
 <!-- Content Template -->
 <ng-template #content>
-  @switch (decoratorLayout) {
-    @case ('single') {
-      <ng-container [ngTemplateOutlet]="projectedContent"></ng-container>
-    }
-    @case ('group') {
-      <fieldset class="fieldset">
-        <legend class="legend">{{ name }}</legend>
+  @if (decoratorLayout === 'group') {
+    <fieldset class="fieldset">
+      <legend class="legend">{{ name }}</legend>
 
-        <ng-container [ngTemplateOutlet]="projectedContent"></ng-container>
-      </fieldset>
-    }
+      <ng-container [ngTemplateOutlet]="projectedContent" />
+    </fieldset>
+  } @else {
+    <ng-container [ngTemplateOutlet]="projectedContent" />
   }
 </ng-template>
 
@@ -87,11 +95,11 @@
     #suffixWrapperRef
     ngClass="suffix-wrapper-{{ decoratorLayout }}"
     [class.hidden]="!hasSuffix">
-    <ng-content select="[formidableFieldSuffix]"></ng-content>
+    <ng-content select="[formidableFieldSuffix]" />
   </div>
 </ng-template>
 
 <!-- Projected Content Template -->
 <ng-template #projectedContent>
-  <ng-content></ng-content>
+  <ng-content />
 </ng-template>

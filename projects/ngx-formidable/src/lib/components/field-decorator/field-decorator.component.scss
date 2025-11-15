@@ -8,6 +8,10 @@
   @include field-before;
 }
 
+.label-tooltip-wrapper {
+  @include label-tooltip-wrapper;
+}
+
 .label-wrapper {
   @include field-label;
 
@@ -29,16 +33,15 @@
 }
 
 .container-single {
-  position: relative;
+  @include decorator-container-single;
 }
 
 .container-group {
-  // no additional styles
+  @include decorator-container-group;
 }
 
 .container-inline {
-  // display: inline-flex;
-  // align-items: center;
+  @include decorator-container-inline;
 }
 
 .prefix-wrapper-single {
@@ -55,6 +58,14 @@
 
 .suffix-wrapper-group {
   @include field-suffix-group;
+}
+
+.prefix-wrapper-inline {
+  @include field-prefix-inline;
+}
+
+.suffix-wrapper-inline {
+  @include field-suffix-inline;
 }
 
 .hidden {
