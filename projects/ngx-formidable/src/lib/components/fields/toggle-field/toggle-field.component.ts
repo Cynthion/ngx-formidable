@@ -73,7 +73,7 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
     return this.toggleRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'inline';
 
   // #endregion
 

@@ -32,6 +32,15 @@
   position: relative;
 }
 
+.container-group {
+  // no additional styles
+}
+
+.container-inline {
+  // display: inline-flex;
+  // align-items: center;
+}
+
 .prefix-wrapper-single {
   @include field-prefix-single;
 }

@@ -3,6 +3,24 @@
   class="before-wrapper"
   [class.hidden]="!hasLabel && !hasTooltip">
   <!-- Label -->
+  <ng-container [ngTemplateOutlet]="label"></ng-container>
+  <!-- Tooltip -->
+  <ng-container [ngTemplateOutlet]="tooltip"></ng-container>
+</div>
+
+<div ngClass="container-{{ decoratorLayout }}">
+  <!-- Prefix -->
+  <ng-container [ngTemplateOutlet]="prefix"></ng-container>
+
+  <!-- Content -->
+  <ng-container [ngTemplateOutlet]="content"></ng-container>
+
+  <!-- Suffix -->
+  <ng-container [ngTemplateOutlet]="suffix"></ng-container>
+</div>
+
+<!-- Label Template -->
+<ng-template #label>
   @switch (decoratorLayout) {
     @case ('single') {
       <label
@@ -23,24 +41,22 @@
     }
   }
 
-  <!-- Tooltip -->
+  <ng-template #projectedLabel>
+    <ng-content select="[formidableFieldLabel]"></ng-content>
+  </ng-template>
+</ng-template>
+
+<!-- Tooltip Template -->
+<ng-template #tooltip>
   <div
     class="tooltip-wrapper"
     [class.hidden]="!hasTooltip">
     <ng-content select="[formidableFieldTooltip]"></ng-content>
   </div>
-</div>
+</ng-template>
 
-<div ngClass="container-{{ decoratorLayout }}">
-  <!-- Prefix -->
-  <div
-    #prefixWrapperRef
-    ngClass="prefix-wrapper-{{ decoratorLayout }}"
-    [class.hidden]="!hasPrefix">
-    <ng-content select="[formidableFieldPrefix]"></ng-content>
-  </div>
-
-  <!-- Content -->
+<!-- Content Template -->
+<ng-template #content>
   @switch (decoratorLayout) {
     @case ('single') {
       <ng-container [ngTemplateOutlet]="projectedContent"></ng-container>
@@ -53,20 +69,29 @@
       </fieldset>
     }
   }
+</ng-template>
 
-  <!-- Suffix -->
+<!-- Prefix Template -->
+<ng-template #prefix>
+  <div
+    #prefixWrapperRef
+    ngClass="prefix-wrapper-{{ decoratorLayout }}"
+    [class.hidden]="!hasPrefix">
+    <ng-content select="[formidableFieldPrefix]"></ng-content>
+  </div>
+</ng-template>
+
+<!-- Suffix Template -->
+<ng-template #suffix>
   <div
     #suffixWrapperRef
     ngClass="suffix-wrapper-{{ decoratorLayout }}"
     [class.hidden]="!hasSuffix">
     <ng-content select="[formidableFieldSuffix]"></ng-content>
   </div>
-</div>
-
-<ng-template #projectedLabel>
-  <ng-content select="[formidableFieldLabel]"></ng-content>
 </ng-template>
 
+<!-- Projected Content Template -->
 <ng-template #projectedContent>
   <ng-content></ng-content>
 </ng-template>
