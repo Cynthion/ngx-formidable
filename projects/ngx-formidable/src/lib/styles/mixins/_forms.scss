@@ -328,13 +328,12 @@
     min-width: 0;
   }
 
-  // ON state: reuse the "selected" option colors
   &.checked {
     --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-selected);
     --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-selected);
 
     .toggle-track {
-      background: red; //var(--formidable-color-option-prefix-background-selected, #{tokens.$formidable-color-option-prefix-background-selected});
+      background: var(--formidable-color-field-background, #{tokens.$formidable-color-field-background});
     }
 
     .toggle-thumb {

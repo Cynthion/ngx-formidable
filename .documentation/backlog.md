@@ -16,6 +16,7 @@ Example:
 
 Improvements:
 
+- Toggle: allow setting layout to 'inline' or 'group'
 - remove validation from the library, only provide ui components
 - rename FormDirective to NgxFormidableFormDirective. (no naming clash with Angular)
 - ARIA attributes
