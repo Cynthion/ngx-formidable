@@ -281,9 +281,8 @@
   height: var(--formidable-toggle-field-height, #{tokens.$formidable-toggle-field-height});
 
   // Toggle is a single inline control with label to the right
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: flex-start;
   column-gap: utils.spacing(8);
 
   // Use the same color token setup as checkbox / radio prefixes
@@ -310,7 +309,7 @@
   .toggle-thumb {
     position: absolute;
     top: 50%;
-    left: utils.spacing(2);
+    // left: utils.spacing(2);
     width: $thumb-size;
     height: $thumb-size;
     border-radius: 9999px;
