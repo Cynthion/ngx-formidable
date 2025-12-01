@@ -26,6 +26,7 @@ export const EMPTY_FIELD_OPTION: IFormidableFieldOption = {
 export type FieldDecoratorLayout = 'single' | 'group' | 'inline';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 export type FormidablePanelPosition = 'left' | 'right' | 'full';
+export type FormidableToggleFieldLabelPosition = 'before' | 'after';
 
 export interface FormValidationOptions {
   debounceValidationInMs: number;
@@ -179,6 +180,7 @@ export interface IFormidableTimeField extends IFormidableField<Date | null> {
 }
 
 export interface IFormidableToggleField extends IFormidableField<boolean | null> {
+  labelPosition?: FormidableToggleFieldLabelPosition;
   onLabel?: string;
   offLabel?: string;
   toggle(): void;

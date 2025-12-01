@@ -20,11 +20,21 @@
     [attr.disabled]="disabled ? '' : null"
     [checked]="value" />
 
+  @if (labelPosition === 'before') {
+    <ng-container [ngTemplateOutlet]="label" />
+  }
+
   <div class="toggle-track">
     <div class="toggle-thumb"></div>
   </div>
 
-  <div class="toggle-label">
+  @if (labelPosition === 'after') {
+    <ng-container [ngTemplateOutlet]="label" />
+  }
+</div>
+
+<ng-template #label>
+  <div class="toggle-label toggle-label-{{ labelPosition }}">
     <ng-container *ngIf="internalLabel; else projectedLabel">
       {{ internalLabel }}
     </ng-container>
@@ -33,4 +43,4 @@
       <ng-content></ng-content>
     </ng-template>
   </div>
-</div>
+</ng-template>

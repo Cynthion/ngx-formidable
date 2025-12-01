@@ -278,13 +278,11 @@
   @include field-reset;
   @include field-font;
 
-  height: var(--formidable-toggle-field-height, #{tokens.$formidable-toggle-field-height});
-
-  // Toggle is a single inline control with label to the right
   display: flex;
   align-items: center;
 
-  // Use the same color token setup as checkbox / radio prefixes
+  height: var(--formidable-toggle-field-height, #{tokens.$formidable-toggle-field-height});
+
   $thumb-size: var(--formidable-option-prefix-dimension-inner, #{tokens.$formidable-option-prefix-dimension-inner});
 
   .toggle-track {
@@ -308,7 +306,7 @@
   .toggle-thumb {
     position: absolute;
     top: 50%;
-    // left: utils.spacing(2);
+    left: utils.spacing(2);
     width: $thumb-size;
     height: $thumb-size;
     border-radius: 9999px;
@@ -322,7 +320,15 @@
   }
 
   .toggle-label {
-    margin-left: utils.spacing(4);
+    @include field-label;
+
+    &.toggle-label-before {
+      margin-right: utils.spacing(4);
+    }
+
+    &.toggle-label-after {
+      margin-left: utils.spacing(4);
+    }
   }
 
   &.checked {

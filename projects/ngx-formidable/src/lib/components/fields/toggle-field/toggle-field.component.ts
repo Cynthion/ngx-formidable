@@ -1,7 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableToggleField } from '../../../models/formidable.model';
+import {
+  FieldDecoratorLayout,
+  FORMIDABLE_FIELD,
+  FormidableToggleFieldLabelPosition,
+  IFormidableToggleField
+} from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.directive';
 
 @Component({
@@ -79,6 +84,7 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
 
   // #region IFormidableToggleField
 
+  @Input() labelPosition?: FormidableToggleFieldLabelPosition = 'before';
   @Input() onLabel?: string;
   @Input() offLabel?: string;
 
