@@ -283,7 +283,6 @@
   // Toggle is a single inline control with label to the right
   display: flex;
   align-items: center;
-  column-gap: utils.spacing(8);
 
   // Use the same color token setup as checkbox / radio prefixes
   $thumb-size: var(--formidable-option-prefix-dimension-inner, #{tokens.$formidable-option-prefix-dimension-inner});
@@ -323,8 +322,7 @@
   }
 
   .toggle-label {
-    flex: 1 1 auto;
-    min-width: 0;
+    margin-left: utils.spacing(4);
   }
 
   &.checked {
@@ -377,7 +375,6 @@
 @mixin inline-prefix-content-suffix-wrapper {
   display: flex;
   align-items: center;
-  column-gap: utils.spacing(8);
 }
 
 @mixin field-label {
@@ -466,10 +463,12 @@
 
 @mixin field-prefix-inline {
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
+  margin-right: utils.spacing(8);
 }
 
 @mixin field-suffix-inline {
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
+  margin-left: utils.spacing(8);
 }
 
 @mixin field-validation-errors {
