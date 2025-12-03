@@ -224,6 +224,14 @@
     #{tokens.$formidable-color-length-indicator}
   );
 
+  // Toggle
+  --formidable-color-toggle-field-background: #{tokens.$formidable-color-toggle-field-background};
+  --formidable-color-toggle-field-background-checked: var(
+    --formidable-color-field-background,
+    #{tokens.$formidable-color-toggle-field-background-checked}
+  );
+  --formidable-color-toggle-thumb: var(--formidable-color-field-border, #{tokens.$formidable-color-toggle-thumb});
+
   // #endregion
 
   // #region Textarea
@@ -231,6 +239,20 @@
   --formidable-textarea-min-height: #{tokens.$formidable-textarea-min-height};
   --formidable-textarea-max-height: #{tokens.$formidable-textarea-max-height};
   --formidable-textarea-padding-top: #{tokens.$formidable-textarea-padding-top};
+
+  // #endregion
+
+  // #region Toggle
+
+  --formidable-toggle-field-width: #{tokens.$formidable-toggle-field-width};
+  --formidable-toggle-field-height: #{tokens.$formidable-toggle-field-height};
+  --formidable-toggle-field-thumb-size: #{tokens.$formidable-toggle-field-thumb-size};
+  --formidable-toggle-field-thumb-border-radius: var(
+    --$formidable-field-border-radius,
+    #{tokens.$formidable-toggle-field-thumb-border-radius}
+  );
+  --formidable-toggle-field-thumb-gap: #{tokens.$formidable-toggle-field-thumb-gap};
+  --formidable-toggle-field-gap: #{tokens.$formidable-toggle-field-gap};
 
   // #endregion
 

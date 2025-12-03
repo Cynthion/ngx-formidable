@@ -281,36 +281,32 @@
   display: flex;
   align-items: center;
 
-  height: var(--formidable-toggle-field-height, #{tokens.$formidable-toggle-field-height});
-
-  $thumb-size: var(--formidable-option-prefix-dimension-inner, #{tokens.$formidable-option-prefix-dimension-inner});
+  $thumb-size: var(--formidable-toggle-field-thumb-size, #{tokens.$formidable-toggle-field-thumb-size});
 
   .toggle-track {
     position: relative;
-    flex: 0 0 auto;
-    width: utils.spacing(32);
-    height: utils.spacing(20);
+    width: var(--formidable-toggle-field-width, #{tokens.$formidable-toggle-field-width});
+    height: var(--formidable-toggle-field-height, #{tokens.$formidable-toggle-field-height});
     box-sizing: border-box;
-    border-radius: utils.spacing(20);
-    padding: 0 utils.spacing(2);
-    background: var(--formidable-color-option-prefix-background, #{tokens.$formidable-color-option-prefix-background});
-    border: utils.spacing(2) solid
-      var(--formidable-color-option-prefix-outer, #{tokens.$formidable-color-option-prefix-outer});
-    transition:
-      background-color var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
-        var(--formidable-animation-easing, #{tokens.$formidable-animation-easing}),
-      border-color var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
-        var(--formidable-animation-easing, #{tokens.$formidable-animation-easing});
+    border: var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) solid
+      var(--formidable-color-field-border, #{tokens.$formidable-color-field-border});
+    border-radius: var(--formidable-field-border-radius, #{tokens.$formidable-field-border-radius});
+    background: var(--formidable-color-toggle-field-background, #{tokens.$formidable-color-toggle-field-background});
+    transition: background-color var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
+      var(--formidable-animation-easing, #{tokens.$formidable-animation-easing});
   }
 
   .toggle-thumb {
     position: absolute;
     top: 50%;
-    left: utils.spacing(2);
+    left: var(--formidable-toggle-field-thumb-gap, #{tokens.$formidable-toggle-field-thumb-gap});
     width: $thumb-size;
     height: $thumb-size;
-    border-radius: 9999px;
-    background: var(--formidable-color-option-prefix-inner, #{tokens.$formidable-color-option-prefix-inner});
+    border-radius: var(
+      --formidable-toggle-field-thumb-border-radius,
+      #{tokens.$formidable-toggle-field-thumb-border-radius}
+    );
+    background: var(--formidable-color-toggle-thumb, #{tokens.$formidable-color-toggle-thumb});
     transform: translateY(-50%);
     transition:
       left var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
@@ -323,11 +319,11 @@
     @include field-label;
 
     &.toggle-label-before {
-      margin-right: utils.spacing(4);
+      margin-right: var(--formidable-toggle-field-gap, #{tokens.$formidable-toggle-field-gap});
     }
 
     &.toggle-label-after {
-      margin-left: utils.spacing(4);
+      margin-left: var(--formidable-toggle-field-gap, #{tokens.$formidable-toggle-field-gap});
     }
   }
 
@@ -336,15 +332,20 @@
     --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-selected);
 
     .toggle-track {
-      background: var(--formidable-color-field-background, #{tokens.$formidable-color-field-background});
+      background: var(
+        --formidable-color-toggle-field-background-checked,
+        #{tokens.$formidable-color-toggle-field-background-checked}
+      );
     }
 
     .toggle-thumb {
-      left: calc(100% - utils.spacing(2) - #{$thumb-size});
+      left: calc(
+        100% - var(--formidable-toggle-field-thumb-gap, #{tokens.$formidable-toggle-field-thumb-gap}) - #{$thumb-size}
+      );
     }
   }
 
-  // readonly / disabled: reuse existing option color tokens
+  // TODO readonly / disabled: reuse existing option color tokens
   &.is-readonly {
     --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-readonly);
     --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-readonly);
