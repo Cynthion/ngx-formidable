@@ -371,6 +371,221 @@
   }
 }
 
+@mixin slider-field {
+  // Base field box: border, bg, font, states, etc.
+  // (Keep commented or enable depending on your decoratorLayout / group usage)
+  // @include field;
+
+  // Sliders need vertical space for label rows + ticks,
+  // so we let the height grow naturally.
+  // height: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: utils.spacing(8);
+
+  cursor: pointer;
+
+  &.is-readonly,
+  &.is-disabled {
+    cursor: default;
+  }
+
+  /**
+   * Label row (min / max) – always below track when shown
+   * -----------------------------------------------------
+   */
+
+  .slider-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .slider-min-label,
+    .slider-max-label {
+      flex: 0 0 auto;
+      white-space: nowrap;
+      opacity: 0.8;
+    }
+
+    &.slider-label-row-below {
+      margin-top: utils.spacing(4);
+    }
+  }
+
+  /**
+   * Track + range input
+   * -------------------
+   */
+
+  .slider-track-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    // reasonable hit area + space above for thumb label
+    min-height: utils.spacing(32);
+  }
+
+  // Visual track behind thumb (the native track is made transparent)
+  .slider-track {
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    transform: translateY(-50%);
+
+    height: var(--formidable-slider-track-height, 4px);
+    border-radius: var(--formidable-slider-track-radius, 999px);
+    background-color: var(--formidable-slider-track-background, rgba(0, 0, 0, 0.12));
+    overflow: hidden;
+    pointer-events: none; // clicks handled by wrapper
+  }
+
+  .slider-track-fill {
+    height: 100%;
+    width: 0; // controlled via [style.width.%] in template
+    background-color: var(--formidable-slider-track-fill, currentColor);
+    border-radius: inherit;
+  }
+
+  /**
+   * Thumb label (above track, follows current value)
+   * -----------------------------------------------
+   */
+
+  .slider-thumb-label {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, calc(-100% - #{utils.spacing(2)}));
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 120ms ease-out,
+      transform 120ms ease-out;
+  }
+
+  .slider-thumb-label-inner {
+    padding: utils.spacing(2) utils.spacing(4);
+    border-radius: 999px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 0.75em;
+    white-space: nowrap;
+  }
+
+  // Show thumb label on hover or focus
+  &:hover .slider-thumb-label,
+  &.focused .slider-thumb-label {
+    opacity: 1;
+    transform: translate(-50%, calc(-100% - #{utils.spacing(4)}));
+  }
+
+  // Native <input type="range">
+  .slider-input {
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: 0;
+
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+
+    height: var(--formidable-slider-hit-area-height, #{utils.spacing(24)});
+
+    &:disabled {
+      cursor: default;
+    }
+
+    // WebKit thumb
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+
+      width: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
+      height: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
+      border-radius: 50%;
+      background-color: var(--formidable-slider-thumb-background, currentColor);
+      border: var(--formidable-slider-thumb-border-width, 2px) solid var(--formidable-slider-thumb-border-color, #fff);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+
+      cursor: pointer;
+
+      // vertically center thumb over the visual track
+      margin-top: calc(
+        (var(--formidable-slider-track-height, 4px) - var(--formidable-slider-thumb-size, #{utils.spacing(16)})) / 2
+      );
+    }
+
+    // Firefox thumb
+    &::-moz-range-thumb {
+      width: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
+      height: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
+      border-radius: 50%;
+      background-color: var(--formidable-slider-thumb-background, currentColor);
+      border: var(--formidable-slider-thumb-border-width, 2px) solid var(--formidable-slider-thumb-border-color, #fff);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+    }
+
+    // Make native track transparent: `.slider-track` is the visible one
+    &::-webkit-slider-runnable-track {
+      background: transparent;
+    }
+
+    &::-moz-range-track {
+      background: transparent;
+    }
+  }
+
+  /**
+   * Tick marks + labels
+   * -------------------
+   */
+
+  .slider-ticks {
+    position: relative;
+    margin-top: utils.spacing(4);
+    min-height: utils.spacing(20);
+    font-size: 0.75em; // slightly smaller than main field text
+  }
+
+  .slider-tick {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    // Avoid clipping labels at the edges
+    &:first-child {
+      align-items: flex-start;
+      transform: translateX(0);
+    }
+
+    &:last-child {
+      align-items: flex-end;
+      transform: translateX(-100%);
+    }
+  }
+
+  .slider-tick-mark {
+    width: 1px;
+    height: utils.spacing(6);
+    margin-bottom: utils.spacing(2);
+    background-color: var(--formidable-slider-tick-color, rgba(0, 0, 0, 0.4));
+  }
+
+  .slider-tick-label {
+    white-space: nowrap;
+    opacity: 0.8;
+  }
+}
+
 @mixin field-before {
   position: relative;
   display: flex;

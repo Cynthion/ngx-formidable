@@ -1,0 +1,69 @@
+<div
+  #sliderRef
+  class="field slider-field"
+  [class.is-readonly]="readonly"
+  [class.is-disabled]="disabled"
+  [class.focused]="isFieldFocused"
+  (click)="onTrackClick($event)">
+  <div class="slider-track-wrapper">
+    <div class="slider-track">
+      <div
+        class="slider-track-fill"
+        [style.width.%]="valuePercent"></div>
+    </div>
+
+    @if (showThumbLabel) {
+      <div
+        class="slider-thumb-label"
+        [style.left.%]="valuePercent">
+        <div class="slider-thumb-label-inner">
+          {{ displayValueLabel }}
+        </div>
+      </div>
+    }
+
+    <input
+      #rangeRef
+      type="range"
+      class="slider-input"
+      [id]="fieldId"
+      [min]="min"
+      [max]="max"
+      [step]="step"
+      [attr.name]="name"
+      [attr.readonly]="readonly ? '' : null"
+      [attr.disabled]="disabled ? '' : null"
+      [attr.tabindex]="readonly || disabled ? -1 : 0"
+      [value]="value ?? min"
+      (input)="onRangeInput($event)"
+      (focus)="onFocusChange(true)"
+      (blur)="onFocusChange(false)" />
+  </div>
+
+  @if (showMinMaxLabels) {
+    <div class="slider-label-row slider-label-row-below">
+      <div class="slider-min-label">
+        {{ minLabel ?? min }}
+      </div>
+
+      <div class="slider-max-label">
+        {{ maxLabel ?? max }}
+      </div>
+    </div>
+  }
+
+  <!-- @if (showTickMarks && ticks.length > 0) {
+    <div class="slider-ticks">
+      @for (tick of ticks; track tick) {
+        <div
+          class="slider-tick"
+          [style.left.%]="getTickPercent(tick)">
+          <div class="slider-tick-mark"></div>
+          <div class="slider-tick-label">
+            {{ transformValueToLabel ? transformValueToLabel(tick) : tick }}
+          </div>
+        </div>
+      }
+    </div>
+  } -->
+</div>

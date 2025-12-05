@@ -23,7 +23,7 @@ export const EMPTY_FIELD_OPTION: IFormidableFieldOption = {
   disabled: true
 };
 
-export type FieldDecoratorLayout = 'single' | 'group' | 'inline';
+export type FieldDecoratorLayout = 'single' | 'group' | 'inline'; // TODO rename options
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 export type FormidablePanelPosition = 'left' | 'right' | 'full';
 export type FormidableToggleFieldLabelPosition = 'before' | 'after';
@@ -184,4 +184,45 @@ export interface IFormidableToggleField extends IFormidableField<boolean | null>
   onLabel?: string;
   offLabel?: string;
   toggle(): void;
+}
+
+export interface IFormidableSliderField extends IFormidableField<number | null> {
+  /** Minimum numeric value of the slider (inclusive). */
+  min: number;
+  /** Maximum numeric value of the slider (inclusive). */
+  max: number;
+  /** Step between slider values. */
+  step: number;
+
+  /** Optional label for the minimum value (fallback: min as string). */
+  minLabel?: string;
+  /** Optional label for the maximum value (fallback: max as string). */
+  maxLabel?: string;
+
+  /** Whether to display the min/max labels below the track. */
+  showMinMaxLabels?: boolean;
+
+  /** Whether to display the thumb label. */
+  showThumbLabel?: boolean;
+
+  /** Whether to show tick marks with labels along the track. */
+  showTickMarks?: boolean;
+
+  /**
+   * Interval between tick marks. If omitted, `step` is used.
+   * Only relevant if `showTickMarks === true`.
+   */
+  tickInterval?: number;
+
+  /**
+   * Imperatively select a value from outside (e.g. via template reference).
+   * Should clamp & snap to min/max/step.
+   */
+  selectValue(value: number): void;
+
+  /**
+   * Optional value → label transform for value and tick labels.
+   * E.g. `value => value + ' %'` or map to named categories.
+   */
+  transformValueToLabel?: (value: number) => string;
 }

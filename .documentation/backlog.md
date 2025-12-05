@@ -14,8 +14,15 @@ Example:
 - add CONTRIBUTING.md
 - logo for ngx-formidable
 
+Slider:
+
+- min/max validation
+- step increment/decrement fixes for initial value, min and max
+- support ticks
+
 Improvements:
 
+- Rename FieldDecoratorLayout options to 'horizontal', 'vertical', 'inline' (instead of 'single', 'group', 'inline')
 - Move the FieldErrorsComponent rendering into Decorator (doesn't work for inline)
 - Toggle: allow setting layout to 'inline' or 'group'
 - remove validation from the library, only provide ui components
