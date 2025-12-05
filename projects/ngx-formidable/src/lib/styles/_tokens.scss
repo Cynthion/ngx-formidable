@@ -125,6 +125,10 @@ $formidable-color-length-indicator: $formidable-color-field-placeholder;
 $formidable-color-toggle-field-background: transparent;
 $formidable-color-toggle-field-background-checked: $formidable-color-field-background;
 $formidable-color-toggle-thumb: $formidable-color-field-border;
+$formidable-color-toggle-thumb-readonly: $formidable-color-field-text-readonly;
+$formidable-color-toggle-thumb-disabled: $formidable-color-field-text-disabled;
+$formidable-color-toggle-track-readonly: $formidable-color-field-background-readonly;
+$formidable-color-toggle-track-disabled: $formidable-color-field-background-disabled;
 
 // #endregion
 

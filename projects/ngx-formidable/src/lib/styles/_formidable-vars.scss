@@ -231,6 +231,22 @@
     #{tokens.$formidable-color-toggle-field-background-checked}
   );
   --formidable-color-toggle-thumb: var(--formidable-color-field-border, #{tokens.$formidable-color-toggle-thumb});
+  --formidable-color-toggle-thumb-readonly: var(
+    --formidable-color-field-text-readonly,
+    #{tokens.$formidable-color-toggle-thumb-readonly}
+  );
+  --formidable-color-toggle-thumb-disabled: var(
+    --formidable-color-field-text-disabled,
+    #{tokens.$formidable-color-toggle-thumb-disabled}
+  );
+  --formidable-color-toggle-track-readonly: var(
+    --formidable-color-field-background-readonly,
+    #{tokens.$formidable-color-toggle-track-readonly}
+  );
+  --formidable-color-toggle-track-disabled: var(
+    --formidable-color-field-background-disabled,
+    #{tokens.$formidable-color-toggle-track-disabled}
+  );
 
   // #endregion
 

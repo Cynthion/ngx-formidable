@@ -328,9 +328,6 @@
   }
 
   &.checked {
-    --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-selected);
-    --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-selected);
-
     .toggle-track {
       background: var(
         --formidable-color-toggle-field-background-checked,
@@ -345,15 +342,22 @@
     }
   }
 
-  // TODO readonly / disabled: reuse existing option color tokens
   &.is-readonly {
-    --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-readonly);
-    --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-readonly);
+    .toggle-track {
+      background: var(--formidable-color-toggle-track-readonly, #{tokens.$formidable-color-toggle-track-readonly});
+    }
+    .toggle-thumb {
+      background: var(--formidable-color-toggle-thumb-readonly, #{tokens.$formidable-color-toggle-thumb-readonly});
+    }
   }
 
   &.is-disabled {
-    --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-disabled);
-    --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-disabled);
+    .toggle-track {
+      background: var(--formidable-color-toggle-track-disabled, #{tokens.$formidable-color-toggle-track-disabled});
+    }
+    .toggle-thumb {
+      background: var(--formidable-color-toggle-thumb-disabled, #{tokens.$formidable-color-toggle-thumb-disabled});
+    }
   }
 }
 
