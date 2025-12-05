@@ -337,7 +337,7 @@
 
     .toggle-thumb {
       left: calc(
-        100% - var(--formidable-toggle-field-thumb-gap, #{tokens.$formidable-toggle-field-thumb-gap}) - #{$thumb-size}
+        100% - (var(--formidable-toggle-field-thumb-gap, #{tokens.$formidable-toggle-field-thumb-gap}) + #{$thumb-size})
       );
     }
   }

@@ -143,11 +143,11 @@ $formidable-textarea-padding-top: utils.spacing(16);
 // #region Toggle
 
 $formidable-toggle-field-width: utils.spacing(48);
-$formidable-toggle-field-height: utils.spacing(64); // TODO check why not applied
+$formidable-toggle-field-height: utils.spacing(24);
 $formidable-toggle-field-thumb-size: utils.spacing(16);
 $formidable-toggle-field-thumb-border-radius: $formidable-field-border-radius;
-$formidable-toggle-field-thumb-gap: utils.spacing(2);
-$formidable-toggle-field-gap: utils.spacing(4);
+$formidable-toggle-field-thumb-gap: utils.spacing(4);
+$formidable-toggle-field-gap: utils.spacing(8);
 
 // #endregion
 
@@ -192,9 +192,3 @@ $formidable-option-prefix-dimension-outer: utils.spacing(20);
 $formidable-option-prefix-dimension-inner: utils.spacing(8);
 
 // #endregion
-
-// # region Toggle Dimensions
-
-$formidable-toggle-field-height: utils.spacing(20);
-
-// # endregion
