@@ -32,7 +32,7 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   protected keyboardCallback = null;
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
-  protected registeredKeys: string[] = []; // TODO: implement keyboard support
+  protected registeredKeys: string[] = []; // arrows are natively supported
 
   private _value: number | null = null;
 
@@ -83,7 +83,8 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   @Input() showTickMarks = false;
   @Input() tickInterval?: number;
 
-  @Input() transformValueToLabel?: (value: number) => string;
+  @Input() transformValueToThumbLabel?: (value: number) => string;
+  @Input() transformTickToTickLabel?: (value: number) => string;
 
   public selectValue(value: number): void {
     const normalized = this.normalizeValue(value);
@@ -97,15 +98,48 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
 
   // #endregion
 
-  get displayValueLabel(): string {
+  get thumbLabel(): string {
     if (this.value == null) return '';
-    return this.transformValueToLabel ? this.transformValueToLabel(this.value) : String(this.value);
+    return this.transformValueToThumbLabel ? this.transformValueToThumbLabel(this.value) : String(this.value);
+  }
+
+  getTickLabel(tick: number): string {
+    return this.transformTickToTickLabel ? this.transformTickToTickLabel(tick) : String(tick);
   }
 
   get valuePercent(): number {
     if (this.max === this.min) return 0;
     const v = this.value ?? this.min;
     return ((v - this.min) / (this.max - this.min)) * 100;
+  }
+
+  get ticks(): number[] {
+    if (!this.showTickMarks) return [];
+
+    const interval = (this.tickInterval && this.tickInterval > 0 ? this.tickInterval : this.step) || 1;
+    const ticks: number[] = [];
+
+    if (this.max <= this.min) {
+      return ticks;
+    }
+
+    ticks.push(this.min);
+
+    let current = this.min + interval;
+    while (current < this.max) {
+      ticks.push(this.roundToStep(current));
+      current += interval;
+    }
+
+    ticks.push(this.max);
+
+    return Array.from(new Set(ticks)).sort((a, b) => a - b);
+  }
+
+  getTickPercent(tick: number): number {
+    if (this.max === this.min) return 0;
+
+    return ((tick - this.min) / (this.max - this.min)) * 100;
   }
 
   /** Move the track to set the value. */

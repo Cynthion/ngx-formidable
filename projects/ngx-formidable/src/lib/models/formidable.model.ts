@@ -221,8 +221,14 @@ export interface IFormidableSliderField extends IFormidableField<number | null> 
   selectValue(value: number): void;
 
   /**
-   * Optional value → label transform for value and tick labels.
-   * E.g. `value => value + ' %'` or map to named categories.
+   * Optional value → thumb label transform for value labels.
+   * E.g., `value => value + ' %'` or map to named categories.
    */
-  transformValueToLabel?: (value: number) => string;
+  transformValueToThumbLabel?: (value: number) => string;
+
+  /**
+   * Optional tick → tick label transform for tick labels.
+   * E.g., `value => value + ' %'` or map to named categories.
+   */
+  transformTickToTickLabel?: (value: number) => string;
 }

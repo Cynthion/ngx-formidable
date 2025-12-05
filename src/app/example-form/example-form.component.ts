@@ -263,8 +263,12 @@ export class ExampleFormComponent {
     this.log(`Focus changed on ${_fieldName} field: ${_isFocused}`);
   }
 
-  protected transformSliderValueToLabel = (value: number): string => {
+  protected transformValueToThumbLabel = (value: number): string => {
     return `${value} years`;
+  };
+
+  protected transformTickToTickLabel = (value: number): string => {
+    return `${value}y`;
   };
 
   protected onSubmit(): void {

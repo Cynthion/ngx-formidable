@@ -17,7 +17,7 @@
         class="slider-thumb-label"
         [style.left.%]="valuePercent">
         <div class="slider-thumb-label-inner">
-          {{ displayValueLabel }}
+          {{ thumbLabel }}
         </div>
       </div>
     }
@@ -52,7 +52,7 @@
     </div>
   }
 
-  <!-- @if (showTickMarks && ticks.length > 0) {
+  @if (showTickMarks && ticks.length > 0) {
     <div class="slider-ticks">
       @for (tick of ticks; track tick) {
         <div
@@ -60,10 +60,10 @@
           [style.left.%]="getTickPercent(tick)">
           <div class="slider-tick-mark"></div>
           <div class="slider-tick-label">
-            {{ transformValueToLabel ? transformValueToLabel(tick) : tick }}
+            {{ transformTickToTickLabel ? getTickLabel(tick) : tick }}
           </div>
         </div>
       }
     </div>
-  } -->
+  }
 </div>
