@@ -359,6 +359,16 @@
       background: var(--formidable-color-toggle-thumb-disabled, #{tokens.$formidable-color-toggle-thumb-disabled});
     }
   }
+
+  &:not(.is-readonly, .is-disabled) {
+    &:focus,
+    &.focused,
+    &:focus-visible {
+      .toggle-track {
+        @include focused-colors;
+      }
+    }
+  }
 }
 
 @mixin field-before {
