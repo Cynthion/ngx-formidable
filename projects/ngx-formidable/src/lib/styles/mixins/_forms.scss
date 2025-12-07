@@ -346,6 +346,7 @@
     .toggle-track {
       background: var(--formidable-color-toggle-track-readonly, #{tokens.$formidable-color-toggle-track-readonly});
     }
+
     .toggle-thumb {
       background: var(--formidable-color-toggle-thumb-readonly, #{tokens.$formidable-color-toggle-thumb-readonly});
     }
@@ -355,6 +356,7 @@
     .toggle-track {
       background: var(--formidable-color-toggle-track-disabled, #{tokens.$formidable-color-toggle-track-disabled});
     }
+
     .toggle-thumb {
       background: var(--formidable-color-toggle-thumb-disabled, #{tokens.$formidable-color-toggle-thumb-disabled});
     }
@@ -372,29 +374,52 @@
 }
 
 @mixin slider-field {
-  // Base field box: border, bg, font, states, etc.
-  // (Keep commented or enable depending on your decoratorLayout / group usage)
-  // @include field;
-
-  // Sliders need vertical space for label rows + ticks,
-  // so we let the height grow naturally.
-  // height: auto;
+  @include field-reset;
+  @include field-font;
 
   display: flex;
   flex-direction: column;
-  gap: utils.spacing(8);
-
   cursor: pointer;
 
-  &.is-readonly,
-  &.is-disabled {
-    cursor: default;
+  $thumb-size: var(--formidable-toggle-field-thumb-size, #{tokens.$formidable-toggle-field-thumb-size});
+
+  /* stylelint-disable-next-line property-no-vendor-prefix */
+  -webkit-appearance: none; // disable native styling in WebKit browsers
+
+  .slider-track-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: yellow;
+
+    // reasonable hit area + space above for thumb label
+    min-height: utils.spacing(48);
   }
 
-  /**
-   * Label row (min / max) – always below track when shown
-   * -----------------------------------------------------
-   */
+  .slider-track {
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 10px; // TODO create token
+    border-radius: 0; // TODO create token
+    background-color: green;
+    // overflow: hidden;
+    // pointer-events: none; // clicks handled by wrapper
+  }
+
+  .slider-track-fill {
+    height: 100%;
+    // width: 0; // controlled via [style.width.%] in template
+    background-color: red;
+    // border-radius: inherit;
+  }
+
+  // Make native track transparent: `.slider-track` is the visible one
+  &::-webkit-slider-runnable-track,
+  &::-moz-range-track {
+    background: transparent;
+  }
 
   .slider-label-row {
     display: flex;
@@ -408,50 +433,8 @@
       opacity: 0.8;
     }
 
-    &.slider-label-row-below {
-      margin-top: utils.spacing(4);
-    }
+    margin-top: utils.spacing(4);
   }
-
-  /**
-   * Track + range input
-   * -------------------
-   */
-
-  .slider-track-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-
-    // reasonable hit area + space above for thumb label
-    min-height: utils.spacing(32);
-  }
-
-  // Visual track behind thumb (the native track is made transparent)
-  .slider-track {
-    position: absolute;
-    inset-inline: 0;
-    top: 50%;
-    transform: translateY(-50%);
-
-    height: var(--formidable-slider-track-height, 4px);
-    border-radius: var(--formidable-slider-track-radius, 999px);
-    background-color: var(--formidable-slider-track-background, rgba(0, 0, 0, 0.12));
-    overflow: hidden;
-    pointer-events: none; // clicks handled by wrapper
-  }
-
-  .slider-track-fill {
-    height: 100%;
-    width: 0; // controlled via [style.width.%] in template
-    background-color: var(--formidable-slider-track-fill, currentColor);
-    border-radius: inherit;
-  }
-
-  /**
-   * Thumb label (above track, follows current value)
-   * -----------------------------------------------
-   */
 
   .slider-thumb-label {
     position: absolute;
@@ -468,7 +451,7 @@
     padding: utils.spacing(2) utils.spacing(4);
     border-radius: 999px;
     background-color: rgba(0, 0, 0, 0.8);
-    color: #fff;
+    color: #ffffff;
     font-size: 0.75em;
     white-space: nowrap;
   }
@@ -480,70 +463,73 @@
     transform: translate(-50%, calc(-100% - #{utils.spacing(4)}));
   }
 
-  // Native <input type="range">
   .slider-input {
-    position: relative;
-    width: 100%;
-    margin: 0;
-    padding: 0;
     background: transparent;
-    border: 0;
+    width: 100%;
+    height: 100%;
+    // border: none;
+    position: relative;
+    // margin: 0;
+    // padding: 0;
 
-    -webkit-appearance: none;
-    appearance: none;
-    outline: none;
-
-    height: var(--formidable-slider-hit-area-height, #{utils.spacing(24)});
+    // -webkit-appearance: none;
+    // appearance: none;
+    // outline: none;
 
     &:disabled {
       cursor: default;
     }
 
     // WebKit thumb
-    &::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
+    // &::-webkit-slider-thumb {
+    //   -webkit-appearance: none;
+    //   appearance: none;
 
-      width: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
-      height: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
-      border-radius: 50%;
-      background-color: var(--formidable-slider-thumb-background, currentColor);
-      border: var(--formidable-slider-thumb-border-width, 2px) solid var(--formidable-slider-thumb-border-color, #fff);
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+    //   width: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
+    //   height: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
+    //   border-radius: 50%;
+    //   background-color: var(--formidable-slider-thumb-background, currentColor);
+    //   border: var(--formidable-slider-thumb-border-width, 2px) solid var(--formidable-slider-thumb-border-color, #fff);
+    //   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
 
-      cursor: pointer;
+    //   cursor: pointer;
 
-      // vertically center thumb over the visual track
-      margin-top: calc(
-        (var(--formidable-slider-track-height, 4px) - var(--formidable-slider-thumb-size, #{utils.spacing(16)})) / 2
-      );
-    }
+    //   // vertically center thumb over the visual track
+    //   margin-top: calc(
+    //     (var(--formidable-slider-track-height, 4px) - var(--formidable-slider-thumb-size, #{utils.spacing(16)})) / 2
+    //   );
+    // }
 
     // Firefox thumb
-    &::-moz-range-thumb {
-      width: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
-      height: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
-      border-radius: 50%;
-      background-color: var(--formidable-slider-thumb-background, currentColor);
-      border: var(--formidable-slider-thumb-border-width, 2px) solid var(--formidable-slider-thumb-border-color, #fff);
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
-      cursor: pointer;
-    }
+    // &::-moz-range-thumb {
+    //   width: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
+    //   height: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
+    //   border-radius: 50%;
+    //   background-color: var(--formidable-slider-thumb-background, currentColor);
+    //   border: var(--formidable-slider-thumb-border-width, 2px) solid var(--formidable-slider-thumb-border-color, #fff);
+    //   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+    //   cursor: pointer;
+    // }
 
-    // Make native track transparent: `.slider-track` is the visible one
-    &::-webkit-slider-runnable-track {
-      background: transparent;
-    }
+    // from https://brennaobrien.com/blog/2014/05/style-input-type-range-in-every-browser.html
+    // input[type='range']::-webkit-slider-thumb {
+    //   -webkit-appearance: none;
+    //   border: none;
+    //   height: 16px;
+    //   width: 16px;
+    //   border-radius: 50%;
+    //   background: goldenrod;
+    //   margin-top: -4px;
+    // }
 
-    &::-moz-range-track {
-      background: transparent;
-    }
+    // input[type='range']:focus {
+    //   outline: none;
+    // }
+
+    // input[type='range']:focus::-webkit-slider-runnable-track {
+    //   background: #ccc;
+    // }
   }
-
-  /**
-   * Tick marks + labels
-   * -------------------
-   */
 
   .slider-ticks {
     position: relative;
@@ -583,6 +569,11 @@
   .slider-tick-label {
     white-space: nowrap;
     opacity: 0.8;
+  }
+
+  &.is-readonly,
+  &.is-disabled {
+    cursor: default;
   }
 }
 

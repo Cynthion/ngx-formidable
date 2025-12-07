@@ -1,6 +1,6 @@
 <div
   #sliderRef
-  class="field slider-field"
+  class="field"
   [class.is-readonly]="readonly"
   [class.is-disabled]="disabled"
   [class.focused]="isFieldFocused"
@@ -41,7 +41,7 @@
   </div>
 
   @if (showMinMaxLabels) {
-    <div class="slider-label-row slider-label-row-below">
+    <div class="slider-label-row">
       <div class="slider-min-label">
         {{ minLabel ?? min }}
       </div>
