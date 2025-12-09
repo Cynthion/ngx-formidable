@@ -379,12 +379,8 @@
 
   display: flex;
   flex-direction: column;
-  cursor: pointer;
 
-  $thumb-size: var(--formidable-toggle-field-thumb-size, #{tokens.$formidable-toggle-field-thumb-size});
-
-  /* stylelint-disable-next-line property-no-vendor-prefix */
-  -webkit-appearance: none; // disable native styling in WebKit browsers
+  $thumb-size: 20px; // TODO create token
 
   .slider-track-wrapper {
     position: relative;
@@ -392,33 +388,28 @@
     align-items: center;
     background: yellow;
 
-    // reasonable hit area + space above for thumb label
-    min-height: utils.spacing(48);
+    // reasonable hit area
+    height: utils.spacing(48); // TODO create token?
   }
 
   .slider-track {
     position: absolute;
     inset-inline: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 10px; // TODO create token
+    // top: 50%;
+    // transform: translateY(-50%);
+    height: 20px; // TODO create token
     border-radius: 0; // TODO create token
     background-color: green;
     // overflow: hidden;
     // pointer-events: none; // clicks handled by wrapper
+    border-radius: 10px; // inherit
   }
 
   .slider-track-fill {
     height: 100%;
     // width: 0; // controlled via [style.width.%] in template
     background-color: red;
-    // border-radius: inherit;
-  }
-
-  // Make native track transparent: `.slider-track` is the visible one
-  &::-webkit-slider-runnable-track,
-  &::-moz-range-track {
-    background: transparent;
+    border-radius: 10px; // inherit
   }
 
   .slider-label-row {
@@ -472,33 +463,35 @@
     // margin: 0;
     // padding: 0;
 
-    // -webkit-appearance: none;
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -webkit-appearance: none; // disable native styling in WebKit browsers
+
     // appearance: none;
     // outline: none;
 
+    cursor: pointer;
     &:disabled {
       cursor: default;
     }
 
-    // WebKit thumb
-    // &::-webkit-slider-thumb {
-    //   -webkit-appearance: none;
-    //   appearance: none;
-
-    //   width: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
-    //   height: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
-    //   border-radius: 50%;
-    //   background-color: var(--formidable-slider-thumb-background, currentColor);
-    //   border: var(--formidable-slider-thumb-border-width, 2px) solid var(--formidable-slider-thumb-border-color, #fff);
-    //   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
-
-    //   cursor: pointer;
-
-    //   // vertically center thumb over the visual track
-    //   margin-top: calc(
-    //     (var(--formidable-slider-track-height, 4px) - var(--formidable-slider-thumb-size, #{utils.spacing(16)})) / 2
-    //   );
+    // Make native track transparent: `.slider-track` is the visible one
+    // &::-webkit-slider-runnable-track,
+    // &::-moz-range-track {
+    //   background: transparent;
     // }
+
+    // WebKit thumb
+    &::-webkit-slider-thumb {
+      // -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+
+      width: $thumb-size;
+      height: $thumb-size;
+      border-radius: 50%; // TODO create token
+      background-color: orange; // TODO create token
+      border: var(--formidable-slider-thumb-border-width, 2px) solid var(--formidable-slider-thumb-border-color, #fff);
+    }
 
     // Firefox thumb
     // &::-moz-range-thumb {

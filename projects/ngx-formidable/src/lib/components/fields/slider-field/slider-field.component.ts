@@ -152,18 +152,16 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   }
 
   /** Click on the track outside the thumb to jump the value.  */
-  onTrackClick(event: MouseEvent): void {
-    if (this.readonly || this.disabled) return;
-
-    const trackEl = this.sliderRef.nativeElement.querySelector('.slider-track') as HTMLDivElement | null;
-    if (!trackEl) return;
-
-    const rect = trackEl.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-    const ratio = rect.width > 0 ? clickX / rect.width : 0;
-    const raw = this.min + ratio * (this.max - this.min);
-
-    this.selectValue(raw);
+  onTrackClick(_event: MouseEvent): void {
+    // TODO re-enable? set cursor: pointer on elements
+    // if (this.readonly || this.disabled) return;
+    // const trackEl = this.sliderRef.nativeElement.querySelector('.slider-track') as HTMLDivElement | null;
+    // if (!trackEl) return;
+    // const rect = trackEl.getBoundingClientRect();
+    // const clickX = event.clientX - rect.left;
+    // const ratio = rect.width > 0 ? clickX / rect.width : 0;
+    // const raw = this.min + ratio * (this.max - this.min);
+    // this.selectValue(raw);
   }
 
   private normalizeValue(value: number | null): number | null {
