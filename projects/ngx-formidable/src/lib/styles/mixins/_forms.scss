@@ -380,7 +380,7 @@
   display: flex;
   flex-direction: column;
 
-  $thumb-size: 20px; // TODO create token
+  $thumb-size: 10px; // TODO create token
 
   .slider-track-wrapper {
     position: relative;
@@ -414,14 +414,17 @@
 
   .slider-label-row {
     display: flex;
-    align-items: center;
+    // align-items: center;
     justify-content: space-between;
 
     .slider-min-label,
     .slider-max-label {
-      flex: 0 0 auto;
-      white-space: nowrap;
-      opacity: 0.8;
+      // flex: 0 0 auto;
+      // white-space: nowrap;
+      // TODO create tokens
+      font-size: var(--formidable-length-indicator-font-size, #{tokens.$formidable-length-indicator-font-size});
+      font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
+      line-height: var(--formidable-length-indicator-line-height, #{tokens.$formidable-length-indicator-line-height});
     }
 
     margin-top: utils.spacing(4);
@@ -488,6 +491,7 @@
 
       width: $thumb-size;
       height: $thumb-size;
+      transform: translateX(-0%);
       border-radius: 50%; // TODO create token
       background-color: orange; // TODO create token
       border: var(--formidable-slider-thumb-border-width, 2px) solid var(--formidable-slider-thumb-border-color, #fff);
@@ -526,14 +530,17 @@
 
   .slider-ticks {
     position: relative;
-    margin-top: utils.spacing(4);
-    min-height: utils.spacing(20);
-    font-size: 0.75em; // slightly smaller than main field text
+    // margin-top: utils.spacing(4);
+    // min-height: utils.spacing(20);
+    // TODO create tokens
+    font-size: var(--formidable-length-indicator-font-size, #{tokens.$formidable-length-indicator-font-size});
+    font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
+    line-height: var(--formidable-length-indicator-line-height, #{tokens.$formidable-length-indicator-line-height});
   }
 
   .slider-tick {
     position: absolute;
-    top: 0;
+    // top: 0;
     transform: translateX(-50%);
     display: flex;
     flex-direction: column;
@@ -542,7 +549,7 @@
 
     // Avoid clipping labels at the edges
     &:first-child {
-      align-items: flex-start;
+      // align-items: flex-start;
       transform: translateX(0);
     }
 
