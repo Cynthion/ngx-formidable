@@ -40,18 +40,6 @@
       (blur)="onFocusChange(false)" />
   </div>
 
-  @if (showMinMaxLabels) {
-    <div class="slider-label-row">
-      <div class="slider-min-label">
-        {{ minLabel ?? min }}
-      </div>
-
-      <div class="slider-max-label">
-        {{ maxLabel ?? max }}
-      </div>
-    </div>
-  }
-
   @if (showTickMarks && ticks.length > 0) {
     <div class="slider-ticks">
       @for (tick of ticks; track tick) {
@@ -64,6 +52,18 @@
           </div>
         </div>
       }
+    </div>
+  }
+
+  @if (showMinMaxLabels) {
+    <div class="slider-label-row">
+      <div class="slider-min-label">
+        {{ minLabel ?? min }}
+      </div>
+
+      <div class="slider-max-label">
+        {{ maxLabel ?? max }}
+      </div>
     </div>
   }
 </div>

@@ -426,8 +426,6 @@
       font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
       line-height: var(--formidable-length-indicator-line-height, #{tokens.$formidable-length-indicator-line-height});
     }
-
-    margin-top: utils.spacing(4);
   }
 
   .slider-thumb-label {
@@ -458,11 +456,11 @@
   }
 
   .slider-input {
+    position: relative;
     background: transparent;
     width: 100%;
     height: 100%;
     // border: none;
-    position: relative;
     // margin: 0;
     // padding: 0;
 
@@ -554,7 +552,7 @@
     }
 
     &:last-child {
-      align-items: flex-end;
+      // align-items: flex-end;
       transform: translateX(-100%);
     }
   }
