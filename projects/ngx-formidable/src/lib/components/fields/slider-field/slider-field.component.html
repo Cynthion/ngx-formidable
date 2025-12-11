@@ -11,7 +11,20 @@
         class="slider-track-fill"
         [style.width.%]="valuePercent"></div>
     </div>
-
+    @if (showTickMarks && ticks.length > 0) {
+      <div class="slider-ticks">
+        @for (tick of ticks; track tick) {
+          <div
+            class="slider-tick"
+            [style.left.%]="getTickPercent(tick)">
+            <div class="slider-tick-mark"></div>
+            <!-- <div class="slider-tick-label">
+              {{ transformTickToTickLabel ? getTickLabel(tick) : tick }}
+            </div> -->
+          </div>
+        }
+      </div>
+    }
     @if (showThumbLabel) {
       <div
         class="slider-thumb-label"
@@ -39,31 +52,4 @@
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
   </div>
-
-  @if (showTickMarks && ticks.length > 0) {
-    <div class="slider-ticks">
-      @for (tick of ticks; track tick) {
-        <div
-          class="slider-tick"
-          [style.left.%]="getTickPercent(tick)">
-          <div class="slider-tick-mark"></div>
-          <div class="slider-tick-label">
-            {{ transformTickToTickLabel ? getTickLabel(tick) : tick }}
-          </div>
-        </div>
-      }
-    </div>
-  }
-
-  @if (showMinMaxLabels) {
-    <div class="slider-label-row">
-      <div class="slider-min-label">
-        {{ minLabel ?? min }}
-      </div>
-
-      <div class="slider-max-label">
-        {{ maxLabel ?? max }}
-      </div>
-    </div>
-  }
 </div>

@@ -377,8 +377,8 @@
   @include field-reset;
   @include field-font;
 
-  display: flex;
-  flex-direction: column;
+  // display: flex;
+  // flex-direction: column;
 
   $thumb-size: 10px; // TODO create token
 
@@ -410,6 +410,55 @@
     // width: 0; // controlled via [style.width.%] in template
     background-color: red;
     border-radius: 10px; // inherit
+  }
+
+  .slider-ticks {
+    position: absolute;
+    inset-inline: 0;
+    display: flex;
+
+    // margin-top: utils.spacing(4);
+    // min-height: utils.spacing(20);
+    // TODO create tokens
+    font-size: var(--formidable-length-indicator-font-size, #{tokens.$formidable-length-indicator-font-size});
+    font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
+    line-height: var(--formidable-length-indicator-line-height, #{tokens.$formidable-length-indicator-line-height});
+
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .slider-tick {
+    // // position: absolute;
+    // // top: 0;
+    // transform: translateX(-50%);
+    // display: flex;
+    // flex-direction: column;
+    // align-items: center;
+    // text-align: center;
+
+    // // Avoid clipping labels at the edges
+    &:first-child {
+      // align-items: flex-start;
+      // transform: translateX(0);
+    }
+
+    &:last-child {
+      // align-items: flex-end;
+      // transform: translateX(-100%);
+    }
+  }
+
+  .slider-tick-mark {
+    width: 10px; // TODO create token
+    height: utils.spacing(6); // TODO create token
+    // margin-bottom: utils.spacing(2);
+    background-color: lime; // TODO create token
+  }
+
+  .slider-tick-label {
+    white-space: nowrap;
+    opacity: 0.8;
   }
 
   .slider-label-row {
@@ -524,49 +573,6 @@
     // input[type='range']:focus::-webkit-slider-runnable-track {
     //   background: #ccc;
     // }
-  }
-
-  .slider-ticks {
-    position: relative;
-    // margin-top: utils.spacing(4);
-    // min-height: utils.spacing(20);
-    // TODO create tokens
-    font-size: var(--formidable-length-indicator-font-size, #{tokens.$formidable-length-indicator-font-size});
-    font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
-    line-height: var(--formidable-length-indicator-line-height, #{tokens.$formidable-length-indicator-line-height});
-  }
-
-  .slider-tick {
-    position: absolute;
-    // top: 0;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-
-    // Avoid clipping labels at the edges
-    &:first-child {
-      // align-items: flex-start;
-      transform: translateX(0);
-    }
-
-    &:last-child {
-      // align-items: flex-end;
-      transform: translateX(-100%);
-    }
-  }
-
-  .slider-tick-mark {
-    width: 1px;
-    height: utils.spacing(6);
-    margin-bottom: utils.spacing(2);
-    background-color: var(--formidable-slider-tick-color, rgba(0, 0, 0, 0.4));
-  }
-
-  .slider-tick-label {
-    white-space: nowrap;
-    opacity: 0.8;
   }
 
   &.is-readonly,
