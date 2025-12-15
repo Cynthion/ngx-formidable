@@ -377,9 +377,6 @@
   @include field-reset;
   @include field-font;
 
-  // display: flex;
-  // flex-direction: column;
-
   $thumb-size: 10px; // TODO create token
 
   .slider-track-wrapper {
@@ -395,21 +392,16 @@
   .slider-track {
     position: absolute;
     inset-inline: 0;
-    // top: 50%;
-    // transform: translateY(-50%);
     height: 20px; // TODO create token
     border-radius: 0; // TODO create token
     background-color: green;
-    // overflow: hidden;
-    // pointer-events: none; // clicks handled by wrapper
-    border-radius: 10px; // inherit
+    border-radius: 10px; // TODO create token
   }
 
   .slider-track-fill {
     height: 100%;
-    // width: 0; // controlled via [style.width.%] in template
     background-color: red;
-    border-radius: 10px; // inherit
+    border-radius: inherit;
   }
 
   .slider-ticks {
@@ -417,8 +409,6 @@
     inset-inline: 0;
     display: flex;
 
-    // margin-top: utils.spacing(4);
-    // min-height: utils.spacing(20);
     // TODO create tokens
     font-size: var(--formidable-length-indicator-font-size, #{tokens.$formidable-length-indicator-font-size});
     font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
@@ -429,47 +419,17 @@
   }
 
   .slider-tick {
-    // // position: absolute;
-    // // top: 0;
-    // transform: translateX(-50%);
-    // display: flex;
-    // flex-direction: column;
-    // align-items: center;
-    // text-align: center;
-
-    // // Avoid clipping labels at the edges
-    &:first-child {
-      // align-items: flex-start;
-      // transform: translateX(0);
-    }
-
-    &:last-child {
-      // align-items: flex-end;
-      // transform: translateX(-100%);
-    }
-  }
-
-  .slider-tick-mark {
-    width: 10px; // TODO create token
-    height: utils.spacing(6); // TODO create token
-    // margin-bottom: utils.spacing(2);
+    width: 15px; // TODO create token
+    height: 15px; // TODO create token
     background-color: lime; // TODO create token
   }
 
-  .slider-tick-label {
-    white-space: nowrap;
-    opacity: 0.8;
-  }
-
-  .slider-label-row {
+  .slider-labels {
     display: flex;
-    // align-items: center;
     justify-content: space-between;
 
-    .slider-min-label,
-    .slider-max-label {
-      // flex: 0 0 auto;
-      // white-space: nowrap;
+    .min-label,
+    .max-label {
       // TODO create tokens
       font-size: var(--formidable-length-indicator-font-size, #{tokens.$formidable-length-indicator-font-size});
       font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
@@ -479,8 +439,7 @@
 
   .slider-thumb-label {
     position: absolute;
-    top: 50%;
-    transform: translate(-50%, calc(-100% - #{utils.spacing(2)}));
+    transform: translate(-50%, calc(-100% - #{utils.spacing(10)})); // TODO create token
     opacity: 0;
     pointer-events: none;
     transition:
@@ -489,19 +448,14 @@
   }
 
   .slider-thumb-label-inner {
-    padding: utils.spacing(2) utils.spacing(4);
-    border-radius: 999px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: #ffffff;
-    font-size: 0.75em;
-    white-space: nowrap;
-  }
-
-  // Show thumb label on hover or focus
-  &:hover .slider-thumb-label,
-  &.focused .slider-thumb-label {
-    opacity: 1;
-    transform: translate(-50%, calc(-100% - #{utils.spacing(4)}));
+    padding: utils.spacing(4); // TODO create token
+    border-radius: 10px; // TODO create token
+    background-color: pink; // TODO create token
+    color: black; // TODO create token
+    // TODO create tokens
+    font-size: var(--formidable-length-indicator-font-size, #{tokens.$formidable-length-indicator-font-size});
+    font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
+    line-height: var(--formidable-length-indicator-line-height, #{tokens.$formidable-length-indicator-line-height});
   }
 
   .slider-input {
@@ -509,70 +463,42 @@
     background: transparent;
     width: 100%;
     height: 100%;
-    // border: none;
-    // margin: 0;
-    // padding: 0;
-
-    /* stylelint-disable-next-line property-no-vendor-prefix */
-    -webkit-appearance: none; // disable native styling in WebKit browsers
-
-    // appearance: none;
-    // outline: none;
 
     cursor: pointer;
     &:disabled {
       cursor: default;
     }
 
-    // Make native track transparent: `.slider-track` is the visible one
-    // &::-webkit-slider-runnable-track,
-    // &::-moz-range-track {
-    //   background: transparent;
-    // }
+    /* stylelint-disable-next-line property-no-vendor-prefix */
+    -webkit-appearance: none; // disable native styling in WebKit browsers
 
     // WebKit thumb
     &::-webkit-slider-thumb {
-      // -webkit-appearance: none;
       appearance: none;
-      cursor: pointer;
-
       width: $thumb-size;
       height: $thumb-size;
-      transform: translateX(-0%);
-      border-radius: 50%; // TODO create token
       background-color: orange; // TODO create token
-      border: var(--formidable-slider-thumb-border-width, 2px) solid var(--formidable-slider-thumb-border-color, #fff);
+      border-radius: 0; // TODO create token
+      border: var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) solid
+        var(--formidable-color-field-border, #{tokens.$formidable-color-field-border}); // TODO create token
     }
 
     // Firefox thumb
-    // &::-moz-range-thumb {
-    //   width: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
-    //   height: var(--formidable-slider-thumb-size, #{utils.spacing(16)});
-    //   border-radius: 50%;
-    //   background-color: var(--formidable-slider-thumb-background, currentColor);
-    //   border: var(--formidable-slider-thumb-border-width, 2px) solid var(--formidable-slider-thumb-border-color, #fff);
-    //   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
-    //   cursor: pointer;
-    // }
+    &::-moz-range-thumb {
+      appearance: none;
+      width: $thumb-size;
+      height: $thumb-size;
+      background-color: orange; // TODO create token
+      border-radius: 0; // TODO create token
+      border: var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) solid
+        var(--formidable-color-field-border, #{tokens.$formidable-color-field-border}); // TODO create token
+    }
+  }
 
-    // from https://brennaobrien.com/blog/2014/05/style-input-type-range-in-every-browser.html
-    // input[type='range']::-webkit-slider-thumb {
-    //   -webkit-appearance: none;
-    //   border: none;
-    //   height: 16px;
-    //   width: 16px;
-    //   border-radius: 50%;
-    //   background: goldenrod;
-    //   margin-top: -4px;
-    // }
-
-    // input[type='range']:focus {
-    //   outline: none;
-    // }
-
-    // input[type='range']:focus::-webkit-slider-runnable-track {
-    //   background: #ccc;
-    // }
+  // TODO show only on hover over thumb, not everything
+  &:hover .slider-thumb-label,
+  &.focused .slider-thumb-label {
+    opacity: 1;
   }
 
   &.is-readonly,

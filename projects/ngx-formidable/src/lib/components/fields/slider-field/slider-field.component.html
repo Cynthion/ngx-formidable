@@ -14,14 +14,7 @@
     @if (showTickMarks && ticks.length > 0) {
       <div class="slider-ticks">
         @for (tick of ticks; track tick) {
-          <div
-            class="slider-tick"
-            [style.left.%]="getTickPercent(tick)">
-            <div class="slider-tick-mark"></div>
-            <!-- <div class="slider-tick-label">
-              {{ transformTickToTickLabel ? getTickLabel(tick) : tick }}
-            </div> -->
-          </div>
+          <div class="slider-tick"></div>
         }
       </div>
     }
@@ -52,4 +45,16 @@
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
   </div>
+
+  @if (showMinMaxLabels) {
+    <div class="slider-labels">
+      <div class="min-label">
+        {{ minLabel ?? min }}
+      </div>
+
+      <div class="max-label">
+        {{ maxLabel ?? max }}
+      </div>
+    </div>
+  }
 </div>
