@@ -393,6 +393,8 @@
 
   .slider-track {
     position: absolute;
+    display: flex;
+    align-items: center;
     inset-inline: 0;
     height: var(--formidable-slider-track-height, #{tokens.$formidable-slider-track-height});
     background: var(--formidable-color-slider-background, #{tokens.$formidable-color-slider-background});
@@ -405,6 +407,7 @@
     height: 100%;
     background: var(--formidable-color-slider-background-fill, #{tokens.$formidable-color-slider-background-fill});
     border-radius: inherit;
+    height: var(--formidable-slider-track-fill-height, #{tokens.$formidable-slider-track-fill-height});
   }
 
   .slider-ticks {

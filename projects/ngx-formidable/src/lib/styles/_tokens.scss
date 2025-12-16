@@ -171,8 +171,9 @@ $formidable-toggle-field-gap: utils.spacing(8);
 
 // #region Slider
 
-$formidable-slider-thumb-size: utils.spacing(10);
-$formidable-slider-track-height: utils.spacing(20);
+$formidable-slider-thumb-size: utils.spacing(20);
+$formidable-slider-track-height: utils.spacing(8);
+$formidable-slider-track-fill-height: utils.spacing(12);
 $formidable-slider-track-border-thickness: utils.spacing(1);
 $formidable-slider-track-border-radius: utils.spacing(6);
 $formidable-slider-tick-width: utils.spacing(1);
