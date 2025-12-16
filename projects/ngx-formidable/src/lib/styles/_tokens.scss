@@ -25,6 +25,12 @@ $formidable-length-indicator-font-size: utils.spacing(12);
 $formidable-length-indicator-font-weight: normal;
 $formidable-length-indicator-line-height: math.div(19.2, 12); // 1.6
 
+// Slider
+
+$formidable-slider-label-font-size: utils.spacing(12);
+$formidable-slider-label-font-weight: normal;
+$formidable-slider-label-line-height: math.div(19.2, 12); // 1.6
+
 // #endregion
 
 // #region Field Dimensions
@@ -130,6 +136,18 @@ $formidable-color-toggle-thumb-disabled: $formidable-color-field-text-disabled;
 $formidable-color-toggle-track-readonly: $formidable-color-field-background-readonly;
 $formidable-color-toggle-track-disabled: $formidable-color-field-background-disabled;
 
+// Slider
+$formidable-color-slider-background: green;
+$formidable-color-slider-background-fill: red;
+$formidable-color-slider-border: yellow;
+$formidable-color-slider-thumb: orange;
+$formidable-color-slider-tick: lime;
+$formidable-color-slider-thumb-label: black;
+$formidable-color-slider-thumb-label-background: pink;
+$formidable-color-slider-thumb-label-border: yellow;
+$formidable-color-slider-thumb-border: blue;
+$formidable-color-slider-track-border: yellow;
+
 // #endregion
 
 // #region Textarea
@@ -148,6 +166,23 @@ $formidable-toggle-field-thumb-size: utils.spacing(16);
 $formidable-toggle-field-thumb-border-radius: $formidable-field-border-radius;
 $formidable-toggle-field-thumb-gap: utils.spacing(4);
 $formidable-toggle-field-gap: utils.spacing(8);
+
+// #endregion
+
+// #region Slider
+
+$formidable-slider-thumb-size: utils.spacing(10);
+$formidable-slider-track-height: utils.spacing(20);
+$formidable-slider-track-border-thickness: utils.spacing(1);
+$formidable-slider-track-border-radius: utils.spacing(6);
+$formidable-slider-tick-width: utils.spacing(1);
+$formidable-slider-tick-height: utils.spacing(10);
+$formidable-slider-thumb-border-thickness: utils.spacing(2);
+$formidable-slider-thumb-border-radius: utils.spacing(10);
+$formidable-slider-thumb-label-distance: utils.spacing(1);
+$formidable-slider-thumb-label-padding: utils.spacing(2) utils.spacing(4);
+$formidable-slider-thumb-label-border-thickness: utils.spacing(1);
+$formidable-slider-thumb-label-border-radius: utils.spacing(6);
 
 // #endregion
 

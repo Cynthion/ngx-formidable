@@ -377,30 +377,33 @@
   @include field-reset;
   @include field-font;
 
-  $thumb-size: 10px; // TODO create token
+  $thumb-size: var(--formidable-slider-thumb-size, #{tokens.$formidable-slider-thumb-size});
+  $label-font-size: var(--formidable-slider-label-font-size, #{tokens.$formidable-slider-label-font-size});
+  $label-font-weight: var(--formidable-slider-label-font-weight, #{tokens.$formidable-slider-label-font-weight});
+  $label-line-height: var(--formidable-slider-label-line-height, #{tokens.$formidable-slider-label-line-height});
 
   .slider-track-wrapper {
     position: relative;
     display: flex;
     align-items: center;
-    background: yellow;
 
     // reasonable hit area
-    height: utils.spacing(48); // TODO create token?
+    height: utils.spacing(24);
   }
 
   .slider-track {
     position: absolute;
     inset-inline: 0;
-    height: 20px; // TODO create token
-    border-radius: 0; // TODO create token
-    background-color: green;
-    border-radius: 10px; // TODO create token
+    height: var(--formidable-slider-track-height, #{tokens.$formidable-slider-track-height});
+    background: var(--formidable-color-slider-background, #{tokens.$formidable-color-slider-background});
+    border-radius: var(--formidable-slider-track-border-radius, #{tokens.$formidable-slider-track-border-radius});
+    border: var(--formidable-slider-track-border-thickness, #{tokens.$formidable-slider-track-border-thickness}) solid
+      var(--formidable-color-slider-track-border, #{tokens.$formidable-color-slider-track-border});
   }
 
   .slider-track-fill {
     height: 100%;
-    background-color: red;
+    background: var(--formidable-color-slider-background-fill, #{tokens.$formidable-color-slider-background-fill});
     border-radius: inherit;
   }
 
@@ -408,20 +411,18 @@
     position: absolute;
     inset-inline: 0;
     display: flex;
-
-    // TODO create tokens
-    font-size: var(--formidable-length-indicator-font-size, #{tokens.$formidable-length-indicator-font-size});
-    font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
-    line-height: var(--formidable-length-indicator-line-height, #{tokens.$formidable-length-indicator-line-height});
+    font-size: $label-font-size;
+    font-weight: $label-font-weight;
+    line-height: $label-line-height;
 
     align-items: center;
     justify-content: space-between;
   }
 
   .slider-tick {
-    width: 15px; // TODO create token
-    height: 15px; // TODO create token
-    background-color: lime; // TODO create token
+    width: var(--formidable-slider-tick-width, #{tokens.$formidable-slider-tick-width});
+    height: var(--formidable-slider-tick-height, #{tokens.$formidable-slider-tick-height});
+    background: var(--formidable-color-slider-tick, #{tokens.$formidable-color-slider-tick});
   }
 
   .slider-labels {
@@ -430,16 +431,18 @@
 
     .min-label,
     .max-label {
-      // TODO create tokens
-      font-size: var(--formidable-length-indicator-font-size, #{tokens.$formidable-length-indicator-font-size});
-      font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
-      line-height: var(--formidable-length-indicator-line-height, #{tokens.$formidable-length-indicator-line-height});
+      font-size: $label-font-size;
+      font-weight: $label-font-weight;
+      line-height: $label-line-height;
     }
   }
 
   .slider-thumb-label {
     position: absolute;
-    transform: translate(-50%, calc(-100% - #{utils.spacing(10)})); // TODO create token
+    transform: translate(
+      -50%,
+      calc(-100% - var(--formidable-slider-thumb-label-distance, #{tokens.$formidable-slider-thumb-label-distance}))
+    );
     opacity: 0;
     pointer-events: none;
     transition:
@@ -448,14 +451,24 @@
   }
 
   .slider-thumb-label-inner {
-    padding: utils.spacing(4); // TODO create token
-    border-radius: 10px; // TODO create token
-    background-color: pink; // TODO create token
-    color: black; // TODO create token
-    // TODO create tokens
-    font-size: var(--formidable-length-indicator-font-size, #{tokens.$formidable-length-indicator-font-size});
-    font-weight: var(--formidable-length-indicator-font-weight, #{tokens.$formidable-length-indicator-font-weight});
-    line-height: var(--formidable-length-indicator-line-height, #{tokens.$formidable-length-indicator-line-height});
+    padding: var(--formidable-slider-thumb-label-padding, #{tokens.$formidable-slider-thumb-label-padding});
+    border-radius: var(
+      --formidable-slider-thumb-label-border-radius,
+      #{tokens.$formidable-slider-thumb-label-border-radius}
+    );
+    border: var(
+        --formidable-slider-thumb-label-border-thickness,
+        #{tokens.$formidable-slider-thumb-label-border-thickness}
+      )
+      solid var(--formidable-color-slider-thumb-label-border, #{tokens.$formidable-color-slider-thumb-label-border});
+    background: var(
+      --formidable-color-slider-thumb-label-background,
+      #{tokens.$formidable-color-slider-thumb-label-background}
+    );
+    color: var(--formidable-color-slider-thumb-label, #{tokens.$formidable-color-slider-thumb-label});
+    font-size: $label-font-size;
+    font-weight: $label-font-weight;
+    line-height: $label-line-height;
   }
 
   .slider-input {
@@ -469,7 +482,6 @@
       cursor: default;
     }
 
-    /* stylelint-disable-next-line property-no-vendor-prefix */
     -webkit-appearance: none; // disable native styling in WebKit browsers
 
     // WebKit thumb
@@ -477,10 +489,10 @@
       appearance: none;
       width: $thumb-size;
       height: $thumb-size;
-      background-color: orange; // TODO create token
-      border-radius: 0; // TODO create token
-      border: var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) solid
-        var(--formidable-color-field-border, #{tokens.$formidable-color-field-border}); // TODO create token
+      background: var(--formidable-color-slider-thumb, #{tokens.$formidable-color-slider-thumb});
+      border-radius: var(--formidable-slider-thumb-border-radius, #{tokens.$formidable-slider-thumb-border-radius});
+      border: var(--formidable-slider-thumb-border-thickness, #{tokens.$formidable-slider-thumb-border-thickness}) solid
+        var(--formidable-color-slider-thumb-border, #{tokens.$formidable-color-slider-thumb-border});
     }
 
     // Firefox thumb
@@ -488,10 +500,10 @@
       appearance: none;
       width: $thumb-size;
       height: $thumb-size;
-      background-color: orange; // TODO create token
-      border-radius: 0; // TODO create token
-      border: var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) solid
-        var(--formidable-color-field-border, #{tokens.$formidable-color-field-border}); // TODO create token
+      background: var(--formidable-color-slider-thumb, #{tokens.$formidable-color-slider-thumb});
+      border-radius: var(--formidable-slider-thumb-border-radius, #{tokens.$formidable-slider-thumb-border-radius});
+      border: var(--formidable-slider-thumb-border-thickness, #{tokens.$formidable-slider-thumb-border-thickness}) solid
+        var(--formidable-color-slider-thumb-border, #{tokens.$formidable-color-slider-thumb-border});
     }
   }
 

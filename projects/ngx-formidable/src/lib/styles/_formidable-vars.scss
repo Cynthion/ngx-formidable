@@ -25,6 +25,12 @@
   --formidable-length-indicator-font-weight: #{tokens.$formidable-length-indicator-font-weight};
   --formidable-length-indicator-line-height: #{tokens.$formidable-length-indicator-line-height};
 
+  // Slider
+
+  --formidable-slider-label-font-size: #{tokens.$formidable-slider-label-font-size};
+  --formidable-slider-label-font-weight: #{tokens.$formidable-slider-label-font-weight};
+  --formidable-slider-label-line-height: #{tokens.$formidable-slider-label-line-height};
+
   // #endregion
 
   // #region Field Dimensions
@@ -248,6 +254,18 @@
     #{tokens.$formidable-color-toggle-track-disabled}
   );
 
+  // Slider
+  --formidable-color-slider-background: #{tokens.$formidable-color-slider-background};
+  --formidable-color-slider-background-fill: #{tokens.$formidable-color-slider-background-fill};
+  --formidable-color-slider-border: #{tokens.$formidable-color-slider-border};
+  --formidable-color-slider-thumb: #{tokens.$formidable-color-slider-thumb};
+  --formidable-color-slider-tick: #{tokens.$formidable-color-slider-tick};
+  --formidable-color-slider-thumb-label-background: #{tokens.$formidable-color-slider-thumb-label-background};
+  --formidable-color-slider-thumb-label: #{tokens.$formidable-color-slider-thumb-label};
+  --formidable-color-slider-thumb-color: #{tokens.$formidable-color-slider-thumb-border};
+  --formidable-color-slider-track-border: #{tokens.$formidable-color-slider-track-border};
+  --formidable-color-slider-thumb-label-border: #{tokens.$formidable-color-slider-thumb-label-border};
+
   // #endregion
 
   // #region Textarea
@@ -269,6 +287,23 @@
   );
   --formidable-toggle-field-thumb-gap: #{tokens.$formidable-toggle-field-thumb-gap};
   --formidable-toggle-field-gap: #{tokens.$formidable-toggle-field-gap};
+
+  // #endregion
+
+  // #region Slider
+
+  --formidable-slider-thumb-size: #{tokens.$formidable-slider-thumb-size};
+  --formidable-slider-track-height: #{tokens.$formidable-slider-track-height};
+  --formidable-slider-track-border-thickness: #{tokens.$formidable-slider-track-border-thickness};
+  --formidable-slider-track-border-radius: #{tokens.$formidable-slider-track-border-radius};
+  --formidable-slider-tick-width: #{tokens.$formidable-slider-tick-width};
+  --formidable-slider-tick-height: #{tokens.$formidable-slider-tick-height};
+  --formidable-slider-thumb-border-thickness: #{tokens.$formidable-slider-thumb-border-thickness};
+  --formidable-slider-thumb-border-radius: #{tokens.$formidable-slider-thumb-border-radius};
+  --formidable-slider-thumb-label-distance: #{tokens.$formidable-slider-thumb-label-distance};
+  --formidable-slider-thumb-label-padding: #{tokens.$formidable-slider-thumb-label-padding};
+  --formidable-slider-thumb-label-border-thickness: #{tokens.$formidable-slider-thumb-label-border-thickness};
+  --formidable-slider-thumb-label-border-radius: #{tokens.$formidable-slider-thumb-label-border-radius};
 
   // #endregion
 
