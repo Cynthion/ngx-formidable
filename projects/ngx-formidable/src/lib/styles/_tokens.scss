@@ -183,7 +183,7 @@ $formidable-slider-thumb-border-radius: $formidable-field-border-radius;
 $formidable-slider-thumb-label-distance: utils.spacing(2);
 $formidable-slider-thumb-label-padding: utils.spacing(2) utils.spacing(4);
 $formidable-slider-thumb-label-border-thickness: $formidable-field-border-thickness;
-$formidable-slider-thumb-label-border-radius: utils.spacing(6);
+$formidable-slider-thumb-label-border-radius: $formidable-field-border-radius;
 
 // #endregion
 
