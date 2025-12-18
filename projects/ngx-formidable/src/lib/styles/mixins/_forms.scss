@@ -400,7 +400,7 @@
     background: var(--formidable-color-slider-background, #{tokens.$formidable-color-slider-background});
     border-radius: var(--formidable-slider-track-border-radius, #{tokens.$formidable-slider-track-border-radius});
     border: var(--formidable-slider-track-border-thickness, #{tokens.$formidable-slider-track-border-thickness}) solid
-      var(--formidable-color-slider-track-border, #{tokens.$formidable-color-slider-track-border});
+      var(--formidable-color-slider-border, #{tokens.$formidable-color-slider-border});
   }
 
   .slider-track-fill {
@@ -426,11 +426,18 @@
     width: var(--formidable-slider-tick-width, #{tokens.$formidable-slider-tick-width});
     height: var(--formidable-slider-tick-height, #{tokens.$formidable-slider-tick-height});
     background: var(--formidable-color-slider-tick, #{tokens.$formidable-color-slider-tick});
+    border-radius: var(--formidable-slider-tick-border-radius, #{tokens.$formidable-slider-tick-border-radius});
+
+    &:first-child,
+    &:last-child {
+      background: transparent;
+    }
   }
 
   .slider-labels {
     display: flex;
     justify-content: space-between;
+    user-select: none;
 
     .min-label,
     .max-label {

@@ -263,7 +263,6 @@
   --formidable-color-slider-thumb-label-background: #{tokens.$formidable-color-slider-thumb-label-background};
   --formidable-color-slider-thumb-label: #{tokens.$formidable-color-slider-thumb-label};
   --formidable-color-slider-thumb-color: #{tokens.$formidable-color-slider-thumb-border};
-  --formidable-color-slider-track-border: #{tokens.$formidable-color-slider-track-border};
   --formidable-color-slider-thumb-label-border: #{tokens.$formidable-color-slider-thumb-label-border};
 
   // #endregion
@@ -299,6 +298,7 @@
   --formidable-slider-track-border-radius: #{tokens.$formidable-slider-track-border-radius};
   --formidable-slider-tick-width: #{tokens.$formidable-slider-tick-width};
   --formidable-slider-tick-height: #{tokens.$formidable-slider-tick-height};
+  --formidable-slider-tick-border-radius: #{tokens.$formidable-slider-tick-border-radius};
   --formidable-slider-thumb-border-thickness: #{tokens.$formidable-slider-thumb-border-thickness};
   --formidable-slider-thumb-border-radius: #{tokens.$formidable-slider-thumb-border-radius};
   --formidable-slider-thumb-label-distance: #{tokens.$formidable-slider-thumb-label-distance};

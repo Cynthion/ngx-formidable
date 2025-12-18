@@ -137,16 +137,15 @@ $formidable-color-toggle-track-readonly: $formidable-color-field-background-read
 $formidable-color-toggle-track-disabled: $formidable-color-field-background-disabled;
 
 // Slider
-$formidable-color-slider-background: green;
-$formidable-color-slider-background-fill: red;
-$formidable-color-slider-border: yellow;
-$formidable-color-slider-thumb: orange;
-$formidable-color-slider-tick: lime;
-$formidable-color-slider-thumb-label: black;
-$formidable-color-slider-thumb-label-background: pink;
-$formidable-color-slider-thumb-label-border: yellow;
-$formidable-color-slider-thumb-border: blue;
-$formidable-color-slider-track-border: yellow;
+$formidable-color-slider-background: $formidable-color-field-background;
+$formidable-color-slider-background-fill: $formidable-color-field-text;
+$formidable-color-slider-border: $formidable-color-field-border;
+$formidable-color-slider-thumb: $formidable-color-field-border;
+$formidable-color-slider-tick: $formidable-color-field-selection;
+$formidable-color-slider-thumb-label: $formidable-color-field-label;
+$formidable-color-slider-thumb-label-background: $formidable-color-field-background;
+$formidable-color-slider-thumb-label-border: $formidable-color-field-border;
+$formidable-color-slider-thumb-border: $formidable-color-field-border;
 
 // #endregion
 
@@ -171,18 +170,19 @@ $formidable-toggle-field-gap: utils.spacing(8);
 
 // #region Slider
 
-$formidable-slider-thumb-size: utils.spacing(20);
-$formidable-slider-track-height: utils.spacing(8);
-$formidable-slider-track-fill-height: utils.spacing(12);
-$formidable-slider-track-border-thickness: utils.spacing(1);
-$formidable-slider-track-border-radius: utils.spacing(6);
-$formidable-slider-tick-width: utils.spacing(1);
-$formidable-slider-tick-height: utils.spacing(10);
-$formidable-slider-thumb-border-thickness: utils.spacing(2);
-$formidable-slider-thumb-border-radius: utils.spacing(10);
-$formidable-slider-thumb-label-distance: utils.spacing(1);
+$formidable-slider-thumb-size: utils.spacing(16);
+$formidable-slider-track-height: utils.spacing(6);
+$formidable-slider-track-fill-height: utils.spacing(8);
+$formidable-slider-track-border-thickness: $formidable-field-border-thickness;
+$formidable-slider-track-border-radius: $formidable-field-border-radius;
+$formidable-slider-tick-width: utils.spacing(4);
+$formidable-slider-tick-height: utils.spacing(4);
+$formidable-slider-tick-border-radius: $formidable-field-border-radius;
+$formidable-slider-thumb-border-thickness: utils.spacing(0);
+$formidable-slider-thumb-border-radius: $formidable-field-border-radius;
+$formidable-slider-thumb-label-distance: utils.spacing(2);
 $formidable-slider-thumb-label-padding: utils.spacing(2) utils.spacing(4);
-$formidable-slider-thumb-label-border-thickness: utils.spacing(1);
+$formidable-slider-thumb-label-border-thickness: $formidable-field-border-thickness;
 $formidable-slider-thumb-label-border-radius: utils.spacing(6);
 
 // #endregion
