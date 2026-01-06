@@ -47,8 +47,16 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   // #region ControlValueAccessor
 
   protected doWriteValue(value: number | null): void {
-    this._value = this.normalizeValue(value);
+    const normalized = this.normalizeValue(value);
+
+    this._value = normalized;
     this.syncRangeInput();
+
+    // If the form gave us an out-of-range / non-step-aligned value,
+    // push the corrected value back so model === UI.
+    if (normalized !== value) {
+      queueMicrotask(() => this.onChange(normalized));
+    }
   }
 
   // #endregion
