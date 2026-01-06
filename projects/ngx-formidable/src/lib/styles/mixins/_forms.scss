@@ -488,9 +488,6 @@
     height: 100%;
 
     cursor: pointer;
-    &:disabled {
-      cursor: default;
-    }
 
     -webkit-appearance: none; // disable native styling in WebKit browsers
 
@@ -517,15 +514,69 @@
     }
   }
 
-  // TODO show only on hover over thumb, not everything
   &:hover .slider-thumb-label,
   &.focused .slider-thumb-label {
     opacity: 1;
   }
 
-  &.is-readonly,
+  &.is-readonly {
+    .slider-input {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .slider-track-fill {
+      background: var(
+        --formidable-color-slider-track-filled-readonly,
+        #{tokens.$formidable-color-slider-track-readonly}
+      );
+    }
+
+    .slider-track {
+      background: var(--formidable-color-slider-track-readonly, #{tokens.$formidable-color-slider-track-readonly});
+    }
+
+    // WebKit thumb
+    .slider-input {
+      &::-webkit-slider-thumb {
+        background: var(--formidable-color-slider-thumb-readonly, #{tokens.$formidable-color-slider-thumb-readonly});
+      }
+
+      // Firefox thumb
+      &::-moz-range-thumb {
+        background: var(--formidable-color-slider-thumb-readonly, #{tokens.$formidable-color-slider-thumb-readonly});
+      }
+    }
+  }
+
   &.is-disabled {
-    cursor: default;
+    .slider-input {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .slider-track-fill {
+      background: var(
+        --formidable-color-slider-track-filled-disabled,
+        #{tokens.$formidable-color-slider-track-disabled}
+      );
+    }
+
+    .slider-track {
+      background: var(--formidable-color-slider-track-disabled, #{tokens.$formidable-color-slider-track-disabled});
+    }
+
+    // WebKit thumb
+    .slider-input {
+      &::-webkit-slider-thumb {
+        background: var(--formidable-color-slider-thumb-disabled, #{tokens.$formidable-color-slider-thumb-disabled});
+      }
+
+      // Firefox thumb
+      &::-moz-range-thumb {
+        background: var(--formidable-color-slider-thumb-disabled, #{tokens.$formidable-color-slider-thumb-disabled});
+      }
+    }
   }
 }
 

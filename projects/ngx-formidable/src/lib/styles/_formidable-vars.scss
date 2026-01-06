@@ -283,11 +283,34 @@
     --formidable-color-field-border,
     #{tokens.$formidable-color-slider-thumb-label-border}
   );
+  --formidable-color-slider-thumb-readonly: var(
+    --formidable-color-field-text,
+    #{tokens.$formidable-color-slider-thumb-readonly}
+  );
+  --formidable-color-slider-thumb-disabled: var(
+    --formidable-color-field-text,
+    #{tokens.$formidable-color-slider-thumb-disabled}
+  );
+  --formidable-color-slider-track-readonly: var(
+    --formidable-color-field-background-readonly,
+    #{tokens.$formidable-color-slider-track-readonly}
+  );
+  --formidable-color-slider-track-disabled: var(
+    --formidable-color-field-background-disabled,
+    #{tokens.$formidable-color-slider-track-disabled}
+  );
+  --formidable-color-slider-track-filled-readonly: var(
+    --formidable-color-field-text-readonly,
+    #{tokens.$formidable-color-slider-track-filled-readonly}
+  );
+  --formidable-color-slider-track-filled-disabled: var(
+    --formidable-color-field-text-disabled,
+    #{tokens.$formidable-color-slider-track-filled-disabled}
+  );
 
   // #endregion
 
   // #region Textarea
-
   --formidable-textarea-min-height: #{tokens.$formidable-textarea-min-height};
   --formidable-textarea-max-height: #{tokens.$formidable-textarea-max-height};
   --formidable-textarea-padding-top: #{tokens.$formidable-textarea-padding-top};
