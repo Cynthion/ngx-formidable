@@ -23,7 +23,7 @@ export const EMPTY_FIELD_OPTION: IFormidableFieldOption = {
   disabled: true
 };
 
-export type FieldDecoratorLayout = 'single' | 'group' | 'inline'; // TODO rename options
+export type FieldDecoratorLayout = 'single' | 'group' | 'inline';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 export type FormidablePanelPosition = 'left' | 'right' | 'full';
 export type FormidableToggleFieldLabelPosition = 'before' | 'after';
