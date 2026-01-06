@@ -587,6 +587,8 @@
     &:focus-visible {
       .slider-track {
         @include focused-colors;
+
+        box-shadow: unset;
       }
     }
   }
