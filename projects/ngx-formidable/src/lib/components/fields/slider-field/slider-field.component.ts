@@ -51,6 +51,7 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
 
     this._value = normalized;
     this.syncRangeInput();
+    this.updateThumbTransform();
 
     // If the form gave us an out-of-range / non-step-aligned value,
     // push the corrected value back so model === UI.
@@ -101,6 +102,7 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
 
     this._value = normalized;
     this.syncRangeInput();
+    this.updateThumbTransform();
     this.onValueChange();
   }
 
@@ -180,5 +182,23 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
 
     const val = this.value ?? this.min;
     this.rangeRef.nativeElement.value = String(val);
+  }
+
+  private updateThumbTransform(): void {
+    const el = this.rangeRef?.nativeElement;
+    if (!el) return;
+
+    // Decide what value to use when null: min makes sense for a slider UI
+    const v = this.value ?? this.min;
+
+    // Avoid divide-by-zero when min === max
+    const range = this.max - this.min;
+    const p = range === 0 ? 0.5 : (v - this.min) / range; // 0..1
+    const clampedP = Math.min(1, Math.max(0, p));
+
+    // Map 0..1 -> -50..+50, with 0.5 -> 0
+    const tx = (clampedP - 0.5) * 100; // -50..+50
+
+    el.style.setProperty('--formidable-slider-thumb-transform', `translateX(${tx}%)`);
   }
 }

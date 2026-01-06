@@ -373,11 +373,24 @@
   }
 }
 
+@mixin slider-thumb {
+  $thumb-size: var(--formidable-slider-thumb-size, #{tokens.$formidable-slider-thumb-size});
+
+  appearance: none;
+  width: $thumb-size;
+  height: $thumb-size;
+  background: var(--formidable-color-slider-thumb, #{tokens.$formidable-color-slider-thumb});
+  border-radius: var(--formidable-slider-thumb-border-radius, #{tokens.$formidable-slider-thumb-border-radius});
+  border: var(--formidable-slider-thumb-border-thickness, #{tokens.$formidable-slider-thumb-border-thickness}) solid
+    var(--formidable-color-slider-thumb-border, #{tokens.$formidable-color-slider-thumb-border});
+
+  transform: var(--formidable-slider-thumb-transform, translateX(0%));
+}
+
 @mixin slider-field {
   @include field-reset;
   @include field-font;
 
-  $thumb-size: var(--formidable-slider-thumb-size, #{tokens.$formidable-slider-thumb-size});
   $label-font-size: var(--formidable-slider-label-font-size, #{tokens.$formidable-slider-label-font-size});
   $label-font-weight: var(--formidable-slider-label-font-weight, #{tokens.$formidable-slider-label-font-weight});
   $label-line-height: var(--formidable-slider-label-line-height, #{tokens.$formidable-slider-label-line-height});
@@ -482,6 +495,8 @@
   }
 
   .slider-input {
+    --formidable-slider-thumb-transform: translateX(0%);
+
     @include field-reset;
 
     position: relative;
@@ -495,24 +510,12 @@
 
     // WebKit thumb
     &::-webkit-slider-thumb {
-      appearance: none;
-      width: $thumb-size;
-      height: $thumb-size;
-      background: var(--formidable-color-slider-thumb, #{tokens.$formidable-color-slider-thumb});
-      border-radius: var(--formidable-slider-thumb-border-radius, #{tokens.$formidable-slider-thumb-border-radius});
-      border: var(--formidable-slider-thumb-border-thickness, #{tokens.$formidable-slider-thumb-border-thickness}) solid
-        var(--formidable-color-slider-thumb-border, #{tokens.$formidable-color-slider-thumb-border});
+      @include slider-thumb;
     }
 
     // Firefox thumb
     &::-moz-range-thumb {
-      appearance: none;
-      width: $thumb-size;
-      height: $thumb-size;
-      background: var(--formidable-color-slider-thumb, #{tokens.$formidable-color-slider-thumb});
-      border-radius: var(--formidable-slider-thumb-border-radius, #{tokens.$formidable-slider-thumb-border-radius});
-      border: var(--formidable-slider-thumb-border-thickness, #{tokens.$formidable-slider-thumb-border-thickness}) solid
-        var(--formidable-color-slider-thumb-border, #{tokens.$formidable-color-slider-thumb-border});
+      @include slider-thumb;
     }
   }
 
