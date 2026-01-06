@@ -41,9 +41,9 @@
       [attr.disabled]="disabled ? '' : null"
       [attr.tabindex]="readonly || disabled ? -1 : 0"
       [value]="value ?? min"
-      (input)="onRangeInput($event)"
       (focus)="onFocusChange(true)"
-      (blur)="onFocusChange(false)" />
+      (blur)="onFocusChange(false)"
+      (input)="onRangeInput($event)" />
   </div>
 
   @if (showMinMaxLabels) {

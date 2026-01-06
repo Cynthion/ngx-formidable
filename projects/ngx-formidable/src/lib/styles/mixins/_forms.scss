@@ -482,6 +482,8 @@
   }
 
   .slider-input {
+    @include field-reset;
+
     position: relative;
     background: transparent;
     width: 100%;
@@ -575,6 +577,16 @@
       // Firefox thumb
       &::-moz-range-thumb {
         background: var(--formidable-color-slider-thumb-disabled, #{tokens.$formidable-color-slider-thumb-disabled});
+      }
+    }
+  }
+
+  &:not(.is-readonly, .is-disabled) {
+    &:focus,
+    &.focused,
+    &:focus-visible {
+      .slider-track {
+        @include focused-colors;
       }
     }
   }
