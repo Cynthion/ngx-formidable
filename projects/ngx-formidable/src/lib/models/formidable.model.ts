@@ -185,3 +185,50 @@ export interface IFormidableToggleField extends IFormidableField<boolean | null>
   offLabel?: string;
   toggle(): void;
 }
+
+export interface IFormidableSliderField extends IFormidableField<number | null> {
+  /** Minimum numeric value of the slider (inclusive). */
+  min: number;
+  /** Maximum numeric value of the slider (inclusive). */
+  max: number;
+  /** Step between slider values. */
+  step: number;
+
+  /** Optional label for the minimum value (fallback: min as string). */
+  minLabel?: string;
+  /** Optional label for the maximum value (fallback: max as string). */
+  maxLabel?: string;
+
+  /** Whether to display the min/max labels below the track. */
+  showMinMaxLabels?: boolean;
+
+  /** Whether to display the thumb label. */
+  showThumbLabel?: boolean;
+
+  /** Whether to show tick marks with labels along the track. */
+  showTickMarks?: boolean;
+
+  /**
+   * Interval between tick marks. If omitted, `step` is used.
+   * Only relevant if `showTickMarks === true`.
+   */
+  tickInterval?: number;
+
+  /**
+   * Imperatively select a value from outside (e.g. via template reference).
+   * Should clamp & snap to min/max/step.
+   */
+  selectValue(value: number): void;
+
+  /**
+   * Optional value → thumb label transform for value labels.
+   * E.g., `value => value + ' %'` or map to named categories.
+   */
+  transformValueToThumbLabel?: (value: number) => string;
+
+  /**
+   * Optional tick → tick label transform for tick labels.
+   * E.g., `value => value + ' %'` or map to named categories.
+   */
+  transformTickToTickLabel?: (value: number) => string;
+}

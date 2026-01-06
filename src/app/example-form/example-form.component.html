@@ -172,6 +172,55 @@
     (ngSubmit)="onSubmit()">
     <fieldset>
       @if (viewModel$ | async; as vm) {
+        <!-- Age -->
+        <formidable-field-decorator>
+          <formidable-slider-field
+            formidableFieldErrors
+            name="age"
+            [min]="0"
+            [max]="100"
+            [step]="10"
+            [minLabel]="'MIN'"
+            [maxLabel]="'MAX'"
+            [showMinMaxLabels]="true"
+            [showThumbLabel]="true"
+            [showTickMarks]="true"
+            [transformValueToThumbLabel]="transformValueToThumbLabel"
+            [transformTickToTickLabel]="transformTickToTickLabel"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
+            [ngModel]="vm.formValue$.age"
+            (valueChanged)="onValueChanged('age', $event)"
+            (focusChanged)="onFocusChanged('age', $event)">
+          </formidable-slider-field>
+          <div
+            *ngIf="controlCenter.showLabels"
+            formidableFieldLabel
+            [isFloating]="controlCenter.floatingLabels">
+            Age
+          </div>
+          <div
+            *ngIf="controlCenter.showTooltips"
+            formidableFieldTooltip>
+            <example-tooltip
+              placement="right"
+              trigger="click"
+              [icon]="exampleTooltipSvg"
+              [text]="'This is a slider field.'">
+            </example-tooltip>
+          </div>
+          <div
+            *ngIf="controlCenter.showPrefixes"
+            formidableFieldPrefix>
+            Prefix
+          </div>
+          <div
+            *ngIf="controlCenter.showSuffixes"
+            formidableFieldSuffix>
+            Suffix
+          </div>
+        </formidable-field-decorator>
+
         <!-- IsSingle -->
         <formidable-field-decorator>
           <formidable-toggle-field

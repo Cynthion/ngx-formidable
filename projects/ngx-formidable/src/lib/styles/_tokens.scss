@@ -25,6 +25,12 @@ $formidable-length-indicator-font-size: utils.spacing(12);
 $formidable-length-indicator-font-weight: normal;
 $formidable-length-indicator-line-height: math.div(19.2, 12); // 1.6
 
+// Slider
+
+$formidable-slider-label-font-size: utils.spacing(12);
+$formidable-slider-label-font-weight: normal;
+$formidable-slider-label-line-height: math.div(19.2, 12); // 1.6
+
 // #endregion
 
 // #region Field Dimensions
@@ -130,6 +136,23 @@ $formidable-color-toggle-thumb-disabled: $formidable-color-field-text-disabled;
 $formidable-color-toggle-track-readonly: $formidable-color-field-background-readonly;
 $formidable-color-toggle-track-disabled: $formidable-color-field-background-disabled;
 
+// Slider
+$formidable-color-slider-background: $formidable-color-field-background;
+$formidable-color-slider-background-fill: $formidable-color-field-text;
+$formidable-color-slider-border: $formidable-color-field-border;
+$formidable-color-slider-thumb: $formidable-color-field-border;
+$formidable-color-slider-tick: $formidable-color-field-selection;
+$formidable-color-slider-thumb-label: $formidable-color-field-label;
+$formidable-color-slider-thumb-label-background: $formidable-color-field-background;
+$formidable-color-slider-thumb-label-border: $formidable-color-field-border;
+$formidable-color-slider-thumb-border: $formidable-color-field-border;
+$formidable-color-slider-thumb-readonly: $formidable-color-field-text;
+$formidable-color-slider-thumb-disabled: $formidable-color-field-text;
+$formidable-color-slider-track-readonly: $formidable-color-field-background-readonly;
+$formidable-color-slider-track-disabled: $formidable-color-field-background-disabled;
+$formidable-color-slider-track-filled-readonly: $formidable-color-field-text-readonly;
+$formidable-color-slider-track-filled-disabled: $formidable-color-field-text-disabled;
+
 // #endregion
 
 // #region Textarea
@@ -148,6 +171,25 @@ $formidable-toggle-field-thumb-size: utils.spacing(16);
 $formidable-toggle-field-thumb-border-radius: $formidable-field-border-radius;
 $formidable-toggle-field-thumb-gap: utils.spacing(4);
 $formidable-toggle-field-gap: utils.spacing(8);
+
+// #endregion
+
+// #region Slider
+
+$formidable-slider-thumb-size: utils.spacing(16);
+$formidable-slider-track-height: utils.spacing(6);
+$formidable-slider-track-fill-height: utils.spacing(6);
+$formidable-slider-track-border-thickness: $formidable-field-border-thickness;
+$formidable-slider-track-border-radius: $formidable-field-border-radius;
+$formidable-slider-tick-width: utils.spacing(4);
+$formidable-slider-tick-height: utils.spacing(4);
+$formidable-slider-tick-border-radius: $formidable-field-border-radius;
+$formidable-slider-thumb-border-thickness: utils.spacing(0);
+$formidable-slider-thumb-border-radius: $formidable-field-border-radius;
+$formidable-slider-thumb-label-distance: utils.spacing(2);
+$formidable-slider-thumb-label-padding: utils.spacing(2) utils.spacing(4);
+$formidable-slider-thumb-label-border-thickness: $formidable-field-border-thickness;
+$formidable-slider-thumb-label-border-radius: $formidable-field-border-radius;
 
 // #endregion
 

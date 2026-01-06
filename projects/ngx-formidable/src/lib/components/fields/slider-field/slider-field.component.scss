@@ -1,0 +1,9 @@
+@use '../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.field {
+  @include slider-field;
+}

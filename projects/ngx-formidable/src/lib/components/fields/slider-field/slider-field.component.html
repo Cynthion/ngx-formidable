@@ -1,0 +1,59 @@
+<div
+  #sliderRef
+  class="field"
+  [class.is-readonly]="readonly"
+  [class.is-disabled]="disabled"
+  [class.focused]="isFieldFocused">
+  <div class="slider-track-wrapper">
+    <div class="slider-track">
+      <div
+        class="slider-track-fill"
+        [style.width.%]="valuePercent"></div>
+    </div>
+    @if (showTickMarks && ticks.length > 0) {
+      <div class="slider-ticks">
+        @for (tick of ticks; track tick) {
+          <div class="slider-tick"></div>
+        }
+      </div>
+    }
+    @if (showThumbLabel) {
+      <div
+        class="slider-thumb-label"
+        [style.left.%]="valuePercent">
+        <div class="slider-thumb-label-inner">
+          {{ thumbLabel }}
+        </div>
+      </div>
+    }
+
+    <input
+      #rangeRef
+      type="range"
+      class="slider-input"
+      [id]="fieldId"
+      [min]="min"
+      [max]="max"
+      [step]="step"
+      [attr.name]="name"
+      [attr.readonly]="readonly ? '' : null"
+      [attr.disabled]="disabled ? '' : null"
+      [attr.tabindex]="readonly || disabled ? -1 : 0"
+      [value]="value ?? min"
+      (focus)="onFocusChange(true)"
+      (blur)="onFocusChange(false)"
+      (input)="onRangeInput($event)" />
+  </div>
+
+  @if (showMinMaxLabels) {
+    <div class="slider-labels">
+      <div class="min-label">
+        {{ minLabel ?? min }}
+      </div>
+
+      <div class="max-label">
+        {{ maxLabel ?? max }}
+      </div>
+    </div>
+  }
+</div>

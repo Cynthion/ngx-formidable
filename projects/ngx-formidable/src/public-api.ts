@@ -13,8 +13,10 @@ export * from './lib/components/fields/dropdown-field/dropdown-field.component';
 export * from './lib/components/fields/input-field/input-field.component';
 export * from './lib/components/fields/radio-group-field/radio-group-field.component';
 export * from './lib/components/fields/select-field/select-field.component';
+export * from './lib/components/fields/slider-field/slider-field.component';
 export * from './lib/components/fields/textarea-field/textarea-field.component';
 export * from './lib/components/fields/time-field/time-field.component';
+export * from './lib/components/fields/toggle-field/toggle-field.component';
 export * from './lib/components/icon/icon.component';
 
 export * from './lib/directives/field-errors.directive';

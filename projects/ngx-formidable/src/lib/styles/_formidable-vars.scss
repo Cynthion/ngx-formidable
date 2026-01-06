@@ -25,6 +25,12 @@
   --formidable-length-indicator-font-weight: #{tokens.$formidable-length-indicator-font-weight};
   --formidable-length-indicator-line-height: #{tokens.$formidable-length-indicator-line-height};
 
+  // Slider
+
+  --formidable-slider-label-font-size: #{tokens.$formidable-slider-label-font-size};
+  --formidable-slider-label-font-weight: #{tokens.$formidable-slider-label-font-weight};
+  --formidable-slider-label-line-height: #{tokens.$formidable-slider-label-line-height};
+
   // #endregion
 
   // #region Field Dimensions
@@ -248,10 +254,63 @@
     #{tokens.$formidable-color-toggle-track-disabled}
   );
 
+  // Slider
+
+  --formidable-color-slider-background: var(
+    --formidable-color-field-background,
+    #{tokens.$formidable-color-slider-background}
+  );
+  --formidable-color-slider-background-fill: var(
+    --formidable-color-field-text,
+    #{tokens.$formidable-color-slider-background-fill}
+  );
+  --formidable-color-slider-border: var(--formidable-color-field-border, #{tokens.$formidable-color-slider-border});
+  --formidable-color-slider-thumb: var(--formidable-color-field-border, #{tokens.$formidable-color-slider-thumb});
+  --formidable-color-slider-tick: var(--formidable-color-field-selection, #{tokens.$formidable-color-slider-tick});
+  --formidable-color-slider-thumb-label: var(
+    --formidable-color-field-label,
+    #{tokens.$formidable-color-slider-thumb-label}
+  );
+  --formidable-color-slider-thumb-label-background: var(
+    --formidable-color-field-background,
+    #{tokens.$formidable-color-slider-thumb-label-background}
+  );
+  --formidable-color-slider-thumb-color: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-slider-thumb-border}
+  );
+  --formidable-color-slider-thumb-label-border: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-slider-thumb-label-border}
+  );
+  --formidable-color-slider-thumb-readonly: var(
+    --formidable-color-field-text,
+    #{tokens.$formidable-color-slider-thumb-readonly}
+  );
+  --formidable-color-slider-thumb-disabled: var(
+    --formidable-color-field-text,
+    #{tokens.$formidable-color-slider-thumb-disabled}
+  );
+  --formidable-color-slider-track-readonly: var(
+    --formidable-color-field-background-readonly,
+    #{tokens.$formidable-color-slider-track-readonly}
+  );
+  --formidable-color-slider-track-disabled: var(
+    --formidable-color-field-background-disabled,
+    #{tokens.$formidable-color-slider-track-disabled}
+  );
+  --formidable-color-slider-track-filled-readonly: var(
+    --formidable-color-field-text-readonly,
+    #{tokens.$formidable-color-slider-track-filled-readonly}
+  );
+  --formidable-color-slider-track-filled-disabled: var(
+    --formidable-color-field-text-disabled,
+    #{tokens.$formidable-color-slider-track-filled-disabled}
+  );
+
   // #endregion
 
   // #region Textarea
-
   --formidable-textarea-min-height: #{tokens.$formidable-textarea-min-height};
   --formidable-textarea-max-height: #{tokens.$formidable-textarea-max-height};
   --formidable-textarea-padding-top: #{tokens.$formidable-textarea-padding-top};
@@ -269,6 +328,43 @@
   );
   --formidable-toggle-field-thumb-gap: #{tokens.$formidable-toggle-field-thumb-gap};
   --formidable-toggle-field-gap: #{tokens.$formidable-toggle-field-gap};
+
+  // #endregion
+
+  // #region Slider
+
+  --formidable-slider-thumb-size: #{tokens.$formidable-slider-thumb-size};
+  --formidable-slider-track-height: #{tokens.$formidable-slider-track-height};
+  --formidable-slider-track-fill-height: #{tokens.$formidable-slider-track-fill-height};
+  --formidable-slider-track-border-thickness: var(
+    --formidable-field-border-thickness,
+    #{tokens.$formidable-slider-track-border-thickness}
+  );
+  --formidable-slider-track-border-radius: var(
+    --formidable-field-border-radius,
+    #{tokens.$formidable-slider-track-border-radius}
+  );
+  --formidable-slider-tick-width: #{tokens.$formidable-slider-tick-width};
+  --formidable-slider-tick-height: #{tokens.$formidable-slider-tick-height};
+  --formidable-slider-tick-border-radius: var(
+    --formidable-field-border-thickness,
+    #{tokens.$formidable-slider-tick-border-radius}
+  );
+  --formidable-slider-thumb-border-thickness: #{tokens.$formidable-slider-thumb-border-thickness};
+  --formidable-slider-thumb-border-radius: var(
+    --formidable-field-border-radius,
+    #{tokens.$formidable-slider-thumb-border-radius}
+  );
+  --formidable-slider-thumb-label-distance: #{tokens.$formidable-slider-thumb-label-distance};
+  --formidable-slider-thumb-label-padding: #{tokens.$formidable-slider-thumb-label-padding};
+  --formidable-slider-thumb-label-border-thickness: var(
+    --formidable-field-border-thickness,
+    #{tokens.$formidable-slider-thumb-label-border-thickness}
+  );
+  --formidable-slider-thumb-label-border-radius: var(
+    --formidable-field-border-radius,
+    #{tokens.$formidable-slider-thumb-label-border-radius}
+  );
 
   // #endregion
 

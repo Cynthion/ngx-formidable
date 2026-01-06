@@ -38,7 +38,7 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
   protected windowResizeScrollCallback = null;
   protected registeredKeys = [' ', 'Space', 'Enter'];
 
-  private _value = false;
+  private _value: boolean | null = null;
 
   protected doOnValueChange(): void {
     // No additional actions needed
@@ -68,7 +68,7 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
 
   // #region IFormidableField
 
-  get value(): boolean {
+  get value(): boolean | null {
     return this._value;
   }
 

@@ -22,6 +22,7 @@ import {
   InputFieldComponent,
   RadioGroupFieldComponent,
   SelectFieldComponent,
+  SliderFieldComponent,
   TextareaFieldComponent,
   TimeFieldComponent
 } from 'ngx-formidable';
@@ -58,6 +59,7 @@ import {
     CheckboxGroupFieldComponent,
     TimeFieldComponent,
     ToggleFieldComponent,
+    SliderFieldComponent,
     FormDirective,
     FormModelDirective,
     // FormModelGroupDirective,
@@ -90,7 +92,8 @@ export class ExampleFormComponent {
     time: undefined, // new Date(0, 0, 0, 12, 30, 15),
     religion: 'agnostic',
     allergies: ['dust', 'lactose'],
-    isSingle: undefined // true
+    isSingle: undefined, // true
+    age: 50 // undefined
   });
   protected readonly formFrame = exampleFormFrame;
   protected readonly formSuite: StaticSuite<string, string, (model: ExampleFormModel, field?: string) => void> =
@@ -259,6 +262,14 @@ export class ExampleFormComponent {
   protected onFocusChanged(_fieldName: string, _isFocused: boolean): void {
     this.log(`Focus changed on ${_fieldName} field: ${_isFocused}`);
   }
+
+  protected transformValueToThumbLabel = (value: number): string => {
+    return `${value} years`;
+  };
+
+  protected transformTickToTickLabel = (value: number): string => {
+    return `${value}y`;
+  };
 
   protected onSubmit(): void {
     if (this.isValid$.value) {
