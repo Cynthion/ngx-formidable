@@ -468,6 +468,7 @@
     );
     opacity: 0;
     pointer-events: none;
+    user-select: none;
     transition:
       opacity 120ms ease-out,
       transform 120ms ease-out;
@@ -533,7 +534,7 @@
     .slider-track-fill {
       background: var(
         --formidable-color-slider-track-filled-readonly,
-        #{tokens.$formidable-color-slider-track-readonly}
+        #{tokens.$formidable-color-slider-track-filled-readonly}
       );
     }
 
@@ -563,7 +564,7 @@
     .slider-track-fill {
       background: var(
         --formidable-color-slider-track-filled-disabled,
-        #{tokens.$formidable-color-slider-track-disabled}
+        #{tokens.$formidable-color-slider-track-filled-disabled}
       );
     }
 

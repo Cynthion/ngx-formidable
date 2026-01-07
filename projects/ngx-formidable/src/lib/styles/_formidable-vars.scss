@@ -261,7 +261,7 @@
     #{tokens.$formidable-color-slider-background}
   );
   --formidable-color-slider-background-fill: var(
-    --formidable-color-field-text,
+    --formidable-color-field-border,
     #{tokens.$formidable-color-slider-background-fill}
   );
   --formidable-color-slider-border: var(--formidable-color-field-border, #{tokens.$formidable-color-slider-border});
