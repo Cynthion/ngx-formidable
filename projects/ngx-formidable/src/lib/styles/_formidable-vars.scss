@@ -323,7 +323,7 @@
   --formidable-toggle-field-height: #{tokens.$formidable-toggle-field-height};
   --formidable-toggle-field-thumb-size: #{tokens.$formidable-toggle-field-thumb-size};
   --formidable-toggle-field-thumb-border-radius: var(
-    --$formidable-field-border-radius,
+    --formidable-field-border-radius,
     #{tokens.$formidable-toggle-field-thumb-border-radius}
   );
   --formidable-toggle-field-thumb-gap: #{tokens.$formidable-toggle-field-thumb-gap};
