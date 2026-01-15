@@ -16,6 +16,17 @@ Example:
 
 Improvements:
 
+- Prefer queueMicrotask over setTimeout where possible
+- Ensure teardown for subscriptions
+
+Add:
+
+```ts
+override ngOnDestroy(): void {
+  super.ngOnDestroy();
+}
+```
+
 - Rename FieldDecoratorLayout options to 'horizontal', 'vertical', 'inline' (instead of 'single', 'group', 'inline')
 - Add Storybook stories for layout options
 - Move the FieldErrorsComponent rendering into Decorator (doesn't work for inline)
