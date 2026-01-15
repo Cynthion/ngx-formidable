@@ -18,13 +18,13 @@ import { BehaviorSubject } from 'rxjs';
 import { getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
 import { scrollHighlightedOptionIntoView } from '../../../helpers/position.helpers';
 import {
-  EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
   IFormidableFieldOption,
-  IFormidableRadioGroupField
+  IFormidableRadioGroupField,
+  NO_OPTIONS_TEXT
 } from '../../../models/formidable.model';
 import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseFieldDirective } from '../base-field.directive';
@@ -35,7 +35,7 @@ import { BaseFieldDirective } from '../base-field.directive';
  * - `name`, `readonly`, `disabled`
  * - `[options]`: IFormidableFieldOption[]
  * - `<formidable-field-option>` children
- * - `[emptyOption]`, `[sortFn]`
+ * - `[noOptionText]`, `[sortFn]`
  *
  * @example
  * ```html
@@ -161,7 +161,7 @@ export class RadioGroupFieldComponent
   // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
-  @Input() emptyOption: IFormidableFieldOption = EMPTY_FIELD_OPTION;
+  @Input() noOptionsText: string = NO_OPTIONS_TEXT;
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
 
   @ContentChildren(FORMIDABLE_FIELD_OPTION)

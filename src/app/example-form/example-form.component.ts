@@ -142,10 +142,7 @@ export class ExampleFormComponent {
     return a.label.localeCompare(b.label);
   };
 
-  protected nationalityEmptyOption: IFormidableFieldOption = {
-    value: 'empty',
-    label: 'No nationality available.'
-  };
+  protected nationalityNoOptionText = 'No nationality available.';
 
   protected hobbyOptions: IFormidableFieldOption[] = [
     { value: 'dev', label: 'Software Development' },
@@ -161,10 +158,7 @@ export class ExampleFormComponent {
     { value: 'cooking', label: 'Cooking' }
   ];
 
-  protected hobbyEmptyOption: IFormidableFieldOption = {
-    value: 'empty',
-    label: 'No hobby available.'
-  };
+  protected hobbyNoOptionText = 'No hobby available.';
 
   protected animalOptionsDefault: IFormidableFieldOption[] = [
     { value: 'cat', label: 'Cat' },
@@ -184,10 +178,7 @@ export class ExampleFormComponent {
     { value: 'maned_wolf', label: 'Maned Wolf', subtitle: 'Tall, long-legged canid' }
   ];
 
-  protected animalEmptyOption: IFormidableFieldOption = {
-    value: 'empty',
-    label: 'No animal available.'
-  };
+  protected animalNoOptionText = 'No animal available.';
 
   protected religionOptions: IFormidableFieldOption[] = [
     { value: 'christian', label: 'Christianity' },
@@ -195,10 +186,7 @@ export class ExampleFormComponent {
     { value: 'buddhist', label: 'Buddhism' }
   ];
 
-  protected religionEmptyOption: IFormidableFieldOption = {
-    value: 'empty',
-    label: 'No religion available.'
-  };
+  protected religionNoOptionText = 'No religion available.';
 
   protected allergiesOptions: IFormidableFieldOption[] = [
     { value: 'pollen', label: 'Pollen' },
@@ -207,10 +195,7 @@ export class ExampleFormComponent {
     { value: 'shellfish', label: 'Shellfish' }
   ];
 
-  protected allergiesEmptyOption: IFormidableFieldOption = {
-    value: 'empty',
-    label: 'No allergies available.'
-  };
+  protected allergiesNoOptionText = 'No allergies available.';
 
   protected specialMatchFn = (filterValue: string): boolean => {
     // Custom matching logic for the religion field

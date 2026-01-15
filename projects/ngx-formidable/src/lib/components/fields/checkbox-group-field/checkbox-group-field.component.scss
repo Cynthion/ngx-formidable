@@ -7,3 +7,7 @@
 .field {
   @include checkbox-group-field;
 }
+
+.no-option {
+  @include no-option;
+}

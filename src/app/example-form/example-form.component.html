@@ -448,7 +448,7 @@
             [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.nationality"
             [options]="nationalityOptions"
-            [emptyOption]="nationalityEmptyOption"
+            [noOptionsText]="nationalityNoOptionText"
             [panelPosition]="'left'"
             [sortFn]="sortAlphabetically"
             (valueChanged)="onValueChanged('nationality', $event)"
@@ -516,7 +516,7 @@
             [readonly]="controlCenter.showAsReadonly"
             [disabled]="controlCenter.showAsDisabled"
             [options]="hobbyOptions"
-            [emptyOption]="hobbyEmptyOption"
+            [noOptionsText]="hobbyNoOptionText"
             [sortFn]="sortAlphabetically"
             (valueChanged)="onValueChanged('hobby', $event)"
             (focusChanged)="onFocusChanged('hobby', $event)">
@@ -578,7 +578,7 @@
             [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.animal"
             [options]="animalOptionsDefault"
-            [emptyOption]="animalEmptyOption"
+            [noOptionsText]="animalNoOptionText"
             (valueChanged)="onValueChanged('animal', $event)"
             (focusChanged)="onFocusChanged('animal', $event)"
             (filterChanged)="onAnimalFilterChange($event)">
@@ -715,7 +715,7 @@
             [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.religion"
             [options]="religionOptions"
-            [emptyOption]="religionEmptyOption"
+            [noOptionsText]="religionNoOptionText"
             [sortFn]="sortAlphabetically"
             (valueChanged)="onValueChanged('religion', $event)"
             (focusChanged)="onFocusChanged('religion', $event)">
@@ -776,7 +776,7 @@
             [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.allergies"
             [options]="allergiesOptions"
-            [emptyOption]="allergiesEmptyOption"
+            [noOptionsText]="allergiesNoOptionText"
             [sortFn]="sortAlphabetically"
             (valueChanged)="onValueChanged('allergies', $event)"
             (focusChanged)="onFocusChanged('allergies', $event)">

@@ -66,10 +66,10 @@
       } @empty {
         <formidable-field-option
           #optionRef
-          [value]="emptyOption.value"
-          [label]="emptyOption.label"
+          [value]="''"
+          [label]="noOptionsText"
           [readonly]="true">
-          {{ emptyOption.label || emptyOption.value }}
+          <div class="no-option">{{ noOptionsText }}</div>
         </formidable-field-option>
       }
     </div>

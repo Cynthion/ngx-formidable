@@ -13,13 +13,13 @@ import {
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import {
-  EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
   IFormidableFieldOption,
-  IFormidableSelectField
+  IFormidableSelectField,
+  NO_OPTIONS_TEXT
 } from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.directive';
 
@@ -29,7 +29,7 @@ import { BaseFieldDirective } from '../base-field.directive';
  * - `name`, `placeholder`, `readonly`, `disabled`
  * - `[options]`: IFormidableFieldOption[]
  * - `<formidable-field-option>` children
- * - `[emptyOption]`, `[sortFn]`
+ * - `[noOptionText]`, `[sortFn]`
  *
  * @example
  * ```html
@@ -123,7 +123,7 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
   // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
-  @Input() emptyOption: IFormidableFieldOption = EMPTY_FIELD_OPTION;
+  @Input() noOptionsText: string = NO_OPTIONS_TEXT;
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
 
   @ContentChildren(FORMIDABLE_FIELD_OPTION)

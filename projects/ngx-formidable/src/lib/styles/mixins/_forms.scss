@@ -939,6 +939,11 @@
   border-radius: 50%;
 }
 
+@mixin no-option {
+  pointer-events: none;
+  user-select: none;
+}
+
 @mixin date-picker-wrapper {
   display: flex;
   justify-content: center;

@@ -16,17 +16,9 @@ Example:
 
 Improvements:
 
+- add property "subLabel" to fields, which can show text below the field (similar to errors, but always visible)
+- add a "defaultOption" input to select, dropdown, autocomplete, radio-group, checkbox-group fields (which is shown always as first or only when no match/option)
 - Prefer queueMicrotask over setTimeout where possible
-- Ensure teardown for subscriptions
-
-Add:
-
-```ts
-override ngOnDestroy(): void {
-  super.ngOnDestroy();
-}
-```
-
 - Rename FieldDecoratorLayout options to 'horizontal', 'vertical', 'inline' (instead of 'single', 'group', 'inline')
 - Add Storybook stories for layout options
 - Move the FieldErrorsComponent rendering into Decorator (doesn't work for inline)
