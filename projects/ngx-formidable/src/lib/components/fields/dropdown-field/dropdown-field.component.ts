@@ -102,7 +102,7 @@ export class DropdownFieldComponent
   protected windowResizeScrollCallback = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
-  private _value = '';
+  private _writtenValue: string | null = null;
   private _highlightedValue: string | null = null;
   private _typedBuffer = '';
 
@@ -184,15 +184,15 @@ export class DropdownFieldComponent
 
   // #region ControlValueAccessor
 
-  protected doWriteValue(value: string): void {
-    this._value = value ?? '';
+  protected doWriteValue(value: string | null): void {
+    this._writtenValue = value ?? null;
 
-    const found = this.options$.value.find((opt) => opt.value === this._value);
+    const found = this.options$.value.find((opt) => opt.value === this._writtenValue);
     this.selectedOption = found ? { ...found } : undefined;
 
     // if the provided value doesn't exist in the options, treat it as empty display
     if (!this.selectedOption) {
-      this._value = '';
+      this._writtenValue = null;
     }
 
     // write to wrapped input element
@@ -279,7 +279,7 @@ export class DropdownFieldComponent
 
     this.setHighlightedIndex(-1);
     this.selectedOption = undefined;
-    this._value = '';
+    this._writtenValue = null;
 
     if (opts.clearInput) {
       this.inputRef.nativeElement.value = '';
@@ -326,7 +326,7 @@ export class DropdownFieldComponent
     this.options$.next(allOptions);
 
     // keep current value in sync with newly combined options
-    this.writeValue(this._value);
+    this.writeValue(this._writtenValue);
   }
 
   private reconcileSelectionAgainstOptions(allOptions: IFormidableFieldOption[]): void {

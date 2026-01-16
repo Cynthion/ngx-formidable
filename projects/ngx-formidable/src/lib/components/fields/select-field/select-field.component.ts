@@ -71,7 +71,7 @@ import { BaseFieldDirective } from '../base-field.directive';
   ]
 })
 export class SelectFieldComponent
-  extends BaseFieldDirective
+  extends BaseFieldDirective<string | null>
   implements IFormidableSelectField, OnChanges, AfterContentInit, OnDestroy
 {
   @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLSelectElement>;
@@ -114,7 +114,7 @@ export class SelectFieldComponent
 
   // #region ControlValueAccessor
 
-  protected doWriteValue(value: string): void {
+  protected doWriteValue(value: string | null): void {
     const match = this.options$.value.find((opt) => opt.value === value);
 
     // write to wrapped select element

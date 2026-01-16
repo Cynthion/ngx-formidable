@@ -91,7 +91,7 @@ import { BaseFieldDirective } from '../base-field.directive';
   ]
 })
 export class AutocompleteFieldComponent
-  extends BaseFieldDirective
+  extends BaseFieldDirective<string | null>
   implements IFormidableAutocompleteField, OnInit, OnChanges, AfterContentInit, OnDestroy
 {
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
@@ -105,7 +105,7 @@ export class AutocompleteFieldComponent
 
   protected filterChangeSubject$ = new BehaviorSubject<string>('');
 
-  // private _value = '';
+  private _writtenValue: string | null = null;
   private _highlightedValue: string | null = null;
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
@@ -195,15 +195,15 @@ export class AutocompleteFieldComponent
 
   // #region ControlValueAccessor
 
-  protected doWriteValue(value: string): void {
-    // this._value = value ?? '';
+  protected doWriteValue(value: string | null): void {
+    this._writtenValue = value ?? null;
 
-    const found = this.filteredOptions$.value.find((opt) => opt.value === value);
+    const found = this.filteredOptions$.value.find((opt) => opt.value === this._writtenValue);
     this.selectedOption = found ? { ...found } : undefined;
 
     // if the provided value doesn't exist in the options, treat it as empty display
     if (!this.selectedOption) {
-      // this._value = '';
+      this._writtenValue = null;
     }
 
     // write to wrapped input element
