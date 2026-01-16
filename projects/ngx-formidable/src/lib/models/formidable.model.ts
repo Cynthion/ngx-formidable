@@ -17,11 +17,7 @@ export const FORMIDABLE_FIELD_OPTION = new InjectionToken<IFormidableFieldOption
 /** InjectionToken for providing global default options for input masking. */
 export const FORMIDABLE_MASK_DEFAULTS = new InjectionToken<Partial<NgxMaskConfig>>('FORMIDABLE_MASK_DEFAULTS');
 
-export const EMPTY_FIELD_OPTION: IFormidableFieldOption = {
-  value: 'empty',
-  label: 'No options available.',
-  disabled: true
-};
+export const NO_OPTIONS_TEXT = 'No options available.';
 
 export type FieldDecoratorLayout = 'single' | 'group' | 'inline';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
@@ -54,7 +50,7 @@ export interface IFormidableField<T = string | null> {
 /** Interface for all Formidable fields that support multiple options. */
 export interface IFormidableOptionField {
   options?: IFormidableFieldOption[];
-  emptyOption?: IFormidableFieldOption;
+  noOptionsOption?: IFormidableFieldOption;
   selectOption(option: IFormidableFieldOption): void;
   sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
 }

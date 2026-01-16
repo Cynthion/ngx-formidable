@@ -38,18 +38,18 @@
     <input
       hidden
       type="radio"
-      [id]="name + '-' + emptyOption.value"
+      [id]="name + '-no-options'"
       [tabindex]="-1"
       [name]="name"
-      [value]="emptyOption.value"
-      [disabled]="emptyOption.disabled || disabled" />
+      [value]="''"
+      [disabled]="true" />
     <formidable-field-option
       #optionRef
       [layout]="'radio-group'"
-      [value]="emptyOption.value"
-      [label]="emptyOption.label"
+      [value]="''"
+      [label]="noOptionsText"
       [readonly]="true">
-      {{ emptyOption.label || emptyOption.value }}
+      <div class="no-option">{{ noOptionsText }}</div>
     </formidable-field-option>
   }
 </div>

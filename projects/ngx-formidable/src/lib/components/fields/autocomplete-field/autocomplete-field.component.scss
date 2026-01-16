@@ -19,3 +19,7 @@
 .panel-scrollcontainer {
   @include panel-scrollcontainer;
 }
+
+.no-option {
+  @include no-option;
+}

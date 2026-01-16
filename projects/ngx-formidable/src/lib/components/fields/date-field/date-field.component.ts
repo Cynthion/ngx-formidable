@@ -613,8 +613,9 @@ export class DateFieldComponent
   }
 
   override ngOnDestroy(): void {
-    super.ngOnDestroy();
     this.mo?.disconnect();
+
+    super.ngOnDestroy();
   }
 
   // #endregion

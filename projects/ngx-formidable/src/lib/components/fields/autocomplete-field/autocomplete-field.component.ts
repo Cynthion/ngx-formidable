@@ -10,10 +10,11 @@ import {
   forwardRef,
   inject,
   Input,
-  OnDestroy,
+  OnChanges,
   OnInit,
   Output,
   QueryList,
+  SimpleChanges,
   ViewChild,
   ViewChildren
 } from '@angular/core';
@@ -27,14 +28,14 @@ import {
   updatePanelPosition
 } from '../../../helpers/position.helpers';
 import {
-  EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
   FormidablePanelPosition,
   IFormidableAutocompleteField,
-  IFormidableFieldOption
+  IFormidableFieldOption,
+  NO_OPTIONS_TEXT
 } from '../../../models/formidable.model';
 import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseFieldDirective } from '../base-field.directive';
@@ -45,7 +46,7 @@ import { BaseFieldDirective } from '../base-field.directive';
  * - `name`, `placeholder`, `readonly`, `disabled`
  * - `[options]`: IFormidableFieldOption[]
  * - `<formidable-field-option>` children
- * - `[emptyOption]`, `[sortFn]`
+ * - `[noOptionText]`, `[sortFn]`
  * - `isPanelOpen` two-way
  * - `panelPosition: 'left'|'right'|'full'`
  *
@@ -89,8 +90,8 @@ import { BaseFieldDirective } from '../base-field.directive';
   ]
 })
 export class AutocompleteFieldComponent
-  extends BaseFieldDirective
-  implements IFormidableAutocompleteField, OnInit, AfterContentInit, OnDestroy
+  extends BaseFieldDirective<string | null>
+  implements IFormidableAutocompleteField, OnInit, OnChanges, AfterContentInit
 {
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
@@ -103,6 +104,9 @@ export class AutocompleteFieldComponent
 
   protected filterChangeSubject$ = new BehaviorSubject<string>('');
 
+  private _writtenValue: string | null = null;
+  private _highlightedValue: string | null = null;
+
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   override ngOnInit(): void {
@@ -110,19 +114,22 @@ export class AutocompleteFieldComponent
     this.registerAutocomplete();
   }
 
-  ngAfterContentInit(): void {
-    // The projected options (option.template) might not be available immediately after content initialization,
-    // so we use setTimeout to ensure they are processed after the current change detection cycle.
-    setTimeout(() => {
-      this.updateFilteredOptions();
-    });
+  ngOnChanges(changes: SimpleChanges): void {
+    // react to changes of @Input properties
+    if (changes['options'] || changes['sortFn']) {
+      queueMicrotask(() => this.onOptionsChanged());
+    }
   }
 
-  override ngOnDestroy(): void {
-    super.ngOnDestroy();
+  ngAfterContentInit(): void {
+    // The projected options (option.template) might not be available immediately after content initialization,
+    // so we use queueMicrotask to ensure they are processed after the current change detection cycle.
+    queueMicrotask(() => this.onOptionsChanged());
 
-    this.destroy$.next();
-    this.destroy$.complete();
+    // react to the changes of projected options
+    this.optionComponents?.changes
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
   }
 
   protected onInput(event: Event): void {
@@ -138,8 +145,10 @@ export class AutocompleteFieldComponent
     // No additional actions needed
   }
 
-  protected doOnFocusChange(_isFocused: boolean): void {
-    // No additional actions needed
+  protected doOnFocusChange(isFocused: boolean): void {
+    if (!isFocused) {
+      this._highlightedValue = null;
+    }
   }
 
   private handleKeydown(event: KeyboardEvent): void {
@@ -163,12 +172,13 @@ export class AutocompleteFieldComponent
           this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'up'));
         }
         break;
-      case 'Enter':
-        if (this.isPanelOpen && options[this.highlightedOptionIndex$.value]) {
-          const option = options[this.highlightedOptionIndex$.value]!;
-          this.selectOption(option);
-        }
+      case 'Enter': {
+        if (!this.isPanelOpen) return;
+        const idx = this.highlightedOptionIndex$.value;
+        const option = this.filteredOptions$.value[idx];
+        if (option) this.selectOption(option);
         break;
+      }
     }
   }
 
@@ -180,14 +190,26 @@ export class AutocompleteFieldComponent
 
   // #region ControlValueAccessor
 
-  protected doWriteValue(value: string): void {
-    const found = this.combineAllOptions().find((opt) => opt.value === value);
+  protected doWriteValue(value: string | null): void {
+    this._writtenValue = value ?? null;
 
+    const found = this.computeAllOptions().find((opt) => opt.value === this._writtenValue);
     this.selectedOption = found ? { ...found } : undefined;
-    this.isFieldFilled = found ? !!value : false;
+
+    // if the provided value doesn't exist in the options, treat it as empty display
+    if (!this.selectedOption) {
+      this._writtenValue = null;
+    }
 
     // write to wrapped input element
-    this.inputRef.nativeElement.value = found ? found.label || found.value : '';
+    this.inputRef.nativeElement.value = this.selectedOption
+      ? this.selectedOption.label || this.selectedOption.value
+      : '';
+
+    this.isFieldFilled = this.inputRef.nativeElement.value.length > 0;
+
+    // keep filter/list consistent with displayed value
+    this.filterChangeSubject$.next(this.inputRef.nativeElement.value);
   }
 
   // #endregion
@@ -222,7 +244,7 @@ export class AutocompleteFieldComponent
   // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
-  @Input() emptyOption: IFormidableFieldOption = EMPTY_FIELD_OPTION;
+  @Input() noOptionsText: string = NO_OPTIONS_TEXT;
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
 
   @ContentChildren(FORMIDABLE_FIELD_OPTION)
@@ -231,7 +253,7 @@ export class AutocompleteFieldComponent
   protected readonly filteredOptions$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
   protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
 
-  private selectedOption?: IFormidableFieldOption = undefined;
+  protected selectedOption?: IFormidableFieldOption = undefined;
 
   public selectOption(option: IFormidableFieldOption): void {
     if (option.disabled) return;
@@ -242,27 +264,65 @@ export class AutocompleteFieldComponent
       disabled: option.disabled
     };
 
+    // commit selection + update displayed label
     this.selectedOption = newOption;
     this.inputRef.nativeElement.value = this.selectedOption.label!; // update input value with selected option label
 
-    this.focusChangeSubject$.next(false); // simulate blur on selection
-    this.focusChanged.emit(false);
+    // emit value change
     this.valueChangeSubject$.next(this.selectedOption.value);
     this.valueChanged.emit(this.selectedOption.value);
     this.isFieldFilled = this.selectedOption.value.length > 0;
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.onTouched();
+
+    // simulate blur (field-state blur, not necessarily native blur)
+    this.focusChangeSubject$.next(false); // simulate blur on selection
+    this.focusChanged.emit(false);
+
+    // close panel
     this.togglePanel(false);
+
+    // move caret to end of input
     setCaretPositionToEnd(this.inputRef.nativeElement);
   }
 
-  private deselectOption(): void {
+  private deselectOption(opts: { clearInput?: boolean } = {}): void {
+    // only do work if there actually was a selection
+    if (!this.selectedOption) return;
+
     this.setHighlightedIndex(-1);
     this.selectedOption = undefined;
+
+    if (opts.clearInput) {
+      this.inputRef.nativeElement.value = '';
+      this.filterChangeSubject$.next(''); // optional: keeps filter + list consistent
+    }
+
+    this.valueChangeSubject$.next(null);
+    this.valueChanged.emit(null);
+    this.isFieldFilled = this.inputRef.nativeElement.value.length > 0;
     this.onChange(null);
+    this.onTouched();
+
+    this.cdRef.markForCheck();
   }
 
-  private combineAllOptions(): IFormidableFieldOption[] {
+  private onOptionsChanged(): void {
+    const allOptions = this.computeAllOptions();
+
+    this.updateFilteredOptions(allOptions);
+    this.reconcileSelectionAgainstOptions(allOptions);
+
+    // keep highlight consistent if panel is open
+    if (this.isPanelOpen) {
+      this.reconcileHighlightAfterOptionsChanged();
+      this.updatePanelPosition();
+    }
+
+    this.cdRef.markForCheck();
+  }
+
+  private computeAllOptions(): IFormidableFieldOption[] {
     const inlineOptions = this.options ?? [];
     const projectedOptions = this.optionComponents?.toArray() ?? [];
 
@@ -275,10 +335,8 @@ export class AutocompleteFieldComponent
     return combined;
   }
 
-  private updateFilteredOptions(): void {
+  private updateFilteredOptions(allOptions: IFormidableFieldOption[]): void {
     const filterValue = this.filterChangeSubject$.value;
-
-    const allOptions = this.combineAllOptions();
 
     const filteredOptions = filterValue
       ? allOptions.filter((opt) =>
@@ -287,6 +345,16 @@ export class AutocompleteFieldComponent
       : allOptions;
 
     this.filteredOptions$.next(filteredOptions);
+  }
+
+  private reconcileSelectionAgainstOptions(allOptions: IFormidableFieldOption[]): void {
+    if (!this.selectedOption) return;
+
+    const stillExists = allOptions.some((o) => o.value === this.selectedOption!.value);
+    if (!stillExists) {
+      // selection is no longer valid
+      this.deselectOption({ clearInput: true });
+    }
   }
 
   // #endregion
@@ -317,6 +385,7 @@ export class AutocompleteFieldComponent
       this.highlightSelectedOption();
       updatePanelPosition(this.autocompleteRef, this.panelRef);
     } else {
+      this._highlightedValue = null;
       this.setHighlightedIndex(-1);
     }
 
@@ -335,8 +404,57 @@ export class AutocompleteFieldComponent
     this.setHighlightedIndex(selectedIndex);
   }
 
+  private reconcileHighlightAfterOptionsChanged(): void {
+    if (!this.isPanelOpen) return;
+
+    const options = this.filteredOptions$.value;
+    const count = options.length;
+
+    // empty list
+    if (count === 0) {
+      this.setHighlightedIndex(-1);
+      return;
+    }
+
+    // selection wins
+    if (this.selectedOption) {
+      const selectedIndex = options.findIndex((o) => o.value === this.selectedOption!.value);
+      if (selectedIndex >= 0) {
+        this.setHighlightedIndex(selectedIndex);
+        return;
+      }
+    }
+
+    // try keep previously highlighted value
+    if (this._highlightedValue) {
+      const keepIndex = options.findIndex((o) => o.value === this._highlightedValue);
+      if (keepIndex >= 0) {
+        this.setHighlightedIndex(keepIndex);
+        return;
+      }
+    }
+
+    // clamp old index into new bounds
+    const prevHighlightIndex = this.highlightedOptionIndex$.value;
+
+    let nextIndex = prevHighlightIndex;
+    if (nextIndex < 0) nextIndex = 0;
+    if (nextIndex >= count) nextIndex = count - 1;
+
+    // skip disabled
+    if (options[nextIndex]?.disabled) {
+      const fixed = getNextAvailableOptionIndex(nextIndex, options, 'down');
+      nextIndex = fixed >= 0 ? fixed : getNextAvailableOptionIndex(nextIndex, options, 'up');
+    }
+
+    this.setHighlightedIndex(nextIndex >= 0 ? nextIndex : -1);
+  }
+
   private setHighlightedIndex(index: number): void {
     this.highlightedOptionIndex$.next(index);
+
+    const option = index >= 0 ? this.filteredOptions$.value[index] : undefined;
+    this._highlightedValue = option?.value ?? null;
 
     setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }
@@ -350,10 +468,18 @@ export class AutocompleteFieldComponent
         takeUntil(this.destroy$)
       )
       .subscribe(() => {
-        this.deselectOption();
-        this.updateFilteredOptions();
+        const typed = this.inputRef.nativeElement.value ?? '';
+        const selectedLabel = this.selectedOption?.label ?? '';
 
-        this.tryAutoSelectExactValue();
+        // only deselect if the user actually diverged from the selected label
+        if (this.selectedOption && typed !== selectedLabel) {
+          this.deselectOption(); // no clearInput
+        }
+
+        const allOptions = this.computeAllOptions();
+
+        this.updateFilteredOptions(allOptions);
+        this.tryAutoSelectExactValue(allOptions);
 
         if (!this.isPanelOpen) {
           this.togglePanel(true);
@@ -363,12 +489,11 @@ export class AutocompleteFieldComponent
       });
   }
 
-  private tryAutoSelectExactValue() {
+  private tryAutoSelectExactValue(allOptions: IFormidableFieldOption[]): void {
     const typed = this.inputRef.nativeElement.value;
     if (!typed) return;
 
-    const options = this.combineAllOptions();
-    const match = options.find((o) => !o.disabled && o.label === typed);
+    const match = allOptions.find((o) => !o.disabled && o.label === typed);
     if (!match) return;
 
     this.selectOption(match);

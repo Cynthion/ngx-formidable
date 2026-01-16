@@ -32,10 +32,10 @@
     </option>
   } @empty {
     <option
-      [value]="emptyOption.value"
-      [label]="emptyOption.label"
+      [value]=""
+      [label]="noOptionsText"
       [disabled]="true">
-      {{ emptyOption.label || emptyOption.value }}
+      {{ noOptionsText }}
     </option>
   }
 </select>

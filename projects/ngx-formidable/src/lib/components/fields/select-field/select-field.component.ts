@@ -2,24 +2,28 @@ import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ContentChildren,
   ElementRef,
   forwardRef,
+  inject,
   Input,
+  OnChanges,
   QueryList,
+  SimpleChanges,
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, takeUntil } from 'rxjs';
 import {
-  EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
   IFormidableFieldOption,
-  IFormidableSelectField
+  IFormidableSelectField,
+  NO_OPTIONS_TEXT
 } from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.directive';
 
@@ -29,7 +33,7 @@ import { BaseFieldDirective } from '../base-field.directive';
  * - `name`, `placeholder`, `readonly`, `disabled`
  * - `[options]`: IFormidableFieldOption[]
  * - `<formidable-field-option>` children
- * - `[emptyOption]`, `[sortFn]`
+ * - `[noOptionText]`, `[sortFn]`
  *
  * @example
  * ```html
@@ -65,16 +69,34 @@ import { BaseFieldDirective } from '../base-field.directive';
     }
   ]
 })
-export class SelectFieldComponent extends BaseFieldDirective implements IFormidableSelectField, AfterContentInit {
-  @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLInputElement>;
+export class SelectFieldComponent
+  extends BaseFieldDirective<string | null>
+  implements IFormidableSelectField, OnChanges, AfterContentInit
+{
+  @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLSelectElement>;
 
   protected keyboardCallback = null;
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
+  private readonly cdRef = inject(ChangeDetectorRef);
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // react to changes of @Input properties
+    if (changes['options'] || changes['sortFn']) {
+      queueMicrotask(() => this.onOptionsChanged());
+    }
+  }
+
   ngAfterContentInit(): void {
-    this.updateOptions();
+    // The projected options (option.template) might not be available immediately after content initialization,
+    // so we use queueMicrotask to ensure they are processed after the current change detection cycle.
+    queueMicrotask(() => this.onOptionsChanged());
+
+    this.optionComponents?.changes
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
   }
 
   protected doOnValueChange(): void {
@@ -87,11 +109,13 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
 
   // #region ControlValueAccessor
 
-  protected doWriteValue(value: string): void {
-    const found = this.options$.value.find((opt) => opt.value === value);
+  protected doWriteValue(value: string | null): void {
+    const match = this.computeAllOptions().find((opt) => opt.value === value);
 
-    // write to wrapped element
-    this.selectRef.nativeElement.value = found ? found.value : '';
+    // write to wrapped select element
+    this.selectRef.nativeElement.value = match ? match.value : '';
+
+    this.isFieldFilled = this.selectRef.nativeElement.value.length > 0;
   }
 
   // #endregion
@@ -106,6 +130,7 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
     const blocked = this.disabled || this.readonly;
     return !blocked && !this.isFieldFocused && !this.isFieldFilled;
   }
+
   get fieldRef(): ElementRef<HTMLElement> {
     return this.selectRef as ElementRef<HTMLElement>;
   }
@@ -114,16 +139,10 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
 
   // #endregion
 
-  // #region IFormidableSelectField
-
-  // empty
-
-  // #endregion
-
   // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
-  @Input() emptyOption: IFormidableFieldOption = EMPTY_FIELD_OPTION;
+  @Input() noOptionsText: string = NO_OPTIONS_TEXT;
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
 
   @ContentChildren(FORMIDABLE_FIELD_OPTION)
@@ -132,21 +151,48 @@ export class SelectFieldComponent extends BaseFieldDirective implements IFormida
   protected readonly options$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
 
   public selectOption(_option: IFormidableFieldOption): void {
-    // Not used in select field, but required by IFormidableOptionField interface.
-    // An <option> is selected by the user through the native <select> element.
+    // Native <select> chooses options; not used.
   }
 
-  private updateOptions(): void {
+  private onOptionsChanged(): void {
+    const allOptions = this.computeAllOptions();
+
+    this.updateOptions(allOptions);
+    this.reconcileSelectionAgainstOptions(allOptions);
+
+    this.cdRef.markForCheck();
+  }
+
+  private computeAllOptions(): IFormidableFieldOption[] {
     const inlineOptions = this.options ?? [];
     const projectedOptions = this.optionComponents?.toArray() ?? [];
 
     let combined = [...inlineOptions, ...projectedOptions];
 
     if (this.sortFn) {
-      combined = combined.sort(this.sortFn);
+      combined = [...combined].sort(this.sortFn);
     }
 
-    this.options$.next(combined);
+    return combined;
+  }
+
+  private updateOptions(allOptions: IFormidableFieldOption[]): void {
+    this.options$.next(allOptions);
+
+    // keep current value consistent with updated options
+    this.writeValue(this.selectRef?.nativeElement?.value ?? '');
+  }
+
+  private reconcileSelectionAgainstOptions(allOptions: IFormidableFieldOption[]): void {
+    const current = this.selectRef.nativeElement.value;
+    if (!current) return;
+
+    const stillExists = allOptions.some((o) => o.value === current);
+    if (stillExists) return;
+
+    // clear selection + notify like other fields
+    this.selectRef.nativeElement.value = '';
+    this.onValueChange();
   }
 
   // #endregion

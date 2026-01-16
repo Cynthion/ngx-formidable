@@ -9,12 +9,16 @@ import {
   forwardRef,
   inject,
   Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
   QueryList,
+  SimpleChanges,
   ViewChild,
   ViewChildren
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject, debounceTime } from 'rxjs';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { isPrintableCharacter } from '../../../helpers/input.helpers';
 import { getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
 import {
@@ -23,14 +27,14 @@ import {
   updatePanelPosition
 } from '../../../helpers/position.helpers';
 import {
-  EMPTY_FIELD_OPTION,
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
   FormidablePanelPosition,
   IFormidableDropdownField,
-  IFormidableFieldOption
+  IFormidableFieldOption,
+  NO_OPTIONS_TEXT
 } from '../../../models/formidable.model';
 import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseFieldDirective } from '../base-field.directive';
@@ -41,7 +45,7 @@ import { BaseFieldDirective } from '../base-field.directive';
  * - `name`, `placeholder`, `readonly`, `disabled`
  * - `[options]`: IFormidableFieldOption[]
  * - `<formidable-field-option>` children
- * - `[emptyOption]`, `[sortFn]`
+ * - `[noOptionText]`, `[sortFn]`
  * - `isPanelOpen` two-way
  * - `panelPosition: 'left'|'right'|'full'`
 
@@ -85,7 +89,10 @@ import { BaseFieldDirective } from '../base-field.directive';
     }
   ]
 })
-export class DropdownFieldComponent extends BaseFieldDirective implements IFormidableDropdownField, AfterContentInit {
+export class DropdownFieldComponent
+  extends BaseFieldDirective
+  implements IFormidableDropdownField, OnInit, OnChanges, AfterContentInit, OnDestroy
+{
   @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChildren('optionRef') optionRefs?: QueryList<FieldOptionComponent>;
@@ -95,27 +102,43 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
   protected windowResizeScrollCallback = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
-  private _value = '';
+  private _writtenValue: string | null = null;
+  private _highlightedValue: string | null = null;
   private _typedBuffer = '';
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
+  override ngOnInit(): void {
+    super.ngOnInit();
+    this.registerTypeahead();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // react to changes of @Input properties
+    if (changes['options'] || changes['sortFn']) {
+      queueMicrotask(() => this.onOptionsChanged());
+    }
+  }
+
   ngAfterContentInit(): void {
     // The projected options (option.template) might not be available immediately after content initialization,
-    // so we use setTimeout to ensure they are processed after the current change detection cycle.
-    setTimeout(() => {
-      this.updateOptions();
-    });
+    // so we use queueMicrotask to ensure they are processed after the current change detection cycle.
+    queueMicrotask(() => this.onOptionsChanged());
 
-    this.subscribeToUserInput();
+    // react to the changes of projected options
+    this.optionComponents?.changes
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
   }
 
   protected doOnValueChange(): void {
     // No additional actions needed
   }
 
-  protected doOnFocusChange(_isFocused: boolean): void {
-    // No additional actions needed
+  protected doOnFocusChange(isFocused: boolean): void {
+    if (!isFocused) {
+      this.resetTypeahead();
+    }
   }
 
   private handleKeydown(event: KeyboardEvent): void {
@@ -139,12 +162,13 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
           this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'up'));
         }
         break;
-      case 'Enter':
-        if (this.isPanelOpen && options[this.highlightedOptionIndex$.value]) {
-          const option = options[this.highlightedOptionIndex$.value]!;
-          this.selectOption(option);
-        }
+      case 'Enter': {
+        if (!this.isPanelOpen) return;
+        const idx = this.highlightedOptionIndex$.value;
+        const option = this.options$.value[idx];
+        if (option) this.selectOption(option);
         break;
+      }
     }
   }
 
@@ -156,12 +180,23 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
 
   // #region ControlValueAccessor
 
-  protected doWriteValue(value: string): void {
-    this._value = value ?? '';
-    this.isFieldFilled = this._value.length > 0;
+  protected doWriteValue(value: string | null): void {
+    this._writtenValue = value ?? null;
 
-    const found = this.options$.value.find((opt) => opt.value === value);
+    const found = this.computeAllOptions().find((opt) => opt.value === this._writtenValue);
     this.selectedOption = found ? { ...found } : undefined;
+
+    // if the provided value doesn't exist in the options, treat it as empty display
+    if (!this.selectedOption) {
+      this._writtenValue = null;
+    }
+
+    // write to wrapped input element
+    this.inputRef.nativeElement.value = this.selectedOption
+      ? this.selectedOption.label || this.selectedOption.value
+      : '';
+
+    this.isFieldFilled = this.inputRef.nativeElement.value.length > 0;
   }
 
   // #endregion
@@ -194,7 +229,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
   // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
-  @Input() emptyOption: IFormidableFieldOption = EMPTY_FIELD_OPTION;
+  @Input() noOptionsText: string = NO_OPTIONS_TEXT;
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
 
   @ContentChildren(FORMIDABLE_FIELD_OPTION)
@@ -202,7 +237,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
 
   protected readonly options$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
   protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
-  private readonly userInput$ = new BehaviorSubject<string>('');
+  private readonly typeahead$ = new BehaviorSubject<string>('');
 
   protected selectedOption?: IFormidableFieldOption = undefined;
 
@@ -215,51 +250,88 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
       disabled: option.disabled
     };
 
+    // commit selection + update displayed label
     this.selectedOption = newOption;
+    this.inputRef.nativeElement.value = this.selectedOption.label!; // update input value with selected option label
 
-    this.focusChangeSubject$.next(false); // simulate blur on selection
-    this.focusChanged.emit(false);
+    // emit value change
     this.valueChangeSubject$.next(this.selectedOption.value);
     this.valueChanged.emit(this.selectedOption.value);
     this.isFieldFilled = this.selectedOption.value.length > 0;
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.onTouched();
+
+    // simulate blur (field-state blur, not necessarily native blur)
+    this.focusChangeSubject$.next(false); // simulate blur on selection
+    this.focusChanged.emit(false);
+
+    // close panel
     this.togglePanel(false);
   }
 
-  private updateOptions(): void {
+  private deselectOption(opts: { clearInput?: boolean } = {}): void {
+    // only do work if there actually was a selection
+    if (!this.selectedOption) return;
+
+    this.setHighlightedIndex(-1);
+    this.selectedOption = undefined;
+    this._writtenValue = null;
+
+    if (opts.clearInput) {
+      this.inputRef.nativeElement.value = '';
+    }
+
+    this.valueChangeSubject$.next(null);
+    this.valueChanged.emit(null);
+    this.isFieldFilled = this.inputRef.nativeElement.value.length > 0;
+    this.onChange(null);
+    this.onTouched();
+
+    this.cdRef.markForCheck();
+  }
+
+  private onOptionsChanged(): void {
+    const allOptions = this.computeAllOptions();
+
+    this.updateOptions(allOptions);
+    this.reconcileSelectionAgainstOptions(allOptions);
+
+    // keep highlight consistent if panel is open
+    if (this.isPanelOpen) {
+      this.reconcileHighlightAfterOptionsChanged();
+      this.updatePanelPosition();
+    }
+
+    this.cdRef.markForCheck();
+  }
+
+  private computeAllOptions(): IFormidableFieldOption[] {
     const inlineOptions = this.options ?? [];
     const projectedOptions = this.optionComponents?.toArray() ?? [];
 
     let combined = [...inlineOptions, ...projectedOptions];
 
     if (this.sortFn) {
-      combined = combined.sort(this.sortFn);
+      combined = [...combined].sort(this.sortFn);
     }
 
-    this.options$.next(combined);
-
-    this.writeValue(this._value);
+    return combined;
   }
 
-  private subscribeToUserInput(): void {
-    this.userInput$.pipe(debounceTime(200)).subscribe((term) => {
-      this.highlightFirstMatchingOption(term);
-      this._typedBuffer = '';
-    });
+  private updateOptions(allOptions: IFormidableFieldOption[]): void {
+    this.options$.next(allOptions);
+
+    // keep current value in sync with newly combined options
+    this.writeValue(this._writtenValue);
   }
 
-  protected onUserInput(event: KeyboardEvent): void {
-    if (isPrintableCharacter(event) && !this.readonly && !this.disabled) {
-      this._typedBuffer += event.key;
-      this.userInput$.next(this._typedBuffer);
+  private reconcileSelectionAgainstOptions(allOptions: IFormidableFieldOption[]): void {
+    if (!this.selectedOption) return;
 
-      if (!this.isPanelOpen) {
-        this.togglePanel(true);
-      }
-    } else if (event.key === 'Backspace') {
-      this._typedBuffer = this._typedBuffer.slice(0, -1);
-      this.userInput$.next(this._typedBuffer);
+    const stillExists = allOptions.some((o) => o.value === this.selectedOption!.value);
+    if (!stillExists) {
+      // selection is no longer valid
+      this.deselectOption({ clearInput: true });
     }
   }
 
@@ -303,6 +375,7 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
       this.highlightSelectedOption();
       updatePanelPosition(this.dropdownRef, this.panelRef);
     } else {
+      this.resetTypeahead();
       this.setHighlightedIndex(-1);
     }
 
@@ -315,8 +388,87 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
 
   // #endregion
 
+  private highlightSelectedOption(): void {
+    const selectedIndex = this.options$.value.findIndex((opt) => opt.value === this.selectedOption?.value);
+
+    this.setHighlightedIndex(selectedIndex);
+  }
+
+  private reconcileHighlightAfterOptionsChanged(): void {
+    if (!this.isPanelOpen) return;
+
+    const options = this.options$.value;
+    const count = options.length;
+
+    // empty list
+    if (count === 0) {
+      this.setHighlightedIndex(-1);
+      return;
+    }
+
+    // selection wins
+    if (this.selectedOption) {
+      const selectedIndex = options.findIndex((o) => o.value === this.selectedOption!.value);
+      if (selectedIndex >= 0) {
+        this.setHighlightedIndex(selectedIndex);
+        return;
+      }
+    }
+
+    // try keep previously highlighted value
+    if (this._highlightedValue) {
+      const keepIndex = options.findIndex((o) => o.value === this._highlightedValue);
+      if (keepIndex >= 0) {
+        this.setHighlightedIndex(keepIndex);
+        return;
+      }
+    }
+
+    // clamp old index into new bounds
+    const prevHighlightIndex = this.highlightedOptionIndex$.value;
+
+    let nextIndex = prevHighlightIndex;
+    if (nextIndex < 0) nextIndex = 0;
+    if (nextIndex >= count) nextIndex = count - 1;
+
+    // skip disabled
+    if (options[nextIndex]?.disabled) {
+      const fixed = getNextAvailableOptionIndex(nextIndex, options, 'down');
+      nextIndex = fixed >= 0 ? fixed : getNextAvailableOptionIndex(nextIndex, options, 'up');
+    }
+
+    this.setHighlightedIndex(nextIndex >= 0 ? nextIndex : -1);
+  }
+
+  private setHighlightedIndex(index: number): void {
+    this.highlightedOptionIndex$.next(index);
+
+    const option = index >= 0 ? this.options$.value[index] : undefined;
+    this._highlightedValue = option?.value ?? null;
+
+    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
+  }
+
+  private registerTypeahead(): void {
+    this.typeahead$
+      .pipe(
+        debounceTime(200),
+        distinctUntilChanged(),
+        filter(() => this.isFieldFocused),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((term) => {
+        this.highlightFirstMatchingOption(term);
+        this._typedBuffer = '';
+      });
+  }
+
   private highlightFirstMatchingOption(term: string): void {
-    if (!term || !this.isPanelOpen) return;
+    if (!term) return;
+
+    if (!this.isPanelOpen) {
+      this.togglePanel(true);
+    }
 
     const matchIndex = this.options$.value.findIndex((opt) =>
       (opt.label || opt.value).toLowerCase().startsWith(term.toLowerCase())
@@ -325,15 +477,22 @@ export class DropdownFieldComponent extends BaseFieldDirective implements IFormi
     this.setHighlightedIndex(matchIndex >= 0 ? matchIndex : -1);
   }
 
-  private highlightSelectedOption(): void {
-    const selectedIndex = this.options$.value.findIndex((opt) => opt.value === this.selectedOption?.value);
+  protected onTypeaheadKeydown(event: KeyboardEvent): void {
+    if (isPrintableCharacter(event) && !this.readonly && !this.disabled) {
+      this._typedBuffer += event.key;
+      this.typeahead$.next(this._typedBuffer);
 
-    this.setHighlightedIndex(selectedIndex);
+      if (!this.isPanelOpen) {
+        this.togglePanel(true);
+      }
+    } else if (event.key === 'Backspace') {
+      this._typedBuffer = this._typedBuffer.slice(0, -1);
+      this.typeahead$.next(this._typedBuffer);
+    }
   }
 
-  private setHighlightedIndex(index: number): void {
-    this.highlightedOptionIndex$.next(index);
-
-    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
+  private resetTypeahead(): void {
+    this._typedBuffer = '';
+    this.typeahead$.next('');
   }
 }
