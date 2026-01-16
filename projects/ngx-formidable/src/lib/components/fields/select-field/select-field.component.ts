@@ -10,7 +10,6 @@ import {
   inject,
   Input,
   OnChanges,
-  OnDestroy,
   QueryList,
   SimpleChanges,
   ViewChild
@@ -72,7 +71,7 @@ import { BaseFieldDirective } from '../base-field.directive';
 })
 export class SelectFieldComponent
   extends BaseFieldDirective<string | null>
-  implements IFormidableSelectField, OnChanges, AfterContentInit, OnDestroy
+  implements IFormidableSelectField, OnChanges, AfterContentInit
 {
   @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLSelectElement>;
 
@@ -100,10 +99,6 @@ export class SelectFieldComponent
       .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
   }
 
-  override ngOnDestroy(): void {
-    super.ngOnDestroy();
-  }
-
   protected doOnValueChange(): void {
     // No additional actions needed
   }
@@ -115,7 +110,7 @@ export class SelectFieldComponent
   // #region ControlValueAccessor
 
   protected doWriteValue(value: string | null): void {
-    const match = this.options$.value.find((opt) => opt.value === value);
+    const match = this.computeAllOptions().find((opt) => opt.value === value);
 
     // write to wrapped select element
     this.selectRef.nativeElement.value = match ? match.value : '';

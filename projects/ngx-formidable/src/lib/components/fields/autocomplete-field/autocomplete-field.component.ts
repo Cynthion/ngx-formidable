@@ -11,7 +11,6 @@ import {
   inject,
   Input,
   OnChanges,
-  OnDestroy,
   OnInit,
   Output,
   QueryList,
@@ -92,7 +91,7 @@ import { BaseFieldDirective } from '../base-field.directive';
 })
 export class AutocompleteFieldComponent
   extends BaseFieldDirective<string | null>
-  implements IFormidableAutocompleteField, OnInit, OnChanges, AfterContentInit, OnDestroy
+  implements IFormidableAutocompleteField, OnInit, OnChanges, AfterContentInit
 {
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
@@ -131,10 +130,6 @@ export class AutocompleteFieldComponent
     this.optionComponents?.changes
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
-  }
-
-  override ngOnDestroy(): void {
-    super.ngOnDestroy();
   }
 
   protected onInput(event: Event): void {
@@ -198,7 +193,7 @@ export class AutocompleteFieldComponent
   protected doWriteValue(value: string | null): void {
     this._writtenValue = value ?? null;
 
-    const found = this.filteredOptions$.value.find((opt) => opt.value === this._writtenValue);
+    const found = this.computeAllOptions().find((opt) => opt.value === this._writtenValue);
     this.selectedOption = found ? { ...found } : undefined;
 
     // if the provided value doesn't exist in the options, treat it as empty display

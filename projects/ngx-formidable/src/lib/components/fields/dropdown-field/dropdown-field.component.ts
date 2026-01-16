@@ -131,10 +131,6 @@ export class DropdownFieldComponent
       .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
   }
 
-  override ngOnDestroy(): void {
-    super.ngOnDestroy();
-  }
-
   protected doOnValueChange(): void {
     // No additional actions needed
   }
@@ -187,7 +183,7 @@ export class DropdownFieldComponent
   protected doWriteValue(value: string | null): void {
     this._writtenValue = value ?? null;
 
-    const found = this.options$.value.find((opt) => opt.value === this._writtenValue);
+    const found = this.computeAllOptions().find((opt) => opt.value === this._writtenValue);
     this.selectedOption = found ? { ...found } : undefined;
 
     // if the provided value doesn't exist in the options, treat it as empty display

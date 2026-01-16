@@ -147,7 +147,7 @@ export class RadioGroupFieldComponent
   protected doWriteValue(value: string | null): void {
     this._writtenValue = value ?? null;
 
-    const found = this.options$.value.find((opt) => opt.value === value);
+    const found = this.computeAllOptions().find((opt) => opt.value === value);
     this.selectedOption = found ? { ...found } : undefined;
 
     this.isFieldFilled = !!this.selectedOption?.value;
