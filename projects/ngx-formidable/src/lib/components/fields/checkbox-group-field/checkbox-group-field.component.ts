@@ -135,6 +135,8 @@ export class CheckboxGroupFieldComponent
       ...opt,
       selected: values.includes(opt.value)
     }));
+
+    this.isFieldFilled = this._value.length > 0;
   }
 
   // #endregion

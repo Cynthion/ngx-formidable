@@ -434,7 +434,7 @@ export class DropdownFieldComponent
     if (nextIndex < 0) nextIndex = 0;
     if (nextIndex >= count) nextIndex = count - 1;
 
-    // ensure not disabled
+    // skip disabled
     if (options[nextIndex]?.disabled) {
       const fixed = getNextAvailableOptionIndex(nextIndex, options, 'down');
       nextIndex = fixed >= 0 ? fixed : getNextAvailableOptionIndex(nextIndex, options, 'up');

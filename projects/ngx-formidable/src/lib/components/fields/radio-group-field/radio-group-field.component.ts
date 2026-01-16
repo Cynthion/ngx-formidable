@@ -2,19 +2,23 @@ import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ContentChildren,
   ElementRef,
   forwardRef,
+  inject,
   Input,
+  OnChanges,
   OnDestroy,
   OnInit,
   QueryList,
+  SimpleChanges,
   ViewChild,
   ViewChildren
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, takeUntil } from 'rxjs';
 import { getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
 import { scrollHighlightedOptionIntoView } from '../../../helpers/position.helpers';
 import {
@@ -72,8 +76,8 @@ import { BaseFieldDirective } from '../base-field.directive';
   ]
 })
 export class RadioGroupFieldComponent
-  extends BaseFieldDirective
-  implements IFormidableRadioGroupField, OnInit, AfterContentInit, OnDestroy
+  extends BaseFieldDirective<string | null>
+  implements IFormidableRadioGroupField, OnInit, AfterContentInit, OnDestroy, OnChanges
 {
   @ViewChild('radioGroupRef', { static: true }) radioGroupRef!: ElementRef<HTMLDivElement>;
   @ViewChildren('optionRef') optionRefs?: QueryList<FieldOptionComponent>;
@@ -83,14 +87,27 @@ export class RadioGroupFieldComponent
   protected windowResizeScrollCallback = null;
   protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
-  private _value = '';
+  private _writtenValue: string | null = null;
+  private _highlightedValue: string | null = null;
+
+  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // react to changes of @Input properties
+    if (changes['options'] || changes['sortFn']) {
+      queueMicrotask(() => this.onOptionsChanged());
+    }
+  }
 
   ngAfterContentInit(): void {
     // The projected options (option.template) might not be available immediately after content initialization,
-    // so we use setTimeout to ensure they are processed after the current change detection cycle.
-    setTimeout(() => {
-      this.updateOptions();
-    });
+    // so we use queueMicrotask to ensure they are processed after the current change detection cycle.
+    queueMicrotask(() => this.onOptionsChanged());
+
+    // react to the changes of projected options
+    this.optionComponents?.changes
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
   }
 
   protected doOnValueChange(): void {
@@ -127,11 +144,13 @@ export class RadioGroupFieldComponent
 
   // #region ControlValueAccessor
 
-  protected doWriteValue(value: string): void {
-    this._value = value;
-    const found = this.options$.value.find((opt) => opt.value === value);
+  protected doWriteValue(value: string | null): void {
+    this._writtenValue = value ?? null;
 
+    const found = this.computeAllOptions().find((opt) => opt.value === value);
     this.selectedOption = found ? { ...found } : undefined;
+
+    this.isFieldFilled = !!this.selectedOption?.value;
   }
 
   // #endregion
@@ -181,33 +200,137 @@ export class RadioGroupFieldComponent
       disabled: option.disabled
     };
 
+    // commit selection + update displayed label
     this.selectedOption = newOption;
+    this._writtenValue = newOption.value;
 
+    // emit value change
     this.valueChangeSubject$.next(this.selectedOption.value);
     this.valueChanged.emit(this.selectedOption.value);
+    this.isFieldFilled = this.selectedOption.value.length > 0;
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.onTouched();
+
+    // immediately highlight the selected option
+    this.highlightSelectedOption();
+
+    this.cdRef.markForCheck();
   }
 
-  private updateOptions(): void {
+  private deselectOption(): void {
+    // only do work if there actually was a selection
+    if (!this.selectedOption) return;
+
+    this.setHighlightedIndex(-1);
+    this.selectedOption = undefined;
+
+    this._writtenValue = null;
+    this.isFieldFilled = false;
+
+    this.valueChangeSubject$.next(null);
+    this.valueChanged.emit(null);
+    this.onChange(null);
+    this.onTouched();
+
+    this.cdRef.markForCheck();
+  }
+
+  private onOptionsChanged(): void {
+    const allOptions = this.computeAllOptions();
+
+    this.updateOptions(allOptions);
+    this.reconcileSelectionAgainstOptions(allOptions);
+    this.reconcileHighlightAfterOptionsChanged(); // (block 4)
+
+    this.cdRef.markForCheck();
+  }
+
+  private computeAllOptions(): IFormidableFieldOption[] {
     const inlineOptions = this.options ?? [];
     const projectedOptions = this.optionComponents?.toArray() ?? [];
 
     let combined = [...inlineOptions, ...projectedOptions];
 
     if (this.sortFn) {
-      combined = combined.sort(this.sortFn);
+      combined = [...combined].sort(this.sortFn);
     }
 
-    this.options$.next(combined);
+    return combined;
+  }
 
-    this.writeValue(this._value);
+  private updateOptions(allOptions: IFormidableFieldOption[]): void {
+    this.options$.next(allOptions);
+
+    // keep current value in sync with newly combined options
+    this.writeValue(this._writtenValue);
+  }
+
+  private reconcileSelectionAgainstOptions(allOptions: IFormidableFieldOption[]): void {
+    if (!this.selectedOption) return;
+
+    const stillExists = allOptions.some((o) => o.value === this.selectedOption!.value);
+    if (!stillExists) {
+      this.deselectOption();
+    }
   }
 
   // #endregion
 
+  private highlightSelectedOption(): void {
+    const selectedIndex = this.options$.value.findIndex((opt) => opt.value === this.selectedOption?.value);
+
+    this.setHighlightedIndex(selectedIndex);
+  }
+
+  private reconcileHighlightAfterOptionsChanged(): void {
+    const options = this.options$.value;
+    const count = options.length;
+
+    // empty list
+    if (count === 0) {
+      this.setHighlightedIndex(-1);
+      return;
+    }
+
+    // selection wins
+    if (this.selectedOption) {
+      const selectedIndex = options.findIndex((o) => o.value === this.selectedOption!.value);
+      if (selectedIndex >= 0) {
+        this.setHighlightedIndex(selectedIndex);
+        return;
+      }
+    }
+
+    // try keep previous highlighted value
+    if (this._highlightedValue) {
+      const keepIndex = options.findIndex((o) => o.value === this._highlightedValue);
+      if (keepIndex >= 0) {
+        this.setHighlightedIndex(keepIndex);
+        return;
+      }
+    }
+
+    // clamp previous index into new bounds
+    const prevHighlightIndex = this.highlightedOptionIndex$.value;
+
+    let nextIndex = prevHighlightIndex;
+    if (nextIndex < 0) nextIndex = 0;
+    if (nextIndex >= count) nextIndex = count - 1;
+
+    // skip disabled
+    if (options[nextIndex]?.disabled) {
+      const fixed = getNextAvailableOptionIndex(nextIndex, options, 'down');
+      nextIndex = fixed >= 0 ? fixed : getNextAvailableOptionIndex(nextIndex, options, 'up');
+    }
+
+    this.setHighlightedIndex(nextIndex >= 0 ? nextIndex : -1);
+  }
+
   private setHighlightedIndex(index: number): void {
     this.highlightedOptionIndex$.next(index);
+
+    const opt = index >= 0 ? this.options$.value[index] : undefined;
+    this._highlightedValue = opt?.value ?? null;
 
     setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }
