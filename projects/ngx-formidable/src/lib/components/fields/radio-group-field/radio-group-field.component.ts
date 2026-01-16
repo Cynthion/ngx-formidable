@@ -77,7 +77,7 @@ import { BaseFieldDirective } from '../base-field.directive';
 })
 export class RadioGroupFieldComponent
   extends BaseFieldDirective<string | null>
-  implements IFormidableRadioGroupField, OnInit, AfterContentInit, OnDestroy, OnChanges
+  implements IFormidableRadioGroupField, OnInit, OnChanges, AfterContentInit, OnDestroy
 {
   @ViewChild('radioGroupRef', { static: true }) radioGroupRef!: ElementRef<HTMLDivElement>;
   @ViewChildren('optionRef') optionRefs?: QueryList<FieldOptionComponent>;
@@ -133,12 +133,12 @@ export class RadioGroupFieldComponent
           this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'up'));
         }
         break;
-      case 'Enter':
-        if (options[this.highlightedOptionIndex$.value]) {
-          const option = options[this.highlightedOptionIndex$.value]!;
-          this.selectOption(option);
-        }
+      case 'Enter': {
+        const idx = this.highlightedOptionIndex$.value;
+        const option = this.options$.value[idx];
+        if (option) this.selectOption(option);
         break;
+      }
     }
   }
 
@@ -147,7 +147,7 @@ export class RadioGroupFieldComponent
   protected doWriteValue(value: string | null): void {
     this._writtenValue = value ?? null;
 
-    const found = this.computeAllOptions().find((opt) => opt.value === value);
+    const found = this.options$.value.find((opt) => opt.value === value);
     this.selectedOption = found ? { ...found } : undefined;
 
     this.isFieldFilled = !!this.selectedOption?.value;
@@ -200,15 +200,16 @@ export class RadioGroupFieldComponent
       disabled: option.disabled
     };
 
-    // commit selection + update displayed label
+    // commit selection
     this.selectedOption = newOption;
     this._writtenValue = newOption.value;
 
     // emit value change
-    this.valueChangeSubject$.next(this.selectedOption.value);
-    this.valueChanged.emit(this.selectedOption.value);
-    this.isFieldFilled = this.selectedOption.value.length > 0;
-    this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
+    const newValue = this.selectedOption.value;
+    this.valueChangeSubject$.next(newValue);
+    this.valueChanged.emit(newValue);
+    this.isFieldFilled = newValue.length > 0;
+    this.onChange(newValue); // notify ControlValueAccessor of the change
     this.onTouched();
 
     // immediately highlight the selected option

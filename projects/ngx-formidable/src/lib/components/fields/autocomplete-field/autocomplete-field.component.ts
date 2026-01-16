@@ -177,12 +177,13 @@ export class AutocompleteFieldComponent
           this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'up'));
         }
         break;
-      case 'Enter':
-        if (this.isPanelOpen && options[this.highlightedOptionIndex$.value]) {
-          const option = options[this.highlightedOptionIndex$.value]!;
-          this.selectOption(option);
-        }
+      case 'Enter': {
+        if (!this.isPanelOpen) return;
+        const idx = this.highlightedOptionIndex$.value;
+        const option = this.filteredOptions$.value[idx];
+        if (option) this.selectOption(option);
         break;
+      }
     }
   }
 
@@ -197,7 +198,7 @@ export class AutocompleteFieldComponent
   protected doWriteValue(value: string): void {
     // this._value = value ?? '';
 
-    const found = this.computeAllOptions().find((opt) => opt.value === value);
+    const found = this.filteredOptions$.value.find((opt) => opt.value === value);
     this.selectedOption = found ? { ...found } : undefined;
 
     // if the provided value doesn't exist in the options, treat it as empty display
