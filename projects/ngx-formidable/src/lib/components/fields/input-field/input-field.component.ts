@@ -116,6 +116,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
       setTimeout(() => {
         const maskedValue = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
         this.inputRef.nativeElement.value = maskedValue;
+        setCaretPositionToEnd(this.inputRef.nativeElement);
 
         // notify the form control again (since usually done in base directive)
         if (newValue) {
@@ -124,9 +125,8 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
       });
     } else {
       this.inputRef.nativeElement.value = newValue;
+      setCaretPositionToEnd(this.inputRef.nativeElement);
     }
-
-    setCaretPositionToEnd(this.inputRef.nativeElement);
   }
 
   // #endregion
