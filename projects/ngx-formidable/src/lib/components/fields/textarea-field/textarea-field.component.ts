@@ -132,6 +132,7 @@ export class TextareaFieldComponent
       setTimeout(() => {
         const maskedValue = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
         el.value = maskedValue;
+        setCaretPositionToEnd(el);
 
         // notify the form control again (since usually done in base directive)
         if (newValue) {
@@ -140,9 +141,8 @@ export class TextareaFieldComponent
       });
     } else {
       el.value = newValue;
+      setCaretPositionToEnd(el);
     }
-
-    setCaretPositionToEnd(el);
   }
 
   // #endregion
@@ -248,7 +248,7 @@ export class TextareaFieldComponent
   }
 
   private get textareaElement(): HTMLTextAreaElement | null {
-    return (this.mask ? this.maskedTextareaRef?.nativeElement : this.maskedTextareaRef?.nativeElement) ?? null;
+    return (this.mask ? this.maskedTextareaRef?.nativeElement : this.plainTextareaRef?.nativeElement) ?? null;
   }
 
   // #endregion
