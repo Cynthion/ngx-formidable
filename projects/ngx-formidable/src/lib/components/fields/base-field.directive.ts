@@ -117,7 +117,7 @@ export abstract class BaseFieldDirective<T = string | null>
 
   get isLabelFloating(): boolean {
     const blocked = this.disabled || this.readonly;
-    return !blocked && !this.isFieldFocused && !this.isFieldFilled;
+    return (!this.isFieldFocused && !this.isFieldFilled) || (blocked && this.isFieldFocused);
   }
 
   abstract fieldRef: ElementRef<HTMLElement>;

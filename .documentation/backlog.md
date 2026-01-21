@@ -16,6 +16,7 @@ Example:
 
 Improvements:
 
+- make floating label from "placeholder" like with Material's Input field
 - make error message "absolute" positioned, so it doesn't take space in layout
 - add property "subLabel" to fields, which can show text below the field (similar to errors, but always visible)
 - add a "defaultOption" input to select, dropdown, autocomplete, radio-group, checkbox-group fields (which is shown always as first or only when no match/option)
