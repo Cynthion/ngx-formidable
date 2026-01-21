@@ -149,11 +149,6 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     }
   }
 
-  get isLabelFloating(): boolean {
-    const blocked = this.disabled || this.readonly;
-    return !blocked && !this.isFieldFocused && !this.isFieldFilled;
-  }
-
   get fieldRef(): ElementRef<HTMLElement> {
     return this.inputRef as ElementRef<HTMLElement>;
   }

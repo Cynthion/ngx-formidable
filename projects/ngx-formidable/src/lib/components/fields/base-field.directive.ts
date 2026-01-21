@@ -115,7 +115,10 @@ export abstract class BaseFieldDirective<T = string | null>
 
   abstract get value(): T;
 
-  abstract isLabelFloating: boolean;
+  get isLabelFloating(): boolean {
+    const blocked = this.disabled || this.readonly;
+    return !blocked && !this.isFieldFocused && !this.isFieldFilled;
+  }
 
   abstract fieldRef: ElementRef<HTMLElement>;
 

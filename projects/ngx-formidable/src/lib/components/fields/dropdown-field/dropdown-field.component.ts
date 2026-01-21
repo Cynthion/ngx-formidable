@@ -207,11 +207,6 @@ export class DropdownFieldComponent
     return this.selectedOption?.value || null;
   }
 
-  get isLabelFloating(): boolean {
-    const blocked = this.disabled || this.readonly;
-    return !blocked && !this.isFieldFocused && !this.isFieldFilled;
-  }
-
   get fieldRef(): ElementRef<HTMLElement> {
     return this.dropdownRef as ElementRef<HTMLElement>;
   }

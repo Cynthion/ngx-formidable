@@ -220,11 +220,6 @@ export class AutocompleteFieldComponent
     return this.selectedOption?.value || null;
   }
 
-  get isLabelFloating(): boolean {
-    const blocked = this.disabled || this.readonly;
-    return !blocked && !this.isFieldFocused && !this.isFieldFilled;
-  }
-
   get fieldRef(): ElementRef<HTMLElement> {
     return this.autocompleteRef as ElementRef<HTMLElement>;
   }

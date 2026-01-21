@@ -150,11 +150,6 @@ export class TimeFieldComponent
     return this.selectedTime || null;
   }
 
-  get isLabelFloating(): boolean {
-    const blocked = this.disabled || this.readonly;
-    return !blocked && !this.isFieldFocused && !this.isFieldFilled;
-  }
-
   get fieldRef(): ElementRef<HTMLElement> {
     return this.timeRef as ElementRef<HTMLElement>;
   }

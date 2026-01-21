@@ -167,11 +167,6 @@ export class TextareaFieldComponent
     }
   }
 
-  get isLabelFloating(): boolean {
-    const blocked = this.disabled || this.readonly;
-    return !blocked && !this.isFieldFocused && !this.isFieldFilled;
-  }
-
   get fieldRef(): ElementRef<HTMLElement> {
     return (this.mask ? this.maskedTextareaRef! : this.plainTextareaRef!) as ElementRef<HTMLElement>;
   }

@@ -161,7 +161,9 @@ export class RadioGroupFieldComponent
     return this.selectedOption?.value || null;
   }
 
-  readonly isLabelFloating = false;
+  override get isLabelFloating(): boolean {
+    return false;
+  }
 
   get fieldRef(): ElementRef<HTMLElement> {
     return this.radioGroupRef as ElementRef<HTMLElement>;

@@ -303,11 +303,6 @@ export class DateFieldComponent
     return this.selectedDate || null;
   }
 
-  get isLabelFloating(): boolean {
-    const blocked = this.disabled || this.readonly;
-    return !blocked && !this.isFieldFocused && !this.isFieldFilled;
-  }
-
   get fieldRef(): ElementRef<HTMLElement> {
     return this.dateRef as ElementRef<HTMLElement>;
   }
