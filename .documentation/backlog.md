@@ -16,6 +16,8 @@ Example:
 
 Improvements:
 
+- don't render `formidable-field-option` components when radiogroup and checkboxgroup are empty
+- add { descendants: true } to options (make options available with `ng-template`, e.g. EnerQi constitution form), see https://chatgpt.com/g/g-p-6881cf5951fc8191998a952f25c65a09-ngx-formidable/c/6972a872-f0bc-8327-a7cc-8bd0e35ddc7e
 - fix multi-row label not overlapping into field (make wrapping)
 - make floating label from "placeholder" like with Material's Input field
 - make error message "absolute" positioned, so it doesn't take space in layout
