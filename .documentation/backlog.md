@@ -13,9 +13,12 @@ Example:
 - tag release commit
 - add CONTRIBUTING.md
 - logo for ngx-formidable
+- how to create a custom field, see e.g. EnerQi `ConstitutionCounterFieldComponent`
 
 Improvements:
 
+- fix DateFieldComponent: when a date is chosen, then user types (and breaks the date), the formValue should become null
+- make DateFieldComponent `smaller` or render better for smaller screens
 - don't render `formidable-field-option` components when radiogroup and checkboxgroup are empty
 - add { descendants: true } to options (make options available with `ng-template`, e.g. EnerQi constitution form), see https://chatgpt.com/g/g-p-6881cf5951fc8191998a952f25c65a09-ngx-formidable/c/6972a872-f0bc-8327-a7cc-8bd0e35ddc7e
 - fix multi-row label not overlapping into field (make wrapping)

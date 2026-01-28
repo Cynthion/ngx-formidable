@@ -138,7 +138,7 @@ export class TimeFieldComponent
 
   // #region ControlValueAccessor
 
-  protected doWriteValue(value: Date): void {
+  protected doWriteValue(value: Date | null): void {
     this.trySetTimeFromInput(value);
   }
 

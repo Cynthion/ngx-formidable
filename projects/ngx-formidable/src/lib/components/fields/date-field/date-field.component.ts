@@ -291,7 +291,7 @@ export class DateFieldComponent
 
   // #region ControlValueAccessor
 
-  protected doWriteValue(value: Date): void {
+  protected doWriteValue(value: Date | null): void {
     this.trySetDateFromInput(value);
   }
 
