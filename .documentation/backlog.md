@@ -5,7 +5,7 @@ Example:
 - Update usage documentation according to EnerQi
 - suffixes: clear/reset, copy, validation state, loading
 - date/time fields: show mask that user provided, not 0
-- complex example
+- group example, using ngModelGroup (see EnerQi appointment-page.form)
 - theme 4 should be tweaked to be tiny, and border-radius 0, no background for field groups
 - add badges to readme
 - exact feature list (per field and component) in readme
