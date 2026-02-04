@@ -37,6 +37,6 @@
 }
 
 .content {
-  // empty, just marking the content area div that is required so the flex alignment doesn't
-  // apply for the wrapped elements
+  flex: 1 1 auto;
+  min-width: 0;
 }
