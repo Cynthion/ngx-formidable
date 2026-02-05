@@ -1,5 +1,4 @@
 import { ElementRef, QueryList } from '@angular/core';
-import { FieldOptionComponent } from '../components/field-option/field-option.component';
 
 export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef?: ElementRef<HTMLElement>): void {
   const field = fieldRef?.nativeElement;
@@ -65,10 +64,11 @@ export function scrollIntoView(
 
 export function scrollHighlightedOptionIntoView(
   index: number,
-  optionRefs: QueryList<FieldOptionComponent> | undefined
+  optionRefs: QueryList<{ elementRef: ElementRef<HTMLElement> } | ElementRef<HTMLElement>> | undefined
 ): void {
-  const optionComponent = optionRefs?.get(index);
-  const optionElement = optionComponent?.elementRef.nativeElement;
+  const item = optionRefs?.get(index);
+
+  const optionElement = item instanceof ElementRef ? item.nativeElement : item?.elementRef?.nativeElement;
 
   if (optionElement) {
     optionElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
