@@ -243,7 +243,7 @@ export class RadioGroupFieldComponent
 
     this.updateOptions(allOptions);
     this.reconcileSelectionAgainstOptions(allOptions);
-    this.reconcileHighlightAfterOptionsChanged(); // (block 4)
+    this.reconcileHighlightAfterOptionsChanged();
 
     this.cdRef.markForCheck();
   }
@@ -334,6 +334,9 @@ export class RadioGroupFieldComponent
 
     const opt = index >= 0 ? this.options$.value[index] : undefined;
     this._highlightedValue = opt?.value ?? null;
+
+    if (!this.isFieldFocused) return;
+    if (index < 0) return;
 
     setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }

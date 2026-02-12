@@ -451,6 +451,9 @@ export class AutocompleteFieldComponent
     const option = index >= 0 ? this.filteredOptions$.value[index] : undefined;
     this._highlightedValue = option?.value ?? null;
 
+    if (!this.isFieldFocused) return;
+    if (index < 0) return;
+
     setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }
 
