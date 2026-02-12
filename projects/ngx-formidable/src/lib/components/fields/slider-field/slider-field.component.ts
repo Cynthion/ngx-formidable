@@ -163,7 +163,7 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   }
 
   private normalizeValue(value: number | null): number | null {
-    if (value == null || Number.isNaN(value)) return null;
+    if (value == null || Number.isNaN(value)) return this.min;
 
     const clamped = Math.min(this.max, Math.max(this.min, value));
     return this.roundToStep(clamped);
