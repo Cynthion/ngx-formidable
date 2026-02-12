@@ -8,6 +8,7 @@ import { CheckboxGroupFieldComponent } from './components/fields/checkbox-group-
 import { DateFieldComponent } from './components/fields/date-field/date-field.component';
 import { DropdownFieldComponent } from './components/fields/dropdown-field/dropdown-field.component';
 import { InputFieldComponent } from './components/fields/input-field/input-field.component';
+import { OptionGroupFieldComponent } from './components/fields/option-group-field/option-group-field.component';
 import { RadioGroupFieldComponent } from './components/fields/radio-group-field/radio-group-field.component';
 import { SelectFieldComponent } from './components/fields/select-field/select-field.component';
 import { SliderFieldComponent } from './components/fields/slider-field/slider-field.component';
@@ -50,6 +51,7 @@ const components = [
   TextareaFieldComponent,
   RadioGroupFieldComponent,
   CheckboxGroupFieldComponent,
+  OptionGroupFieldComponent,
   TimeFieldComponent,
   ToggleFieldComponent,
   SliderFieldComponent,

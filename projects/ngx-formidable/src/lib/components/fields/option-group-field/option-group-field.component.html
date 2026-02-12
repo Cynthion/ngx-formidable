@@ -1,0 +1,52 @@
+<div
+  #optionGroupRef
+  role="radiogroup"
+  class="field field-layout-row"
+  [class.is-readonly]="readonly"
+  [class.is-disabled]="disabled"
+  [tabindex]="readonly || disabled ? -1 : null"
+  (focus)="onFocusChange(true)"
+  (blur)="onFocusChange(false)">
+  <!-- Options -->
+  <!-- Options are re-created in order to use native <input> elements. -->
+  @for (option of options$ | async; track option.value; let i = $index) {
+    <label
+      #optionRef
+      class="option"
+      [class.option-disabled]="option.disabled || disabled">
+      <input
+        type="radio"
+        hidden
+        class="input"
+        [id]="name + '-' + option.value"
+        [tabindex]="-1"
+        [attr.name]="name"
+        [attr.readonly]="option.readonly || readonly ? '' : null"
+        [attr.disabled]="option.disabled || disabled ? '' : null"
+        [checked]="option.value === value"
+        (click)="$event.preventDefault(); selectOption(option)" />
+
+      <span
+        class="option-content"
+        [class.option-content-selected]="option.value === value"
+        [class.option-content-highlighted]="i === (highlightedOptionIndex$ | async)">
+        {{ option.label || option.value }}
+      </span>
+    </label>
+  } @empty {
+    <label
+      #optionRef
+      class="option option-disabled">
+      <input
+        type="radio"
+        hidden
+        class="input"
+        [id]="name + '-no-options'"
+        [tabindex]="-1"
+        [name]="name"
+        [value]="''"
+        [disabled]="true" />
+      <span class="option-content no-option">{{ noOptionsText }}</span>
+    </label>
+  }
+</div>

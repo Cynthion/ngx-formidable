@@ -1,0 +1,109 @@
+@use '../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.field {
+  display: grid;
+  align-items: stretch;
+}
+
+.field-layout-row {
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 2px;
+}
+
+.option {
+  display: block;
+  min-width: 0;
+}
+
+.input {
+  @include visuallyhidden;
+}
+
+.option-content {
+  cursor: pointer;
+  position: relative;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  user-select: none;
+
+  @include font-s-bold;
+
+  // segmented row default
+  .field-layout-row & {
+    padding: cmp_space(16) cmp_space(12);
+    background-color: var(--cmp-color-black-5);
+
+    &::before {
+      @include absolute-cover;
+
+      content: '';
+      background-color: var(--cmp-color-black-5);
+      opacity: 0;
+      transition: opacity var(--cmp-hover-duration-short) var(--cmp-hover-easing);
+    }
+
+    &::after {
+      @include absolute-cover;
+
+      content: '';
+      border: 2px solid;
+      opacity: 0;
+      transition: opacity var(--cmp-hover-duration-short) var(--cmp-hover-easing);
+    }
+  }
+
+  .field-layout-row .option:first-child & {
+    border-top-left-radius: var(--cmp-border-radius-m);
+    border-bottom-left-radius: var(--cmp-border-radius-m);
+
+    &::before,
+    &::after {
+      border-top-left-radius: var(--cmp-border-radius-m);
+      border-bottom-left-radius: var(--cmp-border-radius-m);
+    }
+  }
+
+  .field-layout-row .option:last-child & {
+    border-top-right-radius: var(--cmp-border-radius-m);
+    border-bottom-right-radius: var(--cmp-border-radius-m);
+
+    &::before,
+    &::after {
+      border-top-right-radius: var(--cmp-border-radius-m);
+      border-bottom-right-radius: var(--cmp-border-radius-m);
+    }
+  }
+
+  // selected
+  &.option-content-selected::after {
+    border-color: unset;
+    opacity: 1;
+  }
+
+  // hover (only when not selected)
+  .field-layout-row .option:not(.option-disabled) &:not(.option-content-selected) {
+    @include hover {
+      &::before {
+        opacity: 1;
+      }
+    }
+  }
+
+  // disabled
+  .option-disabled &,
+  .field.is-disabled & {
+    @include field-disabled;
+
+    cursor: not-allowed;
+  }
+}
+
+.no-option {
+  @include no-option;
+}
