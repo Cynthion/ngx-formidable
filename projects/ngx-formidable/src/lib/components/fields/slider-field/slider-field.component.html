@@ -11,9 +11,9 @@
         [style.width.%]="valuePercent"></div>
     </div>
     @if (showTickMarks && ticks.length > 0) {
-      <div class="slider-ticks">
+      <div class="slider-tick-marks">
         @for (tick of ticks; track tick) {
-          <div class="slider-tick"></div>
+          <div class="slider-tick-mark"></div>
         }
       </div>
     }

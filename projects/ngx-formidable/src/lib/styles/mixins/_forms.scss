@@ -421,7 +421,7 @@
     height: var(--formidable-slider-track-fill-height, #{tokens.$formidable-slider-track-fill-height});
   }
 
-  .slider-ticks {
+  .slider-tick-marks {
     position: absolute;
     inset-inline: 0;
     display: flex;
@@ -432,11 +432,14 @@
     justify-content: space-between;
   }
 
-  .slider-tick {
-    width: var(--formidable-slider-tick-width, #{tokens.$formidable-slider-tick-width});
-    height: var(--formidable-slider-tick-height, #{tokens.$formidable-slider-tick-height});
-    background: var(--formidable-color-slider-tick, #{tokens.$formidable-color-slider-tick});
-    border-radius: var(--formidable-slider-tick-border-radius, #{tokens.$formidable-slider-tick-border-radius});
+  .slider-tick-mark {
+    width: var(--formidable-slider-tick-mark-width, #{tokens.$formidable-slider-tick-mark-width});
+    height: var(--formidable-slider-tick-mark-height, #{tokens.$formidable-slider-tick-mark-height});
+    background: var(--formidable-color-slider-tick-mark, #{tokens.$formidable-color-slider-tick-mark});
+    border-radius: var(
+      --formidable-slider-tick-mark-border-radius,
+      #{tokens.$formidable-slider-tick-mark-border-radius}
+    );
 
     &:first-child,
     &:last-child {
