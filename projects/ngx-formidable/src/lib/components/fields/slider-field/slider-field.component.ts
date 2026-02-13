@@ -276,11 +276,31 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
 
     // Avoid divide-by-zero when min === max
     const range = this.max - this.min;
-    const p = range === 0 ? 0.5 : (v - this.min) / range; // 0..1
+    const p = range === 0 ? 0 : (v - this.min) / range; // 0..1
     const clampedP = Math.min(1, Math.max(0, p));
 
-    // Map 0..1 -> -50..+50, with 0.5 -> 0
-    const tx = (clampedP - 0.5) * 100; // -50..+50
+    // compensation to centers over the value)
+    const baseTx = (clampedP - 0.5) * 100; // -50..+50
+
+    // Edge zone where we blend back to 0 so the thumb doesn't overflow.
+    // Tune (0.02 = 2%) to taste; 2–5% usually feels good.
+    const edge = 0.02;
+
+    let tx: number;
+
+    if (clampedP <= edge) {
+      // Blend from 0 at p=0 to baseTx at p=edge
+      const t = clampedP / edge; // 0..1
+      const baseAtEdge = (edge - 0.5) * 100;
+      tx = 0 + (baseAtEdge - 0) * t;
+    } else if (clampedP >= 1 - edge) {
+      // Blend from baseTx at p=1-edge to 0 at p=1
+      const t = (clampedP - (1 - edge)) / edge; // 0..1
+      const baseAtEdge = (1 - edge - 0.5) * 100;
+      tx = baseAtEdge + (0 - baseAtEdge) * t;
+    } else {
+      tx = baseTx;
+    }
 
     el.style.setProperty('--formidable-slider-thumb-transform', `translateX(${tx}%)`);
   }
