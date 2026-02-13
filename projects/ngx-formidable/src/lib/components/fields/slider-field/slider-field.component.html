@@ -20,7 +20,8 @@
     @if (showThumbLabel) {
       <div
         class="slider-thumb-label"
-        [style.left.%]="valuePercent">
+        [style.left.%]="valuePercent"
+        [attr.data-align]="thumbLabelAlign">
         <div class="slider-thumb-label-inner">
           {{ thumbLabel }}
         </div>

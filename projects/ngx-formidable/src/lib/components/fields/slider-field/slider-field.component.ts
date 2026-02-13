@@ -134,6 +134,16 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
     return ((v - this.min) / (this.max - this.min)) * 100;
   }
 
+  get thumbLabelAlign(): SliderLabelAlign {
+    // snap to edges to avoid overflow
+    const p = this.valuePercent;
+
+    // small deadzone
+    if (p <= 5) return 'start';
+    if (p >= 95) return 'end';
+    return 'center';
+  }
+
   get tickMarks(): number[] {
     if (!this.showTickMarks) return [];
 
