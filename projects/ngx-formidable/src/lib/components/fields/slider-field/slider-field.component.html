@@ -10,9 +10,9 @@
         class="slider-track-fill"
         [style.width.%]="valuePercent"></div>
     </div>
-    @if (showTickMarks && ticks.length > 0) {
+    @if (showTickMarks && tickMarks.length > 0) {
       <div class="slider-tick-marks">
-        @for (tick of ticks; track tick) {
+        @for (tick of tickMarks; track tick) {
           <div class="slider-tick-mark"></div>
         }
       </div>
@@ -45,37 +45,14 @@
       (input)="onRangeInput($event)" />
   </div>
 
-  @if (showMinMaxLabels) {
-    <div class="slider-labels">
-      <div class="min-label">
-        {{ minLabel ?? min }}
-      </div>
-
-      <div class="slider-labels-spacer"></div>
-
-      <div class="max-label">
-        {{ maxLabel ?? max }}
-      </div>
-
-      @if (showAnyTickLabels && innerTicks.length > 0) {
-        <div class="slider-tick-labels-overlay">
-          @for (tick of innerTicks; track tick) {
-            <div
-              class="slider-tick-label"
-              [style.left.%]="getTickPercent(tick)">
-              {{ getTickLabel(tick) }}
-            </div>
-          }
-        </div>
-      }
-    </div>
-  } @else if (showAnyTickLabels) {
-    <div class="slider-tick-labels-full">
-      @for (tick of ticks; track tick) {
+  @if (showLabelRow) {
+    <div class="slider-label-row">
+      @for (item of labelItems; track item.leftPercent + '-' + item.text) {
         <div
-          class="slider-tick-label"
-          [style.left.%]="getTickPercent(tick)">
-          {{ getTickLabel(tick) }}
+          class="slider-label-item"
+          [style.left.%]="item.leftPercent"
+          [attr.data-align]="item.align">
+          {{ item.text }}
         </div>
       }
     </div>

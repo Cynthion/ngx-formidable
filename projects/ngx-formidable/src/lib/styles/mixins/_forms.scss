@@ -447,53 +447,31 @@
     }
   }
 
-  .slider-labels {
-    position: relative; // anchor overlay
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline; // baseline alignment!
-    user-select: none;
-
-    .min-label,
-    .max-label {
-      font-size: $label-font-size;
-      font-weight: $label-font-weight;
-      line-height: $label-line-height;
-      white-space: nowrap;
-    }
-
-    // pushes min/max to edges, but doesn't affect overlay
-    .slider-labels-spacer {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-
-    // full-width overlay that matches the slider track width
-    .slider-tick-labels-overlay {
-      position: absolute;
-      inset-inline: 0;
-      top: 0; // same top as min/max line box
-      height: $label-line-height;
-      pointer-events: none;
-    }
-  }
-
-  .slider-tick-labels-full {
+  .slider-label-row {
     position: relative;
     user-select: none;
     height: $label-line-height;
-    margin-top: utils.spacing(2); // TODO add token
+    margin-top: var(--formidable-slider-tick-labels-margin-top, #{tokens.$formidable-slider-tick-labels-margin-top});
     pointer-events: none;
   }
 
-  .slider-tick-label {
+  .slider-label-item {
     position: absolute;
     top: 0;
-    transform: translateX(-50%);
     font-size: $label-font-size;
     font-weight: $label-font-weight;
     line-height: $label-line-height;
     white-space: nowrap;
+
+    transform: translateX(-50%);
+  }
+
+  .slider-label-item[data-align='start'] {
+    transform: translateX(0);
+  }
+
+  .slider-label-item[data-align='end'] {
+    transform: translateX(-100%);
   }
 
   .slider-thumb-label {

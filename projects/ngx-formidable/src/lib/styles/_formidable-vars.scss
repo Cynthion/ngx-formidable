@@ -368,6 +368,7 @@
     --formidable-field-border-radius,
     #{tokens.$formidable-slider-thumb-label-border-radius}
   );
+  --formidable-slider-tick-labels-margin-top: #{tokens.$formidable-slider-tick-labels-margin-top};
 
   // #endregion
 

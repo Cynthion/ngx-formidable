@@ -4,6 +4,14 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableSliderField } from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.directive';
 
+type SliderLabelAlign = 'start' | 'center' | 'end';
+
+interface SliderLabelItem {
+  text: string;
+  leftPercent: number;
+  align: SliderLabelAlign;
+}
+
 @Component({
   selector: 'formidable-slider-field',
   templateUrl: './slider-field.component.html',
@@ -126,41 +134,95 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
     return ((v - this.min) / (this.max - this.min)) * 100;
   }
 
-  get ticks(): number[] {
+  get tickMarks(): number[] {
     if (!this.showTickMarks) return [];
 
     const interval = (this.tickInterval && this.tickInterval > 0 ? this.tickInterval : this.step) || 1;
-    const ticks: number[] = [];
+    const tickMarks: number[] = [];
 
     if (this.max <= this.min) {
-      return ticks;
+      return tickMarks;
     }
 
-    ticks.push(this.min);
+    tickMarks.push(this.min);
 
     let current = this.min + interval;
     while (current < this.max) {
-      ticks.push(this.roundToStep(current));
+      tickMarks.push(this.roundToStep(current));
       current += interval;
     }
 
-    ticks.push(this.max);
+    tickMarks.push(this.max);
 
-    return Array.from(new Set(ticks)).sort((a, b) => a - b);
+    return Array.from(new Set(tickMarks)).sort((a, b) => a - b);
+  }
+
+  get innerTicks(): number[] {
+    return this.tickMarks.length > 2 ? this.tickMarks.slice(1, -1) : [];
+  }
+
+  get showLabelRow(): boolean {
+    return this.showMinMaxLabels || this.showAnyTickLabels;
+  }
+
+  get showAnyTickLabels(): boolean {
+    return this.showTickMarks && this.showTickLabels && this.tickMarks.length > 0;
+  }
+
+  get labelItems(): SliderLabelItem[] {
+    const items: SliderLabelItem[] = [];
+
+    // Case A: min/max labels shown, with optional tick labels for inner ticks
+    if (this.showMinMaxLabels) {
+      items.push({
+        text: String(this.minLabel ?? this.min),
+        leftPercent: 0,
+        align: 'start'
+      });
+
+      if (this.showAnyTickLabels && this.innerTicks.length > 0) {
+        for (const tick of this.innerTicks) {
+          items.push({
+            text: this.getTickLabel(tick),
+            leftPercent: this.getTickPercent(tick),
+            align: 'center'
+          });
+        }
+      }
+
+      items.push({
+        text: String(this.maxLabel ?? this.max),
+        leftPercent: 100,
+        align: 'end'
+      });
+
+      return items;
+    }
+
+    // Case B: min/max labels hidden, but tick labels shown for all ticks
+    if (this.showAnyTickLabels) {
+      const t = this.tickMarks;
+      if (t.length === 0) return items;
+
+      for (let i = 0; i < t.length; i++) {
+        const tick = t[i];
+        if (tick !== undefined) {
+          items.push({
+            text: this.getTickLabel(tick),
+            leftPercent: this.getTickPercent(tick),
+            align: i === 0 ? 'start' : i === t.length - 1 ? 'end' : 'center'
+          });
+        }
+      }
+    }
+
+    return items;
   }
 
   getTickPercent(tick: number): number {
     if (this.max === this.min) return 0;
 
     return ((tick - this.min) / (this.max - this.min)) * 100;
-  }
-
-  get showAnyTickLabels(): boolean {
-    return this.showTickLabels && this.showTickMarks && this.ticks.length > 0;
-  }
-
-  get innerTicks(): number[] {
-    return this.ticks.length > 2 ? this.ticks.slice(1, -1) : [];
   }
 
   onRangeInput(event: Event): void {
