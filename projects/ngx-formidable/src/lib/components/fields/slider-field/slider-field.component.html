@@ -51,9 +51,33 @@
         {{ minLabel ?? min }}
       </div>
 
+      <div class="slider-labels-spacer"></div>
+
       <div class="max-label">
         {{ maxLabel ?? max }}
       </div>
+
+      @if (showAnyTickLabels && innerTicks.length > 0) {
+        <div class="slider-tick-labels-overlay">
+          @for (tick of innerTicks; track tick) {
+            <div
+              class="slider-tick-label"
+              [style.left.%]="getTickPercent(tick)">
+              {{ getTickLabel(tick) }}
+            </div>
+          }
+        </div>
+      }
+    </div>
+  } @else if (showAnyTickLabels) {
+    <div class="slider-tick-labels-full">
+      @for (tick of ticks; track tick) {
+        <div
+          class="slider-tick-label"
+          [style.left.%]="getTickPercent(tick)">
+          {{ getTickLabel(tick) }}
+        </div>
+      }
     </div>
   }
 </div>

@@ -89,9 +89,10 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   @Input() minLabel?: string;
   @Input() maxLabel?: string;
 
-  @Input() showMinMaxLabels = false;
   @Input() showThumbLabel = true;
   @Input() showTickMarks = false;
+  @Input() showMinMaxLabels = false;
+  @Input() showTickLabels = false;
   @Input() tickInterval?: number;
 
   @Input() transformValueToThumbLabel?: (value: number) => string;
@@ -152,6 +153,14 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
     if (this.max === this.min) return 0;
 
     return ((tick - this.min) / (this.max - this.min)) * 100;
+  }
+
+  get showAnyTickLabels(): boolean {
+    return this.showTickLabels && this.showTickMarks && this.ticks.length > 0;
+  }
+
+  get innerTicks(): number[] {
+    return this.ticks.length > 2 ? this.ticks.slice(1, -1) : [];
   }
 
   onRangeInput(event: Event): void {

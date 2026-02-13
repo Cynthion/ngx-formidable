@@ -448,8 +448,10 @@
   }
 
   .slider-labels {
+    position: relative; // anchor overlay
     display: flex;
     justify-content: space-between;
+    align-items: baseline; // baseline alignment!
     user-select: none;
 
     .min-label,
@@ -457,7 +459,41 @@
       font-size: $label-font-size;
       font-weight: $label-font-weight;
       line-height: $label-line-height;
+      white-space: nowrap;
     }
+
+    // pushes min/max to edges, but doesn't affect overlay
+    .slider-labels-spacer {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    // full-width overlay that matches the slider track width
+    .slider-tick-labels-overlay {
+      position: absolute;
+      inset-inline: 0;
+      top: 0; // same top as min/max line box
+      height: $label-line-height;
+      pointer-events: none;
+    }
+  }
+
+  .slider-tick-labels-full {
+    position: relative;
+    user-select: none;
+    height: $label-line-height;
+    margin-top: utils.spacing(2); // TODO add token
+    pointer-events: none;
+  }
+
+  .slider-tick-label {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    font-size: $label-font-size;
+    font-weight: $label-font-weight;
+    line-height: $label-line-height;
+    white-space: nowrap;
   }
 
   .slider-thumb-label {
