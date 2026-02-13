@@ -4,6 +4,14 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableSliderField } from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.directive';
 
+type SliderLabelAlign = 'start' | 'center' | 'end';
+
+interface SliderLabelItem {
+  text: string;
+  leftPercent: number;
+  align: SliderLabelAlign;
+}
+
 @Component({
   selector: 'formidable-slider-field',
   templateUrl: './slider-field.component.html',
@@ -89,9 +97,10 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   @Input() minLabel?: string;
   @Input() maxLabel?: string;
 
-  @Input() showMinMaxLabels = false;
   @Input() showThumbLabel = true;
   @Input() showTickMarks = false;
+  @Input() showMinMaxLabels = false;
+  @Input() showTickLabels = false;
   @Input() tickInterval?: number;
 
   @Input() transformValueToThumbLabel?: (value: number) => string;
@@ -125,27 +134,99 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
     return ((v - this.min) / (this.max - this.min)) * 100;
   }
 
-  get ticks(): number[] {
+  get thumbLabelAlign(): SliderLabelAlign {
+    // snap to edges to avoid overflow
+    const p = this.valuePercent;
+
+    // small deadzone
+    if (p <= 5) return 'start';
+    if (p >= 95) return 'end';
+    return 'center';
+  }
+
+  get tickMarks(): number[] {
     if (!this.showTickMarks) return [];
 
     const interval = (this.tickInterval && this.tickInterval > 0 ? this.tickInterval : this.step) || 1;
-    const ticks: number[] = [];
+    const tickMarks: number[] = [];
 
     if (this.max <= this.min) {
-      return ticks;
+      return tickMarks;
     }
 
-    ticks.push(this.min);
+    tickMarks.push(this.min);
 
     let current = this.min + interval;
     while (current < this.max) {
-      ticks.push(this.roundToStep(current));
+      tickMarks.push(this.roundToStep(current));
       current += interval;
     }
 
-    ticks.push(this.max);
+    tickMarks.push(this.max);
 
-    return Array.from(new Set(ticks)).sort((a, b) => a - b);
+    return Array.from(new Set(tickMarks)).sort((a, b) => a - b);
+  }
+
+  get innerTicks(): number[] {
+    return this.tickMarks.length > 2 ? this.tickMarks.slice(1, -1) : [];
+  }
+
+  get showLabelRow(): boolean {
+    return this.showMinMaxLabels || this.showAnyTickLabels;
+  }
+
+  get showAnyTickLabels(): boolean {
+    return this.showTickMarks && this.showTickLabels && this.tickMarks.length > 0;
+  }
+
+  get labelItems(): SliderLabelItem[] {
+    const items: SliderLabelItem[] = [];
+
+    // Case A: min/max labels shown, with optional tick labels for inner ticks
+    if (this.showMinMaxLabels) {
+      items.push({
+        text: String(this.minLabel ?? this.min),
+        leftPercent: 0,
+        align: 'start'
+      });
+
+      if (this.showAnyTickLabels && this.innerTicks.length > 0) {
+        for (const tick of this.innerTicks) {
+          items.push({
+            text: this.getTickLabel(tick),
+            leftPercent: this.getTickPercent(tick),
+            align: 'center'
+          });
+        }
+      }
+
+      items.push({
+        text: String(this.maxLabel ?? this.max),
+        leftPercent: 100,
+        align: 'end'
+      });
+
+      return items;
+    }
+
+    // Case B: min/max labels hidden, but tick labels shown for all ticks
+    if (this.showAnyTickLabels) {
+      const t = this.tickMarks;
+      if (t.length === 0) return items;
+
+      for (let i = 0; i < t.length; i++) {
+        const tick = t[i];
+        if (tick !== undefined) {
+          items.push({
+            text: this.getTickLabel(tick),
+            leftPercent: this.getTickPercent(tick),
+            align: i === 0 ? 'start' : i === t.length - 1 ? 'end' : 'center'
+          });
+        }
+      }
+    }
+
+    return items;
   }
 
   getTickPercent(tick: number): number {
@@ -195,11 +276,31 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
 
     // Avoid divide-by-zero when min === max
     const range = this.max - this.min;
-    const p = range === 0 ? 0.5 : (v - this.min) / range; // 0..1
+    const p = range === 0 ? 0 : (v - this.min) / range; // 0..1
     const clampedP = Math.min(1, Math.max(0, p));
 
-    // Map 0..1 -> -50..+50, with 0.5 -> 0
-    const tx = (clampedP - 0.5) * 100; // -50..+50
+    // compensation to centers over the value)
+    const baseTx = (clampedP - 0.5) * 100; // -50..+50
+
+    // Edge zone where we blend back to 0 so the thumb doesn't overflow.
+    // Tune (0.02 = 2%) to taste; 2–5% usually feels good.
+    const edge = 0.02;
+
+    let tx: number;
+
+    if (clampedP <= edge) {
+      // Blend from 0 at p=0 to baseTx at p=edge
+      const t = clampedP / edge; // 0..1
+      const baseAtEdge = (edge - 0.5) * 100;
+      tx = 0 + (baseAtEdge - 0) * t;
+    } else if (clampedP >= 1 - edge) {
+      // Blend from baseTx at p=1-edge to 0 at p=1
+      const t = (clampedP - (1 - edge)) / edge; // 0..1
+      const baseAtEdge = (1 - edge - 0.5) * 100;
+      tx = baseAtEdge + (0 - baseAtEdge) * t;
+    } else {
+      tx = baseTx;
+    }
 
     el.style.setProperty('--formidable-slider-thumb-transform', `translateX(${tx}%)`);
   }

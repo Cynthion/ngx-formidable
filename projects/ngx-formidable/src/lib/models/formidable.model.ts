@@ -195,14 +195,17 @@ export interface IFormidableSliderField extends IFormidableField<number | null> 
   /** Optional label for the maximum value (fallback: max as string). */
   maxLabel?: string;
 
-  /** Whether to display the min/max labels below the track. */
-  showMinMaxLabels?: boolean;
-
   /** Whether to display the thumb label. */
   showThumbLabel?: boolean;
 
   /** Whether to show tick marks with labels along the track. */
   showTickMarks?: boolean;
+
+  /** Whether to display the min/max labels below the track. */
+  showMinMaxLabels?: boolean;
+
+  /** Whether to display labels for tick marks along the track. */
+  showTickLabels?: boolean;
 
   /**
    * Interval between tick marks. If omitted, `step` is used.

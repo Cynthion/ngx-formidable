@@ -141,7 +141,7 @@ $formidable-color-slider-background: $formidable-color-field-background;
 $formidable-color-slider-background-fill: $formidable-color-field-border;
 $formidable-color-slider-border: $formidable-color-field-border;
 $formidable-color-slider-thumb: $formidable-color-field-border;
-$formidable-color-slider-tick: $formidable-color-field-selection;
+$formidable-color-slider-tick-mark: $formidable-color-field-selection;
 $formidable-color-slider-thumb-label: $formidable-color-field-label;
 $formidable-color-slider-thumb-label-background: $formidable-color-field-background;
 $formidable-color-slider-thumb-label-border: $formidable-color-field-border;
@@ -181,15 +181,16 @@ $formidable-slider-track-height: utils.spacing(6);
 $formidable-slider-track-fill-height: utils.spacing(6);
 $formidable-slider-track-border-thickness: $formidable-field-border-thickness;
 $formidable-slider-track-border-radius: $formidable-field-border-radius;
-$formidable-slider-tick-width: utils.spacing(4);
-$formidable-slider-tick-height: utils.spacing(4);
-$formidable-slider-tick-border-radius: $formidable-field-border-radius;
+$formidable-slider-tick-mark-width: utils.spacing(4);
+$formidable-slider-tick-mark-height: utils.spacing(4);
+$formidable-slider-tick-mark-border-radius: $formidable-field-border-radius;
 $formidable-slider-thumb-border-thickness: utils.spacing(0);
 $formidable-slider-thumb-border-radius: $formidable-field-border-radius;
 $formidable-slider-thumb-label-distance: utils.spacing(2);
 $formidable-slider-thumb-label-padding: utils.spacing(2) utils.spacing(4);
 $formidable-slider-thumb-label-border-thickness: $formidable-field-border-thickness;
 $formidable-slider-thumb-label-border-radius: $formidable-field-border-radius;
+$formidable-slider-tick-labels-margin-top: utils.spacing(2);
 
 // #endregion
 
