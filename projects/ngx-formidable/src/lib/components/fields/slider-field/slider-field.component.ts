@@ -63,7 +63,8 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
 
     // If the form gave us an out-of-range / non-step-aligned value,
     // push the corrected value back so model === UI.
-    if (normalized !== value) {
+    // Only correct real numeric values; do not "correct" null/undefined to something else.
+    if (value != null && normalized !== value) {
       queueMicrotask(() => this.onChange(normalized));
     }
   }
@@ -244,7 +245,7 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   }
 
   private normalizeValue(value: number | null): number | null {
-    if (value == null || Number.isNaN(value)) return this.min;
+    if (value == null || Number.isNaN(value)) return null;
 
     const clamped = Math.min(this.max, Math.max(this.min, value));
     return this.roundToStep(clamped);
