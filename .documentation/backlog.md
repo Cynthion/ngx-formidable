@@ -42,6 +42,7 @@ Improvements:
 
 # Bugs:
 
+- date field: unicodedfomat yyy-MM-dd (default), entering 20200202, gives 2025-02-15 -> why?
 - add --formidable-color-field-group-background-readonly and -disabled
 - datefield: when panel open, arrow/left/right moves caret in field
 - ios: inspect padding when prefix is missing
