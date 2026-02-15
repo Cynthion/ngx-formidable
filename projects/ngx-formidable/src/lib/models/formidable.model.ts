@@ -17,12 +17,19 @@ export const FORMIDABLE_FIELD_OPTION = new InjectionToken<IFormidableFieldOption
 /** InjectionToken for providing global default options for input masking. */
 export const FORMIDABLE_MASK_DEFAULTS = new InjectionToken<Partial<NgxMaskConfig>>('FORMIDABLE_MASK_DEFAULTS');
 
+/** InjectionToken for providing a translation function for error messages. */
+export const FORMIDABLE_ERROR_TRANSLATOR = new InjectionToken<FormidableTranslateErrorFn>(
+  'FORMIDABLE_ERROR_TRANSLATOR',
+  { factory: () => (e) => e }
+);
+
 export const NO_OPTIONS_TEXT = 'No options available.';
 
 export type FieldDecoratorLayout = 'single' | 'group' | 'inline';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 export type FormidablePanelPosition = 'left' | 'right' | 'full';
 export type FormidableToggleFieldLabelPosition = 'before' | 'after';
+export type FormidableTranslateErrorFn = (error: string) => string;
 
 export interface FormValidationOptions {
   debounceValidationInMs: number;

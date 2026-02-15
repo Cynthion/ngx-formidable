@@ -2,10 +2,10 @@
   *ngIf="invalid"
   class="errors">
   <ul>
-    <li
-      *ngFor="let error of errors; trackBy: trackError"
-      class="error">
-      {{ error }}
-    </li>
+    @for (error of errors; track error) {
+      <li class="error">
+        {{ translateError(error) }}
+      </li>
+    }
   </ul>
 </div>

@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, Input } from '@angular/core';
 import { AbstractControl, NgModel, NgModelGroup } from '@angular/forms';
+import { FORMIDABLE_ERROR_TRANSLATOR, FormidableTranslateErrorFn } from '../../models/formidable.model';
 
 /**
  * Renders the list of validation error messages for a single NgModel or NgModelGroup.
  * - Automatically tracks previous errors while control is pending.
  * - Exposes `invalid` flag once the control is touched and has errors.
+ * > Tip: You can globally translate displayed error messages by providing `FORMIDABLE_ERROR_TRANSLATOR`
  *
  * Inputs:
  * - `@Input() ngModel?: NgModel`
@@ -33,7 +35,10 @@ export class FieldErrorsComponent {
 
   private previousError?: string[];
 
-  constructor(private readonly cdRef: ChangeDetectorRef) {}
+  constructor(
+    private readonly cdRef: ChangeDetectorRef,
+    @Inject(FORMIDABLE_ERROR_TRANSLATOR) protected readonly translateError: FormidableTranslateErrorFn
+  ) {}
 
   get control(): AbstractControl | undefined {
     return this.ngModelGroup?.control ?? this.ngModel?.control;
@@ -55,9 +60,5 @@ export class FieldErrorsComponent {
 
   markForCheck(): void {
     this.cdRef.markForCheck();
-  }
-
-  trackError(_index: number, error: string): string {
-    return error;
   }
 }

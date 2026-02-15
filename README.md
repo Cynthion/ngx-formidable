@@ -37,6 +37,7 @@ A powerful Angular component library for building rich, validated forms.
 - [Field Components](#field-components)
 - [Theming & Styles](#theming--styles)
 - [Root-Level / Cross-Field Validation](#root-level--cross-field-validation)
+- [Error Message Translation (i18n)](#error-message-translation-i18n)
 - [Keyboard Navigation](#keyboard-navigation)
 - [Masking](#masking)
 - [Extending with Custom Components / Options](#extending-with-custom-components--options)
@@ -66,6 +67,7 @@ A powerful Angular component library for building rich, validated forms.
 • Powered by <code>Vest</code>
 • Live errors &amp; validity
 • Simple <code>formidable-field-errors</code> directive
+• Optional i18n via `FORMIDABLE_ERROR_TRANSLATOR`
 
 </td>
 <td width="33%" valign="top">
@@ -517,6 +519,78 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
 });
 ```
 
+## Error Message Translation (i18n)
+
+By default, `ngx-formidable` displays validation errors exactly as they are produced by your validation suite (e.g. Vest test messages).
+
+For i18n use-cases, it’s common to emit **translation keys** from your validation suite and translate them when rendering.
+
+### Configure a Global Error Translator
+
+Instead of returning human-readable text in Vest, return a translation key:
+
+```ts
+import { enforce, staticSuite, test } from 'vest';
+
+export const userFormValidationSuite = staticSuite((model: UserFormModel, field?: string) => {
+  test('name', 'validation.name.required', () => {
+    enforce(model.name).isNotBlank();
+  });
+});
+```
+
+Then provide a translation function via the `FORMIDABLE_ERROR_TRANSLATOR` injection token.
+
+### Standalone Usage
+
+```ts
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideNgxFormidable, FORMIDABLE_ERROR_TRANSLATOR } from 'ngx-formidable';
+import { AppComponent } from './app/app.component';
+import { YourTranslationService } from './your-translation.service';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    ...provideNgxFormidable(),
+    {
+      provide: FORMIDABLE_ERROR_TRANSLATOR,
+      useFactory: (ts: YourTranslationService) => (key: string) => ts.translate(key),
+      deps: [YourTranslationService]
+    }
+  ]
+});
+```
+
+### Module Usage
+
+```ts
+import { NgModule } from '@angular/core';
+import { NgxFormidableModule, FORMIDABLE_ERROR_TRANSLATOR } from 'ngx-formidable';
+import { YourTranslationService } from './your-translation.service';
+
+@NgModule({
+  imports: [NgxFormidableModule.forRoot()],
+  providers: [
+    {
+      provide: FORMIDABLE_ERROR_TRANSLATOR,
+      useFactory: (ts: YourTranslationService) => (key: string) => ts.translate(key),
+      deps: [YourTranslationService]
+    }
+  ]
+})
+export class AppModule {}
+```
+
+### What gets translated?
+
+Any string returned from your validation layer and rendered by `<formidable-field-errors>`:
+
+- Vest messages (`test('field', 'some.key', ...)`)
+- Root-level errors (when rendered)
+- Any custom error strings you attach to `control.errors['errors']`
+
+If you do not provide `FORMIDABLE_ERROR_TRANSLATOR`, errors are rendered unchanged.
+
 ## Keyboard Navigation
 
 All controls are keyboard-friendly.
@@ -576,6 +650,8 @@ bootstrapApplication(AppComponent, {
   ]
 }).catch(console.error);
 ```
+
+````
 
 **Module Usage**
 
@@ -800,4 +876,5 @@ Contributions are welcome!
 
 Everything in this repository is licensed under the [MIT License](./LICENSE) unless otherwise specified.
 
-Copyright (c) 2025 - present Christian Lüthold
+Copyright (c) 2026 - present Christian Lüthold
+````
