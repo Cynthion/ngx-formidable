@@ -17,6 +17,7 @@ Example:
 
 Improvements:
 
+- icons must be able to be set from outside, delete formidable-icon component
 - fix DateFieldComponent: when a date is chosen, then user types (and breaks the date), the formValue should become null
 - make DateFieldComponent `smaller` or render better for smaller screens
 - don't render `formidable-field-option` components when radiogroup and checkboxgroup are empty
@@ -33,6 +34,7 @@ Improvements:
 - Toggle: allow setting layout to 'inline' or 'group'
 - remove validation from the library, only provide ui components
 - rename FormDirective to NgxFormidableFormDirective. (no naming clash with Angular)
+- add option to date field to show at bottom of screen (e.g., see VIAC app)
 - ARIA attributes
 - update ngx-formidable from EnerQi:
   - add form.model.ts (NEW)

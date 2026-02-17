@@ -15,7 +15,6 @@ type TriggerMode = 'click' | 'hover';
 })
 export class ExampleTooltipComponent implements OnInit, OnDestroy {
   @Input() text = '';
-  @Input() tooltipId?: string;
   @Input() placement: Placement = 'right';
   @Input() trigger: TriggerMode = 'click';
 
