@@ -17,6 +17,7 @@ Example:
 
 Improvements:
 
+- override autofill (`input:-webkit-autofill`, etc.)
 - icons must be able to be set from outside, delete formidable-icon component
 - fix DateFieldComponent: when a date is chosen, then user types (and breaks the date), the formValue should become null
 - make DateFieldComponent `smaller` or render better for smaller screens
