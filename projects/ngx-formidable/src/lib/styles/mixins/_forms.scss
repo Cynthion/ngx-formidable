@@ -1033,6 +1033,7 @@
 @mixin length-indicator {
   position: absolute;
   bottom: utils.spacing(8);
+  right: 0;
   color: var(--formidable-color-length-indicator, #{tokens.$formidable-color-length-indicator});
   pointer-events: none;
   user-select: none;
