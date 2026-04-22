@@ -362,6 +362,9 @@
             (valueChanged)="onValueChanged('nationality', $event)"
             (focusChanged)="onFocusChanged('nationality', $event)">
             <formidable-field-option
+              [value]="'label-only'"
+              [label]="'Label only'"></formidable-field-option>
+            <formidable-field-option
               [value]="'disabled'"
               [label]="'Disabled'"
               [disabled]="true"

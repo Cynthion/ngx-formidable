@@ -1,9 +1,12 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterContentInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   forwardRef,
+  inject,
   Inject,
   Input,
   OnInit,
@@ -50,7 +53,7 @@ import {
     }
   ]
 })
-export class FieldOptionComponent implements IFormidableFieldOption, OnInit {
+export class FieldOptionComponent implements IFormidableFieldOption, OnInit, AfterContentInit {
   @ViewChild('contentTemplate', { static: true }) private contentTemplate!: TemplateRef<unknown>;
 
   @Input({ required: true }) value!: string;
@@ -80,8 +83,12 @@ export class FieldOptionComponent implements IFormidableFieldOption, OnInit {
 
   @Input() layout: FieldOptionLayout = 'inline';
 
-  get template(): TemplateRef<unknown> {
-    return this.contentTemplate;
+  hasContent = false;
+
+  private readonly cdRef = inject(ChangeDetectorRef);
+
+  get template(): TemplateRef<unknown> | undefined {
+    return this.hasContent ? this.contentTemplate : undefined;
   }
 
   constructor(
@@ -94,6 +101,26 @@ export class FieldOptionComponent implements IFormidableFieldOption, OnInit {
       throw new Error(
         '[ngx-formidable] formidable-field-option must be used inside a component that provides FORMIDABLE_OPTION_FIELD (i.e. implements IFormidableOptionField).'
       );
+    }
+  }
+
+  ngAfterContentInit(): void {
+    // Angular has no API to check whether <ng-content> received content;
+    // instantiating the template temporarily is the standard workaround.
+    const view = this.contentTemplate.createEmbeddedView({});
+    this.hasContent = view.rootNodes.some((n: Node) => n.nodeType !== Node.TEXT_NODE || !!n.textContent?.trim());
+
+    if (this.hasContent && !this.label) {
+      this.label = view.rootNodes
+        .map((n: Node) => n.textContent ?? '')
+        .join('')
+        .trim();
+    }
+
+    view.destroy();
+
+    if (this.hasContent) {
+      this.cdRef.markForCheck();
     }
   }
 
