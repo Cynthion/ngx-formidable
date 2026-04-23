@@ -196,12 +196,8 @@ export class AutocompleteFieldComponent
     const found = this.computeAllOptions().find((opt) => opt.value === this._writtenValue);
     this.selectedOption = found ? { ...found } : undefined;
 
-    // if the provided value doesn't exist in the options, treat it as empty display
-    if (!this.selectedOption) {
-      this._writtenValue = null;
-    }
-
-    // write to wrapped input element
+    // write to wrapped input element — if the option isn't found yet (options may not be
+    // loaded), the input stays empty; _writtenValue is kept so onOptionsChanged re-applies it
     this.inputRef.nativeElement.value = this.selectedOption
       ? this.selectedOption.label || this.selectedOption.value
       : '';
@@ -287,6 +283,7 @@ export class AutocompleteFieldComponent
 
     this.setHighlightedIndex(-1);
     this.selectedOption = undefined;
+    this._writtenValue = null; // clear pending value so it isn't re-applied when options change
 
     if (opts.clearInput) {
       this.inputRef.nativeElement.value = '';
@@ -306,6 +303,7 @@ export class AutocompleteFieldComponent
     const allOptions = this.computeAllOptions();
 
     this.updateFilteredOptions(allOptions);
+    this.writeValue(this._writtenValue);
     this.reconcileSelectionAgainstOptions(allOptions);
 
     // keep highlight consistent if panel is open
