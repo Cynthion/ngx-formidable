@@ -17,6 +17,7 @@ Example:
 
 Improvements:
 
+- ensure all fields can be "focus on page load" (without panels being opened)
 - readonly/disabled fields are currently still able to float the label. this should be prevented.
 - override autofill (`input:-webkit-autofill`, etc.)
 - icons must be able to be set from outside, delete formidable-icon component
