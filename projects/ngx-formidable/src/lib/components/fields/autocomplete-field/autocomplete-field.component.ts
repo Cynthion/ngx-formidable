@@ -303,7 +303,14 @@ export class AutocompleteFieldComponent
     const allOptions = this.computeAllOptions();
 
     this.updateFilteredOptions(allOptions);
-    this.writeValue(this._writtenValue);
+
+    // Only re-apply the written value when there actually is one. Calling writeValue(null)
+    // would clear the native input and reset the filter subject, erasing the user's typed
+    // text whenever the option list refreshes (e.g. during fuzzy-search updates).
+    if (this._writtenValue !== null) {
+      this.writeValue(this._writtenValue);
+    }
+
     this.reconcileSelectionAgainstOptions(allOptions);
 
     // keep highlight consistent if panel is open
