@@ -17,6 +17,7 @@ Example:
 
 Improvements:
 
+- The 16px gap between radiobox/checkbox and label (field-option-prefix paddin) and the 2px checkbox border thickness are hardcoded SCSS and cannot be reduced via CSS variables. Expose them as variables in the checkbox-group mixin.
 - ensure all fields can be "focus on page load" (without panels being opened)
 - readonly/disabled fields are currently still able to float the label. this should be prevented.
 - override autofill (`input:-webkit-autofill`, etc.)
