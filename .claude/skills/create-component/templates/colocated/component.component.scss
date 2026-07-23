@@ -1,0 +1,8 @@
+// adjust the ../ depth so this resolves to projects/app/src/styles/variables
+@use '../../../../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+// No styles here — style the UI component in modules/ui/components/ instead

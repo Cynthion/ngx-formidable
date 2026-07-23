@@ -1,0 +1,12 @@
+// adjust the ../ depth so this resolves to projects/app/src/styles/variables
+@use '../../../../../../styles/variables' as *;
+
+:host {
+  display: inline-block;
+}
+
+.name {
+  @include mobile {
+    // responsive tweaks live here — never on an @Input
+  }
+}
