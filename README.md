@@ -336,6 +336,8 @@ The decorator adjusts padding and forwards the wrapped field’s properties and 
 
 ## Field Components
 
+For the full API of every field and directive — selectors, value types and all inputs — see the [component catalogue](.documentation/ui_components.md).
+
 | Category          | Component                           | Description                                        |
 | ----------------- | ----------------------------------- | -------------------------------------------------- |
 | **Basic Fields**  | `<formidable-input-field>`          | A standard single-line text input field.           |

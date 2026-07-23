@@ -11,3 +11,6 @@ dist
 tmp
 out-tsc
 
+# Angular cache
+.angular
+

@@ -13,7 +13,7 @@
       "Bash(npx ng:*)",
       "Bash(npx tsc:*)",
       "Bash(npx eslint:*)",
-      "Bash(npx jest:*)",
+      "Bash(npx stylelint:*)",
       "Bash(npx prettier:*)",
       "Bash(git status:*)",
       "Bash(git diff:*)",

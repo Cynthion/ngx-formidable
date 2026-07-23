@@ -9,5 +9,5 @@ Style, Open-Close, DRY and docs index: @.documentation/documentation.md and @.do
 
 Operational reminders:
 
-- Do NOT rewrap or reformat markdown you did not change (`.editorconfig`: MD = tab indent, no line-length limit, no trailing-whitespace trim).
-- Never edit generated files.
+- Do NOT rewrap or reformat markdown you did not change (`.editorconfig`: MD = space indent, no line-length limit, no trailing-whitespace trim).
+- Never hand-edit build output (`dist/`).

@@ -14,12 +14,13 @@ Do: implement code + helpers-first tests; follow all conventions; reuse existing
 
 Prove it (run from repo root; record which you ran + the output):
 
-- `npm --prefix projects/app run prettier:check`
-- `npm --prefix projects/app run lint`
-- `npm --prefix projects/app run style-lint`
-- `npm --prefix projects/app run test`
+- `npm run build:lib`
+- `npm run prettier:check`
+- `npm run lint`
+- `npm run style-lint`
+- `ng test ngx-formidable` (when specs exist)
 
-Fix only files you touched. Never edit `src/lib/common/api/enerqi/**`, `android/**`, `ios/**`.
+Fix only files you touched. Never hand-edit build output (`dist/`).
 No whole-repo formatting.
 
 Write ONE file `specs/<slug>/implementation.md`, seeded from `.claude/skills/sdd/templates/implementation.md`.
