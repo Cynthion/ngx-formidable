@@ -1,6 +1,6 @@
 import { Directive, inject, input } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { getFormGroupFieldPath } from '../helpers/form.helpers';
 import { FormValidationOptions } from '../models/formidable.model';
 import { FormDirective } from './form.directive';
@@ -39,9 +39,13 @@ import { FormDirective } from './form.directive';
 export class FormModelGroupDirective implements AsyncValidator {
   public validationOptions = input<FormValidationOptions>({ debounceValidationInMs: 0 });
 
-  private readonly formDirective = inject(FormDirective);
+  private readonly formDirective = inject(FormDirective, { optional: true, skipSelf: true });
 
   public validate(control: AbstractControl): Observable<ValidationErrors | null> {
+    // The `[ngModelGroup]` selector matches every ngModelGroup, including those outside a formidable form.
+    // Without a host FormDirective there is nothing to validate against, so skip.
+    if (!this.formDirective) return of(null);
+
     const { ngForm } = this.formDirective;
 
     const fieldPath = getFormGroupFieldPath(ngForm.control, control);
