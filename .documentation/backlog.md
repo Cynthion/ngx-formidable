@@ -40,11 +40,6 @@ Improvements:
 - rename FormDirective to NgxFormidableFormDirective. (no naming clash with Angular)
 - add option to date field to show at bottom of screen (e.g., see VIAC app)
 - ARIA attributes
-- update ngx-formidable from EnerQi:
-  - add form.model.ts (NEW)
-  - form-root-valudate.directive.ts
-  - form.direvtive.ts
-  - form-validate.helpers.ts
 
 # Bugs:
 

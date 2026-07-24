@@ -1,5 +1,5 @@
 {
-  "name": "ngx-formidable",
+  "name": "@cynthion/ngx-formidable",
   "version": "1.0.0",
   "description": "A powerful Angular component library for building rich, validated forms.",
   "license": "MIT",
@@ -36,7 +36,8 @@
     "npm": ">=10.8.2"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
     "build": "ng build ngx-formidable",
