@@ -55,10 +55,23 @@
   );
   --formidable-field-height: #{tokens.$formidable-field-height};
 
+  // Push the label down to the field's inner content top, then center its line-box in the top
+  // margin: the band between that top and the field's vertical center (where the value text sits).
+  // Gives equal whitespace above the label and below it, to the value.
   --formidable-label-floating-offset: calc(
     var(--formidable-label-height, #{tokens.$formidable-label-height}) +
       var(--formidable-field-before-margin-bottom, #{tokens.$formidable-field-before-margin-bottom}) +
-      var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
+      var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) +
+      (
+        var(--formidable-field-height, #{tokens.$formidable-field-height}) / 2 - var(
+            --formidable-field-border-thickness,
+            #{tokens.$formidable-field-border-thickness}
+          ) -
+          (
+            var(--formidable-label-floating-line-height, #{tokens.$formidable-label-floating-line-height}) *
+              var(--formidable-label-floating-font-size, #{tokens.$formidable-label-floating-font-size})
+          )
+      ) / 2
   );
 
   --formidable-field-group-option-padding: #{tokens.$formidable-field-group-option-padding};

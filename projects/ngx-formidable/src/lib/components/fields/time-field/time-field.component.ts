@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -13,17 +12,23 @@ import {
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { isEqual, parse } from 'date-fns';
+import { format, isEqual } from 'date-fns';
 import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import {
   formatToTimeTokenMask,
   isValidDateObject,
   normalizeDatePart,
+  parseUnicodeDateTime,
   UNICODE_TIME_TOKENS,
   validateUnicodeTimeTokenFormat
 } from '../../../helpers/format.helpers';
-import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
-import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableTimeField } from '../../../models/formidable.model';
+import { renderEmptyMask } from '../../../helpers/input.helpers';
+import {
+  FieldDecoratorLayout,
+  FORMIDABLE_FIELD,
+  FormidableEmptyHint,
+  IFormidableTimeField
+} from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.directive';
 
 /**
@@ -72,7 +77,7 @@ import { BaseFieldDirective } from '../base-field.directive';
 })
 export class TimeFieldComponent
   extends BaseFieldDirective<Date | null>
-  implements IFormidableTimeField, OnInit, AfterViewInit, OnChanges, OnDestroy
+  implements IFormidableTimeField, OnInit, OnChanges, OnDestroy
 {
   @ViewChild('timeRef', { static: true }) timeRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
@@ -83,7 +88,6 @@ export class TimeFieldComponent
   protected registeredKeys = ['Enter'];
 
   private maskChar = '0';
-  private emptyMaskChar = '_';
   private readonly defaultUnicodeTokenFormat = 'HH.mm';
 
   override ngOnInit(): void {
@@ -97,15 +101,15 @@ export class TimeFieldComponent
 
       this.unicodeTokenFormat = this.defaultUnicodeTokenFormat;
     }
-  }
 
-  ngAfterViewInit(): void {
+    // must run before the first binding pass, so the input carries the correct mask
     this.updateMask();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['unicodeTokenFormat'] && !changes['unicodeTokenFormat'].firstChange) {
       this.updateMask();
+      this.setTime(this.selectedTime); // re-render the current value in the new format
     }
   }
 
@@ -122,10 +126,14 @@ export class TimeFieldComponent
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
-    // try set date on blur
-    if (!isFocused) {
-      this.trySetTimeFromInput(this.inputRef.nativeElement.value);
+    // hand the empty display over to ngxMask while focused (see renderEmpty)
+    if (isFocused) {
+      if (this.selectedTime == null) this.renderEmpty();
+      return;
     }
+
+    // try set time on blur
+    this.trySetTimeFromInput(this.inputRef.nativeElement.value);
   }
 
   private handleKeydown(event: KeyboardEvent): void {
@@ -161,15 +169,31 @@ export class TimeFieldComponent
   // #region IFormidableTimeField
 
   @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
+  /** What an empty, unfocused field shows: underscores (default, "__ : __") or the `unicodeTokenFormat` ("HH : mm"). */
+  @Input() emptyHint: FormidableEmptyHint = 'underscores';
 
   protected ngxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.maskChar);
-  private emptyNgxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.emptyMaskChar);
 
-  protected ngxMaskConfig: Partial<NgxMaskConfig> = {
+  protected ngxMaskConfig: Pick<NgxMaskConfig, 'showMaskTyped' | 'leadZeroDateTime' | 'dropSpecialCharacters'> = {
     showMaskTyped: true,
     leadZeroDateTime: false, // must be enforced by unicodeTokenFormat, if required
     dropSpecialCharacters: false // keep special characters like '-', '.' or '/' in the input
   };
+
+  /** ngxMask's own empty display: the mask with every slot as its placeholder character. */
+  private get maskPlaceholder(): string {
+    return this.ngxMask.replace(/\w/g, '_');
+  }
+
+  /** The resting display of an empty field for the current `emptyHint`: the format string, or `maskPlaceholder`. */
+  private get emptyDisplay(): string {
+    return this.emptyHint === 'format' ? (this.unicodeTokenFormat ?? '') : this.maskPlaceholder;
+  }
+
+  /** Shows the `emptyHint` at rest, but lets ngxMask own the text while focused. */
+  private renderEmpty(): void {
+    renderEmptyMask(this.inputRef.nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused);
+  }
 
   private selectedTime: Date | null = null;
 
@@ -187,7 +211,6 @@ export class TimeFieldComponent
     this.isFieldFilled = !!this.selectedTime;
     this.onChange(this.selectedTime); // notify ControlValueAccessor of the change
     this.onTouched();
-    setCaretPositionToEnd(this.inputRef.nativeElement);
   }
 
   // #endregion
@@ -196,20 +219,13 @@ export class TimeFieldComponent
 
   /** Uses the entered string, parses it and returns the resulting Date. */
   private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
-    const parsedDate = parse(dateString.trim(), unicodeTokenFormat, new Date());
-
-    if (!isValidDateObject(parsedDate)) {
-      return null;
-    }
-
-    return parsedDate;
+    return parseUnicodeDateTime(dateString, unicodeTokenFormat);
   }
 
   // #endregion
 
   private updateMask(): void {
     this.ngxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.maskChar);
-    this.emptyNgxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.emptyMaskChar);
   }
 
   private trySetTimeFromInput(value: Date | null | string): void {
@@ -246,10 +262,14 @@ export class TimeFieldComponent
 
     // ensure ngxMask is initialized before applying the value
     setTimeout(() => {
-      // write empty mask until ngxMask re-applies it on focus
-      if (time == null) {
-        this.inputRef.nativeElement.value = this.emptyNgxMask;
+      // ngxMask leaves an empty input untouched, so render the empty state ourselves
+      if (this.selectedTime == null) {
+        this.renderEmpty();
+        return;
       }
+
+      const formatted = format(this.selectedTime, this.unicodeTokenFormat || this.defaultUnicodeTokenFormat);
+      if (this.inputRef.nativeElement.value !== formatted) this.inputRef.nativeElement.value = formatted;
     });
   }
 }

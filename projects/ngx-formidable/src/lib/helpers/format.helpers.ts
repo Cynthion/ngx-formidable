@@ -1,7 +1,26 @@
-import { isValid } from 'date-fns';
+import { format, isValid, parse } from 'date-fns';
 
 export function isValidDateObject(value: unknown): boolean {
   return value instanceof Date && isValid(value);
+}
+
+/**
+ * Parses a masked date/time string against a Unicode format, strictly.
+ *
+ * date-fns `parse` fills tokens it cannot read from the reference date, so a
+ * partial/empty/ambiguous string can yield a bogus (often "today") date. To
+ * reject those, we require the parsed date to round-trip back to the exact
+ * input. Returns null unless the input is a complete, unambiguous match.
+ */
+export function parseUnicodeDateTime(input: string, unicodeTokenFormat: string): Date | null {
+  const trimmed = input.trim();
+  if (trimmed.length === 0) return null;
+
+  const parsed = parse(trimmed, unicodeTokenFormat, new Date());
+  if (!isValidDateObject(parsed)) return null;
+  if (format(parsed, unicodeTokenFormat) !== trimmed) return null;
+
+  return parsed;
 }
 
 // #region Date

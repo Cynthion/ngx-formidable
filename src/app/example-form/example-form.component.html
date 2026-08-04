@@ -545,6 +545,7 @@
             [showMonthAfterYear]="true"
             [showDaysInNextAndPreviousMonths]="true"
             [unicodeTokenFormat]="'dd . MM . yyyy'"
+            [emptyHint]="'format'"
             (valueChanged)="onValueChanged('birthdate', $event)"
             (focusChanged)="onFocusChanged('birthdate', $event)">
           </formidable-date-field>

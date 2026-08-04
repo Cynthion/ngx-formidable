@@ -116,8 +116,10 @@ export abstract class BaseFieldDirective<T = string | null>
   abstract get value(): T;
 
   get isLabelFloating(): boolean {
-    const blocked = this.disabled || this.readonly;
-    return (!this.isFieldFocused && !this.isFieldFilled) || (blocked && this.isFieldFocused);
+    // Readonly/disabled fields never float — the label stays put instead of
+    // dropping over the (often filled) value when the field gains focus.
+    if (this.disabled || this.readonly) return false;
+    return !this.isFieldFocused && !this.isFieldFilled;
   }
 
   abstract fieldRef: ElementRef<HTMLElement>;

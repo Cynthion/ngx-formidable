@@ -121,12 +121,15 @@ Date picker backed by Pikaday.
 | Input                | Type                      | Default             | Description                 |
 | :------------------- | :------------------------ | :------------------ | :-------------------------- |
 | `unicodeTokenFormat` | `string`                  | `'yyyy-MM-dd'`      | date-fns parse/format token |
+| `emptyHint`          | `FormidableEmptyHint`     | `'underscores'`     | Resting empty display       |
 | `toggleIconClosed`   | `string`                  | `calendarArrowDown` | Icon when panel closed      |
 | `toggleIconOpen`     | `string`                  | `calendarArrowUp`   | Icon when panel open        |
 | `isPanelOpen`        | `boolean`                 | `false`             | Panel open state            |
 | `panelPosition`      | `FormidablePanelPosition` | `'right'`           | Panel alignment             |
 
-**Pikaday passthrough** inputs: `ariaLabel`, `defaultDate`, `setDefaultDate`, `firstDay`, `minDate`, `maxDate`, `disableWeekends`, `disableDayFn`, `yearRange`, `i18n`, `yearSuffix`, `showMonthAfterYear`, `showDaysInNextAndPreviousMonths`, `enableSelectionDaysInNextAndPreviousMonths`, `numberOfMonths`. **Use when** you need calendar date selection.
+**Pikaday passthrough** inputs, each applied to the calendar when it changes at runtime: `ariaLabel`, `defaultDate`, `setDefaultDate`, `firstDay`, `minDate`, `maxDate`, `disableWeekends`, `disableDayFn`, `yearRange`, `i18n`, `yearSuffix`, `showMonthAfterYear`, `showDaysInNextAndPreviousMonths`, `enableSelectionDaysInNextAndPreviousMonths`, `numberOfMonths`.
+
+**Use when** you need calendar date selection.
 
 ### Time Field
 
@@ -134,9 +137,10 @@ Date picker backed by Pikaday.
 
 Masked time input.
 
-| Input                | Type     | Default    | Description                 |
-| :------------------- | :------- | :--------- | :-------------------------- |
-| `unicodeTokenFormat` | `string` | `HH:mm:ss` | date-fns parse/format token |
+| Input                | Type                  | Default         | Description                 |
+| :------------------- | :-------------------- | :-------------- | :-------------------------- |
+| `unicodeTokenFormat` | `string`              | `'HH.mm'`       | date-fns parse/format token |
+| `emptyHint`          | `FormidableEmptyHint` | `'underscores'` | Resting empty display       |
 
 **Use when** you need time-of-day entry.
 
@@ -301,9 +305,12 @@ Renders an inline SVG string (sanitized via `DomSanitizer`).
 | :----------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
 | `FieldDecoratorLayout`               | `'single' \| 'group' \| 'inline'`                                                                                |
 | `FieldOptionLayout`                  | `'inline' \| 'radio-group' \| 'checkbox-group'`                                                                  |
+| `FormidableEmptyHint`                | `'underscores' \| 'format'`                                                                                      |
 | `FormidablePanelPosition`            | `'left' \| 'right' \| 'full'`                                                                                    |
 | `FormidableToggleFieldLabelPosition` | `'before' \| 'after'`                                                                                            |
 | `IFormidableFieldOption`             | `{ value: string; label?; template?; readonly?; disabled?; selected?; highlighted?; select?(); match?(filter) }` |
+
+`FormidableEmptyHint` sets what the date/time fields show while empty **and unfocused** — `_` slots or the `unicodeTokenFormat` itself. A focused empty field always shows `_` slots, because ngx-mask's caret arithmetic only recognizes its own placeholder character.
 
 `DeepPartial<T>` and `DeepRequired<T>` (from `utility-types.ts`) build the form model and frame types.
 

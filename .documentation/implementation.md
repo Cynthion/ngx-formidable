@@ -13,17 +13,17 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 ## Phase 1 — Correctness: Bugs And UX Defects
 
-Fix defects before adding surface. This is the north star of the roadmap.
+Fix defects before adding surface. This is the north star of the roadmap. **Shipped** — every item done except the iOS padding fix, which is **deferred** (needs a device to verify; annotated in `backlog.md`).
 
-| Group          | Item                                                                      |
-| :------------- | :------------------------------------------------------------------------ |
-| Date / Time    | Show the user-provided mask instead of `0` in date/time fields            |
-| Date / Time    | Typing that breaks a valid date must set the form value to `null`         |
-| Date / Time    | Fix the unicode-format parse bug (`yyyy-MM-dd` + `20200202` → wrong date) |
-| Date / Time    | Stop arrow / left / right from moving the caret while the panel is open   |
-| Label / Layout | Readonly and disabled fields must not float the label                     |
-| Label / Layout | Fix multi-row label overlapping into the field — make it wrap             |
-| Platform       | Fix iOS padding when the prefix is missing                                |
+| Group          | Item                                                                      |  Status  |
+| :------------- | :------------------------------------------------------------------------ | :------: |
+| Date / Time    | Show the user-provided mask instead of `0` in date/time fields            |   Done   |
+| Date / Time    | Typing that breaks a valid date must set the form value to `null`         |   Done   |
+| Date / Time    | Fix the unicode-format parse bug (`yyyy-MM-dd` + `20200202` → wrong date) |   Done   |
+| Date / Time    | Stop arrow / left / right from moving the caret while the panel is open   |   Done   |
+| Label / Layout | Readonly and disabled fields must not float the label                     |   Done   |
+| Label / Layout | Fix multi-row label overlapping into the field — make it wrap             |   Done   |
+| Platform       | Fix iOS padding when the prefix is missing                                | Deferred |
 
 ---
 
@@ -60,18 +60,18 @@ Runtime CSS-variable and theme gaps. See the styling conventions in `conventions
 
 New capabilities across fields, built on the corrected base and stable API.
 
-| Item                                                                                       |
-| :----------------------------------------------------------------------------------------- |
-| Suffix actions: clear/reset, copy, validation state, loading                               |
-| Add a `subLabel` input — always-visible text below the field                               |
-| Add a `defaultOption` input to select, dropdown, autocomplete, radio-group, checkbox-group |
-| Do not render `formidable-field-option` when radio/checkbox groups are empty               |
-| Add `{ descendants: true }` to option `@ContentChildren` so options work via `ng-template` |
-| Toggle field: allow `inline` / `group` layout                                              |
-| Move `FieldErrorsComponent` rendering into the decorator (currently broken for `inline`)   |
-| Date field: responsive / smaller rendering for small screens                               |
-| Date field: option to open the panel at the bottom of the screen (VIAC-style)              |
-| Chore: prefer `queueMicrotask` over `setTimeout` where possible                            |
+| Item                                                                                                                    |
+| :---------------------------------------------------------------------------------------------------------------------- |
+| Suffix actions: clear/reset, copy, validation state, loading                                                            |
+| Add a `subLabel` input — always-visible text below the field                                                            |
+| Add a `defaultOption` input to select, dropdown, autocomplete, radio-group, checkbox-group                              |
+| Do not render `formidable-field-option` when radio/checkbox groups are empty                                            |
+| Add `{ descendants: true }` to option `@ContentChildren` so options work via `ng-template`                              |
+| Toggle field: allow `inline` / `group` layout                                                                           |
+| Move `FieldErrorsComponent` rendering into the decorator (currently broken for `inline`)                                |
+| Date field: responsive / smaller rendering for small screens                                                            |
+| Date field: option to open the panel at the bottom of the screen (VIAC-style, like a keyboard), e.g. for mobile devices |
+| Chore: prefer `queueMicrotask` over `setTimeout` where possible                                                         |
 
 ---
 
@@ -88,19 +88,19 @@ New capabilities across fields, built on the corrected base and stable API.
 
 Release-readiness. The Angular major upgrade lands here.
 
-| Item                                                                                 |
-| :----------------------------------------------------------------------------------- |
-| Upgrade Angular and refresh all dependencies; reconcile the `ngx-mask` major with it |
-| Refresh usage documentation                                                          |
-| Demo: add a group example via `ngModelGroup`                                         |
-| Write a "how to create a custom field" guide                                         |
-| README: add badges                                                                   |
-| README: add an exact per-field / per-component feature list                          |
-| Add `CONTRIBUTING.md`                                                                |
-| Add a logo for `ngx-formidable`                                                      |
-| Add Storybook stories for layout options                                             |
-| Reconcile `publish:lib --access public` with the GitHub Packages registry            |
-| Tag the release commit (final step)                                                  |
+| Item                                                                                                                                                           |
+| :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Upgrade Angular and refresh all dependencies; reconcile the `ngx-mask` major with it                                                                           |
+| Refresh usage documentation                                                                                                                                    |
+| Demo: add a group example via `ngModelGroup`                                                                                                                   |
+| Write a "how to create a custom field" guide                                                                                                                   |
+| README: add GitHub badges                                                                                                                                      |
+| README: add an exact per-field / per-component feature list                                                                                                    |
+| Add `CONTRIBUTING.md`                                                                                                                                          |
+| Add a logo for `ngx-formidable`                                                                                                                                |
+| Add Storybook stories for all components, showcasing all features. (First take over conventions from the EnerQi sibling project. See the documentation there.) |
+| Reconcile `publish:lib --access public` with the GitHub Packages registry                                                                                      |
+| Tag the release commit (final step)                                                                                                                            |
 
 ---
 

@@ -15,21 +15,23 @@ import {
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { addDays, format, isEqual, parse } from 'date-fns';
+import { addDays, format, isEqual } from 'date-fns';
 import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import {
   formatToDateTokenMask,
   isValidDateObject,
   normalizeTimePart,
+  parseUnicodeDateTime,
   UNICODE_DATE_TOKENS,
   validateUnicodeDateTokenFormat
 } from '../../../helpers/format.helpers';
-import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
+import { renderEmptyMask } from '../../../helpers/input.helpers';
 import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import {
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
+  FormidableEmptyHint,
   FormidablePanelPosition,
   IFormidableDateField
 } from '../../../models/formidable.model';
@@ -124,7 +126,6 @@ export class DateFieldComponent
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'];
 
   private maskChar = '0';
-  private emptyMaskChar = '_';
   private readonly defaultUnicodeTokenFormat = 'yyyy-MM-dd';
 
   private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
@@ -190,6 +191,12 @@ export class DateFieldComponent
     numberOfMonths: 1
   };
 
+  /**
+   * The inputs `updateOptions()` reads. Every Pikaday passthrough input has a `defaultOptions` key
+   * of the same name (it needs one for its fallback); only `format` is fed by `unicodeTokenFormat`.
+   */
+  private readonly optionInputs = new Set([...Object.keys(this.defaultOptions), 'unicodeTokenFormat']);
+
   private picker?: Pikaday;
 
   override ngOnInit(): void {
@@ -203,18 +210,28 @@ export class DateFieldComponent
 
       this.unicodeTokenFormat = this.defaultUnicodeTokenFormat;
     }
+
+    // must run before the first binding pass, so the input carries the correct mask
+    this.updateMask();
   }
 
   ngAfterViewInit(): void {
     this.updateOptions();
-    this.updateMask();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes[0] && !changes[0].firstChange) {
-      this.updateOptions();
-      this.updateMask();
-    }
+    const changedOptions = Object.entries(changes)
+      .filter(([key, change]) => !change.firstChange && this.optionInputs.has(key))
+      .map(([key]) => key);
+
+    if (changedOptions.length === 0) return;
+
+    if (changedOptions.includes('unicodeTokenFormat')) this.updateMask();
+
+    this.updateOptions();
+
+    // re-render the current value, since the format it was rendered with has changed
+    if (changedOptions.includes('unicodeTokenFormat')) this.setDate(this.selectedDate);
   }
 
   /** Override onValueChange to only trigger onChange and valueChanged events when a date is set. */
@@ -230,27 +247,38 @@ export class DateFieldComponent
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
-    // try set date on blur
-    if (!isFocused && !this.ignoreNextBlur) {
-      this.trySetDateFromInput(this.inputRef.nativeElement.value);
-      this.ignoreNextBlur = false;
+    // hand the empty display over to ngxMask while focused (see renderEmpty)
+    if (isFocused) {
+      if (this.selectedDate == null) this.renderEmpty();
+      return;
     }
+
+    // try set date on blur
+    if (this.ignoreNextBlur) {
+      this.ignoreNextBlur = false;
+      return;
+    }
+
+    this.trySetDateFromInput(this.inputRef.nativeElement.value);
   }
 
   private handleKeydown(event: KeyboardEvent): void {
     const date = this.picker?.getDate();
 
+    // While the calendar is open, arrow keys navigate it — stop them from also
+    // moving the text caret in the input (base directive lets Left/Right through).
+    if (this.isPanelOpen && event.key.startsWith('Arrow')) {
+      event.preventDefault();
+    }
+
     switch (event.key) {
       case 'Escape':
       case 'Tab':
       case 'Enter':
-        if (this.isPanelOpen) {
-          this.togglePanel(false);
-          const currentDate = this.picker!.getDate();
-          this.selectDate(currentDate); // select the current date on close
-        } else {
-          this.trySetDateFromInput(this.inputRef.nativeElement.value);
-        }
+        if (this.isPanelOpen) this.togglePanel(false);
+        // Commit what's in the input — it reflects both typing and calendar
+        // arrow-navigation — never the picker's default cursor (which is "today").
+        this.trySetDateFromInput(this.inputRef.nativeElement.value);
         break;
       case 'ArrowDown':
         if (!this.isPanelOpen) {
@@ -314,17 +342,33 @@ export class DateFieldComponent
   // #region IFormidableDateField
 
   @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
+  /** What an empty, unfocused field shows: underscores (default, "____-__-__") or the `unicodeTokenFormat` ("dd . MM . yyyy"). */
+  @Input() emptyHint: FormidableEmptyHint = 'underscores';
   @Input() toggleIconClosed = calendarArrowDown;
   @Input() toggleIconOpen = calendarArrowUp;
 
   protected ngxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.maskChar);
-  private emptyNgxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.emptyMaskChar);
 
-  protected ngxMaskConfig: Partial<NgxMaskConfig> = {
+  protected ngxMaskConfig: Pick<NgxMaskConfig, 'showMaskTyped' | 'leadZeroDateTime' | 'dropSpecialCharacters'> = {
     showMaskTyped: true,
     leadZeroDateTime: false, // must be enforced by unicodeTokenFormat, if required
     dropSpecialCharacters: false // keep special characters like '-', '.' or '/' in the input
   };
+
+  /** ngxMask's own empty display: the mask with every slot as its placeholder character. */
+  private get maskPlaceholder(): string {
+    return this.ngxMask.replace(/\w/g, '_');
+  }
+
+  /** The resting display of an empty field for the current `emptyHint`: the format string, or `maskPlaceholder`. */
+  private get emptyDisplay(): string {
+    return this.emptyHint === 'format' ? (this.unicodeTokenFormat ?? '') : this.maskPlaceholder;
+  }
+
+  /** Shows the `emptyHint` at rest, but lets ngxMask own the text while focused. */
+  private renderEmpty(): void {
+    renderEmptyMask(this.inputRef.nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused);
+  }
 
   private selectedDate: Date | null = null;
 
@@ -343,7 +387,6 @@ export class DateFieldComponent
     this.onChange(this.selectedDate); // notify ControlValueAccessor of the change
     this.onTouched();
     this.togglePanel(false);
-    setCaretPositionToEnd(this.inputRef.nativeElement);
   }
 
   // #endregion
@@ -367,11 +410,13 @@ export class DateFieldComponent
   @Input() numberOfMonths?: number;
 
   private updateOptions(): void {
+    const viewDate = this.getDefaultDate(this.minDate, this.maxDate, this.defaultDate);
+
     const dynamicOptions: PikadayOptions = {
       ...this.defaultOptions,
       ariaLabel: this.ariaLabel ?? this.defaultOptions.ariaLabel,
       format: this.unicodeTokenFormat ?? this.defaultOptions.format,
-      defaultDate: this.getDefaultDate(this.minDate, this.maxDate, this.defaultDate) ?? this.defaultOptions.defaultDate,
+      defaultDate: viewDate,
       setDefaultDate: this.setDefaultDate ?? this.defaultOptions.setDefaultDate,
       firstDay: this.firstDay ?? this.defaultOptions.firstDay,
       minDate: this.minDate ?? this.defaultOptions.minDate,
@@ -400,14 +445,21 @@ export class DateFieldComponent
 
     if (!this.picker) {
       this.picker = new Pikaday(updatedOptions);
-    } else {
-      this.picker.config(updatedOptions);
+      return;
     }
+
+    // Pikaday's config() only merges the options into the instance — it neither redraws nor
+    // rebuilds the month views. So reset the derived min/max year first (config skips that when the
+    // date is cleared, and both setters redraw, which a not-yet-rebuilt calendar cannot survive),
+    // then let gotoDate() rebuild and redraw with the merged options.
+    this.picker.setMinDate(this.minDate ?? null);
+    this.picker.setMaxDate(this.maxDate ?? null);
+    this.picker.config(updatedOptions);
+    this.picker.gotoDate(this.selectedDate ?? viewDate);
   }
 
   private updateMask(): void {
     this.ngxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.maskChar);
-    this.emptyNgxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.emptyMaskChar);
   }
 
   // #endregion
@@ -487,13 +539,7 @@ export class DateFieldComponent
 
   /** Uses the entered string, parses it and writes/selects the resulting Date into the picker. */
   private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
-    const parsedDate = parse(dateString.trim(), unicodeTokenFormat, new Date());
-
-    if (!isValidDateObject(parsedDate)) {
-      return null;
-    }
-
-    return parsedDate;
+    return parseUnicodeDateTime(dateString, unicodeTokenFormat);
   }
 
   // #endregion
@@ -546,9 +592,9 @@ export class DateFieldComponent
     setTimeout(() => {
       this.picker?.setDate(date, false); // don't silent update to achieve valueChanged/focusChanged events
 
-      // write empty mask until ngxMask re-applies it on focus
+      // ngxMask leaves an empty input untouched, so render the empty state ourselves
       if (date == null) {
-        this.inputRef.nativeElement.value = this.emptyNgxMask;
+        this.renderEmpty();
       }
     });
   }

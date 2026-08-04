@@ -30,6 +30,12 @@ export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 export type FormidablePanelPosition = 'left' | 'right' | 'full';
 export type FormidableToggleFieldLabelPosition = 'before' | 'after';
 export type FormidableTranslateErrorFn = (error: string) => string;
+/**
+ * What an empty date/time field shows in its mask slots while **unfocused**: underscores
+ * (default, e.g. `____-__-__`), or the `unicodeTokenFormat` (e.g. `dd . MM . yyyy`).
+ * A focused empty field always shows underscores — ngxMask's caret arithmetic only recognizes its own placeholder.
+ */
+export type FormidableEmptyHint = 'underscores' | 'format';
 
 export interface FormValidationOptions {
   debounceValidationInMs: number;
@@ -169,6 +175,8 @@ export interface IFormidablePikadayOptions
 export interface IFormidableDateField extends IFormidableField<Date | null>, IFormidablePikadayOptions {
   /** Must be a valid Unicode format (e.g. yyyy-MM-dd). Supported tokens: y, yy, yyy, yyyy, M, MM, MMM, MMMM, d, dd */
   unicodeTokenFormat: string;
+  /** What an empty field displays in its mask slots. Defaults to `'underscores'`. */
+  emptyHint: FormidableEmptyHint;
   selectDate(date: Date | null): void;
   /** Must be a valid SVG icon string. */
   toggleIconClosed?: string;
@@ -179,6 +187,8 @@ export interface IFormidableDateField extends IFormidableField<Date | null>, IFo
 export interface IFormidableTimeField extends IFormidableField<Date | null> {
   /** Must be a valid Unicode format (e.g. HH:mm:ss). Supported tokens: H, HH, h, hh, m, mm, s, ss, a, aa */
   unicodeTokenFormat: string;
+  /** What an empty field displays in its mask slots. Defaults to `'underscores'`. */
+  emptyHint: FormidableEmptyHint;
   selectTime(time: Date | null): void;
 }
 

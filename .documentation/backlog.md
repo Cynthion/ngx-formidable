@@ -4,7 +4,6 @@ Example:
 
 - Update usage documentation according to EnerQi
 - suffixes: clear/reset, copy, validation state, loading
-- date/time fields: show mask that user provided, not 0
 - group example, using ngModelGroup (see EnerQi appointment-page.form)
 - theme 4 should be tweaked to be tiny, and border-radius 0, no background for field groups
 - add badges to readme
@@ -19,14 +18,11 @@ Improvements:
 
 - The 16px gap between radiobox/checkbox and label (field-option-prefix paddin) and the 2px checkbox border thickness are hardcoded SCSS and cannot be reduced via CSS variables. Expose them as variables in the checkbox-group mixin.
 - ensure all fields can be "focus on page load" (without panels being opened)
-- readonly/disabled fields are currently still able to float the label. this should be prevented.
 - override autofill (`input:-webkit-autofill`, etc.)
 - icons must be able to be set from outside, delete formidable-icon component
-- fix DateFieldComponent: when a date is chosen, then user types (and breaks the date), the formValue should become null
 - make DateFieldComponent `smaller` or render better for smaller screens
 - don't render `formidable-field-option` components when radiogroup and checkboxgroup are empty
 - add { descendants: true } to options (make options available with `ng-template`, e.g. EnerQi constitution form), see https://chatgpt.com/g/g-p-6881cf5951fc8191998a952f25c65a09-ngx-formidable/c/6972a872-f0bc-8327-a7cc-8bd0e35ddc7e
-- fix multi-row label not overlapping into field (make wrapping)
 - make floating label from "placeholder" like with Material's Input field
 - make error message "absolute" positioned, so it doesn't take space in layout
 - add property "subLabel" to fields, which can show text below the field (similar to errors, but always visible)
@@ -43,7 +39,10 @@ Improvements:
 
 # Bugs:
 
-- date field: unicodedfomat yyy-MM-dd (default), entering 20200202, gives 2025-02-15 -> why?
+- stale nested install: `projects/ngx-formidable/node_modules` shadows the root install with a second `@angular/core` and breaks `TestBed` in library specs (deleted during the caret fix; re-appears if `npm install` is run inside the library folder).
 - add --formidable-color-field-group-background-readonly and -disabled
-- datefield: when panel open, arrow/left/right moves caret in field
-- ios: inspect padding when prefix is missing
+- ios: inspect padding when prefix is missing (deferred from Phase 1 — needs a device; root cause found: `adjustLayout()` sets inline `paddingLeft`/`paddingRight` only when a prefix/suffix is present and never resets them, and runs once at `ngAfterViewInit`)
+
+# Features:
+
+- date/time field: arrow up/down to increment/decrement years/months/days and hours/minutes
