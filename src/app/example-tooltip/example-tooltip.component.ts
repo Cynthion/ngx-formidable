@@ -1,6 +1,6 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, inject } from '@angular/core';
-import { IconComponent } from 'ngx-formidable';
+import { ExampleIconComponent } from '../example-icon/example-icon.component';
 
 type Placement = 'right' | 'left' | 'top' | 'bottom';
 type TriggerMode = 'click' | 'hover';
@@ -11,7 +11,7 @@ type TriggerMode = 'click' | 'hover';
   styleUrls: ['./example-tooltip.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, IconComponent]
+  imports: [CommonModule, ExampleIconComponent]
 })
 export class ExampleTooltipComponent implements OnInit, OnDestroy {
   @Input() text = '';

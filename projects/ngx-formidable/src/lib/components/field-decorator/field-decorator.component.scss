@@ -40,32 +40,32 @@
   @include field-tooltip;
 }
 
-.container-single {
-  @include decorator-container-single;
+.container-horizontal {
+  @include decorator-container-horizontal;
 }
 
-.container-group {
-  @include decorator-container-group;
+.container-vertical {
+  @include decorator-container-vertical;
 }
 
 .container-inline {
   @include decorator-container-inline;
 }
 
-.prefix-wrapper-single {
-  @include field-prefix-single;
+.prefix-wrapper-horizontal {
+  @include field-prefix-horizontal;
 }
 
-.suffix-wrapper-single {
-  @include field-suffix-single;
+.suffix-wrapper-horizontal {
+  @include field-suffix-horizontal;
 }
 
-.prefix-wrapper-group {
-  @include field-prefix-group;
+.prefix-wrapper-vertical {
+  @include field-prefix-vertical;
 }
 
-.suffix-wrapper-group {
-  @include field-suffix-group;
+.suffix-wrapper-vertical {
+  @include field-suffix-vertical;
 }
 
 .prefix-wrapper-inline {

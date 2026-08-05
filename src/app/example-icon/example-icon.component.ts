@@ -3,14 +3,14 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
-  selector: 'formidable-icon',
-  templateUrl: './icon.component.html',
-  styleUrls: ['./icon.component.scss'],
+  selector: 'example-icon',
+  templateUrl: './example-icon.component.html',
+  styleUrls: ['./example-icon.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule]
 })
-export class IconComponent {
+export class ExampleIconComponent {
   @Input() set svg(val: string) {
     this.sanitizedSvg = this.sanitizer.bypassSecurityTrustHtml(val);
   }

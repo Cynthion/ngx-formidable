@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterContentInit,
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  ContentChild,
   ElementRef,
   forwardRef,
   inject,
@@ -18,6 +20,7 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { addDays, format, isEqual } from 'date-fns';
 import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
+import { FieldToggleIconDirective } from '../../../directives/field-toggle-icon.directive';
 import {
   formatToDateTokenMask,
   isValidDateObject,
@@ -35,8 +38,6 @@ import {
   FormidablePanelPosition,
   IFormidableDateField
 } from '../../../models/formidable.model';
-import { calendarArrowDown, calendarArrowUp } from '../../../models/icons';
-import { IconComponent } from '../../icon/icon.component';
 import { BaseFieldDirective } from '../base-field.directive';
 
 /**
@@ -50,9 +51,8 @@ import { BaseFieldDirective } from '../base-field.directive';
  * @input unicodeTokenFormat?: string
  *   Unicode date format mask (defaults to "yyyy-MM-dd").
  *
- * @input toggleIconClosed?: string
- * @input toggleIconOpen?: string
- *   Icons for open/closed calendar toggle (SVG path data).
+ * Project `[formidableFieldToggleIcon]` content to replace the default CSS arrow of the panel toggle.
+ * The consumer styles it (size, color, hover); the toggle centers it and carries the `open` class while the panel is open.
  *
  * @input ariaLabel?: string
  * @input defaultDate?: Date
@@ -97,7 +97,7 @@ import { BaseFieldDirective } from '../base-field.directive';
   styleUrls: ['./date-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, NgxMaskDirective, IconComponent],
+  imports: [CommonModule, NgxMaskDirective],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -114,11 +114,16 @@ import { BaseFieldDirective } from '../base-field.directive';
 })
 export class DateFieldComponent
   extends BaseFieldDirective<Date | null>
-  implements IFormidableDateField, OnInit, AfterViewInit, OnChanges, OnDestroy
+  implements IFormidableDateField, OnInit, AfterContentInit, AfterViewInit, OnChanges, OnDestroy
 {
   @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('pickerRef') pickerRef?: ElementRef<HTMLDivElement>;
+
+  @ContentChild(FieldToggleIconDirective) private projectedToggleIcon?: FieldToggleIconDirective;
+
+  /** False while no `[formidableFieldToggleIcon]` is projected, which is when the default CSS arrow is drawn. */
+  protected hasToggleIcon = false;
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = () => this.handleExternalClick();
@@ -213,6 +218,11 @@ export class DateFieldComponent
 
     // must run before the first binding pass, so the input carries the correct mask
     this.updateMask();
+  }
+
+  ngAfterContentInit(): void {
+    this.hasToggleIcon = !!this.projectedToggleIcon;
+    this.cdRef.markForCheck();
   }
 
   ngAfterViewInit(): void {
@@ -335,7 +345,7 @@ export class DateFieldComponent
     return this.dateRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
   // #endregion
 
@@ -344,8 +354,6 @@ export class DateFieldComponent
   @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
   /** What an empty, unfocused field shows: underscores (default, "____-__-__") or the `unicodeTokenFormat` ("dd . MM . yyyy"). */
   @Input() emptyHint: FormidableEmptyHint = 'underscores';
-  @Input() toggleIconClosed = calendarArrowDown;
-  @Input() toggleIconOpen = calendarArrowUp;
 
   protected ngxMask = formatToDateTokenMask(this.unicodeTokenFormat!, this.maskChar);
 

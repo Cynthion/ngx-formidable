@@ -171,7 +171,7 @@ export class TextareaFieldComponent
     return (this.mask ? this.maskedTextareaRef! : this.plainTextareaRef!) as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
   // #endregion
 

@@ -548,6 +548,11 @@
             [emptyHint]="'format'"
             (valueChanged)="onValueChanged('birthdate', $event)"
             (focusChanged)="onFocusChanged('birthdate', $event)">
+            <example-icon
+              formidableFieldToggleIcon
+              class="date-toggle-icon"
+              [svg]="exampleCalendarSvg"
+              [size]="24" />
           </formidable-date-field>
           <div
             *ngIf="controlCenter.showLabels"

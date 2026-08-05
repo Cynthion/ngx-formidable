@@ -49,7 +49,7 @@
 
 <!-- Label Template -->
 <ng-template #label>
-  @if (decoratorLayout === 'group') {
+  @if (decoratorLayout === 'vertical') {
     <div
       class="label-wrapper"
       [class.hidden]="!hasLabel"
@@ -82,7 +82,7 @@
 
 <!-- Content Template -->
 <ng-template #content>
-  @if (decoratorLayout === 'group') {
+  @if (decoratorLayout === 'vertical') {
     <fieldset class="fieldset">
       <legend class="legend">{{ name }}</legend>
 

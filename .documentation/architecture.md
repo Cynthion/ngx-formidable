@@ -37,7 +37,7 @@ lib/
 
 **Composition Model**: field components implement `ControlValueAccessor` and register the `FORMIDABLE_FIELD` token; `FieldDecoratorComponent` projects a field plus its label/prefix/suffix/tooltip/errors; option-based fields collect `FieldOptionComponent` children via `@ContentChildren`. The abstract `BaseFieldDirective` is the shared base and the extension point for custom fields. See `ui_components.md`.
 
-**Validation**: `FormDirective` bridges Angular template-driven forms to Vest static suites, exposing errors/validity as observables and producing async validators per field path.
+**Validation**: `NgxFormidableFormDirective` bridges Angular template-driven forms to Vest static suites, exposing errors/validity as observables and producing async validators per field path.
 
 ## Demo App
 

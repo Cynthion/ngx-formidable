@@ -12,8 +12,8 @@
   @include input-wrapper;
 }
 
-.toggle-background {
-  @include toggle-background;
+.toggle {
+  @include dropdown-toggle;
 }
 
 .panel {

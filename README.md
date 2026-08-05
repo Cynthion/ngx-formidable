@@ -302,12 +302,12 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
 
 ## Core Directives
 
-### FormDirective (`formidableForm`)
+### NgxFormidableFormDirective (`formidableForm`)
 
 - Binds your form model, frame, and Vest suite.
 - Emits `formValueChange$`, `errorsChange$`, `dirtyChange$`, `validChange$`.
 
-### FormRootValidateDirective (`formidableRootValidate`)
+### NgxFormidableFormRootValidateDirective (`formidableRootValidate`)
 
 Adds a root-level async validator for cross-field Vest tests on `ROOT_FORM`.
 
@@ -315,11 +315,11 @@ Adds a root-level async validator for cross-field Vest tests on `ROOT_FORM`.
 
 Renders a `<formidable-field-errors>` component next to any control to display its validation messages.
 
-### FormModelDirective
+### NgxFormidableFormModelDirective
 
 Hooks into each `ngModel` to run per-field async Vest tests.
 
-### FormModelGroupDirective
+### NgxFormidableFormModelGroupDirective
 
 Hooks into `ngModelGroup` to validate nested groups.
 
@@ -333,6 +333,10 @@ Wrap any field in a <formidable-field-decorator> to project:
 - Suffix: `<div formidableFieldSuffix>…</div>`
 
 The decorator adjusts padding and forwards the wrapped field’s properties and events.
+
+The library ships no icons. Where a field has an icon, project your own into it — the date field's panel toggle
+draws a CSS arrow unless you project `<span formidableFieldToggleIcon>…</span>` directly into
+`<formidable-date-field>`. The toggle centers it; its size, color and hover feedback are yours.
 
 ## Field Components
 
@@ -696,7 +700,7 @@ That’s it: Set a `[mask]` when you want masking and optionally tweak behavior 
 
 When you add your own field component (by implementing `IFormidableField` or `IFormidableOptionField` and providing it via `FORMIDABLE_FIELD`/`FORMIDABLE_OPTION_FIELD`), it immediately gains:
 
-- **Async validation** via `FormModelDirective`
+- **Async validation** via `NgxFormidableFormModelDirective`
 - **Root-level / cross-field validation** if you use `formidableRootValidate`
 - **Error rendering** simply by adding `formidableFieldErrors`
 - **Decorator support** — labels, tooltips, prefixes, and suffixes work out of the box
@@ -771,7 +775,7 @@ export class CustomColorPickerComponent extends BaseFieldDirective implements IF
     return this.inputRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
   // #endregion
 

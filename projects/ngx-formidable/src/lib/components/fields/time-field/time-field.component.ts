@@ -162,7 +162,7 @@ export class TimeFieldComponent
     return this.timeRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
   // #endregion
 

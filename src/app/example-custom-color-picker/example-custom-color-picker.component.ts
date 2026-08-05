@@ -64,7 +64,7 @@ export class ExampleCustomColorPickerComponent extends BaseFieldDirective implem
     return this.inputRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
   // #endregion
 

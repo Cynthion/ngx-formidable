@@ -13,13 +13,14 @@ import {
   FieldOptionComponent,
   FieldPrefixDirective,
   FieldSuffixDirective,
+  FieldToggleIconDirective,
   FieldTooltipDirective,
-  FormDirective,
-  FormModelDirective,
-  FormRootValidateDirective,
-  FormValidationOptions,
   IFormidableFieldOption,
   InputFieldComponent,
+  NgxFormidableFormDirective,
+  NgxFormidableFormModelDirective,
+  NgxFormidableFormRootValidateDirective,
+  NgxFormidableFormValidationOptions,
   RadioGroupFieldComponent,
   SelectFieldComponent,
   SliderFieldComponent,
@@ -30,6 +31,7 @@ import { BehaviorSubject, combineLatest, map, Observable, startWith, Subject } f
 import { StaticSuite } from 'vest';
 import { ToggleFieldComponent } from '../../../projects/ngx-formidable/src/lib/components/fields/toggle-field/toggle-field.component';
 import { ExampleFuzzyOptionComponent } from '../example-fuzzy-option/example-fuzzy-option.component';
+import { ExampleIconComponent } from '../example-icon/example-icon.component';
 import { ExampleTooltipComponent } from '../example-tooltip/example-tooltip.component';
 import {
   AnimalFormFieldOption,
@@ -60,16 +62,18 @@ import {
     TimeFieldComponent,
     ToggleFieldComponent,
     SliderFieldComponent,
-    FormDirective,
-    FormModelDirective,
-    // FormModelGroupDirective,
-    FormRootValidateDirective,
+    NgxFormidableFormDirective,
+    NgxFormidableFormModelDirective,
+    // NgxFormidableFormModelGroupDirective,
+    NgxFormidableFormRootValidateDirective,
     FieldTooltipDirective,
     FieldLabelDirective,
     FieldPrefixDirective,
     FieldSuffixDirective,
+    FieldToggleIconDirective,
     FieldErrorsDirective,
     // Example
+    ExampleIconComponent,
     ExampleTooltipComponent,
     ExampleFuzzyOptionComponent
   ]
@@ -98,7 +102,7 @@ export class ExampleFormComponent {
   protected readonly formFrame = exampleFormFrame;
   protected readonly formSuite: StaticSuite<string, string, (model: ExampleFormModel, field?: string) => void> =
     exampleFormValidationSuite;
-  protected readonly validationOptions: FormValidationOptions = { debounceValidationInMs: 0 };
+  protected readonly validationOptions: NgxFormidableFormValidationOptions = { debounceValidationInMs: 0 };
 
   protected readonly isDirty$ = new BehaviorSubject<boolean | null>(null);
   protected readonly isValid$ = new BehaviorSubject<boolean | null>(null);
@@ -237,6 +241,22 @@ export class ExampleFormComponent {
   <circle cx="12" cy="12" r="10" />
   <line x1="12" y1="16" x2="12" y2="12" />
   <line x1="12" y1="8" x2="12" y2="8" />
+</svg>
+`;
+
+  protected exampleCalendarSvg = `
+  <svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round">
+  <path d="M8 2v4" />
+  <path d="M16 2v4" />
+  <path d="M3 10h18" />
+  <path d="M21 6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z" />
 </svg>
 `;
 

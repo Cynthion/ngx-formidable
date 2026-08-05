@@ -693,11 +693,11 @@
   color: var(--formidable-color-field-tooltip, #{tokens.$formidable-color-field-tooltip});
 }
 
-@mixin decorator-container-single {
+@mixin decorator-container-horizontal {
   position: relative;
 }
 
-@mixin decorator-container-group {
+@mixin decorator-container-vertical {
   // no additional styles
 }
 
@@ -707,7 +707,7 @@
   column-gap: utils.spacing(8);
 }
 
-@mixin field-prefix-single {
+@mixin field-prefix-horizontal {
   position: absolute;
   top: calc(var(--formidable-field-height, #{formidable-field-height}) / 2);
   left: 0;
@@ -719,19 +719,19 @@
   z-index: 1; // keep on top of field
 }
 
-@mixin field-suffix-single {
-  @include field-prefix-single;
+@mixin field-suffix-horizontal {
+  @include field-prefix-horizontal;
 
   left: unset;
   right: 0;
 }
 
-@mixin field-prefix-group {
+@mixin field-prefix-vertical {
   padding-bottom: utils.spacing(16);
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
 }
 
-@mixin field-suffix-group {
+@mixin field-suffix-vertical {
   padding-top: utils.spacing(16);
   padding-bottom: utils.spacing(16);
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
@@ -987,36 +987,16 @@
   margin: utils.spacing(16);
 }
 
-@mixin toggle-background {
-  position: relative;
-  cursor: pointer;
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 120%;
-    height: 120%;
-    border-radius: var(--formidable-field-border-radius, #{tokens.$formidable-field-border-radius});
-  }
-
-  &:hover::before,
-  &.open::before {
-    opacity: 1;
-    background: var(
-      --formidable-color-field-option-background-hovered,
-      #{tokens.$formidable-color-field-option-background-hovered}
-    );
-  }
-}
-
+// Panel toggle for dropdown, autocomplete and date fields. Centers projected icon content;
+// draws a css-icon arrow instead when `.arrow-up` / `.arrow-down` is set.
 @mixin dropdown-toggle {
   cursor: pointer;
   user-select: none;
   width: utils.spacing(32);
   height: utils.spacing(32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &.arrow-up {
     top: calc(utils.spacing(2));

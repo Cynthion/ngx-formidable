@@ -14,29 +14,30 @@ import { SliderFieldComponent } from './components/fields/slider-field/slider-fi
 import { TextareaFieldComponent } from './components/fields/textarea-field/textarea-field.component';
 import { TimeFieldComponent } from './components/fields/time-field/time-field.component';
 import { ToggleFieldComponent } from './components/fields/toggle-field/toggle-field.component';
-import { IconComponent } from './components/icon/icon.component';
 import { FieldErrorsDirective } from './directives/field-errors.directive';
 import { FieldLabelDirective } from './directives/field-label.directive';
 import { FieldPrefixDirective } from './directives/field-prefix.directive';
 import { FieldSuffixDirective } from './directives/field-suffix.directive';
+import { FieldToggleIconDirective } from './directives/field-toggle-icon.directive';
 import { FieldTooltipDirective } from './directives/field-tooltip.directive';
-import { FormModelGroupDirective } from './directives/form-model-group.directive';
-import { FormModelDirective } from './directives/form-model.directive';
-import { FormRootValidateDirective } from './directives/form-root-validate.directive';
-import { FormDirective } from './directives/form.directive';
+import { NgxFormidableFormModelGroupDirective } from './directives/form-model-group.directive';
+import { NgxFormidableFormModelDirective } from './directives/form-model.directive';
+import { NgxFormidableFormRootValidateDirective } from './directives/form-root-validate.directive';
+import { NgxFormidableFormDirective } from './directives/form.directive';
 import { NgxFormidableConfig, provideNgxFormidable } from './provide-ngx-formidable';
 
 const components = [
   // Form Directives
-  FormDirective,
-  FormModelDirective,
-  FormModelGroupDirective,
-  FormRootValidateDirective,
+  NgxFormidableFormDirective,
+  NgxFormidableFormModelDirective,
+  NgxFormidableFormModelGroupDirective,
+  NgxFormidableFormRootValidateDirective,
   // Field Directives
   FieldTooltipDirective,
   FieldLabelDirective,
   FieldPrefixDirective,
   FieldSuffixDirective,
+  FieldToggleIconDirective,
   FieldErrorsDirective,
   // Field Components
   FieldErrorsComponent,
@@ -52,9 +53,7 @@ const components = [
   CheckboxGroupFieldComponent,
   TimeFieldComponent,
   ToggleFieldComponent,
-  SliderFieldComponent,
-  // Utility Components
-  IconComponent
+  SliderFieldComponent
 ];
 
 @NgModule({

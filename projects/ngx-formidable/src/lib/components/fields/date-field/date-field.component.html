@@ -27,13 +27,15 @@
 
     <!-- Toggle -->
     @if (!readonly && !disabled) {
-      <formidable-icon
+      <span
         #toggleRef
-        class="toggle-background"
+        class="toggle"
         [class.open]="isPanelOpen"
-        [svg]="isPanelOpen ? toggleIconOpen : toggleIconClosed"
-        [size]="32"
-        (mousedown)="toggleMouseDown($event)" />
+        [class.arrow-down]="!hasToggleIcon && !isPanelOpen"
+        [class.arrow-up]="!hasToggleIcon && isPanelOpen"
+        (mousedown)="toggleMouseDown($event)">
+        <ng-content select="[formidableFieldToggleIcon]" />
+      </span>
     }
   </div>
 

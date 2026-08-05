@@ -11,7 +11,7 @@ import {
 import { NgModel, NgModelGroup } from '@angular/forms';
 import { of, Subject, switchMap, takeUntil } from 'rxjs';
 import { FieldErrorsComponent } from '../components/field-errors/field-errors.component';
-import { FormDirective } from './form.directive';
+import { NgxFormidableFormDirective } from './form.directive';
 
 /**
  * Dynamically instantiates a `<formidable-field-errors>` component next to any form control
@@ -19,7 +19,7 @@ import { FormDirective } from './form.directive';
  * with the host `NgModel` or `NgModelGroup`.
  *
  * - Automatically picks up `NgModel` or `NgModelGroup` from DI
- * - Subscribes to the parent FormDirective’s `idle$` stream to mark the errors component for check on every model change
+ * - Subscribes to the parent NgxFormidableFormDirective’s `idle$` stream to mark the errors component for check on every model change
  * - Cleans up component instance on destroy
  *
  * @example
@@ -38,7 +38,7 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly environmentInjector = inject(EnvironmentInjector);
-  private readonly formDirective = inject(FormDirective);
+  private readonly formDirective = inject(NgxFormidableFormDirective);
   private readonly destroy$ = new Subject<void>();
 
   private fieldErrorsComponentRef = this.viewContainerRef.createComponent(FieldErrorsComponent, {

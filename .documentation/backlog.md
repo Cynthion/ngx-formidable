@@ -19,7 +19,6 @@ Improvements:
 - The 16px gap between radiobox/checkbox and label (field-option-prefix paddin) and the 2px checkbox border thickness are hardcoded SCSS and cannot be reduced via CSS variables. Expose them as variables in the checkbox-group mixin.
 - ensure all fields can be "focus on page load" (without panels being opened)
 - override autofill (`input:-webkit-autofill`, etc.)
-- icons must be able to be set from outside, delete formidable-icon component
 - make DateFieldComponent `smaller` or render better for smaller screens
 - don't render `formidable-field-option` components when radiogroup and checkboxgroup are empty
 - add { descendants: true } to options (make options available with `ng-template`, e.g. EnerQi constitution form), see https://chatgpt.com/g/g-p-6881cf5951fc8191998a952f25c65a09-ngx-formidable/c/6972a872-f0bc-8327-a7cc-8bd0e35ddc7e
@@ -28,12 +27,10 @@ Improvements:
 - add property "subLabel" to fields, which can show text below the field (similar to errors, but always visible)
 - add a "defaultOption" input to select, dropdown, autocomplete, radio-group, checkbox-group fields (which is shown always as first or only when no match/option)
 - Prefer queueMicrotask over setTimeout where possible
-- Rename FieldDecoratorLayout options to 'horizontal', 'vertical', 'inline' (instead of 'single', 'group', 'inline')
 - Add Storybook stories for layout options
 - Move the FieldErrorsComponent rendering into Decorator (doesn't work for inline)
 - Toggle: allow setting layout to 'inline' or 'group'
 - remove validation from the library, only provide ui components
-- rename FormDirective to NgxFormidableFormDirective. (no naming clash with Angular)
 - add option to date field to show at bottom of screen (e.g., see VIAC app)
 - ARIA attributes
 
@@ -46,3 +43,4 @@ Improvements:
 # Features:
 
 - date/time field: arrow up/down to increment/decrement years/months/days and hours/minutes
+- date field: arrow down should not open panel, only navigate throught the dates. when the panel is open, the arrow keys must move the date selection in the panel.

@@ -17,12 +17,12 @@ export * from './lib/components/fields/slider-field/slider-field.component';
 export * from './lib/components/fields/textarea-field/textarea-field.component';
 export * from './lib/components/fields/time-field/time-field.component';
 export * from './lib/components/fields/toggle-field/toggle-field.component';
-export * from './lib/components/icon/icon.component';
 
 export * from './lib/directives/field-errors.directive';
 export * from './lib/directives/field-label.directive';
 export * from './lib/directives/field-prefix.directive';
 export * from './lib/directives/field-suffix.directive';
+export * from './lib/directives/field-toggle-icon.directive';
 export * from './lib/directives/field-tooltip.directive';
 export * from './lib/directives/form-model-group.directive';
 export * from './lib/directives/form-model.directive';

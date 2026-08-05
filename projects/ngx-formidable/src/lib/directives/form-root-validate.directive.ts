@@ -10,7 +10,7 @@ import { debounceTime, Observable, of, ReplaySubject, Subject, switchMap, take, 
 import { StaticSuite } from 'vest';
 import { set } from '../helpers/form.helpers';
 import { cloneDeep } from '../helpers/utility.helpers';
-import { FormValidationOptions, ROOT_FORM } from '../models/formidable.model';
+import { NgxFormidableFormValidationOptions, ROOT_FORM } from '../models/formidable.model';
 
 /**
  * Attaches a root-level async validator to an Angular `<form>` to run Vest tests
@@ -34,7 +34,7 @@ import { FormValidationOptions, ROOT_FORM } from '../models/formidable.model';
  * - `@Input() formSuite: StaticSuite<string, string, (model: T, field: string) => void> | null`
  *   Your Vest `staticSuite` containing `test(ROOT_FORM, ...)` rules.
  *
- * - `@Input() validationOptions: FormValidationOptions`
+ * - `@Input() validationOptions: NgxFormidableFormValidationOptions`
  *   Debounce settings for cross-field async validation.
  *
  * @example
@@ -57,13 +57,13 @@ import { FormValidationOptions, ROOT_FORM } from '../models/formidable.model';
   providers: [
     {
       provide: NG_ASYNC_VALIDATORS,
-      useExisting: FormRootValidateDirective,
+      useExisting: NgxFormidableFormRootValidateDirective,
       multi: true
     }
   ]
 })
-export class FormRootValidateDirective<T> implements AsyncValidator, OnDestroy {
-  public validationOptions = input<FormValidationOptions>({ debounceValidationInMs: 0 });
+export class NgxFormidableFormRootValidateDirective<T> implements AsyncValidator, OnDestroy {
+  public validationOptions = input<NgxFormidableFormValidationOptions>({ debounceValidationInMs: 0 });
 
   private readonly destroy$ = new Subject<void>();
 
@@ -94,7 +94,10 @@ export class FormRootValidateDirective<T> implements AsyncValidator, OnDestroy {
    * Feeds the formValueCache, debounces it until the next tick
    * and creates an asynchronous validator which runs a validation suite.
    */
-  public createAsyncValidator(fieldPath: string, validationOptions: FormValidationOptions): AsyncValidatorFn {
+  public createAsyncValidator(
+    fieldPath: string,
+    validationOptions: NgxFormidableFormValidationOptions
+  ): AsyncValidatorFn {
     if (!this.formSuite()) {
       return () => of(null);
     }

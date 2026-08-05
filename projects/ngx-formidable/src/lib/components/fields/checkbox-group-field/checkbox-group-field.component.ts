@@ -166,7 +166,7 @@ export class CheckboxGroupFieldComponent
     return this.checkboxGroupRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout: FieldDecoratorLayout = 'group';
+  decoratorLayout: FieldDecoratorLayout = 'vertical';
 
   // #endregion
 

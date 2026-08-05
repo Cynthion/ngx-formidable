@@ -6,7 +6,7 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 - **Correctness First**: bugs and UX defects lead; new surface comes after the base is solid.
 - **Breaking Early**: the library is pre-`1.0` with no external consumers, so all breaking API changes are batched up front.
-- **Validation Stays**: the Vest / `FormDirective` bridge is a core feature. The backlog item "remove validation from the library" is **dropped** and not scheduled.
+- **Validation Stays**: the Vest / `NgxFormidableFormDirective` bridge is a core feature. The backlog item "remove validation from the library" is **dropped** and not scheduled.
 - **Angular Upgrade Is Release Prep**: the major Angular upgrade is deferred to the final phase; all feature and bug work happens on the current Angular first.
 
 ---
@@ -29,15 +29,15 @@ Fix defects before adding surface. This is the north star of the roadmap. **Ship
 
 ## Phase 2 — Breaking API Changes
 
-Batch every breaking change into one pass while there are no consumers to migrate.
+Batch every breaking change into one pass while there are no consumers to migrate. **Shipped** — all three items done.
 
-| Item                                                                                                       |
-| :--------------------------------------------------------------------------------------------------------- |
-| Rename `FieldDecoratorLayout` options `single` / `group` / `inline` → `horizontal` / `vertical` / `inline` |
-| Rename `FormDirective` → `NgxFormidableFormDirective` (avoids the Angular naming clash)                    |
-| Externalize icons so consumers set their own SVGs, then delete the `formidable-icon` component             |
+| Item                                                                                                       | Status |
+| :--------------------------------------------------------------------------------------------------------- | :----: |
+| Rename `FieldDecoratorLayout` options `single` / `group` / `inline` → `horizontal` / `vertical` / `inline` |  Done  |
+| Rename `FormDirective` → `NgxFormidableFormDirective` (avoids the Angular naming clash)                    |  Done  |
+| Externalize icons so consumers set their own SVGs, then delete the `formidable-icon` component             |  Done  |
 
-Each rename touches the type/export, all internal references, the demo, and the docs (`ui_components.md`, root `README.md`).
+Each rename touched the type/export, all internal references, the demo, and the docs (`ui_components.md`, root `README.md`). The layout rename also renamed the decorator's SCSS mixins (`decorator-container-*`, `field-prefix/suffix-*`). The directive rename was widened to the whole `Form*` family — `NgxFormidableFormModelDirective`, `NgxFormidableFormModelGroupDirective`, `NgxFormidableFormRootValidateDirective`, `NgxFormidableFormValidationOptions` — per the class-naming rule in `conventions.md`; filenames stayed unprefixed. Icons left the library entirely: the date field's panel toggle draws a CSS arrow unless the consumer projects `[formidableFieldToggleIcon]` content, and the demo's `example-icon` component shows how to supply one.
 
 ---
 

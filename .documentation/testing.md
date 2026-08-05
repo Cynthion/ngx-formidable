@@ -44,8 +44,8 @@ The `helpers/` modules are pure functions and the highest-value, lowest-cost tar
 Behavior that carries real risk, tested through a minimal host — not the framework around it:
 
 - **ControlValueAccessor**: a field writes an external value and emits on user change.
-- **FormDirective ↔ Vest**: `createAsyncValidator` maps a Vest suite result to Angular errors for a field path.
-- **Directive attach behavior**: `FormModelDirective`/`FormModelGroupDirective` attach to `[ngModel]`/`[ngModelGroup]` and **no-op outside a formidable form** (they inject `FormDirective` optionally) — a regression here breaks any consuming app.
+- **NgxFormidableFormDirective ↔ Vest**: `createAsyncValidator` maps a Vest suite result to Angular errors for a field path.
+- **Directive attach behavior**: `NgxFormidableFormModelDirective`/`NgxFormidableFormModelGroupDirective` attach to `[ngModel]`/`[ngModelGroup]` and **no-op outside a formidable form** (they inject `NgxFormidableFormDirective` optionally) — a regression here breaks any consuming app.
 - **Keyboard navigation**: option/panel fields respond to the registered keys.
 
 ---

@@ -118,14 +118,14 @@ Dropdown panel plus a filter input. Emits filter text; the consumer supplies fil
 
 Date picker backed by Pikaday.
 
-| Input                | Type                      | Default             | Description                 |
-| :------------------- | :------------------------ | :------------------ | :-------------------------- |
-| `unicodeTokenFormat` | `string`                  | `'yyyy-MM-dd'`      | date-fns parse/format token |
-| `emptyHint`          | `FormidableEmptyHint`     | `'underscores'`     | Resting empty display       |
-| `toggleIconClosed`   | `string`                  | `calendarArrowDown` | Icon when panel closed      |
-| `toggleIconOpen`     | `string`                  | `calendarArrowUp`   | Icon when panel open        |
-| `isPanelOpen`        | `boolean`                 | `false`             | Panel open state            |
-| `panelPosition`      | `FormidablePanelPosition` | `'right'`           | Panel alignment             |
+| Input                | Type                      | Default         | Description                 |
+| :------------------- | :------------------------ | :-------------- | :-------------------------- |
+| `unicodeTokenFormat` | `string`                  | `'yyyy-MM-dd'`  | date-fns parse/format token |
+| `emptyHint`          | `FormidableEmptyHint`     | `'underscores'` | Resting empty display       |
+| `isPanelOpen`        | `boolean`                 | `false`         | Panel open state            |
+| `panelPosition`      | `FormidablePanelPosition` | `'right'`       | Panel alignment             |
+
+**Toggle icon**: the panel toggle draws a CSS arrow by default. Project `[formidableFieldToggleIcon]` content into the field to replace it — the library ships no SVG, so the consumer owns everything about the projected markup: size, color and hover feedback. The toggle centers it and carries the `open` class while the panel is open.
 
 **Pikaday passthrough** inputs, each applied to the calendar when it changes at runtime: `ariaLabel`, `defaultDate`, `setDefaultDate`, `firstDay`, `minDate`, `maxDate`, `disableWeekends`, `disableDayFn`, `yearRange`, `i18n`, `yearSuffix`, `showMonthAfterYear`, `showDaysInNextAndPreviousMonths`, `enableSelectionDaysInNextAndPreviousMonths`, `numberOfMonths`.
 
@@ -217,7 +217,7 @@ Collects `formidable-field-option` children. **Use when** multiple choices may b
 
 **Selector** `formidable-field-decorator`
 
-Wraps a field and its label, tooltip, prefix, suffix and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `@ContentChild`. Forwards the field's `valueChanged` / `focusChanged`. Exposes `decoratorLayout: 'single' | 'group' | 'inline'` and auto-adjusts prefix/suffix padding in the `single` layout. No inputs.
+Wraps a field and its label, tooltip, prefix, suffix and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `@ContentChild`. Forwards the field's `valueChanged` / `focusChanged`. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and auto-adjusts prefix/suffix padding in the `horizontal` layout. No inputs.
 
 ### Field Option
 
@@ -248,40 +248,29 @@ Renders validation error messages for a control. Reads the `errors` array off `c
 | `ngModel`      | `NgModel`      | Control to read errors from |
 | `ngModelGroup` | `NgModelGroup` | Group to read errors from   |
 
-### Icon
-
-**Selector** `formidable-icon`
-
-Renders an inline SVG string (sanitized via `DomSanitizer`).
-
-| Input   | Type     | Default          | Description         |
-| :------ | :------- | :--------------- | :------------------ |
-| `svg`   | `string` | —                | SVG markup (setter) |
-| `size`  | `number` | `32`             | Square size in px   |
-| `color` | `string` | `'currentColor'` | Fill color          |
-
 ---
 
 ## Directives
 
 ### Form-Level
 
-| Directive                      | Selector                                             | Purpose / API                                                                                                                                                                                                                                                                                                               |
-| :----------------------------- | :--------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `FormDirective<T>`             | `form[formidableForm]`                               | Bridges `NgForm` to a Vest suite. Signal inputs `formValue`, `formFrame: DeepRequired<T>`, `formSuite: StaticSuite`, `validationConfig`. Observable outputs `formValueChange$`, `errorsChange$`, `dirtyChange$`, `validChange$`, `pending$`, `idle$`. Method `createAsyncValidator(fieldPath, { debounceValidationInMs })`. |
-| `FormModelDirective`           | `[ngModel]`                                          | Registers as `NG_ASYNC_VALIDATORS`; delegates the control's validation to the host `FormDirective`. Signal input `validationOptions`. No-op outside a formidable form (injects `FormDirective` optionally).                                                                                                                 |
-| `FormModelGroupDirective`      | `[ngModelGroup]`                                     | As above, for group paths.                                                                                                                                                                                                                                                                                                  |
-| `FormRootValidateDirective<T>` | `form[formidableRootValidate][formValue][formSuite]` | Root / cross-field validation under the `ROOT_FORM` key. Signal inputs `formidableValidateRootForm`, `formValue`, `formSuite`, `validationOptions`.                                                                                                                                                                         |
+| Directive                                   | Selector                                             | Purpose / API                                                                                                                                                                                                                                                                                                               |
+| :------------------------------------------ | :--------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NgxFormidableFormDirective<T>`             | `form[formidableForm]`                               | Bridges `NgForm` to a Vest suite. Signal inputs `formValue`, `formFrame: DeepRequired<T>`, `formSuite: StaticSuite`, `validationConfig`. Observable outputs `formValueChange$`, `errorsChange$`, `dirtyChange$`, `validChange$`, `pending$`, `idle$`. Method `createAsyncValidator(fieldPath, { debounceValidationInMs })`. |
+| `NgxFormidableFormModelDirective`           | `[ngModel]`                                          | Registers as `NG_ASYNC_VALIDATORS`; delegates the control's validation to the host `NgxFormidableFormDirective`. Signal input `validationOptions`. No-op outside a formidable form (injects `NgxFormidableFormDirective` optionally).                                                                                       |
+| `NgxFormidableFormModelGroupDirective`      | `[ngModelGroup]`                                     | As above, for group paths.                                                                                                                                                                                                                                                                                                  |
+| `NgxFormidableFormRootValidateDirective<T>` | `form[formidableRootValidate][formValue][formSuite]` | Root / cross-field validation under the `ROOT_FORM` key. Signal inputs `formidableValidateRootForm`, `formValue`, `formSuite`, `validationOptions`.                                                                                                                                                                         |
 
 ### Field-Decoration
 
-| Directive               | Selector                   | Purpose                                                                                                                  |
-| :---------------------- | :------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| `FieldErrorsDirective`  | `[formidableFieldErrors]`  | Instantiates a `FieldErrorsComponent` beside the host control and wires its `ngModel`/`ngModelGroup` from DI. No inputs. |
-| `FieldLabelDirective`   | `[formidableFieldLabel]`   | Projects label content. `@Input() isFloating` (`false`).                                                                 |
-| `FieldPrefixDirective`  | `[formidableFieldPrefix]`  | Projects prefix content. Exposes `elementRef`.                                                                           |
-| `FieldSuffixDirective`  | `[formidableFieldSuffix]`  | Projects suffix content. Exposes `elementRef`.                                                                           |
-| `FieldTooltipDirective` | `[formidableFieldTooltip]` | Projects tooltip content. Exposes `elementRef`.                                                                          |
+| Directive                  | Selector                      | Purpose                                                                                                                  |
+| :------------------------- | :---------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| `FieldErrorsDirective`     | `[formidableFieldErrors]`     | Instantiates a `FieldErrorsComponent` beside the host control and wires its `ngModel`/`ngModelGroup` from DI. No inputs. |
+| `FieldLabelDirective`      | `[formidableFieldLabel]`      | Projects label content. `@Input() isFloating` (`false`).                                                                 |
+| `FieldPrefixDirective`     | `[formidableFieldPrefix]`     | Projects prefix content. Exposes `elementRef`.                                                                           |
+| `FieldSuffixDirective`     | `[formidableFieldSuffix]`     | Projects suffix content. Exposes `elementRef`.                                                                           |
+| `FieldToggleIconDirective` | `[formidableFieldToggleIcon]` | Marks projected content as a field's panel-toggle icon (date field). Exposes `elementRef`.                               |
+| `FieldTooltipDirective`    | `[formidableFieldTooltip]`    | Projects tooltip content. Exposes `elementRef`.                                                                          |
 
 ---
 
@@ -303,7 +292,7 @@ Renders an inline SVG string (sanitized via `DomSanitizer`).
 
 | Name                                 | Definition                                                                                                       |
 | :----------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
-| `FieldDecoratorLayout`               | `'single' \| 'group' \| 'inline'`                                                                                |
+| `FieldDecoratorLayout`               | `'horizontal' \| 'vertical' \| 'inline'`                                                                         |
 | `FieldOptionLayout`                  | `'inline' \| 'radio-group' \| 'checkbox-group'`                                                                  |
 | `FormidableEmptyHint`                | `'underscores' \| 'format'`                                                                                      |
 | `FormidablePanelPosition`            | `'left' \| 'right' \| 'full'`                                                                                    |
@@ -318,29 +307,29 @@ Renders an inline SVG string (sanitized via `DomSanitizer`).
 
 ## Catalogue Summary
 
-| Component / Directive         | Selector                                             | Kind       | Value `T`         |
-| :---------------------------- | :--------------------------------------------------- | :--------- | :---------------- |
-| `InputFieldComponent`         | `formidable-input-field`                             | Field      | `string \| null`  |
-| `TextareaFieldComponent`      | `formidable-textarea-field`                          | Field      | `string \| null`  |
-| `SelectFieldComponent`        | `formidable-select-field`                            | Field      | `string \| null`  |
-| `DropdownFieldComponent`      | `formidable-dropdown-field`                          | Field      | `string \| null`  |
-| `AutocompleteFieldComponent`  | `formidable-autocomplete-field`                      | Field      | `string \| null`  |
-| `DateFieldComponent`          | `formidable-date-field`                              | Field      | `Date \| null`    |
-| `TimeFieldComponent`          | `formidable-time-field`                              | Field      | `Date \| null`    |
-| `ToggleFieldComponent`        | `formidable-toggle-field`                            | Field      | `boolean \| null` |
-| `SliderFieldComponent`        | `formidable-slider-field`                            | Field      | `number \| null`  |
-| `RadioGroupFieldComponent`    | `formidable-radio-group-field`                       | Field      | `string \| null`  |
-| `CheckboxGroupFieldComponent` | `formidable-checkbox-group-field`                    | Field      | `string[]`        |
-| `FieldDecoratorComponent`     | `formidable-field-decorator`                         | Structural | —                 |
-| `FieldOptionComponent`        | `formidable-field-option`                            | Structural | —                 |
-| `FieldErrorsComponent`        | `formidable-field-errors`                            | Structural | —                 |
-| `IconComponent`               | `formidable-icon`                                    | Structural | —                 |
-| `FormDirective`               | `form[formidableForm]`                               | Directive  | —                 |
-| `FormModelDirective`          | `[ngModel]`                                          | Directive  | —                 |
-| `FormModelGroupDirective`     | `[ngModelGroup]`                                     | Directive  | —                 |
-| `FormRootValidateDirective`   | `form[formidableRootValidate][formValue][formSuite]` | Directive  | —                 |
-| `FieldErrorsDirective`        | `[formidableFieldErrors]`                            | Directive  | —                 |
-| `FieldLabelDirective`         | `[formidableFieldLabel]`                             | Directive  | —                 |
-| `FieldPrefixDirective`        | `[formidableFieldPrefix]`                            | Directive  | —                 |
-| `FieldSuffixDirective`        | `[formidableFieldSuffix]`                            | Directive  | —                 |
-| `FieldTooltipDirective`       | `[formidableFieldTooltip]`                           | Directive  | —                 |
+| Component / Directive                    | Selector                                             | Kind       | Value `T`         |
+| :--------------------------------------- | :--------------------------------------------------- | :--------- | :---------------- |
+| `InputFieldComponent`                    | `formidable-input-field`                             | Field      | `string \| null`  |
+| `TextareaFieldComponent`                 | `formidable-textarea-field`                          | Field      | `string \| null`  |
+| `SelectFieldComponent`                   | `formidable-select-field`                            | Field      | `string \| null`  |
+| `DropdownFieldComponent`                 | `formidable-dropdown-field`                          | Field      | `string \| null`  |
+| `AutocompleteFieldComponent`             | `formidable-autocomplete-field`                      | Field      | `string \| null`  |
+| `DateFieldComponent`                     | `formidable-date-field`                              | Field      | `Date \| null`    |
+| `TimeFieldComponent`                     | `formidable-time-field`                              | Field      | `Date \| null`    |
+| `ToggleFieldComponent`                   | `formidable-toggle-field`                            | Field      | `boolean \| null` |
+| `SliderFieldComponent`                   | `formidable-slider-field`                            | Field      | `number \| null`  |
+| `RadioGroupFieldComponent`               | `formidable-radio-group-field`                       | Field      | `string \| null`  |
+| `CheckboxGroupFieldComponent`            | `formidable-checkbox-group-field`                    | Field      | `string[]`        |
+| `FieldDecoratorComponent`                | `formidable-field-decorator`                         | Structural | —                 |
+| `FieldOptionComponent`                   | `formidable-field-option`                            | Structural | —                 |
+| `FieldErrorsComponent`                   | `formidable-field-errors`                            | Structural | —                 |
+| `NgxFormidableFormDirective`             | `form[formidableForm]`                               | Directive  | —                 |
+| `NgxFormidableFormModelDirective`        | `[ngModel]`                                          | Directive  | —                 |
+| `NgxFormidableFormModelGroupDirective`   | `[ngModelGroup]`                                     | Directive  | —                 |
+| `NgxFormidableFormRootValidateDirective` | `form[formidableRootValidate][formValue][formSuite]` | Directive  | —                 |
+| `FieldErrorsDirective`                   | `[formidableFieldErrors]`                            | Directive  | —                 |
+| `FieldLabelDirective`                    | `[formidableFieldLabel]`                             | Directive  | —                 |
+| `FieldPrefixDirective`                   | `[formidableFieldPrefix]`                            | Directive  | —                 |
+| `FieldSuffixDirective`                   | `[formidableFieldSuffix]`                            | Directive  | —                 |
+| `FieldToggleIconDirective`               | `[formidableFieldToggleIcon]`                        | Directive  | —                 |
+| `FieldTooltipDirective`                  | `[formidableFieldTooltip]`                           | Directive  | —                 |

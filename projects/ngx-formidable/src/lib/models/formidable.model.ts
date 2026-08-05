@@ -25,7 +25,7 @@ export const FORMIDABLE_ERROR_TRANSLATOR = new InjectionToken<FormidableTranslat
 
 export const NO_OPTIONS_TEXT = 'No options available.';
 
-export type FieldDecoratorLayout = 'single' | 'group' | 'inline';
+export type FieldDecoratorLayout = 'horizontal' | 'vertical' | 'inline';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 export type FormidablePanelPosition = 'left' | 'right' | 'full';
 export type FormidableToggleFieldLabelPosition = 'before' | 'after';
@@ -37,7 +37,7 @@ export type FormidableTranslateErrorFn = (error: string) => string;
  */
 export type FormidableEmptyHint = 'underscores' | 'format';
 
-export interface FormValidationOptions {
+export interface NgxFormidableFormValidationOptions {
   debounceValidationInMs: number;
 }
 
@@ -178,10 +178,6 @@ export interface IFormidableDateField extends IFormidableField<Date | null>, IFo
   /** What an empty field displays in its mask slots. Defaults to `'underscores'`. */
   emptyHint: FormidableEmptyHint;
   selectDate(date: Date | null): void;
-  /** Must be a valid SVG icon string. */
-  toggleIconClosed?: string;
-  /** Must be a valid SVG icon string. */
-  toggleIconOpen?: string;
 }
 
 export interface IFormidableTimeField extends IFormidableField<Date | null> {

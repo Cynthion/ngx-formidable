@@ -85,7 +85,7 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
     return this.sliderRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout: FieldDecoratorLayout = 'group';
+  decoratorLayout: FieldDecoratorLayout = 'vertical';
 
   // #endregion
 

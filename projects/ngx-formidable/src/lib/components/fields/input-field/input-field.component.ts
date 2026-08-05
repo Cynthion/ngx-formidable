@@ -153,7 +153,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     return this.inputRef as ElementRef<HTMLElement>;
   }
 
-  decoratorLayout: FieldDecoratorLayout = 'single';
+  decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
   // #endregion
 

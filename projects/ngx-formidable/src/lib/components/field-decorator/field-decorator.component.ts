@@ -147,7 +147,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   }
 
   get decoratorLayout(): FieldDecoratorLayout {
-    return this.projectedField?.decoratorLayout ?? 'single';
+    return this.projectedField?.decoratorLayout ?? 'horizontal';
   }
 
   /** As a decorator, the wrapped field events are forwarded. */
@@ -170,7 +170,7 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   // #endregion
 
   private adjustLayout(): void {
-    if (this.decoratorLayout !== 'single') return;
+    if (this.decoratorLayout !== 'horizontal') return;
 
     requestAnimationFrame(() => {
       // if prefix/suffix are projected, adjust the padding of the field

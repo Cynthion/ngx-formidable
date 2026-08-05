@@ -29,7 +29,7 @@ import { StaticSuite } from 'vest';
 import { validateFormFrame } from '../helpers/form-validate.helpers';
 import { getAllFormErrors, mergeValuesAndRawValues, set } from '../helpers/form.helpers';
 import { cloneDeep } from '../helpers/utility.helpers';
-import { FormValidationOptions } from '../models/formidable.model';
+import { NgxFormidableFormValidationOptions } from '../models/formidable.model';
 import { DeepRequired } from '../models/utility-types';
 
 /**
@@ -67,7 +67,7 @@ import { DeepRequired } from '../models/utility-types';
  *   Internal streams you can subscribe to to show spinners or block submissions.
  *
  * Methods:
- * - `createAsyncValidator(fieldPath: string, validationOptions: FormValidationOptions): AsyncValidatorFn`
+ * - `createAsyncValidator(fieldPath: string, validationOptions: NgxFormidableFormValidationOptions): AsyncValidatorFn`
  *   Returns an Angular async validator that will debounce and run your Vest suite
  *   for the given field path within the form model.
  *
@@ -91,7 +91,7 @@ import { DeepRequired } from '../models/utility-types';
   selector: 'form[formidableForm]',
   standalone: true
 })
-export class FormDirective<T extends Record<string, unknown>> implements OnDestroy {
+export class NgxFormidableFormDirective<T extends Record<string, unknown>> implements OnDestroy {
   public readonly ngForm = inject(NgForm, { self: true, optional: false });
 
   /**
@@ -253,7 +253,10 @@ export class FormDirective<T extends Record<string, unknown>> implements OnDestr
   /**
    * Feeds the formValueCache, debounces it until the next tick and creates an asynchronous validator which runs a validation suite.
    */
-  public createAsyncValidator(fieldPath: string, validationOptions: FormValidationOptions): AsyncValidatorFn {
+  public createAsyncValidator(
+    fieldPath: string,
+    validationOptions: NgxFormidableFormValidationOptions
+  ): AsyncValidatorFn {
     if (!this.formSuite()) {
       return () => of(null);
     }

@@ -6,8 +6,9 @@ Coding conventions for the library. See also: `architecture.md` (structure, key 
 
 - **Standalone**: every component and directive is `standalone: true`. Consumers import them directly or via `NgxFormidableModule`.
 - **Change Detection**: every component uses `ChangeDetectionStrategy.OnPush`.
-- **Selectors**: components are elements, kebab-case, `formidable-` prefix (`formidable-input-field`). Field-decoration directives are attributes, camelCase, `formidable` prefix (`[formidableFieldLabel]`, `form[formidableForm]`). Two directives intentionally hijack Angular's own selectors — `FormModelDirective` on `[ngModel]` and `FormModelGroupDirective` on `[ngModelGroup]` — so they attach to every model-bound control (they no-op outside a formidable form).
-- **File Naming**: components are folders with external `*.component.ts` / `.html` / `.scss` (never inline templates or styles). Directives are single `*.directive.ts` files. The shared base is `base-field.directive.ts`.
+- **Selectors**: components are elements, kebab-case, `formidable-` prefix (`formidable-input-field`). Field-decoration directives are attributes, camelCase, `formidable` prefix (`[formidableFieldLabel]`, `form[formidableForm]`). Two directives intentionally hijack Angular's own selectors — `NgxFormidableFormModelDirective` on `[ngModel]` and `NgxFormidableFormModelGroupDirective` on `[ngModelGroup]` — so they attach to every model-bound control (they no-op outside a formidable form).
+- **File Naming**: components are folders with external `*.component.ts` / `.html` / `.scss` (never inline templates or styles). Directives are single `*.directive.ts` files. The shared base is `base-field.directive.ts`. Filenames drop the `NgxFormidable` prefix (`form-model.directive.ts`, not `ngx-formidable-form-model.directive.ts`) — consumers import from the package root, so the prefix would only add path noise.
+- **Class Naming**: every public symbol whose name starts with `Form` carries the `NgxFormidable` prefix (`NgxFormidableFormDirective`, `NgxFormidableFormModelDirective`, `NgxFormidableFormModelGroupDirective`, `NgxFormidableFormRootValidateDirective`, `NgxFormidableFormValidationOptions`). `Form*` is Angular's namespace (`FormGroupDirective`, `FormControlDirective`, `NgForm`), so an unprefixed name reads as if it came from `@angular/forms`. Everything else keeps the library's own vocabulary unprefixed — `Field*`, `*FieldComponent`, `IFormidable*`, `FORMIDABLE_*` — because none of it overlaps with Angular.
 
 ## Field Contract
 
@@ -17,7 +18,7 @@ Coding conventions for the library. See also: `architecture.md` (structure, key 
 
 ## Inputs, Outputs And Observables
 
-- **Inputs**: components and fields use classic `@Input()`; the newer signal `input()` API is used only in the form-level directives (`FormDirective`, `FormModelDirective`, `FormModelGroupDirective`, `FormRootValidateDirective`).
+- **Inputs**: components and fields use classic `@Input()`; the newer signal `input()` API is used only in the form-level directives (`NgxFormidableFormDirective`, `NgxFormidableFormModelDirective`, `NgxFormidableFormModelGroupDirective`, `NgxFormidableFormRootValidateDirective`).
 - **Outputs**: a mix of `@Output() EventEmitter` and RxJS observable outputs.
 - **Observable Naming**: append `$` (`valueChange$`, `formValueChange$`). Enforced by the `rxjs-x/finnish` ESLint rule (exempts `EventEmitter` and Angular lifecycle hooks like `canActivate`/`validate`).
 
