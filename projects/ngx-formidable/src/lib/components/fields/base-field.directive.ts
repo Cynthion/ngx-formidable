@@ -40,7 +40,7 @@ export abstract class BaseFieldDirective<T = string | null>
     if (value == this._valuePrevious) return;
     this._valuePrevious = value;
 
-    this.isFieldFilled = typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
+    this.isFieldFilled = BaseFieldDirective.isFilled(value);
 
     this.valueChangeSubject$.next(value);
     this.valueChanged.emit(value);
@@ -75,7 +75,7 @@ export abstract class BaseFieldDirective<T = string | null>
   protected onTouched: () => void = () => {};
 
   writeValue(value: T): void {
-    this.isFieldFilled = !!value;
+    this.isFieldFilled = BaseFieldDirective.isFilled(value);
 
     this.doWriteValue(value);
   }
@@ -115,11 +115,24 @@ export abstract class BaseFieldDirective<T = string | null>
 
   abstract get value(): T;
 
-  get isLabelFloating(): boolean {
-    // Readonly/disabled fields never float — the label stays put instead of
+  private static isFilled(value: unknown): boolean {
+    return typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
+  }
+
+  get canLabelRest(): boolean {
+    // Readonly/disabled fields never rest — the label stays put instead of
     // dropping over the (often filled) value when the field gains focus.
     if (this.disabled || this.readonly) return false;
-    return !this.isFieldFocused && !this.isFieldFilled;
+    return !this.isFieldFocused && !this.isFieldFilled && !this.placeholder && !this.showsEmptyValueHint;
+  }
+
+  /**
+   * Whether the field renders something where the value goes even while it has no value (e.g. mask
+   * slots), which a resting label would collide with. Overridden by the fields that do.
+   */
+  // eslint-disable-next-line @typescript-eslint/class-literal-property-style
+  protected get showsEmptyValueHint(): boolean {
+    return false;
   }
 
   abstract fieldRef: ElementRef<HTMLElement>;

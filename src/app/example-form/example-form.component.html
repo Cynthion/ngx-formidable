@@ -43,13 +43,6 @@
         <label>
           <input
             type="checkbox"
-            [checked]="controlCenter.floatingLabels"
-            (change)="onToggle('floatingLabels', $any($event.target).checked)" />
-          Floating Labels
-        </label>
-        <label>
-          <input
-            type="checkbox"
             [checked]="controlCenter.showAsReadonly"
             (change)="onToggle('showAsReadonly', $any($event.target).checked)" />
           Show as Readonly
@@ -60,6 +53,51 @@
             [checked]="controlCenter.showAsDisabled"
             (change)="onToggle('showAsDisabled', $any($event.target).checked)" />
           Show as Disabled
+        </label>
+      </fieldset>
+
+      <!-- Label Position -->
+      <fieldset>
+        <legend>Label Position:</legend>
+        <label>
+          <input
+            type="radio"
+            name="labelPosition"
+            [checked]="labelPosition === 'outside'"
+            (change)="setLabelPosition('outside')" />
+          Outside
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="labelPosition"
+            [checked]="labelPosition === 'inside'"
+            (change)="setLabelPosition('inside')" />
+          Inside
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="labelPosition"
+            [checked]="labelPosition === 'inside-floating'"
+            (change)="setLabelPosition('inside-floating')" />
+          Inside, Floating Only
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="labelPosition"
+            [checked]="labelPosition === 'border'"
+            (change)="setLabelPosition('border')" />
+          Border
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="labelPosition"
+            [checked]="labelPosition === 'border-prefix'"
+            (change)="setLabelPosition('border-prefix')" />
+          Border, Prefix-Aligned
         </label>
       </fieldset>
 
@@ -189,7 +227,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             First Name
           </div>
           <div
@@ -215,9 +253,9 @@
 
         <!-- Middle Name -->
         <formidable-field-decorator>
+          <!-- no placeholder: an `inside` label may rest here -->
           <formidable-input-field
             formidableFieldErrors
-            placeholder="Your middle name"
             name="middleName"
             [readonly]="controlCenter.showAsReadonly"
             [disabled]="controlCenter.showAsDisabled"
@@ -230,7 +268,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             Middle Name
           </div>
           <div
@@ -275,7 +313,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             Last Name
           </div>
           <div
@@ -301,6 +339,7 @@
 
         <!-- Gender -->
         <formidable-field-decorator>
+          <!-- a native select always renders an option, so its label never rests -->
           <formidable-select-field
             formidableFieldErrors
             placeholder="Select..."
@@ -321,7 +360,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             Gender
           </div>
           <div
@@ -348,9 +387,9 @@
 
         <!-- Nationality -->
         <formidable-field-decorator>
+          <!-- no placeholder: an `inside` label may rest here -->
           <formidable-dropdown-field
             formidableFieldErrors
-            placeholder="Select..."
             name="nationality"
             [readonly]="controlCenter.showAsReadonly"
             [disabled]="controlCenter.showAsDisabled"
@@ -392,7 +431,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             Nationality
           </div>
           <div
@@ -454,7 +493,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             Hobby
           </div>
           <div
@@ -503,11 +542,12 @@
               </example-fuzzy-option>
             }
           </formidable-autocomplete-field>
+          <!-- deliberately long: an `inside` label stays on one line and ellipsizes -->
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
-            Animal
+            [position]="labelPosition">
+            Animal — pick your favourite one from this deliberately long list of animals
           </div>
           <div
             *ngIf="controlCenter.showTooltips"
@@ -557,7 +597,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             Birthdate
           </div>
           <div
@@ -598,7 +638,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             Time
           </div>
           <div
@@ -659,7 +699,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             Religion
           </div>
           <div
@@ -720,7 +760,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             Allergies
           </div>
           <div
@@ -763,7 +803,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             Is Single?
           </div>
           <div
@@ -813,7 +853,7 @@
           <div
             *ngIf="controlCenter.showLabels"
             formidableFieldLabel
-            [isFloating]="controlCenter.floatingLabels">
+            [position]="labelPosition">
             Age
           </div>
           <div

@@ -39,6 +39,7 @@ Coding conventions for the library. See also: `architecture.md` (structure, key 
 - **Two Layers**: `_tokens.scss` holds compile-time SCSS primitives (the default values); `_formidable-vars.scss` emits a `:root` block of runtime CSS custom properties named `--formidable-{category}-{name}` (e.g. `--formidable-color-field-border`, `--formidable-field-height`), each mapped to its token default.
 - **Theming**: consumers theme by overriding `--formidable-*` custom properties in their own `:root` — they never touch SCSS tokens. Many variables self-reference, so overriding one base cascades to derived ones.
 - **Field Styling**: all field CSS lives in `mixins/_forms.scss` (with `_pikaday.scss`, `_css-icons.scss`, `_utils.scss`).
+- **Global Rules**: `_globals.scss` holds the few rules that cannot be scoped to a component — those that must reach consumer-projected content, which view encapsulation puts out of a component stylesheet's reach.
 - **Consuming Styles**: the demo imports `@use 'ngx-formidable'` (resolved via the `angular.json` `includePaths`); an external consumer imports `@use '@cynthion/ngx-formidable/styles/ngx-formidable'` (resolved from the published package). The full overridable-variable list lives in the root `README.md`.
 
 ## TypeScript

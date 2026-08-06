@@ -26,6 +26,22 @@ export const FORMIDABLE_ERROR_TRANSLATOR = new InjectionToken<FormidableTranslat
 export const NO_OPTIONS_TEXT = 'No options available.';
 
 export type FieldDecoratorLayout = 'horizontal' | 'vertical' | 'inline';
+/**
+ * Where the field's label renders:
+ * - `outside`: statically above the field, in normal document flow.
+ * - `inside`: inside the field's bounds, centered like a placeholder while the field is visually empty,
+ *   floating above the value otherwise (default).
+ * - `inside-floating`: inside the field's bounds, always floating — it never rests.
+ * - `border`: centered on the field's top border, which it hides behind itself, aligned with the value.
+ * - `border-prefix`: as `border`, but aligned with a projected prefix instead of with the value.
+ */
+export type FieldLabelPosition = 'outside' | 'inside' | 'inside-floating' | 'border' | 'border-prefix';
+/**
+ * Where the field's value sits vertically, which a projected prefix/suffix aligns itself with: the
+ * `center` of the field's box (the default), or its `top` line for a multi-line field, whose box grows
+ * as the value does.
+ */
+export type FieldValueAlignment = 'center' | 'top';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 export type FormidablePanelPosition = 'left' | 'right' | 'full';
 export type FormidableToggleFieldLabelPosition = 'before' | 'after';
@@ -52,7 +68,9 @@ export interface IFormidableField<T = string | null> {
   readonly: boolean;
   disabled: boolean;
   value: T;
-  isLabelFloating: boolean;
+  /** Whether nothing is rendered where the value goes, so a label may rest there like a placeholder. */
+  canLabelRest: boolean;
+  valueAlignment?: FieldValueAlignment;
   valueChange$: Observable<T>;
   focusChange$: Observable<boolean>;
   valueChanged: EventEmitter<T>;

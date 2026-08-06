@@ -5,7 +5,6 @@ Example:
 - Update usage documentation according to EnerQi
 - suffixes: clear/reset, copy, validation state, loading
 - group example, using ngModelGroup (see EnerQi appointment-page.form)
-- theme 4 should be tweaked to be tiny, and border-radius 0, no background for field groups
 - add badges to readme
 - exact feature list (per field and component) in readme
 - update all dependencies (angular 20)
@@ -16,19 +15,14 @@ Example:
 
 Improvements:
 
-- The 16px gap between radiobox/checkbox and label (field-option-prefix paddin) and the 2px checkbox border thickness are hardcoded SCSS and cannot be reduced via CSS variables. Expose them as variables in the checkbox-group mixin.
+- an in-field panel toggle is not part of the value inset, so a long label can run under it. `dropdown`, `autocomplete`, `date` and `time` render a toggle icon inside the field, but `adjustLayout()` only measures projected prefixes and suffixes — so a `resting`, `floating` or `border` label spans the field right up to the icon and disappears behind it. Either the toggle joins the suffix measurement or those fields set `--formidable-field-value-inset-right` themselves. See `label-handoff.md`.
 - ensure all fields can be "focus on page load" (without panels being opened)
-- override autofill (`input:-webkit-autofill`, etc.)
 - make DateFieldComponent `smaller` or render better for smaller screens
 - don't render `formidable-field-option` components when radiogroup and checkboxgroup are empty
 - add { descendants: true } to options (make options available with `ng-template`, e.g. EnerQi constitution form), see https://chatgpt.com/g/g-p-6881cf5951fc8191998a952f25c65a09-ngx-formidable/c/6972a872-f0bc-8327-a7cc-8bd0e35ddc7e
-- make floating label from "placeholder" like with Material's Input field
-- make error message "absolute" positioned, so it doesn't take space in layout
-- add property "subLabel" to fields, which can show text below the field (similar to errors, but always visible)
 - add a "defaultOption" input to select, dropdown, autocomplete, radio-group, checkbox-group fields (which is shown always as first or only when no match/option)
 - Prefer queueMicrotask over setTimeout where possible
 - Add Storybook stories for layout options
-- Move the FieldErrorsComponent rendering into Decorator (doesn't work for inline)
 - Toggle: allow setting layout to 'inline' or 'group'
 - remove validation from the library, only provide ui components
 - add option to date field to show at bottom of screen (e.g., see VIAC app)
@@ -37,10 +31,53 @@ Improvements:
 # Bugs:
 
 - stale nested install: `projects/ngx-formidable/node_modules` shadows the root install with a second `@angular/core` and breaks `TestBed` in library specs (deleted during the caret fix; re-appears if `npm install` is run inside the library folder).
-- add --formidable-color-field-group-background-readonly and -disabled
 - ios: inspect padding when prefix is missing (deferred from Phase 1 — needs a device; root cause found: `adjustLayout()` sets inline `paddingLeft`/`paddingRight` only when a prefix/suffix is present and never resets them, and runs once at `ngAfterViewInit`)
+- the EnerQi consumer resolves a tarball that predates the label-position feature: it still exports `isLabelFloating` and `FieldDecoratorLayout = 'single' | 'group' | 'inline'`, while EnerQi's own sources have already been mirrored forward to `canLabelRest` and the `horizontal` layout gate. So EnerQi cannot typecheck against its own dependency. Needs a rebuilt and reinstalled tarball.
 
 # Features:
 
 - date/time field: arrow up/down to increment/decrement years/months/days and hours/minutes
 - date field: arrow down should not open panel, only navigate throught the dates. when the panel is open, the arrow keys must move the date selection in the panel.
+- add property "supportingText"/"hints" to fields, which can show text below the field (similar to errors, but always visible); allow them to be left-aligned, centered or right-aligned (default left-aligned); similar to material's hints (so could be a new component, like errors); provide a few pre-defined ones (e.g., message-value-length) (or is it better to let the user define them?)
+  ```html
+  <!-- Material Example -->
+  <mat-hint align="start"><strong>Don't disclose personal info</strong> </mat-hint>
+  <mat-hint align="end">{{message.value.length}} / 256</mat-hint>
+  ```
+- add config for prefix and suffix to defined their vertical alignment: centered or with field value (mask, placeholder, value) (default: centered)
+- when label position is "inside", then the label should be shown and the placeholder only on focus (when the label is floating); this is similar to material's behavior
+- add tokens for the background, border, value (text) and label color when the field is invalid, disabled, readonly, focused, hovered and define the default colors for these states (similar to material's behavior)
+- allow the bottom border to be configured (thickness and color) when the field is invalid or focused (and defined default values)
+- allow the border corner radius to be configured (so each can have different, e.g. only top rounded)
+
+# Documentation:
+
+- all interfaces must be documented; this is a library, so the documentation is important for users to understand how to use it; keep it brief and short and simple
+- ensure the ui_components.md is correct
+- update the readme and ensure it is correct and up to date with the latest features and changes; make sure it sells all features
+
+# Portal:
+
+"Customize your own form theme".
+The idea is a product page, where users can come to and play around with options to configure the theme for their own brand and product.
+
+- preview of all fields (in an example form), the example form should use multiple fields of the same type (and can thus be a bit more complex) so that different variations of field type configs can be demoed
+- the example form is fully functional and can be filled out, and the current values are shown in a separate view (see below)
+- the fields of the new example form should be layed out in a grid and not all fields just using full width
+- all options of every field can be changed in the portal and the result is shown in the preview form
+- all theme tokens can be changed (with color picker or sliders, etc.) in the portal and the result is shown in the preview form
+- the resulting theme can be exported (copy-paste)
+- the portal is deployed as GitHub Pages
+- the example form is removed
+- the root project is hosting the portal instead of the example form
+- all theme tokens and field options are documented in the portal (with examples), inline to options and also in a separate documentation page
+- the portal "control elements" shall use the ngx-formidable controls themselves, but with a distinct theme
+- the example form must use a different default theme and token config as the starting position
+- portal also provides expandable/collapsible views for "form"-values, showing the current values entered in the example form
+- portal also provides a (html-)editor to modify the example form and add/remove further fields and configurations, and the result is shown in the preview form
+- the documentation is updated so that future features and fixes also find their way into the portal
+- prefixes/suffixes can be added to fields and may be icons, text, or buttons. The portal should provide a way to configure them and show the result in the preview form.
+- the portal should also link to the public github repository
+- i18n config should also be changeable to best demonstrate the date field
+
+Before all, propose a page structure and layout for the portal, including an optional navigation. The portal must be super intuitive and easy to use.

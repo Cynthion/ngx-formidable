@@ -23,6 +23,7 @@ import {
 } from '../../../helpers/mask.helpers';
 import {
   FieldDecoratorLayout,
+  FieldValueAlignment,
   FORMIDABLE_FIELD,
   FORMIDABLE_MASK_DEFAULTS,
   IFormidableTextareaField
@@ -173,6 +174,10 @@ export class TextareaFieldComponent
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
+  // A textarea top-aligns its value and grows as the value does, so a projected prefix/suffix sits on the
+  // first line rather than drifting down with the box's middle.
+  valueAlignment: FieldValueAlignment = 'top';
+
   // #endregion
 
   // #region IFormidableTextareaField
@@ -189,6 +194,11 @@ export class TextareaFieldComponent
 
   @Input() mask?: string = undefined;
   @Input() maskConfig?: Partial<NgxMaskConfig>;
+
+  protected override get showsEmptyValueHint(): boolean {
+    // Only a mask that renders its slots while empty occupies the value area.
+    return !!this.mask && this.mergedMaskConfig.showMaskTyped;
+  }
 
   private readonly LOCAL_MASK_DEFAULTS: Required<MaskConfigSubset> = {
     validation: true,

@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ComponentRef,
   Directive,
   EnvironmentInjector,
   inject,
@@ -10,15 +11,19 @@ import {
 } from '@angular/core';
 import { NgModel, NgModelGroup } from '@angular/forms';
 import { of, Subject, switchMap, takeUntil } from 'rxjs';
+import { FieldDecoratorComponent } from '../components/field-decorator/field-decorator.component';
 import { FieldErrorsComponent } from '../components/field-errors/field-errors.component';
 import { NgxFormidableFormDirective } from './form.directive';
 
 /**
- * Dynamically instantiates a `<formidable-field-errors>` component next to any form control
- * decorated with this `formidableFieldErrors` directive, and synchronizes its display
- * with the host `NgModel` or `NgModelGroup`.
+ * Dynamically instantiates a `<formidable-field-errors>` component for any form control decorated with
+ * this `formidableFieldErrors` directive, and synchronizes its display with the host `NgModel` or
+ * `NgModelGroup`.
  *
  * - Automatically picks up `NgModel` or `NgModelGroup` from DI
+ * - Renders into the surrounding `formidable-field-decorator`'s errors slot when there is one, so the
+ *   errors land below the field instead of inside the container that positions its label and prefix;
+ *   falls back to rendering beside the host control when the field is used without a decorator
  * - Subscribes to the parent NgxFormidableFormDirective’s `idle$` stream to mark the errors component for check on every model change
  * - Cleans up component instance on destroy
  *
@@ -41,10 +46,10 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly formDirective = inject(NgxFormidableFormDirective);
   private readonly destroy$ = new Subject<void>();
 
-  private fieldErrorsComponentRef = this.viewContainerRef.createComponent(FieldErrorsComponent, {
-    injector: this.injector,
-    environmentInjector: this.environmentInjector
-  });
+  // Element injectors follow the declaring template, so a projected field really does see its decorator.
+  private readonly decorator = inject(FieldDecoratorComponent, { optional: true });
+
+  private fieldErrorsComponentRef?: ComponentRef<FieldErrorsComponent>;
 
   @Optional() private readonly ngModel = inject(NgModel, { optional: true });
   @Optional() private readonly ngModelGroup = inject(NgModelGroup, {
@@ -56,10 +61,17 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
 
-    this.fieldErrorsComponentRef.destroy();
+    this.fieldErrorsComponentRef?.destroy();
   }
 
   public ngAfterViewInit(): void {
+    // The injector stays this directive's either way, so the component resolves the same error translator
+    // wherever it is rendered — only the DOM anchor differs.
+    this.fieldErrorsComponentRef = (this.decorator?.errorsSlot ?? this.viewContainerRef).createComponent(
+      FieldErrorsComponent,
+      { injector: this.injector, environmentInjector: this.environmentInjector }
+    );
+
     this.fieldErrorsComponentRef.instance.ngModel = this.ngModel ?? undefined;
     this.fieldErrorsComponentRef.instance.ngModelGroup = this.ngModelGroup ?? undefined;
 
@@ -73,7 +85,7 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe(() => {
-        this.fieldErrorsComponentRef.instance.markForCheck();
+        this.fieldErrorsComponentRef?.instance.markForCheck();
       });
   }
 }

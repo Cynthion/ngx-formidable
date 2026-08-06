@@ -170,6 +170,11 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   @Input() mask?: string = undefined;
   @Input() maskConfig?: Partial<NgxMaskConfig>;
 
+  protected override get showsEmptyValueHint(): boolean {
+    // Only a mask that renders its slots while empty occupies the value area.
+    return !!this.mask && this.mergedMaskConfig.showMaskTyped;
+  }
+
   private readonly LOCAL_MASK_DEFAULTS: Required<MaskConfigSubset> = {
     validation: true,
     showMaskTyped: false,

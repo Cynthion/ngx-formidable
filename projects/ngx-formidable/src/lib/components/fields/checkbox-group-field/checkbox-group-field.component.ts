@@ -158,10 +158,6 @@ export class CheckboxGroupFieldComponent
     return this._writtenValues;
   }
 
-  override get isLabelFloating(): boolean {
-    return false;
-  }
-
   get fieldRef(): ElementRef<HTMLElement> {
     return this.checkboxGroupRef as ElementRef<HTMLElement>;
   }

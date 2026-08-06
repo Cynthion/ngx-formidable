@@ -180,6 +180,11 @@ export class TimeFieldComponent
     dropSpecialCharacters: false // keep special characters like '-', '.' or '/' in the input
   };
 
+  // An empty time field always shows its `emptyHint` in the value area, so a label can never rest there.
+  protected override get showsEmptyValueHint(): boolean {
+    return true;
+  }
+
   /** ngxMask's own empty display: the mask with every slot as its placeholder character. */
   private get maskPlaceholder(): string {
     return this.ngxMask.replace(/\w/g, '_');

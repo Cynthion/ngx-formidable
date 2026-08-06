@@ -132,6 +132,12 @@ export class SelectFieldComponent
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
+  // A native <select> always renders something in its value area, so a label can never rest there: with
+  // nothing selected it shows its first option, and with no options at all it shows `noOptionsText`.
+  protected override get showsEmptyValueHint(): boolean {
+    return true;
+  }
+
   // #endregion
 
   // #region IFormidableOptionField

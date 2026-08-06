@@ -1,0 +1,3 @@
+// Loads the shipped theme into the Karma run, so specs measure the real `:root` variables and the
+// global rules — not just the SCSS fallbacks baked into each component's stylesheet.
+@use 'ngx-formidable';

@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, Input } from '@angular/core';
 import { AbstractControl, NgModel, NgModelGroup } from '@angular/forms';
 import { FORMIDABLE_ERROR_TRANSLATOR, FormidableTranslateErrorFn } from '../../models/formidable.model';
@@ -26,8 +25,7 @@ import { FORMIDABLE_ERROR_TRANSLATOR, FormidableTranslateErrorFn } from '../../m
   templateUrl: './field-errors.component.html',
   styleUrls: ['./field-errors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [CommonModule]
+  standalone: true
 })
 export class FieldErrorsComponent {
   @Input() ngModel?: NgModel;

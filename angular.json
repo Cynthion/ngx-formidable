@@ -119,7 +119,11 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "tsConfig": "projects/ngx-formidable/tsconfig.spec.json",
-            "polyfills": ["zone.js", "zone.js/testing"]
+            "polyfills": ["zone.js", "zone.js/testing"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["projects/ngx-formidable/src/lib/styles"]
+            },
+            "styles": ["projects/ngx-formidable/src/test-styles.scss"]
           }
         }
       }

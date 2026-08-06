@@ -77,10 +77,6 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
     return this._value;
   }
 
-  override get isLabelFloating(): boolean {
-    return false;
-  }
-
   get fieldRef(): ElementRef<HTMLElement> {
     return this.sliderRef as ElementRef<HTMLElement>;
   }

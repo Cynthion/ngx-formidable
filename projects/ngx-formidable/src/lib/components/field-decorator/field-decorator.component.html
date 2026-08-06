@@ -2,13 +2,15 @@
 @if (decoratorLayout !== 'inline') {
   <div
     class="before-wrapper"
-    [class.hidden]="!hasLabel && !hasTooltip">
+    [class.hidden]="!showsBeforeWrapper">
     <ng-container [ngTemplateOutlet]="labelTooltip" />
   </div>
 }
 
 <!-- Layout -->
-<div ngClass="container-{{ decoratorLayout }}">
+<div
+  ngClass="container-{{ decoratorLayout }}"
+  [class.value-top]="valueAlignment === 'top'">
   @if (decoratorLayout === 'inline') {
     <div class="inline-wrapper">
       <!-- Label & Tooltip -->
@@ -26,6 +28,11 @@
       </div>
     </div>
   } @else {
+    <!-- Label, when it renders over the field: this container is its positioning context -->
+    @if (isLabelOverField) {
+      <ng-container [ngTemplateOutlet]="label" />
+    }
+
     <!-- Prefix -->
     <ng-container [ngTemplateOutlet]="prefix" />
 
@@ -37,11 +44,18 @@
   }
 </div>
 
+<!-- Validation errors, rendered here by `FieldErrorsDirective`. -->
+<ng-container #errorsSlot />
+
 <!-- Label & Tooltip Template -->
+<!-- The label is only here while it renders in normal flow; over the field it lives in the container above,
+     so exactly one of the two outlets exists and the single `ng-content` below still projects once. -->
 <ng-template #labelTooltip>
   <div class="label-tooltip-wrapper">
     <!-- Label -->
-    <ng-container [ngTemplateOutlet]="label" />
+    @if (!isLabelOverField) {
+      <ng-container [ngTemplateOutlet]="label" />
+    }
     <!-- Tooltip -->
     <ng-container [ngTemplateOutlet]="tooltip" />
   </div>
@@ -51,16 +65,14 @@
 <ng-template #label>
   @if (decoratorLayout === 'vertical') {
     <div
-      class="label-wrapper"
-      [class.hidden]="!hasLabel"
-      [class.floating]="isLabelFloating">
+      ngClass="label-wrapper label-{{ labelState }}"
+      [class.hidden]="!hasLabel">
       <ng-container [ngTemplateOutlet]="projectedLabel" />
     </div>
   } @else {
     <label
-      class="label-wrapper"
+      ngClass="label-wrapper label-{{ labelState }}"
       [class.hidden]="!hasLabel"
-      [class.floating]="isLabelFloating"
       [attr.for]="fieldId">
       <ng-container [ngTemplateOutlet]="projectedLabel" />
     </label>

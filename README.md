@@ -275,7 +275,7 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
     </formidable-select-field>
     <div
       formidableFieldLabel
-      [isFloating]="true">
+      [position]="'inside'">
       Hobby
     </div>
   </formidable-field-decorator>
@@ -313,7 +313,8 @@ Adds a root-level async validator for cross-field Vest tests on `ROOT_FORM`.
 
 ### FieldErrorsDirective (`formidableFieldErrors`)
 
-Renders a `<formidable-field-errors>` component next to any control to display its validation messages.
+Renders a `<formidable-field-errors>` component for any control to display its validation messages. Inside a
+`formidable-field-decorator` it renders below the field; used on a bare control it renders next to it.
 
 ### NgxFormidableFormModelDirective
 
@@ -327,12 +328,28 @@ Hooks into `ngModelGroup` to validate nested groups.
 
 Wrap any field in a <formidable-field-decorator> to project:
 
-- Label: `<div formidableFieldLabel [isFloating]="true">…</div>`
+- Label: `<div formidableFieldLabel [position]="'inside'">…</div>`
 - Tooltip: `<div formidableFieldTooltip>…</div>`
 - Prefix: `<div formidableFieldPrefix>…</div>`
 - Suffix: `<div formidableFieldSuffix>…</div>`
 
 The decorator adjusts padding and forwards the wrapped field’s properties and events.
+
+The label’s `position` chooses where it renders:
+
+| Position           | Behaviour                                                                                                                                  |
+| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| `outside`          | Static, above the field, in normal document flow. Never moves. The value is centered in the field.                                         |
+| `inside` (default) | Inside the field: centered like a placeholder while the field is visually empty, floating above the value once focused, filled, or masked. |
+| `inside-floating`  | Inside the field, always floating above the value.                                                                                         |
+| `border`           | Centered on the field’s top border, which it hides behind itself. The value stays centered, as with `outside`.                             |
+| `border-prefix`    | As `border`, but aligned with a projected prefix instead of with the value.                                                                |
+
+Every position other than `outside` needs a field with room for a label over it, so they are a no-op for the
+toggle, radio-group, checkbox-group and slider fields — their label always renders `outside`. An `inside`
+label only rests while nothing else occupies the value area: a `placeholder`, visible mask slots, a value,
+`readonly` or `disabled` all make it float instead. A label rendered over the field stays aligned with the
+value (a prefix or suffix pushes it in too), stays on one line, and ellipsizes.
 
 The library ships no icons. Where a field has an icon, project your own into it — the date field's panel toggle
 draws a CSS arrow unless you project `<span formidableFieldToggleIcon>…</span>` directly into
@@ -393,9 +410,9 @@ You can also tweak Pikaday CSS.
 | `--formidable-label-font-size`                              | Font size for labels.                                                                                               |
 | `--formidable-label-font-weight`                            | Font weight for labels.                                                                                             |
 | `--formidable-label-line-height`                            | Line height for labels.                                                                                             |
-| `--formidable-label-floating-font-size`                     | Font size for floating labels.                                                                                      |
-| `--formidable-label-floating-font-weight`                   | Font weight for floating labels.                                                                                    |
-| `--formidable-label-floating-line-height`                   | Line height for floating labels.                                                                                    |
+| `--formidable-label-floating-font-size`                     | Font size for a floating label (see Field Dimensions below).                                                        |
+| `--formidable-label-floating-font-weight`                   | Font weight for a floating label.                                                                                   |
+| `--formidable-label-floating-line-height`                   | Line height for a floating label.                                                                                   |
 | `--formidable-field-validation-error-font-size`             | Font size for validation error messages.                                                                            |
 | `--formidable-field-validation-error-font-weight`           | Font weight for validation error messages.                                                                          |
 | `--formidable-field-validation-error-line-height`           | Line height for validation error messages.                                                                          |
@@ -410,8 +427,20 @@ You can also tweak Pikaday CSS.
 | `--formidable-field-group-border-radius`                    | Border-radius for field group corners.                                                                              |
 | `--formidable-label-height`                                 | Computed height of the label text line box.                                                                         |
 | `--formidable-field-height`                                 | Default height for single-line fields.                                                                              |
-| `--formidable-label-floating-offset`                        | Vertical offset applied when a label floats above its field.                                                        |
+| `--formidable-field-padding-x`                              | Horizontal padding of a field: where its value, and a projected prefix's text, start.                               |
+| `--formidable-field-inner-height`                           | Computed height inside a field's borders.                                                                           |
+| `--formidable-field-value-height`                           | Computed height of a field value's text line box.                                                                   |
+| `--formidable-label-floating-height`                        | Computed height of a floating label's text line box.                                                                |
+| `--formidable-label-inside-slack`                           | Computed space above and below the centered label-plus-value block of a field with an inside label.                 |
+| `--formidable-label-inside-value-top`                       | Computed offset of the value's text line box from the field's inner top, with an inside label.                      |
+| `--formidable-field-value-centered-top`                     | Computed offset of the value's text line box when it is centered in the field's inner height on its own.            |
+| `--formidable-label-resting-offset`                         | Vertical offset for a resting label, centered in the field's inner height like a placeholder.                       |
+| `--formidable-label-floating-offset`                        | Vertical offset for a floating label, at the top of the centered label-plus-value block.                            |
+| `--formidable-label-border-offset`                          | Vertical offset for a `border` label, so its text line box straddles the field's top border.                        |
+| `--formidable-label-border-gap`                             | How far a `border` label's border-hiding band reaches either side of its text.                                      |
+| `--formidable-label-border-band-bleed`                      | How far that band outgrows the border above and below, so pixel rounding leaves no hairline showing.                |
 | `--formidable-field-group-option-padding`                   | Padding of options within a field group.                                                                            |
+| `--formidable-field-support-min-height`                     | Minimum reserved height for a field's supporting-text area (currently validation errors).                           |
 | **Colors**                                                  |                                                                                                                     |
 | `--formidable-color-validation-error`                       | Text color for validation errors.                                                                                   |
 | `--formidable-color-field-text`                             | Text color for fields.                                                                                              |
@@ -419,7 +448,10 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-field-text-readonly`                    | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is readonly.             |
 | `--formidable-color-field-text-disabled`                    | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is disabled.             |
 | `--formidable-color-field-label`                            | Text color for labels.                                                                                              |
-| `--formidable-color-field-label-floating`                   | Text color for floating labels.                                                                                     |
+| `--formidable-color-field-label-floating`                   | Text color for a floating label. A resting label uses the field's placeholder color instead.                        |
+| `--formidable-color-label-border-band`                      | Fill a `border` label paints over the border it hides. Follows the field background by default.                     |
+| `--formidable-color-label-border-band-readonly`             | Overrides `--formidable-color-label-border-band` when the field is readonly.                                        |
+| `--formidable-color-label-border-band-disabled`             | Overrides `--formidable-color-label-border-band` when the field is disabled.                                        |
 | `--formidable-color-field-tooltip`                          | Text color for tooltip text.                                                                                        |
 | `--formidable-color-field-placeholder`                      | Text color for placeholder text.                                                                                    |
 | `--formidable-color-field-selection`                        | Background color for selected text.                                                                                 |
@@ -435,6 +467,8 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-field-group-background`                 | Background color for field groups.                                                                                  |
 | `--formidable-color-field-background-readonly`              | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is readonly. |
 | `--formidable-color-field-background-disabled`              | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is disabled. |
+| `--formidable-color-field-group-background-readonly`        | Overrides`--formidable-color-field-group-background`when field group is readonly.                                   |
+| `--formidable-color-field-group-background-disabled`        | Overrides`--formidable-color-field-group-background`when field group is disabled.                                   |
 | `--formidable-color-field-option-text-readonly`             | Text color for option items that are readonly.                                                                      |
 | `--formidable-color-field-option-text-disabled`             | Text color for option items that are disabled.                                                                      |
 | `--formidable-color-field-option-background-selected`       | Background color for option items that are selected.                                                                |
@@ -488,6 +522,8 @@ You can also tweak Pikaday CSS.
 | **Option Prefix Dimensions**                                |                                                                                                                     |
 | `--formidable-option-prefix-dimension-outer`                | Size of the outer circle/box for radio/checkbox prefixes.                                                           |
 | `--formidable-option-prefix-dimension-inner`                | Size of the inner indicator for selected radio/checkbox prefixes.                                                   |
+| `--formidable-option-prefix-gap`                            | Gap between a radio/checkbox prefix and its option label.                                                           |
+| `--formidable-option-prefix-border-thickness`               | Border thickness of the outer circle/box for radio/checkbox prefixes.                                               |
 
 ## Root-Level / Cross-Field Validation
 
@@ -702,8 +738,10 @@ When you add your own field component (by implementing `IFormidableField` or `IF
 
 - **Async validation** via `NgxFormidableFormModelDirective`
 - **Root-level / cross-field validation** if you use `formidableRootValidate`
-- **Error rendering** simply by adding `formidableFieldErrors`
-- **Decorator support** — labels, tooltips, prefixes, and suffixes work out of the box
+- **Error rendering** simply by adding `formidableFieldErrors` — with or without a decorator around the field
+- **Decorator support** — labels, tooltips, prefixes, and suffixes work out of the box. A prefix/suffix is
+  centered in your field's box; if your field top-aligns its value (like a textarea), set
+  `valueAlignment: 'top'` so they sit on its first line instead
 
 You don’t need any extra wiring; just implement the interface, extend `BaseFieldDirective`, and register the provider.
 
@@ -767,9 +805,8 @@ export class CustomColorPickerComponent extends BaseFieldDirective implements IF
     return this.inputRef.nativeElement.value || null;
   }
 
-  get isLabelFloating(): boolean {
-    return !this.isFieldFocused && !this.isFieldFilled;
-  }
+  // `canLabelRest` is inherited from BaseFieldDirective. Override `showsEmptyValueHint` instead if the
+  // field renders something where the value goes while empty, which a resting label would collide with.
 
   get fieldRef(): ElementRef<HTMLElement> {
     return this.inputRef as ElementRef<HTMLElement>;

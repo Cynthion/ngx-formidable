@@ -4,6 +4,21 @@
   display: block;
 }
 
+:host(.label-inside) {
+  @include field-label-inside-host;
+}
+
+// A `border` label paints a band in the field's fill to hide the border behind it, but `readonly` and
+// `disabled` remap that fill on the field element — which the label, a sibling, never sees. Remapping the
+// band's own colour here keeps the two matching.
+:host(.is-readonly) {
+  --formidable-color-label-border-band: var(--formidable-color-label-border-band-readonly);
+}
+
+:host(.is-disabled) {
+  --formidable-color-label-border-band: var(--formidable-color-label-border-band-disabled);
+}
+
 .before-wrapper {
   @include field-before;
 }
@@ -23,8 +38,27 @@
 .label-wrapper {
   @include field-label;
 
-  &.floating {
+  &.label-resting {
+    @include field-label-resting;
+  }
+
+  &.label-floating {
     @include field-label-floating;
+  }
+
+  &.label-border,
+  &.label-border-prefix {
+    @include field-label-border;
+  }
+
+  // Aligned with the field's value...
+  &.label-border {
+    @include field-label-border-align(field-value-inset('left'));
+  }
+
+  // ...or with a projected prefix, whose text starts at the field's own padding.
+  &.label-border-prefix {
+    @include field-label-border-align(field-padding-x());
   }
 }
 
@@ -58,6 +92,14 @@
 
 .suffix-wrapper-horizontal {
   @include field-suffix-horizontal;
+}
+
+// The field top-aligns its value, so the prefix/suffix follow its first line instead of its middle.
+.container-horizontal.value-top {
+  .prefix-wrapper-horizontal,
+  .suffix-wrapper-horizontal {
+    @include field-prefix-suffix-value-top;
+  }
 }
 
 .prefix-wrapper-vertical {

@@ -1,11 +1,11 @@
-<div
-  *ngIf="invalid"
-  class="errors">
-  <ul>
-    @for (error of errors; track error) {
-      <li class="error">
-        {{ translateError(error) }}
-      </li>
-    }
-  </ul>
+<div class="errors">
+  @if (invalid) {
+    <ul>
+      @for (error of errors; track error) {
+        <li class="error">
+          {{ translateError(error) }}
+        </li>
+      }
+    </ul>
+  }
 </div>

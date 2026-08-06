@@ -72,10 +72,6 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
     return this._value;
   }
 
-  override get isLabelFloating(): boolean {
-    return false;
-  }
-
   get fieldRef(): ElementRef<HTMLElement> {
     return this.toggleRef as ElementRef<HTMLElement>;
   }

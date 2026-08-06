@@ -55,11 +55,6 @@ export class ExampleCustomColorPickerComponent extends BaseFieldDirective implem
     return this.inputRef.nativeElement.value || null;
   }
 
-  get isLabelFloating(): boolean {
-    const blocked = this.disabled || this.readonly;
-    return !blocked && !this.isFieldFocused && !this.isFieldFilled;
-  }
-
   get fieldRef(): ElementRef<HTMLElement> {
     return this.inputRef as ElementRef<HTMLElement>;
   }

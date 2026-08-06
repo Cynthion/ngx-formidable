@@ -10,6 +10,7 @@ import {
   FieldDecoratorComponent,
   FieldErrorsDirective,
   FieldLabelDirective,
+  FieldLabelPosition,
   FieldOptionComponent,
   FieldPrefixDirective,
   FieldSuffixDirective,
@@ -86,7 +87,7 @@ export class ExampleFormComponent {
 
   protected readonly formValue$ = new BehaviorSubject<ExampleFormModel>({
     firstName: 'Cynthion',
-    middleName: 'Initial Value',
+    middleName: undefined,
     lastName: undefined, // 'Morris',
     gender: undefined, // 'male',
     nationality: 'ch',
@@ -400,10 +401,11 @@ export class ExampleFormComponent {
     showSuffixes: true,
     showTooltips: true,
     showLabels: true,
-    floatingLabels: true,
     showAsReadonly: false,
     showAsDisabled: false
   };
+
+  protected labelPosition: FieldLabelPosition = 'inside';
 
   // Since all components are change-detection OnPush, we need to trigger a change detection cycle
   protected renderFlip = true;
@@ -414,6 +416,11 @@ export class ExampleFormComponent {
     this.renderFlip = !this.renderFlip;
     this.clearLogs();
     // this.cdRef.markForCheck();
+  }
+
+  setLabelPosition(position: FieldLabelPosition): void {
+    this.labelPosition = position;
+    this.clearLogs();
   }
 
   setTheme(key: ThemeKey): void {
@@ -482,9 +489,9 @@ export class ExampleFormComponent {
       '--formidable-panel-box-shadow': '0 8px 32px rgba(255, 140, 0, 0.25)'
     },
     theme4: {
-      '--formidable-field-height': '42px',
+      '--formidable-field-height': '36px',
       '--formidable-field-border-thickness': '1px',
-      '--formidable-field-border-radius': '4px',
+      '--formidable-field-border-radius': '0',
       '--formidable-color-validation-error': '#b91c1c',
       '--formidable-color-field-text': '#111827',
       '--formidable-color-field-label': '#111827',
@@ -496,9 +503,12 @@ export class ExampleFormComponent {
       '--formidable-color-field-background': '#f9fafb',
       '--formidable-color-field-background-readonly': '#e5e7eb',
       '--formidable-color-field-background-disabled': '#e5e7eb',
+      '--formidable-color-field-group-background': 'transparent',
+      '--formidable-color-field-group-background-readonly': 'transparent',
+      '--formidable-color-field-group-background-disabled': 'transparent',
       '--formidable-color-field-option-background-highlighted': 'rgba(37, 99, 235, 0.08)',
       '--formidable-color-field-option-background-hovered': 'rgba(37, 99, 235, 0.15)',
-      '--formidable-date-field-panel-width': '200px',
+      '--formidable-date-field-panel-width': '180px',
       '--formidable-panel-background': '#ffffff',
       '--formidable-panel-box-shadow': '0 4px 20px rgba(0,0,0,0.08)'
     }
@@ -507,13 +517,6 @@ export class ExampleFormComponent {
   // #endregion
 }
 
-type ControlKey =
-  | 'showPrefixes'
-  | 'showSuffixes'
-  | 'showTooltips'
-  | 'showLabels'
-  | 'floatingLabels'
-  | 'showAsReadonly'
-  | 'showAsDisabled';
+type ControlKey = 'showPrefixes' | 'showSuffixes' | 'showTooltips' | 'showLabels' | 'showAsReadonly' | 'showAsDisabled';
 type ThemeKey = 'default' | 'theme2' | 'theme3' | 'theme4';
 type ThemeVars = Record<string, string>;

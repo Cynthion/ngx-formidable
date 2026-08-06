@@ -46,18 +46,59 @@ $formidable-field-group-border-radius: $formidable-field-border-radius;
 $formidable-label-height: $formidable-label-line-height * $formidable-label-font-size;
 $formidable-field-height: utils.spacing(60); // even number
 
-// Push the label down to the field's inner content top, then center its line-box in the top
-// margin: the band between that top and the field's vertical center (where the value text sits).
-// Gives equal whitespace above the label and below it, to the value.
-$formidable-label-floating-offset: $formidable-label-height + $formidable-field-before-margin-bottom +
-  $formidable-field-border-thickness +
-  math.div(
-    math.div($formidable-field-height, 2) - $formidable-field-border-thickness - $formidable-label-floating-line-height *
-      $formidable-label-floating-font-size,
+// The field's horizontal padding — where its value starts, and where a projected prefix's text starts.
+// One named value because a `border-prefix` label aligns with the prefix by using it directly.
+$formidable-field-padding-x: utils.spacing(16);
+
+// Line-box heights of the two things that share the field's inner height when the label is inside.
+$formidable-field-inner-height: $formidable-field-height - 2 * $formidable-field-border-thickness;
+$formidable-field-value-height: $formidable-field-line-height * $formidable-field-font-size;
+$formidable-label-floating-height: $formidable-label-floating-line-height * $formidable-label-floating-font-size;
+
+// With the label inside, the floating label and the value are centered as one block: this is the
+// leftover space above the block — and, by symmetry, below it.
+$formidable-label-inside-slack: math.div(
+  $formidable-field-inner-height - $formidable-label-floating-height - $formidable-field-value-height,
+  2
+);
+
+// Where the value's line-box starts, measured from the field's inner top — with the label inside, so
+// the label+value pair is centered rather than the value alone.
+$formidable-label-inside-value-top: $formidable-label-inside-slack + $formidable-label-floating-height;
+
+// Where the value's line-box starts when it is centered in the field's inner height on its own — the
+// `outside` and `border` positions, and where an empty field's resting label sits.
+$formidable-field-value-centered-top: math.div($formidable-field-inner-height - $formidable-field-value-height, 2);
+
+// A label that renders over the field is positioned inside the field's own container, whose top edge is
+// the field's border-box top. The offsets below are therefore plain distances from that edge, and depend
+// on nothing but the field's own metrics.
+
+// Floating: the top of the centered label+value block, one border in from the container's top.
+$formidable-label-floating-offset: $formidable-field-border-thickness + $formidable-label-inside-slack;
+
+// Resting: the label is the only thing an empty field shows, so it is centered in the inner height.
+$formidable-label-resting-offset: $formidable-field-border-thickness + $formidable-field-value-centered-top;
+
+// Border: the label's line-box is centered on the field's top border, so it straddles it. Negative,
+// because the label is taller than the border it is centered on.
+$formidable-label-border-offset: math.div($formidable-field-border-thickness, 2) - math.div(
+    $formidable-label-floating-height,
     2
   );
 
+// How far a `border` label's border-hiding band reaches either side of its text.
+$formidable-label-border-gap: utils.spacing(4);
+
+// How far that band outgrows the border it hides, above and below. Both are sub-pixel positioned, so a
+// band exactly as thick as the border leaves a hairline of it showing once rasterized. Deliberately a
+// device pixel and not a rem: this guards against pixel rounding, not against a theme's scale.
+$formidable-label-border-band-bleed: 1px;
+
 $formidable-field-group-option-padding: utils.spacing(8) utils.spacing(0);
+
+$formidable-field-support-min-height: $formidable-field-validation-error-line-height *
+  $formidable-field-validation-error-font-size;
 
 // #endregion
 
@@ -99,6 +140,15 @@ $formidable-color-field-background: #f2faff; // 100
 $formidable-color-field-group-background: $formidable-color-field-background;
 $formidable-color-field-background-readonly: rgb($formidable-color-field-background, 75%);
 $formidable-color-field-background-disabled: $formidable-color-field-background-readonly;
+$formidable-color-field-group-background-readonly: $formidable-color-field-background-readonly;
+$formidable-color-field-group-background-disabled: $formidable-color-field-background-disabled;
+
+// What a `border` label paints over the border it hides. Its own variable, not the field background
+// directly, because `readonly`/`disabled` remap that on the field element — which the label, a sibling,
+// cannot see. The decorator remaps this one instead so the band keeps matching the fill.
+$formidable-color-label-border-band: $formidable-color-field-background;
+$formidable-color-label-border-band-readonly: $formidable-color-field-background-readonly;
+$formidable-color-label-border-band-disabled: $formidable-color-field-background-disabled;
 
 $formidable-color-field-option-text-readonly: $formidable-color-field-text-readonly;
 $formidable-color-field-option-text-disabled: $formidable-color-field-text-disabled;
@@ -241,5 +291,7 @@ $formidable-date-field-panel-box-shadow: $formidable-panel-box-shadow;
 
 $formidable-option-prefix-dimension-outer: utils.spacing(20);
 $formidable-option-prefix-dimension-inner: utils.spacing(8);
+$formidable-option-prefix-gap: utils.spacing(16);
+$formidable-option-prefix-border-thickness: utils.spacing(2);
 
 // #endregion

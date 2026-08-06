@@ -1,0 +1,14 @@
+// This file defines the few rules that cannot be scoped to a component.
+
+// A label rendered over the field stays on one line and ellipsizes. `text-overflow` needs
+// `overflow: hidden` on the element that holds the text — and that element is projected by the consumer,
+// so the decorator's own (encapsulated) stylesheet cannot reach it. The state classes below already mean
+// "the label renders over the field", so no further gating is needed.
+formidable-field-decorator .label-wrapper.label-resting > *,
+formidable-field-decorator .label-wrapper.label-floating > *,
+formidable-field-decorator .label-wrapper.label-border > *,
+formidable-field-decorator .label-wrapper.label-border-prefix > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

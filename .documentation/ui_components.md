@@ -2,7 +2,7 @@
 
 Catalogue of every public component and directive exported from `public-api.ts`. This is the authoritative detailed reference — the root `README.md` lists components abstractly and links here for the full API.
 
-Every component is `standalone` and uses `ChangeDetectionStrategy.OnPush`. Field components implement `ControlValueAccessor` (usable with `ngModel`) and extend `BaseFieldDirective`; their shared surface is documented once below and not repeated per entry.
+Every component is `standalone`, and uses `ChangeDetectionStrategy.OnPush` except `FieldDecoratorComponent` — it resolves its label state from field state it cannot observe, so it is checked every cycle. Field components implement `ControlValueAccessor` (usable with `ngModel`) and extend `BaseFieldDirective`; their shared surface is documented once below and not repeated per entry.
 
 ## Base Field Directive
 
@@ -10,21 +10,22 @@ Every component is `standalone` and uses `ChangeDetectionStrategy.OnPush`. Field
 
 Inherited by every field:
 
-| Member            | Kind        | Description                             |
-| :---------------- | :---------- | :-------------------------------------- |
-| `name`            | `@Input()`  | Field name (`''`)                       |
-| `placeholder`     | `@Input()`  | Placeholder text (`''`)                 |
-| `readonly`        | `@Input()`  | Blocks input, still focusable (`false`) |
-| `disabled`        | `@Input()`  | Fully disabled (`false`)                |
-| `valueChanged`    | `@Output()` | `EventEmitter<T>` on value change       |
-| `focusChanged`    | `@Output()` | `EventEmitter<boolean>` on focus/blur   |
-| `valueChange$`    | Observable  | Value stream                            |
-| `focusChange$`    | Observable  | Focus stream                            |
-| `fieldId`         | getter      | Generated unique id                     |
-| `value`           | getter      | Current value                           |
-| `isLabelFloating` | getter      | Whether the decorator label floats      |
+| Member           | Kind        | Description                                                                                         |
+| :--------------- | :---------- | :-------------------------------------------------------------------------------------------------- |
+| `name`           | `@Input()`  | Field name (`''`)                                                                                   |
+| `placeholder`    | `@Input()`  | Placeholder text (`''`)                                                                             |
+| `readonly`       | `@Input()`  | Blocks input, still focusable (`false`)                                                             |
+| `disabled`       | `@Input()`  | Fully disabled (`false`)                                                                            |
+| `valueChanged`   | `@Output()` | `EventEmitter<T>` on value change                                                                   |
+| `focusChanged`   | `@Output()` | `EventEmitter<boolean>` on focus/blur                                                               |
+| `valueChange$`   | Observable  | Value stream                                                                                        |
+| `focusChange$`   | Observable  | Focus stream                                                                                        |
+| `fieldId`        | getter      | Generated unique id                                                                                 |
+| `value`          | getter      | Current value                                                                                       |
+| `canLabelRest`   | getter      | Whether nothing occupies the value area, so a label may rest there like a placeholder               |
+| `valueAlignment` | optional    | Where the value sits vertically, which a prefix/suffix aligns with: `'center'` (default) or `'top'` |
 
-**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners (run outside the Angular zone), readonly/disabled blocking, and label-float state.
+**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners (run outside the Angular zone), readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly, disabled, or has a `placeholder`; a field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` getter (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always). A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows.
 
 ---
 
@@ -219,6 +220,30 @@ Collects `formidable-field-option` children. **Use when** multiple choices may b
 
 Wraps a field and its label, tooltip, prefix, suffix and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `@ContentChild`. Forwards the field's `valueChanged` / `focusChanged`. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and auto-adjusts prefix/suffix padding in the `horizontal` layout. No inputs.
 
+**Label Position**: `formidableFieldLabel`'s `position: FieldLabelPosition` (default `'inside'`) chooses between five mutually exclusive, statically-configured modes.
+
+The decorator resolves the configured position against the field's own state into one `labelState`, emitted as a `label-*` class on `.label-wrapper`, plus a `label-inside` class on its own host whenever the label sits over the value area. Any position other than `outside` needs a `horizontal` `decoratorLayout` — the only layout with room for a label over the field — so all of them are a no-op for `toggle-field`, `radio-group-field`, `checkbox-group-field` and `slider-field`.
+
+| `labelState`          | Resolved From                                                       |
+| :-------------------- | :------------------------------------------------------------------ |
+| `label-outside`       | `position: 'outside'`, or a field whose layout has no room          |
+| `label-resting`       | `position: 'inside'` and the field's `canLabelRest`                 |
+| `label-floating`      | `position: 'inside'` without `canLabelRest`, or `'inside-floating'` |
+| `label-border`        | `position: 'border'`                                                |
+| `label-border-prefix` | `position: 'border-prefix'`                                         |
+
+Because `labelState` reads field state the decorator cannot observe — `readonly`, `disabled`, `placeholder`, mask configuration — the decorator is deliberately **not** `OnPush`.
+
+**Label Geometry**: an `outside` label sits in `.before-wrapper` in normal flow. Every other position renders the label over the field, which puts it in `.container-horizontal` — the field's own positioning context, whose top edge is the field's border-box top. Each offset is therefore a plain distance from that edge, unreachable by anything around the label, and `.before-wrapper` collapses entirely once no label or tooltip is left in it.
+
+| Offset                               | Lands At                                                                                              |
+| :----------------------------------- | :---------------------------------------------------------------------------------------------------- |
+| `--formidable-label-floating-offset` | The top of the centered label-plus-value block, `--formidable-label-inside-slack` below the inner top |
+| `--formidable-label-resting-offset`  | `--formidable-field-value-centered-top`, so an empty field's label is centered in the inner height    |
+| `--formidable-label-border-offset`   | Negative — the label's line-box straddles the field's top border                                      |
+
+A floating label's value clears it because the `label-inside` host hands the field a `--formidable-field-value-padding-top`; a `textarea`, whose value is top-aligned rather than centered, uses `--formidable-field-value-top` instead. The `border` positions get neither, so their value stays centered exactly as with `outside`. Horizontally, a label is bounded by `--formidable-field-value-inset-left` / `-right`, which `adjustLayout` sets from the same measurements it uses for the field's prefix/suffix padding — so the label stays aligned with the value instead of colliding with a prefix; both fall back to `--formidable-field-padding-x`, the field's own horizontal padding. A `border` label additionally shrink-wraps and is pulled left by `--formidable-label-border-gap`, so it hides only the stretch of border it covers while its text still starts where the value does; `border-prefix` is the same mixin anchored to `--formidable-field-padding-x` instead, which is where a projected prefix's text starts. The border is hidden by a `linear-gradient` band one `--formidable-field-border-thickness` tall, painted in `--formidable-color-label-border-band` — its own variable, because `readonly` / `disabled` remap the field's fill on the field element, out of the label's reach, so the decorator's host remaps the band's colour instead. Any label rendered over the field stays on one line and ellipsizes.
+
 ### Field Option
 
 **Selector** `formidable-field-option`
@@ -241,7 +266,9 @@ A single option inside an option-based field. Provides `FORMIDABLE_FIELD_OPTION`
 
 **Selector** `formidable-field-errors`
 
-Renders validation error messages for a control. Reads the `errors` array off `control.errors['errors']`; `invalid` is true when touched and errored. Error strings pass through `FORMIDABLE_ERROR_TRANSLATOR`.
+Renders validation error messages for a control. Reads the `errors` array off `control.errors['errors']`; `invalid` is true when touched and errored. Error strings pass through `FORMIDABLE_ERROR_TRANSLATOR`. The container always reserves one line of height (`--formidable-field-support-min-height`) so a single-line error doesn't shift later fields; longer, wrapping errors still push later content down.
+
+Usually created by `FieldErrorsDirective` rather than written by hand. Inside a decorator it renders in that decorator's errors slot, after the field's layout container — never inside it, since that container is the positioning context for the label and the prefix/suffix and has to stay exactly the field's box. Placement is therefore the same for all three `decoratorLayout`s.
 
 | Input          | Type           | Description                 |
 | :------------- | :------------- | :-------------------------- |
@@ -263,14 +290,14 @@ Renders validation error messages for a control. Reads the `errors` array off `c
 
 ### Field-Decoration
 
-| Directive                  | Selector                      | Purpose                                                                                                                  |
-| :------------------------- | :---------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| `FieldErrorsDirective`     | `[formidableFieldErrors]`     | Instantiates a `FieldErrorsComponent` beside the host control and wires its `ngModel`/`ngModelGroup` from DI. No inputs. |
-| `FieldLabelDirective`      | `[formidableFieldLabel]`      | Projects label content. `@Input() isFloating` (`false`).                                                                 |
-| `FieldPrefixDirective`     | `[formidableFieldPrefix]`     | Projects prefix content. Exposes `elementRef`.                                                                           |
-| `FieldSuffixDirective`     | `[formidableFieldSuffix]`     | Projects suffix content. Exposes `elementRef`.                                                                           |
-| `FieldToggleIconDirective` | `[formidableFieldToggleIcon]` | Marks projected content as a field's panel-toggle icon (date field). Exposes `elementRef`.                               |
-| `FieldTooltipDirective`    | `[formidableFieldTooltip]`    | Projects tooltip content. Exposes `elementRef`.                                                                          |
+| Directive                  | Selector                      | Purpose                                                                                                                                                                                            |
+| :------------------------- | :---------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FieldErrorsDirective`     | `[formidableFieldErrors]`     | Instantiates a `FieldErrorsComponent` and wires its `ngModel`/`ngModelGroup` from DI — into the surrounding decorator's errors slot if there is one, beside the host control otherwise. No inputs. |
+| `FieldLabelDirective`      | `[formidableFieldLabel]`      | Projects label content. `@Input() position: FieldLabelPosition` (`'outside'`).                                                                                                                     |
+| `FieldPrefixDirective`     | `[formidableFieldPrefix]`     | Projects prefix content. Exposes `elementRef`.                                                                                                                                                     |
+| `FieldSuffixDirective`     | `[formidableFieldSuffix]`     | Projects suffix content. Exposes `elementRef`.                                                                                                                                                     |
+| `FieldToggleIconDirective` | `[formidableFieldToggleIcon]` | Marks projected content as a field's panel-toggle icon (date field). Exposes `elementRef`.                                                                                                         |
+| `FieldTooltipDirective`    | `[formidableFieldTooltip]`    | Projects tooltip content. Exposes `elementRef`.                                                                                                                                                    |
 
 ---
 
@@ -293,7 +320,9 @@ Renders validation error messages for a control. Reads the `errors` array off `c
 | Name                                 | Definition                                                                                                       |
 | :----------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
 | `FieldDecoratorLayout`               | `'horizontal' \| 'vertical' \| 'inline'`                                                                         |
+| `FieldLabelPosition`                 | `'outside' \| 'inside' \| 'inside-floating' \| 'border' \| 'border-prefix'`                                      |
 | `FieldOptionLayout`                  | `'inline' \| 'radio-group' \| 'checkbox-group'`                                                                  |
+| `FieldValueAlignment`                | `'center' \| 'top'`                                                                                              |
 | `FormidableEmptyHint`                | `'underscores' \| 'format'`                                                                                      |
 | `FormidablePanelPosition`            | `'left' \| 'right' \| 'full'`                                                                                    |
 | `FormidableToggleFieldLabelPosition` | `'before' \| 'after'`                                                                                            |

@@ -1,4 +1,5 @@
 @use './tokens';
+@use './mixins/utils' as utils;
 
 // This file defines the exposed CSS variables (run-time), which keep track of relationships/calculations between each other.
 
@@ -55,26 +56,88 @@
   );
   --formidable-field-height: #{tokens.$formidable-field-height};
 
-  // Push the label down to the field's inner content top, then center its line-box in the top
-  // margin: the band between that top and the field's vertical center (where the value text sits).
-  // Gives equal whitespace above the label and below it, to the value.
-  --formidable-label-floating-offset: calc(
-    var(--formidable-label-height, #{tokens.$formidable-label-height}) +
-      var(--formidable-field-before-margin-bottom, #{tokens.$formidable-field-before-margin-bottom}) +
-      var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) +
-      (
-        var(--formidable-field-height, #{tokens.$formidable-field-height}) / 2 - var(
-            --formidable-field-border-thickness,
-            #{tokens.$formidable-field-border-thickness}
-          ) -
-          (
-            var(--formidable-label-floating-line-height, #{tokens.$formidable-label-floating-line-height}) *
-              var(--formidable-label-floating-font-size, #{tokens.$formidable-label-floating-font-size})
+  // The field's horizontal padding — where its value starts, and where a projected prefix's text starts.
+  --formidable-field-padding-x: #{tokens.$formidable-field-padding-x};
+
+  // Line-box heights of the two things that share the field's inner height when the label is inside.
+  --formidable-field-inner-height: calc(
+    var(--formidable-field-height, #{tokens.$formidable-field-height}) - 2 *
+      var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
+  );
+  --formidable-field-value-height: calc(
+    var(--formidable-field-line-height, #{tokens.$formidable-field-line-height}) *
+      var(--formidable-field-font-size, #{tokens.$formidable-field-font-size})
+  );
+  --formidable-label-floating-height: calc(
+    var(--formidable-label-floating-line-height, #{tokens.$formidable-label-floating-line-height}) *
+      var(--formidable-label-floating-font-size, #{tokens.$formidable-label-floating-font-size})
+  );
+
+  // With the label inside, the floating label and the value are centered as one block: this is the
+  // leftover space above the block — and, by symmetry, below it.
+  --formidable-label-inside-slack: calc(
+    (
+        var(--formidable-field-inner-height, #{tokens.$formidable-field-inner-height}) - var(
+            --formidable-label-floating-height,
+            #{tokens.$formidable-label-floating-height}
+          ) - var(--formidable-field-value-height, #{tokens.$formidable-field-value-height})
+      ) / 2
+  );
+
+  // Where the value's line-box starts, measured from the field's inner top — with the label inside, so
+  // the label+value pair is centered rather than the value alone.
+  --formidable-label-inside-value-top: calc(
+    var(--formidable-label-inside-slack, #{tokens.$formidable-label-inside-slack}) +
+      var(--formidable-label-floating-height, #{tokens.$formidable-label-floating-height})
+  );
+
+  // Where the value's line-box starts when it is centered in the field's inner height on its own — the
+  // `outside` and `border` positions, and where an empty field's resting label sits.
+  --formidable-field-value-centered-top: calc(
+    (
+        var(--formidable-field-inner-height, #{tokens.$formidable-field-inner-height}) - var(
+            --formidable-field-value-height,
+            #{tokens.$formidable-field-value-height}
           )
       ) / 2
   );
 
+  // A label that renders over the field is positioned inside the field's own container, whose top edge is
+  // the field's border-box top. The offsets below are therefore plain distances from that edge, and depend
+  // on nothing but the field's own metrics.
+
+  // Floating: the top of the centered label+value block, one border in from the container's top.
+  --formidable-label-floating-offset: calc(
+    var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) +
+      var(--formidable-label-inside-slack, #{tokens.$formidable-label-inside-slack})
+  );
+
+  // Resting: the label is the only thing an empty field shows, so it is centered in the inner height.
+  --formidable-label-resting-offset: calc(
+    var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) +
+      var(--formidable-field-value-centered-top, #{tokens.$formidable-field-value-centered-top})
+  );
+
+  // Border: the label's line-box is centered on the field's top border, so it straddles it. Negative,
+  // because the label is taller than the border it is centered on.
+  --formidable-label-border-offset: calc(
+    var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) / 2 - var(
+        --formidable-label-floating-height,
+        #{tokens.$formidable-label-floating-height}
+      ) / 2
+  );
+
+  // How far a `border` label's border-hiding band reaches either side of its text, and how far it
+  // outgrows the border above and below so pixel rounding cannot leave a hairline of it showing.
+  --formidable-label-border-gap: #{tokens.$formidable-label-border-gap};
+  --formidable-label-border-band-bleed: #{tokens.$formidable-label-border-band-bleed};
+
   --formidable-field-group-option-padding: #{tokens.$formidable-field-group-option-padding};
+
+  --formidable-field-support-min-height: calc(
+    var(--formidable-field-validation-error-line-height, #{tokens.$formidable-field-validation-error-line-height}) *
+      var(--formidable-field-validation-error-font-size, #{tokens.$formidable-field-validation-error-font-size})
+  );
 
   // #endregion
 
@@ -138,6 +201,30 @@
   --formidable-color-field-background-disabled: var(
     --formidable-color-field-background-readonly,
     #{tokens.$formidable-color-field-background-disabled}
+  );
+  --formidable-color-field-group-background-readonly: var(
+    --formidable-color-field-background-readonly,
+    #{tokens.$formidable-color-field-group-background-readonly}
+  );
+  --formidable-color-field-group-background-disabled: var(
+    --formidable-color-field-group-background-readonly,
+    #{tokens.$formidable-color-field-group-background-disabled}
+  );
+
+  // What a `border` label paints over the border it hides. Its own variable, not the field background
+  // directly, because `readonly`/`disabled` remap that on the field element — which the label, a sibling,
+  // cannot see. The decorator remaps this one instead so the band keeps matching the fill.
+  --formidable-color-label-border-band: var(
+    --formidable-color-field-background,
+    #{tokens.$formidable-color-label-border-band}
+  );
+  --formidable-color-label-border-band-readonly: var(
+    --formidable-color-field-background-readonly,
+    #{tokens.$formidable-color-label-border-band-readonly}
+  );
+  --formidable-color-label-border-band-disabled: var(
+    --formidable-color-field-background-disabled,
+    #{tokens.$formidable-color-label-border-band-disabled}
   );
 
   --formidable-color-field-option-text-readonly: var(
@@ -429,6 +516,8 @@
 
   --formidable-option-prefix-dimension-outer: #{tokens.$formidable-option-prefix-dimension-outer};
   --formidable-option-prefix-dimension-inner: #{tokens.$formidable-option-prefix-dimension-inner};
+  --formidable-option-prefix-gap: #{tokens.$formidable-option-prefix-gap};
+  --formidable-option-prefix-border-thickness: #{tokens.$formidable-option-prefix-border-thickness};
 
   // #endregion
 }

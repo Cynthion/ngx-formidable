@@ -2,6 +2,17 @@
 @use 'utils' as utils;
 @use '../tokens' as tokens;
 
+// The field's own horizontal padding: where its value starts, and where a projected prefix's text starts.
+@function field-padding-x() {
+  @return var(--formidable-field-padding-x, #{tokens.$formidable-field-padding-x});
+}
+
+// Where the field's value starts horizontally: the field's padding, or the inset the decorator measures
+// when a projected prefix/suffix pushes the value further in.
+@function field-value-inset($side) {
+  @return var(--formidable-field-value-inset-#{$side}, #{field-padding-x()});
+}
+
 @mixin icon {
   display: inline-flex;
   align-items: center;
@@ -54,15 +65,27 @@
   @include field-reset;
   @include selection-colors;
   @include placeholder-colors;
+  @include field-value-padding;
 
   background: transparent;
   width: 100%;
-  height: calc(100% - (2 * var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})));
+  height: 100%;
   border: none;
 
   &[disabled] {
     cursor: not-allowed;
     pointer-events: none;
+  }
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
+    box-shadow: 0 0 0 1000px var(--formidable-color-field-background, #{tokens.$formidable-color-field-background})
+      inset;
+    transition:
+      background-color 0s 600000s,
+      color 0s 600000s;
   }
 }
 
@@ -83,7 +106,7 @@
   --formidable-color-field-group-border: var(--formidable-color-field-group-border-readonly);
 
   --formidable-color-field-background: var(--formidable-color-field-background-readonly);
-  --formidable-color-field-group-background: var(--formidable-color-field-background-readonly);
+  --formidable-color-field-group-background: var(--formidable-color-field-group-background-readonly);
   --formidable-color-field-text: var(--formidable-color-field-text-readonly);
   --formidable-color-field-group-text: var(--formidable-color-field-text-readonly);
 }
@@ -93,7 +116,7 @@
   --formidable-color-field-group-border: var(--formidable-color-field-group-border-disabled);
 
   --formidable-color-field-background: var(--formidable-color-field-background-disabled);
-  --formidable-color-field-group-background: var(--formidable-color-field-background-disabled);
+  --formidable-color-field-group-background: var(--formidable-color-field-group-background-disabled);
   --formidable-color-field-text: var(--formidable-color-field-text-disabled);
   --formidable-color-field-group-text: var(--formidable-color-field-text-disabled);
 }
@@ -215,19 +238,39 @@
   @include group-field;
 }
 
-@mixin input-field {
+// The field's own box, shared by native fields and by the wrapper `<div>`s that host one.
+@mixin field-box {
   @include field;
 
   height: var(--formidable-field-height, #{tokens.$formidable-field-height});
-  padding: 0 utils.spacing(16); // horizontal padding only
+  padding: 0 field-padding-x(); // horizontal padding only
+  // The field box is inline-level inside a block host, so without this the host's line box adds a
+  // baseline descender below it and the field's container ends up taller than the field.
+  vertical-align: top;
+}
+
+// Applied to whichever element renders the value, so it clears an inside label. Zero otherwise.
+// Vertically centered values only need the floating label's line-box as top padding — their own
+// centering then centers the label+value pair as one block in the field's inner height.
+@mixin field-value-padding {
+  padding-top: var(--formidable-field-value-padding-top, 0);
+}
+
+@mixin input-field {
+  @include field-box;
+  @include field-value-padding;
 }
 
 @mixin textarea-field {
-  @include input-field;
+  @include field-box;
 
   min-height: var(--formidable-textarea-min-height, #{tokens.$formidable-textarea-min-height});
   max-height: var(--formidable-textarea-max-height, #{tokens.$formidable-textarea-max-height});
-  padding-top: var(--formidable-textarea-padding-top, #{tokens.$formidable-textarea-padding-top});
+  // A textarea's value is top-aligned, not centered, so it takes the absolute offset instead.
+  padding-top: max(
+    var(--formidable-textarea-padding-top, #{tokens.$formidable-textarea-padding-top}),
+    var(--formidable-field-value-top, 0rem)
+  );
   resize: vertical;
 }
 
@@ -240,8 +283,10 @@
   }
 }
 
+// A wrapper `<div>` around a value plus a toggle: the value padding belongs to `.wrapped-input`, so
+// the toggle stays centered in the field's full height.
 @mixin panel-field {
-  @include select-field;
+  @include field-box;
 }
 
 @mixin input-wrapper {
@@ -271,7 +316,7 @@
 }
 
 @mixin time-field {
-  @include input-field;
+  @include panel-field;
 }
 
 @mixin toggle-field {
@@ -659,15 +704,10 @@
   line-height: var(--formidable-label-height, #{tokens.$formidable-label-height});
   min-height: var(--formidable-label-height, #{tokens.$formidable-label-height});
   color: var(--formidable-color-field-label, #{tokens.$formidable-color-field-label});
-  pointer-events: none;
 
   // animation
-  transform: translateY(0);
-  transform-origin: left top;
   transition:
-    transform var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
-      var(--formidable-animation-easing, #{tokens.$formidable-animation-easing}),
-    margin-right var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
+    top var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
       var(--formidable-animation-easing, #{tokens.$formidable-animation-easing}),
     font-size var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
       var(--formidable-animation-easing, #{tokens.$formidable-animation-easing}),
@@ -675,18 +715,106 @@
       var(--formidable-animation-easing, #{tokens.$formidable-animation-easing});
 }
 
-@mixin field-label-floating {
+// Shared by every label position that renders over the field, on a single, ellipsized line.
+// These labels live in the field's own container, whose top edge is the field's border-box top, so
+// `top` is a plain distance from it — it cannot be skewed by anything around the label.
+// `pointer-events: none` lets clicks through to the field the label sits over; an `outside` label is in
+// normal flow instead and stays clickable, so it can focus its field.
+@mixin field-label-overlay-base {
+  position: absolute;
+  box-sizing: border-box; // `max-width` below has to bound the padded box, not the content box
+  min-height: 0;
+  overflow: hidden;
+  text-overflow: ellipsis; // for label content projected as a bare text node; `_globals.scss` covers elements
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1; // keep on top of field
+}
+
+// Spans the value's own horizontal band, so the label stays aligned with it.
+@mixin field-label-value-aligned {
+  left: field-value-inset('left');
+  right: field-value-inset('right');
+}
+
+// Small type overlaid on the field, shared by the floating and border positions.
+@mixin field-label-small {
   font-size: var(--formidable-label-floating-font-size, #{tokens.$formidable-label-floating-font-size});
   font-weight: var(--formidable-label-floating-font-weight, #{tokens.$formidable-label-floating-font-weight});
   line-height: var(--formidable-label-floating-line-height, #{tokens.$formidable-label-floating-line-height});
-  position: absolute;
-  left: utils.spacing(16);
-  margin-right: 0;
   color: var(--formidable-color-field-label-floating, #{tokens.$formidable-color-field-label-floating});
-  z-index: 1; // keep on top of field
+}
 
-  // animation
-  transform: translateY(var(--formidable-label-floating-offset, #{tokens.$formidable-label-floating-offset})) scale(1);
+// Field is visually empty: the label is the only thing in it, so it is centered in the inner height and
+// mimics the placeholder it stands in for.
+@mixin field-label-resting {
+  @include field-label-overlay-base;
+  @include field-label-value-aligned;
+
+  font-size: var(--formidable-field-font-size, #{tokens.$formidable-field-font-size});
+  font-weight: var(--formidable-field-font-weight, #{tokens.$formidable-field-font-weight});
+  line-height: var(--formidable-field-line-height, #{tokens.$formidable-field-line-height});
+  color: var(--formidable-color-field-placeholder, #{tokens.$formidable-color-field-placeholder});
+  top: var(--formidable-label-resting-offset, #{tokens.$formidable-label-resting-offset});
+}
+
+// Field is focused, filled, or shows a placeholder/mask: the label floats above the value, small.
+@mixin field-label-floating {
+  @include field-label-overlay-base;
+  @include field-label-value-aligned;
+  @include field-label-small;
+
+  top: var(--formidable-label-floating-offset, #{tokens.$formidable-label-floating-offset});
+}
+
+// How far a `border` label's band reaches past its text, either side.
+@function label-border-gap() {
+  @return var(--formidable-label-border-gap, #{tokens.$formidable-label-border-gap});
+}
+
+// The label straddles the field's top border. It shrink-wraps (`right: auto`) so its band hides only the
+// stretch of border it actually covers. The band is the only thing painted: a strip just thick enough to
+// hide the border, centered on the label's own box, so nothing above or below it is tinted.
+// Everything here is shared by both border positions; `field-label-border-align` adds what differs.
+@mixin field-label-border {
+  @include field-label-overlay-base;
+  @include field-label-small;
+
+  right: auto;
+  padding: 0 #{label-border-gap()};
+  top: var(--formidable-label-border-offset, #{tokens.$formidable-label-border-offset});
+  // Half the band, measured from the label's own centre — which sits on the border's centre.
+  $band-half: calc(
+    var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) / 2 +
+      var(--formidable-label-border-band-bleed, #{tokens.$formidable-label-border-band-bleed})
+  );
+  $band-color: var(--formidable-color-label-border-band, #{tokens.$formidable-color-label-border-band});
+
+  background: linear-gradient(
+    to bottom,
+    transparent calc(50% - #{$band-half}),
+    #{$band-color} calc(50% - #{$band-half}),
+    #{$band-color} calc(50% + #{$band-half}),
+    transparent calc(50% + #{$band-half})
+  );
+}
+
+// Where a `border` label's text lines up, the one thing the two border positions disagree on: the value's
+// own inset for `border`, the field's padding — which is where a projected prefix's text starts — for
+// `border-prefix`. The label is pulled left by the gap so its text still starts exactly at `$text-left`.
+@mixin field-label-border-align($text-left) {
+  left: calc(#{$text-left} - #{label-border-gap()});
+  max-width: calc(100% - #{$text-left} - #{field-value-inset('right')} + 2 * #{label-border-gap()});
+}
+
+// Set on the decorator while its label renders inside the field. Custom properties inherit through
+// view encapsulation, so this is how the projected field learns to keep its value clear of the label.
+@mixin field-label-inside-host {
+  --formidable-field-value-padding-top: var(
+    --formidable-label-floating-height,
+    #{tokens.$formidable-label-floating-height}
+  );
+  --formidable-field-value-top: var(--formidable-label-inside-value-top, #{tokens.$formidable-label-inside-value-top});
 }
 
 @mixin field-tooltip {
@@ -707,12 +835,18 @@
   column-gap: utils.spacing(8);
 }
 
+// Centered in the field's own box, and deliberately independent of the label: an inside label pushes the
+// value down while the prefix stays put. The container this is measured against holds nothing but the
+// field — validation errors render in the decorator's slot below it precisely so that stays true — so
+// `50%` is the field's real middle, a `textarea`'s included.
+// `padding-left` puts the prefix's text at the same x as the field's value, which is what a
+// `border-prefix` label aligns itself with.
 @mixin field-prefix-horizontal {
   position: absolute;
-  top: calc(var(--formidable-field-height, #{formidable-field-height}) / 2);
+  top: 50%;
   left: 0;
-  padding-left: utils.spacing(16);
-  padding-right: utils.spacing(16);
+  padding-left: field-padding-x();
+  padding-right: field-padding-x();
   transform: translateY(-50%);
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
   pointer-events: none;
@@ -724,6 +858,17 @@
 
   left: unset;
   right: 0;
+}
+
+// A multi-line field top-aligns its value and grows downwards, so centring would drift its prefix/suffix
+// away from the text. They sit on the value's first line instead — the same `padding-top` the textarea
+// gives itself, so the two line-boxes start together.
+@mixin field-prefix-suffix-value-top {
+  top: max(
+    var(--formidable-textarea-padding-top, #{tokens.$formidable-textarea-padding-top}),
+    var(--formidable-field-value-top, 0rem)
+  );
+  transform: none;
 }
 
 @mixin field-prefix-vertical {
@@ -750,6 +895,7 @@
 @mixin field-validation-errors {
   margin-top: utils.spacing(8);
   margin-bottom: utils.spacing(16);
+  min-height: var(--formidable-field-support-min-height, #{tokens.$formidable-field-support-min-height});
 }
 
 @mixin field-validation-error {
@@ -944,13 +1090,13 @@
 @mixin field-option-prefix {
   display: flex;
   align-items: center;
-  padding: utils.spacing(0) utils.spacing(16);
+  padding: utils.spacing(0) var(--formidable-option-prefix-gap, #{tokens.$formidable-option-prefix-gap});
 }
 
 @mixin checkbox-group-prefix-outer {
   width: var(--formidable-option-prefix-dimension-outer, #{tokens.$formidable-option-prefix-dimension-outer});
   height: var(--formidable-option-prefix-dimension-outer, #{tokens.$formidable-option-prefix-dimension-outer});
-  border: utils.spacing(2) solid
+  border: var(--formidable-option-prefix-border-thickness, #{tokens.$formidable-option-prefix-border-thickness}) solid
     var(--formidable-color-option-prefix-outer, #{tokens.$formidable-color-option-prefix-outer});
   display: flex;
   align-items: center;
