@@ -7,7 +7,6 @@ Example:
 - group example, using ngModelGroup (see EnerQi appointment-page.form)
 - add badges to readme
 - exact feature list (per field and component) in readme
-- update all dependencies (angular 20)
 - tag release commit
 - add CONTRIBUTING.md
 - logo for ngx-formidable
@@ -15,7 +14,7 @@ Example:
 
 Improvements:
 
-- an in-field panel toggle is not part of the value inset, so a long label can run under it. `dropdown`, `autocomplete`, `date` and `time` render a toggle icon inside the field, but `adjustLayout()` only measures projected prefixes and suffixes — so a `resting`, `floating` or `border` label spans the field right up to the icon and disappears behind it. Either the toggle joins the suffix measurement or those fields set `--formidable-field-value-inset-right` themselves. See `label-handoff.md`.
+- an in-field panel toggle is not part of the value inset, so a long label can run under it. `dropdown` and `date` render a toggle icon inside the field (`autocomplete` and `time` do not), but `adjustLayout()` only measures projected prefixes and suffixes — so a `resting`, `floating` or `border` label spans the field right up to the icon and disappears behind it. Either the toggle joins the suffix measurement or those fields set `--formidable-field-value-inset-right` themselves. A projected suffix has the same collision: it is absolutely positioned at the right edge on the same z-index as the toggle.
 - ensure all fields can be "focus on page load" (without panels being opened)
 - make DateFieldComponent `smaller` or render better for smaller screens
 - don't render `formidable-field-option` components when radiogroup and checkboxgroup are empty
@@ -24,13 +23,12 @@ Improvements:
 - Prefer queueMicrotask over setTimeout where possible
 - Add Storybook stories for layout options
 - Toggle: allow setting layout to 'inline' or 'group'
-- remove validation from the library, only provide ui components
 - add option to date field to show at bottom of screen (e.g., see VIAC app)
 - ARIA attributes
 
 # Bugs:
 
-- stale nested install: `projects/ngx-formidable/node_modules` shadows the root install with a second `@angular/core` and breaks `TestBed` in library specs (deleted during the caret fix; re-appears if `npm install` is run inside the library folder).
+- stale nested install: a leftover `package-lock.json` sits inside the library project and invites `npm install` being run there, which recreates a nested `node_modules` that shadows the root install with a second `@angular/core` and breaks `TestBed` in library specs. The `node_modules` itself is already deleted; the lockfile and a stray package tarball at the repo root are what remain.
 - ios: inspect padding when prefix is missing (deferred from Phase 1 — needs a device; root cause found: `adjustLayout()` sets inline `paddingLeft`/`paddingRight` only when a prefix/suffix is present and never resets them, and runs once at `ngAfterViewInit`)
 - the EnerQi consumer resolves a tarball that predates the label-position feature: it still exports `isLabelFloating` and `FieldDecoratorLayout = 'single' | 'group' | 'inline'`, while EnerQi's own sources have already been mirrored forward to `canLabelRest` and the `horizontal` layout gate. So EnerQi cannot typecheck against its own dependency. Needs a rebuilt and reinstalled tarball.
 
@@ -49,6 +47,8 @@ Improvements:
 - add tokens for the background, border, value (text) and label color when the field is invalid, disabled, readonly, focused, hovered and define the default colors for these states (similar to material's behavior)
 - allow the bottom border to be configured (thickness and color) when the field is invalid or focused (and defined default values)
 - allow the border corner radius to be configured (so each can have different, e.g. only top rounded)
+- tooltip: any tooltip stuff should be removed from the library, as this is user stuff that he can add as label content, no? or should I keep it? or how would a tooltip or other custom content be put next to the label? does it make sense for all label positions? can the tooltip slot be removed? what does material do?
+- prefix/suffix: only relevant for horizontal fields, correct? remove for group fields.
 
 # Documentation:
 
@@ -81,3 +81,12 @@ The idea is a product page, where users can come to and play around with options
 - i18n config should also be changeable to best demonstrate the date field
 
 Before all, propose a page structure and layout for the portal, including an optional navigation. The portal must be super intuitive and easy to use.
+
+# Deferred And Unscheduled:
+
+Real items, deliberately not in any phase of `implementation.md`. Revisit explicitly; do not pull them into a phase without deciding to.
+
+- update all dependencies (angular 20). Deferred so all feature work happens on one baseline. Consequence: the release is tagged on the current Angular major, and `ngx-mask` is already a major ahead of it — a peer mismatch that ships with it.
+- remove validation from the library, only provide ui components. The Vest bridge is currently a headline feature and the largest possible breaking change; parked as an open question, not scheduled.
+- the demo writes the selected theme to `localStorage` but never reads it back on init, so the choice does not survive a reload.
+- there is no CI workflow — nothing runs lint, stylelint, prettier or tests on push. `deploy.yml` also reinstalls from scratch instead of from the lockfile, so builds are not reproducible.

@@ -1,123 +1,249 @@
 # Implementation Roadmap
 
-Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of truth; this file orders the same items into themed phases to work through one at a time. When an item ships, update or remove it in `backlog.md` per the Definition of Done in `conventions.md`.
+Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of truth; this file orders the same items into phases.
+
+- **One Phase, One Conversation**: phases are sized to be finished in a single session. Do not merge them.
+- **Delete On Ship**: when a phase ships, its `backlog.md` items are **deleted**, not annotated. See the Definition of Done in `conventions.md`.
+- **No Silent Reordering**: a phase's dependencies are listed with it. Do not start a phase whose dependencies are open.
 
 ## Ordering Strategy
 
-- **Correctness First**: bugs and UX defects lead; new surface comes after the base is solid.
-- **Breaking Early**: the library is pre-`1.0` with no external consumers, so all breaking API changes are batched up front.
-- **Validation Stays**: the Vest / `NgxFormidableFormDirective` bridge is a core feature. The backlog item "remove validation from the library" is **dropped** and not scheduled.
-- **Angular Upgrade Is Release Prep**: the major Angular upgrade is deferred to the final phase; all feature and bug work happens on the current Angular first.
+- **Bugs First**: defects lead. The in-field toggle overlap is filed under _Improvements_ in `backlog.md` but is a defect on the same code path as the iOS padding bug, so it joins Phase 1.
+- **Breaking Early**: the library is pre-release with one known consumer, so slot and API removals are batched into Phase 2 before anything builds on them.
+- **State Before Style**: the invalid-state hook (Phase 6) is a prerequisite for both border geometry (Phase 7) and `aria-invalid` (Phase 11).
+- **Docs Last**: API documentation and the `README.md` pass come after the API stops moving.
+- **Portal After The Library**: the portal must expose every field option and theme token, so it starts only once those are stable.
 
 ---
 
-## Phase 1 — Correctness: Bugs And UX Defects
+## Phase Overview
 
-Fix defects before adding surface. This is the north star of the roadmap. **Shipped** — every item done except the iOS padding fix, which is **deferred** (needs a device to verify; annotated in `backlog.md`).
-
-| Group          | Item                                                                      |  Status  |
-| :------------- | :------------------------------------------------------------------------ | :------: |
-| Date / Time    | Show the user-provided mask instead of `0` in date/time fields            |   Done   |
-| Date / Time    | Typing that breaks a valid date must set the form value to `null`         |   Done   |
-| Date / Time    | Fix the unicode-format parse bug (`yyyy-MM-dd` + `20200202` → wrong date) |   Done   |
-| Date / Time    | Stop arrow / left / right from moving the caret while the panel is open   |   Done   |
-| Label / Layout | Readonly and disabled fields must not float the label                     |   Done   |
-| Label / Layout | Fix multi-row label overlapping into the field — one line, ellipsized     |   Done   |
-| Platform       | Fix iOS padding when the prefix is missing                                | Deferred |
-
----
-
-## Phase 2 — Breaking API Changes
-
-Batch every breaking change into one pass while there are no consumers to migrate. **Shipped** — all three items done.
-
-| Item                                                                                                       | Status |
-| :--------------------------------------------------------------------------------------------------------- | :----: |
-| Rename `FieldDecoratorLayout` options `single` / `group` / `inline` → `horizontal` / `vertical` / `inline` |  Done  |
-| Rename `FormDirective` → `NgxFormidableFormDirective` (avoids the Angular naming clash)                    |  Done  |
-| Externalize icons so consumers set their own SVGs, then delete the `formidable-icon` component             |  Done  |
-
-Each rename touched the type/export, all internal references, the demo, and the docs (`ui_components.md`, root `README.md`). The layout rename also renamed the decorator's SCSS mixins (`decorator-container-*`, `field-prefix/suffix-*`). The directive rename was widened to the whole `Form*` family — `NgxFormidableFormModelDirective`, `NgxFormidableFormModelGroupDirective`, `NgxFormidableFormRootValidateDirective`, `NgxFormidableFormValidationOptions` — per the class-naming rule in `conventions.md`; filenames stayed unprefixed. Icons left the library entirely: the date field's panel toggle draws a CSS arrow unless the consumer projects `[formidableFieldToggleIcon]` content, and the demo's `example-icon` component shows how to supply one.
+|  Phase | Title                                  | Depends On |
+| -----: | :------------------------------------- | :--------- |
+|      1 | Bugs — Decorator Layout Measurement    | —          |
+|      2 | Breaking — Decorator Slot Cleanup      | —          |
+|      3 | Option Fields                          | —          |
+|      4 | Supporting Text                        | 1, 2       |
+|      5 | Prefix And Suffix — Actions, Alignment | 1, 2       |
+|      6 | Field State Styling                    | —          |
+|      7 | Border Geometry                        | 6          |
+|      8 | Date And Time Keyboard                 | —          |
+|      9 | Date Panel Responsiveness              | —          |
+|     10 | Small API Additions And Chores         | 8          |
+|     11 | ARIA — Fields, Errors, Support Text    | 4, 6       |
+|     12 | ARIA — Panel And Option Fields         | 3, 11      |
+|     13 | API Doc Comments                       | 1–12       |
+|     14 | README And Project Docs                | 13         |
+|     15 | Storybook                              | 13         |
+|     16 | Release                                | 14         |
+|     P1 | Portal — Design Proposal               | 16         |
+| P2–P10 | Portal — Build                         | P1         |
 
 ---
 
-## Phase 3 — Styling And Theming Polish
+## Library Phases
 
-Runtime CSS-variable and theme gaps. See the styling conventions in `conventions.md`. **Shipped** — all six items done.
+### Phase 1 — Bugs: Decorator Layout Measurement
 
-| Item                                                                                                                                                                                                                                              | Status |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----: |
-| Expose the hardcoded option-label gap and checkbox border thickness as CSS variables in the checkbox-group mixin                                                                                                                                  |  Done  |
-| Override autofill styling (`input:-webkit-autofill`, etc.)                                                                                                                                                                                        |  Done  |
-| Add `--formidable-color-field-group-background-readonly` and `-disabled`                                                                                                                                                                          |  Done  |
-| Position error messages `absolute` so they do not consume layout space (Problem is that currently subsequent fields will be "pushed down" in view); evaluate this requirement, AskUserQuestions                                                   |  Done  |
-| Refactoring of "floating" label; "floating" must be when the label is placed between upper border and value text; the label must never be outside of field, only either being inside the field (like the placeholder) or floating above the value |  Done  |
-| Tweak theme 4: tiny sizing, `border-radius: 0`, no field-group background                                                                                                                                                                         |  Done  |
-| Add `border` / `border-prefix` label positions, and move an over-field label into the field's own container                                                                                                                                       |  Done  |
-| Render validation errors in a decorator slot below the field's container, so it stays exactly the field's box                                                                                                                                     |  Done  |
+One root cause behind three symptoms. Touches `field-decorator.component.ts` (`adjustLayout`, `insetValue`), the `dropdown-field` and `date-field` templates, and `_forms.scss`.
 
-The error-message item resolved differently than first phrased: after checking with Chris, error text stays in normal document flow (not `absolute`) but the container now reserves one line of height, so an ordinary single-line error causes no layout shift; longer, wrapping errors still push later fields down. The label refactor went further than "floating": the label's position is now an explicit, mutually exclusive choice — `formidableFieldLabel`'s `position: 'outside' | 'inside' | 'inside-floating'` — where `outside` (default) is always static and the two inside positions never render outside the field; see `ui_components.md`. Theme 4's "no field-group background" was scoped to group containers (radio-group/checkbox-group) only; plain inputs keep their fill. The new CSS variables were also mirrored into the sibling EnerQi project's `styles.scss` override layer.
+- **Reset The Inset**: `adjustLayout()` guards its writes on a non-zero prefix/suffix width and has no else branch, so the inline `paddingLeft` / `paddingRight` and `--formidable-field-value-inset-*` are never cleared once set. This is the root cause of the iOS padding bug. Add the reset.
+- **Re-Measure**: `adjustLayout()` runs once from `ngAfterViewInit`. Re-run it when the projected prefix/suffix changes (`QueryList.changes`, and/or a `ResizeObserver`).
+- **Measure The Toggle**: the in-field panel toggle is not part of the value inset, so a `resting`, `floating` or `border` label runs under it. Only `dropdown-field` and `date-field` render one — `autocomplete-field` and `time-field` do not, contrary to the backlog wording. The same fix stops a projected suffix stacking on top of the toggle; both are absolutely positioned at the right edge on the same z-index.
+- **Resolve The Padding Split**: `adjustLayout()` writes padding onto the field host, but panel fields take their text padding from `.wrapped-input` in the `wrapped-input` mixin. Pick one owner.
+- **Repo Hygiene**: delete the leftover `package-lock.json` inside the library project (it is what invites an `npm install` there, which recreates the nested `node_modules` that shadows the root install and breaks `TestBed`) and the stray package tarball at the repo root. Add a `.gitignore` guard.
+- **Then Rebuild The Consumer Tarball**: last step, so the consumer picks up these fixes and typechecks against `canLabelRest` and the `horizontal` layout gate again.
 
-The two later rows came out of re-analyzing the label implementation once it worked. `.container-horizontal` is the positioning context for both the over-field label and the prefix/suffix, and it was never only the field: `FieldErrorsDirective` created its component beside the field, which content projection then placed inside that container. With a reserved error line in it the container was ~87px instead of 60px, so a prefix centered on `50%` sat ~14px below the field's middle — and the same misplacement put the errors inside the `inline` layout's flex row and the `vertical` layout's `<fieldset>`. The directive now renders into a slot the decorator exposes after the container, keeping its old behaviour when a field has no decorator, which the EnerQi consumer relies on. Prefix and suffix are confirmed as centered in the field and independent of the label; a field whose value is top-aligned says so with the new optional `IFormidableField.valueAlignment`, which puts them on the value's first line instead. Requirements and rationale live in `label-handoff.md`.
+**Verification**: desktop browser plus specs; Chris confirms the padding fix on an iOS device.
 
-The "between upper border and value text" wording turned out to be unsatisfiable while the value stays centered in the field's full inner height: that leaves `1.0125rem` above it, less than the floating label's own `1.2rem` line-box, so the two overlapped. Chris's ruling: with the label inside, the label and the value are centered together as one block (the value gets a top padding); with the label outside, the value is centered alone, and differing value heights between the two modes is fine. In the same pass, `isFloating` → `position` was joined by two more breaking renames — `IFormidableField.isLabelFloating` → `canLabelRest` (the old name meant its own opposite) and the removal of `supportsInsideLabel`, now derived from `decoratorLayout === 'horizontal'`. All three were applied to the demo and the EnerQi consumer's real usages too.
+**Clears**: all three `backlog.md` bugs, plus the in-field toggle improvement.
+
+### Phase 2 — Breaking: Decorator Slot Cleanup
+
+Batch the slot removals before anything builds on the current set.
+
+- **Rename The Tooltip Slot**: `[formidableFieldTooltip]` → `[formidableFieldLabelAdornment]`, with `hasTooltip`, `.tooltip-wrapper`, the `#tooltip` template and its mixins renamed to match. The library only ever owned a projection slot, never a tooltip implementation.
+- **Hide It Over The Field**: when the label renders over the field (`inside`, `inside-floating`, `border`, `border-prefix`), the label moves into the field container and the adornment is left stranded above it. Hide the adornment in that case.
+- **Drop Prefix And Suffix For `vertical`**: they become a `horizontal` and `inline` concept only. Remove the slots from the `vertical` branch of the decorator template and delete the `field-prefix-vertical` and `field-suffix-vertical` mixins.
+- **Propagate**: the demo `example-form` (thirteen usages), the consumer's example form (fourteen), `ui_components.md`, root `README.md`.
+
+**Clears**: the tooltip and prefix/suffix items under _Features_.
+
+### Phase 3 — Option Fields
+
+All three items touch the same five components: `select-field`, `dropdown-field`, `autocomplete-field`, `radio-group-field`, `checkbox-group-field`.
+
+- **Descendant Options**: all five use the bare one-argument `@ContentChildren(FORMIDABLE_FIELD_OPTION)`. Add `{ descendants: true }` so options wrapped in an `ng-template` are found. Prove it in the demo, mirroring the consumer's constitution form.
+- **Default Option**: add the `defaultOption` input to all five — shown always as first, or only when nothing matches. Today only `noOptionsText` exists, which is an empty-state label, not a default.
+- **No Empty Option Markup**: `radio-group-field` and `checkbox-group-field` render a hidden native input plus a full readonly `formidable-field-option` in their `@empty` branch. Drop it. Keep the panel empty-state in `dropdown-field` and `autocomplete-field` — inside a panel it is wanted.
+
+**Clears**: three _Improvements_ items.
+
+### Phase 4 — Supporting Text
+
+Depends on Phases 1 and 2 (final container geometry and slot set).
+
+- **New Component**: `FieldSupportComponent` plus its directive, mirroring `FieldErrorsComponent` and `FieldErrorsDirective`, rendered into a decorator slot below the field. Reuse the existing errors-slot mechanism rather than inventing a second one.
+- **Alignment**: `align: 'start' | 'center' | 'end'`, default `start`.
+- **Slot Only**: no pre-defined hints. A value-length counter is a few characters of consumer template; presets would drag in i18n, formatting options and a per-field wiring API.
+
+**Clears**: the `supportingText` item.
+
+### Phase 5 — Prefix And Suffix: Actions And Alignment
+
+Depends on Phases 1 and 2 — a suffix action changes the measured width, so the Phase 1 re-measure must be in place first.
+
+- **Suffix Actions**: clear/reset, copy, validation state, loading. `field-suffix.directive.ts` is a bare marker directive today.
+- **Vertical Alignment**: make it configurable — centered (default) or aligned with the field value. `FieldValueAlignment` exists but is field-driven and only `textarea-field` opts in; promote it to an input the consumer can override.
+
+**Clears**: the suffix-actions item and the prefix/suffix alignment item.
+
+### Phase 6 — Field State Styling
+
+- **Invalid Plumbing First**: nothing in the library styles `.ng-invalid` — there is no invalid selector at all. `field-errors.component.ts` already computes the flag; surface it as a host class the stylesheets can target. Both Phase 7 and Phase 11 depend on this hook.
+- **Fill The State Matrix**: tokens for background, border, value text and label color across invalid, disabled, readonly, focused and hovered. Missing today: all of invalid, all of hovered for fields (options and the date panel have hover tokens, fields do not), background and text on focus, and every label state.
+- **Inside Label As Placeholder**: with `position: 'inside'` the label should act as the placeholder and reveal the real placeholder only on focus. Today `canLabelRest` returns false whenever a `placeholder` is set, which permanently forces the floating state.
+- **Fix A Dead Override**: `_forms.scss` reads `--formidable-color-slider-thumb-border`, but `:root` only declares `--formidable-color-slider-thumb-color`. The override name does nothing.
+
+**Clears**: the state-tokens item and the inside-label item.
+
+### Phase 7 — Border Geometry
+
+Depends on Phase 6 for the invalid hook.
+
+- **Per-State Bottom Border**: thickness and color for invalid and focused. Today the border is a single all-sides shorthand with one thickness scalar; only the color varies by state.
+- **Per-Corner Radius**: so a field can be, for example, top-rounded only.
+- **Split The Shared Radius First**: `--formidable-field-border-radius` is the fallback source for the toggle thumb, the slider track, thumb, tick mark and thumb label, and the date panel. Give those their own tokens before splitting the field radius, or a multi-value string leaks into all of them.
+- **Watch The Layout Math**: `--formidable-field-border-thickness` feeds `--formidable-field-inner-height` and every label offset. A per-state thickness must not shift layout between states.
+
+**Clears**: the bottom-border and corner-radius items.
+
+### Phase 8 — Date And Time Keyboard
+
+- **ArrowDown Must Not Open The Panel**: `date-field` opens the panel on ArrowDown when closed. It should navigate the value instead; arrows drive the panel selection only while the panel is open.
+- **Segment-Aware Increment**: ArrowUp / ArrowDown increment and decrement the year, month or day under the caret in `date-field`, and the hour or minute in `time-field`. Today `date-field` only does whole-date steps while the panel is open, and `time-field` has no arrow handling at all — its registered keys are `Enter` only.
+
+**Clears**: both date/time keyboard items.
+
+### Phase 9 — Date Panel Responsiveness
+
+- **Small Screens**: render `DateFieldComponent` smaller or better on narrow viewports. The library currently has no responsive rules for it.
+- **Bottom Sheet**: an option to show the panel at the bottom of the screen, keyboard-style. `FormidablePanelPosition` is horizontal-only today; the only vertical logic is the flip-above in `position.helpers.ts`.
+
+**Clears**: both date-panel items.
+
+### Phase 10 — Small API Additions And Chores
+
+Depends on Phase 8 (focus-on-load pairs with the ArrowDown change).
+
+- **Toggle Layout**: expose `decoratorLayout` as an input on `ToggleFieldComponent`; it is hardcoded to `inline` today.
+- **Focus On Page Load**: an input on `BaseFieldDirective` to focus a field on load, without opening a panel. No public `focus()` exists today. Panels do not open on focus, so the constraint already holds — this is about adding the API.
+- **Timer Audit**: prefer `queueMicrotask` over `setTimeout`. Most option paths already use it; the remainder are layout, scroll and focus call sites, and some of those genuinely need `requestAnimationFrame`. Audit each, do not blanket-replace.
+
+**Clears**: the toggle-layout, focus-on-load and `queueMicrotask` items.
+
+### Phase 11 — ARIA: Fields, Errors And Support Text
+
+Depends on Phase 4 (support text to describe) and Phase 6 (invalid state).
+
+- **State Attributes**: `aria-invalid`, `aria-required`, `aria-readonly`, `aria-disabled`.
+- **Descriptions**: `aria-describedby` linking the field to its errors and its support text.
+- **Group Naming**: the `vertical` branch of the decorator renders a plain `div` instead of a `label`, so radio and checkbox groups have no accessible name at all. Fix that first — it is the worst gap.
+- **Widget State**: `aria-checked` on the toggle (it has `role="switch"` but signals state only through a CSS class), and `aria-valuenow` plus a label on the slider.
+
+### Phase 12 — ARIA: Panel And Option Fields
+
+Depends on Phase 3 (the option query changes) and Phase 11.
+
+- **Combobox Pattern**: `role="combobox"`, `role="listbox"` and `role="option"`, with `aria-expanded`, `aria-controls` and `aria-activedescendant` for `dropdown-field`, `autocomplete-field` and `date-field`. `field-option.component.html` carries no role today.
+- **Option State**: `aria-checked` on radio and checkbox options.
+
+**Clears** (with Phase 11): the ARIA item.
+
+### Phase 13 — API Doc Comments
+
+Depends on Phases 1–12 — do not document an API that is still moving.
+
+- **Model Coverage**: document every export in `formidable.model.ts`. Roughly a third of the interfaces have no doc block, and the central `IFormidableField` has one documented member out of fourteen. `IFormidableToggleField` has nothing.
+- **Public API**: same pass over the remaining `public-api.ts` exports.
+- **Keep It Short**: one line of intent per symbol. This is a library — users read these in their editor.
+- **Re-Verify `ui_components.md`** against the shipped reality.
+
+**Clears**: the interface-documentation and `ui_components.md` items.
+
+### Phase 14 — README And Project Docs
+
+Depends on Phase 13.
+
+- **Correctness Pass**: the root `README.md` is long and has drifted. Make the feature list sell every feature.
+- **Token Table**: sync it against the real `:root` declarations — it misses the runtime-only inset variables and is inconsistent on the slider group. Fix the unterminated code fence at the end of the file.
+- **Badges**: the badge block is commented out and still points at another project's URLs. Repoint and enable it.
+- **Feature List**: exact per-field and per-component feature list.
+- **Custom Field Guide**: how to build one, using the consumer's `ConstitutionCounterFieldComponent` as the worked example.
+- **Usage Refresh And Group Example**: refresh usage docs and add an `ngModelGroup` example to the demo, using the consumer's `appointment-page.form.ts` and its form component as the reference.
+- **Project Files**: add `CONTRIBUTING.md` (today a short list inside `README.md`) and a logo (there is no image asset; the title is plain text).
+
+**Clears**: the usage-docs, badges, feature-list, group-example, `CONTRIBUTING.md`, logo, custom-field and README items.
+
+### Phase 15 — Storybook
+
+Depends on Phase 13.
+
+- **Set It Up**: Storybook is not installed. Take conventions from the sibling project's `storybook.md` and its `.storybook` configuration first.
+- **Stories**: all components, including the layout options.
+
+**Clears**: the Storybook item.
+
+### Phase 16 — Release
+
+- **Registry**: reconcile `publish:lib --access public` with the GitHub Packages registry.
+- **Tag**: tag the release commit. Final step.
+- **Known Trade-Off**: this releases on the current Angular major with the existing `ngx-mask` peer mismatch, because the dependency refresh is unscheduled. See _Deferred And Unscheduled_ in `backlog.md`.
+
+**Clears**: the release-tag item.
 
 ---
 
-## Phase 4 — Field Features And API Additions
+## Portal Phases
 
-New capabilities across fields, built on the corrected base and stable API.
+`backlog.md` requires a page structure and layout proposal before any portal code, so P1 is a document needing sign-off.
 
-| Item                                                                                                                    |
-| :---------------------------------------------------------------------------------------------------------------------- |
-| Suffix actions: clear/reset, copy, validation state, loading                                                            |
-| Add a `supportingText` input — always-visible text below the field                                                      |
-| Add a `defaultOption` input to select, dropdown, autocomplete, radio-group, checkbox-group                              |
-| Do not render `formidable-field-option` when radio/checkbox groups are empty                                            |
-| Add `{ descendants: true }` to option `@ContentChildren` so options work via `ng-template`                              |
-| Toggle field: allow `inline` / `group` layout                                                                           |
-| Date field: responsive / smaller rendering for small screens                                                            |
-| Date field: option to open the panel at the bottom of the screen (VIAC-style, like a keyboard), e.g. for mobile devices |
-| Chore: prefer `queueMicrotask` over `setTimeout` where possible                                                         |
+| Phase | Title                | Scope                                                                                                                                           |
+| ----: | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------- |
+|    P1 | Design Proposal      | Page structure, layout, optional navigation. Document only — needs approval before P2                                                           |
+|    P2 | Shell                | Routes (there are none today), navigation, page layout, repository link; portal controls use the library's own components with a distinct theme |
+|    P3 | Preview Form         | Grid layout, several fields per type to demo config variations, fully functional, distinct starting theme                                       |
+|    P4 | Form Values View     | Expandable and collapsible panels showing what has been entered                                                                                 |
+|    P5 | Field Options Editor | Every option of every field, live preview                                                                                                       |
+|    P6 | Theme Editor         | Every token via color pickers and sliders, live preview, copy-paste export                                                                      |
+|    P7 | Adornment Config     | Prefixes and suffixes as icons, text or buttons; i18n switcher to demo the date field                                                           |
+|    P8 | Markup Editor        | Edit the preview form, add and remove fields                                                                                                    |
+|    P9 | Portal Docs          | Inline per-option documentation plus a separate documentation page                                                                              |
+|   P10 | Cutover              | Remove the example form, portal becomes the Pages deploy, add the portal to the Definition of Done in `conventions.md`                          |
 
----
-
-## Phase 5 — Accessibility And Focus
-
-| Item                                                               |
-| :----------------------------------------------------------------- |
-| Add ARIA attributes across all fields                              |
-| Support "focus on page load" for all fields without opening panels |
+**P6 Note**: four variables are set imperatively and never declared in `:root` — the two value insets, the value padding top and the value top. A token editor cannot discover them without a generated manifest.
 
 ---
 
-## Phase 6 — Docs, Tooling And Release
+## Already Shipped
 
-Release-readiness. The Angular major upgrade lands here.
+Kept for context only; the detail lived in the previous revision of this file and in the commit history.
 
-| Item                                                                                                                                                           |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Upgrade Angular and refresh all dependencies; reconcile the `ngx-mask` major with it                                                                           |
-| Refresh usage documentation                                                                                                                                    |
-| Demo: add a group example via `ngModelGroup`                                                                                                                   |
-| Write a "how to create a custom field" guide                                                                                                                   |
-| README: add GitHub badges                                                                                                                                      |
-| README: add an exact per-field / per-component feature list                                                                                                    |
-| Add `CONTRIBUTING.md`                                                                                                                                          |
-| Add a logo for `ngx-formidable`                                                                                                                                |
-| Add Storybook stories for all components, showcasing all features. (First take over conventions from the EnerQi sibling project. See the documentation there.) |
-| Reconcile `publish:lib --access public` with the GitHub Packages registry                                                                                      |
-| Tag the release commit (final step)                                                                                                                            |
+| Pass                | Outcome                                                                                                                                       |
+| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bugs And UX Defects | Date/time mask display, parse and caret fixes; readonly and disabled labels no longer float; single-line ellipsized labels                    |
+| Breaking API        | `FieldDecoratorLayout` renamed to `horizontal` / `vertical` / `inline`; the whole `Form*` family prefixed `NgxFormidable`; icons externalized |
+| Styling And Theming | New group and autofill tokens; the label became an explicit `position` choice; errors moved to a decorator slot below the field container     |
 
 ---
 
-## Needs Source Material
+## Found During Analysis
 
-These items reference a private project (`EnerQi`) or an external link that is not accessible from the repo. Confirm the source with Chris before starting.
+Defects that were not in `backlog.md` when this roadmap was written. Recorded here so they are not rediscovered.
 
-| Item                                             | Missing Source                               |
-| :----------------------------------------------- | :------------------------------------------- |
-| Refresh usage documentation                      | The `EnerQi` reference                       |
-| Demo group example via `ngModelGroup`            | `EnerQi` `appointment-page.form`             |
-| "How to create a custom field" guide             | `EnerQi` `ConstitutionCounterFieldComponent` |
-| Option `{ descendants: true }` via `ng-template` | External ChatGPT link                        |
+| Finding                                                                                       | Disposition                          |
+| :-------------------------------------------------------------------------------------------- | :----------------------------------- |
+| Dead `--formidable-color-slider-thumb-border` override in `_forms.scss`                       | Folded into Phase 6                  |
+| Stray package tarball at the repo root and a stale `package-lock.json` in the library project | Folded into Phase 1                  |
+| The demo writes the selected theme to `localStorage` but never reads it back on init          | Added to `backlog.md`, not scheduled |
+| No CI workflow; `deploy.yml` reinstalls from scratch rather than from the lockfile            | Added to `backlog.md`, not scheduled |
