@@ -21,6 +21,10 @@ $formidable-field-validation-error-font-size: utils.spacing(12);
 $formidable-field-validation-error-font-weight: normal;
 $formidable-field-validation-error-line-height: math.div(19.2, 12); // 1.6
 
+$formidable-field-hint-font-size: utils.spacing(12);
+$formidable-field-hint-font-weight: normal;
+$formidable-field-hint-line-height: math.div(19.2, 12); // 1.6
+
 $formidable-length-indicator-font-size: utils.spacing(12);
 $formidable-length-indicator-font-weight: normal;
 $formidable-length-indicator-line-height: math.div(19.2, 12); // 1.6
@@ -184,6 +188,9 @@ $formidable-color-option-prefix-inner-disabled: $formidable-color-option-prefix-
 $formidable-color-option-prefix-inner-selected: $formidable-color-option-prefix-outer-selected;
 $formidable-color-option-prefix-inner-highlighted: $formidable-color-option-prefix-outer-highlighted;
 $formidable-color-option-prefix-background: transparent;
+
+// Hint
+$formidable-color-field-hint: $formidable-color-field-placeholder;
 
 // Length Indicator
 $formidable-color-length-indicator: $formidable-color-field-placeholder;

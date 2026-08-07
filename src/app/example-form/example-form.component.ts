@@ -9,6 +9,7 @@ import {
   DropdownFieldComponent,
   FieldDecoratorComponent,
   FieldErrorsDirective,
+  FieldHintDirective,
   FieldLabelAdornmentDirective,
   FieldLabelDirective,
   FieldLabelPosition,
@@ -73,6 +74,7 @@ import {
     FieldSuffixDirective,
     FieldToggleIconDirective,
     FieldErrorsDirective,
+    FieldHintDirective,
     // Example
     ExampleIconComponent,
     ExampleTooltipComponent,
@@ -421,6 +423,7 @@ export class ExampleFormComponent {
     showSuffixes: true,
     showLabelAdornments: true,
     showLabels: true,
+    showHints: true,
     showAsReadonly: false,
     showAsDisabled: false
   };
@@ -542,6 +545,7 @@ type ControlKey =
   | 'showSuffixes'
   | 'showLabelAdornments'
   | 'showLabels'
+  | 'showHints'
   | 'showAsReadonly'
   | 'showAsDisabled';
 type ThemeKey = 'default' | 'theme2' | 'theme3' | 'theme4';

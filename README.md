@@ -68,6 +68,7 @@ A powerful Angular component library for building rich, validated forms.
 • Live errors &amp; validity
 • Simple <code>formidable-field-errors</code> directive
 • Optional i18n via `FORMIDABLE_ERROR_TRANSLATOR`
+• Always-visible hints via <code>formidableFieldHint</code>
 
 </td>
 <td width="33%" valign="top">
@@ -318,6 +319,28 @@ Adds a root-level async validator for cross-field Vest tests on `ROOT_FORM`.
 Renders a `<formidable-field-errors>` component for any control to display its validation messages. Inside a
 `formidable-field-decorator` it renders below the field; used on a bare control it renders next to it.
 
+### FieldHintDirective (`formidableFieldHint`)
+
+Projects always-visible support text into a `formidable-field-decorator`, on a row below the field and above
+the errors. `align` (`'start'` by default, or `'center'` / `'end'`) places each hint's text; hints share the
+row in equal parts, so a note and a counter sit on one line:
+
+```html
+<formidable-field-decorator>
+  <formidable-input-field
+    formidableFieldErrors
+    name="firstName"
+    [maxLength]="150"
+    [ngModel]="value.firstName" />
+  <div formidableFieldHint>Your legal first name</div>
+  <div
+    formidableFieldHint
+    align="end">
+    {{ value.firstName?.length ?? 0 }} / 150
+  </div>
+</formidable-field-decorator>
+```
+
 ### NgxFormidableFormModelDirective
 
 Hooks into each `ngModel` to run per-field async Vest tests.
@@ -334,6 +357,7 @@ Wrap any field in a <formidable-field-decorator> to project:
 - Label adornment: `<div formidableFieldLabelAdornment>…</div>` — anything you want beside the label
 - Prefix: `<div formidableFieldPrefix>…</div>` — horizontal and inline fields only
 - Suffix: `<div formidableFieldSuffix>…</div>` — horizontal and inline fields only
+- Hint: `<div formidableFieldHint [align]="'end'">…</div>` — support text below the field, all layouts
 
 The decorator adjusts padding and forwards the wrapped field’s properties and events.
 
@@ -454,6 +478,9 @@ You can also tweak Pikaday CSS.
 | `--formidable-field-validation-error-font-size`             | Font size for validation error messages.                                                                            |
 | `--formidable-field-validation-error-font-weight`           | Font weight for validation error messages.                                                                          |
 | `--formidable-field-validation-error-line-height`           | Line height for validation error messages.                                                                          |
+| `--formidable-field-hint-font-size`                         | Font size for hint text.                                                                                            |
+| `--formidable-field-hint-font-weight`                       | Font weight for hint text.                                                                                          |
+| `--formidable-field-hint-line-height`                       | Line height for hint text.                                                                                          |
 | `--formidable-length-indicator-font-size`                   | Font size for the textarea length indicator.                                                                        |
 | `--formidable-length-indicator-font-weight`                 | Font weight for the textarea length indicator.                                                                      |
 | `--formidable-length-indicator-line-height`                 | Line height for the textarea length indicator.                                                                      |
@@ -480,7 +507,7 @@ You can also tweak Pikaday CSS.
 | `--formidable-label-border-gap`                             | How far a `border` label's border-hiding band reaches either side of its text.                                      |
 | `--formidable-label-border-band-bleed`                      | How far that band outgrows the border above and below, so pixel rounding leaves no hairline showing.                |
 | `--formidable-field-group-option-padding`                   | Padding of options within a field group.                                                                            |
-| `--formidable-field-support-min-height`                     | Minimum reserved height for a field's supporting-text area (currently validation errors).                           |
+| `--formidable-field-support-min-height`                     | Minimum reserved height of a support-text row below a field — the hints and the validation errors.                  |
 | **Colors**                                                  |                                                                                                                     |
 | `--formidable-color-validation-error`                       | Text color for validation errors.                                                                                   |
 | `--formidable-color-field-text`                             | Text color for fields.                                                                                              |
@@ -536,6 +563,7 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-option-prefix-inner-highlighted`        | Overrides`--formidable-color-option-prefix-inner`when option is highlighted.                                        |
 | `--formidable-color-option-prefix-background`               | Background color behind option prefix elements.                                                                     |
 | **Length Indicator**                                        |                                                                                                                     |
+| `--formidable-color-field-hint`                             | Text color for hint text. Follows the field placeholder color by default.                                           |
 | `--formidable-color-length-indicator`                       | Text color for the textarea length indicator.                                                                       |
 | **Textarea**                                                |                                                                                                                     |
 | `--formidable-textarea-min-height`                          | Minimum height for textareas.                                                                                       |
@@ -778,7 +806,8 @@ When you add your own field component (by implementing `IFormidableField` or `IF
 - **Async validation** via `NgxFormidableFormModelDirective`
 - **Root-level / cross-field validation** if you use `formidableRootValidate`
 - **Error rendering** simply by adding `formidableFieldErrors` — with or without a decorator around the field
-- **Decorator support** — labels, label adornments, prefixes, and suffixes work out of the box. A
+- **Hints** simply by projecting `formidableFieldHint` elements into the decorator
+- **Decorator support** — labels, label adornments, prefixes, suffixes and hints work out of the box. A
   prefix/suffix is centered in your field's box; if your field top-aligns its value (like a textarea), set
   `valueAlignment: 'top'` so they sit on its first line instead
 

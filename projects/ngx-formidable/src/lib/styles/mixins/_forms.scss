@@ -917,8 +917,20 @@
 
 @mixin field-validation-errors {
   margin-top: utils.spacing(8);
-  margin-bottom: utils.spacing(16);
   min-height: var(--formidable-field-support-min-height, #{tokens.$formidable-field-support-min-height});
+}
+
+// A row of projected hints. Font properties and `color` inherit, so they reach the projected content from
+// here; `flex` and each hint's own `text-align` do not, and live in `_globals.scss`.
+@mixin field-hint {
+  display: flex;
+  column-gap: utils.spacing(8);
+  margin-top: utils.spacing(8);
+  min-height: var(--formidable-field-support-min-height, #{tokens.$formidable-field-support-min-height});
+  font-size: var(--formidable-field-hint-font-size, #{tokens.$formidable-field-hint-font-size});
+  font-weight: var(--formidable-field-hint-font-weight, #{tokens.$formidable-field-hint-font-weight});
+  line-height: var(--formidable-field-hint-line-height, #{tokens.$formidable-field-hint-line-height});
+  color: var(--formidable-color-field-hint, #{tokens.$formidable-color-field-hint});
 }
 
 @mixin field-validation-error {

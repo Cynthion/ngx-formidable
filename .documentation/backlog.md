@@ -25,17 +25,12 @@ Improvements:
 # Bugs:
 
 - label position border: label is hidden behind the panel if it is open on top/before the field
+- in the "Nationality" field example, the label always runs the animation on page reload. Animation of an inside label should only show/run when necessary
 
 # Features:
 
 - date/time field: arrow up/down to increment/decrement years/months/days and hours/minutes
 - date field: arrow down should not open panel, only navigate throught the dates. when the panel is open, the arrow keys must move the date selection in the panel.
-- add property "supportingText"/"hints" to fields, which can show text below the field (similar to errors, but always visible); allow them to be left-aligned, centered or right-aligned (default left-aligned); similar to material's hints (so could be a new component, like errors); provide a few pre-defined ones (e.g., message-value-length) (or is it better to let the user define them?)
-  ```html
-  <!-- Material Example -->
-  <mat-hint align="start"><strong>Don't disclose personal info</strong> </mat-hint>
-  <mat-hint align="end">{{message.value.length}} / 256</mat-hint>
-  ```
 - add config for prefix and suffix to defined their vertical alignment: centered or with field value (mask, placeholder, value) (default: centered)
 - when label position is "inside", then the label should be shown and the placeholder only on focus (when the label is floating); this is similar to material's behavior
 - add tokens for the background, border, value (text) and label color when the field is invalid, disabled, readonly, focused, hovered and define the default colors for these states (similar to material's behavior)
@@ -54,7 +49,7 @@ Improvements:
 "Customize your own form theme".
 The idea is a product page, where users can come to and play around with options to configure the theme for their own brand and product.
 
-- preview of all fields (in an example form), the example form should use multiple fields of the same type (and can thus be a bit more complex) so that different variations of field type configs can be demoed
+- preview of all fields (in an example form, funny context), the example form should use multiple fields of the same type (and can thus be a bit more complex) so that different variations of field type configs can be demoed
 - the example form is fully functional and can be filled out, and the current values are shown in a separate view (see below)
 - the fields of the new example form should be layed out in a grid and not all fields just using full width
 - all options of every field can be changed in the portal and the result is shown in the preview form

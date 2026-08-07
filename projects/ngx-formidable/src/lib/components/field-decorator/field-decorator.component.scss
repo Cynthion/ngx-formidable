@@ -110,6 +110,10 @@
   @include field-suffix-inline;
 }
 
+.hint-wrapper {
+  @include field-hint;
+}
+
 .hidden {
   display: none;
 }

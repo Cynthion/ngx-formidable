@@ -22,6 +22,10 @@
   --formidable-field-validation-error-font-weight: #{tokens.$formidable-field-validation-error-font-weight};
   --formidable-field-validation-error-line-height: #{tokens.$formidable-field-validation-error-line-height};
 
+  --formidable-field-hint-font-size: #{tokens.$formidable-field-hint-font-size};
+  --formidable-field-hint-font-weight: #{tokens.$formidable-field-hint-font-weight};
+  --formidable-field-hint-line-height: #{tokens.$formidable-field-hint-line-height};
+
   --formidable-length-indicator-font-size: #{tokens.$formidable-length-indicator-font-size};
   --formidable-length-indicator-font-weight: #{tokens.$formidable-length-indicator-font-weight};
   --formidable-length-indicator-line-height: #{tokens.$formidable-length-indicator-line-height};
@@ -328,6 +332,9 @@
     #{tokens.$formidable-color-option-prefix-inner-highlighted}
   );
   --formidable-color-option-prefix-background: #{tokens.$formidable-color-option-prefix-background};
+
+  // Hint
+  --formidable-color-field-hint: var(--formidable-color-field-placeholder, #{tokens.$formidable-color-field-hint});
 
   // Length Indicator
   --formidable-color-length-indicator: var(

@@ -229,13 +229,15 @@ Collects `formidable-field-option` children. With no options it renders `noOptio
 
 **Selector** `formidable-field-decorator`
 
-Wraps a field and its label, label adornment, prefix, suffix and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `@ContentChild`. Forwards the field's `valueChanged` / `focusChanged`. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and measures a projected prefix/suffix in the `horizontal` layout. No inputs.
+Wraps a field and its label, label adornment, prefix, suffix, hints and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `@ContentChild`. Forwards the field's `valueChanged` / `focusChanged`. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and measures a projected prefix/suffix in the `horizontal` layout. No inputs.
 
 **Label Adornment**: a slot beside the label, in the same row, for whatever the consumer wants next to it — the library owns the slot only, never its content. It collapses with that row: a label rendered over the field takes its row with it, and an adornment left above a field it no longer decorates is worse than no adornment, so it hides too.
 
 **Prefix And Suffix Placement**: a `horizontal` and `inline` concept only. The `vertical` layout stacks its group inside a fieldset, which leaves a prefix/suffix nothing to sit beside and no value to inset, so the slots are not rendered there at all.
 
 **Prefix And Suffix Measurement**: a projected prefix/suffix takes horizontal space the field has to give up, so the decorator measures its wrapper — which shrink-wraps the projected content, padding included — and publishes the width on its own host as `--formidable-field-prefix-inset` / `--formidable-field-suffix-inset`. The stylesheet turns those into the field's `padding-left` / `padding-right` and into the bounds of a label rendered over the value; both fall back to `--formidable-field-padding-x` when unset. The measurement runs in a `ResizeObserver` over both wrappers, so it follows content being added or removed, a font loading, or a wrapper being hidden — and a hidden wrapper measures zero, which removes the property and gives the field its own padding back. CSS owns the padding throughout; the decorator never writes an inline `style.padding`.
+
+**Hints**: `formidableFieldHint` elements share one row below the field and above the errors, outside the layout container — so, like the errors, they render identically in all three `decoratorLayout`s. The row is content-only: the library owns the slot, never what goes in it, and there are no pre-defined hints. Hints split the row in equal parts and each aligns its own text via `align`, so a `start` note and an `end` counter sit on one line. The row reserves the same single line as the errors (`--formidable-field-support-min-height`) and collapses entirely when nothing is projected. Both the equal split and the per-hint alignment live in `_globals.scss`: the hint element belongs to the consumer's view, which the decorator's encapsulated stylesheet cannot reach.
 
 **In-Field Toggle**: `dropdown-field` and `date-field` draw a panel toggle inside their own box, at the field's inner right edge. It is not projected content, so instead of measuring it the field declares `hasInFieldToggle` and the decorator turns that into a `has-in-field-toggle` host class, which raises `--formidable-field-toggle-inset` to `--formidable-field-toggle-size`. Only the value inset adds it: the toggle is a flex item inside the field's `padding-right`, so a projected suffix — measured into that padding — already pushes the toggle left of itself.
 
@@ -312,6 +314,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | Directive                      | Selector                          | Purpose                                                                                                                                                                                            |
 | :----------------------------- | :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `FieldErrorsDirective`         | `[formidableFieldErrors]`         | Instantiates a `FieldErrorsComponent` and wires its `ngModel`/`ngModelGroup` from DI — into the surrounding decorator's errors slot if there is one, beside the host control otherwise. No inputs. |
+| `FieldHintDirective`           | `[formidableFieldHint]`           | Projects always-visible support text into the decorator's hint row. `@Input() align: FieldHintAlignment` (`'start'`), emitted as `data-align`.                                                     |
 | `FieldLabelAdornmentDirective` | `[formidableFieldLabelAdornment]` | Projects content beside the label. Exposes `elementRef`.                                                                                                                                           |
 | `FieldLabelDirective`          | `[formidableFieldLabel]`          | Projects label content. `@Input() position: FieldLabelPosition` (`'outside'`).                                                                                                                     |
 | `FieldPrefixDirective`         | `[formidableFieldPrefix]`         | Projects prefix content, in the `horizontal` and `inline` layouts. Exposes `elementRef`.                                                                                                           |
@@ -340,6 +343,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | :----------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
 | `FieldDecoratorLayout`               | `'horizontal' \| 'vertical' \| 'inline'`                                                                         |
 | `FieldDefaultOptionMode`             | `'always' \| 'fallback'`                                                                                         |
+| `FieldHintAlignment`                 | `'start' \| 'center' \| 'end'`                                                                                   |
 | `FieldLabelPosition`                 | `'outside' \| 'inside' \| 'inside-floating' \| 'border' \| 'border-prefix'`                                      |
 | `FieldOptionLayout`                  | `'inline' \| 'radio-group' \| 'checkbox-group'`                                                                  |
 | `FieldValueAlignment`                | `'center' \| 'top'`                                                                                              |
@@ -379,6 +383,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `NgxFormidableFormModelGroupDirective`   | `[ngModelGroup]`                                     | Directive  | —                 |
 | `NgxFormidableFormRootValidateDirective` | `form[formidableRootValidate][formValue][formSuite]` | Directive  | —                 |
 | `FieldErrorsDirective`                   | `[formidableFieldErrors]`                            | Directive  | —                 |
+| `FieldHintDirective`                     | `[formidableFieldHint]`                              | Directive  | —                 |
 | `FieldLabelAdornmentDirective`           | `[formidableFieldLabelAdornment]`                    | Directive  | —                 |
 | `FieldLabelDirective`                    | `[formidableFieldLabel]`                             | Directive  | —                 |
 | `FieldPrefixDirective`                   | `[formidableFieldPrefix]`                            | Directive  | —                 |

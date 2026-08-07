@@ -19,14 +19,13 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 |  Phase | Title                                  | Depends On |
 | -----: | :------------------------------------- | :--------- |
-|      4 | Supporting Text                        | —          |
 |      5 | Prefix And Suffix — Actions, Alignment | —          |
 |      6 | Field State Styling                    | —          |
 |      7 | Border Geometry                        | 6          |
 |      8 | Date And Time Keyboard                 | —          |
 |      9 | Date Panel Responsiveness              | —          |
 |     10 | Small API Additions And Chores         | 8          |
-|     11 | ARIA — Fields, Errors, Support Text    | 4, 6       |
+|     11 | ARIA — Fields, Errors, Support Text    | 6          |
 |     12 | ARIA — Panel And Option Fields         | 11         |
 |     13 | API Doc Comments                       | 1–12       |
 |     14 | README And Project Docs                | 13         |
@@ -39,21 +38,12 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 ## Library Phases
 
-### Phase 4 — Supporting Text
-
-- **New Component**: `FieldSupportComponent` plus its directive, mirroring `FieldErrorsComponent` and `FieldErrorsDirective`, rendered into a decorator slot below the field. Reuse the existing errors-slot mechanism rather than inventing a second one.
-- **Alignment**: `align: 'start' | 'center' | 'end'`, default `start`.
-- **Slot Only**: no pre-defined hints. A value-length counter is a few characters of consumer template; presets would drag in i18n, formatting options and a per-field wiring API.
-- make sure that the fields (and decorator) don't use more margin/padding before and below; spacing is business of the consumer, not the library.
-
-**Clears**: the `supportingText` item.
-
 ### Phase 5 — Prefix And Suffix: Actions And Alignment
 
 The re-measure a suffix action needs is already in place.
 
-- **Suffix Actions**: clear/reset, copy, validation state, loading. `field-suffix.directive.ts` is a bare marker directive today.
-- **Vertical Alignment**: make it configurable — centered (default) or aligned with the field value. `FieldValueAlignment` exists but is field-driven and only `textarea-field` opts in; promote it to an input the consumer can override.
+- **Suffix Actions**: possible user features are: clear/reset, copy, validation state, loading. `field-suffix.directive.ts` is a bare marker directive today. Can the library provide something for such features to be implemented? can they be implemented today? I want to add fields to the example form that demo these. Also add them as quick examples in the README, if that is a good place.
+- **Vertical Alignment**: make prefix/suffix alignment configurable — vertically centered (default, as-is) or aligned with the field value (relevant when label position is inside and the value is pushed down a little). `FieldValueAlignment` exists but is field-driven and only `textarea-field` opts in; promote it to an input the consumer can override.
 
 **Clears**: the suffix-actions item and the prefix/suffix alignment item.
 
@@ -103,7 +93,7 @@ Depends on Phase 8 (focus-on-load pairs with the ArrowDown change).
 
 ### Phase 11 — ARIA: Fields, Errors And Support Text
 
-Depends on Phase 4 (support text to describe) and Phase 6 (invalid state).
+Depends on Phase 6 (invalid state). The support text it describes shipped with the hint row.
 
 - **State Attributes**: `aria-invalid`, `aria-required`, `aria-readonly`, `aria-disabled`.
 - **Descriptions**: `aria-describedby` linking the field to its errors and its support text.
@@ -119,6 +109,14 @@ Depends on Phase 3 (the option query changes) and Phase 11.
 
 **Clears** (with Phase 11): the ARIA item.
 
+### Phase 12.5 - Cleanup SCSS
+
+- Group and order mixins in `_forms.scss` to match the order of the fields in `public-api.ts`. This is a cosmetic change only, but it makes the file easier to read and maintain. Shared mixins should be grouped hierarchically at the top.
+- Improve documentation in `_forms.scss` with a short description of each mixin's purpose and usage. This will help future developers understand the intent behind each mixin and how to use them effectively. Keep it brief and short, not too detailed, but relevant.
+- Group and order the tokens in `_tokens.scss` to match the order of the fields in `public-api.ts`. This is a cosmetic change only, but it makes the file easier to read and maintain. Shared tokens should be grouped hierarchically at the top.
+- Equivalently, group and order the tokens in `_formidable-vars.scss` to match the order of the fields in `public-api.ts`. This is a cosmetic change only, but it makes the file easier to read and maintain. Shared tokens should be grouped hierarchically at the top.
+- Documentation of tokens (same order) must be extracted from README.md into a dedicated markdown document.
+
 ### Phase 13 — API Doc Comments
 
 Depends on Phases 1–12 — do not document an API that is still moving.
@@ -126,7 +124,7 @@ Depends on Phases 1–12 — do not document an API that is still moving.
 - **Model Coverage**: document every export in `formidable.model.ts`. Roughly a third of the interfaces have no doc block, and the central `IFormidableField` has one documented member out of fourteen. `IFormidableToggleField` has nothing.
 - **Public API**: same pass over the remaining `public-api.ts` exports.
 - **Keep It Short**: one line of intent per symbol. This is a library — users read these in their editor.
-- **Re-Verify `ui_components.md`** against the shipped reality.
+- **Re-Verify `ui_components.md`** against the shipped reality. Brief and exact, not prose. Keep the details relevant or avoid them. It will be the catalogue of the library's public API, so it must be correct. The current version is out of date and has drifted from the code. May rename the file.
 
 **Clears**: the interface-documentation and `ui_components.md` items.
 
@@ -141,6 +139,8 @@ Depends on Phase 13.
 - **Custom Field Guide**: how to build one, using the consumer's `ConstitutionCounterFieldComponent` as the worked example.
 - **Usage Refresh And Group Example**: refresh usage docs and add an `ngModelGroup` example to the demo, using the consumer's `appointment-page.form.ts` and its form component as the reference.
 - **Project Files**: add `CONTRIBUTING.md` (today a short list inside `README.md`) and a logo (there is no image asset; the title is plain text).
+- README.md must be overhauled. It is the starting place for a consumer, so it must sell every feature. The feature list is out of date.
+- Add a documentation hierarchy for examples, etc. so that README.md is not overcrowded.
 
 **Clears**: the usage-docs, badges, feature-list, group-example, `CONTRIBUTING.md`, logo, custom-field and README items.
 
@@ -188,14 +188,15 @@ Depends on Phase 13.
 
 Kept for context only; the detail lived in the previous revision of this file and in the commit history.
 
-| Pass                         | Outcome                                                                                                                                                                                                                                    |
-| :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bugs And UX Defects          | Date/time mask display, parse and caret fixes; readonly and disabled labels no longer float; single-line ellipsized labels                                                                                                                 |
-| Decorator Layout Measurement | Padding moved from inline styles to CSS, measured in a `ResizeObserver`; the in-field toggle joined the value inset; nested `package-lock.json` removed. The consumer tarball rebuild was dropped from the phase and stays in `backlog.md` |
-| Breaking API                 | `FieldDecoratorLayout` renamed to `horizontal` / `vertical` / `inline`; the whole `Form*` family prefixed `NgxFormidable`; icons externalized                                                                                              |
-| Styling And Theming          | New group and autofill tokens; the label became an explicit `position` choice; errors moved to a decorator slot below the field container                                                                                                  |
-| Decorator Slot Cleanup       | The tooltip slot became `[formidableFieldLabelAdornment]` and now collapses with the label's row; prefix and suffix became `horizontal` and `inline` only; the `--formidable-color-field-tooltip` token was dropped                        |
-| Option Fields                | `{ descendants: true }` on all five option queries; a `defaultOption` / `defaultOptionMode` input pair; the group empty state became plain text. The duplicated `computeAllOptions` collapsed into two tested helpers                      |
+| Pass                         | Outcome                                                                                                                                                                                                                                                                        |
+| :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bugs And UX Defects          | Date/time mask display, parse and caret fixes; readonly and disabled labels no longer float; single-line ellipsized labels                                                                                                                                                     |
+| Decorator Layout Measurement | Padding moved from inline styles to CSS, measured in a `ResizeObserver`; the in-field toggle joined the value inset; nested `package-lock.json` removed. The consumer tarball rebuild was dropped from the phase and stays in `backlog.md`                                     |
+| Breaking API                 | `FieldDecoratorLayout` renamed to `horizontal` / `vertical` / `inline`; the whole `Form*` family prefixed `NgxFormidable`; icons externalized                                                                                                                                  |
+| Styling And Theming          | New group and autofill tokens; the label became an explicit `position` choice; errors moved to a decorator slot below the field container                                                                                                                                      |
+| Decorator Slot Cleanup       | The tooltip slot became `[formidableFieldLabelAdornment]` and now collapses with the label's row; prefix and suffix became `horizontal` and `inline` only; the `--formidable-color-field-tooltip` token was dropped                                                            |
+| Hint Text                    | `FieldHintDirective` plus a decorator hint row below the field; hints share the row and each aligns itself. No `FieldHintComponent`: a hint has no logic, so projection was enough. The errors mixin's `margin-bottom` went away — spacing below a decorator is the consumer's |
+| Option Fields                | `{ descendants: true }` on all five option queries; a `defaultOption` / `defaultOptionMode` input pair; the group empty state became plain text. The duplicated `computeAllOptions` collapsed into two tested helpers                                                          |
 
 ---
 

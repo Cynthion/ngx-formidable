@@ -19,6 +19,7 @@ export * from './lib/components/fields/time-field/time-field.component';
 export * from './lib/components/fields/toggle-field/toggle-field.component';
 
 export * from './lib/directives/field-errors.directive';
+export * from './lib/directives/field-hint.directive';
 export * from './lib/directives/field-label-adornment.directive';
 export * from './lib/directives/field-label.directive';
 export * from './lib/directives/field-prefix.directive';

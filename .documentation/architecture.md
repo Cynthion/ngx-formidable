@@ -23,7 +23,7 @@ The library source lives under `projects/ngx-formidable/src/lib/`. Everything pu
 lib/
 ├── components/
 │   ├── fields/          # the field components, each a folder (.ts/.html/.scss) + base-field.directive.ts
-│   ├── field-decorator/ # wraps a field with label, adornment, prefix, suffix, errors
+│   ├── field-decorator/ # wraps a field with label, adornment, prefix, suffix, hints, errors
 │   ├── field-errors/    # renders validation errors
 │   ├── field-option/    # a single option inside option-based fields
 │   └── icon/            # inline SVG icon

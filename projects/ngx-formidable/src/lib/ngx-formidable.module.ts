@@ -15,6 +15,7 @@ import { TextareaFieldComponent } from './components/fields/textarea-field/texta
 import { TimeFieldComponent } from './components/fields/time-field/time-field.component';
 import { ToggleFieldComponent } from './components/fields/toggle-field/toggle-field.component';
 import { FieldErrorsDirective } from './directives/field-errors.directive';
+import { FieldHintDirective } from './directives/field-hint.directive';
 import { FieldLabelAdornmentDirective } from './directives/field-label-adornment.directive';
 import { FieldLabelDirective } from './directives/field-label.directive';
 import { FieldPrefixDirective } from './directives/field-prefix.directive';
@@ -39,6 +40,7 @@ const components = [
   FieldSuffixDirective,
   FieldToggleIconDirective,
   FieldErrorsDirective,
+  FieldHintDirective,
   // Field Components
   FieldErrorsComponent,
   FieldDecoratorComponent,

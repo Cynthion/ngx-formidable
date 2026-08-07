@@ -48,6 +48,13 @@
   }
 </div>
 
+<!-- Hint -->
+<div
+  class="hint-wrapper"
+  [class.hidden]="!hasHint">
+  <ng-content select="[formidableFieldHint]" />
+</div>
+
 <!-- Validation errors, rendered here by `FieldErrorsDirective`. -->
 <ng-container #errorsSlot />
 

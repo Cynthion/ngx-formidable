@@ -14,6 +14,7 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
+import { FieldHintDirective } from '../../directives/field-hint.directive';
 import { FieldLabelAdornmentDirective } from '../../directives/field-label-adornment.directive';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
@@ -39,6 +40,7 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
  * - `FieldLabelAdornmentDirective` (wrapped label adornment element)
  * - `FieldPrefixDirective` (wrapped prefix element)
  * - `FieldSuffixDirective` (wrapped suffix element)
+ * - `FieldHintDirective` (wrapped hint element(s), rendered below the field)
  *
  * Outputs (re-emitted from projected field):
  * - `@Output() valueChanged: EventEmitter<unknown>`
@@ -77,8 +79,9 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
    */
   @ViewChild('errorsSlot', { read: ViewContainerRef, static: true }) errorsSlot?: ViewContainerRef;
 
-  // Content children are used to project the field, label, label adornment, prefix and suffix
+  // Content children are used to project the field, label, label adornment, prefix, suffix and hint
   @ContentChild(FORMIDABLE_FIELD) projectedField?: IFormidableField;
+  @ContentChild(FieldHintDirective) projectedHint?: FieldHintDirective;
   @ContentChild(FieldLabelDirective) projectedLabel?: FieldLabelDirective;
   @ContentChild(FieldLabelAdornmentDirective) projectedLabelAdornment?: FieldLabelAdornmentDirective;
   @ContentChild(FieldPrefixDirective) projectedPrefix?: FieldPrefixDirective;
@@ -100,6 +103,10 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
 
   protected get hasSuffix(): boolean {
     return !!this.projectedSuffix;
+  }
+
+  protected get hasHint(): boolean {
+    return !!this.projectedHint;
   }
 
   private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);

@@ -43,6 +43,13 @@
         <label>
           <input
             type="checkbox"
+            [checked]="controlCenter.showHints"
+            (change)="onToggle('showHints', $any($event.target).checked)" />
+          Show Hints
+        </label>
+        <label>
+          <input
+            type="checkbox"
             [checked]="controlCenter.showAsReadonly"
             (change)="onToggle('showAsReadonly', $any($event.target).checked)" />
           Show as Readonly
@@ -248,6 +255,17 @@
             *ngIf="controlCenter.showSuffixes"
             formidableFieldSuffix>
             Suffix
+          </div>
+          <div
+            *ngIf="controlCenter.showHints"
+            formidableFieldHint>
+            Your legal first name
+          </div>
+          <div
+            *ngIf="controlCenter.showHints"
+            formidableFieldHint
+            align="end">
+            {{ vm.formValue$.firstName?.length ?? 0 }} / 150
           </div>
         </formidable-field-decorator>
 

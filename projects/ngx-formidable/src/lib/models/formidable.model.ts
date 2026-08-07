@@ -42,6 +42,11 @@ export type FieldLabelPosition = 'outside' | 'inside' | 'inside-floating' | 'bor
  * as the value does.
  */
 export type FieldValueAlignment = 'center' | 'top';
+/**
+ * Where a projected hint sits horizontally within the decorator's hint row. Each hint aligns
+ * itself, so a `start` note and an `end` counter share one row.
+ */
+export type FieldHintAlignment = 'start' | 'center' | 'end';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 /**
  * When an option field renders its `defaultOption`: `always` as the first entry, never sorted and never

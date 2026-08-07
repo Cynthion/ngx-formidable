@@ -12,3 +12,18 @@ formidable-field-decorator .label-wrapper.label-border-prefix > * {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+// Hints are projected by the consumer, so the decorator's stylesheet cannot reach them. They share the hint
+// row in equal shares, and each one aligns its own text — neither `flex` nor a per-element `text-align`
+// inherits from the wrapper. The `start` default needs no rule: it is the inherited value.
+formidable-field-decorator .hint-wrapper > * {
+  flex: 1 1 0;
+}
+
+formidable-field-decorator .hint-wrapper > [data-align='center'] {
+  text-align: center;
+}
+
+formidable-field-decorator .hint-wrapper > [data-align='end'] {
+  text-align: end;
+}
