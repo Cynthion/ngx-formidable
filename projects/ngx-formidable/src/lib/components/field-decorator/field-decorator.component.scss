@@ -102,6 +102,15 @@
   }
 }
 
+// `align="value"`, which only a centred field can honour: a value-top field has no meaningful box centre
+// to offer, so its own alignment already is the value's and wins.
+.container-horizontal:not(.value-top) {
+  .prefix-wrapper-horizontal.align-value,
+  .suffix-wrapper-horizontal.align-value {
+    @include field-adornment-align-value;
+  }
+}
+
 .prefix-wrapper-inline {
   @include field-prefix-inline;
 }

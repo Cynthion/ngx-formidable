@@ -29,6 +29,13 @@
         <label>
           <input
             type="checkbox"
+            [checked]="controlCenter.showActions"
+            (change)="onToggle('showActions', $any($event.target).checked)" />
+          Show Adornment Actions
+        </label>
+        <label>
+          <input
+            type="checkbox"
             [checked]="controlCenter.showLabelAdornments"
             (change)="onToggle('showLabelAdornments', $any($event.target).checked)" />
           Show Label Adornments
@@ -105,6 +112,27 @@
             [checked]="labelPosition === 'border-prefix'"
             (change)="setLabelPosition('border-prefix')" />
           Border, Prefix-Aligned
+        </label>
+      </fieldset>
+
+      <!-- Adornment Alignment -->
+      <fieldset>
+        <legend>Prefix / Suffix Alignment:</legend>
+        <label>
+          <input
+            type="radio"
+            name="adornmentAlignment"
+            [checked]="adornmentAlignment === 'center'"
+            (change)="setAdornmentAlignment('center')" />
+          Centered
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="adornmentAlignment"
+            [checked]="adornmentAlignment === 'value'"
+            (change)="setAdornmentAlignment('value')" />
+          With the Value
         </label>
       </fieldset>
 
@@ -248,13 +276,22 @@
           </div>
           <div
             *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
+            formidableFieldPrefix
+            [align]="adornmentAlignment">
             Prefix
           </div>
           <div
             *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
-            Suffix
+            formidableFieldSuffix
+            [align]="adornmentAlignment">
+            <ng-container
+              *ngIf="controlCenter.showActions; else textSuffix"
+              [ngTemplateOutlet]="clearAction"
+              [ngTemplateOutletContext]="{
+                $implicit: 'firstName',
+                value: vm.formValue$.firstName,
+                error: vm.errors$['firstName']
+              }" />
           </div>
           <div
             *ngIf="controlCenter.showHints"
@@ -300,13 +337,18 @@
           </div>
           <div
             *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
+            formidableFieldPrefix
+            [align]="adornmentAlignment">
             Prefix
           </div>
           <div
             *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
-            Suffix
+            formidableFieldSuffix
+            [align]="adornmentAlignment">
+            <ng-container
+              *ngIf="controlCenter.showActions; else textSuffix"
+              [ngTemplateOutlet]="copyAction"
+              [ngTemplateOutletContext]="{ $implicit: 'middleName', value: vm.formValue$.middleName }" />
           </div>
         </formidable-field-decorator>
 
@@ -345,12 +387,14 @@
           </div>
           <div
             *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
+            formidableFieldPrefix
+            [align]="adornmentAlignment">
             Prefix
           </div>
           <div
             *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
+            formidableFieldSuffix
+            [align]="adornmentAlignment">
             Suffix
           </div>
         </formidable-field-decorator>
@@ -394,12 +438,14 @@
           </div>
           <div
             *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
+            formidableFieldPrefix
+            [align]="adornmentAlignment">
             Prefix
           </div>
           <div
             *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
+            formidableFieldSuffix
+            [align]="adornmentAlignment">
             Suffix
           </div>
         </formidable-field-decorator>
@@ -466,12 +512,14 @@
           </div>
           <div
             *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
+            formidableFieldPrefix
+            [align]="adornmentAlignment">
             Prefix
           </div>
           <div
             *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
+            formidableFieldSuffix
+            [align]="adornmentAlignment">
             Suffix
           </div>
         </formidable-field-decorator>
@@ -530,13 +578,17 @@
           </div>
           <div
             *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
+            formidableFieldPrefix
+            [align]="adornmentAlignment">
             Prefix
           </div>
           <div
             *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
-            Suffix
+            formidableFieldSuffix
+            [align]="adornmentAlignment">
+            <ng-container
+              *ngIf="controlCenter.showActions; else textSuffix"
+              [ngTemplateOutlet]="loadingAction" />
           </div>
         </formidable-field-decorator>
 
@@ -583,12 +635,14 @@
           </div>
           <div
             *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
+            formidableFieldPrefix
+            [align]="adornmentAlignment">
             Prefix
           </div>
           <div
             *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
+            formidableFieldSuffix
+            [align]="adornmentAlignment">
             Suffix
           </div>
         </formidable-field-decorator>
@@ -634,12 +688,16 @@
           </div>
           <div
             *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
-            Prefix
+            formidableFieldPrefix
+            [align]="adornmentAlignment">
+            <ng-container
+              *ngIf="controlCenter.showActions; else textPrefix"
+              [ngTemplateOutlet]="todayAction" />
           </div>
           <div
             *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
+            formidableFieldSuffix
+            [align]="adornmentAlignment">
             Suffix
           </div>
         </formidable-field-decorator>
@@ -675,12 +733,14 @@
           </div>
           <div
             *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
+            formidableFieldPrefix
+            [align]="adornmentAlignment">
             Prefix
           </div>
           <div
             *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
+            formidableFieldSuffix
+            [align]="adornmentAlignment">
             Suffix
           </div>
         </formidable-field-decorator>
@@ -826,12 +886,14 @@
           </div>
           <div
             *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
+            formidableFieldPrefix
+            [align]="adornmentAlignment">
             Prefix
           </div>
           <div
             *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
+            formidableFieldSuffix
+            [align]="adornmentAlignment">
             Suffix
           </div>
         </formidable-field-decorator>
@@ -890,4 +952,70 @@
       }
     </fieldset>
   </form>
+</ng-template>
+
+<!-- Adornment Action Templates -->
+<!-- The marker element itself has to stay a static child of the decorator — `ng-content select` matches
+     the nodes as written, so a `formidableFieldPrefix` reached through an outlet would land in the field's
+     own slot. Only the content comes from here. -->
+
+<!-- What a slot falls back to while the actions are off. The fields with no action of their own keep the
+     word inline; these two exist because an `*ngIf` else-branch needs a template. -->
+<ng-template #textPrefix>Prefix</ng-template>
+<ng-template #textSuffix>Suffix</ng-template>
+
+<!-- Clear the value, beside a glyph for its validation state. Both come and go, which re-insets the field. -->
+<ng-template
+  #clearAction
+  let-key
+  let-error="error"
+  let-value="value">
+  <div class="adornment-row">
+    <button
+      *ngIf="value"
+      type="button"
+      title="Clear"
+      class="adornment-action"
+      (mousedown)="$event.preventDefault()"
+      (click)="clearField(key)">
+      &times;
+    </button>
+    <span [class]="error ? 'adornment-state invalid' : 'adornment-state valid'">{{ error ? '✗' : '✓' }}</span>
+  </div>
+</ng-template>
+
+<!-- Copy the value to the clipboard. -->
+<ng-template
+  #copyAction
+  let-key
+  let-value="value">
+  <button
+    type="button"
+    title="Copy"
+    class="adornment-action"
+    [disabled]="!value"
+    (mousedown)="$event.preventDefault()"
+    (click)="copyField(key)">
+    Copy
+  </button>
+</ng-template>
+
+<!-- A spinner is not interactive, so it stays click-through. It only exists while the lookup runs, and the
+     slot falling back to its text is what shows the inset following the width back and forth. -->
+<ng-template #loadingAction>
+  <span
+    *ngIf="isHobbyLoading; else textSuffix"
+    class="adornment-spinner"></span>
+</ng-template>
+
+<!-- An action works in either slot; this one is a prefix. -->
+<ng-template #todayAction>
+  <button
+    type="button"
+    title="Today"
+    class="adornment-action"
+    (mousedown)="$event.preventDefault()"
+    (click)="setToday()">
+    Today
+  </button>
 </ng-template>

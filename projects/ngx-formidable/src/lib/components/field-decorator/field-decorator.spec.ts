@@ -6,11 +6,12 @@ import { By } from '@angular/platform-browser';
 import { provideNgxMask } from 'ngx-mask';
 import { enforce, staticSuite, test } from 'vest';
 import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { FieldErrorsComponent } from '../field-errors/field-errors.component';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
 import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
 import { NgxFormidableFormDirective } from '../../directives/form.directive';
+import { FieldAdornmentAlignment, FieldLabelPosition } from '../../models/formidable.model';
+import { FieldErrorsComponent } from '../field-errors/field-errors.component';
 import { AutocompleteFieldComponent } from '../fields/autocomplete-field/autocomplete-field.component';
 import { DateFieldComponent } from '../fields/date-field/date-field.component';
 import { DropdownFieldComponent } from '../fields/dropdown-field/dropdown-field.component';
@@ -113,12 +114,75 @@ class NoDecoratorHostComponent {
       <formidable-textarea-field
         name="field"
         [ngModel]="value" />
-      <div formidableFieldPrefix>Prefix</div>
+      <div
+        formidableFieldPrefix
+        [align]="align">
+        Prefix
+      </div>
     </formidable-field-decorator>
   `
 })
 class TextareaPrefixHostComponent {
   value = '';
+  align: FieldAdornmentAlignment = 'center';
+}
+
+/** An adornment over a label that pushes the value down, so the two alignments visibly disagree. */
+@Component({
+  standalone: true,
+  imports: [
+    InputFieldComponent,
+    FieldDecoratorComponent,
+    FieldLabelDirective,
+    FieldPrefixDirective,
+    FieldSuffixDirective
+  ],
+  template: `
+    <formidable-field-decorator>
+      <formidable-input-field name="field" />
+      <div
+        formidableFieldLabel
+        [position]="labelPosition">
+        Label
+      </div>
+      <div
+        formidableFieldPrefix
+        [align]="align">
+        Prefix
+      </div>
+      <div
+        formidableFieldSuffix
+        [align]="align">
+        Suffix
+      </div>
+    </formidable-field-decorator>
+  `
+})
+class AdornmentAlignmentHostComponent {
+  align: FieldAdornmentAlignment = 'center';
+  labelPosition: FieldLabelPosition = 'inside';
+}
+
+/** An action in one slot and plain text in the other — the two have to answer a click differently. */
+@Component({
+  standalone: true,
+  imports: [InputFieldComponent, FieldDecoratorComponent, FieldPrefixDirective, FieldSuffixDirective],
+  template: `
+    <formidable-field-decorator>
+      <formidable-input-field name="field" />
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>
+        <button
+          type="button"
+          (click)="clicks = clicks + 1">
+          Clear
+        </button>
+      </div>
+    </formidable-field-decorator>
+  `
+})
+class AdornmentActionHostComponent {
+  clicks = 0;
 }
 
 /** A prefix and a suffix that come and go, the way a consumer's own `*ngIf` moves them. */
@@ -328,6 +392,122 @@ describe('formidable-field-decorator layout', () => {
     textarea.style.height = '12rem';
 
     expect(prefix.getBoundingClientRect().top).toBeCloseTo(before, 0);
+  });
+
+  /**
+   * `align` lets the consumer pick what the adornment follows: the field's box, or the value inside it.
+   * The two only differ where something pushes the value off the box's centre, which today is an inside
+   * label. A centred value takes the label's line-box as top padding, so its text sits half that padding
+   * below the box's middle — and an adornment given the same padding lands on it.
+   */
+  describe('adornment alignment', () => {
+    let fixture: ComponentFixture<AdornmentAlignmentHostComponent>;
+    let root: HTMLElement;
+
+    beforeEach(() => {
+      fixture = TestBed.createComponent(AdornmentAlignmentHostComponent);
+      fixture.detectChanges();
+      root = fixture.nativeElement as HTMLElement;
+    });
+
+    function field(): HTMLInputElement {
+      return root.querySelector('input') as HTMLInputElement;
+    }
+
+    // The wrapper's own box is pinned by `translateY(-50%)`, so what moves is the content inside it.
+    function prefix(): HTMLElement {
+      return root.querySelector('[formidableFieldPrefix]') as HTMLElement;
+    }
+
+    function suffix(): HTMLElement {
+      return root.querySelector('[formidableFieldSuffix]') as HTMLElement;
+    }
+
+    /** Where the field's text sits: centred in a content box an inside label has already shortened. */
+    function valueCentreY(): number {
+      return centreY(field()) + parseFloat(getComputedStyle(field()).paddingTop) / 2;
+    }
+
+    it('centers on the field, not on the value, by default', () => {
+      // the label has to be pushing the value down, or the two alignments are the same test
+      expect(parseFloat(getComputedStyle(field()).paddingTop)).toBeGreaterThan(0);
+
+      expect(centreY(prefix())).toBeCloseTo(centreY(field()), 0);
+      expect(centreY(suffix())).toBeCloseTo(centreY(field()), 0);
+    });
+
+    it('follows the value once asked to, prefix and suffix alike', () => {
+      fixture.componentInstance.align = 'value';
+      fixture.detectChanges();
+
+      expect(centreY(prefix())).toBeCloseTo(valueCentreY(), 0);
+      expect(centreY(suffix())).toBeCloseTo(valueCentreY(), 0);
+    });
+
+    // With the label in normal flow the value is already centred, so there is nothing to follow.
+    it('is a no-op where no label pushes the value down', () => {
+      fixture.componentInstance.labelPosition = 'outside';
+      fixture.componentInstance.align = 'value';
+      fixture.detectChanges();
+
+      expect(parseFloat(getComputedStyle(field()).paddingTop)).toBe(0);
+      expect(centreY(prefix())).toBeCloseTo(centreY(field()), 0);
+    });
+  });
+
+  /**
+   * A prefix/suffix wrapper is click-through, so a text adornment over the field's edge still focuses the
+   * field rather than swallowing the click. That is what made a clear/copy action impossible, so `button`
+   * and `a` inside one are excepted — a hit test is the assertion, not the computed property.
+   */
+  describe('with a projected action', () => {
+    let fixture: ComponentFixture<AdornmentActionHostComponent>;
+    let root: HTMLElement;
+
+    beforeEach(async () => {
+      fixture = TestBed.createComponent(AdornmentActionHostComponent);
+      root = await settle(fixture);
+    });
+
+    /** What a click at an element's centre would actually land on. */
+    function hit(element: Element): Element | null {
+      const rect = element.getBoundingClientRect();
+
+      return document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    }
+
+    it('lets a click reach a button in the suffix', () => {
+      const button = root.querySelector('button') as HTMLButtonElement;
+
+      expect(hit(button)).toBe(button);
+
+      button.click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.clicks).toBe(1);
+    });
+
+    it('keeps a text prefix click-through, so the field still takes the click', () => {
+      const prefix = root.querySelector('[formidableFieldPrefix]') as HTMLElement;
+
+      expect(hit(prefix)).toBe(root.querySelector('input'));
+    });
+  });
+
+  // A field that top-aligns its value already aligns with it, so it owns the decision — otherwise the
+  // value's padding would be added on top of the first-line offset and push the prefix past the text.
+  it('lets a value-top field keep its own alignment whatever the adornment asks for', () => {
+    const fixture = TestBed.createComponent(TextareaPrefixHostComponent);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const prefix = root.querySelector('[formidableFieldPrefix]') as HTMLElement;
+    const firstLine = prefix.getBoundingClientRect().top;
+
+    fixture.componentInstance.align = 'value';
+    fixture.detectChanges();
+
+    expect(prefix.getBoundingClientRect().top).toBeCloseTo(firstLine, 0);
   });
 
   // The bug this replaced: the measurement ran once and wrote inline padding only when it found a

@@ -7,6 +7,7 @@ import {
   CheckboxGroupFieldComponent,
   DateFieldComponent,
   DropdownFieldComponent,
+  FieldAdornmentAlignment,
   FieldDecoratorComponent,
   FieldErrorsDirective,
   FieldHintDirective,
@@ -285,11 +286,52 @@ export class ExampleFormComponent {
 
   protected onValueChanged(_fieldName: string, _value: unknown): void {
     this.log(`Value changed on ${_fieldName} field: ${_value}`);
+
+    if (_fieldName === 'hobby') this.simulateHobbyLookup();
   }
 
   protected onFocusChanged(_fieldName: string, _isFocused: boolean): void {
     this.log(`Focus changed on ${_fieldName} field: ${_isFocused}`);
   }
+
+  // #region Prefix & Suffix Actions
+
+  // The fields are one-way `[ngModel]`-bound to `formValue$`, and the form pipes its own changes back into
+  // it, so writing here is what an action needs to change a value.
+  private patchFormValue(patch: Partial<ExampleFormModel>): void {
+    this.formValue$.next({ ...this.formValue$.value, ...patch });
+  }
+
+  protected clearField(key: 'firstName' | 'middleName'): void {
+    this.patchFormValue({ [key]: '' });
+    this.log(`Cleared ${key} from its suffix.`);
+  }
+
+  protected copyField(key: 'firstName' | 'middleName'): void {
+    const value = this.formValue$.value[key] ?? '';
+
+    navigator.clipboard.writeText(value);
+    this.log(`Copied ${key} to the clipboard: ${value}`);
+  }
+
+  protected setToday(): void {
+    this.patchFormValue({ birthdate: new Date() });
+    this.log('Set birthdate to today from its prefix.');
+  }
+
+  protected isHobbyLoading = false;
+
+  /** Stands in for an async lookup, so the suffix demonstrates a spinner that comes and goes. */
+  private simulateHobbyLookup(): void {
+    this.isHobbyLoading = true;
+
+    setTimeout(() => {
+      this.isHobbyLoading = false;
+      this.cdRef.markForCheck();
+    }, 800);
+  }
+
+  // #endregion
 
   protected transformValueToThumbLabel = (value: number): string => {
     return `${value} years`;
@@ -421,6 +463,7 @@ export class ExampleFormComponent {
   protected controlCenter = {
     showPrefixes: true,
     showSuffixes: true,
+    showActions: false,
     showLabelAdornments: true,
     showLabels: true,
     showHints: true,
@@ -429,6 +472,7 @@ export class ExampleFormComponent {
   };
 
   protected labelPosition: FieldLabelPosition = 'inside';
+  protected adornmentAlignment: FieldAdornmentAlignment = 'center';
 
   // Since all components are change-detection OnPush, we need to trigger a change detection cycle
   protected renderFlip = true;
@@ -443,6 +487,11 @@ export class ExampleFormComponent {
 
   setLabelPosition(position: FieldLabelPosition): void {
     this.labelPosition = position;
+    this.clearLogs();
+  }
+
+  setAdornmentAlignment(alignment: FieldAdornmentAlignment): void {
+    this.adornmentAlignment = alignment;
     this.clearLogs();
   }
 
@@ -543,6 +592,7 @@ export class ExampleFormComponent {
 type ControlKey =
   | 'showPrefixes'
   | 'showSuffixes'
+  | 'showActions'
   | 'showLabelAdornments'
   | 'showLabels'
   | 'showHints'

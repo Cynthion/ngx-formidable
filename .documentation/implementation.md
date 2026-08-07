@@ -17,35 +17,25 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 ## Phase Overview
 
-|  Phase | Title                                  | Depends On |
-| -----: | :------------------------------------- | :--------- |
-|      5 | Prefix And Suffix — Actions, Alignment | —          |
-|      6 | Field State Styling                    | —          |
-|      7 | Border Geometry                        | 6          |
-|      8 | Date And Time Keyboard                 | —          |
-|      9 | Date Panel Responsiveness              | —          |
-|     10 | Small API Additions And Chores         | 8          |
-|     11 | ARIA — Fields, Errors, Support Text    | 6          |
-|     12 | ARIA — Panel And Option Fields         | 11         |
-|     13 | API Doc Comments                       | 1–12       |
-|     14 | README And Project Docs                | 13         |
-|     15 | Storybook                              | 13         |
-|     16 | Release                                | 14         |
-|     P1 | Portal — Design Proposal               | 16         |
-| P2–P10 | Portal — Build                         | P1         |
+|  Phase | Title                               | Depends On |
+| -----: | :---------------------------------- | :--------- |
+|      6 | Field State Styling                 | —          |
+|      7 | Border Geometry                     | 6          |
+|      8 | Date And Time Keyboard              | —          |
+|      9 | Date Panel Responsiveness           | —          |
+|     10 | Small API Additions And Chores      | 8          |
+|     11 | ARIA — Fields, Errors, Support Text | 6          |
+|     12 | ARIA — Panel And Option Fields      | 11         |
+|     13 | API Doc Comments                    | 1–12       |
+|     14 | README And Project Docs             | 13         |
+|     15 | Storybook                           | 13         |
+|     16 | Release                             | 14         |
+|     P1 | Portal — Design Proposal            | 16         |
+| P2–P10 | Portal — Build                      | P1         |
 
 ---
 
 ## Library Phases
-
-### Phase 5 — Prefix And Suffix: Actions And Alignment
-
-The re-measure a suffix action needs is already in place.
-
-- **Suffix Actions**: possible user features are: clear/reset, copy, validation state, loading. `field-suffix.directive.ts` is a bare marker directive today. Can the library provide something for such features to be implemented? can they be implemented today? I want to add fields to the example form that demo these. Also add them as quick examples in the README, if that is a good place.
-- **Vertical Alignment**: make prefix/suffix alignment configurable — vertically centered (default, as-is) or aligned with the field value (relevant when label position is inside and the value is pushed down a little). `FieldValueAlignment` exists but is field-driven and only `textarea-field` opts in; promote it to an input the consumer can override.
-
-**Clears**: the suffix-actions item and the prefix/suffix alignment item.
 
 ### Phase 6 — Field State Styling
 
@@ -141,6 +131,8 @@ Depends on Phase 13.
 - **Project Files**: add `CONTRIBUTING.md` (today a short list inside `README.md`) and a logo (there is no image asset; the title is plain text).
 - README.md must be overhauled. It is the starting place for a consumer, so it must sell every feature. The feature list is out of date.
 - Add a documentation hierarchy for examples, etc. so that README.md is not overcrowded.
+- Add reasoning why this library is an alternative to Angular Material, and why it might be a better choice for some use cases.
+- Overall, make sure to use ubiquitous and consistent terminology throughout documentation and code.
 
 **Clears**: the usage-docs, badges, feature-list, group-example, `CONTRIBUTING.md`, logo, custom-field and README items.
 
@@ -197,6 +189,7 @@ Kept for context only; the detail lived in the previous revision of this file an
 | Decorator Slot Cleanup       | The tooltip slot became `[formidableFieldLabelAdornment]` and now collapses with the label's row; prefix and suffix became `horizontal` and `inline` only; the `--formidable-color-field-tooltip` token was dropped                                                            |
 | Hint Text                    | `FieldHintDirective` plus a decorator hint row below the field; hints share the row and each aligns itself. No `FieldHintComponent`: a hint has no logic, so projection was enough. The errors mixin's `margin-bottom` went away — spacing below a decorator is the consumer's |
 | Option Fields                | `{ descendants: true }` on all five option queries; a `defaultOption` / `defaultOptionMode` input pair; the group empty state became plain text. The duplicated `computeAllOptions` collapsed into two tested helpers                                                          |
+| Prefix And Suffix            | An `align` input on both adornment directives (`center` / `value`), and a `_globals.scss` exception that makes a projected `button` / `a` clickable. No action components: the demo and `README.md` carry the clear, copy, validation-state and loading recipes instead        |
 
 ---
 

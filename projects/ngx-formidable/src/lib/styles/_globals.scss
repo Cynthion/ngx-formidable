@@ -27,3 +27,11 @@ formidable-field-decorator .hint-wrapper > [data-align='center'] {
 formidable-field-decorator .hint-wrapper > [data-align='end'] {
   text-align: end;
 }
+
+// An action projected into a prefix or suffix has to be clickable, while the wrapper around it stays
+// click-through so a plain text adornment still focuses the field. The consumer projects the button, so
+// the decorator's own (encapsulated) stylesheet cannot reach it.
+formidable-field-decorator .adornment-wrapper button,
+formidable-field-decorator .adornment-wrapper a {
+  pointer-events: auto;
+}

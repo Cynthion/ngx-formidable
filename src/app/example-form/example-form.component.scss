@@ -196,3 +196,57 @@ fieldset {
     background: var(--formidable-color-field-option-background-hovered);
   }
 }
+
+// Prefix / suffix actions. The library re-enables pointer events on a projected `button` or `a`; how it
+// looks is the consumer's, so these are ordinary demo styles.
+.adornment-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adornment-action {
+  padding: 2px 6px;
+  border: 1px solid var(--formidable-color-field-border);
+  border-radius: var(--formidable-field-border-radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: var(--formidable-color-field-option-background-hovered);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.adornment-state {
+  &.valid {
+    color: #16a34a;
+  }
+
+  &.invalid {
+    color: var(--formidable-color-validation-error);
+  }
+}
+
+.adornment-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--formidable-color-field-border);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: adornment-spin 700ms linear infinite;
+}
+
+@keyframes adornment-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

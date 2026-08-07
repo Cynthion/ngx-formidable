@@ -47,6 +47,12 @@ export type FieldValueAlignment = 'center' | 'top';
  * itself, so a `start` note and an `end` counter share one row.
  */
 export type FieldHintAlignment = 'start' | 'center' | 'end';
+/**
+ * What a projected prefix/suffix follows vertically: the `center` of the field's box (the default), or
+ * the field's `value`, which an inside label pushes down. A field that top-aligns its value
+ * (`valueAlignment: 'top'`) always aligns with it, so this has no effect there.
+ */
+export type FieldAdornmentAlignment = 'center' | 'value';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 /**
  * When an option field renders its `defaultOption`: `always` as the first entry, never sorted and never

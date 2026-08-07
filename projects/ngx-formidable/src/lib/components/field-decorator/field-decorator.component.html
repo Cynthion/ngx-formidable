@@ -121,6 +121,8 @@
   <div
     #prefixWrapperRef
     ngClass="prefix-wrapper-{{ decoratorLayout }}"
+    class="adornment-wrapper"
+    [class.align-value]="prefixAlignment === 'value'"
     [class.hidden]="!hasPrefix">
     <ng-content select="[formidableFieldPrefix]"></ng-content>
   </div>
@@ -131,6 +133,8 @@
   <div
     #suffixWrapperRef
     ngClass="suffix-wrapper-{{ decoratorLayout }}"
+    class="adornment-wrapper"
+    [class.align-value]="suffixAlignment === 'value'"
     [class.hidden]="!hasSuffix">
     <ng-content select="[formidableFieldSuffix]" />
   </div>

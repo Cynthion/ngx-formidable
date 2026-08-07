@@ -3,7 +3,6 @@
 Example:
 
 - Update usage documentation according to EnerQi
-- suffixes: clear/reset, copy, validation state, loading
 - group example, using ngModelGroup (see EnerQi appointment-page.form)
 - add badges to readme
 - exact feature list (per field and component) in readme
@@ -31,7 +30,6 @@ Improvements:
 
 - date/time field: arrow up/down to increment/decrement years/months/days and hours/minutes
 - date field: arrow down should not open panel, only navigate throught the dates. when the panel is open, the arrow keys must move the date selection in the panel.
-- add config for prefix and suffix to defined their vertical alignment: centered or with field value (mask, placeholder, value) (default: centered)
 - when label position is "inside", then the label should be shown and the placeholder only on focus (when the label is floating); this is similar to material's behavior
 - add tokens for the background, border, value (text) and label color when the field is invalid, disabled, readonly, focused, hovered and define the default colors for these states (similar to material's behavior)
 - allow the bottom border to be configured (thickness and color) when the field is invalid or focused (and defined default values)

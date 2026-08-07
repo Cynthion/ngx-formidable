@@ -905,6 +905,13 @@
   transform: none;
 }
 
+// Follows the value instead of the field's box. The wrapper stays centred, so giving it the value's own
+// top padding shifts its content down by half that padding — which is exactly where a centred value's text
+// lands once the same padding pushes it clear of an inside label.
+@mixin field-adornment-align-value {
+  padding-top: var(--formidable-field-value-padding-top, 0);
+}
+
 @mixin field-prefix-inline {
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
   margin-right: utils.spacing(8);

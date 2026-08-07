@@ -355,8 +355,8 @@ Wrap any field in a <formidable-field-decorator> to project:
 
 - Label: `<div formidableFieldLabel [position]="'inside'">…</div>`
 - Label adornment: `<div formidableFieldLabelAdornment>…</div>` — anything you want beside the label
-- Prefix: `<div formidableFieldPrefix>…</div>` — horizontal and inline fields only
-- Suffix: `<div formidableFieldSuffix>…</div>` — horizontal and inline fields only
+- Prefix: `<div formidableFieldPrefix [align]="'center'">…</div>` — horizontal and inline fields only
+- Suffix: `<div formidableFieldSuffix [align]="'center'">…</div>` — horizontal and inline fields only
 - Hint: `<div formidableFieldHint [align]="'end'">…</div>` — support text below the field, all layouts
 
 The decorator adjusts padding and forwards the wrapped field’s properties and events.
@@ -416,6 +416,99 @@ value (a prefix or suffix pushes it in too), stays on one line, and ellipsizes.
 The library ships no icons. Where a field has an icon, project your own into it — the date field's panel toggle
 draws a CSS arrow unless you project `<span formidableFieldToggleIcon>…</span>` directly into
 `<formidable-date-field>`. The toggle centers it; its size, color and hover feedback are yours.
+
+### Prefix And Suffix Alignment
+
+A prefix and a suffix each pick what they follow vertically with `align`:
+
+| `align`            | Behaviour                                                                    |
+| :----------------- | :--------------------------------------------------------------------------- |
+| `center` (default) | Centered in the field’s box, wherever the value happens to sit.              |
+| `value`            | Follows the value, which an `inside` or `inside-floating` label pushes down. |
+
+The two only differ where a label sits over the value — with an `outside` or `border` label the value is
+already centered, so `value` changes nothing. A field that top-aligns its value, like the textarea, always
+aligns with it and ignores `align`. The setting is for the horizontal layout; the inline layout is a
+centered row.
+
+```html
+<formidable-field-decorator>
+  <formidable-input-field
+    name="amount"
+    ngModel />
+  <div
+    formidableFieldLabel
+    [position]="'inside'">
+    Amount
+  </div>
+  <div
+    formidableFieldPrefix
+    [align]="'value'">
+    CHF
+  </div>
+</formidable-field-decorator>
+```
+
+### Action Prefixes And Suffixes
+
+A prefix and a suffix are click-through, so a text adornment over the field’s edge still focuses the field.
+A projected `<button>` or `<a>` is the exception — it takes the click, which is all a clear, copy, retry or
+loading action needs. The library ships no such components: it is your button, your icon, your label.
+
+Two things every action needs:
+
+- `type="button"` — otherwise it submits the form it sits in.
+- `(mousedown)="$event.preventDefault()"` — keeps the focus on the field, and stops a panel field closing
+  its panel underneath the click.
+
+The decorator re-measures its slots whenever their width changes, so an action that appears, disappears or
+swaps its content re-insets the field on its own. No refresh call exists because none is needed.
+
+**Clear / reset** — the button only exists while there is something to clear:
+
+```html
+<div formidableFieldSuffix>
+  <button
+    *ngIf="model.firstName"
+    type="button"
+    (mousedown)="$event.preventDefault()"
+    (click)="model.firstName = ''">
+    &times;
+  </button>
+</div>
+```
+
+**Copy**:
+
+```html
+<div formidableFieldSuffix>
+  <button
+    type="button"
+    [disabled]="!model.iban"
+    (mousedown)="$event.preventDefault()"
+    (click)="clipboard.writeText(model.iban)">
+    Copy
+  </button>
+</div>
+```
+
+**Validation state** — a glyph, not a control, so it stays click-through:
+
+```html
+<div formidableFieldSuffix>
+  <span [class.invalid]="errors['email']">{{ errors['email'] ? '✗' : '✓' }}</span>
+</div>
+```
+
+**Loading** — bind the flag your own async work sets:
+
+```html
+<div formidableFieldSuffix>
+  <span
+    *ngIf="isLookingUp"
+    class="spinner"></span>
+</div>
+```
 
 ## Field Components
 
@@ -808,8 +901,9 @@ When you add your own field component (by implementing `IFormidableField` or `IF
 - **Error rendering** simply by adding `formidableFieldErrors` — with or without a decorator around the field
 - **Hints** simply by projecting `formidableFieldHint` elements into the decorator
 - **Decorator support** — labels, label adornments, prefixes, suffixes and hints work out of the box. A
-  prefix/suffix is centered in your field's box; if your field top-aligns its value (like a textarea), set
-  `valueAlignment: 'top'` so they sit on its first line instead
+  prefix/suffix is centered in your field's box, or follows its value when the consumer sets `align`; if
+  your field top-aligns its value (like a textarea), set `valueAlignment: 'top'` so they sit on its first
+  line instead and `align` steps aside
 
 You don’t need any extra wiring; just implement the interface, extend `BaseFieldDirective`, and register the provider.
 

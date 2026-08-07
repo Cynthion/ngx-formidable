@@ -20,6 +20,7 @@ import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
 import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
 import {
+  FieldAdornmentAlignment,
   FieldDecoratorLayout,
   FieldValueAlignment,
   FORMIDABLE_FIELD,
@@ -107,6 +108,16 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
 
   protected get hasHint(): boolean {
     return !!this.projectedHint;
+  }
+
+  // Read off the projected directives rather than host-bound by them: the wrappers these style are the
+  // decorator's own elements, so it needs no global rule to reach them (a hint does).
+  protected get prefixAlignment(): FieldAdornmentAlignment {
+    return this.projectedPrefix?.align ?? 'center';
+  }
+
+  protected get suffixAlignment(): FieldAdornmentAlignment {
+    return this.projectedSuffix?.align ?? 'center';
   }
 
   private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
