@@ -1150,6 +1150,16 @@
   user-select: none;
 }
 
+// The group fields render their empty state as bare text rather than as an option, so it has to bring its
+// own padding: the option row's vertical rhythm, plus the field's horizontal padding — an option gets that
+// inset from its prefix marker, which this text has none of, and without it the text sits on the border.
+@mixin group-no-option {
+  @include no-option;
+
+  padding: var(--formidable-field-group-option-padding, #{tokens.$formidable-field-group-option-padding});
+  padding-inline: field-padding-x();
+}
+
 @mixin date-picker-wrapper {
   display: flex;
   justify-content: center;

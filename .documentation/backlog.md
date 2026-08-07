@@ -16,9 +16,6 @@ Improvements:
 
 - ensure all fields can be "focus on page load" (without panels being opened)
 - make DateFieldComponent `smaller` or render better for smaller screens
-- don't render `formidable-field-option` components when radiogroup and checkboxgroup are empty
-- add { descendants: true } to options (make options available with `ng-template`, e.g. EnerQi constitution form), see https://chatgpt.com/g/g-p-6881cf5951fc8191998a952f25c65a09-ngx-formidable/c/6972a872-f0bc-8327-a7cc-8bd0e35ddc7e
-- add a "defaultOption" input to select, dropdown, autocomplete, radio-group, checkbox-group fields (which is shown always as first or only when no match/option)
 - Prefer queueMicrotask over setTimeout where possible
 - Add Storybook stories for layout options
 - Toggle: allow setting layout to 'inline' or 'group'
@@ -61,6 +58,7 @@ The idea is a product page, where users can come to and play around with options
 - the example form is fully functional and can be filled out, and the current values are shown in a separate view (see below)
 - the fields of the new example form should be layed out in a grid and not all fields just using full width
 - all options of every field can be changed in the portal and the result is shown in the preview form
+- for options in fields, there should always be sample options that are disabled and readonly, so that the theming of them can be demoed
 - all theme tokens can be changed (with color picker or sliders, etc.) in the portal and the result is shown in the preview form
 - the resulting theme can be exported (copy-paste)
 - the portal is deployed as GitHub Pages

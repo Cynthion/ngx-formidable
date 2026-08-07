@@ -20,7 +20,7 @@ import {
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { isPrintableCharacter } from '../../../helpers/input.helpers';
-import { getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
+import { applyDefaultOption, combineFieldOptions, getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
 import {
   scrollHighlightedOptionIntoView,
   scrollIntoView,
@@ -28,6 +28,7 @@ import {
 } from '../../../helpers/position.helpers';
 import {
   FieldDecoratorLayout,
+  FieldDefaultOptionMode,
   FORMIDABLE_FIELD,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
@@ -115,7 +116,7 @@ export class DropdownFieldComponent
 
   ngOnChanges(changes: SimpleChanges): void {
     // react to changes of @Input properties
-    if (changes['options'] || changes['sortFn']) {
+    if (changes['options'] || changes['sortFn'] || changes['defaultOption'] || changes['defaultOptionMode']) {
       queueMicrotask(() => this.onOptionsChanged());
     }
   }
@@ -225,10 +226,12 @@ export class DropdownFieldComponent
   // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
+  @Input() defaultOption?: IFormidableFieldOption;
+  @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
   @Input() noOptionsText: string = NO_OPTIONS_TEXT;
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
 
-  @ContentChildren(FORMIDABLE_FIELD_OPTION)
+  @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
   optionComponents?: QueryList<IFormidableFieldOption>;
 
   protected readonly options$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
@@ -302,16 +305,9 @@ export class DropdownFieldComponent
   }
 
   private computeAllOptions(): IFormidableFieldOption[] {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
+    const combined = combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
 
-    let combined = [...inlineOptions, ...projectedOptions];
-
-    if (this.sortFn) {
-      combined = [...combined].sort(this.sortFn);
-    }
-
-    return combined;
+    return applyDefaultOption(combined, this.defaultOption, this.defaultOptionMode);
   }
 
   private updateOptions(allOptions: IFormidableFieldOption[]): void {

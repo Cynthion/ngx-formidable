@@ -19,7 +19,6 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 |  Phase | Title                                  | Depends On |
 | -----: | :------------------------------------- | :--------- |
-|      3 | Option Fields                          | —          |
 |      4 | Supporting Text                        | —          |
 |      5 | Prefix And Suffix — Actions, Alignment | —          |
 |      6 | Field State Styling                    | —          |
@@ -28,7 +27,7 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 |      9 | Date Panel Responsiveness              | —          |
 |     10 | Small API Additions And Chores         | 8          |
 |     11 | ARIA — Fields, Errors, Support Text    | 4, 6       |
-|     12 | ARIA — Panel And Option Fields         | 3, 11      |
+|     12 | ARIA — Panel And Option Fields         | 11         |
 |     13 | API Doc Comments                       | 1–12       |
 |     14 | README And Project Docs                | 13         |
 |     15 | Storybook                              | 13         |
@@ -39,16 +38,6 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 ---
 
 ## Library Phases
-
-### Phase 3 — Option Fields
-
-All three items touch the same five components: `select-field`, `dropdown-field`, `autocomplete-field`, `radio-group-field`, `checkbox-group-field`.
-
-- **Descendant Options**: all five use the bare one-argument `@ContentChildren(FORMIDABLE_FIELD_OPTION)`. Add `{ descendants: true }` so options wrapped in an `ng-template` are found. Prove it in the demo, mirroring the consumer's constitution form.
-- **Default Option**: add the `defaultOption` input to all five — shown always as first, or only when nothing matches. Today only `noOptionsText` exists, which is an empty-state label, not a default.
-- **No Empty Option Markup**: `radio-group-field` and `checkbox-group-field` render a hidden native input plus a full readonly `formidable-field-option` in their `@empty` branch. Drop it. Keep the panel empty-state in `dropdown-field` and `autocomplete-field` — inside a panel it is wanted.
-
-**Clears**: three _Improvements_ items.
 
 ### Phase 4 — Supporting Text
 
@@ -206,6 +195,7 @@ Kept for context only; the detail lived in the previous revision of this file an
 | Breaking API                 | `FieldDecoratorLayout` renamed to `horizontal` / `vertical` / `inline`; the whole `Form*` family prefixed `NgxFormidable`; icons externalized                                                                                              |
 | Styling And Theming          | New group and autofill tokens; the label became an explicit `position` choice; errors moved to a decorator slot below the field container                                                                                                  |
 | Decorator Slot Cleanup       | The tooltip slot became `[formidableFieldLabelAdornment]` and now collapses with the label's row; prefix and suffix became `horizontal` and `inline` only; the `--formidable-color-field-tooltip` token was dropped                        |
+| Option Fields                | `{ descendants: true }` on all five option queries; a `defaultOption` / `defaultOptionMode` input pair; the group empty state became plain text. The duplicated `computeAllOptions` collapsed into two tested helpers                      |
 
 ---
 
@@ -213,9 +203,11 @@ Kept for context only; the detail lived in the previous revision of this file an
 
 Defects that were not in `backlog.md` when this roadmap was written. Recorded here so they are not rediscovered.
 
-| Finding                                                                              | Disposition                          |
-| :----------------------------------------------------------------------------------- | :----------------------------------- |
-| Dead `--formidable-color-slider-thumb-border` override in `_forms.scss`              | Folded into Phase 6                  |
-| Stale `package-lock.json` in the library project                                     | Removed, with a `.gitignore` guard   |
-| The demo writes the selected theme to `localStorage` but never reads it back on init | Added to `backlog.md`, not scheduled |
-| No CI workflow; `deploy.yml` reinstalls from scratch rather than from the lockfile   | Added to `backlog.md`, not scheduled |
+| Finding                                                                                                                                                                                                                                                                                                | Disposition                             |
+| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------- |
+| Dead `--formidable-color-slider-thumb-border` override in `_forms.scss`                                                                                                                                                                                                                                | Folded into Phase 6                     |
+| The `descendants` backlog item's premise was wrong: Ivy's shallow content query already reaches into `@for`, `*ngIf` and `<ng-template>`. What it misses is an option nested in a wrapper **element**. `{ descendants: true }` shipped anyway and now covers both; `option-projection.spec.ts` pins it | Corrected while shipping Phase 3        |
+| Sharing one option `<ng-template>` across two fields is impossible: Angular resolves parent injection and content-query membership from the template's declaration site, so it must be written inside the field. EnerQi's constitution-form TODO cannot be done this way                               | Tell the consumer; not a library change |
+| Stale `package-lock.json` in the library project                                                                                                                                                                                                                                                       | Removed, with a `.gitignore` guard      |
+| The demo writes the selected theme to `localStorage` but never reads it back on init                                                                                                                                                                                                                   | Added to `backlog.md`, not scheduled    |
+| No CI workflow; `deploy.yml` reinstalls from scratch rather than from the lockfile                                                                                                                                                                                                                     | Added to `backlog.md`, not scheduled    |

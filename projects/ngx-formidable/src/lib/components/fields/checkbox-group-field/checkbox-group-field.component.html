@@ -35,21 +35,6 @@
       <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
     </formidable-field-option>
   } @empty {
-    <input
-      hidden
-      type="checkbox"
-      [id]="name + '-no-options'"
-      [tabindex]="-1"
-      [name]="name"
-      [value]="noOptionsText"
-      [disabled]="true" />
-    <formidable-field-option
-      #optionRef
-      [layout]="'checkbox-group'"
-      [value]="''"
-      [label]="noOptionsText"
-      [readonly]="true">
-      <div class="no-option">{{ noOptionsText }}</div>
-    </formidable-field-option>
+    <div class="no-option">{{ noOptionsText }}</div>
   }
 </div>

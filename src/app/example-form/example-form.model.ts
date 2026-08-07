@@ -8,8 +8,8 @@ export interface Password {
   confirmPassword?: string;
 }
 
-export type UserGender = 'male' | 'female';
-export type UserNationality = 'ch' | 'de' | 'fr' | 'jp';
+export type UserGender = 'male' | 'female' | 'unspecified';
+export type UserNationality = 'ch' | 'de' | 'fr' | 'jp' | 'other';
 export type UserReligion =
   | 'christian'
   | 'islam'
@@ -18,7 +18,8 @@ export type UserReligion =
   | 'buddhist'
   | 'agnostic'
   | 'atheist'
-  | 'custom';
+  | 'custom'
+  | 'none';
 
 export interface User {
   firstName: string;

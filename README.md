@@ -79,6 +79,7 @@ A powerful Angular component library for building rich, validated forms.
 • Radio Groups / Checkboxes
 • Date Picker / Time
 • Re-usable <code>formidable-field-option</code> for all option fields
+• Pinned or fallback <code>defaultOption</code> on every option field
 
 </td>
 </tr>
@@ -269,8 +270,9 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
       [disabled]="false"
       [readonly]="false"
       [ngModel]="vm.formValue.hobby"
-      [options]="hobbyOptions">
-      <!-- optional inline options -->
+      [options]="hobbyOptions"
+      [defaultOption]="{ value: 'none', label: 'None' }">
+      <!-- optional inline options, anywhere inside the field -->
       <formidable-field-option [value]="'gardening'">Gardening</formidable-field-option>
     </formidable-select-field>
     <div

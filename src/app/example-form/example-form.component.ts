@@ -131,6 +131,9 @@ export class ExampleFormComponent {
     { value: 'female', label: 'Female' }
   ];
 
+  // pinned first, ahead of the sortFn
+  protected genderDefaultOption: IFormidableFieldOption = { value: 'unspecified', label: 'Prefer not to say' };
+
   protected nationalityOptions: IFormidableFieldOption[] = [
     { value: 'jp', label: 'Japan 🇯🇵' },
     { value: 'de', label: 'Germany 🇩🇪' },
@@ -147,6 +150,8 @@ export class ExampleFormComponent {
     return a.label.localeCompare(b.label);
   };
 
+  protected nationalityDefaultOption: IFormidableFieldOption = { value: 'other', label: 'Other…' };
+
   protected nationalityNoOptionText = 'No nationality available.';
 
   protected hobbyOptions: IFormidableFieldOption[] = [
@@ -162,6 +167,9 @@ export class ExampleFormComponent {
     },
     { value: 'cooking', label: 'Cooking' }
   ];
+
+  // only rendered when the filter matches nothing
+  protected hobbyDefaultOption: IFormidableFieldOption = { value: 'add-new', label: 'Add a new hobby…' };
 
   protected hobbyNoOptionText = 'No hobby available.';
 
@@ -191,6 +199,8 @@ export class ExampleFormComponent {
     { value: 'buddhist', label: 'Buddhism' }
   ];
 
+  protected religionDefaultOption: IFormidableFieldOption = { value: 'none', label: 'None' };
+
   protected religionNoOptionText = 'No religion available.';
 
   protected allergiesOptions: IFormidableFieldOption[] = [
@@ -199,6 +209,16 @@ export class ExampleFormComponent {
     { value: 'peanuts', label: 'Peanuts' },
     { value: 'shellfish', label: 'Shellfish' }
   ];
+
+  // projected inside a wrapper element — only reachable with { descendants: true }
+  protected allergiesProjectedOptions: IFormidableFieldOption[] = [
+    { value: 'lactose', label: 'Lactose (disabled)', disabled: true },
+    { value: 'gluten', label: 'GLUTEN' },
+    { value: 'soy', label: 'Soy' }
+  ];
+
+  // only rendered when the group has no other option
+  protected allergiesDefaultOption: IFormidableFieldOption = { value: 'unknown', label: 'Not known yet' };
 
   protected allergiesNoOptionText = 'No allergies available.';
 

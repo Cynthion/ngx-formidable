@@ -348,6 +348,7 @@
             [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.gender"
             [options]="genderOptions"
+            [defaultOption]="genderDefaultOption"
             [sortFn]="sortAlphabetically"
             (valueChanged)="onValueChanged('gender', $event)"
             (focusChanged)="onFocusChanged('gender', $event)">
@@ -395,6 +396,7 @@
             [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.nationality"
             [options]="nationalityOptions"
+            [defaultOption]="nationalityDefaultOption"
             [noOptionsText]="nationalityNoOptionText"
             [panelPosition]="'left'"
             [sortFn]="sortAlphabetically"
@@ -466,6 +468,8 @@
             [readonly]="controlCenter.showAsReadonly"
             [disabled]="controlCenter.showAsDisabled"
             [options]="hobbyOptions"
+            [defaultOption]="hobbyDefaultOption"
+            [defaultOptionMode]="'fallback'"
             [noOptionsText]="hobbyNoOptionText"
             [sortFn]="sortAlphabetically"
             (valueChanged)="onValueChanged('hobby', $event)"
@@ -672,29 +676,34 @@
             [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.religion"
             [options]="religionOptions"
+            [defaultOption]="religionDefaultOption"
             [noOptionsText]="religionNoOptionText"
             [sortFn]="sortAlphabetically"
             (valueChanged)="onValueChanged('religion', $event)"
             (focusChanged)="onFocusChanged('religion', $event)">
-            <formidable-field-option
-              [value]="'atheist'"
-              [label]="'Atheist'"
-              [disabled]="true">
-              Atheist (disabled)
-            </formidable-field-option>
-            <formidable-field-option
-              [value]="'agnostic'"
-              [label]="'AGNOSTIC'"
-              >Agnostic (other label)</formidable-field-option
-            >
-            <formidable-field-option [value]="'other'">Other (no label)</formidable-field-option>
-            <formidable-field-option
-              [value]="'custom'"
-              [label]="'The Special One'"
-              [match]="specialMatchFn">
-              <p>I'm a special item</p>
-              <pre>And I can have any content</pre>
-            </formidable-field-option>
+            <!-- projected through an ng-template, mirroring the consumer's constitution form -->
+            <ng-container *ngTemplateOutlet="religionProjectedOptions"></ng-container>
+            <ng-template #religionProjectedOptions>
+              <formidable-field-option
+                [value]="'atheist'"
+                [label]="'Atheist'"
+                [disabled]="true">
+                Atheist (disabled)
+              </formidable-field-option>
+              <formidable-field-option
+                [value]="'agnostic'"
+                [label]="'AGNOSTIC'"
+                >Agnostic (other label)</formidable-field-option
+              >
+              <formidable-field-option [value]="'other'">Other (no label)</formidable-field-option>
+              <formidable-field-option
+                [value]="'custom'"
+                [label]="'The Special One'"
+                [match]="specialMatchFn">
+                <p>I'm a special item</p>
+                <pre>And I can have any content</pre>
+              </formidable-field-option>
+            </ng-template>
           </formidable-radio-group-field>
           <div
             *ngIf="controlCenter.showLabels"
@@ -723,22 +732,23 @@
             [disabled]="controlCenter.showAsDisabled"
             [ngModel]="vm.formValue$.allergies"
             [options]="allergiesOptions"
+            [defaultOption]="allergiesDefaultOption"
+            [defaultOptionMode]="'fallback'"
             [noOptionsText]="allergiesNoOptionText"
             [sortFn]="sortAlphabetically"
             (valueChanged)="onValueChanged('allergies', $event)"
             (focusChanged)="onFocusChanged('allergies', $event)">
-            <formidable-field-option
-              [value]="'lactose'"
-              [label]="'Lactose'"
-              [disabled]="true">
-              Lactose (disabled)
-            </formidable-field-option>
-            <formidable-field-option
-              [value]="'gluten'"
-              [label]="'GLUTEN'"
-              >Gluten (other label)</formidable-field-option
-            >
-            <formidable-field-option [value]="'soy'">Soy (no label)</formidable-field-option>
+            <!-- wrapped in an element and looped: the wrapper is only reachable with { descendants: true } -->
+            <div class="option-group">
+              @for (option of allergiesProjectedOptions; track option.value) {
+                <formidable-field-option
+                  [value]="option.value"
+                  [label]="option.label"
+                  [disabled]="option.disabled || false">
+                  {{ option.label }}
+                </formidable-field-option>
+              }
+            </div>
             <formidable-field-option
               [value]="'custom'"
               [label]="'The Special One'"

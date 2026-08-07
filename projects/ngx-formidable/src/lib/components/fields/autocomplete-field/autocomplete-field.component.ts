@@ -21,7 +21,7 @@ import {
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
-import { getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
+import { applyDefaultOption, combineFieldOptions, getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
 import {
   scrollHighlightedOptionIntoView,
   scrollIntoView,
@@ -29,6 +29,7 @@ import {
 } from '../../../helpers/position.helpers';
 import {
   FieldDecoratorLayout,
+  FieldDefaultOptionMode,
   FORMIDABLE_FIELD,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
@@ -116,7 +117,7 @@ export class AutocompleteFieldComponent
 
   ngOnChanges(changes: SimpleChanges): void {
     // react to changes of @Input properties
-    if (changes['options'] || changes['sortFn']) {
+    if (changes['options'] || changes['sortFn'] || changes['defaultOption'] || changes['defaultOptionMode']) {
       queueMicrotask(() => this.onOptionsChanged());
     }
   }
@@ -193,7 +194,9 @@ export class AutocompleteFieldComponent
   protected doWriteValue(value: string | null): void {
     this._writtenValue = value ?? null;
 
-    const found = this.computeAllOptions().find((opt) => opt.value === this._writtenValue);
+    const found = this.computeSelectableOptions(this.computeAllOptions()).find(
+      (opt) => opt.value === this._writtenValue
+    );
     this.selectedOption = found ? { ...found } : undefined;
 
     // write to wrapped input element — if the option isn't found yet (options may not be
@@ -235,10 +238,12 @@ export class AutocompleteFieldComponent
   // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
+  @Input() defaultOption?: IFormidableFieldOption;
+  @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
   @Input() noOptionsText: string = NO_OPTIONS_TEXT;
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
 
-  @ContentChildren(FORMIDABLE_FIELD_OPTION)
+  @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
   optionComponents?: QueryList<IFormidableFieldOption>;
 
   protected readonly filteredOptions$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
@@ -311,7 +316,7 @@ export class AutocompleteFieldComponent
       this.writeValue(this._writtenValue);
     }
 
-    this.reconcileSelectionAgainstOptions(allOptions);
+    this.reconcileSelectionAgainstOptions(this.computeSelectableOptions(allOptions));
 
     // keep highlight consistent if panel is open
     if (this.isPanelOpen) {
@@ -323,16 +328,15 @@ export class AutocompleteFieldComponent
   }
 
   private computeAllOptions(): IFormidableFieldOption[] {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
+    return combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
+  }
 
-    let combined = [...inlineOptions, ...projectedOptions];
-
-    if (this.sortFn) {
-      combined = [...combined].sort(this.sortFn);
-    }
-
-    return combined;
+  /**
+   * A configured default option is always selectable, whatever its mode: in `fallback` mode whether it
+   * renders depends on the current filter, so excluding it here would deselect it on the next keystroke.
+   */
+  private computeSelectableOptions(allOptions: IFormidableFieldOption[]): IFormidableFieldOption[] {
+    return this.defaultOption ? [this.defaultOption, ...allOptions] : allOptions;
   }
 
   private updateFilteredOptions(allOptions: IFormidableFieldOption[]): void {
@@ -344,7 +348,8 @@ export class AutocompleteFieldComponent
         )
       : allOptions;
 
-    this.filteredOptions$.next(filteredOptions);
+    // the default option is pinned after filtering, so an `always` default survives a non-matching filter
+    this.filteredOptions$.next(applyDefaultOption(filteredOptions, this.defaultOption, this.defaultOptionMode));
   }
 
   private reconcileSelectionAgainstOptions(allOptions: IFormidableFieldOption[]): void {
@@ -482,7 +487,7 @@ export class AutocompleteFieldComponent
         const allOptions = this.computeAllOptions();
 
         this.updateFilteredOptions(allOptions);
-        this.tryAutoSelectExactValue(allOptions);
+        this.tryAutoSelectExactValue(this.computeSelectableOptions(allOptions));
 
         if (!this.isPanelOpen) {
           this.togglePanel(true);

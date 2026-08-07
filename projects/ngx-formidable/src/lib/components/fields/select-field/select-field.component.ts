@@ -16,8 +16,10 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, takeUntil } from 'rxjs';
+import { applyDefaultOption, combineFieldOptions } from '../../../helpers/option.helpers';
 import {
   FieldDecoratorLayout,
+  FieldDefaultOptionMode,
   FORMIDABLE_FIELD,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
@@ -84,7 +86,7 @@ export class SelectFieldComponent
 
   ngOnChanges(changes: SimpleChanges): void {
     // react to changes of @Input properties
-    if (changes['options'] || changes['sortFn']) {
+    if (changes['options'] || changes['sortFn'] || changes['defaultOption'] || changes['defaultOptionMode']) {
       queueMicrotask(() => this.onOptionsChanged());
     }
   }
@@ -143,10 +145,12 @@ export class SelectFieldComponent
   // #region IFormidableOptionField
 
   @Input() options?: IFormidableFieldOption[] = [];
+  @Input() defaultOption?: IFormidableFieldOption;
+  @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
   @Input() noOptionsText: string = NO_OPTIONS_TEXT;
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
 
-  @ContentChildren(FORMIDABLE_FIELD_OPTION)
+  @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
   optionComponents?: QueryList<IFormidableFieldOption>;
 
   protected readonly options$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
@@ -165,16 +169,9 @@ export class SelectFieldComponent
   }
 
   private computeAllOptions(): IFormidableFieldOption[] {
-    const inlineOptions = this.options ?? [];
-    const projectedOptions = this.optionComponents?.toArray() ?? [];
+    const combined = combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
 
-    let combined = [...inlineOptions, ...projectedOptions];
-
-    if (this.sortFn) {
-      combined = [...combined].sort(this.sortFn);
-    }
-
-    return combined;
+    return applyDefaultOption(combined, this.defaultOption, this.defaultOptionMode);
   }
 
   private updateOptions(allOptions: IFormidableFieldOption[]): void {

@@ -35,21 +35,6 @@
       <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
     </formidable-field-option>
   } @empty {
-    <input
-      hidden
-      type="radio"
-      [id]="name + '-no-options'"
-      [tabindex]="-1"
-      [name]="name"
-      [value]="''"
-      [disabled]="true" />
-    <formidable-field-option
-      #optionRef
-      [layout]="'radio-group'"
-      [value]="''"
-      [label]="noOptionsText"
-      [readonly]="true">
-      <div class="no-option">{{ noOptionsText }}</div>
-    </formidable-field-option>
+    <div class="no-option">{{ noOptionsText }}</div>
   }
 </div>

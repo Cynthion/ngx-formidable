@@ -74,13 +74,15 @@ Multi-line text with optional autosize and a length indicator.
 
 Native-style single select. Options come from the `options` input or projected `formidable-field-option` children.
 
-| Input           | Type                       | Default                   | Description            |
-| :-------------- | :------------------------- | :------------------------ | :--------------------- |
-| `options`       | `IFormidableFieldOption[]` | `[]`                      | Option list            |
-| `noOptionsText` | `string`                   | `'No options available.'` | Empty-state text       |
-| `sortFn`        | `(a, b) => number`         | —                         | Optional option sorter |
+| Input               | Type                       | Default                   | Description            |
+| :------------------ | :------------------------- | :------------------------ | :--------------------- |
+| `options`           | `IFormidableFieldOption[]` | `[]`                      | Option list            |
+| `defaultOption`     | `IFormidableFieldOption`   | —                         | Option pinned first    |
+| `defaultOptionMode` | `FieldDefaultOptionMode`   | `'always'`                | When it renders        |
+| `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text       |
+| `sortFn`            | `(a, b) => number`         | —                         | Optional option sorter |
 
-Collects options via `@ContentChildren(FORMIDABLE_FIELD_OPTION)` and provides `FORMIDABLE_OPTION_FIELD`. **Use when** a compact single-choice control fits.
+Collects options via `@ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })` and provides `FORMIDABLE_OPTION_FIELD`. **Use when** a compact single-choice control fits.
 
 ### Dropdown Field
 
@@ -88,13 +90,15 @@ Collects options via `@ContentChildren(FORMIDABLE_FIELD_OPTION)` and provides `F
 
 Custom single-select with a floating panel.
 
-| Input           | Type                       | Default                   | Description                |
-| :-------------- | :------------------------- | :------------------------ | :------------------------- |
-| `options`       | `IFormidableFieldOption[]` | `[]`                      | Option list                |
-| `noOptionsText` | `string`                   | `'No options available.'` | Empty-state text           |
-| `sortFn`        | `(a, b) => number`         | —                         | Optional option sorter     |
-| `isPanelOpen`   | `boolean`                  | `false`                   | Panel open state (get/set) |
-| `panelPosition` | `FormidablePanelPosition`  | `'full'`                  | Panel alignment            |
+| Input               | Type                       | Default                   | Description                |
+| :------------------ | :------------------------- | :------------------------ | :------------------------- |
+| `options`           | `IFormidableFieldOption[]` | `[]`                      | Option list                |
+| `defaultOption`     | `IFormidableFieldOption`   | —                         | Option pinned first        |
+| `defaultOptionMode` | `FieldDefaultOptionMode`   | `'always'`                | When it renders            |
+| `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text           |
+| `sortFn`            | `(a, b) => number`         | —                         | Optional option sorter     |
+| `isPanelOpen`       | `boolean`                  | `false`                   | Panel open state (get/set) |
+| `panelPosition`     | `FormidablePanelPosition`  | `'full'`                  | Panel alignment            |
 
 Supports projected `formidable-field-option` children. **Use when** you need a styled dropdown with rich option content.
 
@@ -104,15 +108,17 @@ Supports projected `formidable-field-option` children. **Use when** you need a s
 
 Dropdown panel plus a filter input. Emits filter text; the consumer supplies filtered options (the demo pairs it with fuse.js).
 
-| Input           | Type                       | Default                   | Description                |
-| :-------------- | :------------------------- | :------------------------ | :------------------------- |
-| `options`       | `IFormidableFieldOption[]` | `[]`                      | Option list                |
-| `noOptionsText` | `string`                   | `'No options available.'` | Empty-state text           |
-| `sortFn`        | `(a, b) => number`         | —                         | Optional option sorter     |
-| `isPanelOpen`   | `boolean`                  | `false`                   | Panel open state (get/set) |
-| `panelPosition` | `FormidablePanelPosition`  | `'full'`                  | Panel alignment            |
+| Input               | Type                       | Default                   | Description                |
+| :------------------ | :------------------------- | :------------------------ | :------------------------- |
+| `options`           | `IFormidableFieldOption[]` | `[]`                      | Option list                |
+| `defaultOption`     | `IFormidableFieldOption`   | —                         | Option pinned first        |
+| `defaultOptionMode` | `FieldDefaultOptionMode`   | `'always'`                | When it renders            |
+| `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text           |
+| `sortFn`            | `(a, b) => number`         | —                         | Optional option sorter     |
+| `isPanelOpen`       | `boolean`                  | `false`                   | Panel open state (get/set) |
+| `panelPosition`     | `FormidablePanelPosition`  | `'full'`                  | Panel alignment            |
 
-**Output** `filterChanged: EventEmitter<string>` (+ `filterChange$`). **Use when** the option set is large or fetched/filtered dynamically.
+The default option is pinned after filtering, so an `always` default stays visible even when the filter matches nothing. **Output** `filterChanged: EventEmitter<string>` (+ `filterChange$`). **Use when** the option set is large or fetched/filtered dynamically.
 
 ### Date Field
 
@@ -189,13 +195,15 @@ Range slider with optional tick marks and labels.
 
 Single choice from projected options.
 
-| Input           | Type                       | Default                   | Description      |
-| :-------------- | :------------------------- | :------------------------ | :--------------- |
-| `options`       | `IFormidableFieldOption[]` | `[]`                      | Option list      |
-| `noOptionsText` | `string`                   | `'No options available.'` | Empty-state text |
-| `sortFn`        | `(a, b) => number`         | —                         | Optional sorter  |
+| Input               | Type                       | Default                   | Description         |
+| :------------------ | :------------------------- | :------------------------ | :------------------ |
+| `options`           | `IFormidableFieldOption[]` | `[]`                      | Option list         |
+| `defaultOption`     | `IFormidableFieldOption`   | —                         | Option pinned first |
+| `defaultOptionMode` | `FieldDefaultOptionMode`   | `'always'`                | When it renders     |
+| `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text    |
+| `sortFn`            | `(a, b) => number`         | —                         | Optional sorter     |
 
-Collects `formidable-field-option` children. **Use when** all choices should be visible and mutually exclusive.
+Collects `formidable-field-option` children. With no options it renders `noOptionsText` as plain text, not as an option. **Use when** all choices should be visible and mutually exclusive.
 
 ### Checkbox Group Field
 
@@ -203,13 +211,15 @@ Collects `formidable-field-option` children. **Use when** all choices should be 
 
 Multi-select from projected options.
 
-| Input           | Type                       | Default                   | Description      |
-| :-------------- | :------------------------- | :------------------------ | :--------------- |
-| `options`       | `IFormidableFieldOption[]` | `[]`                      | Option list      |
-| `noOptionsText` | `string`                   | `'No options available.'` | Empty-state text |
-| `sortFn`        | `(a, b) => number`         | —                         | Optional sorter  |
+| Input               | Type                       | Default                   | Description         |
+| :------------------ | :------------------------- | :------------------------ | :------------------ |
+| `options`           | `IFormidableFieldOption[]` | `[]`                      | Option list         |
+| `defaultOption`     | `IFormidableFieldOption`   | —                         | Option pinned first |
+| `defaultOptionMode` | `FieldDefaultOptionMode`   | `'always'`                | When it renders     |
+| `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text    |
+| `sortFn`            | `(a, b) => number`         | —                         | Optional sorter     |
 
-Collects `formidable-field-option` children. **Use when** multiple choices may be selected.
+Collects `formidable-field-option` children. With no options it renders `noOptionsText` as plain text, not as an option. **Use when** multiple choices may be selected.
 
 ---
 
@@ -257,7 +267,7 @@ A floating label's value clears it because the `label-inside` host hands the fie
 
 **Selector** `formidable-field-option`
 
-A single option inside an option-based field. Provides `FORMIDABLE_FIELD_OPTION` and throws if used outside a `FORMIDABLE_OPTION_FIELD` parent. Supports projected template content.
+A single option inside an option-based field. Provides `FORMIDABLE_FIELD_OPTION` and throws if used outside a `FORMIDABLE_OPTION_FIELD` parent. Supports projected template content. It may sit anywhere inside the field element — directly, inside a `@for` / `*ngIf` / `<ng-template>`, or nested in a wrapper element — but it must be **written inside** that element: Angular resolves both the parent injection and the content query from where the option is declared, not from where it renders.
 
 | Input         | Type                  | Default    | Description           |
 | :------------ | :-------------------- | :--------- | :-------------------- |
@@ -329,6 +339,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | Name                                 | Definition                                                                                                       |
 | :----------------------------------- | :--------------------------------------------------------------------------------------------------------------- |
 | `FieldDecoratorLayout`               | `'horizontal' \| 'vertical' \| 'inline'`                                                                         |
+| `FieldDefaultOptionMode`             | `'always' \| 'fallback'`                                                                                         |
 | `FieldLabelPosition`                 | `'outside' \| 'inside' \| 'inside-floating' \| 'border' \| 'border-prefix'`                                      |
 | `FieldOptionLayout`                  | `'inline' \| 'radio-group' \| 'checkbox-group'`                                                                  |
 | `FieldValueAlignment`                | `'center' \| 'top'`                                                                                              |
@@ -336,6 +347,8 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `FormidablePanelPosition`            | `'left' \| 'right' \| 'full'`                                                                                    |
 | `FormidableToggleFieldLabelPosition` | `'before' \| 'after'`                                                                                            |
 | `IFormidableFieldOption`             | `{ value: string; label?; template?; readonly?; disabled?; selected?; highlighted?; select?(); match?(filter) }` |
+
+`FieldDefaultOptionMode` decides when an option field renders its `defaultOption`: `always`, pinned first and exempt from both `sortFn` and the autocomplete filter, or as a `fallback` only when the list would otherwise be empty.
 
 `FormidableEmptyHint` sets what the date/time fields show while empty **and unfocused** — `_` slots or the `unicodeTokenFormat` itself. A focused empty field always shows `_` slots, because ngx-mask's caret arithmetic only recognizes its own placeholder character.
 

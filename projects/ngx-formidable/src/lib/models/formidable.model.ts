@@ -43,6 +43,11 @@ export type FieldLabelPosition = 'outside' | 'inside' | 'inside-floating' | 'bor
  */
 export type FieldValueAlignment = 'center' | 'top';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
+/**
+ * When an option field renders its `defaultOption`: `always` as the first entry, never sorted and never
+ * filtered, or only as a `fallback` when the option list would otherwise be empty.
+ */
+export type FieldDefaultOptionMode = 'always' | 'fallback';
 export type FormidablePanelPosition = 'left' | 'right' | 'full';
 export type FormidableToggleFieldLabelPosition = 'before' | 'after';
 export type FormidableTranslateErrorFn = (error: string) => string;
@@ -83,7 +88,9 @@ export interface IFormidableField<T = string | null> {
 /** Interface for all Formidable fields that support multiple options. */
 export interface IFormidableOptionField {
   options?: IFormidableFieldOption[];
-  noOptionsOption?: IFormidableFieldOption;
+  /** An option pinned to the top of the list — see `defaultOptionMode` for when it renders. */
+  defaultOption?: IFormidableFieldOption;
+  defaultOptionMode: FieldDefaultOptionMode;
   selectOption(option: IFormidableFieldOption): void;
   sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
 }

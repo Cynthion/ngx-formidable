@@ -13,7 +13,7 @@ Coding conventions for the library. See also: `architecture.md` (structure, key 
 ## Field Contract
 
 - Field components extend `BaseFieldDirective<T>` and register two providers: `NG_VALUE_ACCESSOR` (via `forwardRef`, `multi: true`) and `FORMIDABLE_FIELD` (`useExisting`) — this is what makes them work with `ngModel` and be discovered by `FieldDecoratorComponent`.
-- Option-based fields additionally collect options with `@ContentChildren(FORMIDABLE_FIELD_OPTION)` and provide `FORMIDABLE_OPTION_FIELD`.
+- Option-based fields additionally collect options with `@ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })` and provide `FORMIDABLE_OPTION_FIELD`. `descendants` is what lets an option sit inside a wrapper element; a shallow query already reaches into `@for` / `*ngIf` / `<ng-template>`.
 - `BaseFieldDirective` is the extension point for custom fields; `example-custom-color-picker` in the demo is the reference implementation. The full contract is documented in `ui_components.md`.
 
 ## Inputs, Outputs And Observables
