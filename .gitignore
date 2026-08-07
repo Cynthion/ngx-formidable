@@ -12,6 +12,11 @@ node_modules
 npm-debug.log
 yarn-error.log
 
+# Nested lockfiles — the workspace installs from the root only. A lockfile inside a project invites
+# `npm install` being run there, which creates a nested `node_modules` that shadows the root install
+# with a second `@angular/core` and breaks `TestBed`.
+projects/**/package-lock.json
+
 # IDEs and editors
 .idea/
 .project

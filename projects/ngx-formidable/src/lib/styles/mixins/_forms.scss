@@ -7,10 +7,28 @@
   @return var(--formidable-field-padding-x, #{tokens.$formidable-field-padding-x});
 }
 
-// Where the field's value starts horizontally: the field's padding, or the inset the decorator measures
-// when a projected prefix/suffix pushes the value further in.
+// The field's own horizontal padding: its padding-x, or the width a projected prefix/suffix takes once
+// the decorator has measured one.
+@function field-padding-left() {
+  @return var(--formidable-field-prefix-inset, #{field-padding-x()});
+}
+
+@function field-padding-right() {
+  @return var(--formidable-field-suffix-inset, #{field-padding-x()});
+}
+
+// What an in-field panel toggle takes from the field's right edge. Zero until a decorator raises it.
+@function field-toggle-inset() {
+  @return var(--formidable-field-toggle-inset);
+}
+
+// Where the field's value starts and ends: the field's own padding, plus a toggle on the right.
 @function field-value-inset($side) {
-  @return var(--formidable-field-value-inset-#{$side}, #{field-padding-x()});
+  @if $side == 'left' {
+    @return field-padding-left();
+  }
+
+  @return calc(#{field-padding-right()} + #{field-toggle-inset()});
 }
 
 @mixin icon {
@@ -243,7 +261,7 @@
   @include field;
 
   height: var(--formidable-field-height, #{tokens.$formidable-field-height});
-  padding: 0 field-padding-x(); // horizontal padding only
+  padding: 0 field-padding-right() 0 field-padding-left(); // horizontal padding only
   // The field box is inline-level inside a block host, so without this the host's line box adds a
   // baseline descender below it and the field's container ends up taller than the field.
   vertical-align: top;
@@ -817,6 +835,12 @@
   --formidable-field-value-top: var(--formidable-label-inside-value-top, #{tokens.$formidable-label-inside-value-top});
 }
 
+// Set on the decorator while its field renders a panel toggle inside its own box. The toggle sits at the
+// field's inner right edge, and the value, an inside label and a projected suffix all have to clear it.
+@mixin field-toggle-inset-host {
+  --formidable-field-toggle-inset: var(--formidable-field-toggle-size, #{tokens.$formidable-field-toggle-size});
+}
+
 @mixin field-tooltip {
   color: var(--formidable-color-field-tooltip, #{tokens.$formidable-color-field-tooltip});
 }
@@ -853,6 +877,9 @@
   z-index: 1; // keep on top of field
 }
 
+// A suffix and an in-field panel toggle both sit at the field's right edge without colliding: the suffix
+// is measured into the field's own `padding-right`, and the toggle is a flex item inside that padding, so
+// reserving the suffix's width is what moves the toggle left of it. Only the value inset adds the toggle.
 @mixin field-suffix-horizontal {
   @include field-prefix-horizontal;
 
@@ -1138,8 +1165,10 @@
 @mixin dropdown-toggle {
   cursor: pointer;
   user-select: none;
-  width: utils.spacing(32);
-  height: utils.spacing(32);
+  // The value inset reserves exactly this width, so the toggle must not be flex-shrunk out of it.
+  flex: none;
+  width: var(--formidable-field-toggle-size, #{tokens.$formidable-field-toggle-size});
+  height: var(--formidable-field-toggle-size, #{tokens.$formidable-field-toggle-size});
   display: flex;
   align-items: center;
   justify-content: center;

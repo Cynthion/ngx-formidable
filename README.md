@@ -428,6 +428,8 @@ You can also tweak Pikaday CSS.
 | `--formidable-label-height`                                 | Computed height of the label text line box.                                                                         |
 | `--formidable-field-height`                                 | Default height for single-line fields.                                                                              |
 | `--formidable-field-padding-x`                              | Horizontal padding of a field: where its value, and a projected prefix's text, start.                               |
+| `--formidable-field-toggle-size`                            | Size of the panel toggle a dropdown or date field draws inside its own box.                                         |
+| `--formidable-field-toggle-inset`                           | How much of a field's right edge that toggle claims. Raised by the decorator for the fields that have one.          |
 | `--formidable-field-inner-height`                           | Computed height inside a field's borders.                                                                           |
 | `--formidable-field-value-height`                           | Computed height of a field value's text line box.                                                                   |
 | `--formidable-label-floating-height`                        | Computed height of a floating label's text line box.                                                                |

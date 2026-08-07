@@ -1,3 +1,4 @@
+import { NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
@@ -6,11 +7,16 @@ import { provideNgxMask } from 'ngx-mask';
 import { enforce, staticSuite, test } from 'vest';
 import { FieldErrorsDirective } from '../../directives/field-errors.directive';
 import { FieldErrorsComponent } from '../field-errors/field-errors.component';
+import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
 import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
 import { NgxFormidableFormDirective } from '../../directives/form.directive';
+import { AutocompleteFieldComponent } from '../fields/autocomplete-field/autocomplete-field.component';
+import { DateFieldComponent } from '../fields/date-field/date-field.component';
+import { DropdownFieldComponent } from '../fields/dropdown-field/dropdown-field.component';
 import { InputFieldComponent } from '../fields/input-field/input-field.component';
 import { TextareaFieldComponent } from '../fields/textarea-field/textarea-field.component';
+import { TimeFieldComponent } from '../fields/time-field/time-field.component';
 import { FieldDecoratorComponent } from './field-decorator.component';
 
 /**
@@ -114,6 +120,72 @@ class TextareaPrefixHostComponent {
   value = '';
 }
 
+/** A prefix and a suffix that come and go, the way a consumer's own `*ngIf` moves them. */
+@Component({
+  standalone: true,
+  imports: [NgIf, InputFieldComponent, FieldDecoratorComponent, FieldPrefixDirective],
+  template: `
+    <formidable-field-decorator>
+      <formidable-input-field name="field" />
+      <div
+        *ngIf="showPrefix"
+        formidableFieldPrefix
+        style="width: 4rem">
+        Prefix
+      </div>
+    </formidable-field-decorator>
+  `
+})
+class TogglablePrefixHostComponent {
+  showPrefix = true;
+}
+
+/** A field that renders its own panel toggle, with an inside label and an optional suffix beside it. */
+@Component({
+  standalone: true,
+  imports: [NgIf, DropdownFieldComponent, FieldDecoratorComponent, FieldLabelDirective, FieldSuffixDirective],
+  template: `
+    <formidable-field-decorator>
+      <formidable-dropdown-field
+        name="field"
+        [readonly]="readonly" />
+      <div
+        formidableFieldLabel
+        [position]="'inside'">
+        Label
+      </div>
+      <div
+        *ngIf="showSuffix"
+        formidableFieldSuffix>
+        Suffix
+      </div>
+    </formidable-field-decorator>
+  `
+})
+class ToggleFieldHostComponent {
+  readonly = false;
+  showSuffix = false;
+}
+
+/** The four panel-ish fields: only two of them draw a toggle inside the field. */
+@Component({
+  standalone: true,
+  imports: [
+    FieldDecoratorComponent,
+    DropdownFieldComponent,
+    DateFieldComponent,
+    AutocompleteFieldComponent,
+    TimeFieldComponent
+  ],
+  template: `
+    <formidable-field-decorator><formidable-dropdown-field name="a" /></formidable-field-decorator>
+    <formidable-field-decorator><formidable-date-field name="b" /></formidable-field-decorator>
+    <formidable-field-decorator><formidable-autocomplete-field name="c" /></formidable-field-decorator>
+    <formidable-field-decorator><formidable-time-field name="d" /></formidable-field-decorator>
+  `
+})
+class EveryPanelFieldHostComponent {}
+
 /** px per rem, so the expectations stay written in the tokens' own unit. */
 function rem(value: number): number {
   return value * parseFloat(getComputedStyle(document.documentElement).fontSize);
@@ -124,6 +196,17 @@ function centreY(element: Element): number {
   const rect = element.getBoundingClientRect();
 
   return rect.top + rect.height / 2;
+}
+
+/** Lets the decorator's `ResizeObserver` deliver and the resulting inset reach the layout. */
+async function settle(fixture: ComponentFixture<unknown>): Promise<HTMLElement> {
+  fixture.detectChanges();
+
+  await new Promise(requestAnimationFrame);
+  await new Promise(requestAnimationFrame);
+  fixture.detectChanges();
+
+  return fixture.nativeElement as HTMLElement;
 }
 
 describe('formidable-field-decorator layout', () => {
@@ -230,5 +313,111 @@ describe('formidable-field-decorator layout', () => {
     textarea.style.height = '12rem';
 
     expect(prefix.getBoundingClientRect().top).toBeCloseTo(before, 0);
+  });
+
+  // The bug this replaced: the measurement ran once and wrote inline padding only when it found a
+  // non-zero width, so a prefix that went away later left its inset on the field forever.
+  it('gives the field back its own padding once the prefix goes away', async () => {
+    const fixture = TestBed.createComponent(TogglablePrefixHostComponent);
+    const root = await settle(fixture);
+    const field = root.querySelector('input') as HTMLInputElement;
+    const host = root.querySelector('formidable-field-decorator') as HTMLElement;
+
+    expect(parseFloat(getComputedStyle(field).paddingLeft)).toBeGreaterThan(rem(4));
+    expect(host.style.getPropertyValue('--formidable-field-prefix-inset')).not.toBe('');
+
+    fixture.componentInstance.showPrefix = false;
+    await settle(fixture);
+
+    expect(parseFloat(getComputedStyle(field).paddingLeft)).toBeCloseTo(rem(1), 1);
+    expect(host.style.getPropertyValue('--formidable-field-prefix-inset')).toBe('');
+  });
+
+  /**
+   * A `dropdown-field` and a `date-field` render a panel toggle inside their own box. It is not projected
+   * content, so nothing measures it — the value inset has to account for it, or a label spans the field
+   * right up to the border and disappears behind the toggle, and a projected suffix lands on top of it.
+   */
+  describe('with an in-field panel toggle', () => {
+    let fixture: ComponentFixture<ToggleFieldHostComponent>;
+    let root: HTMLElement;
+
+    /** The distance the toggle and the field's own padding together claim: `2rem` plus `1rem`. */
+    const insetWithToggle = rem(3);
+
+    beforeEach(async () => {
+      fixture = TestBed.createComponent(ToggleFieldHostComponent);
+      root = await settle(fixture);
+    });
+
+    function field(): HTMLElement {
+      return root.querySelector('.field') as HTMLElement;
+    }
+
+    function toggle(): HTMLElement {
+      return root.querySelector('.dropdown-toggle') as HTMLElement;
+    }
+
+    it('keeps the label clear of the toggle instead of running it underneath', () => {
+      const label = root.querySelector('.label-wrapper') as HTMLElement;
+
+      expect(field().getBoundingClientRect().right - label.getBoundingClientRect().right).toBeCloseTo(
+        insetWithToggle,
+        1
+      );
+    });
+
+    it('hands the width back when readonly takes the toggle away', async () => {
+      const host = root.querySelector('formidable-field-decorator') as HTMLElement;
+
+      expect(host.classList.contains('has-in-field-toggle')).toBe(true);
+
+      fixture.componentInstance.readonly = true;
+      await settle(fixture);
+
+      const label = root.querySelector('.label-wrapper') as HTMLElement;
+
+      expect(host.classList.contains('has-in-field-toggle')).toBe(false);
+      expect(toggle()).toBeNull();
+      expect(field().getBoundingClientRect().right - label.getBoundingClientRect().right).toBeCloseTo(rem(1), 1);
+    });
+
+    // The toggle is a flex item inside the field's padding, so reserving the suffix's width there is
+    // what moves the two apart. The suffix itself stays anchored to the field's right edge.
+    it('stacks a projected suffix beside the toggle rather than over it', async () => {
+      expect(parseFloat(getComputedStyle(field()).paddingRight)).toBeCloseTo(rem(1), 1);
+
+      fixture.componentInstance.showSuffix = true;
+      await settle(fixture);
+
+      const suffix = root.querySelector('[formidableFieldSuffix]') as HTMLElement;
+
+      expect(parseFloat(getComputedStyle(field()).paddingRight)).toBeGreaterThan(rem(2));
+      expect(suffix.getBoundingClientRect().left).toBeGreaterThanOrEqual(toggle().getBoundingClientRect().right);
+    });
+
+    // `autocomplete-field` and `time-field` have a panel and a mask but draw nothing in the field, so
+    // reserving the width for them would leave a visible gap at the right edge.
+    it('is claimed by the two fields that draw one and by no others', async () => {
+      const every = await settle(TestBed.createComponent(EveryPanelFieldHostComponent));
+      const claims = Array.from(every.querySelectorAll('formidable-field-decorator')).map((host) =>
+        host.classList.contains('has-in-field-toggle')
+      );
+
+      expect(claims).toEqual([true, true, false, false]); // dropdown, date, autocomplete, time
+    });
+
+    it('keeps the label clear of a suffix and the toggle together', async () => {
+      fixture.componentInstance.showSuffix = true;
+      await settle(fixture);
+
+      const label = root.querySelector('.label-wrapper') as HTMLElement;
+      const suffixInset = parseFloat(getComputedStyle(field()).paddingRight);
+
+      expect(field().getBoundingClientRect().right - label.getBoundingClientRect().right).toBeCloseTo(
+        suffixInset + rem(2),
+        1
+      );
+    });
   });
 });

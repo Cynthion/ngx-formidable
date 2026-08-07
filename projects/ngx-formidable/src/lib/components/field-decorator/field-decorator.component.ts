@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import {
-  AfterContentInit,
   AfterViewInit,
   Component,
   ContentChild,
@@ -8,6 +7,7 @@ import {
   EventEmitter,
   HostBinding,
   inject,
+  NgZone,
   OnDestroy,
   Output,
   ViewChild,
@@ -30,8 +30,8 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
 
 /**
  * Wraps any form field and projects optional label, tooltip, prefix, and suffix.
- * Forwards focus/value events from the wrapped field and adjusts layout for
- * prefix/suffix padding.
+ * Forwards focus/value events from the wrapped field and measures a projected
+ * prefix/suffix, so the field's padding and an inside label clear it.
  *
  * ContentChildren:
  * - `FORMIDABLE_FIELD` (your IFormidableField component)
@@ -65,7 +65,7 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
   standalone: true,
   imports: [CommonModule]
 })
-export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit, OnDestroy, IFormidableField<unknown> {
+export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormidableField<unknown> {
   // View children are used to access the prefix and suffix wrappers
   @ViewChild('prefixWrapperRef') prefixWrapper?: ElementRef<HTMLDivElement>;
   @ViewChild('suffixWrapperRef') suffixWrapper?: ElementRef<HTMLDivElement>;
@@ -84,31 +84,40 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
   @ContentChild(FieldPrefixDirective) projectedPrefix?: FieldPrefixDirective;
   @ContentChild(FieldSuffixDirective) projectedSuffix?: FieldSuffixDirective;
 
-  protected hasLabel = false;
-  protected hasTooltip = false;
-  protected hasPrefix = false;
-  protected hasSuffix = false;
+  // Getters, not fields: a consumer adds and removes a projected decoration at runtime (`@if`, `*ngIf`),
+  // and a value latched in `ngAfterContentInit` would leave its wrapper shown — or hidden — forever.
+  protected get hasLabel(): boolean {
+    return !!this.projectedLabel;
+  }
+
+  protected get hasTooltip(): boolean {
+    return !!this.projectedTooltip;
+  }
+
+  protected get hasPrefix(): boolean {
+    return !!this.projectedPrefix;
+  }
+
+  protected get hasSuffix(): boolean {
+    return !!this.projectedSuffix;
+  }
 
   private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
+  private readonly ngZone: NgZone = inject(NgZone);
 
   private valueChangeSubject$ = new Subject<unknown>();
   private focusChangeSubject$ = new Subject<boolean>();
   private destroy$ = new Subject<void>();
-
-  ngAfterContentInit(): void {
-    this.hasLabel = !!this.projectedLabel;
-    this.hasTooltip = !!this.projectedTooltip;
-    this.hasPrefix = !!this.projectedPrefix;
-    this.hasSuffix = !!this.projectedSuffix;
-  }
+  private resizeObserver?: ResizeObserver;
 
   ngAfterViewInit(): void {
     // interact with the projected field content
     this.forwardEvents();
-    this.adjustLayout();
+    this.observeInsets();
   }
 
   ngOnDestroy() {
+    this.resizeObserver?.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -206,6 +215,16 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
     return this.disabled;
   }
 
+  /**
+   * Whether the field renders a panel toggle inside its own box. The toggle is a fixed-size square at the
+   * field's inner right edge, so the stylesheet turns this class into a right inset rather than measuring
+   * it — which also spares a re-measure every time `readonly` / `disabled` add or remove the toggle.
+   */
+  @HostBinding('class.has-in-field-toggle')
+  get hasInFieldToggle(): boolean {
+    return !!this.projectedField?.hasInFieldToggle;
+  }
+
   get fieldRef(): ElementRef<HTMLElement> {
     if (!this.projectedField) {
       throw new Error('FieldDecoratorComponent: projectedField is not available yet.');
@@ -234,38 +253,42 @@ export class FieldDecoratorComponent implements AfterContentInit, AfterViewInit,
 
   // #endregion
 
-  private adjustLayout(): void {
+  /**
+   * A projected prefix/suffix takes horizontal space from the field's box, which the stylesheet turns
+   * into the field's padding and into the bounds of a label rendered over the value. Its wrapper
+   * shrink-wraps it, so the wrapper's own width — padding included — is the whole inset, and collapses to
+   * zero the moment nothing is projected. `ResizeObserver` covers every way that width moves: content
+   * added or removed, a font loading, the wrapper hidden.
+   */
+  private observeInsets(): void {
     if (this.decoratorLayout !== 'horizontal') return;
 
-    requestAnimationFrame(() => {
-      // if prefix/suffix are projected, adjust the padding of the field
-      const field = this.fieldRef.nativeElement;
-      const prefixWrapper = this.prefixWrapper?.nativeElement;
-      const suffixWrapper = this.suffixWrapper?.nativeElement;
+    const wrappers = [this.prefixWrapper?.nativeElement, this.suffixWrapper?.nativeElement].filter(
+      (wrapper): wrapper is HTMLDivElement => !!wrapper
+    );
 
-      const prefixWidth = this.projectedPrefix?.elementRef.nativeElement.offsetWidth || 0;
-      const suffixWidth = this.projectedSuffix?.elementRef.nativeElement.offsetWidth || 0;
-
-      if (field && prefixWrapper && prefixWidth) {
-        const prefixStyle = window.getComputedStyle(prefixWrapper);
-        const prefixPaddingLeft = parseFloat(prefixStyle.paddingLeft) || 0;
-        const prefixPaddingRight = parseFloat(prefixStyle.paddingRight) || 0;
-
-        this.insetValue('left', prefixPaddingLeft + prefixWidth + prefixPaddingRight);
-      }
-      if (field && suffixWrapper && suffixWidth) {
-        const suffixStyle = window.getComputedStyle(suffixWrapper);
-        const suffixPaddingLeft = parseFloat(suffixStyle.paddingLeft) || 0;
-        const suffixPaddingRight = parseFloat(suffixStyle.paddingRight) || 0;
-
-        this.insetValue('right', suffixPaddingLeft + suffixWidth + suffixPaddingRight);
-      }
+    // Writes custom properties only, so it never needs a change-detection pass of its own.
+    this.ngZone.runOutsideAngular(() => {
+      this.resizeObserver = new ResizeObserver(() => this.insetValue());
+      wrappers.forEach((wrapper) => this.resizeObserver?.observe(wrapper));
     });
   }
 
   /** Moves the value clear of a prefix/suffix — and an inside label with it, so the two stay aligned. */
-  private insetValue(side: 'left' | 'right', inset: number): void {
-    this.fieldRef.nativeElement.style[side === 'left' ? 'paddingLeft' : 'paddingRight'] = `${inset}px`;
-    this.elementRef.nativeElement.style.setProperty(`--formidable-field-value-inset-${side}`, `${inset}px`);
+  private insetValue(): void {
+    this.setInset('prefix', this.prefixWrapper?.nativeElement.offsetWidth ?? 0);
+    this.setInset('suffix', this.suffixWrapper?.nativeElement.offsetWidth ?? 0);
+  }
+
+  /** Removing the property, rather than writing a zero, is what restores the field's own padding. */
+  private setInset(side: 'prefix' | 'suffix', inset: number): void {
+    const style = this.elementRef.nativeElement.style;
+    const property = `--formidable-field-${side}-inset`;
+
+    if (inset > 0) {
+      style.setProperty(property, `${inset}px`);
+    } else {
+      style.removeProperty(property);
+    }
   }
 }

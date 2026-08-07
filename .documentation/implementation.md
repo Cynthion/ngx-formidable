@@ -8,7 +8,7 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 ## Ordering Strategy
 
-- **Bugs First**: defects lead. The in-field toggle overlap is filed under _Improvements_ in `backlog.md` but is a defect on the same code path as the iOS padding bug, so it joins Phase 1.
+- **Bugs First**: defects lead, whichever `backlog.md` section they are filed under.
 - **Breaking Early**: the library is pre-release with one known consumer, so slot and API removals are batched into Phase 2 before anything builds on them.
 - **State Before Style**: the invalid-state hook (Phase 6) is a prerequisite for both border geometry (Phase 7) and `aria-invalid` (Phase 11).
 - **Docs Last**: API documentation and the `README.md` pass come after the API stops moving.
@@ -20,11 +20,10 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 |  Phase | Title                                  | Depends On |
 | -----: | :------------------------------------- | :--------- |
-|      1 | Bugs — Decorator Layout Measurement    | —          |
 |      2 | Breaking — Decorator Slot Cleanup      | —          |
 |      3 | Option Fields                          | —          |
-|      4 | Supporting Text                        | 1, 2       |
-|      5 | Prefix And Suffix — Actions, Alignment | 1, 2       |
+|      4 | Supporting Text                        | 2          |
+|      5 | Prefix And Suffix — Actions, Alignment | 2          |
 |      6 | Field State Styling                    | —          |
 |      7 | Border Geometry                        | 6          |
 |      8 | Date And Time Keyboard                 | —          |
@@ -42,21 +41,6 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 ---
 
 ## Library Phases
-
-### Phase 1 — Bugs: Decorator Layout Measurement
-
-One root cause behind three symptoms. Touches `field-decorator.component.ts` (`adjustLayout`, `insetValue`), the `dropdown-field` and `date-field` templates, and `_forms.scss`.
-
-- **Reset The Inset**: `adjustLayout()` guards its writes on a non-zero prefix/suffix width and has no else branch, so the inline `paddingLeft` / `paddingRight` and `--formidable-field-value-inset-*` are never cleared once set. This is the root cause of the iOS padding bug. Add the reset.
-- **Re-Measure**: `adjustLayout()` runs once from `ngAfterViewInit`. Re-run it when the projected prefix/suffix changes (`QueryList.changes`, and/or a `ResizeObserver`).
-- **Measure The Toggle**: the in-field panel toggle is not part of the value inset, so a `resting`, `floating` or `border` label runs under it. Only `dropdown-field` and `date-field` render one — `autocomplete-field` and `time-field` do not, contrary to the backlog wording. The same fix stops a projected suffix stacking on top of the toggle; both are absolutely positioned at the right edge on the same z-index.
-- **Resolve The Padding Split**: `adjustLayout()` writes padding onto the field host, but panel fields take their text padding from `.wrapped-input` in the `wrapped-input` mixin. Pick one owner.
-- **Repo Hygiene**: delete the leftover `package-lock.json` inside the library project (it is what invites an `npm install` there, which recreates the nested `node_modules` that shadows the root install and breaks `TestBed`) and the stray package tarball at the repo root. Add a `.gitignore` guard.
-- **Then Rebuild The Consumer Tarball**: last step, so the consumer picks up these fixes and typechecks against `canLabelRest` and the `horizontal` layout gate again.
-
-**Verification**: desktop browser plus specs; Chris confirms the padding fix on an iOS device.
-
-**Clears**: all three `backlog.md` bugs, plus the in-field toggle improvement.
 
 ### Phase 2 — Breaking: Decorator Slot Cleanup
 
@@ -81,7 +65,7 @@ All three items touch the same five components: `select-field`, `dropdown-field`
 
 ### Phase 4 — Supporting Text
 
-Depends on Phases 1 and 2 (final container geometry and slot set).
+Depends on Phase 2 (final slot set).
 
 - **New Component**: `FieldSupportComponent` plus its directive, mirroring `FieldErrorsComponent` and `FieldErrorsDirective`, rendered into a decorator slot below the field. Reuse the existing errors-slot mechanism rather than inventing a second one.
 - **Alignment**: `align: 'start' | 'center' | 'end'`, default `start`.
@@ -91,7 +75,7 @@ Depends on Phases 1 and 2 (final container geometry and slot set).
 
 ### Phase 5 — Prefix And Suffix: Actions And Alignment
 
-Depends on Phases 1 and 2 — a suffix action changes the measured width, so the Phase 1 re-measure must be in place first.
+Depends on Phase 2 for the slot set. The re-measure a suffix action needs is already in place.
 
 - **Suffix Actions**: clear/reset, copy, validation state, loading. `field-suffix.directive.ts` is a bare marker directive today.
 - **Vertical Alignment**: make it configurable — centered (default) or aligned with the field value. `FieldValueAlignment` exists but is field-driven and only `textarea-field` opts in; promote it to an input the consumer can override.
@@ -229,11 +213,12 @@ Depends on Phase 13.
 
 Kept for context only; the detail lived in the previous revision of this file and in the commit history.
 
-| Pass                | Outcome                                                                                                                                       |
-| :------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bugs And UX Defects | Date/time mask display, parse and caret fixes; readonly and disabled labels no longer float; single-line ellipsized labels                    |
-| Breaking API        | `FieldDecoratorLayout` renamed to `horizontal` / `vertical` / `inline`; the whole `Form*` family prefixed `NgxFormidable`; icons externalized |
-| Styling And Theming | New group and autofill tokens; the label became an explicit `position` choice; errors moved to a decorator slot below the field container     |
+| Pass                         | Outcome                                                                                                                                                                                                                                    |
+| :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bugs And UX Defects          | Date/time mask display, parse and caret fixes; readonly and disabled labels no longer float; single-line ellipsized labels                                                                                                                 |
+| Decorator Layout Measurement | Padding moved from inline styles to CSS, measured in a `ResizeObserver`; the in-field toggle joined the value inset; nested `package-lock.json` removed. The consumer tarball rebuild was dropped from the phase and stays in `backlog.md` |
+| Breaking API                 | `FieldDecoratorLayout` renamed to `horizontal` / `vertical` / `inline`; the whole `Form*` family prefixed `NgxFormidable`; icons externalized                                                                                              |
+| Styling And Theming          | New group and autofill tokens; the label became an explicit `position` choice; errors moved to a decorator slot below the field container                                                                                                  |
 
 ---
 
@@ -241,9 +226,9 @@ Kept for context only; the detail lived in the previous revision of this file an
 
 Defects that were not in `backlog.md` when this roadmap was written. Recorded here so they are not rediscovered.
 
-| Finding                                                                                       | Disposition                          |
-| :-------------------------------------------------------------------------------------------- | :----------------------------------- |
-| Dead `--formidable-color-slider-thumb-border` override in `_forms.scss`                       | Folded into Phase 6                  |
-| Stray package tarball at the repo root and a stale `package-lock.json` in the library project | Folded into Phase 1                  |
-| The demo writes the selected theme to `localStorage` but never reads it back on init          | Added to `backlog.md`, not scheduled |
-| No CI workflow; `deploy.yml` reinstalls from scratch rather than from the lockfile            | Added to `backlog.md`, not scheduled |
+| Finding                                                                              | Disposition                          |
+| :----------------------------------------------------------------------------------- | :----------------------------------- |
+| Dead `--formidable-color-slider-thumb-border` override in `_forms.scss`              | Folded into Phase 6                  |
+| Stale `package-lock.json` in the library project                                     | Removed, with a `.gitignore` guard   |
+| The demo writes the selected theme to `localStorage` but never reads it back on init | Added to `backlog.md`, not scheduled |
+| No CI workflow; `deploy.yml` reinstalls from scratch rather than from the lockfile   | Added to `backlog.md`, not scheduled |

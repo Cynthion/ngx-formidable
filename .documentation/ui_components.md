@@ -10,22 +10,23 @@ Every component is `standalone`, and uses `ChangeDetectionStrategy.OnPush` excep
 
 Inherited by every field:
 
-| Member           | Kind        | Description                                                                                         |
-| :--------------- | :---------- | :-------------------------------------------------------------------------------------------------- |
-| `name`           | `@Input()`  | Field name (`''`)                                                                                   |
-| `placeholder`    | `@Input()`  | Placeholder text (`''`)                                                                             |
-| `readonly`       | `@Input()`  | Blocks input, still focusable (`false`)                                                             |
-| `disabled`       | `@Input()`  | Fully disabled (`false`)                                                                            |
-| `valueChanged`   | `@Output()` | `EventEmitter<T>` on value change                                                                   |
-| `focusChanged`   | `@Output()` | `EventEmitter<boolean>` on focus/blur                                                               |
-| `valueChange$`   | Observable  | Value stream                                                                                        |
-| `focusChange$`   | Observable  | Focus stream                                                                                        |
-| `fieldId`        | getter      | Generated unique id                                                                                 |
-| `value`          | getter      | Current value                                                                                       |
-| `canLabelRest`   | getter      | Whether nothing occupies the value area, so a label may rest there like a placeholder               |
-| `valueAlignment` | optional    | Where the value sits vertically, which a prefix/suffix aligns with: `'center'` (default) or `'top'` |
+| Member             | Kind        | Description                                                                                         |
+| :----------------- | :---------- | :-------------------------------------------------------------------------------------------------- |
+| `name`             | `@Input()`  | Field name (`''`)                                                                                   |
+| `placeholder`      | `@Input()`  | Placeholder text (`''`)                                                                             |
+| `readonly`         | `@Input()`  | Blocks input, still focusable (`false`)                                                             |
+| `disabled`         | `@Input()`  | Fully disabled (`false`)                                                                            |
+| `valueChanged`     | `@Output()` | `EventEmitter<T>` on value change                                                                   |
+| `focusChanged`     | `@Output()` | `EventEmitter<boolean>` on focus/blur                                                               |
+| `valueChange$`     | Observable  | Value stream                                                                                        |
+| `focusChange$`     | Observable  | Focus stream                                                                                        |
+| `fieldId`          | getter      | Generated unique id                                                                                 |
+| `value`            | getter      | Current value                                                                                       |
+| `canLabelRest`     | getter      | Whether nothing occupies the value area, so a label may rest there like a placeholder               |
+| `hasInFieldToggle` | optional    | Whether the field renders a panel toggle inside its own box, which the value and a label must clear |
+| `valueAlignment`   | optional    | Where the value sits vertically, which a prefix/suffix aligns with: `'center'` (default) or `'top'` |
 
-**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners (run outside the Angular zone), readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly, disabled, or has a `placeholder`; a field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` getter (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always). A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows.
+**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners (run outside the Angular zone), readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly, disabled, or has a `placeholder`; a field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` getter (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always). A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field`, with their panel toggle — declares `hasInFieldToggle`, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it.
 
 ---
 
@@ -218,7 +219,11 @@ Collects `formidable-field-option` children. **Use when** multiple choices may b
 
 **Selector** `formidable-field-decorator`
 
-Wraps a field and its label, tooltip, prefix, suffix and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `@ContentChild`. Forwards the field's `valueChanged` / `focusChanged`. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and auto-adjusts prefix/suffix padding in the `horizontal` layout. No inputs.
+Wraps a field and its label, tooltip, prefix, suffix and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `@ContentChild`. Forwards the field's `valueChanged` / `focusChanged`. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and measures a projected prefix/suffix in the `horizontal` layout. No inputs.
+
+**Prefix And Suffix Measurement**: a projected prefix/suffix takes horizontal space the field has to give up, so the decorator measures its wrapper — which shrink-wraps the projected content, padding included — and publishes the width on its own host as `--formidable-field-prefix-inset` / `--formidable-field-suffix-inset`. The stylesheet turns those into the field's `padding-left` / `padding-right` and into the bounds of a label rendered over the value; both fall back to `--formidable-field-padding-x` when unset. The measurement runs in a `ResizeObserver` over both wrappers, so it follows content being added or removed, a font loading, or a wrapper being hidden — and a hidden wrapper measures zero, which removes the property and gives the field its own padding back. CSS owns the padding throughout; the decorator never writes an inline `style.padding`.
+
+**In-Field Toggle**: `dropdown-field` and `date-field` draw a panel toggle inside their own box, at the field's inner right edge. It is not projected content, so instead of measuring it the field declares `hasInFieldToggle` and the decorator turns that into a `has-in-field-toggle` host class, which raises `--formidable-field-toggle-inset` to `--formidable-field-toggle-size`. Only the value inset adds it: the toggle is a flex item inside the field's `padding-right`, so a projected suffix — measured into that padding — already pushes the toggle left of itself.
 
 **Label Position**: `formidableFieldLabel`'s `position: FieldLabelPosition` (default `'inside'`) chooses between five mutually exclusive, statically-configured modes.
 
@@ -242,7 +247,7 @@ Because `labelState` reads field state the decorator cannot observe — `readonl
 | `--formidable-label-resting-offset`  | `--formidable-field-value-centered-top`, so an empty field's label is centered in the inner height    |
 | `--formidable-label-border-offset`   | Negative — the label's line-box straddles the field's top border                                      |
 
-A floating label's value clears it because the `label-inside` host hands the field a `--formidable-field-value-padding-top`; a `textarea`, whose value is top-aligned rather than centered, uses `--formidable-field-value-top` instead. The `border` positions get neither, so their value stays centered exactly as with `outside`. Horizontally, a label is bounded by `--formidable-field-value-inset-left` / `-right`, which `adjustLayout` sets from the same measurements it uses for the field's prefix/suffix padding — so the label stays aligned with the value instead of colliding with a prefix; both fall back to `--formidable-field-padding-x`, the field's own horizontal padding. A `border` label additionally shrink-wraps and is pulled left by `--formidable-label-border-gap`, so it hides only the stretch of border it covers while its text still starts where the value does; `border-prefix` is the same mixin anchored to `--formidable-field-padding-x` instead, which is where a projected prefix's text starts. The border is hidden by a `linear-gradient` band one `--formidable-field-border-thickness` tall, painted in `--formidable-color-label-border-band` — its own variable, because `readonly` / `disabled` remap the field's fill on the field element, out of the label's reach, so the decorator's host remaps the band's colour instead. Any label rendered over the field stays on one line and ellipsizes.
+A floating label's value clears it because the `label-inside` host hands the field a `--formidable-field-value-padding-top`; a `textarea`, whose value is top-aligned rather than centered, uses `--formidable-field-value-top` instead. The `border` positions get neither, so their value stays centered exactly as with `outside`. Horizontally, a label is bounded by the same value inset the field's own padding is built from — see **Prefix And Suffix Measurement** and **In-Field Toggle** above — so the label stays aligned with the value instead of colliding with a prefix or disappearing behind a panel toggle. A `border` label additionally shrink-wraps and is pulled left by `--formidable-label-border-gap`, so it hides only the stretch of border it covers while its text still starts where the value does; `border-prefix` is the same mixin anchored to `--formidable-field-padding-x` instead, which is where a projected prefix's text starts. The border is hidden by a `linear-gradient` band one `--formidable-field-border-thickness` tall, painted in `--formidable-color-label-border-band` — its own variable, because `readonly` / `disabled` remap the field's fill on the field element, out of the label's reach, so the decorator's host remaps the band's colour instead. Any label rendered over the field stays on one line and ellipsizes.
 
 ### Field Option
 

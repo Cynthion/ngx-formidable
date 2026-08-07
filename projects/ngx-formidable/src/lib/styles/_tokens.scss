@@ -50,6 +50,10 @@ $formidable-field-height: utils.spacing(60); // even number
 // One named value because a `border-prefix` label aligns with the prefix by using it directly.
 $formidable-field-padding-x: utils.spacing(16);
 
+// The square panel toggle `dropdown-field` and `date-field` render inside their own box, at the field's
+// inner right edge.
+$formidable-field-toggle-size: utils.spacing(32);
+
 // Line-box heights of the two things that share the field's inner height when the label is inside.
 $formidable-field-inner-height: $formidable-field-height - 2 * $formidable-field-border-thickness;
 $formidable-field-value-height: $formidable-field-line-height * $formidable-field-font-size;

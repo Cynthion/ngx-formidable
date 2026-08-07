@@ -59,6 +59,12 @@
   // The field's horizontal padding — where its value starts, and where a projected prefix's text starts.
   --formidable-field-padding-x: #{tokens.$formidable-field-padding-x};
 
+  // The square panel toggle a `dropdown-field` / `date-field` renders inside its own box, and how much of
+  // the field's right edge it takes. The decorator raises the inset to the size for the fields that have
+  // one; everything else keeps the zero declared here.
+  --formidable-field-toggle-size: #{tokens.$formidable-field-toggle-size};
+  --formidable-field-toggle-inset: 0rem;
+
   // Line-box heights of the two things that share the field's inner height when the label is inside.
   --formidable-field-inner-height: calc(
     var(--formidable-field-height, #{tokens.$formidable-field-height}) - 2 *

@@ -345,6 +345,11 @@ export class DateFieldComponent
     return this.dateRef as ElementRef<HTMLElement>;
   }
 
+  /** Mirrors the template: there is nothing to open once the field is readonly or disabled. */
+  get hasInFieldToggle(): boolean {
+    return !this.readonly && !this.disabled;
+  }
+
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
   // #endregion

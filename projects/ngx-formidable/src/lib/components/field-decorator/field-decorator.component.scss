@@ -8,6 +8,10 @@
   @include field-label-inside-host;
 }
 
+:host(.has-in-field-toggle) {
+  @include field-toggle-inset-host;
+}
+
 // A `border` label paints a band in the field's fill to hide the border behind it, but `readonly` and
 // `disabled` remap that fill on the field element — which the label, a sibling, never sees. Remapping the
 // band's own colour here keeps the two matching.

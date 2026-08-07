@@ -14,7 +14,6 @@ Example:
 
 Improvements:
 
-- an in-field panel toggle is not part of the value inset, so a long label can run under it. `dropdown` and `date` render a toggle icon inside the field (`autocomplete` and `time` do not), but `adjustLayout()` only measures projected prefixes and suffixes — so a `resting`, `floating` or `border` label spans the field right up to the icon and disappears behind it. Either the toggle joins the suffix measurement or those fields set `--formidable-field-value-inset-right` themselves. A projected suffix has the same collision: it is absolutely positioned at the right edge on the same z-index as the toggle.
 - ensure all fields can be "focus on page load" (without panels being opened)
 - make DateFieldComponent `smaller` or render better for smaller screens
 - don't render `formidable-field-option` components when radiogroup and checkboxgroup are empty
@@ -28,9 +27,7 @@ Improvements:
 
 # Bugs:
 
-- stale nested install: a leftover `package-lock.json` sits inside the library project and invites `npm install` being run there, which recreates a nested `node_modules` that shadows the root install with a second `@angular/core` and breaks `TestBed` in library specs. The `node_modules` itself is already deleted; the lockfile and a stray package tarball at the repo root are what remain.
-- ios: inspect padding when prefix is missing (deferred from Phase 1 — needs a device; root cause found: `adjustLayout()` sets inline `paddingLeft`/`paddingRight` only when a prefix/suffix is present and never resets them, and runs once at `ngAfterViewInit`)
-- the EnerQi consumer resolves a tarball that predates the label-position feature: it still exports `isLabelFloating` and `FieldDecoratorLayout = 'single' | 'group' | 'inline'`, while EnerQi's own sources have already been mirrored forward to `canLabelRest` and the `horizontal` layout gate. So EnerQi cannot typecheck against its own dependency. Needs a rebuilt and reinstalled tarball.
+- label position border: label is hidden behind the panel if it is open on top/before the field
 
 # Features:
 
@@ -49,6 +46,7 @@ Improvements:
 - allow the border corner radius to be configured (so each can have different, e.g. only top rounded)
 - tooltip: any tooltip stuff should be removed from the library, as this is user stuff that he can add as label content, no? or should I keep it? or how would a tooltip or other custom content be put next to the label? does it make sense for all label positions? can the tooltip slot be removed? what does material do?
 - prefix/suffix: only relevant for horizontal fields, correct? remove for group fields.
+- possibility check: can the group fields (radio, checkbox) be configured with tokens so that the options (radio buttons, checkboxes) are left-aligned with the left border of other fields in the form (above and below)? or what would need to change? (background and border most probably would then be styled "transparent")
 
 # Documentation:
 

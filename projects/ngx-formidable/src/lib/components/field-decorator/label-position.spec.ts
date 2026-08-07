@@ -493,7 +493,7 @@ describe('formidableFieldLabel [position]', () => {
     return label.getBoundingClientRect().left + parseFloat(getComputedStyle(label).paddingLeft);
   }
 
-  /** Renders a prefixed field and waits out the `requestAnimationFrame` `adjustLayout` measures in. */
+  /** Renders a prefixed field and waits out the `ResizeObserver` the decorator measures the prefix in. */
   async function renderWithPrefix(position: FieldLabelPosition): Promise<HTMLElement> {
     const prefixFixture = TestBed.createComponent(PrefixHostComponent);
     prefixFixture.componentInstance.position = position;

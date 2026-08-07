@@ -70,6 +70,8 @@ export interface IFormidableField<T = string | null> {
   value: T;
   /** Whether nothing is rendered where the value goes, so a label may rest there like a placeholder. */
   canLabelRest: boolean;
+  /** Whether the field renders a panel toggle inside its own box, which the value and a label must clear. */
+  hasInFieldToggle?: boolean;
   valueAlignment?: FieldValueAlignment;
   valueChange$: Observable<T>;
   focusChange$: Observable<boolean>;
