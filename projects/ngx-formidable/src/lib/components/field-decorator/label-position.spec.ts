@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NgxMaskConfig, provideNgxMask } from 'ngx-mask';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
-import { FieldTooltipDirective } from '../../directives/field-tooltip.directive';
+import { FieldLabelAdornmentDirective } from '../../directives/field-label-adornment.directive';
 import { FieldLabelPosition } from '../../models/formidable.model';
 import { AutocompleteFieldComponent } from '../fields/autocomplete-field/autocomplete-field.component';
 import { DateFieldComponent } from '../fields/date-field/date-field.component';
@@ -98,27 +98,25 @@ class PrefixHostComponent {
   position: FieldLabelPosition = 'inside';
 }
 
-/** Same field, but with a tooltip taller than the label sharing the label's wrapper. */
+/** Same field, but with an adornment sharing the label's row. */
 @Component({
   standalone: true,
-  imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective, FieldTooltipDirective],
+  imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective, FieldLabelAdornmentDirective],
   template: `
     <formidable-field-decorator>
       <formidable-input-field name="field" />
       <div
         formidableFieldLabel
-        position="inside">
+        [position]="position">
         Label
       </div>
-      <div
-        formidableFieldTooltip
-        style="height: 5rem">
-        ?
-      </div>
+      <div formidableFieldLabelAdornment>?</div>
     </formidable-field-decorator>
   `
 })
-class TooltipHostComponent {}
+class LabelAdornmentHostComponent {
+  position: FieldLabelPosition = 'inside';
+}
 
 /** A textarea top-aligns its value, so it clears an inside label with an offset rather than the padding. */
 @Component({
@@ -634,29 +632,23 @@ describe('formidableFieldLabel [position]', () => {
       expect(getComputedStyle(beforeWrapper()).display).toBe('none');
     });
 
-    it('keeps the wrapper for a projected tooltip, even with the label over the field', () => {
-      const tooltipFixture = TestBed.createComponent(TooltipHostComponent);
-      tooltipFixture.detectChanges();
+    // An adornment decorates the label, so on its own it would be stranded above a field it no longer
+    // belongs to — and its height would stretch the wrapper the overlay label measures its offset from.
+    it('takes a projected adornment with the label when the label moves over the field', () => {
+      const adornmentFixture = TestBed.createComponent(LabelAdornmentHostComponent);
+      const before = () => adornmentFixture.nativeElement.querySelector('.before-wrapper') as HTMLElement;
 
-      const before = tooltipFixture.nativeElement.querySelector('.before-wrapper') as HTMLElement;
+      adornmentFixture.componentInstance.position = 'outside';
+      adornmentFixture.detectChanges();
+      expect(getComputedStyle(before()).display).not.toBe('none');
 
-      expect(getComputedStyle(before).display).not.toBe('none');
+      for (const position of ['inside', 'inside-floating', 'border', 'border-prefix'] as FieldLabelPosition[]) {
+        adornmentFixture.componentInstance.position = position;
+        adornmentFixture.detectChanges();
+
+        expect(getComputedStyle(before()).display).toBe('none');
+      }
     });
-  });
-
-  it('keeps its offset when a taller tooltip stretches the wrapper it lives in', () => {
-    const tooltipFixture = TestBed.createComponent(TooltipHostComponent);
-    tooltipFixture.detectChanges();
-
-    const root = tooltipFixture.nativeElement as HTMLElement;
-    const field = root.querySelector('input') as HTMLInputElement;
-    const label = root.querySelector('.label-wrapper') as HTMLElement;
-    const before = root.querySelector('.before-wrapper') as HTMLElement;
-    const innerTop = field.getBoundingClientRect().top + parseFloat(getComputedStyle(field).borderTopWidth);
-
-    // the wrapper is genuinely taller than a label line, which is what used to skew the offset
-    expect(before.getBoundingClientRect().height).toBeGreaterThan(rem(1.6));
-    expect(label.getBoundingClientRect().top - innerTop).toBeCloseTo(rem(1.0125), 1);
   });
 
   // A textarea top-aligns its value, so `--formidable-field-value-top` clears the label instead of the

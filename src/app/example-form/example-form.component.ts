@@ -9,13 +9,13 @@ import {
   DropdownFieldComponent,
   FieldDecoratorComponent,
   FieldErrorsDirective,
+  FieldLabelAdornmentDirective,
   FieldLabelDirective,
   FieldLabelPosition,
   FieldOptionComponent,
   FieldPrefixDirective,
   FieldSuffixDirective,
   FieldToggleIconDirective,
-  FieldTooltipDirective,
   IFormidableFieldOption,
   InputFieldComponent,
   NgxFormidableFormDirective,
@@ -67,7 +67,7 @@ import {
     NgxFormidableFormModelDirective,
     // NgxFormidableFormModelGroupDirective,
     NgxFormidableFormRootValidateDirective,
-    FieldTooltipDirective,
+    FieldLabelAdornmentDirective,
     FieldLabelDirective,
     FieldPrefixDirective,
     FieldSuffixDirective,
@@ -399,7 +399,7 @@ export class ExampleFormComponent {
   protected controlCenter = {
     showPrefixes: true,
     showSuffixes: true,
-    showTooltips: true,
+    showLabelAdornments: true,
     showLabels: true,
     showAsReadonly: false,
     showAsDisabled: false
@@ -517,6 +517,12 @@ export class ExampleFormComponent {
   // #endregion
 }
 
-type ControlKey = 'showPrefixes' | 'showSuffixes' | 'showTooltips' | 'showLabels' | 'showAsReadonly' | 'showAsDisabled';
+type ControlKey =
+  | 'showPrefixes'
+  | 'showSuffixes'
+  | 'showLabelAdornments'
+  | 'showLabels'
+  | 'showAsReadonly'
+  | 'showAsDisabled';
 type ThemeKey = 'default' | 'theme2' | 'theme3' | 'theme4';
 type ThemeVars = Record<string, string>;

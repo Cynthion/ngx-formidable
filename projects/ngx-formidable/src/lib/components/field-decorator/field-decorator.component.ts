@@ -14,10 +14,10 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
+import { FieldLabelAdornmentDirective } from '../../directives/field-label-adornment.directive';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
 import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
-import { FieldTooltipDirective } from '../../directives/field-tooltip.directive';
 import {
   FieldDecoratorLayout,
   FieldValueAlignment,
@@ -29,14 +29,14 @@ import {
 type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-prefix';
 
 /**
- * Wraps any form field and projects optional label, tooltip, prefix, and suffix.
+ * Wraps any form field and projects optional label, label adornment, prefix, and suffix.
  * Forwards focus/value events from the wrapped field and measures a projected
  * prefix/suffix, so the field's padding and an inside label clear it.
  *
  * ContentChildren:
  * - `FORMIDABLE_FIELD` (your IFormidableField component)
  * - `FieldLabelDirective` (wrapped label element)
- * - `FieldTooltipDirective` (wrapped tooltip element)
+ * - `FieldLabelAdornmentDirective` (wrapped label adornment element)
  * - `FieldPrefixDirective` (wrapped prefix element)
  * - `FieldSuffixDirective` (wrapped suffix element)
  *
@@ -49,7 +49,7 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
  * <formidable-field-decorator>
  *   <formidable-input-field name="email" ngModel></formidable-input-field>
  *   <div formidableFieldLabel>Email address</div>
- *   <div formidableFieldTooltip>Enter your work email</div>
+ *   <div formidableFieldLabelAdornment>?</div>
  *   <div formidableFieldPrefix>@</div>
  * </formidable-field-decorator>
  * ```
@@ -77,10 +77,10 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
    */
   @ViewChild('errorsSlot', { read: ViewContainerRef, static: true }) errorsSlot?: ViewContainerRef;
 
-  // Content children are used to project the field, label, tooltip, prefix and suffix
+  // Content children are used to project the field, label, label adornment, prefix and suffix
   @ContentChild(FORMIDABLE_FIELD) projectedField?: IFormidableField;
   @ContentChild(FieldLabelDirective) projectedLabel?: FieldLabelDirective;
-  @ContentChild(FieldTooltipDirective) projectedTooltip?: FieldTooltipDirective;
+  @ContentChild(FieldLabelAdornmentDirective) projectedLabelAdornment?: FieldLabelAdornmentDirective;
   @ContentChild(FieldPrefixDirective) projectedPrefix?: FieldPrefixDirective;
   @ContentChild(FieldSuffixDirective) projectedSuffix?: FieldSuffixDirective;
 
@@ -90,8 +90,8 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
     return !!this.projectedLabel;
   }
 
-  protected get hasTooltip(): boolean {
-    return !!this.projectedTooltip;
+  protected get hasLabelAdornment(): boolean {
+    return !!this.projectedLabelAdornment;
   }
 
   protected get hasPrefix(): boolean {
@@ -199,9 +199,12 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
     return this.labelState !== 'outside';
   }
 
-  /** Nothing is left in `.before-wrapper` once an overlay label has moved out of it, so it collapses. */
+  /**
+   * The row collapses once the label has moved over the field: an adornment decorates that label, so on
+   * its own it would be left stranded above a field it no longer belongs to.
+   */
   protected get showsBeforeWrapper(): boolean {
-    return this.hasTooltip || (this.hasLabel && !this.isLabelOverField);
+    return !this.isLabelOverField && (this.hasLabel || this.hasLabelAdornment);
   }
 
   /** Mirrored onto the host so a `border` label's band can follow the field's remapped fill. */

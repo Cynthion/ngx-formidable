@@ -9,7 +9,6 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 ## Ordering Strategy
 
 - **Bugs First**: defects lead, whichever `backlog.md` section they are filed under.
-- **Breaking Early**: the library is pre-release with one known consumer, so slot and API removals are batched into Phase 2 before anything builds on them.
 - **State Before Style**: the invalid-state hook (Phase 6) is a prerequisite for both border geometry (Phase 7) and `aria-invalid` (Phase 11).
 - **Docs Last**: API documentation and the `README.md` pass come after the API stops moving.
 - **Portal After The Library**: the portal must expose every field option and theme token, so it starts only once those are stable.
@@ -20,10 +19,9 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 |  Phase | Title                                  | Depends On |
 | -----: | :------------------------------------- | :--------- |
-|      2 | Breaking — Decorator Slot Cleanup      | —          |
 |      3 | Option Fields                          | —          |
-|      4 | Supporting Text                        | 2          |
-|      5 | Prefix And Suffix — Actions, Alignment | 2          |
+|      4 | Supporting Text                        | —          |
+|      5 | Prefix And Suffix — Actions, Alignment | —          |
 |      6 | Field State Styling                    | —          |
 |      7 | Border Geometry                        | 6          |
 |      8 | Date And Time Keyboard                 | —          |
@@ -42,17 +40,6 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 ## Library Phases
 
-### Phase 2 — Breaking: Decorator Slot Cleanup
-
-Batch the slot removals before anything builds on the current set.
-
-- **Rename The Tooltip Slot**: `[formidableFieldTooltip]` → `[formidableFieldLabelAdornment]`, with `hasTooltip`, `.tooltip-wrapper`, the `#tooltip` template and its mixins renamed to match. The library only ever owned a projection slot, never a tooltip implementation.
-- **Hide It Over The Field**: when the label renders over the field (`inside`, `inside-floating`, `border`, `border-prefix`), the label moves into the field container and the adornment is left stranded above it. Hide the adornment in that case.
-- **Drop Prefix And Suffix For `vertical`**: they become a `horizontal` and `inline` concept only. Remove the slots from the `vertical` branch of the decorator template and delete the `field-prefix-vertical` and `field-suffix-vertical` mixins.
-- **Propagate**: the demo `example-form` (thirteen usages), the consumer's example form (fourteen), `ui_components.md`, root `README.md`.
-
-**Clears**: the tooltip and prefix/suffix items under _Features_.
-
 ### Phase 3 — Option Fields
 
 All three items touch the same five components: `select-field`, `dropdown-field`, `autocomplete-field`, `radio-group-field`, `checkbox-group-field`.
@@ -65,17 +52,16 @@ All three items touch the same five components: `select-field`, `dropdown-field`
 
 ### Phase 4 — Supporting Text
 
-Depends on Phase 2 (final slot set).
-
 - **New Component**: `FieldSupportComponent` plus its directive, mirroring `FieldErrorsComponent` and `FieldErrorsDirective`, rendered into a decorator slot below the field. Reuse the existing errors-slot mechanism rather than inventing a second one.
 - **Alignment**: `align: 'start' | 'center' | 'end'`, default `start`.
 - **Slot Only**: no pre-defined hints. A value-length counter is a few characters of consumer template; presets would drag in i18n, formatting options and a per-field wiring API.
+- make sure that the fields (and decorator) don't use more margin/padding before and below; spacing is business of the consumer, not the library.
 
 **Clears**: the `supportingText` item.
 
 ### Phase 5 — Prefix And Suffix: Actions And Alignment
 
-Depends on Phase 2 for the slot set. The re-measure a suffix action needs is already in place.
+The re-measure a suffix action needs is already in place.
 
 - **Suffix Actions**: clear/reset, copy, validation state, loading. `field-suffix.directive.ts` is a bare marker directive today.
 - **Vertical Alignment**: make it configurable — centered (default) or aligned with the field value. `FieldValueAlignment` exists but is field-driven and only `textarea-field` opts in; promote it to an input the consumer can override.
@@ -219,6 +205,7 @@ Kept for context only; the detail lived in the previous revision of this file an
 | Decorator Layout Measurement | Padding moved from inline styles to CSS, measured in a `ResizeObserver`; the in-field toggle joined the value inset; nested `package-lock.json` removed. The consumer tarball rebuild was dropped from the phase and stays in `backlog.md` |
 | Breaking API                 | `FieldDecoratorLayout` renamed to `horizontal` / `vertical` / `inline`; the whole `Form*` family prefixed `NgxFormidable`; icons externalized                                                                                              |
 | Styling And Theming          | New group and autofill tokens; the label became an explicit `position` choice; errors moved to a decorator slot below the field container                                                                                                  |
+| Decorator Slot Cleanup       | The tooltip slot became `[formidableFieldLabelAdornment]` and now collapses with the label's row; prefix and suffix became `horizontal` and `inline` only; the `--formidable-color-field-tooltip` token was dropped                        |
 
 ---
 

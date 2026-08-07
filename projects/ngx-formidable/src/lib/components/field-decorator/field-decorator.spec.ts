@@ -15,6 +15,7 @@ import { AutocompleteFieldComponent } from '../fields/autocomplete-field/autocom
 import { DateFieldComponent } from '../fields/date-field/date-field.component';
 import { DropdownFieldComponent } from '../fields/dropdown-field/dropdown-field.component';
 import { InputFieldComponent } from '../fields/input-field/input-field.component';
+import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
 import { TextareaFieldComponent } from '../fields/textarea-field/textarea-field.component';
 import { TimeFieldComponent } from '../fields/time-field/time-field.component';
 import { FieldDecoratorComponent } from './field-decorator.component';
@@ -139,6 +140,20 @@ class TextareaPrefixHostComponent {
 class TogglablePrefixHostComponent {
   showPrefix = true;
 }
+
+/** A group field, whose decorator lays out vertically. */
+@Component({
+  standalone: true,
+  imports: [RadioGroupFieldComponent, FieldDecoratorComponent, FieldPrefixDirective, FieldSuffixDirective],
+  template: `
+    <formidable-field-decorator>
+      <formidable-radio-group-field name="field" />
+      <div formidableFieldPrefix>Prefix</div>
+      <div formidableFieldSuffix>Suffix</div>
+    </formidable-field-decorator>
+  `
+})
+class VerticalPrefixHostComponent {}
 
 /** A field that renders its own panel toggle, with an inside label and an optional suffix beside it. */
 @Component({
@@ -331,6 +346,21 @@ describe('formidable-field-decorator layout', () => {
 
     expect(parseFloat(getComputedStyle(field).paddingLeft)).toBeCloseTo(rem(1), 1);
     expect(host.style.getPropertyValue('--formidable-field-prefix-inset')).toBe('');
+  });
+
+  // A prefix/suffix insets the field's value, which a vertical layout has no value to inset — it stacks a
+  // group inside a fieldset. The slots are not rendered there at all, rather than rendered and ignored.
+  it('drops a projected prefix and suffix in the vertical layout', () => {
+    const fixture = TestBed.createComponent(VerticalPrefixHostComponent);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+
+    expect(root.querySelector('.container-vertical')).toBeTruthy();
+    expect(root.querySelector('[formidableFieldPrefix]')).toBeNull();
+    expect(root.querySelector('[formidableFieldSuffix]')).toBeNull();
+    expect(root.querySelector('[class^="prefix-wrapper"]')).toBeNull();
+    expect(root.querySelector('[class^="suffix-wrapper"]')).toBeNull();
   });
 
   /**

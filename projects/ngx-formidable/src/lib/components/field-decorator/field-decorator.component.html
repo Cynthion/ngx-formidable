@@ -3,7 +3,7 @@
   <div
     class="before-wrapper"
     [class.hidden]="!showsBeforeWrapper">
-    <ng-container [ngTemplateOutlet]="labelTooltip" />
+    <ng-container [ngTemplateOutlet]="labelRow" />
   </div>
 }
 
@@ -13,8 +13,8 @@
   [class.value-top]="valueAlignment === 'top'">
   @if (decoratorLayout === 'inline') {
     <div class="inline-wrapper">
-      <!-- Label & Tooltip -->
-      <ng-container [ngTemplateOutlet]="labelTooltip" />
+      <!-- Label & Adornment -->
+      <ng-container [ngTemplateOutlet]="labelRow" />
 
       <div class="inline-prefix-content-suffix-wrapper">
         <!-- Prefix -->
@@ -33,31 +33,35 @@
       <ng-container [ngTemplateOutlet]="label" />
     }
 
-    <!-- Prefix -->
-    <ng-container [ngTemplateOutlet]="prefix" />
+    <!-- Prefix, `horizontal` only -->
+    @if (decoratorLayout !== 'vertical') {
+      <ng-container [ngTemplateOutlet]="prefix" />
+    }
 
     <!-- Content -->
     <ng-container [ngTemplateOutlet]="content" />
 
     <!-- Suffix -->
-    <ng-container [ngTemplateOutlet]="suffix" />
+    @if (decoratorLayout !== 'vertical') {
+      <ng-container [ngTemplateOutlet]="suffix" />
+    }
   }
 </div>
 
 <!-- Validation errors, rendered here by `FieldErrorsDirective`. -->
 <ng-container #errorsSlot />
 
-<!-- Label & Tooltip Template -->
+<!-- Label & Adornment Template -->
 <!-- The label is only here while it renders in normal flow; over the field it lives in the container above,
      so exactly one of the two outlets exists and the single `ng-content` below still projects once. -->
-<ng-template #labelTooltip>
-  <div class="label-tooltip-wrapper">
+<ng-template #labelRow>
+  <div class="label-row">
     <!-- Label -->
     @if (!isLabelOverField) {
       <ng-container [ngTemplateOutlet]="label" />
     }
-    <!-- Tooltip -->
-    <ng-container [ngTemplateOutlet]="tooltip" />
+    <!-- Label Adornment -->
+    <ng-container [ngTemplateOutlet]="labelAdornment" />
   </div>
 </ng-template>
 
@@ -83,12 +87,12 @@
   </ng-template>
 </ng-template>
 
-<!-- Tooltip Template -->
-<ng-template #tooltip>
+<!-- Label Adornment Template -->
+<ng-template #labelAdornment>
   <div
-    class="tooltip-wrapper"
-    [class.hidden]="!hasTooltip">
-    <ng-content select="[formidableFieldTooltip]"></ng-content>
+    class="label-adornment-wrapper"
+    [class.hidden]="!hasLabelAdornment">
+    <ng-content select="[formidableFieldLabelAdornment]"></ng-content>
   </div>
 </ng-template>
 

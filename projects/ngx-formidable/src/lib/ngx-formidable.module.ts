@@ -15,11 +15,11 @@ import { TextareaFieldComponent } from './components/fields/textarea-field/texta
 import { TimeFieldComponent } from './components/fields/time-field/time-field.component';
 import { ToggleFieldComponent } from './components/fields/toggle-field/toggle-field.component';
 import { FieldErrorsDirective } from './directives/field-errors.directive';
+import { FieldLabelAdornmentDirective } from './directives/field-label-adornment.directive';
 import { FieldLabelDirective } from './directives/field-label.directive';
 import { FieldPrefixDirective } from './directives/field-prefix.directive';
 import { FieldSuffixDirective } from './directives/field-suffix.directive';
 import { FieldToggleIconDirective } from './directives/field-toggle-icon.directive';
-import { FieldTooltipDirective } from './directives/field-tooltip.directive';
 import { NgxFormidableFormModelGroupDirective } from './directives/form-model-group.directive';
 import { NgxFormidableFormModelDirective } from './directives/form-model.directive';
 import { NgxFormidableFormRootValidateDirective } from './directives/form-root-validate.directive';
@@ -33,7 +33,7 @@ const components = [
   NgxFormidableFormModelGroupDirective,
   NgxFormidableFormRootValidateDirective,
   // Field Directives
-  FieldTooltipDirective,
+  FieldLabelAdornmentDirective,
   FieldLabelDirective,
   FieldPrefixDirective,
   FieldSuffixDirective,

@@ -219,7 +219,11 @@ Collects `formidable-field-option` children. **Use when** multiple choices may b
 
 **Selector** `formidable-field-decorator`
 
-Wraps a field and its label, tooltip, prefix, suffix and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `@ContentChild`. Forwards the field's `valueChanged` / `focusChanged`. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and measures a projected prefix/suffix in the `horizontal` layout. No inputs.
+Wraps a field and its label, label adornment, prefix, suffix and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `@ContentChild`. Forwards the field's `valueChanged` / `focusChanged`. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and measures a projected prefix/suffix in the `horizontal` layout. No inputs.
+
+**Label Adornment**: a slot beside the label, in the same row, for whatever the consumer wants next to it — the library owns the slot only, never its content. It collapses with that row: a label rendered over the field takes its row with it, and an adornment left above a field it no longer decorates is worse than no adornment, so it hides too.
+
+**Prefix And Suffix Placement**: a `horizontal` and `inline` concept only. The `vertical` layout stacks its group inside a fieldset, which leaves a prefix/suffix nothing to sit beside and no value to inset, so the slots are not rendered there at all.
 
 **Prefix And Suffix Measurement**: a projected prefix/suffix takes horizontal space the field has to give up, so the decorator measures its wrapper — which shrink-wraps the projected content, padding included — and publishes the width on its own host as `--formidable-field-prefix-inset` / `--formidable-field-suffix-inset`. The stylesheet turns those into the field's `padding-left` / `padding-right` and into the bounds of a label rendered over the value; both fall back to `--formidable-field-padding-x` when unset. The measurement runs in a `ResizeObserver` over both wrappers, so it follows content being added or removed, a font loading, or a wrapper being hidden — and a hidden wrapper measures zero, which removes the property and gives the field its own padding back. CSS owns the padding throughout; the decorator never writes an inline `style.padding`.
 
@@ -239,7 +243,7 @@ The decorator resolves the configured position against the field's own state int
 
 Because `labelState` reads field state the decorator cannot observe — `readonly`, `disabled`, `placeholder`, mask configuration — the decorator is deliberately **not** `OnPush`.
 
-**Label Geometry**: an `outside` label sits in `.before-wrapper` in normal flow. Every other position renders the label over the field, which puts it in `.container-horizontal` — the field's own positioning context, whose top edge is the field's border-box top. Each offset is therefore a plain distance from that edge, unreachable by anything around the label, and `.before-wrapper` collapses entirely once no label or tooltip is left in it.
+**Label Geometry**: an `outside` label sits in `.before-wrapper` in normal flow. Every other position renders the label over the field, which puts it in `.container-horizontal` — the field's own positioning context, whose top edge is the field's border-box top. Each offset is therefore a plain distance from that edge, unreachable by anything around the label, and `.before-wrapper` collapses entirely once the label has left it.
 
 | Offset                               | Lands At                                                                                              |
 | :----------------------------------- | :---------------------------------------------------------------------------------------------------- |
@@ -295,14 +299,14 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 
 ### Field-Decoration
 
-| Directive                  | Selector                      | Purpose                                                                                                                                                                                            |
-| :------------------------- | :---------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `FieldErrorsDirective`     | `[formidableFieldErrors]`     | Instantiates a `FieldErrorsComponent` and wires its `ngModel`/`ngModelGroup` from DI — into the surrounding decorator's errors slot if there is one, beside the host control otherwise. No inputs. |
-| `FieldLabelDirective`      | `[formidableFieldLabel]`      | Projects label content. `@Input() position: FieldLabelPosition` (`'outside'`).                                                                                                                     |
-| `FieldPrefixDirective`     | `[formidableFieldPrefix]`     | Projects prefix content. Exposes `elementRef`.                                                                                                                                                     |
-| `FieldSuffixDirective`     | `[formidableFieldSuffix]`     | Projects suffix content. Exposes `elementRef`.                                                                                                                                                     |
-| `FieldToggleIconDirective` | `[formidableFieldToggleIcon]` | Marks projected content as a field's panel-toggle icon (date field). Exposes `elementRef`.                                                                                                         |
-| `FieldTooltipDirective`    | `[formidableFieldTooltip]`    | Projects tooltip content. Exposes `elementRef`.                                                                                                                                                    |
+| Directive                      | Selector                          | Purpose                                                                                                                                                                                            |
+| :----------------------------- | :-------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FieldErrorsDirective`         | `[formidableFieldErrors]`         | Instantiates a `FieldErrorsComponent` and wires its `ngModel`/`ngModelGroup` from DI — into the surrounding decorator's errors slot if there is one, beside the host control otherwise. No inputs. |
+| `FieldLabelAdornmentDirective` | `[formidableFieldLabelAdornment]` | Projects content beside the label. Exposes `elementRef`.                                                                                                                                           |
+| `FieldLabelDirective`          | `[formidableFieldLabel]`          | Projects label content. `@Input() position: FieldLabelPosition` (`'outside'`).                                                                                                                     |
+| `FieldPrefixDirective`         | `[formidableFieldPrefix]`         | Projects prefix content, in the `horizontal` and `inline` layouts. Exposes `elementRef`.                                                                                                           |
+| `FieldSuffixDirective`         | `[formidableFieldSuffix]`         | Projects suffix content, in the `horizontal` and `inline` layouts. Exposes `elementRef`.                                                                                                           |
+| `FieldToggleIconDirective`     | `[formidableFieldToggleIcon]`     | Marks projected content as a field's panel-toggle icon (date field). Exposes `elementRef`.                                                                                                         |
 
 ---
 
@@ -362,8 +366,8 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `NgxFormidableFormModelGroupDirective`   | `[ngModelGroup]`                                     | Directive  | —                 |
 | `NgxFormidableFormRootValidateDirective` | `form[formidableRootValidate][formValue][formSuite]` | Directive  | —                 |
 | `FieldErrorsDirective`                   | `[formidableFieldErrors]`                            | Directive  | —                 |
+| `FieldLabelAdornmentDirective`           | `[formidableFieldLabelAdornment]`                    | Directive  | —                 |
 | `FieldLabelDirective`                    | `[formidableFieldLabel]`                             | Directive  | —                 |
 | `FieldPrefixDirective`                   | `[formidableFieldPrefix]`                            | Directive  | —                 |
 | `FieldSuffixDirective`                   | `[formidableFieldSuffix]`                            | Directive  | —                 |
 | `FieldToggleIconDirective`               | `[formidableFieldToggleIcon]`                        | Directive  | —                 |
-| `FieldTooltipDirective`                  | `[formidableFieldTooltip]`                           | Directive  | —                 |

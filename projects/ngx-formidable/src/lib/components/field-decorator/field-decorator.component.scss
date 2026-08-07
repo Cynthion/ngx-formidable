@@ -27,8 +27,8 @@
   @include field-before;
 }
 
-.label-tooltip-wrapper {
-  @include label-tooltip-wrapper;
+.label-row {
+  @include label-row;
 }
 
 .inline-wrapper {
@@ -74,10 +74,6 @@
   @include legend;
 }
 
-.tooltip-wrapper {
-  @include field-tooltip;
-}
-
 .container-horizontal {
   @include decorator-container-horizontal;
 }
@@ -104,14 +100,6 @@
   .suffix-wrapper-horizontal {
     @include field-prefix-suffix-value-top;
   }
-}
-
-.prefix-wrapper-vertical {
-  @include field-prefix-vertical;
-}
-
-.suffix-wrapper-vertical {
-  @include field-suffix-vertical;
 }
 
 .prefix-wrapper-inline {

@@ -88,7 +88,7 @@ A powerful Angular component library for building rich, validated forms.
 
 ### <h5><a href="#field-decorator">🎀 Field Decorator</a></h5>
 
-• Label / Tooltip / Prefix / Suffix
+• Label / Adornment / Prefix / Suffix
 • Floating label transitions
 • Forwards <code>valueChanged</code>/<code>focusChanged</code>
 
@@ -259,7 +259,7 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
       ngModel
       placeholder="Name"></formidable-input-field>
     <div formidableFieldLabel>Name</div>
-    <div formidableFieldTooltip>Enter your name</div>
+    <div formidableFieldLabelAdornment>?</div>
   </formidable-field-decorator>
 
   <formidable-field-decorator>
@@ -329,11 +329,47 @@ Hooks into `ngModelGroup` to validate nested groups.
 Wrap any field in a <formidable-field-decorator> to project:
 
 - Label: `<div formidableFieldLabel [position]="'inside'">…</div>`
-- Tooltip: `<div formidableFieldTooltip>…</div>`
-- Prefix: `<div formidableFieldPrefix>…</div>`
-- Suffix: `<div formidableFieldSuffix>…</div>`
+- Label adornment: `<div formidableFieldLabelAdornment>…</div>` — anything you want beside the label
+- Prefix: `<div formidableFieldPrefix>…</div>` — horizontal and inline fields only
+- Suffix: `<div formidableFieldSuffix>…</div>` — horizontal and inline fields only
 
 The decorator adjusts padding and forwards the wrapped field’s properties and events.
+
+Each field picks its own layout, which is what decides where the slots land:
+
+```text
+horizontal — input, textarea, select, dropdown, autocomplete, date, time
+
+   Label  Adornment                          the label’s own row
+  ┌────────────────────────────────────┐
+  │ Prefix     value          Suffix   │     prefix and suffix inset the value
+  └────────────────────────────────────┘
+   Errors
+
+horizontal, with the label over the field (inside, inside-floating, border, border-prefix)
+
+  ┌────────────────────────────────────┐     the label moves into the field, and
+  │ Prefix     Label…         Suffix   │     the adornment goes with its row
+  └────────────────────────────────────┘
+   Errors
+
+vertical — radio-group, checkbox-group, slider
+
+   Label  Adornment
+  ┌────────────────────────────────────┐
+  │ ▢ Option                           │     no prefix or suffix here
+  │ ▢ Option                           │
+  └────────────────────────────────────┘
+   Errors
+
+inline — toggle
+
+  Label  Adornment    Prefix [-] Suffix
+   Errors
+```
+
+An adornment decorates the label, so it lives and dies with the label’s row: every position other than
+`outside` takes that row away, and the adornment with it.
 
 The label’s `position` chooses where it renders:
 
@@ -454,7 +490,6 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-label-border-band`                      | Fill a `border` label paints over the border it hides. Follows the field background by default.                     |
 | `--formidable-color-label-border-band-readonly`             | Overrides `--formidable-color-label-border-band` when the field is readonly.                                        |
 | `--formidable-color-label-border-band-disabled`             | Overrides `--formidable-color-label-border-band` when the field is disabled.                                        |
-| `--formidable-color-field-tooltip`                          | Text color for tooltip text.                                                                                        |
 | `--formidable-color-field-placeholder`                      | Text color for placeholder text.                                                                                    |
 | `--formidable-color-field-selection`                        | Background color for selected text.                                                                                 |
 | `--formidable-color-field-border`                           | Border color for fields.                                                                                            |
@@ -741,8 +776,8 @@ When you add your own field component (by implementing `IFormidableField` or `IF
 - **Async validation** via `NgxFormidableFormModelDirective`
 - **Root-level / cross-field validation** if you use `formidableRootValidate`
 - **Error rendering** simply by adding `formidableFieldErrors` — with or without a decorator around the field
-- **Decorator support** — labels, tooltips, prefixes, and suffixes work out of the box. A prefix/suffix is
-  centered in your field's box; if your field top-aligns its value (like a textarea), set
+- **Decorator support** — labels, label adornments, prefixes, and suffixes work out of the box. A
+  prefix/suffix is centered in your field's box; if your field top-aligns its value (like a textarea), set
   `valueAlignment: 'top'` so they sit on its first line instead
 
 You don’t need any extra wiring; just implement the interface, extend `BaseFieldDirective`, and register the provider.

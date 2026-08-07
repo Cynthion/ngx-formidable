@@ -44,8 +44,6 @@ Improvements:
 - add tokens for the background, border, value (text) and label color when the field is invalid, disabled, readonly, focused, hovered and define the default colors for these states (similar to material's behavior)
 - allow the bottom border to be configured (thickness and color) when the field is invalid or focused (and defined default values)
 - allow the border corner radius to be configured (so each can have different, e.g. only top rounded)
-- tooltip: any tooltip stuff should be removed from the library, as this is user stuff that he can add as label content, no? or should I keep it? or how would a tooltip or other custom content be put next to the label? does it make sense for all label positions? can the tooltip slot be removed? what does material do?
-- prefix/suffix: only relevant for horizontal fields, correct? remove for group fields.
 - possibility check: can the group fields (radio, checkbox) be configured with tokens so that the options (radio buttons, checkboxes) are left-aligned with the left border of other fields in the form (above and below)? or what would need to change? (background and border most probably would then be styled "transparent")
 
 # Documentation:
@@ -88,3 +86,4 @@ Real items, deliberately not in any phase of `implementation.md`. Revisit explic
 - remove validation from the library, only provide ui components. The Vest bridge is currently a headline feature and the largest possible breaking change; parked as an open question, not scheduled.
 - the demo writes the selected theme to `localStorage` but never reads it back on init, so the choice does not survive a reload.
 - there is no CI workflow — nothing runs lint, stylelint, prettier or tests on push. `deploy.yml` also reinstalls from scratch instead of from the lockfile, so builds are not reproducible.
+- EnerQi consumes the library as a tarball and its example form still uses `formidableFieldTooltip` and a prefix/suffix on its group fields. Both were removed here; propagate them the next time the tarball is rebuilt.

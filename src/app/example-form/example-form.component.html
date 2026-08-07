@@ -29,9 +29,9 @@
         <label>
           <input
             type="checkbox"
-            [checked]="controlCenter.showTooltips"
-            (change)="onToggle('showTooltips', $any($event.target).checked)" />
-          Show Tooltips
+            [checked]="controlCenter.showLabelAdornments"
+            (change)="onToggle('showLabelAdornments', $any($event.target).checked)" />
+          Show Label Adornments
         </label>
         <label>
           <input
@@ -231,8 +231,8 @@
             First Name
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="hover"
@@ -272,8 +272,8 @@
             Middle Name
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="hover"
@@ -317,8 +317,8 @@
             Last Name
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="bottom"
               trigger="click"
@@ -364,8 +364,8 @@
             Gender
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="click"
@@ -435,8 +435,8 @@
             Nationality - a long label to test the ellipsis overflow
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="click"
@@ -497,8 +497,8 @@
             Hobby
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="click"
@@ -550,8 +550,8 @@
             Animal — pick your favourite one from this deliberately long list of animals
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="click"
@@ -601,8 +601,8 @@
             Birthdate - a rather long label to test the ellipsis
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="click"
@@ -642,8 +642,8 @@
             Time
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="click"
@@ -703,24 +703,14 @@
             Religion
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="click"
               [icon]="exampleTooltipSvg"
               [text]="'This is a radio group field. It can have a tooltip, too.'">
             </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
-            Suffix
           </div>
         </formidable-field-decorator>
 
@@ -764,24 +754,14 @@
             Allergies
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="click"
               [icon]="exampleTooltipSvg"
               [text]="'This is a checkbox group field.'">
             </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
-            Suffix
           </div>
         </formidable-field-decorator>
 
@@ -807,8 +787,8 @@
             Is Single?
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="click"
@@ -857,24 +837,14 @@
             Age
           </div>
           <div
-            *ngIf="controlCenter.showTooltips"
-            formidableFieldTooltip>
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
             <example-tooltip
               placement="right"
               trigger="click"
               [icon]="exampleTooltipSvg"
               [text]="'This is a slider field.'">
             </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix>
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix>
-            Suffix
           </div>
         </formidable-field-decorator>
 
