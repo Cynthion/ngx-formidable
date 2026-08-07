@@ -5,7 +5,9 @@ import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
 import { FieldTooltipDirective } from '../../directives/field-tooltip.directive';
 import { FieldLabelPosition } from '../../models/formidable.model';
+import { AutocompleteFieldComponent } from '../fields/autocomplete-field/autocomplete-field.component';
 import { DateFieldComponent } from '../fields/date-field/date-field.component';
+import { DropdownFieldComponent } from '../fields/dropdown-field/dropdown-field.component';
 import { InputFieldComponent } from '../fields/input-field/input-field.component';
 import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
 import { SelectFieldComponent } from '../fields/select-field/select-field.component';
@@ -31,6 +33,16 @@ import { FieldDecoratorComponent } from './field-decorator.component';
 /** px per rem, so the expectations stay written in the tokens' own unit. */
 function rem(value: number): number {
   return value * parseFloat(getComputedStyle(document.documentElement).fontSize);
+}
+
+/**
+ * Where the value's text starts, in viewport coordinates: the field's padding is measured from its content
+ * box, so the border is between it and the border-box edge every label is positioned from.
+ */
+function valueLeft(field: HTMLElement): number {
+  const style = getComputedStyle(field);
+
+  return field.getBoundingClientRect().left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft);
 }
 
 @Component({
@@ -126,6 +138,58 @@ class TooltipHostComponent {}
 class TextareaHostComponent {
   position: FieldLabelPosition = 'inside';
 }
+
+/**
+ * The panel fields render their value in an inner `.wrapped-input` instead of on the field element, so the
+ * field's own padding stops at the wrapper and cannot place the value. The label is `inside-floating` so
+ * every one of them floats, whatever it shows while empty.
+ */
+@Component({
+  standalone: true,
+  imports: [
+    FieldDecoratorComponent,
+    DateFieldComponent,
+    TimeFieldComponent,
+    AutocompleteFieldComponent,
+    DropdownFieldComponent,
+    FieldLabelDirective
+  ],
+  template: `
+    <formidable-field-decorator>
+      <formidable-date-field name="date" />
+      <div
+        formidableFieldLabel
+        position="inside-floating">
+        Label
+      </div>
+    </formidable-field-decorator>
+    <formidable-field-decorator>
+      <formidable-time-field name="time" />
+      <div
+        formidableFieldLabel
+        position="inside-floating">
+        Label
+      </div>
+    </formidable-field-decorator>
+    <formidable-field-decorator>
+      <formidable-autocomplete-field name="autocomplete" />
+      <div
+        formidableFieldLabel
+        position="inside-floating">
+        Label
+      </div>
+    </formidable-field-decorator>
+    <formidable-field-decorator>
+      <formidable-dropdown-field name="dropdown" />
+      <div
+        formidableFieldLabel
+        position="inside-floating">
+        Label
+      </div>
+    </formidable-field-decorator>
+  `
+})
+class WrappedInputHostComponent {}
 
 @Component({
   standalone: true,
@@ -308,15 +372,17 @@ describe('formidableFieldLabel [position]', () => {
       expect(style.textOverflow).toBe('ellipsis');
     });
 
-    it('bounds the label to the field’s own horizontal padding', () => {
+    it('bounds the label to the value’s own horizontal band', () => {
       setPosition('inside');
 
       const label = labelWrapper().getBoundingClientRect();
+      const style = getComputedStyle(input());
       const field = input().getBoundingClientRect();
-      const padding = parseFloat(getComputedStyle(input()).paddingLeft);
+      const inset = parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft);
 
-      expect(label.left - field.left).toBeCloseTo(padding, 1);
-      expect(field.right - label.right).toBeCloseTo(padding, 1);
+      expect(label.left).toBeCloseTo(valueLeft(input()), 1);
+      expect(label.left - field.left).toBeCloseTo(inset, 1);
+      expect(field.right - label.right).toBeCloseTo(inset, 1);
     });
   });
 
@@ -412,10 +478,7 @@ describe('formidableFieldLabel [position]', () => {
       const label = labelWrapper();
       const textLeft = label.getBoundingClientRect().left + parseFloat(getComputedStyle(label).paddingLeft);
 
-      expect(textLeft - input().getBoundingClientRect().left).toBeCloseTo(
-        parseFloat(getComputedStyle(input()).paddingLeft),
-        1
-      );
+      expect(textLeft).toBeCloseTo(valueLeft(input()), 1);
     });
 
     it('shrink-wraps, so its band hides only the border it covers', () => {
@@ -510,19 +573,17 @@ describe('formidableFieldLabel [position]', () => {
     const root = await renderWithPrefix('inside');
     const field = root.querySelector('input') as HTMLInputElement;
     const label = root.querySelector('.label-wrapper') as HTMLElement;
-    const padding = parseFloat(getComputedStyle(field).paddingLeft);
 
-    expect(padding).toBeGreaterThan(rem(4));
-    expect(label.getBoundingClientRect().left - field.getBoundingClientRect().left).toBeCloseTo(padding, 1);
+    expect(parseFloat(getComputedStyle(field).paddingLeft)).toBeGreaterThan(rem(4));
+    expect(label.getBoundingClientRect().left).toBeCloseTo(valueLeft(field), 1);
   });
 
   it('follows the value inwards for a border label too', async () => {
     const root = await renderWithPrefix('border');
     const field = root.querySelector('input') as HTMLInputElement;
-    const padding = parseFloat(getComputedStyle(field).paddingLeft);
 
-    expect(padding).toBeGreaterThan(rem(4));
-    expect(labelTextLeft(root) - field.getBoundingClientRect().left).toBeCloseTo(padding, 1);
+    expect(parseFloat(getComputedStyle(field).paddingLeft)).toBeGreaterThan(rem(4));
+    expect(labelTextLeft(root)).toBeCloseTo(valueLeft(field), 1);
   });
 
   it('aligns with the prefix, not the value, when the position says so', async () => {
@@ -637,6 +698,78 @@ describe('formidableFieldLabel [position]', () => {
     expect(wrapper.classList.contains('label-outside')).toBe(true);
     expect(getComputedStyle(wrapper).position).toBe('static');
   });
+});
+
+/**
+ * A panel field's value lives in an inner `.wrapped-input`, which the field's own padding cannot reach — so
+ * whatever the user agent puts on that input (Chrome: `padding: 1px 2px`) is left holding the value, and
+ * offsets it from the inset the label is anchored to. Only the label's clearance may remain on it.
+ */
+describe('a value rendered in a wrapped input', () => {
+  let fixture: ComponentFixture<WrappedInputHostComponent>;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+
+    fixture = TestBed.createComponent(WrappedInputHostComponent);
+    fixture.detectChanges();
+  });
+
+  function decorator(selector: string): HTMLElement {
+    return (fixture.nativeElement.querySelector(selector) as HTMLElement).closest(
+      'formidable-field-decorator'
+    ) as HTMLElement;
+  }
+
+  for (const selector of [
+    'formidable-date-field',
+    'formidable-time-field',
+    'formidable-autocomplete-field',
+    'formidable-dropdown-field'
+  ]) {
+    describe(selector, () => {
+      let fieldBox: HTMLElement;
+      let input: HTMLInputElement;
+      let label: HTMLElement;
+
+      beforeEach(() => {
+        const root = decorator(selector);
+
+        fieldBox = root.querySelector('.field') as HTMLElement;
+        input = root.querySelector('.wrapped-input') as HTMLInputElement;
+        label = root.querySelector('.label-wrapper') as HTMLElement;
+      });
+
+      it('carries no padding of its own beyond the label’s clearance', () => {
+        const style = getComputedStyle(input);
+
+        expect(style.paddingLeft).toBe('0px');
+        expect(style.paddingRight).toBe('0px');
+        expect(style.paddingBottom).toBe('0px');
+        expect(parseFloat(style.paddingTop)).toBeCloseTo(rem(1.2), 1);
+      });
+
+      it('starts its value exactly where the label starts', () => {
+        const valueLeft = input.getBoundingClientRect().left + parseFloat(getComputedStyle(input).paddingLeft);
+
+        expect(valueLeft).toBeCloseTo(label.getBoundingClientRect().left, 1);
+      });
+
+      it('stacks the floating label and the value as one block', () => {
+        const style = getComputedStyle(input);
+        const paddingTop = parseFloat(style.paddingTop);
+        const contentHeight = input.clientHeight - paddingTop - parseFloat(style.paddingBottom);
+        const innerTop = fieldBox.getBoundingClientRect().top + parseFloat(getComputedStyle(fieldBox).borderTopWidth);
+
+        const labelRect = label.getBoundingClientRect();
+        const labelBottom = labelRect.top - innerTop + labelRect.height;
+        const valueTop = paddingTop + (contentHeight - parseFloat(style.lineHeight)) / 2;
+
+        expect(labelBottom).toBeCloseTo(rem(1.6125), 1);
+        expect(valueTop).toBeCloseTo(labelBottom, 1);
+      });
+    });
+  }
 });
 
 describe('IFormidableField.canLabelRest', () => {

@@ -22,13 +22,18 @@
   @return var(--formidable-field-toggle-inset);
 }
 
-// Where the field's value starts and ends: the field's own padding, plus a toggle on the right.
+// Where the field's value starts and ends: the field's own padding, plus a toggle on the right — and plus
+// one border. This inset positions the label overlays, which live in the field's own container and are
+// therefore measured from the field's border-box, one border outside the box the field's padding is
+// measured from. The vertical offsets in `_tokens.scss` add the border for the same reason.
 @function field-value-inset($side) {
+  $border: var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness});
+
   @if $side == 'left' {
-    @return field-padding-left();
+    @return calc(#{$border} + #{field-padding-left()});
   }
 
-  @return calc(#{field-padding-right()} + #{field-toggle-inset()});
+  @return calc(#{$border} + #{field-padding-right()} + #{field-toggle-inset()});
 }
 
 @mixin icon {
@@ -83,6 +88,12 @@
   @include field-reset;
   @include selection-colors;
   @include placeholder-colors;
+
+  // The wrapper owns the field's padding, so a user agent's own padding on this input (Chrome: `1px 2px`)
+  // is left holding the value and offsets it from the inset the label is aligned to. `field-box` overwrites
+  // it with a shorthand for the fields that are an input themselves; this is the same reset, one level in.
+  padding: 0;
+
   @include field-value-padding;
 
   background: transparent;

@@ -358,13 +358,18 @@ describe('formidable-field-decorator layout', () => {
       return root.querySelector('.dropdown-toggle') as HTMLElement;
     }
 
+    /**
+     * Where the value's band ends: the field's padding is measured from its content box, so the border sits
+     * between it and the border-box edge the label is positioned from.
+     */
+    function innerRight(): number {
+      return field().getBoundingClientRect().right - parseFloat(getComputedStyle(field()).borderRightWidth);
+    }
+
     it('keeps the label clear of the toggle instead of running it underneath', () => {
       const label = root.querySelector('.label-wrapper') as HTMLElement;
 
-      expect(field().getBoundingClientRect().right - label.getBoundingClientRect().right).toBeCloseTo(
-        insetWithToggle,
-        1
-      );
+      expect(innerRight() - label.getBoundingClientRect().right).toBeCloseTo(insetWithToggle, 1);
     });
 
     it('hands the width back when readonly takes the toggle away', async () => {
@@ -379,7 +384,7 @@ describe('formidable-field-decorator layout', () => {
 
       expect(host.classList.contains('has-in-field-toggle')).toBe(false);
       expect(toggle()).toBeNull();
-      expect(field().getBoundingClientRect().right - label.getBoundingClientRect().right).toBeCloseTo(rem(1), 1);
+      expect(innerRight() - label.getBoundingClientRect().right).toBeCloseTo(rem(1), 1);
     });
 
     // The toggle is a flex item inside the field's padding, so reserving the suffix's width there is
@@ -414,10 +419,7 @@ describe('formidable-field-decorator layout', () => {
       const label = root.querySelector('.label-wrapper') as HTMLElement;
       const suffixInset = parseFloat(getComputedStyle(field()).paddingRight);
 
-      expect(field().getBoundingClientRect().right - label.getBoundingClientRect().right).toBeCloseTo(
-        suffixInset + rem(2),
-        1
-      );
+      expect(innerRight() - label.getBoundingClientRect().right).toBeCloseTo(suffixInset + rem(2), 1);
     });
   });
 });
