@@ -144,6 +144,43 @@
         </label>
       </fieldset>
 
+      <!-- Panel Position -->
+      <fieldset>
+        <legend>Panel Position:</legend>
+        <label>
+          <input
+            type="radio"
+            name="panelPosition"
+            [checked]="panelPosition === 'left'"
+            (change)="setPanelPosition('left')" />
+          Left
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="panelPosition"
+            [checked]="panelPosition === 'right'"
+            (change)="setPanelPosition('right')" />
+          Right
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="panelPosition"
+            [checked]="panelPosition === 'full'"
+            (change)="setPanelPosition('full')" />
+          Full
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="panelPosition"
+            [checked]="panelPosition === 'bottom'"
+            (change)="setPanelPosition('bottom')" />
+          Bottom Sheet
+        </label>
+      </fieldset>
+
       <!-- Theme -->
       <fieldset>
         <legend>Theme:</legend>
@@ -480,7 +517,7 @@
             [options]="nationalityOptions"
             [defaultOption]="nationalityDefaultOption"
             [noOptionsText]="nationalityNoOptionText"
-            [panelPosition]="'left'"
+            [panelPosition]="panelPosition"
             [sortFn]="sortAlphabetically"
             (valueChanged)="onValueChanged('nationality', $event)"
             (focusChanged)="onFocusChanged('nationality', $event)">
@@ -555,6 +592,7 @@
             [defaultOption]="hobbyDefaultOption"
             [defaultOptionMode]="'fallback'"
             [noOptionsText]="hobbyNoOptionText"
+            [panelPosition]="panelPosition"
             [sortFn]="sortAlphabetically"
             (valueChanged)="onValueChanged('hobby', $event)"
             (focusChanged)="onFocusChanged('hobby', $event)">
@@ -621,6 +659,7 @@
             [ngModel]="vm.formValue$.animal"
             [options]="animalOptionsDefault"
             [noOptionsText]="animalNoOptionText"
+            [panelPosition]="panelPosition"
             (valueChanged)="onValueChanged('animal', $event)"
             (focusChanged)="onFocusChanged('animal', $event)"
             (filterChanged)="onAnimalFilterChange($event)">
@@ -680,6 +719,7 @@
             [showDaysInNextAndPreviousMonths]="true"
             [unicodeTokenFormat]="'dd . MM . yyyy'"
             [emptyHint]="'format'"
+            [panelPosition]="panelPosition"
             (valueChanged)="onValueChanged('birthdate', $event)"
             (focusChanged)="onFocusChanged('birthdate', $event)">
             <example-icon

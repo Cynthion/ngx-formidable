@@ -18,6 +18,7 @@ import {
   FieldPrefixDirective,
   FieldSuffixDirective,
   FieldToggleIconDirective,
+  FormidablePanelPosition,
   IFormidableFieldOption,
   InputFieldComponent,
   NgxFormidableFormDirective,
@@ -473,6 +474,7 @@ export class ExampleFormComponent {
 
   protected labelPosition: FieldLabelPosition = 'inside';
   protected adornmentAlignment: FieldAdornmentAlignment = 'center';
+  protected panelPosition: FormidablePanelPosition = 'right';
 
   // Since all components are change-detection OnPush, we need to trigger a change detection cycle
   protected renderFlip = true;
@@ -492,6 +494,11 @@ export class ExampleFormComponent {
 
   setAdornmentAlignment(alignment: FieldAdornmentAlignment): void {
     this.adornmentAlignment = alignment;
+    this.clearLogs();
+  }
+
+  setPanelPosition(position: FormidablePanelPosition): void {
+    this.panelPosition = position;
     this.clearLogs();
   }
 

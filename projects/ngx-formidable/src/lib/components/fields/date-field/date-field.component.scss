@@ -27,3 +27,7 @@
 .picker-wrapper {
   @include date-picker-wrapper;
 }
+
+.picker {
+  @include date-picker;
+}

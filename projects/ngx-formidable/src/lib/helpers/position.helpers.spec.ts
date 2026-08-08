@@ -6,7 +6,8 @@ import { updatePanelPosition } from './position.helpers';
  *
  * It picks the side the panel opens on — below unless there is no room there and there is room above —
  * and marks the panel with it. It touches the panel only: a field's corners are its own, and it is the
- * open panel that adopts the two it sits against.
+ * open panel that adopts the two it sits against. A bottom sheet is exempt: it is pinned to the viewport
+ * rather than to the field, so there is no side to pick.
  */
 
 /** A stand-in for a field, with the rect and the viewport it should be measured against. */
@@ -83,5 +84,32 @@ describe('updatePanelPosition', () => {
   it('does nothing without both elements', () => {
     expect(() => updatePanelPosition(undefined, panelOf(100))).not.toThrow();
     expect(() => updatePanelPosition(elementAt(0, 60), undefined)).not.toThrow();
+  });
+
+  // A sheet sits on the viewport, not on the field, so the space around the field says nothing about it.
+  it('never flips a bottom sheet, however little room the field leaves', () => {
+    const panel = panelOf(200);
+
+    panel.nativeElement.classList.add('panel-bottom');
+
+    updatePanelPosition(elementAt(viewport - 70, 60), panel);
+
+    expect(panel.nativeElement.classList.contains('above')).toBe(false);
+  });
+
+  // The position is an input: a panel that was anchored and flipped can become a sheet at any time, and it
+  // must not keep the transform that flip carries.
+  it('drops a flip a panel picked up before it became a sheet', () => {
+    const panel = panelOf(200);
+
+    updatePanelPosition(elementAt(viewport - 70, 60), panel);
+
+    expect(panel.nativeElement.classList.contains('above')).toBe(true);
+
+    panel.nativeElement.classList.add('panel-bottom');
+
+    updatePanelPosition(elementAt(viewport - 70, 60), panel);
+
+    expect(panel.nativeElement.classList.contains('above')).toBe(false);
   });
 });

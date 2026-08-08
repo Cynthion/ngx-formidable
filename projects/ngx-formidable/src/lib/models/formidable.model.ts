@@ -68,7 +68,12 @@ export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
  * filtered, or only as a `fallback` when the option list would otherwise be empty.
  */
 export type FieldDefaultOptionMode = 'always' | 'fallback';
-export type FormidablePanelPosition = 'left' | 'right' | 'full';
+/**
+ * Where a field's panel opens: aligned to the field's `left` or `right` edge, spanning its `full` width, or
+ * as a `bottom` sheet pinned to the bottom of the viewport. The first three flip above the field when there
+ * is no room below; a sheet does not move.
+ */
+export type FormidablePanelPosition = 'left' | 'right' | 'full' | 'bottom';
 export type FormidableToggleFieldLabelPosition = 'before' | 'after';
 export type FormidableTranslateErrorFn = (error: string) => string;
 /**

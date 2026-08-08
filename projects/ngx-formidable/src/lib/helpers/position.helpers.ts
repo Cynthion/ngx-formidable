@@ -3,13 +3,21 @@ import { ElementRef, QueryList } from '@angular/core';
 /**
  * Opens the panel below the field, or above it when there is no room below and there is above. The panel
  * carries the direction so its own styling can follow it — the field is never touched: its corners are its
- * own, and an open panel mirrors them rather than the other way round.
+ * own, and an open panel mirrors them rather than the other way round. A bottom sheet is exempt: it is
+ * pinned to the viewport, not to the field, so there is no side to pick.
  */
 export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef?: ElementRef<HTMLElement>): void {
   const field = fieldRef?.nativeElement;
   const panel = panelRef?.nativeElement;
 
   if (!field || !panel) return;
+
+  // A sheet never flips, and must not keep a flip it picked up while it was still anchored to the field.
+  if (panel.classList.contains('panel-bottom')) {
+    panel.classList.remove('above');
+
+    return;
+  }
 
   const fieldRect = field.getBoundingClientRect();
   const panelHeight = panel.offsetHeight;

@@ -554,6 +554,23 @@ For the full API of every field and directive — selectors, value types and all
 | **Date & Time**   | `<formidable-date-field>`           | A masked date input with a calendar popup.         |
 |                   | `<formidable-time-field>`           | A masked time-only input field.                    |
 
+### Panel Placement
+
+`panelPosition` places the panel of a dropdown, autocomplete or date field. `left`, `right` and `full` anchor it to the field and flip it above when there is no room below. `bottom` makes it a sheet instead — fixed across the bottom of the viewport, full width, and it never flips:
+
+```html
+<formidable-date-field
+  name="birthdate"
+  [panelPosition]="'bottom'" />
+```
+
+This is what a phone wants; an anchored panel in a narrow column is not. Two things to know before you reach for it:
+
+- A sheet is `position: fixed`, which any ancestor with a `transform`, `filter` or `contain` turns back into an ordinary absolute box. Keep those off the elements the field sits in.
+- Opening a date sheet moves focus to the panel, so a soft keyboard retracts and the sheet is clear. An autocomplete sheet keeps focus in its filter input — that is what makes it type-ahead — so on a phone the keyboard can cover it.
+
+Whatever the placement, the calendar scales to the width its panel has, so `--formidable-date-field-panel-width` is the width it prefers rather than one it is fixed at.
+
 ## Theming & Styles
 
 Various styling variables allow to customize the theming. Override any supported CSS variable.
@@ -735,7 +752,7 @@ You can also tweak Pikaday CSS.
 | `--formidable-overlay-z-index`                              | z-index applied to any full-screen overlays.                                                                        |
 | `--formidable-above-overlay-z-index`                        | z-index for elements that must sit above overlays.                                                                  |
 | **Date-Field Panel**                                        |                                                                                                                     |
-| `--formidable-date-field-panel-width`                       | Fixed width for the date-picker panel.                                                                              |
+| `--formidable-date-field-panel-width`                       | Width the calendar prefers; it scales down into a narrower panel.                                                   |
 | `--formidable-date-field-panel-border-radius`               | Border-radius for the date-picker panel.                                                                            |
 | `--formidable-date-field-panel-box-shadow`                  | Box-shadow override for the date-picker panel.                                                                      |
 | **Option Prefix Dimensions**                                |                                                                                                                     |
@@ -758,7 +775,7 @@ Every corner of a field falls back to `--formidable-field-border-radius`, and ea
 
 They shape the field box and nothing else. Everything else that is rounded — the toggle, the slider, the panels — falls back to `--formidable-border-radius` instead, which is what to override to round the whole library at once. Set that one in your own `:root`: the derived variables resolve where they are declared, so overriding a base further down the tree has no effect. The corner variables above are the exception — they are read where they are used, so they work on `:root` and on a single field alike. A field group takes its shape from `--formidable-field-group-border-radius`, which is substituted verbatim into `border-radius` and so still accepts the whole CSS shorthand.
 
-While a dropdown, autocomplete or date panel is open, it adopts the two corners of the field it sits against: opened below, its top corners take the field's bottom ones; flipped above, its bottom corners take the field's top ones. Its far side keeps `--formidable-panel-border-radius`. The field never reshapes itself — its corners are what you declared, panel or no panel.
+While a dropdown, autocomplete or date panel is open, it adopts the two corners of the field it sits against: opened below, its top corners take the field's bottom ones; flipped above, its bottom corners take the field's top ones. Its far side keeps `--formidable-panel-border-radius`. The field never reshapes itself — its corners are what you declared, panel or no panel. A `bottom` sheet is the exception: it sits against the screen, not the field, so it keeps its own radius on top and squares off where it meets the edge.
 
 ### Underline
 

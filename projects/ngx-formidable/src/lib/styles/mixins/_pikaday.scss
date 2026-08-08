@@ -48,7 +48,11 @@
 
 .pika-lendar {
   float: left;
+  // A preferred width, not a fixed one: everything below here is already fluid (the table is 100% wide,
+  // its cells are a seventh each and stay square on percentage padding), so capping this at the space the
+  // panel actually has is what lets the whole calendar scale into a narrow panel instead of being clipped.
   width: var(--formidable-date-field-panel-width, #{tokens.$formidable-date-field-panel-width});
+  max-width: 100%;
 
   & + & {
     margin-left: utils.spacing(16);

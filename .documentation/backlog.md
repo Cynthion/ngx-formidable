@@ -14,20 +14,21 @@ Example:
 Improvements:
 
 - ensure all fields can be "focus on page load" (without panels being opened)
-- make DateFieldComponent `smaller` or render better for smaller screens
 - Prefer queueMicrotask over setTimeout where possible
 - Add Storybook stories for layout options
 - Toggle: allow setting layout to 'inline' or 'group'
-- add option to date field to show at bottom of screen (e.g., see VIAC app)
 - ARIA attributes
 
 # Bugs:
 
 - label position border: label is hidden behind the panel if it is open on top/before the field
 - in the "Nationality" field example, the label always runs the animation on page reload. Animation of an inside label should only show/run when necessary
+- date and time fields: make sure that clearing the input value resets the value. I saw this problem: select a date, then clear it with backspace, the pressing ArrowUp/ArrowDown, the date increased from the date set before instead of today
 
 # Features:
 
+- date field: in the panel, the current date must be visually highlighted (e.g., with a circle around it)
+- date field: support entering a date range (from - to); this might be very tricky with respect to form state, keyboardhandling and visual representation; pikaday probably doesn't support it either
 - possibility check: can the group fields (radio, checkbox) be configured with tokens so that the options (radio buttons, checkboxes) are left-aligned with the left border of other fields in the form (above and below)? or what would need to change? (background and border most probably would then be styled "transparent")
 
 # Documentation:
@@ -52,7 +53,7 @@ The idea is a product page, where users can come to and play around with options
 - the example form is removed
 - the root project is hosting the portal instead of the example form
 - all theme tokens and field options are documented in the portal (with examples), inline to options and also in a separate documentation page
-- the portal "control elements" shall use the ngx-formidable controls themselves, but with a distinct theme
+- the portal "control elements" shall use the ngx-formidable controls themselves, but with a distinct and compact theme
 - the example form must use a different default theme and token config as the starting position
 - portal also provides expandable/collapsible views for "form"-values, showing the current values entered in the example form
 - portal also provides a (html-)editor to modify the example form and add/remove further fields and configurations, and the result is shown in the preview form

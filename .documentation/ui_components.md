@@ -99,7 +99,7 @@ Custom single-select with a floating panel.
 | `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text           |
 | `sortFn`            | `(a, b) => number`         | —                         | Optional option sorter     |
 | `isPanelOpen`       | `boolean`                  | `false`                   | Panel open state (get/set) |
-| `panelPosition`     | `FormidablePanelPosition`  | `'full'`                  | Panel alignment            |
+| `panelPosition`     | `FormidablePanelPosition`  | `'full'`                  | Panel placement            |
 
 Supports projected `formidable-field-option` children. **Use when** you need a styled dropdown with rich option content.
 
@@ -117,7 +117,7 @@ Dropdown panel plus a filter input. Emits filter text; the consumer supplies fil
 | `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text           |
 | `sortFn`            | `(a, b) => number`         | —                         | Optional option sorter     |
 | `isPanelOpen`       | `boolean`                  | `false`                   | Panel open state (get/set) |
-| `panelPosition`     | `FormidablePanelPosition`  | `'full'`                  | Panel alignment            |
+| `panelPosition`     | `FormidablePanelPosition`  | `'full'`                  | Panel placement            |
 
 The default option is pinned after filtering, so an `always` default stays visible even when the filter matches nothing. **Output** `filterChanged: EventEmitter<string>` (+ `filterChange$`). **Use when** the option set is large or fetched/filtered dynamically.
 
@@ -132,7 +132,7 @@ Date picker backed by Pikaday.
 | `unicodeTokenFormat` | `string`                  | `'yyyy-MM-dd'`  | date-fns parse/format token |
 | `emptyHint`          | `FormidableEmptyHint`     | `'underscores'` | Resting empty display       |
 | `isPanelOpen`        | `boolean`                 | `false`         | Panel open state            |
-| `panelPosition`      | `FormidablePanelPosition` | `'right'`       | Panel alignment             |
+| `panelPosition`      | `FormidablePanelPosition` | `'right'`       | Panel placement             |
 
 **Toggle icon**: the panel toggle draws a CSS arrow by default. Project `[formidableFieldToggleIcon]` content into the field to replace it — the library ships no SVG, so the consumer owns everything about the projected markup: size, color and hover feedback. The toggle centers it and carries the `open` class while the panel is open.
 
@@ -372,13 +372,15 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `FieldOptionLayout`                  | `'inline' \| 'radio-group' \| 'checkbox-group'`                                                                  |
 | `FieldValueAlignment`                | `'center' \| 'top'`                                                                                              |
 | `FormidableEmptyHint`                | `'underscores' \| 'format'`                                                                                      |
-| `FormidablePanelPosition`            | `'left' \| 'right' \| 'full'`                                                                                    |
+| `FormidablePanelPosition`            | `'left' \| 'right' \| 'full' \| 'bottom'`                                                                        |
 | `FormidableToggleFieldLabelPosition` | `'before' \| 'after'`                                                                                            |
 | `IFormidableFieldOption`             | `{ value: string; label?; template?; readonly?; disabled?; selected?; highlighted?; select?(); match?(filter) }` |
 
 `FieldDefaultOptionMode` decides when an option field renders its `defaultOption`: `always`, pinned first and exempt from both `sortFn` and the autocomplete filter, or as a `fallback` only when the list would otherwise be empty.
 
 `FormidableEmptyHint` sets what the date/time fields show while empty **and unfocused** — `_` slots or the `unicodeTokenFormat` itself. A focused empty field always shows `_` slots, because ngx-mask's caret arithmetic only recognizes its own placeholder character.
+
+`FormidablePanelPosition` picks between two kinds of panel. `left`, `right` and `full` are **anchored**: absolutely positioned against the field, flipping above it when there is no room below and adopting the two field corners they sit against. `bottom` is a **sheet**: `position: fixed` across the bottom of the viewport, full width, square where it meets the screen edge, and it never flips. A sheet is what a phone wants — an anchored panel in a narrow column is not. Two limits, both the consumer's to weigh: `fixed` is defeated by an ancestor `transform`, `filter` or `contain`, and an `autocomplete-field` sheet keeps focus in its filter input, so a soft keyboard can cover it. The date field moves focus to the panel when it opens, so its sheet is clear of the keyboard.
 
 `DeepPartial<T>` and `DeepRequired<T>` (from `utility-types.ts`) build the form model and frame types.
 

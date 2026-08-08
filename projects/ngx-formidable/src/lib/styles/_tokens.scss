@@ -335,7 +335,7 @@ $formidable-panel-background: $formidable-color-field-background;
 $formidable-panel-border-radius: $formidable-border-radius;
 $formidable-panel-box-shadow: utils.spacing(0) utils.spacing(12) utils.spacing(48) calc(utils.spacing(8) * -1)
   rgb(0 0 0 / 12%);
-$formidable-panel-max-height: 33vh; // 1/3 of viewport height
+$formidable-panel-max-height: 33dvh; // 1/3 of the viewport actually visible — mobile chrome collapses `vh`
 
 // #endregion
 

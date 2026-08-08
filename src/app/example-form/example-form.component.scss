@@ -45,7 +45,9 @@ fieldset {
 }
 
 .panel {
-  z-index: 1000;
+  // Below --formidable-flyout-z-index (999): this is the demo's own sticky chrome, and an open field
+  // panel — a bottom sheet always, an anchored one near the page foot — has to sit over it.
+  z-index: 998;
   font-family: monospace;
   font-size: 0.7rem;
   padding: 1rem;
