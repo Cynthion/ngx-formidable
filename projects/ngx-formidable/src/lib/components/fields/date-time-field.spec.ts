@@ -40,6 +40,16 @@ function state(input: HTMLInputElement): string {
   return `${input.value}|${input.selectionStart}`;
 }
 
+/** An arrow keydown. `bubbles` is mandatory — the base directive listens on the wrapper, not the input. */
+function arrow(input: HTMLInputElement, key: 'ArrowUp' | 'ArrowDown', altKey = false): void {
+  input.dispatchEvent(new KeyboardEvent('keydown', { key, altKey, bubbles: true }));
+}
+
+/** The range a step leaves selected. */
+function selection(input: HTMLInputElement): [number | null, number | null] {
+  return [input.selectionStart, input.selectionEnd];
+}
+
 function setup<T extends MaskedField>(
   component: Type<T>,
   unicodeTokenFormat: string,
@@ -289,6 +299,166 @@ describe('masked date/time field', () => {
 
       expect(input.value).toBe('dd . MM . yyyy');
       expect(fixture.componentInstance.value).toBeNull();
+    }));
+  });
+
+  describe('arrow keys', () => {
+    /** May 2024, focused, with the caret parked where the test wants it. */
+    function focusedAt(caret: number): { fixture: ComponentFixture<DateFieldComponent>; input: HTMLInputElement } {
+      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+
+      fixture.componentInstance.writeValue(new Date(2024, 4, 12));
+      tick();
+
+      input.focus();
+      input.setSelectionRange(caret, caret);
+
+      return { fixture, input };
+    }
+
+    it('steps the segment under the caret and leaves it selected', fakeAsync(() => {
+      const { input } = focusedAt(10); // year
+
+      arrow(input, 'ArrowUp');
+      tick();
+
+      expect(input.value).toBe('12 . 05 . 2025');
+      expect(selection(input)).toEqual([10, 14]);
+
+      // the selection keeps the caret in the year, so repeated arrows stay there
+      arrow(input, 'ArrowDown');
+      tick();
+      arrow(input, 'ArrowDown');
+      tick();
+
+      expect(input.value).toBe('12 . 05 . 2023');
+    }));
+
+    it('steps only the unit under the caret', fakeAsync(() => {
+      const { input } = focusedAt(0); // day
+
+      arrow(input, 'ArrowUp');
+      tick();
+      expect(input.value).toBe('13 . 05 . 2024');
+
+      input.setSelectionRange(5, 5); // month
+      arrow(input, 'ArrowUp');
+      tick();
+      expect(input.value).toBe('13 . 06 . 2024');
+      expect(selection(input)).toEqual([5, 7]);
+    }));
+
+    it('does not open the panel on a plain ArrowDown', fakeAsync(() => {
+      const { fixture, input } = focusedAt(0);
+
+      arrow(input, 'ArrowDown');
+      tick();
+
+      expect(fixture.componentInstance.isPanelOpen).toBe(false);
+      expect(input.value).toBe('11 . 05 . 2024');
+    }));
+
+    it('opens and closes the panel on Alt+Arrow', fakeAsync(() => {
+      const { fixture, input } = focusedAt(0);
+
+      arrow(input, 'ArrowDown', true);
+      tick();
+      expect(fixture.componentInstance.isPanelOpen).toBe(true);
+      expect(input.value).toBe('12 . 05 . 2024'); // an Alt+Arrow never touches the value
+
+      arrow(input, 'ArrowUp', true);
+      tick();
+      expect(fixture.componentInstance.isPanelOpen).toBe(false);
+    }));
+
+    it('still moves the calendar by a week while the panel is open, committing only on Enter', fakeAsync(() => {
+      const { fixture, input } = focusedAt(0);
+
+      arrow(input, 'ArrowDown', true);
+      tick();
+
+      arrow(input, 'ArrowDown');
+      tick();
+
+      expect(input.value).toBe('19 . 05 . 2024');
+      expect(fixture.componentInstance.value).toEqual(new Date(2024, 4, 12)); // navigation is not a commit
+
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      tick();
+
+      expect(fixture.componentInstance.value).toEqual(new Date(2024, 4, 19));
+      expect(fixture.componentInstance.isPanelOpen).toBe(false);
+    }));
+
+    it('seeds an empty date field before stepping it', fakeAsync(() => {
+      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+
+      input.focus();
+      input.setSelectionRange(10, 10); // year
+      arrow(input, 'ArrowUp');
+      tick();
+
+      expect(fixture.componentInstance.value?.getFullYear()).toBe(new Date().getFullYear() + 1);
+    }));
+
+    it('refuses a step that would leave minDate/maxDate', fakeAsync(() => {
+      const { fixture, input } = focusedAt(0); // day
+
+      setInput(fixture, 'maxDate', new Date(2024, 4, 13));
+
+      arrow(input, 'ArrowUp');
+      tick();
+      expect(input.value).toBe('13 . 05 . 2024'); // on the boundary, still allowed
+
+      arrow(input, 'ArrowUp');
+      tick();
+      expect(input.value).toBe('13 . 05 . 2024'); // past it, refused
+    }));
+
+    it('steps the hour and the minute of a time field', fakeAsync(() => {
+      const { fixture, input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+
+      fixture.componentInstance.writeValue(new Date(2024, 0, 1, 14, 30));
+      tick();
+
+      input.focus();
+      input.setSelectionRange(0, 0); // hour
+      arrow(input, 'ArrowUp');
+      tick();
+
+      expect(input.value).toBe('15 : 30');
+      expect(selection(input)).toEqual([0, 2]);
+
+      input.setSelectionRange(5, 5); // minute
+      arrow(input, 'ArrowDown');
+      tick();
+
+      expect(input.value).toBe('15 : 29');
+      expect(selection(input)).toEqual([5, 7]);
+    }));
+
+    it('carries a minute step over midnight', fakeAsync(() => {
+      const { fixture, input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+
+      fixture.componentInstance.writeValue(new Date(2024, 0, 1, 23, 59));
+      tick();
+
+      input.focus();
+      input.setSelectionRange(5, 5);
+      arrow(input, 'ArrowUp');
+      tick();
+
+      expect(input.value).toBe('00 : 00');
+    }));
+
+    it('seeds an empty time field with midnight before stepping it', fakeAsync(() => {
+      const { input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+
+      input.focus();
+      arrow(input, 'ArrowUp'); // caret sits at 0, the hour
+      tick();
+
+      expect(input.value).toBe('01 : 00');
     }));
   });
 

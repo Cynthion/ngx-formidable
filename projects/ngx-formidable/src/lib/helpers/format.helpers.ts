@@ -1,4 +1,4 @@
-import { format, isValid, parse } from 'date-fns';
+import { addDays, addHours, addMinutes, addMonths, addSeconds, addYears, format, isValid, parse } from 'date-fns';
 
 export function isValidDateObject(value: unknown): boolean {
   return value instanceof Date && isValid(value);
@@ -189,6 +189,107 @@ const TIME_TOKEN_MASK_MAP: Record<TimeToken, string> = {
 
 function isTimeToken(token: string): token is TimeToken {
   return (UNICODE_TIME_TOKENS as readonly string[]).includes(token);
+}
+
+// #endregion
+
+// #region Segments
+
+/** The part of a date/time an arrow key steps. */
+export type DateTimeUnit = 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second' | 'meridiem';
+
+/** A steppable token of a format string, mapped onto the character range it occupies in the rendered value. */
+export interface FormatSegment {
+  token: string;
+  start: number;
+  /** Exclusive. */
+  end: number;
+  unit: DateTimeUnit;
+}
+
+/**
+ * The segment a caret edits: the one it sits in, else the closest one starting before it.
+ *
+ * A caret at a segment's end, or parked in a separator, therefore keeps editing the segment to its
+ * left — which is where the last keystroke was.
+ */
+export function findSegmentAtCaret(unicodeTokenFormat: string, caret: number): FormatSegment | null {
+  const segments = getFormatSegments(unicodeTokenFormat);
+
+  return segments.filter((segment) => segment.start <= caret).pop() ?? segments[0] ?? null;
+}
+
+/** Steps `date` by one `unit` in `direction`. Meridiem flips by 12 hours, either way. */
+export function stepDateTimeUnit(date: Date, unit: DateTimeUnit, direction: 1 | -1): Date {
+  switch (unit) {
+    case 'year':
+      return addYears(date, direction);
+    case 'month':
+      return addMonths(date, direction);
+    case 'day':
+      return addDays(date, direction);
+    case 'hour':
+      return addHours(date, direction);
+    case 'minute':
+      return addMinutes(date, direction);
+    case 'second':
+      return addSeconds(date, direction);
+    case 'meridiem':
+      return addHours(date, 12 * direction);
+  }
+}
+
+/** `M` (month) and `m` (minute) differ by case, so date and time tokens share one map without colliding. */
+const TOKEN_UNIT_MAP: Record<string, DateTimeUnit> = {
+  y: 'year',
+  yy: 'year',
+  yyy: 'year',
+  yyyy: 'year',
+  M: 'month',
+  MM: 'month',
+  MMM: 'month',
+  MMMM: 'month',
+  d: 'day',
+  dd: 'day',
+  H: 'hour',
+  HH: 'hour',
+  h: 'hour',
+  hh: 'hour',
+  m: 'minute',
+  mm: 'minute',
+  s: 'second',
+  ss: 'second',
+  a: 'meridiem',
+  aa: 'meridiem'
+};
+
+/**
+ * The steppable segments of the rendered value, in render order. Separators are skipped but still
+ * advance the offset — widths come from each part's *mask*, which is what the input shows.
+ */
+function getFormatSegments(unicodeTokenFormat: string): FormatSegment[] {
+  const segments: FormatSegment[] = [];
+  let offset = 0;
+
+  for (const token of tokenizeFormat(unicodeTokenFormat)) {
+    const start = offset;
+    offset += renderedWidth(token);
+
+    const unit = TOKEN_UNIT_MAP[token];
+    if (unit) segments.push({ token, start, end: offset, unit });
+  }
+
+  return segments;
+}
+
+function renderedWidth(token: string): number {
+  const mask = isDateToken(token)
+    ? DATE_TOKEN_MASK_MAP[token]
+    : isTimeToken(token)
+      ? TIME_TOKEN_MASK_MAP[token]
+      : token;
+
+  return mask.length;
 }
 
 // #endregion

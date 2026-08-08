@@ -22,10 +22,12 @@ import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { FieldToggleIconDirective } from '../../../directives/field-toggle-icon.directive';
 import {
+  findSegmentAtCaret,
   formatToDateTokenMask,
   isValidDateObject,
   normalizeTimePart,
   parseUnicodeDateTime,
+  stepDateTimeUnit,
   UNICODE_DATE_TOKENS,
   validateUnicodeDateTokenFormat
 } from '../../../helpers/format.helpers';
@@ -291,17 +293,23 @@ export class DateFieldComponent
         this.trySetDateFromInput(this.inputRef.nativeElement.value);
         break;
       case 'ArrowDown':
-        if (!this.isPanelOpen) {
+        // Alt+Arrow works the panel, the way a native <select> and the ARIA combobox pattern do.
+        // Plain arrows never open it — they belong to the value.
+        if (event.altKey) {
           this.togglePanel(true);
-        } else {
-          if (date) {
-            const nextDate = addDays(date, 7);
-            this.picker?.setDate(nextDate, true); // silent update
-          }
+        } else if (!this.isPanelOpen) {
+          this.stepSegment(-1);
+        } else if (date) {
+          const nextDate = addDays(date, 7);
+          this.picker?.setDate(nextDate, true); // silent update
         }
         break;
       case 'ArrowUp':
-        if (this.isPanelOpen && date) {
+        if (event.altKey) {
+          this.togglePanel(false);
+        } else if (!this.isPanelOpen) {
+          this.stepSegment(1);
+        } else if (date) {
           const nextDate = addDays(date, -7);
           this.picker?.setDate(nextDate, true); // silent update
         }
@@ -319,6 +327,40 @@ export class DateFieldComponent
         }
         break;
     }
+  }
+
+  /**
+   * Steps the date part under the caret by one, and leaves that part selected so repeated arrows
+   * keep to it — and so the next digit typed replaces it.
+   *
+   * The input text is what gets stepped, not `selectedDate`: it also carries what was typed but not
+   * yet committed. An empty field is seeded first, so arrows alone can fill it.
+   */
+  private stepSegment(direction: 1 | -1): void {
+    const input = this.inputRef.nativeElement;
+    const segment = findSegmentAtCaret(this.unicodeTokenFormat, input.selectionStart ?? 0);
+    if (!segment) return;
+
+    const base =
+      this.onParse(input.value, this.unicodeTokenFormat) ??
+      this.selectedDate ??
+      this.getDefaultDate(this.minDate, this.maxDate, this.defaultDate);
+
+    const nextDate = normalizeTimePart(stepDateTimeUnit(base, segment.unit, direction));
+    if (this.isOutOfRange(nextDate)) return;
+
+    this.setDate(nextDate);
+
+    // setDate re-renders the input from a setTimeout of its own; ours has to land after it
+    setTimeout(() => input.setSelectionRange(segment.start, segment.end));
+  }
+
+  /** A step is refused rather than clamped, so arrows can never reach a date the calendar forbids. */
+  private isOutOfRange(date: Date): boolean {
+    if (this.minDate && date < normalizeTimePart(this.minDate)) return true;
+    if (this.maxDate && date > normalizeTimePart(this.maxDate)) return true;
+
+    return false;
   }
 
   private handleExternalClick(): void {

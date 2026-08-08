@@ -19,9 +19,8 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 |  Phase | Title                               | Depends On |
 | -----: | :---------------------------------- | :--------- |
-|      8 | Date And Time Keyboard              | —          |
 |      9 | Date Panel Responsiveness           | —          |
-|     10 | Small API Additions And Chores      | 8          |
+|     10 | Small API Additions And Chores      | —          |
 |     11 | ARIA — Fields, Errors, Support Text | —          |
 |     12 | ARIA — Panel And Option Fields      | 11         |
 |     13 | API Doc Comments                    | 1–12       |
@@ -35,27 +34,18 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 ## Library Phases
 
-### Phase 8 — Date And Time Keyboard
-
-- **ArrowDown Must Not Open The Panel**: `date-field` opens the panel on ArrowDown when closed. It should navigate the value instead; arrows drive the panel selection only while the panel is open.
-- **Segment-Aware Increment**: ArrowUp / ArrowDown increment and decrement the year, month or day under the caret in `date-field`, and the hour or minute in `time-field`. Today `date-field` only does whole-date steps while the panel is open, and `time-field` has no arrow handling at all — its registered keys are `Enter` only.
-
-**Clears**: both date/time keyboard items.
-
 ### Phase 9 — Date Panel Responsiveness
 
 - **Small Screens**: render `DateFieldComponent` smaller or better on narrow viewports. The library currently has no responsive rules for it.
-- **Bottom Sheet**: an option to show the panel at the bottom of the screen, keyboard-style. `FormidablePanelPosition` is horizontal-only today; the only vertical logic is the flip-above in `position.helpers.ts`.
+- **Bottom Sheet**: an option to show the panel at the bottom of the screen, keyboard-style on mobile; does that work with virtual keyboards on smartphones?; `FormidablePanelPosition` is horizontal-only today; the only vertical logic is the flip-above in `position.helpers.ts`.
 
 **Clears**: both date-panel items.
 
 ### Phase 10 — Small API Additions And Chores
 
-Depends on Phase 8 (focus-on-load pairs with the ArrowDown change).
-
-- **Toggle Layout**: expose `decoratorLayout` as an input on `ToggleFieldComponent`; it is hardcoded to `inline` today.
+- **Toggle Layout**: expose `decoratorLayout` as an input on `ToggleFieldComponent`; it is hardcoded to `inline` today. does that even make sense?
 - **Focus On Page Load**: an input on `BaseFieldDirective` to focus a field on load, without opening a panel. No public `focus()` exists today. Panels do not open on focus, so the constraint already holds — this is about adding the API.
-- **Timer Audit**: prefer `queueMicrotask` over `setTimeout`. Most option paths already use it; the remainder are layout, scroll and focus call sites, and some of those genuinely need `requestAnimationFrame`. Audit each, do not blanket-replace.
+- **Timer Audit**: prefer `queueMicrotask` over `setTimeout`. Most option paths already use it; the remainder are layout, scroll and focus call sites, and some of those genuinely need `requestAnimationFrame`. Audit each, do not blanket-replace. The caret restore in each field's `stepSegment` is one that must stay a `setTimeout`: it only works because it queues behind `setDate` / `setTime`, which re-render the input from a `setTimeout` of their own.
 
 **Clears**: the toggle-layout, focus-on-load and `queueMicrotask` items.
 
@@ -175,6 +165,7 @@ Kept for context only; the detail lived in the previous revision of this file an
 | Field State Styling          | An `is-invalid` host class on the decorator, fed by the errors component; a colour token per state for background, border, text and label; and a sixth label position, `inside-placeholder`, whose resting label stands in for the placeholder and hides it until focus — `inside` itself is unchanged. Groups reuse the field's state colours, and the toggle's and slider's tracks follow them. The dead `--formidable-color-slider-thumb-border` override was renamed to the name `_forms.scss` reads                                                                                                                                                                                                                                                                                                                                                                                           |
 | Required Marker              | A `required` input on `BaseFieldDirective`, suffixed to the label as a marker whose glyph is `--formidable-label-required-marker`. Presentational only — nothing can infer requiredness from a Vest suite, so no native attribute and no Angular validator were added, and the flag and the suite are the consumer's to keep in step. `.label-wrapper` became a flex row so the marker is a sibling of the projected label and the consumer's text is what ellipsizes                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | Border Geometry              | `--formidable-border-radius`, a neutral base every rounded thing that is not a field box falls back to, so `--formidable-field-border-radius` is free to be the default for four per-corner variables that round a field on some corners only. A `--formidable-field-underline-*` family painting an extra line inside the field's bottom edge, thicker on focus and on invalid — an inset shadow rather than a `border-bottom-width`, so a state cannot shrink the content box and nudge the value, which left the layout math untouched; field groups take the focus ring without it. An open panel adopts the two corners of the field it sits against, so the pair reads as one box without the field ever reshaping itself. A `border` label's band reaches up over the focus ring while focused, which is what was showing above it on any theme with a border thicker than the band's bleed |
+| Date And Time Keyboard       | `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret and leave it selected, in both masked fields — two pure helpers, `findSegmentAtCaret` and `stepDateTimeUnit`, built on the tokenizer and mask-width maps `format.helpers.ts` already had. A plain `ArrowDown` no longer opens the date panel; `Alt` + the arrows do, per the ARIA combobox pattern, and while the panel is open the arrows still move the calendar. An empty field is seeded before it is stepped (a date from `getDefaultDate`, a time from midnight), so arrows alone can fill one; a date step outside `minDate` / `maxDate` is refused rather than clamped, so the two input paths cannot disagree. The step commits immediately through the existing `setDate` / `setTime` — which is why the caret restore has to be a `setTimeout` queued behind theirs                                       |
 | Prefix And Suffix            | An `align` input on both adornment directives (`center` / `value`), and a `_globals.scss` exception that makes a projected `button` / `a` clickable. No action components: the demo and `README.md` carry the clear, copy, validation-state and loading recipes instead                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ---

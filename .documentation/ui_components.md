@@ -138,6 +138,8 @@ Date picker backed by Pikaday.
 
 **Pikaday passthrough** inputs, each applied to the calendar when it changes at runtime: `ariaLabel`, `defaultDate`, `setDefaultDate`, `firstDay`, `minDate`, `maxDate`, `disableWeekends`, `disableDayFn`, `yearRange`, `i18n`, `yearSuffix`, `showMonthAfterYear`, `showDaysInNextAndPreviousMonths`, `enableSelectionDaysInNextAndPreviousMonths`, `numberOfMonths`.
 
+**Keyboard**: `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret — year, month or day — and leave it selected; a step outside `minDate`/`maxDate` is refused. `Alt` + those keys work the panel, and while it is open the arrows move the calendar instead. Plain arrows never open it. Full table in `README.md`.
+
 **Use when** you need calendar date selection.
 
 ### Time Field
@@ -150,6 +152,8 @@ Masked time input.
 | :------------------- | :-------------------- | :-------------- | :-------------------------- |
 | `unicodeTokenFormat` | `string`              | `'HH.mm'`       | date-fns parse/format token |
 | `emptyHint`          | `FormidableEmptyHint` | `'underscores'` | Resting empty display       |
+
+**Keyboard**: `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret — hour, minute, second or AM/PM — and leave it selected. Full table in `README.md`.
 
 **Use when** you need time-of-day entry.
 

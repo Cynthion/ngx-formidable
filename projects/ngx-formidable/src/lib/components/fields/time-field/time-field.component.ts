@@ -15,10 +15,12 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { format, isEqual } from 'date-fns';
 import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import {
+  findSegmentAtCaret,
   formatToTimeTokenMask,
   isValidDateObject,
   normalizeDatePart,
   parseUnicodeDateTime,
+  stepDateTimeUnit,
   UNICODE_TIME_TOKENS,
   validateUnicodeTimeTokenFormat
 } from '../../../helpers/format.helpers';
@@ -85,7 +87,7 @@ export class TimeFieldComponent
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
-  protected registeredKeys = ['Enter'];
+  protected registeredKeys = ['Enter', 'ArrowUp', 'ArrowDown'];
 
   private maskChar = '0';
   private readonly defaultUnicodeTokenFormat = 'HH.mm';
@@ -141,7 +143,33 @@ export class TimeFieldComponent
       case 'Enter':
         this.trySetTimeFromInput(this.inputRef.nativeElement.value);
         break;
+      case 'ArrowUp':
+        this.stepSegment(1);
+        break;
+      case 'ArrowDown':
+        this.stepSegment(-1);
+        break;
     }
+  }
+
+  /**
+   * Steps the time part under the caret by one, and leaves that part selected so repeated arrows
+   * keep to it — and so the next digit typed replaces it.
+   *
+   * The input text is what gets stepped, not `selectedTime`: it also carries what was typed but not
+   * yet committed. An empty field is seeded with midnight, so arrows alone can fill it.
+   */
+  private stepSegment(direction: 1 | -1): void {
+    const input = this.inputRef.nativeElement;
+    const segment = findSegmentAtCaret(this.unicodeTokenFormat, input.selectionStart ?? 0);
+    if (!segment) return;
+
+    const base = this.onParse(input.value, this.unicodeTokenFormat) ?? this.selectedTime ?? new Date(1970, 0, 1);
+
+    this.setTime(normalizeDatePart(stepDateTimeUnit(base, segment.unit, direction)));
+
+    // setTime re-renders the input from a setTimeout of its own; ours has to land after it
+    setTimeout(() => input.setSelectionRange(segment.start, segment.end));
   }
 
   // #region ControlValueAccessor
