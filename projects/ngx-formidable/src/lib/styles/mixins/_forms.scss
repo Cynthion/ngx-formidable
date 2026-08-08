@@ -130,6 +130,56 @@
   }
 }
 
+// The state colour sets. Each remaps the field's own colour variables rather than declaring properties,
+// so a field picks up whichever set applies without every rule having to restate `background`, `color`
+// and `border-color`. The group variables are remapped onto the same field tokens: the states differ per
+// field state, not per field kind.
+@mixin hovered-colors {
+  --formidable-color-field-border: var(--formidable-color-field-border-hovered);
+  --formidable-color-field-group-border: var(--formidable-color-field-border-hovered);
+
+  --formidable-color-field-background: var(--formidable-color-field-background-hovered);
+  --formidable-color-field-group-background: var(--formidable-color-field-background-hovered);
+  --formidable-color-field-text: var(--formidable-color-field-text-hovered);
+  --formidable-color-field-group-text: var(--formidable-color-field-text-hovered);
+}
+
+// The ring is the one property still declared rather than remapped: it has no base to override.
+@mixin focused-colors {
+  --formidable-color-field-border: var(--formidable-color-field-border-focus);
+  --formidable-color-field-group-border: var(--formidable-color-field-group-border-focus);
+
+  --formidable-color-field-background: var(--formidable-color-field-background-focus);
+  --formidable-color-field-group-background: var(--formidable-color-field-background-focus);
+  --formidable-color-field-text: var(--formidable-color-field-text-focus);
+  --formidable-color-field-group-text: var(--formidable-color-field-text-focus);
+
+  box-shadow: var(--formidable-color-field-focus-box-shadow, #{tokens.$formidable-color-field-focus-box-shadow});
+}
+
+// Unlike the others this one is set on the decorator, not on the field: only the decorator knows the
+// control is invalid, and the field inherits every variable from it. That makes precedence a matter of
+// *which* variables are remapped rather than of selector order — the field's own state rules still win on
+// the element, so pointing hover's and focus's colours at the invalid one is what keeps them invalid,
+// while leaving readonly's and disabled's alone is what lets those two outrank it.
+@mixin invalid-colors {
+  --formidable-color-field-border: var(--formidable-color-field-border-invalid);
+  --formidable-color-field-border-hovered: var(--formidable-color-field-border-invalid);
+  --formidable-color-field-border-focus: var(--formidable-color-field-border-invalid);
+  --formidable-color-field-group-border: var(--formidable-color-field-border-invalid);
+  --formidable-color-field-group-border-focus: var(--formidable-color-field-border-invalid);
+  // The slider's track borders with a colour of its own rather than with the field's.
+  --formidable-color-slider-border: var(--formidable-color-field-border-invalid);
+
+  --formidable-color-field-background: var(--formidable-color-field-background-invalid);
+  --formidable-color-field-group-background: var(--formidable-color-field-background-invalid);
+  --formidable-color-field-text: var(--formidable-color-field-text-invalid);
+  --formidable-color-field-group-text: var(--formidable-color-field-text-invalid);
+
+  --formidable-color-field-focus-box-shadow: var(--formidable-color-field-focus-box-shadow-invalid);
+  --formidable-color-field-group-focus-box-shadow: var(--formidable-color-field-focus-box-shadow-invalid);
+}
+
 @mixin readonly-colors {
   --formidable-color-field-border: var(--formidable-color-field-border-readonly);
   --formidable-color-field-group-border: var(--formidable-color-field-group-border-readonly);
@@ -150,13 +200,10 @@
   --formidable-color-field-group-text: var(--formidable-color-field-text-disabled);
 }
 
-@mixin focused-colors {
-  border-color: var(--formidable-color-field-border-focus, #{tokens.$formidable-color-field-border-focus});
-  box-shadow: var(--formidable-color-field-focus-box-shadow, #{tokens.$formidable-color-field-focus-box-shadow});
-}
-
+// Same set, but the group's own ring: it is sized off the group's border thickness.
 @mixin focused-group-colors {
-  border-color: var(--formidable-color-field-group-border-focus, #{tokens.$formidable-color-field-group-border-focus});
+  @include focused-colors;
+
   box-shadow: var(
     --formidable-color-field-group-focus-box-shadow,
     #{tokens.$formidable-color-field-group-focus-box-shadow}
@@ -203,6 +250,21 @@
   width: 100%;
   position: relative;
 
+  // The state sets all remap the same variables, so their order here *is* their precedence:
+  // hovered < focused < readonly < disabled. `invalid` is not among them — the decorator applies it,
+  // see `invalid-colors`.
+  &:not([readonly], [disabled], .is-readonly, .is-disabled) {
+    &:hover {
+      @include hovered-colors;
+    }
+
+    &:focus,
+    &.focused,
+    &:focus-visible {
+      @include focused-colors;
+    }
+  }
+
   &[readonly], // use native [readonly] and [disabled] attributes for native elements (input, textarea, select)
   &.is-readonly // use custom .is-readonly class for non-native elements (e.g. dropdown, autocomplete, date, time)
   {
@@ -219,14 +281,6 @@
     pointer-events: none;
     user-select: none;
   }
-
-  &:not([readonly], [disabled], .is-readonly, .is-disabled) {
-    &:focus,
-    &.focused,
-    &:focus-visible {
-      @include focused-colors;
-    }
-  }
 }
 
 @mixin group-field {
@@ -234,6 +288,19 @@
   @include field-font;
   @include field-group-colors;
   @include field-group-border;
+
+  // Same precedence chain as `field`: hovered < focused < readonly < disabled.
+  &:not(.is-readonly, .is-disabled) {
+    &:hover {
+      @include hovered-colors;
+    }
+
+    &:focus,
+    &.focused,
+    &:focus-visible {
+      @include focused-group-colors;
+    }
+  }
 
   // use custom .is-readonly class for non-native elements (radio group, checkbox group)
   &.is-readonly {
@@ -248,14 +315,6 @@
 
     pointer-events: none;
     user-select: none;
-  }
-
-  &:not(.is-readonly, .is-disabled) {
-    &:focus,
-    &.focused,
-    &:focus-visible {
-      @include focused-group-colors;
-    }
   }
 }
 
@@ -694,6 +753,10 @@
       .slider-track {
         @include focused-colors;
 
+        // The track borders with a slider colour of its own rather than with the field's, so it is the
+        // one element a state has to point at its colour explicitly.
+        --formidable-color-slider-border: var(--formidable-color-field-border-focus);
+
         box-shadow: unset;
       }
     }
@@ -783,7 +846,9 @@
   font-size: var(--formidable-field-font-size, #{tokens.$formidable-field-font-size});
   font-weight: var(--formidable-field-font-weight, #{tokens.$formidable-field-font-weight});
   line-height: var(--formidable-field-line-height, #{tokens.$formidable-field-line-height});
-  color: var(--formidable-color-field-placeholder, #{tokens.$formidable-color-field-placeholder});
+  // Its own colour rather than the placeholder's directly: the decorator blanks the placeholder while a
+  // label rests in its place, and the label must not go with it.
+  color: var(--formidable-color-field-label-resting, #{tokens.$formidable-color-field-label-resting});
   top: var(--formidable-label-resting-offset, #{tokens.$formidable-label-resting-offset});
 }
 
@@ -834,6 +899,14 @@
 @mixin field-label-border-align($text-left) {
   left: calc(#{$text-left} - #{label-border-gap()});
   max-width: calc(100% - #{$text-left} - #{field-value-inset('right')} + 2 * #{label-border-gap()});
+}
+
+// One state's colour for all three labels — the one above the field, the floating one over it, and the
+// resting one standing in for the placeholder — so a state cannot recolour one and miss another.
+@mixin field-label-state-colors($color) {
+  --formidable-color-field-label: #{$color};
+  --formidable-color-field-label-floating: #{$color};
+  --formidable-color-field-label-resting: #{$color};
 }
 
 // Set on the decorator while its label renders inside the field. Custom properties inherit through

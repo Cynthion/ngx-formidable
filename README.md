@@ -372,7 +372,7 @@ horizontal — input, textarea, select, dropdown, autocomplete, date, time
   └────────────────────────────────────┘
    Errors
 
-horizontal, with the label over the field (inside, inside-floating, border, border-prefix)
+horizontal, with the label over the field (inside, inside-placeholder, inside-floating, border, border-prefix)
 
   ┌────────────────────────────────────┐     the label moves into the field, and
   │ Prefix     Label…         Suffix   │     the adornment goes with its row
@@ -399,19 +399,22 @@ An adornment decorates the label, so it lives and dies with the label’s row: e
 
 The label’s `position` chooses where it renders:
 
-| Position           | Behaviour                                                                                                                                  |
-| :----------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| `outside`          | Static, above the field, in normal document flow. Never moves. The value is centered in the field.                                         |
-| `inside` (default) | Inside the field: centered like a placeholder while the field is visually empty, floating above the value once focused, filled, or masked. |
-| `inside-floating`  | Inside the field, always floating above the value.                                                                                         |
-| `border`           | Centered on the field’s top border, which it hides behind itself. The value stays centered, as with `outside`.                             |
-| `border-prefix`    | As `border`, but aligned with a projected prefix instead of with the value.                                                                |
+| Position             | Behaviour                                                                                                                                                                                       |
+| :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `outside`            | Static, above the field, in normal document flow. Never moves. The value is centered in the field.                                                                                              |
+| `inside` (default)   | Inside the field: centered like a placeholder while the field is visually empty, floating above the value once focused, filled, or masked. A field that sets a `placeholder` floats throughout. |
+| `inside-placeholder` | As `inside`, but the label takes the placeholder's place rather than yielding to it: the field's own `placeholder` stays hidden until focus floats the label and reveals it.                    |
+| `inside-floating`    | Inside the field, always floating above the value.                                                                                                                                              |
+| `border`             | Centered on the field’s top border, which it hides behind itself. The value stays centered, as with `outside`.                                                                                  |
+| `border-prefix`      | As `border`, but aligned with a projected prefix instead of with the value.                                                                                                                     |
 
 Every position other than `outside` needs a field with room for a label over it, so they are a no-op for the
-toggle, radio-group, checkbox-group and slider fields — their label always renders `outside`. An `inside`
-label only rests while nothing else occupies the value area: a `placeholder`, visible mask slots, a value,
-`readonly` or `disabled` all make it float instead. A label rendered over the field stays aligned with the
-value (a prefix or suffix pushes it in too), stays on one line, and ellipsizes.
+toggle, radio-group, checkbox-group and slider fields — their label always renders `outside`. A label rests
+only while nothing occupies the value area: a value, visible mask slots, `readonly` or `disabled` all make
+it float instead, whichever of the two `inside` positions you choose. They differ only over the
+`placeholder` — `inside` lets it win, `inside-placeholder` hides it behind the resting label. A label
+rendered over the field stays aligned with the value (a prefix or suffix pushes it in too), stays on one
+line, and ellipsizes.
 
 The library ships no icons. Where a field has an icon, project your own into it — the date field's panel toggle
 draws a CSS arrow unless you project `<span formidableFieldToggleIcon>…</span>` directly into
@@ -605,17 +608,28 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-validation-error`                       | Text color for validation errors.                                                                                   |
 | `--formidable-color-field-text`                             | Text color for fields.                                                                                              |
 | `--formidable-color-field-group-text`                       | Text color for field groups.                                                                                        |
+| `--formidable-color-field-text-hovered`                     | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is hovered.              |
+| `--formidable-color-field-text-focus`                       | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is focused.              |
+| `--formidable-color-field-text-invalid`                     | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is invalid.              |
 | `--formidable-color-field-text-readonly`                    | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is readonly.             |
 | `--formidable-color-field-text-disabled`                    | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is disabled.             |
 | `--formidable-color-field-label`                            | Text color for labels.                                                                                              |
-| `--formidable-color-field-label-floating`                   | Text color for a floating label. A resting label uses the field's placeholder color instead.                        |
+| `--formidable-color-field-label-floating`                   | Text color for a floating label.                                                                                    |
+| `--formidable-color-field-label-resting`                    | Text color for a resting label, which stands in for the placeholder.                                                |
+| `--formidable-color-field-label-hovered`                    | Overrides all three label colors when the field is hovered.                                                         |
+| `--formidable-color-field-label-focus`                      | Overrides all three label colors when the field is focused.                                                         |
+| `--formidable-color-field-label-invalid`                    | Overrides all three label colors when the field is invalid.                                                         |
+| `--formidable-color-field-label-readonly`                   | Overrides all three label colors when the field is readonly.                                                        |
+| `--formidable-color-field-label-disabled`                   | Overrides all three label colors when the field is disabled.                                                        |
 | `--formidable-color-label-border-band`                      | Fill a `border` label paints over the border it hides. Follows the field background by default.                     |
 | `--formidable-color-label-border-band-readonly`             | Overrides `--formidable-color-label-border-band` when the field is readonly.                                        |
 | `--formidable-color-label-border-band-disabled`             | Overrides `--formidable-color-label-border-band` when the field is disabled.                                        |
 | `--formidable-color-field-placeholder`                      | Text color for placeholder text.                                                                                    |
 | `--formidable-color-field-selection`                        | Background color for selected text.                                                                                 |
 | `--formidable-color-field-border`                           | Border color for fields.                                                                                            |
+| `--formidable-color-field-border-hovered`                   | Border color for fields that are hovered.                                                                           |
 | `--formidable-color-field-border-focus`                     | Border color for fields that are focused.                                                                           |
+| `--formidable-color-field-border-invalid`                   | Border color for fields that are invalid. Also replaces the hover and focus border, and the field group's.          |
 | `--formidable-color-field-border-readonly`                  | Overrides`--formidable-color-field-border`when field is readonly.                                                   |
 | `--formidable-color-field-border-disabled`                  | Overrides`--formidable-color-field-border`when field is disabled.                                                   |
 | `--formidable-color-field-group-border`                     | Border color for field groups.                                                                                      |
@@ -624,6 +638,9 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-field-group-border-disabled`            | Overrides`--formidable-color-field-group-border`when field is disabled.                                             |
 | `--formidable-color-field-background`                       | Background color for fields.                                                                                        |
 | `--formidable-color-field-group-background`                 | Background color for field groups.                                                                                  |
+| `--formidable-color-field-background-hovered`               | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is hovered.  |
+| `--formidable-color-field-background-focus`                 | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is focused.  |
+| `--formidable-color-field-background-invalid`               | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is invalid.  |
 | `--formidable-color-field-background-readonly`              | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is readonly. |
 | `--formidable-color-field-background-disabled`              | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is disabled. |
 | `--formidable-color-field-group-background-readonly`        | Overrides`--formidable-color-field-group-background`when field group is readonly.                                   |
@@ -635,6 +652,7 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-field-option-background-hovered`        | Background color for option items that are hovered.                                                                 |
 | `--formidable-color-field-focus-box-shadow`                 | Box shadow for fields that are focused.                                                                             |
 | `--formidable-color-field-group-focus-box-shadow`           | Box shadow for field groups that are focused.                                                                       |
+| `--formidable-color-field-focus-box-shadow-invalid`         | Replaces both focus box shadows while the field is invalid.                                                         |
 | **Date-Field Panel**                                        |                                                                                                                     |
 | `--formidable-color-date-field-panel-select`                | Text color for “Today” / selected date toggle in calendar.                                                          |
 | `--formidable-color-date-field-panel-select-hovered`        | Hover color for the “Today” toggle.                                                                                 |

@@ -30,12 +30,21 @@ export type FieldDecoratorLayout = 'horizontal' | 'vertical' | 'inline';
  * Where the field's label renders:
  * - `outside`: statically above the field, in normal document flow.
  * - `inside`: inside the field's bounds, centered like a placeholder while the field is visually empty,
- *   floating above the value otherwise (default).
+ *   floating above the value otherwise (default). A field with a `placeholder` has nothing to rest in, so
+ *   its label floats throughout.
+ * - `inside-placeholder`: as `inside`, but the label takes the placeholder's place instead of yielding to
+ *   it — the field's own `placeholder` stays hidden until focus floats the label and reveals it.
  * - `inside-floating`: inside the field's bounds, always floating — it never rests.
  * - `border`: centered on the field's top border, which it hides behind itself, aligned with the value.
  * - `border-prefix`: as `border`, but aligned with a projected prefix instead of with the value.
  */
-export type FieldLabelPosition = 'outside' | 'inside' | 'inside-floating' | 'border' | 'border-prefix';
+export type FieldLabelPosition =
+  | 'outside'
+  | 'inside'
+  | 'inside-placeholder'
+  | 'inside-floating'
+  | 'border'
+  | 'border-prefix';
 /**
  * Where the field's value sits vertically, which a projected prefix/suffix aligns itself with: the
  * `center` of the field's box (the default), or its `top` line for a multi-line field, whose box grows

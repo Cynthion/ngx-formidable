@@ -123,7 +123,10 @@ export abstract class BaseFieldDirective<T = string | null>
     // Readonly/disabled fields never rest — the label stays put instead of
     // dropping over the (often filled) value when the field gains focus.
     if (this.disabled || this.readonly) return false;
-    return !this.isFieldFocused && !this.isFieldFilled && !this.placeholder && !this.showsEmptyValueHint;
+    // Only what the field renders of its own accord counts here — its value, or mask slots. A
+    // `placeholder` is the decorator's to weigh, because whether it blocks a resting label or is hidden
+    // behind one depends on the label's position, which this field cannot see.
+    return !this.isFieldFocused && !this.isFieldFilled && !this.showsEmptyValueHint;
   }
 
   /**

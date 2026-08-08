@@ -93,6 +93,14 @@
           <input
             type="radio"
             name="labelPosition"
+            [checked]="labelPosition === 'inside-placeholder'"
+            (change)="setLabelPosition('inside-placeholder')" />
+          Inside, As Placeholder
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="labelPosition"
             [checked]="labelPosition === 'inside-floating'"
             (change)="setLabelPosition('inside-floating')" />
           Inside, Floating Only

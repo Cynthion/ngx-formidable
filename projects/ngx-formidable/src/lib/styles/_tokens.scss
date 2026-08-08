@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'sass:math';
 @use 'mixins/utils' as utils;
 
@@ -124,18 +125,24 @@ $formidable-field-support-min-height: $formidable-field-validation-error-line-he
 
 $formidable-color-validation-error: #dc5858;
 
+// A field's colours come in one set per state. `hovered` and `focus` apply only while the field is
+// neither readonly nor disabled; `invalid` outranks both of those but not readonly/disabled — the
+// order the state blocks are written in inside the `field` mixin is what decides that.
 $formidable-color-field-text: #00345a; // 900
 $formidable-color-field-group-text: $formidable-color-field-text;
+$formidable-color-field-text-hovered: $formidable-color-field-text;
+$formidable-color-field-text-focus: $formidable-color-field-text;
+$formidable-color-field-text-invalid: $formidable-color-field-text;
 $formidable-color-field-text-readonly: rgb($formidable-color-field-text, 75%);
 $formidable-color-field-text-disabled: rgb($formidable-color-field-text, 50%);
 
-$formidable-color-field-label: $formidable-color-field-text;
-$formidable-color-field-label-floating: #255476; // 700
 $formidable-color-field-placeholder: #5b7f99; // 500
 $formidable-color-field-selection: #9fb7c7; // 300
 
 $formidable-color-field-border: $formidable-color-field-text;
+$formidable-color-field-border-hovered: $formidable-color-field-border;
 $formidable-color-field-border-focus: #5b7f99; // 500
+$formidable-color-field-border-invalid: $formidable-color-validation-error;
 $formidable-color-field-border-readonly: transparent;
 $formidable-color-field-border-disabled: $formidable-color-field-text-disabled;
 $formidable-color-field-group-border: $formidable-color-field-border;
@@ -143,12 +150,32 @@ $formidable-color-field-group-border-focus: $formidable-color-field-border-focus
 $formidable-color-field-group-border-readonly: $formidable-color-field-border-readonly;
 $formidable-color-field-group-border-disabled: $formidable-color-field-border-disabled;
 
+// The one state with a visible fill of its own: a hover is otherwise indistinguishable, since a field
+// keeps its border and its text colour throughout.
 $formidable-color-field-background: #f2faff; // 100
 $formidable-color-field-group-background: $formidable-color-field-background;
+$formidable-color-field-background-hovered: color.mix(
+  $formidable-color-field-selection,
+  $formidable-color-field-background,
+  20%
+);
+$formidable-color-field-background-focus: $formidable-color-field-background;
+$formidable-color-field-background-invalid: $formidable-color-field-background;
 $formidable-color-field-background-readonly: rgb($formidable-color-field-background, 75%);
 $formidable-color-field-background-disabled: $formidable-color-field-background-readonly;
 $formidable-color-field-group-background-readonly: $formidable-color-field-background-readonly;
 $formidable-color-field-group-background-disabled: $formidable-color-field-background-disabled;
+
+// Every label — the one above the field, the floating one over it and the resting one standing in for
+// the placeholder — takes a single colour per state, so a state cannot recolour one and miss another.
+$formidable-color-field-label: $formidable-color-field-text;
+$formidable-color-field-label-floating: #255476; // 700
+$formidable-color-field-label-resting: $formidable-color-field-placeholder;
+$formidable-color-field-label-hovered: $formidable-color-field-label;
+$formidable-color-field-label-focus: $formidable-color-field-border-focus;
+$formidable-color-field-label-invalid: $formidable-color-validation-error;
+$formidable-color-field-label-readonly: $formidable-color-field-text-readonly;
+$formidable-color-field-label-disabled: $formidable-color-field-text-disabled;
 
 // What a `border` label paints over the border it hides. Its own variable, not the field background
 // directly, because `readonly`/`disabled` remap that on the field element — which the label, a sibling,
@@ -166,6 +193,10 @@ $formidable-color-field-option-background-hovered: rgb($formidable-color-field-p
 $formidable-color-field-focus-box-shadow: 0 0 0 $formidable-field-border-thickness $formidable-color-field-border-focus;
 $formidable-color-field-group-focus-box-shadow: 0 0 0 $formidable-field-group-border-thickness
   $formidable-color-field-group-border-focus;
+
+// A focused field keeps its ring while invalid, so the ring takes the invalid colour with the border.
+$formidable-color-field-focus-box-shadow-invalid: 0 0 0 $formidable-field-border-thickness
+  $formidable-color-field-border-invalid;
 
 // Date Field Panel
 $formidable-color-date-field-panel-select: $formidable-color-field-label;

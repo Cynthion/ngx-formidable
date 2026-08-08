@@ -431,6 +431,37 @@ describe('formidableFieldLabel [position]', () => {
     });
   });
 
+  // The one position that does not yield the value area to the placeholder: the label takes its place
+  // and the field's own placeholder stays hidden behind it until focus floats the label off it.
+  describe('inside-placeholder', () => {
+    beforeEach(() => {
+      host.placeholder = 'Your name';
+      setPosition('inside-placeholder');
+    });
+
+    it('rests in place of the placeholder, and hides it', () => {
+      expect(labelWrapper().classList.contains('label-resting')).toBe(true);
+      expect(getComputedStyle(input(), '::placeholder').color).toBe('rgba(0, 0, 0, 0)');
+    });
+
+    it('reveals the placeholder once focus floats the label', () => {
+      focus();
+
+      expect(labelWrapper().classList.contains('label-floating')).toBe(true);
+      expect(getComputedStyle(input(), '::placeholder').color).not.toBe('rgba(0, 0, 0, 0)');
+    });
+
+    // Only the placeholder is the label's to take over. Mask slots are the field's own rendering, so
+    // `canLabelRest` still vetoes here exactly as it does for `inside`.
+    it('still floats when mask slots occupy the value area', () => {
+      host.mask = '000-000';
+      host.maskConfig = { showMaskTyped: true };
+      render();
+
+      expect(labelWrapper().classList.contains('label-floating')).toBe(true);
+    });
+  });
+
   describe('inside-floating', () => {
     beforeEach(() => setPosition('inside-floating'));
 
@@ -616,7 +647,13 @@ describe('formidableFieldLabel [position]', () => {
 
     // This is what lets the offsets be plain distances instead of reaching down past the wrapper.
     it('moves a label rendered over the field into the field own container', () => {
-      for (const position of ['inside', 'inside-floating', 'border', 'border-prefix'] as FieldLabelPosition[]) {
+      for (const position of [
+        'inside',
+        'inside-placeholder',
+        'inside-floating',
+        'border',
+        'border-prefix'
+      ] as FieldLabelPosition[]) {
         setPosition(position);
 
         expect(container().contains(labelWrapper())).toBe(true);
@@ -642,7 +679,13 @@ describe('formidableFieldLabel [position]', () => {
       adornmentFixture.detectChanges();
       expect(getComputedStyle(before()).display).not.toBe('none');
 
-      for (const position of ['inside', 'inside-floating', 'border', 'border-prefix'] as FieldLabelPosition[]) {
+      for (const position of [
+        'inside',
+        'inside-placeholder',
+        'inside-floating',
+        'border',
+        'border-prefix'
+      ] as FieldLabelPosition[]) {
         adornmentFixture.componentInstance.position = position;
         adornmentFixture.detectChanges();
 

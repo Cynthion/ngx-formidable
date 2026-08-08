@@ -12,15 +12,45 @@
   @include field-toggle-inset-host;
 }
 
+// The label lives here rather than in the field, so its state colours are remapped here too — from the
+// host classes that carry the field's state. Written in the same order as the field's own state blocks,
+// because that order is the precedence: hovered < focused < invalid < readonly < disabled.
+// `:host(:hover)` is the whole decorator, hint row included: an `outside` label sits outside the field's
+// container, so no tighter selector reaches both placements.
+:host(:hover) {
+  @include field-label-state-colors(var(--formidable-color-field-label-hovered));
+}
+
+:host(.is-focused) {
+  @include field-label-state-colors(var(--formidable-color-field-label-focus));
+}
+
+// The only state the decorator applies to the field as well as to the label: nothing else here knows the
+// control is invalid, and everything below inherits these variables.
+:host(.is-invalid) {
+  @include field-label-state-colors(var(--formidable-color-field-label-invalid));
+  @include invalid-colors;
+}
+
 // A `border` label paints a band in the field's fill to hide the border behind it, but `readonly` and
 // `disabled` remap that fill on the field element — which the label, a sibling, never sees. Remapping the
 // band's own colour here keeps the two matching.
 :host(.is-readonly) {
+  @include field-label-state-colors(var(--formidable-color-field-label-readonly));
+
   --formidable-color-label-border-band: var(--formidable-color-label-border-band-readonly);
 }
 
 :host(.is-disabled) {
+  @include field-label-state-colors(var(--formidable-color-field-label-disabled));
+
   --formidable-color-label-border-band: var(--formidable-color-label-border-band-disabled);
+}
+
+// While the label rests it *is* the placeholder, so the field must stop rendering its own — which would
+// otherwise sit directly behind it. Focus floats the label and reveals the real placeholder underneath.
+:host(.label-resting) {
+  --formidable-color-field-placeholder: transparent;
 }
 
 .before-wrapper {

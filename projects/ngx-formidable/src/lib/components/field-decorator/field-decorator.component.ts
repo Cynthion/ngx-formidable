@@ -26,6 +26,7 @@ import {
   FORMIDABLE_FIELD,
   IFormidableField
 } from '../../models/formidable.model';
+import { FieldErrorsComponent } from '../field-errors/field-errors.component';
 
 /** How a label renders once its configured position is resolved against the field's own state. */
 type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-prefix';
@@ -46,6 +47,9 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
  * Outputs (re-emitted from projected field):
  * - `@Output() valueChanged: EventEmitter<unknown>`
  * - `@Output() focusChanged: EventEmitter<boolean>`
+ *
+ * Host classes (the field's state, for theming):
+ * - `.is-readonly`, `.is-disabled`, `.is-focused`, `.is-invalid`, `.label-resting`
  *
  * @example
  * ```html
@@ -127,6 +131,16 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
   private focusChangeSubject$ = new Subject<boolean>();
   private destroy$ = new Subject<void>();
   private resizeObserver?: ResizeObserver;
+  private errors?: FieldErrorsComponent;
+  private isFocused = false;
+
+  /**
+   * Called by `FieldErrorsDirective` with the errors component it renders into this decorator's slot,
+   * so the invalid state it already computes can surface as a host class the stylesheets target.
+   */
+  registerErrors(errors: FieldErrorsComponent): void {
+    this.errors = errors;
+  }
 
   ngAfterViewInit(): void {
     // interact with the projected field content
@@ -187,7 +201,10 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
     if (!position || position === 'outside' || this.projectedField?.decoratorLayout !== 'horizontal') {
       return 'outside';
     }
-    if (position === 'inside') return this.canLabelRest ? 'resting' : 'floating';
+    // Whether a `placeholder` blocks the label from resting is the position's call, not the field's:
+    // `inside` yields the value area to it, `inside-placeholder` takes it over and hides it instead.
+    if (position === 'inside') return this.canLabelRest && !this.placeholder ? 'resting' : 'floating';
+    if (position === 'inside-placeholder') return this.canLabelRest ? 'resting' : 'floating';
     if (position === 'inside-floating') return 'floating';
 
     return position; // 'border' | 'border-prefix'
@@ -225,7 +242,11 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
     return !this.isLabelOverField && (this.hasLabel || this.hasLabelAdornment);
   }
 
-  /** Mirrored onto the host so a `border` label's band can follow the field's remapped fill. */
+  /**
+   * The field's state, mirrored onto the host — this is where all of it is reachable at once. The label
+   * lives here, so its colours are remapped from these classes; the projected field reads the same
+   * classes with `:host-context()`, since custom properties set here inherit into it either way.
+   */
   @HostBinding('class.is-readonly')
   get isReadonly(): boolean {
     return this.readonly;
@@ -234,6 +255,23 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
   @HostBinding('class.is-disabled')
   get isDisabled(): boolean {
     return this.disabled;
+  }
+
+  @HostBinding('class.is-focused')
+  get isFieldFocused(): boolean {
+    return this.isFocused;
+  }
+
+  /** Only ever true with a `formidableFieldErrors` field inside: nothing else computes validity. */
+  @HostBinding('class.is-invalid')
+  get isInvalid(): boolean {
+    return this.errors?.invalid ?? false;
+  }
+
+  /** The label stands in for the placeholder, so the field has to stop rendering its own. */
+  @HostBinding('class.label-resting')
+  get isLabelResting(): boolean {
+    return this.labelState === 'resting';
   }
 
   /**
@@ -261,6 +299,7 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
   private forwardEvents(): void {
     if (this.projectedField) {
       this.projectedField.focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
+        this.isFocused = focused;
         this.focusChangeSubject$.next(focused);
         this.focusChanged.emit(focused);
       });

@@ -155,8 +155,20 @@
 
   --formidable-color-validation-error: #{tokens.$formidable-color-validation-error};
 
+  // A field's colours come in one set per state. `hovered` and `focus` apply only while the field is
+  // neither readonly nor disabled; `invalid` outranks both of those but not readonly/disabled — the
+  // order the state blocks are written in inside the `field` mixin is what decides that.
   --formidable-color-field-text: #{tokens.$formidable-color-field-text};
   --formidable-color-field-group-text: var(--formidable-color-field-text, #{tokens.$formidable-color-field-group-text});
+  --formidable-color-field-text-hovered: var(
+    --formidable-color-field-text,
+    #{tokens.$formidable-color-field-text-hovered}
+  );
+  --formidable-color-field-text-focus: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text-focus});
+  --formidable-color-field-text-invalid: var(
+    --formidable-color-field-text,
+    #{tokens.$formidable-color-field-text-invalid}
+  );
   --formidable-color-field-text-readonly: color-mix(
     in srgb,
     var(--formidable-color-field-text, #{tokens.$formidable-color-field-text}) 75%,
@@ -168,13 +180,19 @@
     transparent
   );
 
-  --formidable-color-field-label: var(--formidable-color-field-text, #{tokens.$formidable-color-field-label});
-  --formidable-color-field-label-floating: #{tokens.$formidable-color-field-label-floating};
   --formidable-color-field-placeholder: #{tokens.$formidable-color-field-placeholder};
   --formidable-color-field-selection: #{tokens.$formidable-color-field-selection};
 
   --formidable-color-field-border: var(--formidable-color-field-text, #{tokens.$formidable-color-field-border});
+  --formidable-color-field-border-hovered: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-field-border-hovered}
+  );
   --formidable-color-field-border-focus: #{tokens.$formidable-color-field-border-focus};
+  --formidable-color-field-border-invalid: var(
+    --formidable-color-validation-error,
+    #{tokens.$formidable-color-field-border-invalid}
+  );
   --formidable-color-field-border-readonly: #{tokens.$formidable-color-field-border-readonly};
   --formidable-color-field-border-disabled: var(
     --formidable-color-field-text-disabled,
@@ -197,10 +215,25 @@
     #{tokens.$formidable-color-field-group-border-disabled}
   );
 
+  // The one state with a visible fill of its own: a hover is otherwise indistinguishable, since a field
+  // keeps its border and its text colour throughout.
   --formidable-color-field-background: #{tokens.$formidable-color-field-background};
   --formidable-color-field-group-background: var(
     --formidable-color-field-background,
     #{tokens.$formidable-color-field-group-background}
+  );
+  --formidable-color-field-background-hovered: color-mix(
+    in srgb,
+    var(--formidable-color-field-selection, #{tokens.$formidable-color-field-selection}) 20%,
+    var(--formidable-color-field-background, #{tokens.$formidable-color-field-background})
+  );
+  --formidable-color-field-background-focus: var(
+    --formidable-color-field-background,
+    #{tokens.$formidable-color-field-background-focus}
+  );
+  --formidable-color-field-background-invalid: var(
+    --formidable-color-field-background,
+    #{tokens.$formidable-color-field-background-invalid}
   );
   --formidable-color-field-background-readonly: color-mix(
     in srgb,
@@ -218,6 +251,35 @@
   --formidable-color-field-group-background-disabled: var(
     --formidable-color-field-group-background-readonly,
     #{tokens.$formidable-color-field-group-background-disabled}
+  );
+
+  // Every label — the one above the field, the floating one over it and the resting one standing in for
+  // the placeholder — takes a single colour per state, so a state cannot recolour one and miss another.
+  --formidable-color-field-label: var(--formidable-color-field-text, #{tokens.$formidable-color-field-label});
+  --formidable-color-field-label-floating: #{tokens.$formidable-color-field-label-floating};
+  --formidable-color-field-label-resting: var(
+    --formidable-color-field-placeholder,
+    #{tokens.$formidable-color-field-label-resting}
+  );
+  --formidable-color-field-label-hovered: var(
+    --formidable-color-field-label,
+    #{tokens.$formidable-color-field-label-hovered}
+  );
+  --formidable-color-field-label-focus: var(
+    --formidable-color-field-border-focus,
+    #{tokens.$formidable-color-field-label-focus}
+  );
+  --formidable-color-field-label-invalid: var(
+    --formidable-color-validation-error,
+    #{tokens.$formidable-color-field-label-invalid}
+  );
+  --formidable-color-field-label-readonly: var(
+    --formidable-color-field-text-readonly,
+    #{tokens.$formidable-color-field-label-readonly}
+  );
+  --formidable-color-field-label-disabled: var(
+    --formidable-color-field-text-disabled,
+    #{tokens.$formidable-color-field-label-disabled}
   );
 
   // What a `border` label paints over the border it hides. Its own variable, not the field background
@@ -259,6 +321,11 @@
   --formidable-color-field-group-focus-box-shadow: 0 0 0
     var(--formidable-field-group-border-thickness, #{tokens.$formidable-field-group-border-thickness})
     var(--formidable-color-field-group-border-focus, #{tokens.$formidable-color-field-group-border-focus});
+
+  // A focused field keeps its ring while invalid, so the ring takes the invalid colour with the border.
+  --formidable-color-field-focus-box-shadow-invalid: 0 0 0
+    var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
+    var(--formidable-color-field-border-invalid, #{tokens.$formidable-color-field-border-invalid});
 
   // Date Field Panel
   --formidable-color-date-field-panel-select: var(
@@ -390,7 +457,7 @@
     --formidable-color-field-background,
     #{tokens.$formidable-color-slider-thumb-label-background}
   );
-  --formidable-color-slider-thumb-color: var(
+  --formidable-color-slider-thumb-border: var(
     --formidable-color-field-border,
     #{tokens.$formidable-color-slider-thumb-border}
   );

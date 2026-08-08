@@ -26,7 +26,7 @@ Inherited by every field:
 | `hasInFieldToggle` | optional    | Whether the field renders a panel toggle inside its own box, which the value and a label must clear |
 | `valueAlignment`   | optional    | Where the value sits vertically, which a prefix/suffix aligns with: `'center'` (default) or `'top'` |
 
-**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners (run outside the Angular zone), readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly, disabled, or has a `placeholder`; a field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` getter (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always). A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field`, with their panel toggle — declares `hasInFieldToggle`, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it.
+**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners (run outside the Angular zone), readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly or disabled. A `placeholder` is not part of it — whether that blocks a resting label belongs to the label's position (see **Label As Placeholder** below). A field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` getter (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always). A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field`, with their panel toggle — declares `hasInFieldToggle`, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it.
 
 ---
 
@@ -245,19 +245,27 @@ Wraps a field and its label, label adornment, prefix, suffix, hints and errors i
 
 **In-Field Toggle**: `dropdown-field` and `date-field` draw a panel toggle inside their own box, at the field's inner right edge. It is not projected content, so instead of measuring it the field declares `hasInFieldToggle` and the decorator turns that into a `has-in-field-toggle` host class, which raises `--formidable-field-toggle-inset` to `--formidable-field-toggle-size`. Only the value inset adds it: the toggle is a flex item inside the field's `padding-right`, so a projected suffix — measured into that padding — already pushes the toggle left of itself.
 
+**Field State**: the decorator is where all of the field's state is reachable at once, so it mirrors it onto its own host as `is-readonly`, `is-disabled`, `is-focused`, `is-invalid` and `label-resting`. `is-invalid` comes from the `FieldErrorsComponent` that `FieldErrorsDirective` registers with the decorator — nothing else in the library knows a control's validity, so a field used without a decorator has no invalid styling.
+
+Each state is a set of `--formidable-color-field-*` remaps rather than a set of property declarations, so a field picks up whichever set applies without every rule restating `background`, `color` and `border-color`. Four of the five are applied on the field element itself, where their order in the `field` and `group-field` mixins is their precedence: `hovered` < `focused` < `readonly` < `disabled`. `invalid` is the exception — it is applied on the decorator's host and inherited, which makes its precedence a matter of _which_ variables it remaps: it points the base, hover and focus colours at the invalid ones and leaves the readonly and disabled ones alone, so it survives hover and focus but yields to readonly and disabled. The group fields reuse the field's state colours; the toggle's track and the slider's track follow the same variables.
+
 **Label Position**: `formidableFieldLabel`'s `position: FieldLabelPosition` (default `'inside'`) chooses between five mutually exclusive, statically-configured modes.
 
 The decorator resolves the configured position against the field's own state into one `labelState`, emitted as a `label-*` class on `.label-wrapper`, plus a `label-inside` class on its own host whenever the label sits over the value area. Any position other than `outside` needs a `horizontal` `decoratorLayout` — the only layout with room for a label over the field — so all of them are a no-op for `toggle-field`, `radio-group-field`, `checkbox-group-field` and `slider-field`.
 
-| `labelState`          | Resolved From                                                       |
-| :-------------------- | :------------------------------------------------------------------ |
-| `label-outside`       | `position: 'outside'`, or a field whose layout has no room          |
-| `label-resting`       | `position: 'inside'` and the field's `canLabelRest`                 |
-| `label-floating`      | `position: 'inside'` without `canLabelRest`, or `'inside-floating'` |
-| `label-border`        | `position: 'border'`                                                |
-| `label-border-prefix` | `position: 'border-prefix'`                                         |
+| `labelState`          | Resolved From                                                                               |
+| :-------------------- | :------------------------------------------------------------------------------------------ |
+| `label-outside`       | `position: 'outside'`, or a field whose layout has no room                                  |
+| `label-resting`       | `position: 'inside'` with no `placeholder`, or `'inside-placeholder'` — plus `canLabelRest` |
+| `label-floating`      | either `inside` position without that, or `'inside-floating'`                               |
+| `label-border`        | `position: 'border'`                                                                        |
+| `label-border-prefix` | `position: 'border-prefix'`                                                                 |
 
 Because `labelState` reads field state the decorator cannot observe — `readonly`, `disabled`, `placeholder`, mask configuration — the decorator is deliberately **not** `OnPush`.
+
+**Label As Placeholder**: `inside` and `inside-placeholder` differ only in what they do about the field's `placeholder`. `inside` yields the value area to it: a field with a placeholder has nothing left to rest in, so its label floats throughout. `inside-placeholder` takes the area over instead — the label rests in the placeholder's position and the decorator's `label-resting` host blanks `--formidable-color-field-placeholder`, so the field's own does not render behind it; focus floats the label and reveals it.
+
+Whether a placeholder blocks a resting label is therefore the position's call, made in `labelState`, not the field's. `canLabelRest` covers only what a field renders of its own accord — a value, or a mask showing its slots (via `showsEmptyValueHint`) — and vetoes both positions alike. The resting label takes `--formidable-color-field-label-resting`, its own variable, precisely so blanking the placeholder cannot blank the label with it.
 
 **Label Geometry**: an `outside` label sits in `.before-wrapper` in normal flow. Every other position renders the label over the field, which puts it in `.container-horizontal` — the field's own positioning context, whose top edge is the field's border-box top. Each offset is therefore a plain distance from that edge, unreachable by anything around the label, and `.before-wrapper` collapses entirely once the label has left it.
 
@@ -294,6 +302,8 @@ A single option inside an option-based field. Provides `FORMIDABLE_FIELD_OPTION`
 Renders validation error messages for a control. Reads the `errors` array off `control.errors['errors']`; `invalid` is true when touched and errored. Error strings pass through `FORMIDABLE_ERROR_TRANSLATOR`. The container always reserves one line of height (`--formidable-field-support-min-height`) so a single-line error doesn't shift later fields; longer, wrapping errors still push later content down.
 
 Usually created by `FieldErrorsDirective` rather than written by hand. Inside a decorator it renders in that decorator's errors slot, after the field's layout container — never inside it, since that container is the positioning context for the label and the prefix/suffix and has to stay exactly the field's box. Placement is therefore the same for all three `decoratorLayout`s.
+
+`invalid` is mirrored onto its own host as `is-invalid`, and the directive registers the component with the surrounding decorator so the same flag reaches that decorator's host — see **Field State** above. It is the only source of validity in the library.
 
 | Input          | Type           | Description                 |
 | :------------- | :------------- | :-------------------------- |

@@ -30,8 +30,6 @@ Improvements:
 
 - date/time field: arrow up/down to increment/decrement years/months/days and hours/minutes
 - date field: arrow down should not open panel, only navigate throught the dates. when the panel is open, the arrow keys must move the date selection in the panel.
-- when label position is "inside", then the label should be shown and the placeholder only on focus (when the label is floating); this is similar to material's behavior
-- add tokens for the background, border, value (text) and label color when the field is invalid, disabled, readonly, focused, hovered and define the default colors for these states (similar to material's behavior)
 - allow the bottom border to be configured (thickness and color) when the field is invalid or focused (and defined default values)
 - allow the border corner radius to be configured (so each can have different, e.g. only top rounded)
 - possibility check: can the group fields (radio, checkbox) be configured with tokens so that the options (radio buttons, checkboxes) are left-aligned with the left border of other fields in the form (above and below)? or what would need to change? (background and border most probably would then be styled "transparent")

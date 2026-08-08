@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, Inject, Input } from '@angular/core';
 import { AbstractControl, NgModel, NgModelGroup } from '@angular/forms';
 import { FORMIDABLE_ERROR_TRANSLATOR, FormidableTranslateErrorFn } from '../../models/formidable.model';
 
 /**
  * Renders the list of validation error messages for a single NgModel or NgModelGroup.
  * - Automatically tracks previous errors while control is pending.
- * - Exposes `invalid` flag once the control is touched and has errors.
+ * - Exposes `invalid` flag once the control is touched and has errors, mirrored onto its host as
+ *   `.is-invalid` and onto the surrounding decorator, which is what the state styling targets.
  * > Tip: You can globally translate displayed error messages by providing `FORMIDABLE_ERROR_TRANSLATOR`
  *
  * Inputs:
@@ -52,6 +53,7 @@ export class FieldErrorsComponent {
     return this.control?.errors?.['errors'];
   }
 
+  @HostBinding('class.is-invalid')
   get invalid(): boolean {
     return !!this.control?.touched && !!this.errors?.length;
   }

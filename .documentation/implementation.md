@@ -9,7 +9,7 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 ## Ordering Strategy
 
 - **Bugs First**: defects lead, whichever `backlog.md` section they are filed under.
-- **State Before Style**: the invalid-state hook (Phase 6) is a prerequisite for both border geometry (Phase 7) and `aria-invalid` (Phase 11).
+- **State Before Style**: the invalid-state hook was a prerequisite for both border geometry (Phase 7) and `aria-invalid` (Phase 11), and shipped ahead of them.
 - **Docs Last**: API documentation and the `README.md` pass come after the API stops moving.
 - **Portal After The Library**: the portal must expose every field option and theme token, so it starts only once those are stable.
 
@@ -19,12 +19,11 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 |  Phase | Title                               | Depends On |
 | -----: | :---------------------------------- | :--------- |
-|      6 | Field State Styling                 | —          |
-|      7 | Border Geometry                     | 6          |
+|      7 | Border Geometry                     | —          |
 |      8 | Date And Time Keyboard              | —          |
 |      9 | Date Panel Responsiveness           | —          |
 |     10 | Small API Additions And Chores      | 8          |
-|     11 | ARIA — Fields, Errors, Support Text | 6          |
+|     11 | ARIA — Fields, Errors, Support Text | —          |
 |     12 | ARIA — Panel And Option Fields      | 11         |
 |     13 | API Doc Comments                    | 1–12       |
 |     14 | README And Project Docs             | 13         |
@@ -37,23 +36,19 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 ## Library Phases
 
-### Phase 6 — Field State Styling
+### Phase 6.5
 
-- **Invalid Plumbing First**: nothing in the library styles `.ng-invalid` — there is no invalid selector at all. `field-errors.component.ts` already computes the flag; surface it as a host class the stylesheets can target. Both Phase 7 and Phase 11 depend on this hook.
-- **Fill The State Matrix**: tokens for background, border, value text and label color across invalid, disabled, readonly, focused and hovered. Missing today: all of invalid, all of hovered for fields (options and the date panel have hover tokens, fields do not), background and text on focus, and every label state.
-- **Inside Label As Placeholder**: with `position: 'inside'` the label should act as the placeholder and reveal the real placeholder only on focus. Today `canLabelRest` returns false whenever a `placeholder` is set, which permanently forces the floating state.
-- **Fix A Dead Override**: `_forms.scss` reads `--formidable-color-slider-thumb-border`, but `:root` only declares `--formidable-color-slider-thumb-color`. The override name does nothing.
-
-**Clears**: the state-tokens item and the inside-label item.
+Define a "required" indicator on the label that will be suffixed to it (e.g., "\*", but customizable); does that make sense? Idea is to visually show what is rquired;
 
 ### Phase 7 — Border Geometry
 
-Depends on Phase 6 for the invalid hook.
+The invalid hook it needs shipped with Phase 6.
 
-- **Per-State Bottom Border**: thickness and color for invalid and focused. Today the border is a single all-sides shorthand with one thickness scalar; only the color varies by state.
+- **Per-State Bottom Border**: thickness and color for invalid and focused. Today the border is a single all-sides shorthand with one thickness scalar; only the color varies by state. material has a thicker bottom border for certain states; is a property distinguishing the error (and other states) design required (all borders colored vs only bottom)?
 - **Per-Corner Radius**: so a field can be, for example, top-rounded only.
 - **Split The Shared Radius First**: `--formidable-field-border-radius` is the fallback source for the toggle thumb, the slider track, thumb, tick mark and thumb label, and the date panel. Give those their own tokens before splitting the field radius, or a multi-value string leaks into all of them.
 - **Watch The Layout Math**: `--formidable-field-border-thickness` feeds `--formidable-field-inner-height` and every label offset. A per-state thickness must not shift layout between states.
+- label position border: depending on the thickness of the border (e.g. example theme 2), the border behind the label is still partly visible; also focus state and other things might change the border thickness
 
 **Clears**: the bottom-border and corner-radius items.
 
@@ -83,7 +78,7 @@ Depends on Phase 8 (focus-on-load pairs with the ArrowDown change).
 
 ### Phase 11 — ARIA: Fields, Errors And Support Text
 
-Depends on Phase 6 (invalid state). The support text it describes shipped with the hint row.
+The invalid state it needs shipped with Phase 6. The support text it describes shipped with the hint row.
 
 - **State Attributes**: `aria-invalid`, `aria-required`, `aria-readonly`, `aria-disabled`.
 - **Descriptions**: `aria-describedby` linking the field to its errors and its support text.
@@ -106,6 +101,11 @@ Depends on Phase 3 (the option query changes) and Phase 11.
 - Group and order the tokens in `_tokens.scss` to match the order of the fields in `public-api.ts`. This is a cosmetic change only, but it makes the file easier to read and maintain. Shared tokens should be grouped hierarchically at the top.
 - Equivalently, group and order the tokens in `_formidable-vars.scss` to match the order of the fields in `public-api.ts`. This is a cosmetic change only, but it makes the file easier to read and maintain. Shared tokens should be grouped hierarchically at the top.
 - Documentation of tokens (same order) must be extracted from README.md into a dedicated markdown document.
+
+### Phase 12.6 - Define Default Theme
+
+- Material has a default theme, and the library should have one too. The default theme should be defined in `_tokens.scss` and `_formidable-vars.scss`, and it should be applied to all fields by default. The default theme should be consistent with the design system and the branding of the library. The default theme should be documented in the dedicated markdown document for tokens.
+- Propose some pretty default themes first. AskUserQuestions.
 
 ### Phase 13 — API Doc Comments
 
@@ -180,16 +180,17 @@ Depends on Phase 13.
 
 Kept for context only; the detail lived in the previous revision of this file and in the commit history.
 
-| Pass                         | Outcome                                                                                                                                                                                                                                                                        |
-| :--------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bugs And UX Defects          | Date/time mask display, parse and caret fixes; readonly and disabled labels no longer float; single-line ellipsized labels                                                                                                                                                     |
-| Decorator Layout Measurement | Padding moved from inline styles to CSS, measured in a `ResizeObserver`; the in-field toggle joined the value inset; nested `package-lock.json` removed. The consumer tarball rebuild was dropped from the phase and stays in `backlog.md`                                     |
-| Breaking API                 | `FieldDecoratorLayout` renamed to `horizontal` / `vertical` / `inline`; the whole `Form*` family prefixed `NgxFormidable`; icons externalized                                                                                                                                  |
-| Styling And Theming          | New group and autofill tokens; the label became an explicit `position` choice; errors moved to a decorator slot below the field container                                                                                                                                      |
-| Decorator Slot Cleanup       | The tooltip slot became `[formidableFieldLabelAdornment]` and now collapses with the label's row; prefix and suffix became `horizontal` and `inline` only; the `--formidable-color-field-tooltip` token was dropped                                                            |
-| Hint Text                    | `FieldHintDirective` plus a decorator hint row below the field; hints share the row and each aligns itself. No `FieldHintComponent`: a hint has no logic, so projection was enough. The errors mixin's `margin-bottom` went away — spacing below a decorator is the consumer's |
-| Option Fields                | `{ descendants: true }` on all five option queries; a `defaultOption` / `defaultOptionMode` input pair; the group empty state became plain text. The duplicated `computeAllOptions` collapsed into two tested helpers                                                          |
-| Prefix And Suffix            | An `align` input on both adornment directives (`center` / `value`), and a `_globals.scss` exception that makes a projected `button` / `a` clickable. No action components: the demo and `README.md` carry the clear, copy, validation-state and loading recipes instead        |
+| Pass                         | Outcome                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| :--------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bugs And UX Defects          | Date/time mask display, parse and caret fixes; readonly and disabled labels no longer float; single-line ellipsized labels                                                                                                                                                                                                                                                                                                                                                                               |
+| Decorator Layout Measurement | Padding moved from inline styles to CSS, measured in a `ResizeObserver`; the in-field toggle joined the value inset; nested `package-lock.json` removed. The consumer tarball rebuild was dropped from the phase and stays in `backlog.md`                                                                                                                                                                                                                                                               |
+| Breaking API                 | `FieldDecoratorLayout` renamed to `horizontal` / `vertical` / `inline`; the whole `Form*` family prefixed `NgxFormidable`; icons externalized                                                                                                                                                                                                                                                                                                                                                            |
+| Styling And Theming          | New group and autofill tokens; the label became an explicit `position` choice; errors moved to a decorator slot below the field container                                                                                                                                                                                                                                                                                                                                                                |
+| Decorator Slot Cleanup       | The tooltip slot became `[formidableFieldLabelAdornment]` and now collapses with the label's row; prefix and suffix became `horizontal` and `inline` only; the `--formidable-color-field-tooltip` token was dropped                                                                                                                                                                                                                                                                                      |
+| Hint Text                    | `FieldHintDirective` plus a decorator hint row below the field; hints share the row and each aligns itself. No `FieldHintComponent`: a hint has no logic, so projection was enough. The errors mixin's `margin-bottom` went away — spacing below a decorator is the consumer's                                                                                                                                                                                                                           |
+| Option Fields                | `{ descendants: true }` on all five option queries; a `defaultOption` / `defaultOptionMode` input pair; the group empty state became plain text. The duplicated `computeAllOptions` collapsed into two tested helpers                                                                                                                                                                                                                                                                                    |
+| Field State Styling          | An `is-invalid` host class on the decorator, fed by the errors component; a colour token per state for background, border, text and label; and a sixth label position, `inside-placeholder`, whose resting label stands in for the placeholder and hides it until focus — `inside` itself is unchanged. Groups reuse the field's state colours, and the toggle's and slider's tracks follow them. The dead `--formidable-color-slider-thumb-border` override was renamed to the name `_forms.scss` reads |
+| Prefix And Suffix            | An `align` input on both adornment directives (`center` / `value`), and a `_globals.scss` exception that makes a projected `button` / `a` clickable. No action components: the demo and `README.md` carry the clear, copy, validation-state and loading recipes instead                                                                                                                                                                                                                                  |
 
 ---
 
@@ -199,7 +200,6 @@ Defects that were not in `backlog.md` when this roadmap was written. Recorded he
 
 | Finding                                                                                                                                                                                                                                                                                                | Disposition                             |
 | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------- |
-| Dead `--formidable-color-slider-thumb-border` override in `_forms.scss`                                                                                                                                                                                                                                | Folded into Phase 6                     |
 | The `descendants` backlog item's premise was wrong: Ivy's shallow content query already reaches into `@for`, `*ngIf` and `<ng-template>`. What it misses is an option nested in a wrapper **element**. `{ descendants: true }` shipped anyway and now covers both; `option-projection.spec.ts` pins it | Corrected while shipping Phase 3        |
 | Sharing one option `<ng-template>` across two fields is impossible: Angular resolves parent injection and content-query membership from the template's declaration site, so it must be written inside the field. EnerQi's constitution-form TODO cannot be done this way                               | Tell the consumer; not a library change |
 | Stale `package-lock.json` in the library project                                                                                                                                                                                                                                                       | Removed, with a `.gitignore` guard      |
