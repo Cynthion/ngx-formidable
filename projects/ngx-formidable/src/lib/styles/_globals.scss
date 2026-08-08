@@ -4,10 +4,13 @@
 // `overflow: hidden` on the element that holds the text — and that element is projected by the consumer,
 // so the decorator's own (encapsulated) stylesheet cannot reach it. The state classes below already mean
 // "the label renders over the field", so no further gating is needed.
+// `min-width: 0` because the wrapper is a flex row (it may carry a required marker): without it a flex
+// item refuses to shrink below its content, and nothing would ever ellipsize.
 formidable-field-decorator .label-wrapper.label-resting > *,
 formidable-field-decorator .label-wrapper.label-floating > *,
 formidable-field-decorator .label-wrapper.label-border > *,
 formidable-field-decorator .label-wrapper.label-border-prefix > * {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

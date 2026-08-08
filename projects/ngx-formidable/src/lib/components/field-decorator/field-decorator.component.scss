@@ -71,6 +71,7 @@
 
 .label-wrapper {
   @include field-label;
+  @include field-label-layout;
 
   &.label-resting {
     @include field-label-resting;
@@ -94,6 +95,10 @@
   &.label-border-prefix {
     @include field-label-border-align(field-padding-x());
   }
+}
+
+.required-marker {
+  @include field-label-required-marker;
 }
 
 .fieldset {

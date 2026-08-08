@@ -142,6 +142,9 @@
   --formidable-label-border-gap: #{tokens.$formidable-label-border-gap};
   --formidable-label-border-band-bleed: #{tokens.$formidable-label-border-band-bleed};
 
+  // Quoted here rather than in the token: interpolation drops the quotes, and `content` needs a string.
+  --formidable-label-required-marker: '#{tokens.$formidable-label-required-marker}';
+
   --formidable-field-group-option-padding: #{tokens.$formidable-field-group-option-padding};
 
   --formidable-field-support-min-height: calc(

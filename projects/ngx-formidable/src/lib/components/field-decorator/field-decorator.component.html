@@ -79,6 +79,7 @@
       ngClass="label-wrapper label-{{ labelState }}"
       [class.hidden]="!hasLabel">
       <ng-container [ngTemplateOutlet]="projectedLabel" />
+      <ng-container [ngTemplateOutlet]="requiredMarker" />
     </div>
   } @else {
     <label
@@ -86,11 +87,22 @@
       [class.hidden]="!hasLabel"
       [attr.for]="fieldId">
       <ng-container [ngTemplateOutlet]="projectedLabel" />
+      <ng-container [ngTemplateOutlet]="requiredMarker" />
     </label>
   }
 
   <ng-template #projectedLabel>
     <ng-content select="[formidableFieldLabel]" />
+  </ng-template>
+
+  <!-- Sibling of the projected label, not part of it, so a label long enough to ellipsize loses its own
+       text and never the marker. Hidden from assistive tech: a glyph is no way to say "required". -->
+  <ng-template #requiredMarker>
+    @if (required) {
+      <span
+        class="required-marker"
+        aria-hidden="true"></span>
+    }
   </ng-template>
 </ng-template>
 

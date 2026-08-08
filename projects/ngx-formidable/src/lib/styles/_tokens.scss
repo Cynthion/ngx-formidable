@@ -104,6 +104,10 @@ $formidable-label-border-gap: utils.spacing(4);
 // device pixel and not a rem: this guards against pixel rounding, not against a theme's scale.
 $formidable-label-border-band-bleed: 1px;
 
+// What a required field's label is suffixed with. A `content` string, so a theme can swap the glyph for a
+// word — ' (required)' — without touching markup.
+$formidable-label-required-marker: '*';
+
 $formidable-field-group-option-padding: utils.spacing(8) utils.spacing(0);
 
 $formidable-field-support-min-height: $formidable-field-validation-error-line-height *

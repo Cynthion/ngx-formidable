@@ -901,6 +901,25 @@
   max-width: calc(100% - #{$text-left} - #{field-value-inset('right')} + 2 * #{label-border-gap()});
 }
 
+// A flex row, so a required marker sits beside the projected label instead of below it: the label content
+// is a consumer element, and a block one would push a following sibling onto its own line. Kept out of
+// `field-label` on purpose — the toggle's on/off labels share that mixin and never carry a marker.
+@mixin field-label-layout {
+  display: flex;
+  align-items: baseline;
+  column-gap: utils.spacing(4);
+}
+
+// Suffixed to a required field's label. `flex: none` so the label's text is what ellipsizes when room runs
+// out, never the marker. No colour of its own: it inherits the label, and so follows every state with it.
+@mixin field-label-required-marker {
+  flex: none;
+
+  &::after {
+    content: var(--formidable-label-required-marker, '#{tokens.$formidable-label-required-marker}');
+  }
+}
+
 // One state's colour for all three labels — the one above the field, the floating one over it, and the
 // resting one standing in for the placeholder — so a state cannot recolour one and miss another.
 @mixin field-label-state-colors($color) {

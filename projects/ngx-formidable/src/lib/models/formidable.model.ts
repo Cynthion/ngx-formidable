@@ -92,6 +92,8 @@ export interface IFormidableField<T = string | null> {
   placeholder: string;
   readonly: boolean;
   disabled: boolean;
+  /** Marks the field's label as required. Presentational only — the validation suite stays the only validator. */
+  required: boolean;
   value: T;
   /** Whether nothing is rendered where the value goes, so a label may rest there like a placeholder. */
   canLabelRest: boolean;

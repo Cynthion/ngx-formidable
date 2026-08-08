@@ -102,6 +102,7 @@ export abstract class BaseFieldDirective<T = string | null>
   @Input() placeholder = '';
   @Input() readonly = false;
   @Input() disabled = false;
+  @Input() required = false;
 
   public valueChange$ = this.valueChangeSubject$.asObservable();
   public focusChange$ = this.focusChangeSubject$.asObservable();

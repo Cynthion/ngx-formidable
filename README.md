@@ -416,6 +416,30 @@ it float instead, whichever of the two `inside` positions you choose. They diffe
 rendered over the field stays aligned with the value (a prefix or suffix pushes it in too), stays on one
 line, and ellipsizes.
 
+### Required Marker
+
+Set `required` on a field and its label is suffixed with a marker, in every label position:
+
+```html
+<formidable-field-decorator>
+  <formidable-input-field
+    name="firstName"
+    [required]="true"
+    ngModel />
+  <div formidableFieldLabel>First Name</div>
+</formidable-field-decorator>
+```
+
+The glyph is the `--formidable-label-required-marker` variable, so a theme can swap `'*'` for a word —
+`--formidable-label-required-marker: ' (required)'` — without touching markup. It inherits the label's
+colour and so follows every field state, and it is never the thing that gets cut off when a label is too
+long to fit.
+
+`required` marks the label and nothing else. It does **not** validate: your Vest suite stays the only
+validator, so mark the fields your suite enforces and keep the two in step yourself. The library
+deliberately sets no native `required` attribute and no Angular validator — either would put a second
+error channel next to your suite.
+
 The library ships no icons. Where a field has an icon, project your own into it — the date field's panel toggle
 draws a CSS arrow unless you project `<span formidableFieldToggleIcon>…</span>` directly into
 `<formidable-date-field>`. The toggle centers it; its size, color and hover feedback are yours.
@@ -602,6 +626,7 @@ You can also tweak Pikaday CSS.
 | `--formidable-label-border-offset`                          | Vertical offset for a `border` label, so its text line box straddles the field's top border.                        |
 | `--formidable-label-border-gap`                             | How far a `border` label's border-hiding band reaches either side of its text.                                      |
 | `--formidable-label-border-band-bleed`                      | How far that band outgrows the border above and below, so pixel rounding leaves no hairline showing.                |
+| `--formidable-label-required-marker`                        | The `content` string suffixed to a required field's label — `'*'`, or a word such as `' (required)'`.               |
 | `--formidable-field-group-option-padding`                   | Padding of options within a field group.                                                                            |
 | `--formidable-field-support-min-height`                     | Minimum reserved height of a support-text row below a field — the hints and the validation errors.                  |
 | **Colors**                                                  |                                                                                                                     |

@@ -182,6 +182,11 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
     return this.projectedField?.disabled ?? false;
   }
 
+  /** Drives the label's required marker. Presentational only. */
+  get required(): boolean {
+    return this.projectedField?.required ?? false;
+  }
+
   get value(): unknown {
     return this.projectedField?.value ?? null;
   }

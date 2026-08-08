@@ -6,7 +6,7 @@ Prioritize testing **logic** over Angular rendering: fast, reliable tests that c
 
 ## Current State
 
-Testing is sparse. Two specs exist, both in the library: `format.helpers.spec.ts` (pure functions) and `date-time-field.spec.ts` (the date/time fields' caret, value-rendering and calendar-option contracts). The demo has none. This doc is therefore both a description of the stack and the strategy to follow when adding further tests.
+Testing is sparse, and lives entirely in the library: specs for the pure helpers, plus one contract spec per feature area, each colocated with the code it pins down and opening with a comment stating the contract. The demo has none. This doc is therefore both a description of the stack and the strategy to follow when adding further tests.
 
 The library's specs need the root `node_modules` only. A nested `projects/ngx-formidable/node_modules` (from running `npm install` inside the library folder) shadows it with a second copy of `@angular/core`, which breaks `TestBed` with `Need to call TestBed.initTestEnvironment() first`. Delete it and install from the workspace root.
 

@@ -36,10 +36,6 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 ## Library Phases
 
-### Phase 6.5
-
-Define a "required" indicator on the label that will be suffixed to it (e.g., "\*", but customizable); does that make sense? Idea is to visually show what is rquired;
-
 ### Phase 7 — Border Geometry
 
 The invalid hook it needs shipped with Phase 6.
@@ -190,6 +186,7 @@ Kept for context only; the detail lived in the previous revision of this file an
 | Hint Text                    | `FieldHintDirective` plus a decorator hint row below the field; hints share the row and each aligns itself. No `FieldHintComponent`: a hint has no logic, so projection was enough. The errors mixin's `margin-bottom` went away — spacing below a decorator is the consumer's                                                                                                                                                                                                                           |
 | Option Fields                | `{ descendants: true }` on all five option queries; a `defaultOption` / `defaultOptionMode` input pair; the group empty state became plain text. The duplicated `computeAllOptions` collapsed into two tested helpers                                                                                                                                                                                                                                                                                    |
 | Field State Styling          | An `is-invalid` host class on the decorator, fed by the errors component; a colour token per state for background, border, text and label; and a sixth label position, `inside-placeholder`, whose resting label stands in for the placeholder and hides it until focus — `inside` itself is unchanged. Groups reuse the field's state colours, and the toggle's and slider's tracks follow them. The dead `--formidable-color-slider-thumb-border` override was renamed to the name `_forms.scss` reads |
+| Required Marker              | A `required` input on `BaseFieldDirective`, suffixed to the label as a marker whose glyph is `--formidable-label-required-marker`. Presentational only — nothing can infer requiredness from a Vest suite, so no native attribute and no Angular validator were added, and the flag and the suite are the consumer's to keep in step. `.label-wrapper` became a flex row so the marker is a sibling of the projected label and the consumer's text is what ellipsizes                                    |
 | Prefix And Suffix            | An `align` input on both adornment directives (`center` / `value`), and a `_globals.scss` exception that makes a projected `button` / `a` clickable. No action components: the demo and `README.md` carry the clear, copy, validation-state and loading recipes instead                                                                                                                                                                                                                                  |
 
 ---
