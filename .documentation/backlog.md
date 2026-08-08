@@ -30,8 +30,6 @@ Improvements:
 
 - date/time field: arrow up/down to increment/decrement years/months/days and hours/minutes
 - date field: arrow down should not open panel, only navigate throught the dates. when the panel is open, the arrow keys must move the date selection in the panel.
-- allow the bottom border to be configured (thickness and color) when the field is invalid or focused (and defined default values)
-- allow the border corner radius to be configured (so each can have different, e.g. only top rounded)
 - possibility check: can the group fields (radio, checkbox) be configured with tokens so that the options (radio buttons, checkboxes) are left-aligned with the left border of other fields in the form (above and below)? or what would need to change? (background and border most probably would then be styled "transparent")
 
 # Documentation:
@@ -64,8 +62,9 @@ The idea is a product page, where users can come to and play around with options
 - prefixes/suffixes can be added to fields and may be icons, text, or buttons. The portal should provide a way to configure them and show the result in the preview form.
 - the portal should also link to the public github repository
 - i18n config should also be changeable to best demonstrate the date field
+- the portal has several pre-defined and well-designed themes that can be selected and applied to the example form, they serve as inspiration and starting point for users to create their own theme. The portal should also provide a way to export the theme configuration (copy-paste) and import it back into the portal.
 
-Before all, propose a page structure and layout for the portal, including an optional navigation. The portal must be super intuitive and easy to use.
+Before anything is implemented, propose a page structure and layout for the portal, including an optional navigation. The portal must be super intuitive and easy to use.
 
 # Deferred And Unscheduled:
 

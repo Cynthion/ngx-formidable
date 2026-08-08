@@ -23,6 +23,11 @@
 
 :host(.is-focused) {
   @include field-label-state-colors(var(--formidable-color-field-label-focus));
+
+  // A `border` label's band hides the field's border behind it, but the focus ring is a box-shadow spread
+  // *outside* that border box — so while focused the band has to reach up over the ring too, or the ring
+  // shows above the label on every theme whose border is thicker than the band's bleed.
+  --formidable-label-border-band-reach: var(--formidable-field-border-thickness);
 }
 
 // The only state the decorator applies to the field as well as to the label: nothing else here knows the

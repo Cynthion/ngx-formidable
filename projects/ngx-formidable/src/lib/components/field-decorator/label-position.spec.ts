@@ -249,6 +249,20 @@ describe('formidableFieldLabel [position]', () => {
     fixture.detectChanges();
   }
 
+  /** How far the `border` label's band reaches above its own centre, in px, resolved on the label. */
+  function bandReach(): number {
+    const probe = document.createElement('div');
+
+    probe.style.position = 'absolute';
+    probe.style.width = 'var(--formidable-label-border-band-reach)';
+    labelWrapper().appendChild(probe);
+
+    const width = probe.getBoundingClientRect().width;
+    probe.remove();
+
+    return width;
+  }
+
   /** The field's inner top: where its content box starts, below the border. */
   function innerTop(): number {
     const field = input();
@@ -526,6 +540,28 @@ describe('formidableFieldLabel [position]', () => {
 
     it('paints a band to hide the border behind it', () => {
       expect(getComputedStyle(labelWrapper()).backgroundImage).toContain('linear-gradient');
+    });
+
+    // The focus ring is a box-shadow spread *outside* the field's border box, so while focused there is
+    // more to hide above the border than below it. Without the extra reach the band stops at its bleed
+    // and the ring shows above the label on every theme whose border is thicker than that bleed.
+    it('reaches up over the focus ring while focused', () => {
+      const resting = getComputedStyle(labelWrapper()).backgroundImage;
+
+      expect(bandReach()).toBe(0);
+
+      focus();
+
+      // The ring is sized off the border's thickness, and so is the reach that has to cover it.
+      expect(bandReach()).toBeCloseTo(parseFloat(getComputedStyle(input()).borderTopWidth), 2);
+      expect(getComputedStyle(labelWrapper()).backgroundImage).not.toBe(resting);
+    });
+
+    it('reaches further over a thicker ring', () => {
+      fixture.nativeElement.style.setProperty('--formidable-field-border-thickness', '3px');
+      focus();
+
+      expect(bandReach()).toBeCloseTo(3, 2);
     });
 
     // `readonly`/`disabled` remap the fill on the field element, which the label — a sibling — cannot see,

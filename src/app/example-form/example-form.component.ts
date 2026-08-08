@@ -521,7 +521,7 @@ export class ExampleFormComponent {
     theme2: {
       '--formidable-field-height': '64px',
       '--formidable-field-border-thickness': '2px',
-      '--formidable-field-border-radius': '10px',
+      '--formidable-border-radius': '10px',
       '--formidable-color-validation-error': '#d61f69',
       '--formidable-color-field-text': '#1b1b1b',
       '--formidable-color-field-label': '#1b1b1b',
@@ -542,7 +542,7 @@ export class ExampleFormComponent {
     theme3: {
       '--formidable-field-height': '60px',
       '--formidable-field-border-thickness': '3px',
-      '--formidable-field-border-radius': '14px',
+      '--formidable-border-radius': '14px',
       '--formidable-color-validation-error': '#ff4d6d',
       '--formidable-color-field-text': '#1e293b',
       '--formidable-color-field-label': '#1e293b',
@@ -563,7 +563,7 @@ export class ExampleFormComponent {
     theme4: {
       '--formidable-field-height': '36px',
       '--formidable-field-border-thickness': '1px',
-      '--formidable-field-border-radius': '0',
+      '--formidable-border-radius': '0',
       '--formidable-color-validation-error': '#b91c1c',
       '--formidable-color-field-text': '#111827',
       '--formidable-color-field-label': '#111827',
@@ -583,6 +583,45 @@ export class ExampleFormComponent {
       '--formidable-date-field-panel-width': '180px',
       '--formidable-panel-background': '#ffffff',
       '--formidable-panel-box-shadow': '0 4px 20px rgba(0,0,0,0.08)'
+    },
+    // Underlined style: no border at all, a line inside the bottom edge that thickens on
+    // focus, and a field rounded only at the top. Everything else keeps the shared radius, which is the
+    // point — the slider thumb, the toggle knob and the panels do not follow the field's corners.
+    // Note the units on the zeroes: a unitless `0` is a `<number>` in `calc()`, not a `<length>`, and
+    // would invalidate every declaration that derives from it.
+    theme5: {
+      '--formidable-field-height': '56px',
+      '--formidable-field-border-thickness': '0px',
+      // Square at the bottom, so an open panel below mirrors that and the pair reads as one box — while
+      // a panel that flips above picks up the 8px instead.
+      '--formidable-field-border-radius': '0px',
+      '--formidable-field-border-start-start-radius': '8px',
+      '--formidable-field-border-start-end-radius': '8px',
+      '--formidable-field-underline-thickness': '1px',
+      '--formidable-field-underline-thickness-focus': '2px',
+      '--formidable-field-underline-thickness-invalid': '2px',
+      '--formidable-color-field-underline': '#6b7280',
+      '--formidable-color-field-underline-focus': '#7c3aed',
+      '--formidable-color-validation-error': '#dc2626',
+      '--formidable-color-field-text': '#1f2937',
+      '--formidable-color-field-label': '#1f2937',
+      '--formidable-color-field-label-floating': '#7c3aed',
+      '--formidable-color-field-placeholder': '#9ca3af',
+      '--formidable-color-field-selection': '#ddd6fe',
+      '--formidable-color-field-border-focus': '#7c3aed',
+      '--formidable-color-field-background': '#f5f3ff',
+      '--formidable-color-field-background-readonly': '#ede9fe',
+      '--formidable-color-field-background-disabled': '#e5e7eb',
+      '--formidable-color-field-option-background-highlighted': 'rgba(124, 58, 237, 0.12)',
+      '--formidable-color-field-option-background-hovered': 'rgba(124, 58, 237, 0.2)',
+      // The toggle's track is drawn by its border, and this theme has no field border — so the track
+      // keeps a thickness of its own rather than vanishing with it.
+      '--formidable-toggle-field-track-border-thickness': '1px',
+      '--formidable-color-toggle-field-background-checked': '#c4b5fd',
+      '--formidable-color-toggle-thumb': '#7c3aed',
+      '--formidable-date-field-panel-width': '260px',
+      '--formidable-panel-background': '#ffffff',
+      '--formidable-panel-box-shadow': '0 8px 32px rgba(124, 58, 237, 0.2)'
     }
   };
 
@@ -598,5 +637,5 @@ type ControlKey =
   | 'showHints'
   | 'showAsReadonly'
   | 'showAsDisabled';
-type ThemeKey = 'default' | 'theme2' | 'theme3' | 'theme4';
+type ThemeKey = 'default' | 'theme2' | 'theme3' | 'theme4' | 'theme5';
 type ThemeVars = Record<string, string>;

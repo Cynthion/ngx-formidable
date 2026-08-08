@@ -28,14 +28,15 @@ The Angular Karma builder is configured for both projects; there is no `karma.co
 
 The `helpers/` modules are pure functions and the highest-value, lowest-cost target. Test them directly with a colocated `*.helpers.spec.ts`.
 
-| Area                  | Where                      | What to assert                                                    |
-| :-------------------- | :------------------------- | :---------------------------------------------------------------- |
-| Formatting/parsing    | `format.helpers.ts`        | date/time format + parse round-trips, edge tokens                 |
-| Masking               | `mask.helpers.ts`          | mask config resolution, min/max-length validation                 |
-| Field-path resolution | `form.helpers.ts`          | control/group path resolution in a form tree                      |
-| Vest frame validation | `form-validate.helpers.ts` | error extraction, root-form key handling                          |
-| Options               | `option.helpers.ts`        | sorting, matching, selection                                      |
-| Utilities             | `utility.helpers.ts`       | `cloneDeep`, `set`, `mergeValuesAndRawValues`, `getAllFormErrors` |
+| Area                  | Where                      | What to assert                                                     |
+| :-------------------- | :------------------------- | :----------------------------------------------------------------- |
+| Formatting/parsing    | `format.helpers.ts`        | date/time format + parse round-trips, edge tokens                  |
+| Masking               | `mask.helpers.ts`          | mask config resolution, min/max-length validation                  |
+| Field-path resolution | `form.helpers.ts`          | control/group path resolution in a form tree                       |
+| Vest frame validation | `form-validate.helpers.ts` | error extraction, root-form key handling                           |
+| Options               | `option.helpers.ts`        | sorting, matching, selection                                       |
+| Panel placement       | `position.helpers.ts`      | side chosen from available space, the flip it marks the panel with |
+| Utilities             | `utility.helpers.ts`       | `cloneDeep`, `set`, `mergeValuesAndRawValues`, `getAllFormErrors`  |
 
 ---
 

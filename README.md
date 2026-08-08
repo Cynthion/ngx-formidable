@@ -606,8 +606,16 @@ You can also tweak Pikaday CSS.
 | `--formidable-length-indicator-line-height`                 | Line height for the textarea length indicator.                                                                      |
 | **Field Dimensions**                                        |                                                                                                                     |
 | `--formidable-field-before-margin-bottom`                   | Vertical margin below each field container.                                                                         |
+| `--formidable-border-radius`                                | The library's base corner radius. Everything rounded that is not a field box falls back to it.                      |
 | `--formidable-field-border-thickness`                       | Thickness of field borders.                                                                                         |
-| `--formidable-field-border-radius`                          | Border-radius for field corners.                                                                                    |
+| `--formidable-field-border-radius`                          | Border-radius every corner of a field falls back to — see _Per-Corner Radius_ below.                                |
+| `--formidable-field-border-start-start-radius`              | Border-radius of a field's top-left corner alone. Defaults to `--formidable-field-border-radius`.                   |
+| `--formidable-field-border-start-end-radius`                | Border-radius of a field's top-right corner alone.                                                                  |
+| `--formidable-field-border-end-end-radius`                  | Border-radius of a field's bottom-right corner alone.                                                               |
+| `--formidable-field-border-end-start-radius`                | Border-radius of a field's bottom-left corner alone.                                                                |
+| `--formidable-field-underline-thickness`                    | Extra line painted inside a field's bottom edge. `0` paints none — see _Underline_ below.                           |
+| `--formidable-field-underline-thickness-focus`              | Underline thickness while the field is focused.                                                                     |
+| `--formidable-field-underline-thickness-invalid`            | Underline thickness while the field is invalid. Outranks the focused thickness.                                     |
 | `--formidable-field-group-border-thickness`                 | Thickness of field group borders.                                                                                   |
 | `--formidable-field-group-border-radius`                    | Border-radius for field group corners.                                                                              |
 | `--formidable-label-height`                                 | Computed height of the label text line box.                                                                         |
@@ -615,6 +623,9 @@ You can also tweak Pikaday CSS.
 | `--formidable-field-padding-x`                              | Horizontal padding of a field: where its value, and a projected prefix's text, start.                               |
 | `--formidable-field-toggle-size`                            | Size of the panel toggle a dropdown or date field draws inside its own box.                                         |
 | `--formidable-field-toggle-inset`                           | How much of a field's right edge that toggle claims. Raised by the decorator for the fields that have one.          |
+| `--formidable-toggle-field-track-border-thickness`          | Border thickness of a toggle field's track, which is what draws it. Defaults to the field's border thickness.       |
+| `--formidable-toggle-field-track-border-radius`             | Border-radius of a toggle field's track.                                                                            |
+| `--formidable-toggle-field-thumb-border-radius`             | Border-radius of a toggle field's thumb.                                                                            |
 | `--formidable-field-inner-height`                           | Computed height inside a field's borders.                                                                           |
 | `--formidable-field-value-height`                           | Computed height of a field value's text line box.                                                                   |
 | `--formidable-label-floating-height`                        | Computed height of a floating label's text line box.                                                                |
@@ -626,6 +637,7 @@ You can also tweak Pikaday CSS.
 | `--formidable-label-border-offset`                          | Vertical offset for a `border` label, so its text line box straddles the field's top border.                        |
 | `--formidable-label-border-gap`                             | How far a `border` label's border-hiding band reaches either side of its text.                                      |
 | `--formidable-label-border-band-bleed`                      | How far that band outgrows the border above and below, so pixel rounding leaves no hairline showing.                |
+| `--formidable-label-border-band-reach`                      | How much further that band reaches upwards. Raised to the focus ring's width while the field is focused.            |
 | `--formidable-label-required-marker`                        | The `content` string suffixed to a required field's label — `'*'`, or a word such as `' (required)'`.               |
 | `--formidable-field-group-option-padding`                   | Padding of options within a field group.                                                                            |
 | `--formidable-field-support-min-height`                     | Minimum reserved height of a support-text row below a field — the hints and the validation errors.                  |
@@ -661,6 +673,9 @@ You can also tweak Pikaday CSS.
 | `--formidable-color-field-group-border-focus`               | Border color for field groups that are focused.                                                                     |
 | `--formidable-color-field-group-border-readonly`            | Overrides`--formidable-color-field-group-border`when field is readonly.                                             |
 | `--formidable-color-field-group-border-disabled`            | Overrides`--formidable-color-field-group-border`when field is disabled.                                             |
+| `--formidable-color-field-underline`                        | Colour of a field's underline. Follows the border colour through every state unless overridden.                     |
+| `--formidable-color-field-underline-focus`                  | Underline colour while the field is focused.                                                                        |
+| `--formidable-color-field-underline-invalid`                | Underline colour while the field is invalid.                                                                        |
 | `--formidable-color-field-background`                       | Background color for fields.                                                                                        |
 | `--formidable-color-field-group-background`                 | Background color for field groups.                                                                                  |
 | `--formidable-color-field-background-hovered`               | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is hovered.  |
@@ -707,6 +722,7 @@ You can also tweak Pikaday CSS.
 | `--formidable-textarea-padding-top`                         | Top padding for textareas when autosizing is enabled.                                                               |
 | **Panels**                                                  |                                                                                                                     |
 | `--formidable-panel-background`                             | Background color for dropdown/autocomplete/date panels.                                                             |
+| `--formidable-panel-border-radius`                          | Border-radius for all panels. The two corners a panel sits against its field with mirror that field instead.        |
 | `--formidable-panel-box-shadow`                             | Box-shadow for all panels.                                                                                          |
 | `--formidable-panel-max-height`                             | Maximum vertical height for panels (before scrolling).                                                              |
 | **Animations**                                              |                                                                                                                     |
@@ -727,6 +743,41 @@ You can also tweak Pikaday CSS.
 | `--formidable-option-prefix-dimension-inner`                | Size of the inner indicator for selected radio/checkbox prefixes.                                                   |
 | `--formidable-option-prefix-gap`                            | Gap between a radio/checkbox prefix and its option label.                                                           |
 | `--formidable-option-prefix-border-thickness`               | Border thickness of the outer circle/box for radio/checkbox prefixes.                                               |
+
+### Per-Corner Radius
+
+Every corner of a field falls back to `--formidable-field-border-radius`, and each can be shaped on its own. The four corner variables use CSS logical names — `start-start` is the top-left corner in a left-to-right, top-to-bottom writing mode:
+
+```scss
+:root {
+  --formidable-field-border-radius: 0.5rem;
+  --formidable-field-border-end-start-radius: 0; /* top-rounded only */
+  --formidable-field-border-end-end-radius: 0;
+}
+```
+
+They shape the field box and nothing else. Everything else that is rounded — the toggle, the slider, the panels — falls back to `--formidable-border-radius` instead, which is what to override to round the whole library at once. Set that one in your own `:root`: the derived variables resolve where they are declared, so overriding a base further down the tree has no effect. The corner variables above are the exception — they are read where they are used, so they work on `:root` and on a single field alike. A field group takes its shape from `--formidable-field-group-border-radius`, which is substituted verbatim into `border-radius` and so still accepts the whole CSS shorthand.
+
+While a dropdown, autocomplete or date panel is open, it adopts the two corners of the field it sits against: opened below, its top corners take the field's bottom ones; flipped above, its bottom corners take the field's top ones. Its far side keeps `--formidable-panel-border-radius`. The field never reshapes itself — its corners are what you declared, panel or no panel.
+
+### Underline
+
+A field can carry an extra line inside its bottom edge, thickening on focus and on invalid. It is painted over the border rather than replacing it, so no state can change it and move the field's content:
+
+```scss
+:root {
+  --formidable-field-border-thickness: 0px;
+  --formidable-field-underline-thickness: 1px;
+  --formidable-field-underline-thickness-focus: 2px;
+  --formidable-field-underline-thickness-invalid: 2px;
+}
+```
+
+The thickness is `0` by default, so nothing is painted until a theme asks for it. The colour follows `--formidable-color-field-border` through every state; name `--formidable-color-field-underline` and its `-focus` / `-invalid` variants only where the two should differ. Field groups never take an underline: a group is a tall multi-row box, and a line across its bottom reads as a divider between its options.
+
+Dropping the field border to `0px` also erases a toggle field's track, which is drawn by that same border — give it `--formidable-toggle-field-track-border-thickness` to keep it.
+
+> **Units are mandatory on length variables.** Write `0px`, not `0`. A unitless zero is a `<number>` rather than a `<length>`, and these variables are consumed inside `calc()`, where that invalidates the whole declaration — silently taking out every value derived from it, including label offsets and panel alignment.
 
 ## Root-Level / Cross-Field Validation
 

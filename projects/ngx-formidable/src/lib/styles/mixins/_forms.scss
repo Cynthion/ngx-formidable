@@ -36,6 +36,22 @@
   @return calc(#{$border} + #{field-padding-right()} + #{field-toggle-inset()});
 }
 
+// The field's corner radius. Called with a logical corner it yields that corner's own token, falling back
+// to the field's radius; called bare it yields the radius itself.
+// The chain is written out here rather than declared in `_formidable-vars.scss` on purpose: a custom
+// property's value is substituted where the property is *declared*, and those declarations live in `:root`.
+// Routing the field's radius through a token declared there would freeze it at `:root` and silently ignore
+// a radius set on a single field — which works today, because `field-border` reads the radius directly.
+@function field-radius($corner: null) {
+  $radius: var(--formidable-field-border-radius, #{tokens.$formidable-field-border-radius});
+
+  @if not $corner {
+    @return $radius;
+  }
+
+  @return var(--formidable-field-border-#{$corner}-radius, #{$radius});
+}
+
 @mixin icon {
   display: inline-flex;
   align-items: center;
@@ -137,6 +153,7 @@
 @mixin hovered-colors {
   --formidable-color-field-border: var(--formidable-color-field-border-hovered);
   --formidable-color-field-group-border: var(--formidable-color-field-border-hovered);
+  --formidable-color-field-underline: var(--formidable-color-field-border-hovered);
 
   --formidable-color-field-background: var(--formidable-color-field-background-hovered);
   --formidable-color-field-group-background: var(--formidable-color-field-background-hovered);
@@ -144,17 +161,22 @@
   --formidable-color-field-group-text: var(--formidable-color-field-text-hovered);
 }
 
-// The ring is the one property still declared rather than remapped: it has no base to override.
 @mixin focused-colors {
   --formidable-color-field-border: var(--formidable-color-field-border-focus);
   --formidable-color-field-group-border: var(--formidable-color-field-group-border-focus);
+
+  --formidable-field-underline-thickness: var(--formidable-field-underline-thickness-focus);
+  --formidable-color-field-underline: var(--formidable-color-field-underline-focus);
 
   --formidable-color-field-background: var(--formidable-color-field-background-focus);
   --formidable-color-field-group-background: var(--formidable-color-field-background-focus);
   --formidable-color-field-text: var(--formidable-color-field-text-focus);
   --formidable-color-field-group-text: var(--formidable-color-field-text-focus);
 
-  box-shadow: var(--formidable-color-field-focus-box-shadow, #{tokens.$formidable-color-field-focus-box-shadow});
+  --formidable-field-ring-shadow: var(
+    --formidable-color-field-focus-box-shadow,
+    #{tokens.$formidable-color-field-focus-box-shadow}
+  );
 }
 
 // Unlike the others this one is set on the decorator, not on the field: only the decorator knows the
@@ -171,6 +193,11 @@
   // The slider's track borders with a colour of its own rather than with the field's.
   --formidable-color-slider-border: var(--formidable-color-field-border-invalid);
 
+  --formidable-field-underline-thickness: var(--formidable-field-underline-thickness-invalid);
+  --formidable-field-underline-thickness-focus: var(--formidable-field-underline-thickness-invalid);
+  --formidable-color-field-underline: var(--formidable-color-field-underline-invalid);
+  --formidable-color-field-underline-focus: var(--formidable-color-field-underline-invalid);
+
   --formidable-color-field-background: var(--formidable-color-field-background-invalid);
   --formidable-color-field-group-background: var(--formidable-color-field-background-invalid);
   --formidable-color-field-text: var(--formidable-color-field-text-invalid);
@@ -183,6 +210,7 @@
 @mixin readonly-colors {
   --formidable-color-field-border: var(--formidable-color-field-border-readonly);
   --formidable-color-field-group-border: var(--formidable-color-field-group-border-readonly);
+  --formidable-color-field-underline: var(--formidable-color-field-border-readonly);
 
   --formidable-color-field-background: var(--formidable-color-field-background-readonly);
   --formidable-color-field-group-background: var(--formidable-color-field-group-background-readonly);
@@ -193,6 +221,7 @@
 @mixin disabled-colors {
   --formidable-color-field-border: var(--formidable-color-field-border-disabled);
   --formidable-color-field-group-border: var(--formidable-color-field-group-border-disabled);
+  --formidable-color-field-underline: var(--formidable-color-field-border-disabled);
 
   --formidable-color-field-background: var(--formidable-color-field-background-disabled);
   --formidable-color-field-group-background: var(--formidable-color-field-group-background-disabled);
@@ -204,7 +233,7 @@
 @mixin focused-group-colors {
   @include focused-colors;
 
-  box-shadow: var(
+  --formidable-field-ring-shadow: var(
     --formidable-color-field-group-focus-box-shadow,
     #{tokens.$formidable-color-field-group-focus-box-shadow}
   );
@@ -229,10 +258,33 @@
   line-height: var(--formidable-field-line-height, #{tokens.$formidable-field-line-height});
 }
 
+// Four longhands rather than the `border-radius` shorthand, so each corner carries a token of its own and
+// an open panel can read the two it sits against. A field's corners are its own: nothing else changes them.
 @mixin field-border {
   border: var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) solid
     var(--formidable-color-field-border, #{tokens.$formidable-color-field-border});
-  border-radius: var(--formidable-field-border-radius, #{tokens.$formidable-field-border-radius});
+  border-start-start-radius: field-radius('start-start');
+  border-start-end-radius: field-radius('start-end');
+  border-end-end-radius: field-radius('end-end');
+  border-end-start-radius: field-radius('end-start');
+}
+
+// The focus ring on its own, for the elements that take a ring but no underline.
+@mixin field-ring {
+  box-shadow: var(--formidable-field-ring-shadow, 0 0 transparent);
+}
+
+// Two composable layers rather than one declaration, so the ring and the underline can be set by
+// different state sets without clobbering each other — and, more to the point, so `invalid-colors` can
+// reach both: it runs on the decorator host, where only variables carry.
+// The underline is a shadow and not a `border-bottom-width` deliberately. A real border would shrink the
+// field's content box, so every state that thickened it would nudge the value; an inset shadow grows
+// inward over the border, clipped by the same corner radius, and moves nothing.
+@mixin field-shadow {
+  box-shadow:
+    var(--formidable-field-ring-shadow, 0 0 transparent),
+    inset 0 calc(-1 * var(--formidable-field-underline-thickness, #{tokens.$formidable-field-underline-thickness})) 0 0
+      var(--formidable-color-field-underline, #{tokens.$formidable-color-field-underline});
 }
 
 @mixin field-group-border {
@@ -246,6 +298,7 @@
   @include field-font;
   @include field-colors;
   @include field-border;
+  @include field-shadow;
 
   width: 100%;
   position: relative;
@@ -288,6 +341,10 @@
   @include field-font;
   @include field-group-colors;
   @include field-group-border;
+
+  // A ring but no underline: a group is a tall multi-row box, and a full-width line across its bottom
+  // reads as a stray divider between its options rather than as the field's own edge.
+  @include field-ring;
 
   // Same precedence chain as `field`: hovered < focused < readonly < disabled.
   &:not(.is-readonly, .is-disabled) {
@@ -417,13 +474,25 @@
   $thumb-size: var(--formidable-toggle-field-thumb-size, #{tokens.$formidable-toggle-field-thumb-size});
 
   .toggle-track {
+    // A ring but no underline: the track is a pill, not a field box.
+    @include field-ring;
+
     position: relative;
     width: var(--formidable-toggle-field-width, #{tokens.$formidable-toggle-field-width});
     height: var(--formidable-toggle-field-height, #{tokens.$formidable-toggle-field-height});
     box-sizing: border-box;
-    border: var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) solid
-      var(--formidable-color-field-border, #{tokens.$formidable-color-field-border});
-    border-radius: var(--formidable-field-border-radius, #{tokens.$formidable-field-border-radius});
+    // The track is drawn *by* its border, so it needs a thickness of its own: a theme that drops the
+    // field's border to go underlined would otherwise erase the track along with it. Written out here
+    // rather than declared in `_formidable-vars.scss`, for the reason `field-radius()` gives.
+    border: var(
+        --formidable-toggle-field-track-border-thickness,
+        var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
+      )
+      solid var(--formidable-color-field-border, #{tokens.$formidable-color-field-border});
+    border-radius: var(
+      --formidable-toggle-field-track-border-radius,
+      #{tokens.$formidable-toggle-field-track-border-radius}
+    );
     background: var(--formidable-color-toggle-field-background, #{tokens.$formidable-color-toggle-field-background});
     transition: background-color var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
       var(--formidable-animation-easing, #{tokens.$formidable-animation-easing});
@@ -754,10 +823,9 @@
         @include focused-colors;
 
         // The track borders with a slider colour of its own rather than with the field's, so it is the
-        // one element a state has to point at its colour explicitly.
+        // one element a state has to point at its colour explicitly. It takes no ring and no underline —
+        // it reads neither shadow mixin, so `focused-colors` leaves its variables unread.
         --formidable-color-slider-border: var(--formidable-color-field-border-focus);
-
-        box-shadow: unset;
       }
     }
   }
@@ -882,12 +950,17 @@
     var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) / 2 +
       var(--formidable-label-border-band-bleed, #{tokens.$formidable-label-border-band-bleed})
   );
+  // Upwards only. The focus ring is a box-shadow spread *outside* the field's border box, so while the
+  // field is focused there is more to hide above the border than below it, and the band is asymmetric.
+  $band-up: calc(
+    #{$band-half} + var(--formidable-label-border-band-reach, #{tokens.$formidable-label-border-band-reach})
+  );
   $band-color: var(--formidable-color-label-border-band, #{tokens.$formidable-color-label-border-band});
 
   background: linear-gradient(
     to bottom,
-    transparent calc(50% - #{$band-half}),
-    #{$band-color} calc(50% - #{$band-half}),
+    transparent calc(50% - #{$band-up}),
+    #{$band-color} calc(50% - #{$band-up}),
     #{$band-color} calc(50% + #{$band-half}),
     transparent calc(50% + #{$band-half})
   );
@@ -1080,7 +1153,9 @@
   box-shadow: var(--formidable-panel-box-shadow, #{tokens.$formidable-panel-box-shadow});
   border: var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) solid
     var(--formidable-color-field-border, #{tokens.$formidable-color-field-border});
-  border-radius: var(--formidable-field-border-radius, #{tokens.$formidable-field-border-radius});
+  // The panel's own radius, so a top-rounded field does not make a top-rounded panel. Its far corners keep
+  // it; the two facing the field are mirrored from the field below.
+  border-radius: var(--formidable-panel-border-radius, #{tokens.$formidable-panel-border-radius});
   background: var(--formidable-panel-background, #{tokens.$formidable-panel-background});
   overflow: hidden; // clip inner content to border-radius
   z-index: var(--formidable-flyout-z-index, #{tokens.$formidable-flyout-z-index}); // keep on top of field
@@ -1100,6 +1175,20 @@
     visibility: visible;
     pointer-events: auto;
     transform: translateY(0);
+
+    // The panel adopts the two corners of the field it sits against, so the pair reads as one box without
+    // the field having to reshape itself. Gated on `open` because a closed panel is still laid out.
+    // Below the field, the panel's top corners mirror the field's bottom ones; flipped above, its bottom
+    // corners mirror the field's top ones and the top pair goes back to the panel's own radius.
+    border-start-start-radius: field-radius('end-start');
+    border-start-end-radius: field-radius('end-end');
+
+    &.above {
+      border-start-start-radius: var(--formidable-panel-border-radius, #{tokens.$formidable-panel-border-radius});
+      border-start-end-radius: var(--formidable-panel-border-radius, #{tokens.$formidable-panel-border-radius});
+      border-end-start-radius: field-radius('start-start');
+      border-end-end-radius: field-radius('start-end');
+    }
   }
 
   &.above {

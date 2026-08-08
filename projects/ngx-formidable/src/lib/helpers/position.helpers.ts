@@ -1,5 +1,10 @@
 import { ElementRef, QueryList } from '@angular/core';
 
+/**
+ * Opens the panel below the field, or above it when there is no room below and there is above. The panel
+ * carries the direction so its own styling can follow it — the field is never touched: its corners are its
+ * own, and an open panel mirrors them rather than the other way round.
+ */
 export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef?: ElementRef<HTMLElement>): void {
   const field = fieldRef?.nativeElement;
   const panel = panelRef?.nativeElement;
@@ -13,13 +18,9 @@ export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef
   const spaceBelow = windowHeight - fieldRect.bottom;
   const spaceAbove = fieldRect.top;
 
-  if (spaceBelow >= panelHeight) {
-    panel.classList.remove('above');
-  } else if (spaceAbove >= panelHeight) {
-    panel.classList.add('above');
-  } else {
-    panel.classList.remove('above');
-  }
+  // Below unless it does not fit there and does fit above — including when it fits neither way, so a
+  // panel with nowhere to go is at least clipped predictably.
+  panel.classList.toggle('above', spaceBelow < panelHeight && spaceAbove >= panelHeight);
 }
 
 export function scrollIntoView(

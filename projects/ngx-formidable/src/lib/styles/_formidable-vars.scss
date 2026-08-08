@@ -42,8 +42,29 @@
 
   --formidable-field-before-margin-bottom: #{tokens.$formidable-field-before-margin-bottom};
 
+  // The base every rounded thing that is not a field box falls back to. Override this to round the whole
+  // library at once; override the field's own radius below to shape the field alone.
+  --formidable-border-radius: #{tokens.$formidable-border-radius};
+
   --formidable-field-border-thickness: #{tokens.$formidable-field-border-thickness};
-  --formidable-field-border-radius: #{tokens.$formidable-field-border-radius};
+  // What every corner of a field falls back to. Shape a single corner with one of
+  // `--formidable-field-border-{start-start,start-end,end-end,end-start}-radius` (logical corners:
+  // start-start is the top-left in a left-to-right, top-to-bottom writing mode). Those four are read at
+  // the use site and deliberately have no declaration here — see `field-radius()` in `mixins/_forms.scss`.
+  // An open panel mirrors the two it sits against, which is why they are per-corner in the first place.
+  --formidable-field-border-radius: var(--formidable-border-radius, #{tokens.$formidable-field-border-radius});
+
+  // An extra line inside the field's bottom edge, painted over the border rather than replacing it, so no
+  // state can change it and move the field's content. Zero paints nothing.
+  --formidable-field-underline-thickness: #{tokens.$formidable-field-underline-thickness};
+  --formidable-field-underline-thickness-focus: var(
+    --formidable-field-underline-thickness,
+    #{tokens.$formidable-field-underline-thickness-focus}
+  );
+  --formidable-field-underline-thickness-invalid: var(
+    --formidable-field-underline-thickness,
+    #{tokens.$formidable-field-underline-thickness-invalid}
+  );
 
   --formidable-field-group-border-thickness: var(
     --formidable-field-border-thickness,
@@ -141,6 +162,9 @@
   // outgrows the border above and below so pixel rounding cannot leave a hairline of it showing.
   --formidable-label-border-gap: #{tokens.$formidable-label-border-gap};
   --formidable-label-border-band-bleed: #{tokens.$formidable-label-border-band-bleed};
+  // Extra upward reach past the bleed. The decorator raises it to the focus ring's width while focused —
+  // the ring is painted outside the field's border box, and the band has to cover that too.
+  --formidable-label-border-band-reach: #{tokens.$formidable-label-border-band-reach};
 
   // Quoted here rather than in the token: interpolation drops the quotes, and `content` needs a string.
   --formidable-label-required-marker: '#{tokens.$formidable-label-required-marker}';
@@ -216,6 +240,18 @@
   --formidable-color-field-group-border-disabled: var(
     --formidable-color-field-border-disabled,
     #{tokens.$formidable-color-field-group-border-disabled}
+  );
+
+  // Only focus and invalid carry an underline colour of their own — every other state drags the underline
+  // along with its own border colour, so one cannot outlive the other.
+  --formidable-color-field-underline: var(--formidable-color-field-border, #{tokens.$formidable-color-field-underline});
+  --formidable-color-field-underline-focus: var(
+    --formidable-color-field-border-focus,
+    #{tokens.$formidable-color-field-underline-focus}
+  );
+  --formidable-color-field-underline-invalid: var(
+    --formidable-color-field-border-invalid,
+    #{tokens.$formidable-color-field-underline-invalid}
   );
 
   // The one state with a visible fill of its own: a hover is otherwise indistinguishable, since a field
@@ -506,9 +542,13 @@
 
   --formidable-toggle-field-width: #{tokens.$formidable-toggle-field-width};
   --formidable-toggle-field-height: #{tokens.$formidable-toggle-field-height};
+  --formidable-toggle-field-track-border-radius: var(
+    --formidable-border-radius,
+    #{tokens.$formidable-toggle-field-track-border-radius}
+  );
   --formidable-toggle-field-thumb-size: #{tokens.$formidable-toggle-field-thumb-size};
   --formidable-toggle-field-thumb-border-radius: var(
-    --formidable-field-border-radius,
+    --formidable-border-radius,
     #{tokens.$formidable-toggle-field-thumb-border-radius}
   );
   --formidable-toggle-field-thumb-gap: #{tokens.$formidable-toggle-field-thumb-gap};
@@ -526,18 +566,18 @@
     #{tokens.$formidable-slider-track-border-thickness}
   );
   --formidable-slider-track-border-radius: var(
-    --formidable-field-border-radius,
+    --formidable-border-radius,
     #{tokens.$formidable-slider-track-border-radius}
   );
   --formidable-slider-tick-mark-width: #{tokens.$formidable-slider-tick-mark-width};
   --formidable-slider-tick-mark-height: #{tokens.$formidable-slider-tick-mark-height};
   --formidable-slider-tick-mark-border-radius: var(
-    --formidable-field-border-thickness,
+    --formidable-border-radius,
     #{tokens.$formidable-slider-tick-mark-border-radius}
   );
   --formidable-slider-thumb-border-thickness: #{tokens.$formidable-slider-thumb-border-thickness};
   --formidable-slider-thumb-border-radius: var(
-    --formidable-field-border-radius,
+    --formidable-border-radius,
     #{tokens.$formidable-slider-thumb-border-radius}
   );
   --formidable-slider-thumb-label-distance: #{tokens.$formidable-slider-thumb-label-distance};
@@ -547,7 +587,7 @@
     #{tokens.$formidable-slider-thumb-label-border-thickness}
   );
   --formidable-slider-thumb-label-border-radius: var(
-    --formidable-field-border-radius,
+    --formidable-border-radius,
     #{tokens.$formidable-slider-thumb-label-border-radius}
   );
   --formidable-slider-tick-labels-margin-top: #{tokens.$formidable-slider-tick-labels-margin-top};
@@ -557,6 +597,9 @@
   // #region Panels
 
   --formidable-panel-background: var(--formidable-color-field-background, #{tokens.$formidable-panel-background});
+  // A panel's own radius, not the field's. It keeps this on the far side; the two corners it sits against
+  // the field with mirror that field's facing corners instead, so the pair reads as one box.
+  --formidable-panel-border-radius: var(--formidable-border-radius, #{tokens.$formidable-panel-border-radius});
   --formidable-panel-box-shadow: #{tokens.$formidable-panel-box-shadow};
   --formidable-panel-max-height: #{tokens.$formidable-panel-max-height};
 
@@ -584,7 +627,7 @@
 
   --formidable-date-field-panel-width: #{tokens.$formidable-date-field-panel-width};
   --formidable-date-field-panel-border-radius: var(
-    --formidable-field-border-radius,
+    --formidable-panel-border-radius,
     #{tokens.$formidable-date-field-panel-border-radius}
   );
   --formidable-date-field-panel-box-shadow: var(

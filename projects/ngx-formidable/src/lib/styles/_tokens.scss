@@ -42,8 +42,25 @@ $formidable-slider-label-line-height: math.div(19.2, 12); // 1.6
 
 $formidable-field-before-margin-bottom: utils.spacing(8);
 
+// The library's base corner radius, and the fallback source for every rounded thing that is not a field
+// box: the toggle, the slider and the panels.
+$formidable-border-radius: utils.spacing(6);
+
 $formidable-field-border-thickness: utils.spacing(1);
-$formidable-field-border-radius: utils.spacing(6);
+
+// What every corner of a field falls back to. A single value: each corner is shaped on its own through
+// the four `--formidable-field-border-<corner>-radius` custom properties, which have no token of their
+// own because this *is* their default.
+$formidable-field-border-radius: $formidable-border-radius;
+
+// An extra line painted *inside* the field's bottom edge, on top of the border. Zero by default, so
+// nothing is painted; a theme goes underlined by dropping the border thickness and raising this.
+// A unit is mandatory here, so `length-zero-no-unit` is waived: this value is negated inside `calc()`,
+// where a unitless zero is a `<number>` and would invalidate the whole `box-shadow`.
+/* stylelint-disable-next-line length-zero-no-unit */
+$formidable-field-underline-thickness: 0rem;
+$formidable-field-underline-thickness-focus: $formidable-field-underline-thickness;
+$formidable-field-underline-thickness-invalid: $formidable-field-underline-thickness;
 
 $formidable-field-group-border-thickness: $formidable-field-border-thickness;
 $formidable-field-group-border-radius: $formidable-field-border-radius;
@@ -104,6 +121,13 @@ $formidable-label-border-gap: utils.spacing(4);
 // device pixel and not a rem: this guards against pixel rounding, not against a theme's scale.
 $formidable-label-border-band-bleed: 1px;
 
+// How much further the band reaches *upwards*, past the bleed. Zero at rest; the decorator raises it to
+// the focus ring's width while focused, because that ring is a box-shadow painted outside the field's
+// border box and the band would otherwise stop short of it. Carries a unit for the same reason as the
+// underline above: it is summed inside `calc()`, where a unitless zero would invalidate the declaration.
+/* stylelint-disable-next-line length-zero-no-unit */
+$formidable-label-border-band-reach: 0rem;
+
 // What a required field's label is suffixed with. A `content` string, so a theme can swap the glyph for a
 // word — ' (required)' — without touching markup.
 $formidable-label-required-marker: '*';
@@ -153,6 +177,13 @@ $formidable-color-field-group-border: $formidable-color-field-border;
 $formidable-color-field-group-border-focus: $formidable-color-field-border-focus;
 $formidable-color-field-group-border-readonly: $formidable-color-field-border-readonly;
 $formidable-color-field-group-border-disabled: $formidable-color-field-border-disabled;
+
+// The underline follows the border by default, so a theme only names these when it wants the two to
+// differ. Only focus and invalid get a source of their own — every other state simply drags the underline
+// along with its border colour, so a state that hides the border cannot leave the underline behind.
+$formidable-color-field-underline: $formidable-color-field-border;
+$formidable-color-field-underline-focus: $formidable-color-field-border-focus;
+$formidable-color-field-underline-invalid: $formidable-color-field-border-invalid;
 
 // The one state with a visible fill of its own: a hover is otherwise indistinguishable, since a field
 // keeps its border and its text colour throughout.
@@ -270,8 +301,9 @@ $formidable-textarea-padding-top: utils.spacing(16);
 
 $formidable-toggle-field-width: utils.spacing(48);
 $formidable-toggle-field-height: utils.spacing(24);
+$formidable-toggle-field-track-border-radius: $formidable-border-radius;
 $formidable-toggle-field-thumb-size: utils.spacing(16);
-$formidable-toggle-field-thumb-border-radius: $formidable-field-border-radius;
+$formidable-toggle-field-thumb-border-radius: $formidable-border-radius;
 $formidable-toggle-field-thumb-gap: utils.spacing(4);
 $formidable-toggle-field-gap: utils.spacing(8);
 
@@ -283,16 +315,16 @@ $formidable-slider-thumb-size: utils.spacing(16);
 $formidable-slider-track-height: utils.spacing(6);
 $formidable-slider-track-fill-height: utils.spacing(6);
 $formidable-slider-track-border-thickness: $formidable-field-border-thickness;
-$formidable-slider-track-border-radius: $formidable-field-border-radius;
+$formidable-slider-track-border-radius: $formidable-border-radius;
 $formidable-slider-tick-mark-width: utils.spacing(4);
 $formidable-slider-tick-mark-height: utils.spacing(4);
-$formidable-slider-tick-mark-border-radius: $formidable-field-border-radius;
+$formidable-slider-tick-mark-border-radius: $formidable-border-radius;
 $formidable-slider-thumb-border-thickness: utils.spacing(0);
-$formidable-slider-thumb-border-radius: $formidable-field-border-radius;
+$formidable-slider-thumb-border-radius: $formidable-border-radius;
 $formidable-slider-thumb-label-distance: utils.spacing(2);
 $formidable-slider-thumb-label-padding: utils.spacing(2) utils.spacing(4);
 $formidable-slider-thumb-label-border-thickness: $formidable-field-border-thickness;
-$formidable-slider-thumb-label-border-radius: $formidable-field-border-radius;
+$formidable-slider-thumb-label-border-radius: $formidable-border-radius;
 $formidable-slider-tick-labels-margin-top: utils.spacing(2);
 
 // #endregion
@@ -300,6 +332,7 @@ $formidable-slider-tick-labels-margin-top: utils.spacing(2);
 // #region Panels
 
 $formidable-panel-background: $formidable-color-field-background;
+$formidable-panel-border-radius: $formidable-border-radius;
 $formidable-panel-box-shadow: utils.spacing(0) utils.spacing(12) utils.spacing(48) calc(utils.spacing(8) * -1)
   rgb(0 0 0 / 12%);
 $formidable-panel-max-height: 33vh; // 1/3 of viewport height
@@ -327,7 +360,7 @@ $formidable-above-overlay-z-index: 99999;
 // #region Date Field Panel
 
 $formidable-date-field-panel-width: utils.spacing(300);
-$formidable-date-field-panel-border-radius: $formidable-field-border-radius;
+$formidable-date-field-panel-border-radius: $formidable-panel-border-radius;
 $formidable-date-field-panel-box-shadow: $formidable-panel-box-shadow;
 
 // #endregion
