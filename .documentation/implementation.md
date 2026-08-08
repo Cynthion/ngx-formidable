@@ -19,7 +19,6 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 |  Phase | Title                               | Depends On |
 | -----: | :---------------------------------- | :--------- |
-|     10 | Small API Additions And Chores      | —          |
 |     11 | ARIA — Fields, Errors, Support Text | —          |
 |     12 | ARIA — Panel And Option Fields      | 11         |
 |     13 | API Doc Comments                    | 1–12       |
@@ -32,14 +31,6 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 ---
 
 ## Library Phases
-
-### Phase 10 — Small API Additions And Chores
-
-- **Toggle Layout**: expose `decoratorLayout` as an input on `ToggleFieldComponent`; it is hardcoded to `inline` today. does that even make sense?
-- **Focus On Page Load**: an input on `BaseFieldDirective` to focus a field on load, without opening a panel. No public `focus()` exists today. Panels do not open on focus, so the constraint already holds — this is about adding the API.
-- **Timer Audit**: prefer `queueMicrotask` over `setTimeout`. Most option paths already use it; the remainder are layout, scroll and focus call sites, and some of those genuinely need `requestAnimationFrame`. Audit each, do not blanket-replace. The caret restore in each field's `stepSegment` is one that must stay a `setTimeout`: it only works because it queues behind `setDate` / `setTime`, which re-render the input from a `setTimeout` of their own.
-
-**Clears**: the toggle-layout, focus-on-load and `queueMicrotask` items.
 
 ### Phase 11 — ARIA: Fields, Errors And Support Text
 
@@ -69,8 +60,8 @@ Depends on Phase 3 (the option query changes) and Phase 11.
 
 ### Phase 12.6 - Define Default Theme
 
-- Material has a default theme, and the library should have one too. The default theme should be defined in `_tokens.scss` and `_formidable-vars.scss`, and it should be applied to all fields by default. The default theme should be consistent with the design system and the branding of the library. The default theme should be documented in the dedicated markdown document for tokens.
-- Propose some pretty default themes first. AskUserQuestions.
+- Material has a default theme, and the this library should have one too. The default theme should be defined in `_tokens.scss` and `_formidable-vars.scss`, and it should be applied to all fields by default. The default theme should be consistent with the design system and the branding of the library. The default theme should be documented in the dedicated markdown document for tokens.
+- Propose some pretty default themes first. This can be done by extending the themes in the example so I can visually check. AskUserQuestions.
 
 ### Phase 13 — API Doc Comments
 
@@ -104,7 +95,15 @@ Depends on Phase 13.
 
 **Clears**: the usage-docs, badges, feature-list, group-example, `CONTRIBUTING.md`, logo, custom-field and README items.
 
-### Phase 15 — Storybook
+### Phase 15 — Release
+
+- **Registry**: reconcile `publish:lib --access public` with the GitHub Packages registry.
+- **Tag**: tag the release commit. Final step.
+- **Known Trade-Off**: this releases on the current Angular major with the existing `ngx-mask` peer mismatch, because the dependency refresh is unscheduled. See _Deferred And Unscheduled_ in `backlog.md`.
+
+**Clears**: the release-tag item.
+
+### Phase 16 — Storybook
 
 Depends on Phase 13.
 
@@ -114,13 +113,12 @@ Depends on Phase 13.
 
 **Clears**: the Storybook item.
 
-### Phase 16 — Release
+### Phase 17 — Portal
 
-- **Registry**: reconcile `publish:lib --access public` with the GitHub Packages registry.
-- **Tag**: tag the release commit. Final step.
-- **Known Trade-Off**: this releases on the current Angular major with the existing `ngx-mask` peer mismatch, because the dependency refresh is unscheduled. See _Deferred And Unscheduled_ in `backlog.md`.
+### Phase 18 - AI Support
 
-**Clears**: the release-tag item.
+I want to support developers to use AI to use this library. How can I do that?
+Should that be done with an MCP? What are other ways?
 
 ---
 
@@ -163,6 +161,7 @@ Kept for context only; the detail lived in the previous revision of this file an
 | Border Geometry              | `--formidable-border-radius`, a neutral base every rounded thing that is not a field box falls back to, so `--formidable-field-border-radius` is free to be the default for four per-corner variables that round a field on some corners only. A `--formidable-field-underline-*` family painting an extra line inside the field's bottom edge, thicker on focus and on invalid — an inset shadow rather than a `border-bottom-width`, so a state cannot shrink the content box and nudge the value, which left the layout math untouched; field groups take the focus ring without it. An open panel adopts the two corners of the field it sits against, so the pair reads as one box without the field ever reshaping itself. A `border` label's band reaches up over the focus ring while focused, which is what was showing above it on any theme with a border thicker than the band's bleed                                                                                                                                      |
 | Date And Time Keyboard       | `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret and leave it selected, in both masked fields — two pure helpers, `findSegmentAtCaret` and `stepDateTimeUnit`, built on the tokenizer and mask-width maps `format.helpers.ts` already had. A plain `ArrowDown` no longer opens the date panel; `Alt` + the arrows do, per the ARIA combobox pattern, and while the panel is open the arrows still move the calendar. An empty field is seeded before it is stepped (a date from `getDefaultDate`, a time from midnight), so arrows alone can fill one; a date step outside `minDate` / `maxDate` is refused rather than clamped, so the two input paths cannot disagree. The step commits immediately through the existing `setDate` / `setTime` — which is why the caret restore has to be a `setTimeout` queued behind theirs                                                                                                                                                                            |
 | Date Panel Responsiveness    | `--formidable-date-field-panel-width` became the width the calendar **prefers** rather than one it is fixed at — `max-width: 100%` on `.pika-lendar` plus `min-width: 0` on the flex item Pikaday builds into, which is the unclassed picker div and not `.pika-single`. Everything below it was already fluid, so the whole calendar now scales into a narrower panel instead of losing its right-hand columns to the panel's `overflow: hidden`. `FormidablePanelPosition` gained a fourth value, `bottom`: a sheet fixed across the bottom of the viewport, full width, square where it meets the screen edge, clear of the home indicator, and exempt from the flip — `updatePanelPosition` returns early for it rather than leaving a class that would move it. Anchored panels are unchanged. The two panel `vh` heights became `dvh`. No new tokens. Not covered: an autocomplete sheet keeps focus in its filter input, so a soft keyboard can cover it — the date field moves focus to the panel and does not have the problem |
+| Small API Additions          | An `autoFocus` input and a public `focus()` on `BaseFieldDirective`, called from a new base `ngAfterViewInit` through a microtask — focusing inside the pass flips `isFieldFocused`, which the decorator reads. What gets focused is a protected `focusElement` getter defaulting to `fieldRef`, which the five fields that wrap their control override; that also let `preventPointerDown` drop its element parameter. `focus()` stayed off `IFormidableField`, so a field implementing the interface without extending the base is unaffected. The timer audit converted nothing: under zone change detection a `queueMicrotask` runs before change detection, so every remaining `setTimeout` waits on rendered DOM or on ngxMask init — each now says which. It removed one dead line and one redundant hop instead, and the re-audit moved to _Deferred And Unscheduled_, to be done once the app is zoneless                                                                                                                      |
 | Prefix And Suffix            | An `align` input on both adornment directives (`center` / `value`), and a `_globals.scss` exception that makes a projected `button` / `a` clickable. No action components: the demo and `README.md` carry the clear, copy, validation-state and loading recipes instead                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ---
@@ -171,12 +170,14 @@ Kept for context only; the detail lived in the previous revision of this file an
 
 Defects that were not in `backlog.md` when this roadmap was written. Recorded here so they are not rediscovered.
 
-| Finding                                                                                                                                                                                                                                                                                                            | Disposition                             |
-| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------- |
-| The `descendants` backlog item's premise was wrong: Ivy's shallow content query already reaches into `@for`, `*ngIf` and `<ng-template>`. What it misses is an option nested in a wrapper **element**. `{ descendants: true }` shipped anyway and now covers both; `option-projection.spec.ts` pins it             | Corrected while shipping Phase 3        |
-| Sharing one option `<ng-template>` across two fields is impossible: Angular resolves parent injection and content-query membership from the template's declaration site, so it must be written inside the field. EnerQi's constitution-form TODO cannot be done this way                                           | Tell the consumer; not a library change |
-| `--formidable-slider-tick-mark-border-radius` fell back to `--formidable-field-border-**thickness**`, not the radius. Its own token was unreachable, tick marks rendered with a 1px radius, and changing a theme's border thickness silently reshaped them                                                         | Fixed while shipping Border Geometry    |
-| A unitless `0` on any length variable is a `<number>`, not a `<length>`, and invalidates every `calc()` deriving from it — silently taking out all label offsets and the panel's alignment at once. Cost real time to diagnose twice; the library's own SCSS already carries `0rem` with a stylelint waiver for it | Documented in `README.md`               |
-| Stale `package-lock.json` in the library project                                                                                                                                                                                                                                                                   | Removed, with a `.gitignore` guard      |
-| The demo writes the selected theme to `localStorage` but never reads it back on init                                                                                                                                                                                                                               | Added to `backlog.md`, not scheduled    |
-| No CI workflow; `deploy.yml` reinstalls from scratch rather than from the lockfile                                                                                                                                                                                                                                 | Added to `backlog.md`, not scheduled    |
+| Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Disposition                             |
+| :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------- |
+| The `descendants` backlog item's premise was wrong: Ivy's shallow content query already reaches into `@for`, `*ngIf` and `<ng-template>`. What it misses is an option nested in a wrapper **element**. `{ descendants: true }` shipped anyway and now covers both; `option-projection.spec.ts` pins it                                                                                                                                                                         | Corrected while shipping Phase 3        |
+| Sharing one option `<ng-template>` across two fields is impossible: Angular resolves parent injection and content-query membership from the template's declaration site, so it must be written inside the field. EnerQi's constitution-form TODO cannot be done this way                                                                                                                                                                                                       | Tell the consumer; not a library change |
+| `--formidable-slider-tick-mark-border-radius` fell back to `--formidable-field-border-**thickness**`, not the radius. Its own token was unreachable, tick marks rendered with a 1px radius, and changing a theme's border thickness silently reshaped them                                                                                                                                                                                                                     | Fixed while shipping Border Geometry    |
+| A unitless `0` on any length variable is a `<number>`, not a `<length>`, and invalidates every `calc()` deriving from it — silently taking out all label offsets and the panel's alignment at once. Cost real time to diagnose twice; the library's own SCSS already carries `0rem` with a stylelint waiver for it                                                                                                                                                             | Documented in `README.md`               |
+| Stale `package-lock.json` in the library project                                                                                                                                                                                                                                                                                                                                                                                                                               | Removed, with a `.gitignore` guard      |
+| The demo writes the selected theme to `localStorage` but never reads it back on init                                                                                                                                                                                                                                                                                                                                                                                           | Added to `backlog.md`, not scheduled    |
+| No CI workflow; `deploy.yml` reinstalls from scratch rather than from the lockfile                                                                                                                                                                                                                                                                                                                                                                                             | Added to `backlog.md`, not scheduled    |
+| A `decoratorLayout` input on the toggle does not make sense. The decorator gates behavior on the layout, not on the field: `horizontal` unlocks the inside/border label positions and absolutely positioned adornments, `vertical` wraps the field in a `fieldset`/`legend`. A toggle is a fixed-size pill, so an inside label lands on it and a prefix overlaps the switch, and a fieldset around a single control is wrong. `inline` is the only layout it does not break in | Item dropped while shipping Phase 10    |
+| `date-field`'s `togglePanel(true)` focused `panelRef` synchronously, before the open state had rendered — a `visibility: hidden` element is not focusable, so the call never did anything. Deferring it until it could would pull focus off the input and run its commit-on-blur path, so it was removed rather than fixed; `focus.spec.ts` pins both halves                                                                                                                   | Removed while shipping Phase 10         |

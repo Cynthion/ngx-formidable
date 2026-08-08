@@ -7,7 +7,7 @@
   <div
     class="input-wrapper"
     (mousedown)="!readonly && !disabled ? toggleMouseDown($event) : null"
-    (pointerdown)="readonly || disabled ? preventPointerDown($event, inputRef) : null"
+    (pointerdown)="readonly || disabled ? preventPointerDown($event) : null"
     (keydown)="readonly || disabled ? preventKeydown($event) : null">
     <!-- Input Field -->
     <input

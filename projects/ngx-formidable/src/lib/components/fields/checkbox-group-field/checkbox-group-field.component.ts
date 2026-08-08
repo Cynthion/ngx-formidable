@@ -302,6 +302,8 @@ export class CheckboxGroupFieldComponent
     if (!this.isFieldFocused) return;
     if (index < 0) return;
 
+    // `optionRefs` is only repopulated once the new highlight has rendered, so a microtask would
+    // resolve the wrong element.
     setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }
 }

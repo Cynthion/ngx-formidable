@@ -1,4 +1,15 @@
-import { Directive, ElementRef, EventEmitter, inject, Input, NgZone, OnDestroy, OnInit, Output } from '@angular/core';
+import {
+  AfterViewInit,
+  Directive,
+  ElementRef,
+  EventEmitter,
+  inject,
+  Input,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  Output
+} from '@angular/core';
 import { ControlValueAccessor } from '@angular/forms';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
@@ -6,7 +17,7 @@ import { FieldDecoratorLayout, IFormidableField } from '../../models/formidable.
 
 @Directive()
 export abstract class BaseFieldDirective<T = string | null>
-  implements ControlValueAccessor, IFormidableField<T>, OnInit, OnDestroy
+  implements ControlValueAccessor, IFormidableField<T>, OnInit, AfterViewInit, OnDestroy
 {
   protected abstract keyboardCallback: ((event: KeyboardEvent) => void) | null;
   protected abstract externalClickCallback: (() => void) | null;
@@ -27,6 +38,12 @@ export abstract class BaseFieldDirective<T = string | null>
 
   ngOnInit(): void {
     this.registerGlobalListeners();
+  }
+
+  ngAfterViewInit(): void {
+    // Focusing inside the change detection pass flips `isFieldFocused`, which the decorator reads through
+    // `canLabelRest` — an ExpressionChanged error. A microtask lands after the pass, with the refs resolved.
+    if (this.autoFocus) queueMicrotask(() => this.focus());
   }
 
   ngOnDestroy(): void {
@@ -103,6 +120,7 @@ export abstract class BaseFieldDirective<T = string | null>
   @Input() readonly = false;
   @Input() disabled = false;
   @Input() required = false;
+  @Input() autoFocus = false;
 
   public valueChange$ = this.valueChangeSubject$.asObservable();
   public focusChange$ = this.focusChangeSubject$.asObservable();
@@ -143,11 +161,28 @@ export abstract class BaseFieldDirective<T = string | null>
 
   abstract decoratorLayout: FieldDecoratorLayout;
 
-  protected preventPointerDown(event: PointerEvent, focusElementRef?: HTMLElement): void {
+  /**
+   * The element that actually takes focus. `fieldRef` is a plain `div` for the fields that wrap their
+   * control, so those override this.
+   */
+  protected get focusElement(): HTMLElement | undefined {
+    return this.fieldRef?.nativeElement;
+  }
+
+  /** Focuses the field without opening its panel — no panel field opens on focus. */
+  public focus(): void {
+    if (this.disabled) return;
+
+    this.focusElement?.focus();
+  }
+
+  protected preventPointerDown(event: PointerEvent): void {
     if (!this.readonly && !this.disabled) return;
 
     event.preventDefault();
-    setTimeout(() => (focusElementRef ? focusElementRef.focus() : this.fieldRef.nativeElement.focus()), 0);
+    // Waits for the browser's default pointerdown handling: `preventDefault` suppresses the native focus,
+    // so the re-focus has to land after the event dispatch. A microtask still runs inside it.
+    setTimeout(() => this.focusElement?.focus());
   }
 
   protected preventKeydown(event: KeyboardEvent): void {

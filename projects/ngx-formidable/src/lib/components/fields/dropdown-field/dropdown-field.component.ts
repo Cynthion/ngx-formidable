@@ -208,6 +208,10 @@ export class DropdownFieldComponent
     return this.dropdownRef as ElementRef<HTMLElement>;
   }
 
+  protected override get focusElement(): HTMLElement {
+    return this.inputRef.nativeElement;
+  }
+
   /** Mirrors the template: there is nothing to open once the field is readonly or disabled. */
   get hasInFieldToggle(): boolean {
     return !this.readonly && !this.disabled;
@@ -360,11 +364,14 @@ export class DropdownFieldComponent
   protected togglePanel(isOpen: boolean): void {
     this._isPanelOpen = isOpen;
 
-    // additional field specific behavior
+    // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
+    // before change detection.
     setTimeout(() => scrollIntoView(this.dropdownRef, this.panelRef, isOpen));
 
     if (isOpen) {
       this.highlightSelectedOption();
+      // Synchronous on purpose: a closed panel is `visibility: hidden`, not `display: none`, so it is
+      // already laid out and measurable. Deferring would flip it after paint, which is a visible jump.
       updatePanelPosition(this.dropdownRef, this.panelRef);
     } else {
       this.resetTypeahead();
@@ -374,6 +381,8 @@ export class DropdownFieldComponent
     this.cdRef.markForCheck();
   }
 
+  /** Deferred, unlike the call in `togglePanel`: the option list changed, so the panel's height is only
+   * correct once change detection has rendered it. */
   private updatePanelPosition(): void {
     setTimeout(() => updatePanelPosition(this.dropdownRef, this.panelRef));
   }
@@ -441,6 +450,8 @@ export class DropdownFieldComponent
     if (!this.isFieldFocused) return;
     if (index < 0) return;
 
+    // `optionRefs` is only repopulated once the new highlight has rendered, so a microtask would
+    // resolve the wrong element.
     setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }
 

@@ -129,7 +129,8 @@ export class DateFieldComponent
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = () => this.handleExternalClick();
-  protected windowResizeScrollCallback = () => this.updatePanelPosition();
+  // Synchronous: the base debounces resize/scroll, so the new layout has already settled.
+  protected windowResizeScrollCallback = () => updatePanelPosition(this.dateRef, this.panelRef);
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'];
 
   private maskChar = '0';
@@ -227,7 +228,9 @@ export class DateFieldComponent
     this.cdRef.markForCheck();
   }
 
-  ngAfterViewInit(): void {
+  override ngAfterViewInit(): void {
+    super.ngAfterViewInit();
+
     this.updateOptions();
   }
 
@@ -385,6 +388,10 @@ export class DateFieldComponent
 
   get fieldRef(): ElementRef<HTMLElement> {
     return this.dateRef as ElementRef<HTMLElement>;
+  }
+
+  protected override get focusElement(): HTMLElement {
+    return this.inputRef.nativeElement;
   }
 
   /** Mirrors the template: there is nothing to open once the field is readonly or disabled. */
@@ -571,19 +578,20 @@ export class DateFieldComponent
   protected togglePanel(isOpen: boolean): void {
     this._isPanelOpen = isOpen;
 
-    // additional field specific behavior
+    // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
+    // before change detection.
     setTimeout(() => scrollIntoView(this.dateRef, this.panelRef, isOpen));
 
     if (isOpen) {
-      this.panelRef?.nativeElement.focus();
+      // Synchronous on purpose: a closed panel is `visibility: hidden`, not `display: none`, so it is
+      // already laid out and measurable. Deferring would flip it after paint, which is a visible jump.
+      // The panel is not focused here: it is still `visibility: hidden` at this point and so cannot take
+      // focus, and deferring the call until it can would pull focus off the input and run its
+      // commit-on-blur path. `panelMouseDown` focuses it once it is open and visible.
       updatePanelPosition(this.dateRef, this.panelRef);
     }
 
     this.cdRef.markForCheck();
-  }
-
-  private updatePanelPosition(): void {
-    setTimeout(() => updatePanelPosition(this.dateRef, this.panelRef));
   }
 
   // #endregion
@@ -648,7 +656,9 @@ export class DateFieldComponent
   private setDate(date: Date | null): void {
     this.selectDate(date);
 
-    // ensure ngxMask is initialized before applying the value
+    // Waits for the ngxMask directive to initialize on the input, which it does across a full task —
+    // a microtask would land before it. `stepSegment` restores the caret from a timer queued behind
+    // this one, so this must stay a macrotask.
     setTimeout(() => {
       this.picker?.setDate(date, false); // don't silent update to achieve valueChanged/focusChanged events
 

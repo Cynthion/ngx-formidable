@@ -83,7 +83,9 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     super();
   }
 
-  ngAfterViewInit(): void {
+  override ngAfterViewInit(): void {
+    super.ngAfterViewInit();
+
     this.warnIfMaskConflictsWithMinMax();
   }
 
@@ -112,7 +114,8 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     const newValue = value ?? '';
 
     if (this.mask) {
-      // Ensure the mask is loaded before setting the value
+      // Waits for the ngxMask directive to initialize on the control, which it does across a full
+      // task — a microtask would land before it and the value would be written unmasked.
       setTimeout(() => {
         const maskedValue = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
         this.inputRef.nativeElement.value = maskedValue;

@@ -190,6 +190,10 @@ export class TimeFieldComponent
     return this.timeRef as ElementRef<HTMLElement>;
   }
 
+  protected override get focusElement(): HTMLElement {
+    return this.inputRef.nativeElement;
+  }
+
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
   // #endregion
@@ -293,7 +297,9 @@ export class TimeFieldComponent
   private setTime(time: Date | null): void {
     this.selectTime(time);
 
-    // ensure ngxMask is initialized before applying the value
+    // Waits for the ngxMask directive to initialize on the input, which it does across a full task —
+    // a microtask would land before it. `stepSegment` restores the caret from a timer queued behind
+    // this one, so this must stay a macrotask.
     setTimeout(() => {
       // ngxMask leaves an empty input untouched, so render the empty state ourselves
       if (this.selectedTime == null) {

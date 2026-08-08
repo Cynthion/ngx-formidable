@@ -440,6 +440,34 @@ validator, so mark the fields your suite enforces and keep the two in step yours
 deliberately sets no native `required` attribute and no Angular validator — either would put a second
 error channel next to your suite.
 
+### Focus
+
+Every field has a `focus()` method, and an `autoFocus` input that calls it once the field's view is ready
+— which is how you focus a field on page load:
+
+```html
+<!-- focused on load -->
+<formidable-input-field
+  name="firstName"
+  [autoFocus]="true"
+  ngModel />
+
+<!-- or imperatively, from anywhere that can reach the field -->
+<formidable-dropdown-field
+  #nationality
+  name="nationality"
+  ngModel />
+<button
+  type="button"
+  (click)="nationality.focus()">
+  Jump to Nationality
+</button>
+```
+
+Focusing never opens a panel — the dropdown, autocomplete and date fields open on click, on `ArrowDown`,
+or on typing, so a focused field is ready for input without a list covering the page. A `disabled` field
+ignores `focus()`.
+
 The library ships no icons. Where a field has an icon, project your own into it — the date field's panel toggle
 draws a CSS arrow unless you project `<span formidableFieldToggleIcon>…</span>` directly into
 `<formidable-date-field>`. The toggle centers it; its size, color and hover feedback are yours.

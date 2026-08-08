@@ -37,6 +37,13 @@ formidable-field-decorator {
   margin-bottom: 16px;
 }
 
+.focus-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
 fieldset {
   border: 0;
   margin: 0;

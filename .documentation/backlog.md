@@ -13,10 +13,7 @@ Example:
 
 Improvements:
 
-- ensure all fields can be "focus on page load" (without panels being opened)
-- Prefer queueMicrotask over setTimeout where possible
 - Add Storybook stories for layout options
-- Toggle: allow setting layout to 'inline' or 'group'
 - ARIA attributes
 
 # Bugs:
@@ -62,6 +59,7 @@ The idea is a product page, where users can come to and play around with options
 - the portal should also link to the public github repository
 - i18n config should also be changeable to best demonstrate the date field
 - the portal has several pre-defined and well-designed themes that can be selected and applied to the example form, they serve as inspiration and starting point for users to create their own theme. The portal should also provide a way to export the theme configuration (copy-paste) and import it back into the portal. Add very different themes and variety in different token settings, since this is the super-power of this library: to pretty much customize everything.
+- provide to choose different fonts; can some open source fonts be "bundled in" or fetched via borwser?
 
 Before anything is implemented, propose a page structure and layout for the portal, including an optional navigation. The portal must be super intuitive and easy to use.
 
@@ -82,4 +80,8 @@ Real items, deliberately not in any phase of `implementation.md`. Revisit explic
 - remove validation from the library, only provide ui components. The Vest bridge is currently a headline feature and the largest possible breaking change; parked as an open question, not scheduled.
 - the demo writes the selected theme to `localStorage` but never reads it back on init, so the choice does not survive a reload.
 - there is no CI workflow — nothing runs lint, stylelint, prettier or tests on push. `deploy.yml` also reinstalls from scratch instead of from the lockfile, so builds are not reproducible.
+- re-run the timer audit once the app is zoneless (comes with the Angular 20 update). Under zone change detection a
+  `queueMicrotask` runs _before_ change detection, which is why no `setTimeout` could convert in Phase 10 — every
+  remaining one waits on rendered DOM or on ngxMask init. Zoneless changes that, and makes `afterNextRender` the
+  candidate rather than `queueMicrotask`.
 - EnerQi consumes the library as a tarball and its example form still uses `formidableFieldTooltip` and a prefix/suffix on its group fields. Both were removed here; propagate them the next time the tarball is rebuilt.

@@ -93,7 +93,9 @@ export class TextareaFieldComponent
     super();
   }
 
-  ngAfterViewInit(): void {
+  override ngAfterViewInit(): void {
+    super.ngAfterViewInit();
+
     this.adjustLayout();
     this.warnIfMaskConflictsWithMinMax();
   }
@@ -129,7 +131,8 @@ export class TextareaFieldComponent
     if (!el) return;
 
     if (this.mask) {
-      // Ensure the mask is loaded before setting the value
+      // Waits for the ngxMask directive to initialize on the control, which it does across a full
+      // task — a microtask would land before it and the value would be written unmasked.
       setTimeout(() => {
         const maskedValue = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
         el.value = maskedValue;
@@ -269,6 +272,8 @@ export class TextareaFieldComponent
   }
 
   private adjustLayout(): void {
+    // Reads resolved styles, so it has to wait for the suffix to render — a microtask runs before
+    // change detection.
     setTimeout(() => {
       // adjust length indicator, so that it also aligns right even if a suffix is set
       const el = this.textareaElement;

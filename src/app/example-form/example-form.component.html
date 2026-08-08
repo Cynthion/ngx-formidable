@@ -298,9 +298,34 @@
     (ngSubmit)="onSubmit()">
     <fieldset>
       @if (viewModel$ | async; as vm) {
+        <!-- Focus: every field exposes focus(); the panel fields never open on it -->
+        <div class="focus-row">
+          <button
+            type="button"
+            (click)="firstNameField.focus()">
+            Focus First Name
+          </button>
+          <button
+            type="button"
+            (click)="nationalityField.focus()">
+            Focus Nationality
+          </button>
+          <button
+            type="button"
+            (click)="birthdateField.focus()">
+            Focus Birthdate
+          </button>
+          <button
+            type="button"
+            (click)="ageField.focus()">
+            Focus Age
+          </button>
+        </div>
+
         <!-- First Name -->
         <formidable-field-decorator>
           <formidable-input-field
+            #firstNameField
             formidableFieldErrors
             placeholder="Your first name"
             autocomplete="given-name"
@@ -509,6 +534,7 @@
         <formidable-field-decorator>
           <!-- no placeholder: an `inside` label may rest here -->
           <formidable-dropdown-field
+            #nationalityField
             formidableFieldErrors
             name="nationality"
             [readonly]="controlCenter.showAsReadonly"
@@ -707,6 +733,7 @@
         <!-- Birthdate -->
         <formidable-field-decorator>
           <formidable-date-field
+            #birthdateField
             formidableFieldErrors
             placeholder="?"
             name="birthdate"
@@ -959,6 +986,7 @@
         <!-- Age -->
         <formidable-field-decorator>
           <formidable-slider-field
+            #ageField
             formidableFieldErrors
             name="age"
             [min]="0"

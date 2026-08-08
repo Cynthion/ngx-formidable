@@ -81,6 +81,10 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
     return this.sliderRef as ElementRef<HTMLElement>;
   }
 
+  protected override get focusElement(): HTMLElement {
+    return this.rangeRef.nativeElement;
+  }
+
   decoratorLayout: FieldDecoratorLayout = 'vertical';
 
   // #endregion
