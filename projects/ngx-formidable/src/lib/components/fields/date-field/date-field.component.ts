@@ -245,12 +245,18 @@ export class DateFieldComponent
     if (changedOptions.includes('unicodeTokenFormat')) this.setDate(this.selectedDate);
   }
 
-  /** Override onValueChange to only trigger onChange and valueChanged events when a date is set. */
+  /**
+   * Typing commits on blur — a half-typed date is not a date — so value changes are handled in the
+   * selectDate method. Wiping the text is the exception: it commits at once, or the cleared date would
+   * stay the model's and `stepSegment` would keep stepping from it.
+   */
   protected override onValueChange(): void {
-    const value = this.value;
-    this.isFieldFilled = typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
+    if (this.selectedDate && this.isInputCleared) {
+      this.setDate(null);
+      return;
+    }
 
-    // value changes are handled in selectDate method
+    this.isFieldFilled = !!this.value;
   }
 
   protected doOnValueChange(): void {
@@ -258,6 +264,9 @@ export class DateFieldComponent
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
+    // A readonly field has nothing to type into: it neither hands its display to ngxMask nor commits on blur.
+    if (this.readonly) return;
+
     // hand the empty display over to ngxMask while focused (see renderEmpty)
     if (isFocused) {
       if (this.selectedDate == null) this.renderEmpty();
@@ -426,6 +435,13 @@ export class DateFieldComponent
   /** The resting display of an empty field for the current `emptyHint`: the format string, or `maskPlaceholder`. */
   private get emptyDisplay(): string {
     return this.emptyHint === 'format' ? (this.unicodeTokenFormat ?? '') : this.maskPlaceholder;
+  }
+
+  /** ngxMask either empties the input outright or leaves the slots it renders for a focused empty field. */
+  private get isInputCleared(): boolean {
+    const value = this.inputRef.nativeElement.value;
+
+    return value === '' || value === this.maskPlaceholder;
   }
 
   /** Shows the `emptyHint` at rest, but lets ngxMask own the text while focused. */

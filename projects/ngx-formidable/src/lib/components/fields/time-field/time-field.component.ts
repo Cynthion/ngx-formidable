@@ -115,12 +115,18 @@ export class TimeFieldComponent
     }
   }
 
-  /** Override onValueChange to only trigger onChange and valueChanged events when a time is set. */
+  /**
+   * Typing commits on blur — a half-typed time is not a time — so value changes are handled in the
+   * selectTime method. Wiping the text is the exception: it commits at once, or the cleared time would
+   * stay the model's and `stepSegment` would keep stepping from it.
+   */
   protected override onValueChange(): void {
-    const value = this.value;
-    this.isFieldFilled = typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
+    if (this.selectedTime && this.isInputCleared) {
+      this.setTime(null);
+      return;
+    }
 
-    // value changes are handled in selectTime method
+    this.isFieldFilled = !!this.value;
   }
 
   protected doOnValueChange(): void {
@@ -128,6 +134,9 @@ export class TimeFieldComponent
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
+    // A readonly field has nothing to type into: it neither hands its display to ngxMask nor commits on blur.
+    if (this.readonly) return;
+
     // hand the empty display over to ngxMask while focused (see renderEmpty)
     if (isFocused) {
       if (this.selectedTime == null) this.renderEmpty();
@@ -225,6 +234,13 @@ export class TimeFieldComponent
   /** The resting display of an empty field for the current `emptyHint`: the format string, or `maskPlaceholder`. */
   private get emptyDisplay(): string {
     return this.emptyHint === 'format' ? (this.unicodeTokenFormat ?? '') : this.maskPlaceholder;
+  }
+
+  /** ngxMask either empties the input outright or leaves the slots it renders for a focused empty field. */
+  private get isInputCleared(): boolean {
+    const value = this.inputRef.nativeElement.value;
+
+    return value === '' || value === this.maskPlaceholder;
   }
 
   /** Shows the `emptyHint` at rest, but lets ngxMask own the text while focused. */

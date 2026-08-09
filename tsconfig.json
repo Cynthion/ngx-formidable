@@ -31,6 +31,7 @@
     "experimentalDecorators": true,
     "lib": ["ES2022", "dom"],
     "target": "ES2022",
+    "types": ["jasmine"],
     "useDefineForClassFields": false,
 
     /* Type Checking */

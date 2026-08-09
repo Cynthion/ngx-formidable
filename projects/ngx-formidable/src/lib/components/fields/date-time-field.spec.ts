@@ -35,6 +35,18 @@ function press(input: HTMLInputElement, key: string): void {
   input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: key }));
 }
 
+/** Wipes the field the way a select-all + Delete does. */
+function clearText(input: HTMLInputElement): void {
+  input.setSelectionRange(0, input.value.length);
+  input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true }));
+
+  if (document.execCommand('delete')) return;
+
+  input.value = '';
+  input.setSelectionRange(0, 0);
+  input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'deleteContentBackward' }));
+}
+
 /** Result of one keystroke: what the field shows and where the caret sits. */
 function state(input: HTMLInputElement): string {
   return `${input.value}|${input.selectionStart}`;
@@ -300,6 +312,104 @@ describe('masked date/time field', () => {
       expect(input.value).toBe('dd . MM . yyyy');
       expect(fixture.componentInstance.value).toBeNull();
     }));
+  });
+
+  describe('clearing the text', () => {
+    it('commits null as soon as a date is wiped, without waiting for the blur', fakeAsync(() => {
+      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+
+      fixture.componentInstance.writeValue(new Date(2024, 4, 12));
+      tick();
+
+      const emitted: (Date | null)[] = [];
+      fixture.componentInstance.valueChanged.subscribe((value) => emitted.push(value));
+
+      input.focus();
+      clearText(input);
+      tick();
+
+      expect(emitted).toEqual([null]);
+      expect(fixture.componentInstance.value).toBeNull();
+    }));
+
+    it('steps from the default date once the text is wiped, not from the date that was there', fakeAsync(() => {
+      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+
+      setInput(fixture, 'defaultDate', new Date(2020, 0, 15));
+      fixture.componentInstance.writeValue(new Date(2024, 4, 12));
+      tick();
+
+      input.focus();
+      clearText(input);
+      tick();
+
+      input.setSelectionRange(0, 0); // day
+      arrow(input, 'ArrowUp');
+      tick();
+
+      expect(input.value).toBe('16 . 01 . 2020');
+    }));
+
+    it('commits null as soon as a time is wiped', fakeAsync(() => {
+      const { fixture, input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+
+      fixture.componentInstance.writeValue(new Date(2024, 0, 1, 14, 30));
+      tick();
+
+      const emitted: (Date | null)[] = [];
+      fixture.componentInstance.valueChanged.subscribe((value) => emitted.push(value));
+
+      input.focus();
+      clearText(input);
+      tick();
+
+      expect(emitted).toEqual([null]);
+      expect(fixture.componentInstance.value).toBeNull();
+    }));
+
+    it('steps from midnight once the time is wiped', fakeAsync(() => {
+      const { fixture, input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+
+      fixture.componentInstance.writeValue(new Date(2024, 0, 1, 14, 30));
+      tick();
+
+      input.focus();
+      clearText(input);
+      tick();
+
+      input.setSelectionRange(0, 0); // hour
+      arrow(input, 'ArrowUp');
+      tick();
+
+      expect(input.value).toBe('01 : 00');
+    }));
+  });
+
+  describe('readonly', () => {
+    // A readonly input blocks typing, not pointer focus — `tabindex="-1"` only keeps it out of the tab order.
+    for (const { name, component, format, hint } of [
+      { name: 'date', component: DateFieldComponent, format: 'dd . MM . yyyy', hint: 'dd . MM . yyyy' },
+      { name: 'time', component: TimeFieldComponent, format: 'HH : mm', hint: 'HH : mm' }
+    ] as const) {
+      it(`keeps the ${name} hint in place when the field is clicked into and out of`, fakeAsync(() => {
+        const { fixture, input } = setup(component as Type<MaskedField>, format, 'format');
+
+        setInput(fixture, 'readonly', true);
+
+        const emitted: (Date | null)[] = [];
+        fixture.componentInstance.valueChanged.subscribe((value) => emitted.push(value));
+
+        input.focus();
+
+        expect(input.value).toBe(hint);
+
+        input.blur();
+        tick();
+
+        expect(input.value).toBe(hint);
+        expect(emitted).toEqual([]);
+      }));
+    }
   });
 
   describe('arrow keys', () => {

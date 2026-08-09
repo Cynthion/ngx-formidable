@@ -51,7 +51,8 @@ import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
       <formidable-date-field
         name="date"
         ngModel
-        [autoFocus]="focused === 'date'" />
+        [autoFocus]="focused === 'date'"
+        [readonly]="dateReadonly" />
       <formidable-slider-field
         name="slider"
         ngModel
@@ -74,6 +75,7 @@ class FocusHostComponent {
 
   focused: string | null = null;
   toggleDisabled = false;
+  dateReadonly = false;
 }
 
 /** The element `[autoFocus]` is expected to land on, per field. */
@@ -159,6 +161,19 @@ describe('field focus', () => {
     discardPeriodicTasks();
 
     expect(document.activeElement).toBe(document.body);
+  }));
+
+  // Unlike a disabled one: readonly guards what the field does with focus, never focus itself.
+  it('still focuses a readonly field', fakeAsync(() => {
+    fixture = TestBed.createComponent(FocusHostComponent);
+    host = fixture.componentInstance;
+    host.focused = 'date';
+    host.dateReadonly = true;
+    fixture.detectChanges();
+    tick();
+    discardPeriodicTasks();
+
+    expect(document.activeElement).toBe(expectedElement(fixture, 'date'));
   }));
 
   it('focus() is callable on the field itself', fakeAsync(() => {
