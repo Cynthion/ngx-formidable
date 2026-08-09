@@ -30,11 +30,13 @@
   --formidable-length-indicator-font-weight: #{tokens.$formidable-length-indicator-font-weight};
   --formidable-length-indicator-line-height: #{tokens.$formidable-length-indicator-line-height};
 
-  // Slider
+  // #region Slider
 
   --formidable-slider-label-font-size: #{tokens.$formidable-slider-label-font-size};
   --formidable-slider-label-font-weight: #{tokens.$formidable-slider-label-font-weight};
   --formidable-slider-label-line-height: #{tokens.$formidable-slider-label-line-height};
+
+  // #endregion
 
   // #endregion
 
@@ -366,7 +368,93 @@
     var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
     var(--formidable-color-field-border-invalid, #{tokens.$formidable-color-field-border-invalid});
 
-  // Date Field Panel
+  // #region Toggle
+
+  --formidable-color-toggle-field-background: #{tokens.$formidable-color-toggle-field-background};
+  --formidable-color-toggle-field-background-checked: var(
+    --formidable-color-field-background,
+    #{tokens.$formidable-color-toggle-field-background-checked}
+  );
+  --formidable-color-toggle-thumb: var(--formidable-color-field-border, #{tokens.$formidable-color-toggle-thumb});
+  --formidable-color-toggle-thumb-readonly: var(
+    --formidable-color-field-text-readonly,
+    #{tokens.$formidable-color-toggle-thumb-readonly}
+  );
+  --formidable-color-toggle-thumb-disabled: var(
+    --formidable-color-field-text-disabled,
+    #{tokens.$formidable-color-toggle-thumb-disabled}
+  );
+  --formidable-color-toggle-track-readonly: var(
+    --formidable-color-field-background-readonly,
+    #{tokens.$formidable-color-toggle-track-readonly}
+  );
+  --formidable-color-toggle-track-disabled: var(
+    --formidable-color-field-background-disabled,
+    #{tokens.$formidable-color-toggle-track-disabled}
+  );
+
+  // #endregion
+
+  // #region Slider
+
+  --formidable-color-slider-background: var(
+    --formidable-color-field-background,
+    #{tokens.$formidable-color-slider-background}
+  );
+  --formidable-color-slider-background-fill: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-slider-background-fill}
+  );
+  --formidable-color-slider-border: var(--formidable-color-field-border, #{tokens.$formidable-color-slider-border});
+  --formidable-color-slider-thumb: var(--formidable-color-field-border, #{tokens.$formidable-color-slider-thumb});
+  --formidable-color-slider-tick-mark: var(
+    --formidable-color-field-selection,
+    #{tokens.$formidable-color-slider-tick-mark}
+  );
+  --formidable-color-slider-thumb-label: var(
+    --formidable-color-field-label,
+    #{tokens.$formidable-color-slider-thumb-label}
+  );
+  --formidable-color-slider-thumb-label-background: var(
+    --formidable-color-field-background,
+    #{tokens.$formidable-color-slider-thumb-label-background}
+  );
+  --formidable-color-slider-thumb-label-border: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-slider-thumb-label-border}
+  );
+  --formidable-color-slider-thumb-border: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-slider-thumb-border}
+  );
+  --formidable-color-slider-thumb-readonly: var(
+    --formidable-color-field-text,
+    #{tokens.$formidable-color-slider-thumb-readonly}
+  );
+  --formidable-color-slider-thumb-disabled: var(
+    --formidable-color-field-text,
+    #{tokens.$formidable-color-slider-thumb-disabled}
+  );
+  --formidable-color-slider-track-readonly: var(
+    --formidable-color-field-background-readonly,
+    #{tokens.$formidable-color-slider-track-readonly}
+  );
+  --formidable-color-slider-track-disabled: var(
+    --formidable-color-field-background-disabled,
+    #{tokens.$formidable-color-slider-track-disabled}
+  );
+  --formidable-color-slider-track-filled-readonly: var(
+    --formidable-color-field-text-readonly,
+    #{tokens.$formidable-color-slider-track-filled-readonly}
+  );
+  --formidable-color-slider-track-filled-disabled: var(
+    --formidable-color-field-text-disabled,
+    #{tokens.$formidable-color-slider-track-filled-disabled}
+  );
+
+  // #endregion
+
+  // #region Date Field Panel
   --formidable-color-date-field-panel-select: var(
     --formidable-color-field-label,
     #{tokens.$formidable-color-date-field-panel-select}
@@ -396,7 +484,9 @@
     #{tokens.$formidable-color-date-field-panel-day-label}
   );
 
-  // Option Prefix
+  // #endregion
+
+  // #region Option Prefix
   --formidable-color-option-prefix-outer: var(
     --formidable-color-field-border,
     #{tokens.$formidable-color-option-prefix-outer}
@@ -439,99 +529,27 @@
   );
   --formidable-color-option-prefix-background: #{tokens.$formidable-color-option-prefix-background};
 
-  // Hint
+  // #endregion
+
+  // #region Hint
+
   --formidable-color-field-hint: var(--formidable-color-field-placeholder, #{tokens.$formidable-color-field-hint});
 
-  // Length Indicator
+  // #endregion
+
+  // #region Length Indicator
+
   --formidable-color-length-indicator: var(
     --formidable-color-field-placeholder,
     #{tokens.$formidable-color-length-indicator}
   );
 
-  // Toggle
-  --formidable-color-toggle-field-background: #{tokens.$formidable-color-toggle-field-background};
-  --formidable-color-toggle-field-background-checked: var(
-    --formidable-color-field-background,
-    #{tokens.$formidable-color-toggle-field-background-checked}
-  );
-  --formidable-color-toggle-thumb: var(--formidable-color-field-border, #{tokens.$formidable-color-toggle-thumb});
-  --formidable-color-toggle-thumb-readonly: var(
-    --formidable-color-field-text-readonly,
-    #{tokens.$formidable-color-toggle-thumb-readonly}
-  );
-  --formidable-color-toggle-thumb-disabled: var(
-    --formidable-color-field-text-disabled,
-    #{tokens.$formidable-color-toggle-thumb-disabled}
-  );
-  --formidable-color-toggle-track-readonly: var(
-    --formidable-color-field-background-readonly,
-    #{tokens.$formidable-color-toggle-track-readonly}
-  );
-  --formidable-color-toggle-track-disabled: var(
-    --formidable-color-field-background-disabled,
-    #{tokens.$formidable-color-toggle-track-disabled}
-  );
-
-  // Slider
-
-  --formidable-color-slider-background: var(
-    --formidable-color-field-background,
-    #{tokens.$formidable-color-slider-background}
-  );
-  --formidable-color-slider-background-fill: var(
-    --formidable-color-field-border,
-    #{tokens.$formidable-color-slider-background-fill}
-  );
-  --formidable-color-slider-border: var(--formidable-color-field-border, #{tokens.$formidable-color-slider-border});
-  --formidable-color-slider-thumb: var(--formidable-color-field-border, #{tokens.$formidable-color-slider-thumb});
-  --formidable-color-slider-tick-mark: var(
-    --formidable-color-field-selection,
-    #{tokens.$formidable-color-slider-tick-mark}
-  );
-  --formidable-color-slider-thumb-label: var(
-    --formidable-color-field-label,
-    #{tokens.$formidable-color-slider-thumb-label}
-  );
-  --formidable-color-slider-thumb-label-background: var(
-    --formidable-color-field-background,
-    #{tokens.$formidable-color-slider-thumb-label-background}
-  );
-  --formidable-color-slider-thumb-border: var(
-    --formidable-color-field-border,
-    #{tokens.$formidable-color-slider-thumb-border}
-  );
-  --formidable-color-slider-thumb-label-border: var(
-    --formidable-color-field-border,
-    #{tokens.$formidable-color-slider-thumb-label-border}
-  );
-  --formidable-color-slider-thumb-readonly: var(
-    --formidable-color-field-text,
-    #{tokens.$formidable-color-slider-thumb-readonly}
-  );
-  --formidable-color-slider-thumb-disabled: var(
-    --formidable-color-field-text,
-    #{tokens.$formidable-color-slider-thumb-disabled}
-  );
-  --formidable-color-slider-track-readonly: var(
-    --formidable-color-field-background-readonly,
-    #{tokens.$formidable-color-slider-track-readonly}
-  );
-  --formidable-color-slider-track-disabled: var(
-    --formidable-color-field-background-disabled,
-    #{tokens.$formidable-color-slider-track-disabled}
-  );
-  --formidable-color-slider-track-filled-readonly: var(
-    --formidable-color-field-text-readonly,
-    #{tokens.$formidable-color-slider-track-filled-readonly}
-  );
-  --formidable-color-slider-track-filled-disabled: var(
-    --formidable-color-field-text-disabled,
-    #{tokens.$formidable-color-slider-track-filled-disabled}
-  );
+  // #endregion
 
   // #endregion
 
   // #region Textarea
+
   --formidable-textarea-min-height: #{tokens.$formidable-textarea-min-height};
   --formidable-textarea-max-height: #{tokens.$formidable-textarea-max-height};
   --formidable-textarea-padding-top: #{tokens.$formidable-textarea-padding-top};

@@ -30,11 +30,13 @@ $formidable-length-indicator-font-size: utils.spacing(12);
 $formidable-length-indicator-font-weight: normal;
 $formidable-length-indicator-line-height: math.div(19.2, 12); // 1.6
 
-// Slider
+// #region Slider
 
 $formidable-slider-label-font-size: utils.spacing(12);
 $formidable-slider-label-font-weight: normal;
 $formidable-slider-label-line-height: math.div(19.2, 12); // 1.6
+
+// #endregion
 
 // #endregion
 
@@ -233,35 +235,7 @@ $formidable-color-field-group-focus-box-shadow: 0 0 0 $formidable-field-group-bo
 $formidable-color-field-focus-box-shadow-invalid: 0 0 0 $formidable-field-border-thickness
   $formidable-color-field-border-invalid;
 
-// Date Field Panel
-$formidable-color-date-field-panel-select: $formidable-color-field-label;
-$formidable-color-date-field-panel-select-hovered: $formidable-color-field-option-background-hovered;
-$formidable-color-date-field-panel-date-highlighted-text: $formidable-color-field-text;
-$formidable-color-date-field-panel-date-highlighted: $formidable-color-field-option-background-highlighted;
-$formidable-color-date-field-panel-date-hovered: $formidable-color-field-option-background-hovered;
-$formidable-color-date-field-panel-date-out-of-range: $formidable-color-field-option-text-disabled;
-$formidable-color-date-field-panel-day-label: $formidable-color-field-label-floating;
-
-// Option Prefix
-$formidable-color-option-prefix-outer: $formidable-color-field-border;
-$formidable-color-option-prefix-outer-readonly: $formidable-color-field-text-readonly;
-$formidable-color-option-prefix-outer-disabled: $formidable-color-field-text-disabled;
-$formidable-color-option-prefix-outer-selected: $formidable-color-field-border;
-$formidable-color-option-prefix-outer-highlighted: $formidable-color-field-border;
-$formidable-color-option-prefix-inner: $formidable-color-field-border;
-$formidable-color-option-prefix-inner-readonly: $formidable-color-option-prefix-outer-readonly;
-$formidable-color-option-prefix-inner-disabled: $formidable-color-option-prefix-outer-disabled;
-$formidable-color-option-prefix-inner-selected: $formidable-color-option-prefix-outer-selected;
-$formidable-color-option-prefix-inner-highlighted: $formidable-color-option-prefix-outer-highlighted;
-$formidable-color-option-prefix-background: transparent;
-
-// Hint
-$formidable-color-field-hint: $formidable-color-field-placeholder;
-
-// Length Indicator
-$formidable-color-length-indicator: $formidable-color-field-placeholder;
-
-// Toggle
+// #region Toggle
 $formidable-color-toggle-field-background: transparent;
 $formidable-color-toggle-field-background-checked: $formidable-color-field-background;
 $formidable-color-toggle-thumb: $formidable-color-field-border;
@@ -270,7 +244,10 @@ $formidable-color-toggle-thumb-disabled: $formidable-color-field-text-disabled;
 $formidable-color-toggle-track-readonly: $formidable-color-field-background-readonly;
 $formidable-color-toggle-track-disabled: $formidable-color-field-background-disabled;
 
-// Slider
+// #endregion
+
+// #region Slider
+
 $formidable-color-slider-background: $formidable-color-field-background;
 $formidable-color-slider-background-fill: $formidable-color-field-border;
 $formidable-color-slider-border: $formidable-color-field-border;
@@ -286,6 +263,46 @@ $formidable-color-slider-track-readonly: $formidable-color-field-background-read
 $formidable-color-slider-track-disabled: $formidable-color-field-background-disabled;
 $formidable-color-slider-track-filled-readonly: $formidable-color-field-text-readonly;
 $formidable-color-slider-track-filled-disabled: $formidable-color-field-text-disabled;
+
+// #endregion
+
+// #region Date Field Panel
+$formidable-color-date-field-panel-select: $formidable-color-field-label;
+$formidable-color-date-field-panel-select-hovered: $formidable-color-field-option-background-hovered;
+$formidable-color-date-field-panel-date-highlighted-text: $formidable-color-field-text;
+$formidable-color-date-field-panel-date-highlighted: $formidable-color-field-option-background-highlighted;
+$formidable-color-date-field-panel-date-hovered: $formidable-color-field-option-background-hovered;
+$formidable-color-date-field-panel-date-out-of-range: $formidable-color-field-option-text-disabled;
+$formidable-color-date-field-panel-day-label: $formidable-color-field-label-floating;
+
+// #endregion
+
+// #region Option Prefix
+$formidable-color-option-prefix-outer: $formidable-color-field-border;
+$formidable-color-option-prefix-outer-readonly: $formidable-color-field-text-readonly;
+$formidable-color-option-prefix-outer-disabled: $formidable-color-field-text-disabled;
+$formidable-color-option-prefix-outer-selected: $formidable-color-field-border;
+$formidable-color-option-prefix-outer-highlighted: $formidable-color-field-border;
+$formidable-color-option-prefix-inner: $formidable-color-field-border;
+$formidable-color-option-prefix-inner-readonly: $formidable-color-option-prefix-outer-readonly;
+$formidable-color-option-prefix-inner-disabled: $formidable-color-option-prefix-outer-disabled;
+$formidable-color-option-prefix-inner-selected: $formidable-color-option-prefix-outer-selected;
+$formidable-color-option-prefix-inner-highlighted: $formidable-color-option-prefix-outer-highlighted;
+$formidable-color-option-prefix-background: transparent;
+
+// #endregion
+
+// #region Hint
+
+$formidable-color-field-hint: $formidable-color-field-placeholder;
+
+// #endregion
+
+// #region Length Indicator
+
+$formidable-color-length-indicator: $formidable-color-field-placeholder;
+
+// #endregion
 
 // #endregion
 

@@ -30,14 +30,6 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 ## Library Phases
 
-### Phase 12.5 - Cleanup SCSS
-
-- Group and order mixins in `_forms.scss`, `_tokens.scss` and `_formidable-vars.scss`. Same structure/hierarchy in all 3 files. This is a cosmetic change only, but it makes the file easier to read and maintain. Shared mixins should be grouped hierarchically at the top.
-- Improve documentation in `_forms.scss` with a short description of each mixin's purpose and usage. This will help future developers understand the intent behind each mixin and how to use them effectively. Keep it brief and short, not too detailed, but relevant.
-- Documentation of tokens must be extracted from README.md into a dedicated markdown document. Also here, the tokens must be grouped and ordered in the same way as in `_tokens.scss` and `_formidable-vars.scss`. This will make it easier for developers to find the information they need and understand the relationships between different tokens. Keep it brief and short, not too detailed, but relevant.
-- `_forms.scss`, `_tokens.scss` and `_formidable-vars.scss` are technical documentation, whereas `README.md` is for library consumers.
-- It might be wise to not document the tokens in all places the same way; maybe the README.md (extracted into own document) should be more consumer-oriented, whereas the `_tokens.scss` and `_formidable-vars.scss` should be more technical and detailed. AskUserQuestions.
-
 ### Phase 12.6 - Define Default Theme
 
 - Material has a default theme, and the this library should have one too. The default theme should be defined in `_tokens.scss` and `_formidable-vars.scss`, and it should be applied to all fields by default. The default theme should be consistent with the design system and the branding of the library. The default theme should be documented in the dedicated markdown document for tokens.
@@ -60,7 +52,6 @@ Depends on Phases 1–12 — do not document an API that is still moving.
 Depends on Phase 13.
 
 - **Correctness Pass**: the root `README.md` is long and has drifted. Make the feature list sell every feature.
-- **Token Table**: sync it against the real `:root` declarations — it misses the runtime-only inset variables and is inconsistent on the slider group. Fix the unterminated code fence at the end of the file.
 - **Badges**: the badge block is commented out and still points at another project's URLs. Repoint and enable it.
 - **Feature List**: exact per-field and per-component feature list.
 - **Custom Field Guide**: how to build one, using the consumer's `ConstitutionCounterFieldComponent` as the worked example.

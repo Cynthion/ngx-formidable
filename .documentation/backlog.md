@@ -27,6 +27,7 @@ Improvements:
 - date field: in the panel, the current date must be visually highlighted (e.g., with a circle around it)
 - date field: support entering a date range (from - to); this might be very tricky with respect to form state, keyboardhandling and visual representation; pikaday probably doesn't support it either
 - possibility check: can the group fields (radio, checkbox) be configured with tokens so that the options (radio buttons, checkboxes) are left-aligned with the left border of other fields in the form (above and below)? or what would need to change? (background and border most probably would then be styled "transparent")
+- dead style code found in Phase 12.5, kept rather than removed — decide on each: (a) the `icon` mixin in `_forms.scss` has zero call sites repo-wide; (b) `_formidable-vars.scss` does `@use './mixins/utils' as utils` and never references it; (c) three `:root` variables are read by nothing at all, not even another variable's fallback chain — `--formidable-overlay-z-index`, `--formidable-above-overlay-z-index`, `--formidable-date-field-panel-box-shadow`. Everything else that no mixin reads is load-bearing: `--formidable-border-radius`, `--formidable-label-line-height`, `--formidable-field-inner-height`, `--formidable-field-value-height`, `--formidable-label-inside-slack` and `--formidable-field-value-centered-top` are each read by a derived variable, so overriding one cascades. Those stay.
 
 # Documentation:
 

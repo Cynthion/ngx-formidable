@@ -601,228 +601,23 @@ Whatever the placement, the calendar scales to the width its panel has, so `--fo
 
 ## Theming & Styles
 
-Various styling variables allow to customize the theming. Override any supported CSS variable.
-You can also tweak Pikaday CSS.
+Every visual property is an overridable CSS custom property. Import the library's stylesheet, then redeclare whatever you want to change in your own `:root`:
 
 ```scss
 // styles.scss
 
 @use 'ngx-formidable';
 
-// ngx-formidable overrides
 :root {
   --formidable-field-height: 50px;
   --formidable-color-validation-error: pink;
   --formidable-color-field-background: #d18fe9ff;
   --formidable-color-field-option-background-highlighted: #aa40ed2d;
   --formidable-date-field-panel-width: 200px;
-  // add more
-}
-
-// Pikaday style overwrites
-.pika-lendar {
-  background-color: #8a2b75ff;
-  // add more
 }
 ```
 
-### Overridable CSS Variables
-
-| CSS Variable                                                | Description                                                                                                         |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Font Sizes & Line-Heights**                               |                                                                                                                     |
-| `--formidable-field-font-size`                              | Base font size for form field text.                                                                                 |
-| `--formidable-field-font-weight`                            | Font weight for form field text.                                                                                    |
-| `--formidable-field-line-height`                            | Line height for form field text.                                                                                    |
-| `--formidable-label-font-size`                              | Font size for labels.                                                                                               |
-| `--formidable-label-font-weight`                            | Font weight for labels.                                                                                             |
-| `--formidable-label-line-height`                            | Line height for labels.                                                                                             |
-| `--formidable-label-floating-font-size`                     | Font size for a floating label (see Field Dimensions below).                                                        |
-| `--formidable-label-floating-font-weight`                   | Font weight for a floating label.                                                                                   |
-| `--formidable-label-floating-line-height`                   | Line height for a floating label.                                                                                   |
-| `--formidable-field-validation-error-font-size`             | Font size for validation error messages.                                                                            |
-| `--formidable-field-validation-error-font-weight`           | Font weight for validation error messages.                                                                          |
-| `--formidable-field-validation-error-line-height`           | Line height for validation error messages.                                                                          |
-| `--formidable-field-hint-font-size`                         | Font size for hint text.                                                                                            |
-| `--formidable-field-hint-font-weight`                       | Font weight for hint text.                                                                                          |
-| `--formidable-field-hint-line-height`                       | Line height for hint text.                                                                                          |
-| `--formidable-length-indicator-font-size`                   | Font size for the textarea length indicator.                                                                        |
-| `--formidable-length-indicator-font-weight`                 | Font weight for the textarea length indicator.                                                                      |
-| `--formidable-length-indicator-line-height`                 | Line height for the textarea length indicator.                                                                      |
-| **Field Dimensions**                                        |                                                                                                                     |
-| `--formidable-field-before-margin-bottom`                   | Vertical margin below each field container.                                                                         |
-| `--formidable-border-radius`                                | The library's base corner radius. Everything rounded that is not a field box falls back to it.                      |
-| `--formidable-field-border-thickness`                       | Thickness of field borders.                                                                                         |
-| `--formidable-field-border-radius`                          | Border-radius every corner of a field falls back to — see _Per-Corner Radius_ below.                                |
-| `--formidable-field-border-start-start-radius`              | Border-radius of a field's top-left corner alone. Defaults to `--formidable-field-border-radius`.                   |
-| `--formidable-field-border-start-end-radius`                | Border-radius of a field's top-right corner alone.                                                                  |
-| `--formidable-field-border-end-end-radius`                  | Border-radius of a field's bottom-right corner alone.                                                               |
-| `--formidable-field-border-end-start-radius`                | Border-radius of a field's bottom-left corner alone.                                                                |
-| `--formidable-field-underline-thickness`                    | Extra line painted inside a field's bottom edge. `0` paints none — see _Underline_ below.                           |
-| `--formidable-field-underline-thickness-focus`              | Underline thickness while the field is focused.                                                                     |
-| `--formidable-field-underline-thickness-invalid`            | Underline thickness while the field is invalid. Outranks the focused thickness.                                     |
-| `--formidable-field-group-border-thickness`                 | Thickness of field group borders.                                                                                   |
-| `--formidable-field-group-border-radius`                    | Border-radius for field group corners.                                                                              |
-| `--formidable-label-height`                                 | Computed height of the label text line box.                                                                         |
-| `--formidable-field-height`                                 | Default height for single-line fields.                                                                              |
-| `--formidable-field-padding-x`                              | Horizontal padding of a field: where its value, and a projected prefix's text, start.                               |
-| `--formidable-field-toggle-size`                            | Size of the panel toggle a dropdown or date field draws inside its own box.                                         |
-| `--formidable-field-toggle-inset`                           | How much of a field's right edge that toggle claims. Raised by the decorator for the fields that have one.          |
-| `--formidable-toggle-field-track-border-thickness`          | Border thickness of a toggle field's track, which is what draws it. Defaults to the field's border thickness.       |
-| `--formidable-toggle-field-track-border-radius`             | Border-radius of a toggle field's track.                                                                            |
-| `--formidable-toggle-field-thumb-border-radius`             | Border-radius of a toggle field's thumb.                                                                            |
-| `--formidable-field-inner-height`                           | Computed height inside a field's borders.                                                                           |
-| `--formidable-field-value-height`                           | Computed height of a field value's text line box.                                                                   |
-| `--formidable-label-floating-height`                        | Computed height of a floating label's text line box.                                                                |
-| `--formidable-label-inside-slack`                           | Computed space above and below the centered label-plus-value block of a field with an inside label.                 |
-| `--formidable-label-inside-value-top`                       | Computed offset of the value's text line box from the field's inner top, with an inside label.                      |
-| `--formidable-field-value-centered-top`                     | Computed offset of the value's text line box when it is centered in the field's inner height on its own.            |
-| `--formidable-label-resting-offset`                         | Vertical offset for a resting label, centered in the field's inner height like a placeholder.                       |
-| `--formidable-label-floating-offset`                        | Vertical offset for a floating label, at the top of the centered label-plus-value block.                            |
-| `--formidable-label-border-offset`                          | Vertical offset for a `border` label, so its text line box straddles the field's top border.                        |
-| `--formidable-label-border-gap`                             | How far a `border` label's border-hiding band reaches either side of its text.                                      |
-| `--formidable-label-border-band-bleed`                      | How far that band outgrows the border above and below, so pixel rounding leaves no hairline showing.                |
-| `--formidable-label-border-band-reach`                      | How much further that band reaches upwards. Raised to the focus ring's width while the field is focused.            |
-| `--formidable-label-required-marker`                        | The `content` string suffixed to a required field's label — `'*'`, or a word such as `' (required)'`.               |
-| `--formidable-field-group-option-padding`                   | Padding of options within a field group.                                                                            |
-| `--formidable-field-support-min-height`                     | Minimum reserved height of a support-text row below a field — the hints and the validation errors.                  |
-| **Colors**                                                  |                                                                                                                     |
-| `--formidable-color-validation-error`                       | Text color for validation errors.                                                                                   |
-| `--formidable-color-field-text`                             | Text color for fields.                                                                                              |
-| `--formidable-color-field-group-text`                       | Text color for field groups.                                                                                        |
-| `--formidable-color-field-text-hovered`                     | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is hovered.              |
-| `--formidable-color-field-text-focus`                       | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is focused.              |
-| `--formidable-color-field-text-invalid`                     | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is invalid.              |
-| `--formidable-color-field-text-readonly`                    | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is readonly.             |
-| `--formidable-color-field-text-disabled`                    | Overrides`--formidable-color-field-text`and`--formidable-color-field-group-text`when field is disabled.             |
-| `--formidable-color-field-label`                            | Text color for labels.                                                                                              |
-| `--formidable-color-field-label-floating`                   | Text color for a floating label.                                                                                    |
-| `--formidable-color-field-label-resting`                    | Text color for a resting label, which stands in for the placeholder.                                                |
-| `--formidable-color-field-label-hovered`                    | Overrides all three label colors when the field is hovered.                                                         |
-| `--formidable-color-field-label-focus`                      | Overrides all three label colors when the field is focused.                                                         |
-| `--formidable-color-field-label-invalid`                    | Overrides all three label colors when the field is invalid.                                                         |
-| `--formidable-color-field-label-readonly`                   | Overrides all three label colors when the field is readonly.                                                        |
-| `--formidable-color-field-label-disabled`                   | Overrides all three label colors when the field is disabled.                                                        |
-| `--formidable-color-label-border-band`                      | Fill a `border` label paints over the border it hides. Follows the field background by default.                     |
-| `--formidable-color-label-border-band-readonly`             | Overrides `--formidable-color-label-border-band` when the field is readonly.                                        |
-| `--formidable-color-label-border-band-disabled`             | Overrides `--formidable-color-label-border-band` when the field is disabled.                                        |
-| `--formidable-color-field-placeholder`                      | Text color for placeholder text.                                                                                    |
-| `--formidable-color-field-selection`                        | Background color for selected text.                                                                                 |
-| `--formidable-color-field-border`                           | Border color for fields.                                                                                            |
-| `--formidable-color-field-border-hovered`                   | Border color for fields that are hovered.                                                                           |
-| `--formidable-color-field-border-focus`                     | Border color for fields that are focused.                                                                           |
-| `--formidable-color-field-border-invalid`                   | Border color for fields that are invalid. Also replaces the hover and focus border, and the field group's.          |
-| `--formidable-color-field-border-readonly`                  | Overrides`--formidable-color-field-border`when field is readonly.                                                   |
-| `--formidable-color-field-border-disabled`                  | Overrides`--formidable-color-field-border`when field is disabled.                                                   |
-| `--formidable-color-field-group-border`                     | Border color for field groups.                                                                                      |
-| `--formidable-color-field-group-border-focus`               | Border color for field groups that are focused.                                                                     |
-| `--formidable-color-field-group-border-readonly`            | Overrides`--formidable-color-field-group-border`when field is readonly.                                             |
-| `--formidable-color-field-group-border-disabled`            | Overrides`--formidable-color-field-group-border`when field is disabled.                                             |
-| `--formidable-color-field-underline`                        | Colour of a field's underline. Follows the border colour through every state unless overridden.                     |
-| `--formidable-color-field-underline-focus`                  | Underline colour while the field is focused.                                                                        |
-| `--formidable-color-field-underline-invalid`                | Underline colour while the field is invalid.                                                                        |
-| `--formidable-color-field-background`                       | Background color for fields.                                                                                        |
-| `--formidable-color-field-group-background`                 | Background color for field groups.                                                                                  |
-| `--formidable-color-field-background-hovered`               | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is hovered.  |
-| `--formidable-color-field-background-focus`                 | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is focused.  |
-| `--formidable-color-field-background-invalid`               | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is invalid.  |
-| `--formidable-color-field-background-readonly`              | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is readonly. |
-| `--formidable-color-field-background-disabled`              | Overrides`--formidable-color-field-background`and`--formidable-color-field-group-background`when field is disabled. |
-| `--formidable-color-field-group-background-readonly`        | Overrides`--formidable-color-field-group-background`when field group is readonly.                                   |
-| `--formidable-color-field-group-background-disabled`        | Overrides`--formidable-color-field-group-background`when field group is disabled.                                   |
-| `--formidable-color-field-option-text-readonly`             | Text color for option items that are readonly.                                                                      |
-| `--formidable-color-field-option-text-disabled`             | Text color for option items that are disabled.                                                                      |
-| `--formidable-color-field-option-background-selected`       | Background color for option items that are selected.                                                                |
-| `--formidable-color-field-option-background-highlighted`    | Background color for option items that are highlighted.                                                             |
-| `--formidable-color-field-option-background-hovered`        | Background color for option items that are hovered.                                                                 |
-| `--formidable-color-field-focus-box-shadow`                 | Box shadow for fields that are focused.                                                                             |
-| `--formidable-color-field-group-focus-box-shadow`           | Box shadow for field groups that are focused.                                                                       |
-| `--formidable-color-field-focus-box-shadow-invalid`         | Replaces both focus box shadows while the field is invalid.                                                         |
-| **Date-Field Panel**                                        |                                                                                                                     |
-| `--formidable-color-date-field-panel-select`                | Text color for “Today” / selected date toggle in calendar.                                                          |
-| `--formidable-color-date-field-panel-select-hovered`        | Hover color for the “Today” toggle.                                                                                 |
-| `--formidable-color-date-field-panel-date-highlighted-text` | Text color for highlighted dates inside the calendar.                                                               |
-| `--formidable-color-date-field-panel-date-highlighted`      | Background color for highlighted dates.                                                                             |
-| `--formidable-color-date-field-panel-date-hovered`          | Background color when hovering a date.                                                                              |
-| `--formidable-color-date-field-panel-date-out-of-range`     | Color for dates outside the min/max range.                                                                          |
-| `--formidable-color-date-field-panel-day-label`             | Color for weekday labels in the calendar header.                                                                    |
-| **Option Prefix**                                           |                                                                                                                     |
-| `--formidable-color-option-prefix-outer`                    | Color of the outer ring/square border of a radio/check box group field option item.                                 |
-| `--formidable-color-option-prefix-outer-readonly`           | Overrides`--formidable-color-option-prefix-outer`when option is readonly.                                           |
-| `--formidable-color-option-prefix-outer-disabled`           | Overrides`--formidable-color-option-prefix-outer`when option is disabled.                                           |
-| `--formidable-color-option-prefix-outer-selected`           | Overrides`--formidable-color-option-prefix-outer`when option is selected.                                           |
-| `--formidable-color-option-prefix-outer-highlighted`        | Overrides`--formidable-color-option-prefix-outer`when option is highlighted.                                        |
-| `--formidable-color-option-prefix-inner`                    | Color of the inner ring/square of a radio/check box group field option item.                                        |
-| `--formidable-color-option-prefix-inner-readonly`           | Overrides`--formidable-color-option-prefix-inner`when option is readonly.                                           |
-| `--formidable-color-option-prefix-inner-disabled`           | Overrides`--formidable-color-option-prefix-inner`when option is disabled.                                           |
-| `--formidable-color-option-prefix-inner-selected`           | Overrides`--formidable-color-option-prefix-inner`when option is selected.                                           |
-| `--formidable-color-option-prefix-inner-highlighted`        | Overrides`--formidable-color-option-prefix-inner`when option is highlighted.                                        |
-| `--formidable-color-option-prefix-background`               | Background color behind option prefix elements.                                                                     |
-| **Length Indicator**                                        |                                                                                                                     |
-| `--formidable-color-field-hint`                             | Text color for hint text. Follows the field placeholder color by default.                                           |
-| `--formidable-color-length-indicator`                       | Text color for the textarea length indicator.                                                                       |
-| **Textarea**                                                |                                                                                                                     |
-| `--formidable-textarea-min-height`                          | Minimum height for textareas.                                                                                       |
-| `--formidable-textarea-max-height`                          | Maximum height for textareas.                                                                                       |
-| `--formidable-textarea-padding-top`                         | Top padding for textareas when autosizing is enabled.                                                               |
-| **Panels**                                                  |                                                                                                                     |
-| `--formidable-panel-background`                             | Background color for dropdown/autocomplete/date panels.                                                             |
-| `--formidable-panel-border-radius`                          | Border-radius for all panels. The two corners a panel sits against its field with mirror that field instead.        |
-| `--formidable-panel-box-shadow`                             | Box-shadow for all panels.                                                                                          |
-| `--formidable-panel-max-height`                             | Maximum vertical height for panels (before scrolling).                                                              |
-| **Animations**                                              |                                                                                                                     |
-| `--formidable-animation-duration`                           | Duration for label/flyout/open/close animations.                                                                    |
-| `--formidable-animation-easing`                             | Easing curve for animations.                                                                                        |
-| `--formidable-hover-duration`                               | Transition duration for hover effects.                                                                              |
-| `--formidable-hover-easing`                                 | Easing curve for hover transitions.                                                                                 |
-| **Z-Index**                                                 |                                                                                                                     |
-| `--formidable-flyout-z-index`                               | z-index applied to dropdown/flyout panels.                                                                          |
-| `--formidable-overlay-z-index`                              | z-index applied to any full-screen overlays.                                                                        |
-| `--formidable-above-overlay-z-index`                        | z-index for elements that must sit above overlays.                                                                  |
-| **Date-Field Panel**                                        |                                                                                                                     |
-| `--formidable-date-field-panel-width`                       | Width the calendar prefers; it scales down into a narrower panel.                                                   |
-| `--formidable-date-field-panel-border-radius`               | Border-radius for the date-picker panel.                                                                            |
-| `--formidable-date-field-panel-box-shadow`                  | Box-shadow override for the date-picker panel.                                                                      |
-| **Option Prefix Dimensions**                                |                                                                                                                     |
-| `--formidable-option-prefix-dimension-outer`                | Size of the outer circle/box for radio/checkbox prefixes.                                                           |
-| `--formidable-option-prefix-dimension-inner`                | Size of the inner indicator for selected radio/checkbox prefixes.                                                   |
-| `--formidable-option-prefix-gap`                            | Gap between a radio/checkbox prefix and its option label.                                                           |
-| `--formidable-option-prefix-border-thickness`               | Border thickness of the outer circle/box for radio/checkbox prefixes.                                               |
-
-### Per-Corner Radius
-
-Every corner of a field falls back to `--formidable-field-border-radius`, and each can be shaped on its own. The four corner variables use CSS logical names — `start-start` is the top-left corner in a left-to-right, top-to-bottom writing mode:
-
-```scss
-:root {
-  --formidable-field-border-radius: 0.5rem;
-  --formidable-field-border-end-start-radius: 0; /* top-rounded only */
-  --formidable-field-border-end-end-radius: 0;
-}
-```
-
-They shape the field box and nothing else. Everything else that is rounded — the toggle, the slider, the panels — falls back to `--formidable-border-radius` instead, which is what to override to round the whole library at once. Set that one in your own `:root`: the derived variables resolve where they are declared, so overriding a base further down the tree has no effect. The corner variables above are the exception — they are read where they are used, so they work on `:root` and on a single field alike. A field group takes its shape from `--formidable-field-group-border-radius`, which is substituted verbatim into `border-radius` and so still accepts the whole CSS shorthand.
-
-While a dropdown, autocomplete or date panel is open, it adopts the two corners of the field it sits against: opened below, its top corners take the field's bottom ones; flipped above, its bottom corners take the field's top ones. Its far side keeps `--formidable-panel-border-radius`. The field never reshapes itself — its corners are what you declared, panel or no panel. A `bottom` sheet is the exception: it sits against the screen, not the field, so it keeps its own radius on top and squares off where it meets the edge.
-
-### Underline
-
-A field can carry an extra line inside its bottom edge, thickening on focus and on invalid. It is painted over the border rather than replacing it, so no state can change it and move the field's content:
-
-```scss
-:root {
-  --formidable-field-border-thickness: 0px;
-  --formidable-field-underline-thickness: 1px;
-  --formidable-field-underline-thickness-focus: 2px;
-  --formidable-field-underline-thickness-invalid: 2px;
-}
-```
-
-The thickness is `0` by default, so nothing is painted until a theme asks for it. The colour follows `--formidable-color-field-border` through every state; name `--formidable-color-field-underline` and its `-focus` / `-invalid` variants only where the two should differ. Field groups never take an underline: a group is a tall multi-row box, and a line across its bottom reads as a divider between its options.
-
-Dropping the field border to `0px` also erases a toggle field's track, which is drawn by that same border — give it `--formidable-toggle-field-track-border-thickness` to keep it.
-
-> **Units are mandatory on length variables.** Write `0px`, not `0`. A unitless zero is a `<number>` rather than a `<length>`, and these variables are consumed inside `calc()`, where that invalidates the whole declaration — silently taking out every value derived from it, including label offsets and panel alignment.
+All customizable variables and some recipes are listed in the [theming guide](.documentation/theming.md).
 
 ## Root-Level / Cross-Field Validation
 
@@ -998,8 +793,6 @@ bootstrapApplication(AppComponent, {
   ]
 }).catch(console.error);
 ```
-
-````
 
 **Module Usage**
 
@@ -1228,4 +1021,3 @@ Contributions are welcome!
 Everything in this repository is licensed under the [MIT License](./LICENSE) unless otherwise specified.
 
 Copyright (c) 2026 - present Christian Lüthold
-````

@@ -11,4 +11,5 @@ Source of truth for outstanding work: `backlog.md`. How to write docs: `document
 | `documentation.md`  | Documentation style and authoring guide                             |
 | `implementation.md` | Sequenced, phased roadmap derived from `backlog.md`                 |
 | `testing.md`        | Testing strategy (helpers-first)                                    |
+| `theming.md`        | CSS custom property reference and how to theme                      |
 | `ui_components.md`  | Component and directive catalogue                                   |
