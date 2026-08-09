@@ -56,7 +56,7 @@ Coding conventions for the library. See also: `architecture.md` (structure, key 
 
 - **Branches**: `main` is production — push triggers the GitHub Pages deploy of the demo. `feature/*` for work in progress.
 - **Publishing**: `build:lib` then `publish:lib` to GitHub Packages; `@cynthion` scope needs `~/.npmrc` auth. See `architecture.md`.
-- **Backlog**: `backlog.md` is the single source of truth — check it before starting work.
+- **Roadmap**: `implementation.md` is the source of truth for outstanding work — check it before starting. `backlog.md` is the intake buffer for ideas that have not been triaged into a phase yet.
 
 ## Definition Of Done
 
@@ -67,4 +67,4 @@ Coding conventions for the library. See also: `architecture.md` (structure, key 
 - **Documentation**: new behavior documented per `documentation.md`; the user-facing `README.md` updated when public usage changes.
 - **Tests**: implemented per `testing.md` (helpers-first).
 - **Build**: `build:lib` compiles without errors.
-- **Backlog**: related `backlog.md` items updated or removed.
+- **Roadmap**: the shipped phase is deleted from `implementation.md`, leaving only its `Already Shipped` row. Anything found on the way that is not part of the phase goes to `backlog.md`.

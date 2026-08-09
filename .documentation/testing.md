@@ -70,4 +70,4 @@ Prove work by pasting command output — do not claim success. When a change is 
 
 ## Visual Testing
 
-There is no Storybook or visual-regression layer yet; it is a `backlog.md` item. Until then, the demo app (`example-form`) is the manual visual check — run `npm start` and exercise the changed field.
+There is no Storybook or visual-regression layer yet; it is Phase 17 in `implementation.md`. Until then, the demo app (`example-form`) is the manual visual check — run `npm start` and exercise the changed field.

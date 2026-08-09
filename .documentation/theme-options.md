@@ -153,9 +153,9 @@ Two further consequences worth knowing before picking a dark default:
 
 Why those two:
 
-- **Geometry A is the only scheme with no footguns.** Its `1px` border lets the toggle track, the slider track, the group's focus ring and the panel outline all derive correctly, with no companion variables. Every borderless geometry needs four and still hits two limits with no escape hatch — see _Traps A Borderless Geometry Has To Handle_ above and the zero-border entries in `backlog.md`. A default that trips the library's own known defects would meet a consumer on day one.
+- **Geometry A is the only scheme with no footguns.** Its `1px` border lets the toggle track, the slider track, the group's focus ring and the panel outline all derive correctly, with no companion variables. Every borderless geometry needs four and still hits two limits with no escape hatch — see _Traps A Borderless Geometry Has To Handle_ above and Phase 12.7.3 in `implementation.md`. A default that trips the library's own known defects would meet a consumer on day one.
 - **Colour A is neutral chrome plus one accent**, which is what a library should ship: it reads as deliberate without competing with the consumer's brand, and rebranding is one variable rather than eight. `ocean` was rejected because keeping the incumbent blue commits every consumer to a brand nobody chose; `mono` because its focus border matches its text in contrast, leaving focus signalled by geometry alone.
 
 Promoting Slate needed one structural change: `--formidable-color-field-border` no longer resolves through `--formidable-color-field-text`. A neutral default wants a light border under dark text, and the old derivation forced them to be the same colour.
 
-The other eight geometries and nine palettes stay here and in the demo as the showcase set, and feed the portal's pre-defined-themes backlog item.
+The other eight geometries and nine palettes stay here and in the demo as the showcase set, and feed the portal's pre-defined themes in Phase 18 P6, which retires this file.
