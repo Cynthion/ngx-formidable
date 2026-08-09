@@ -2,12 +2,10 @@ import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ContentChildren,
   ElementRef,
   forwardRef,
-  inject,
   Input,
   OnChanges,
   QueryList,
@@ -81,8 +79,6 @@ export class SelectFieldComponent
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
-
-  private readonly cdRef = inject(ChangeDetectorRef);
 
   ngOnChanges(changes: SimpleChanges): void {
     // react to changes of @Input properties

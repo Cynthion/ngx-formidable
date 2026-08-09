@@ -6,6 +6,7 @@ import {
   Component,
   ElementRef,
   forwardRef,
+  HostBinding,
   inject,
   Inject,
   Input,
@@ -16,6 +17,7 @@ import {
 } from '@angular/core';
 import {
   FieldOptionLayout,
+  FieldOptionRole,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
   IFormidableFieldOption,
@@ -30,6 +32,9 @@ import {
  * - `disabled`, `readonly`, `selected`, `highlighted`
  * - `match?(filter: string)` custom filter predicate
  * - `select?()` custom select callback
+ *
+ * Takes its ARIA role from the parent field's `optionRole`, and reports its state as `aria-selected`
+ * (in a listbox) or `aria-checked` (in a radio or checkbox group).
  *
  * @example
  * ```html
@@ -90,6 +95,41 @@ export class FieldOptionComponent implements IFormidableFieldOption, OnInit, Aft
   get template(): TemplateRef<unknown> | undefined {
     return this.hasContent ? this.contentTemplate : undefined;
   }
+
+  // #region ARIA
+
+  // Everything here sits on the host, not on the inner div: the host is the direct child of the
+  // `listbox` / `radiogroup` / `group` that owns the option, and an element with no role in between
+  // would break that ownership. The id is bound by the parent, which is what knows the index.
+
+  /** The container decides, not the option's `layout` — that is a look a consumer may set freely. */
+  get role(): FieldOptionRole {
+    return this.parent?.optionRole ?? 'option';
+  }
+
+  @HostBinding('attr.role')
+  get roleAttribute(): FieldOptionRole {
+    return this.role;
+  }
+
+  /** Bound raw rather than `|| null`: an unselected option has to report `false`, not stay silent. */
+  @HostBinding('attr.aria-selected')
+  get ariaSelected(): boolean | null {
+    return this.role === 'option' ? this.selected : null;
+  }
+
+  @HostBinding('attr.aria-checked')
+  get ariaChecked(): boolean | null {
+    return this.role === 'option' ? null : this.selected;
+  }
+
+  /** ARIA has no `aria-readonly` for these roles, and both flags mean the same thing here: unselectable. */
+  @HostBinding('attr.aria-disabled')
+  get ariaDisabled(): true | null {
+    return this.disabled || this.readonly || null;
+  }
+
+  // #endregion
 
   constructor(
     @Optional() @Inject(FORMIDABLE_OPTION_FIELD) private parent: IFormidableOptionField,

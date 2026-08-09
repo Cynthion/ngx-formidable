@@ -10,7 +10,9 @@
       #inputRef
       type="text"
       autocomplete="off"
+      role="combobox"
       class="wrapped-input"
+      aria-haspopup="dialog"
       [mask]="ngxMask"
       [showMaskTyped]="ngxMaskConfig.showMaskTyped"
       [leadZeroDateTime]="ngxMaskConfig.leadZeroDateTime"
@@ -21,6 +23,12 @@
       [attr.readonly]="readonly ? '' : null"
       [attr.disabled]="disabled ? '' : null"
       [attr.tabindex]="readonly || disabled ? -1 : null"
+      [attr.aria-required]="required || null"
+      [attr.aria-invalid]="isInvalid || null"
+      [attr.aria-describedby]="describedBy"
+      [attr.aria-readonly]="readonly || null"
+      [attr.aria-expanded]="isPanelOpen"
+      [attr.aria-controls]="panelId"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
@@ -46,7 +54,13 @@
     class="panel panel-{{ panelPosition }}"
     [class.open]="isPanelOpen"
     (mousedown)="panelMouseDown($event)">
-    <div class="panel-scrollcontainer">
+    <!-- A calendar is not a list, so this is a dialog. It is named from the same label as the field, and
+         stays unnamed without one — the same rule `labelledBy` follows everywhere else. -->
+    <div
+      role="dialog"
+      class="panel-scrollcontainer"
+      [id]="panelId"
+      [attr.aria-labelledby]="labelledBy">
       <div class="picker-wrapper">
         <!-- Date Picker -->
         <div

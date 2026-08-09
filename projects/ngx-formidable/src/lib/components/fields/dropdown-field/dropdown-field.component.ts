@@ -2,12 +2,10 @@ import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ContentChildren,
   ElementRef,
   forwardRef,
-  inject,
   Input,
   OnChanges,
   OnDestroy,
@@ -29,6 +27,7 @@ import {
 import {
   FieldDecoratorLayout,
   FieldDefaultOptionMode,
+  FieldOptionRole,
   FORMIDABLE_FIELD,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
@@ -106,8 +105,6 @@ export class DropdownFieldComponent
   private _writtenValue: string | null = null;
   private _highlightedValue: string | null = null;
   private _typedBuffer = '';
-
-  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   override ngOnInit(): void {
     super.ngOnInit();
@@ -234,6 +231,8 @@ export class DropdownFieldComponent
   @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
   @Input() noOptionsText: string = NO_OPTIONS_TEXT;
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
+
+  public readonly optionRole: FieldOptionRole = 'option';
 
   @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
   optionComponents?: QueryList<IFormidableFieldOption>;

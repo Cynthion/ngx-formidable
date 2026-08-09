@@ -26,12 +26,19 @@ Inherited by every field:
 | `value`            | getter      | Current value                                                                                       |
 | `canLabelRest`     | getter      | Whether nothing occupies the value area, so a label may rest there like a placeholder               |
 | `focus()`          | method      | Focuses the field — see **Focus**                                                                   |
+| `markForCheck()`   | method      | Repaints the field when state it does not own changes — see **Accessibility**                       |
 | `hasInFieldToggle` | optional    | Whether the field renders a panel toggle inside its own box, which the value and a label must clear |
 | `valueAlignment`   | optional    | Where the value sits vertically, which a prefix/suffix aligns with: `'center'` (default) or `'top'` |
 
 **Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners (run outside the Angular zone), readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly or disabled. A `placeholder` is not part of it — whether that blocks a resting label belongs to the label's position (see **Label As Placeholder** below). A field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` getter (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always). A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field`, with their panel toggle — declares `hasInFieldToggle`, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it. A field whose `fieldRef` is not the element that takes focus overrides the protected `focusElement` getter (see **Focus**).
 
 **Focus**: `focus()` focuses the field, and `autoFocus` calls it once, from the base's `ngAfterViewInit` — a field can therefore be focused on page load. Neither opens a panel: no panel field opens on focus, they open on click, on `ArrowDown`, or on typing. `focus()` does nothing while the field is `disabled`. The element it focuses is the protected `focusElement` getter, which defaults to `fieldRef.nativeElement`; the five fields that wrap their control in a `div` override it — `dropdown-field`, `autocomplete-field`, `date-field` and `time-field` to their `input`, `slider-field` to its `input[type=range]`. The container-focused fields (`toggle-field`, and the two groups) need no override: their wrapper carries a `tabindex` and is focusable itself. `focus()` is deliberately not on `IFormidableField` — the decorator has no use for it, and putting it there would break a field that implements the interface without extending `BaseFieldDirective`.
+
+**Accessibility**: the base gives every field three protected getters its template binds onto whichever element actually takes focus — `labelledBy`, `describedBy` and `isInvalid`. All three come from the surrounding decorator, injected optionally, so a field used on its own emits none of the attributes rather than pointing at ids that do not exist. See **Field Accessibility** under **Field Decorator** for the ids and what each field carries.
+
+The base also **mints** two ids of its own from `fieldId`, the mirror of the decorator's rule: the decorator owns what it renders around the field, the field owns what lives inside its own box. `panelId` (`{fieldId}-panel`) names the popup a panel field's `aria-controls` points at, and `optionId(index)` (`{fieldId}-option-{index}`) names one option, or `null` for a negative index so an unhighlighted field emits no `aria-activedescendant` at all. See **Combobox And Options** below.
+
+`markForCheck()` exists for the one attribute the field cannot see coming: validity lives in the `FieldErrorsComponent`, whose own `markForCheck` marks its ancestors and never this sibling, so `FieldErrorsDirective` pumps the field too and `aria-invalid` repaints with the errors. It is an optional member of `IFormidableField` — a field that implements the interface without extending the base simply does not get pumped. `labelledBy` is read on the same schedule: a label added or removed at runtime lands the next time the field is checked.
 
 ---
 
@@ -258,6 +265,37 @@ Wraps a field and its label, label adornment, prefix, suffix, hints and errors i
 
 Each state is a set of `--formidable-color-field-*` remaps rather than a set of property declarations, so a field picks up whichever set applies without every rule restating `background`, `color` and `border-color`. Four of the five are applied on the field element itself, where their order in the `field` and `group-field` mixins is their precedence: `hovered` < `focused` < `readonly` < `disabled`. `invalid` is the exception — it is applied on the decorator's host and inherited, which makes its precedence a matter of _which_ variables it remaps: it points the base, hover and focus colours at the invalid ones and leaves the readonly and disabled ones alone, so it survives hover and focus but yields to readonly and disabled. The group fields reuse the field's state colours; the toggle's track and the slider's track follow the same variables.
 
+**Field Accessibility**: the decorator owns the label, the hint row and the errors slot, so it is what mints the ids they carry — `{fieldId}-label`, `{fieldId}-hint` and `{fieldId}-errors` — and exposes `labelledById` and `describedByIds` for the field to bind. `describedByIds` names both wrappers unconditionally: they always render, and a reference to a hidden or empty element contributes nothing to the accessible description, so there is no state to track. `labelledById` is `null` until a label is projected, because an `aria-labelledby` pointing at nothing would suppress whatever else might have named the field. The errors slot is an `aria-live="polite"` region, so an error appearing while the field is already focused is announced rather than waiting for the next focus.
+
+`aria-labelledby` is what the `vertical` layout has instead of a `<label for>`, which its `div` label cannot be. It is also the toggle's only name: the toggle's `[id]` is on its hidden checkbox while the focusable element is the `role="switch"` `div`, and its own `onLabel` / `offLabel` is state text rather than a name. For the same reason the `vertical` layout renders no `legend` — the field inside carries the group role and is named from the projected label, so a legend would only add a second announcement of the raw control name.
+
+| Field                                                | Element carrying the state                  | Attributes beyond `aria-required` / `aria-invalid` / `aria-describedby`           |
+| :--------------------------------------------------- | :------------------------------------------ | :-------------------------------------------------------------------------------- |
+| `input-field`, `textarea-field`                      | the `input` / `textarea`                    | — native `readonly` and `disabled` already speak                                  |
+| `select-field`                                       | the `select`                                | `aria-readonly` (native `readonly` is inert on a `select`)                        |
+| `dropdown-field`, `autocomplete-field`, `date-field` | the wrapped `input[role=combobox]`          | `aria-readonly`, plus the combobox set below                                      |
+| `time-field`                                         | the wrapped `input`                         | `aria-readonly`                                                                   |
+| `slider-field`                                       | the `input[type=range]`                     | `aria-labelledby`, `aria-readonly`, `aria-valuetext`                              |
+| `toggle-field`                                       | the `div[role=switch]`                      | `aria-labelledby`, `aria-checked`, `aria-readonly`, `aria-disabled`               |
+| `radio-group-field`, `checkbox-group-field`          | the `div[role=radiogroup]` / `[role=group]` | `aria-labelledby`, `aria-readonly`, `aria-disabled`, plus `aria-activedescendant` |
+
+`aria-readonly` and `aria-disabled` are set only where no native attribute does the job — a `div`, or a `select` / range input that ignores `readonly`. The slider gets no `aria-valuenow`, `aria-valuemin` or `aria-valuemax`: a native range already reports all three. `aria-valuetext` is the exception, set only once `transformValueToThumbLabel` makes the value read as something other than its number. The hidden `input`s inside the groups and the toggle stay out of the accessibility tree entirely.
+
+**Combobox And Options**: the ids for everything inside a field's own box are the field's to mint — see **Accessibility** under **Base Field Directive**. `time-field` and `select-field` take none of this: one has no panel, the other is a native `select` the platform already speaks for.
+
+| Field                                       | Popup                                      | On the control                                                                |
+| :------------------------------------------ | :----------------------------------------- | :---------------------------------------------------------------------------- |
+| `dropdown-field`                            | `.panel-scrollcontainer[role=listbox]`     | `role="combobox"`, `aria-expanded`, `aria-controls`, `aria-activedescendant`  |
+| `autocomplete-field`                        | `.panel-scrollcontainer[role=listbox]`     | as above, plus `aria-autocomplete="list"`                                     |
+| `date-field`                                | `.panel-scrollcontainer[role=dialog]`      | `role="combobox"`, `aria-haspopup="dialog"`, `aria-expanded`, `aria-controls` |
+| `radio-group-field`, `checkbox-group-field` | — the options are the group's own children | `aria-activedescendant`                                                       |
+
+The role sits on `.panel-scrollcontainer` rather than on the panel itself, so the options a listbox owns are its direct children. `aria-expanded` and the option state attributes bind their boolean raw, because a closed combobox has to report `false` rather than fall silent — unlike every `|| null` state attribute. `aria-activedescendant` is bound off the same stream that drives the `is-highlighted` class, so the highlight and the active descendant cannot name different options; a panel starts with nothing highlighted, while a group highlights its first option straight away so the arrows have somewhere to start.
+
+`date-field` is deliberately a `dialog` rather than a listbox: a Pikaday calendar is not a list, and its cells are third-party markup with no ids of ours, so there is nothing to point `aria-activedescendant` at. The dialog is named from the same `labelledBy` as everything else, and stays unnamed without a projected label.
+
+The two panel fields render their empty state as plain text, exactly as the groups do — a listbox must not offer "no options available" as something to pick, and it also means an empty panel contains no `role="option"` at all.
+
 **Label Position**: `formidableFieldLabel`'s `position: FieldLabelPosition` (default `'inside'`) chooses between five mutually exclusive, statically-configured modes.
 
 The decorator resolves the configured position against the field's own state into one `labelState`, emitted as a `label-*` class on `.label-wrapper`, plus a `label-inside` class on its own host whenever the label sits over the value area. Any position other than `outside` needs a `horizontal` `decoratorLayout` — the only layout with room for a label over the field — so all of them are a no-op for `toggle-field`, `radio-group-field`, `checkbox-group-field` and `slider-field`.
@@ -308,6 +346,8 @@ A single option inside an option-based field. Provides `FORMIDABLE_FIELD_OPTION`
 | `match`       | `(filter) => boolean` | —          | Custom filter matcher |
 | `layout`      | `FieldOptionLayout`   | `'inline'` | Option layout         |
 
+**Accessibility**: the option's ARIA lands on its host element, not on the inner `div` — the host is the direct child of the `listbox` / `radiogroup` / `group` that owns it, and an element with no role in between would break that ownership. The role comes from the parent field's `optionRole`, never from `layout`: `layout` is a look a consumer may set freely, while the role has to follow the container. It is also what chooses the state attribute — `aria-selected` for an `option`, `aria-checked` for a `radio` or a `checkbox`, each binding its boolean raw so an unselected option reports `false`. `readonly` folds into `aria-disabled` alongside `disabled`: ARIA has no `aria-readonly` for these roles, and both flags mean the same thing here. The option's `id` is bound by the parent, which is what knows the index — see **Combobox And Options**.
+
 ### Field Errors
 
 **Selector** `formidable-field-errors`
@@ -316,7 +356,7 @@ Renders validation error messages for a control. Reads the `errors` array off `c
 
 Usually created by `FieldErrorsDirective` rather than written by hand. Inside a decorator it renders in that decorator's errors slot, after the field's layout container — never inside it, since that container is the positioning context for the label and the prefix/suffix and has to stay exactly the field's box. Placement is therefore the same for all three `decoratorLayout`s.
 
-`invalid` is mirrored onto its own host as `is-invalid`, and the directive registers the component with the surrounding decorator so the same flag reaches that decorator's host — see **Field State** above. It is the only source of validity in the library.
+`invalid` is mirrored onto its own host as `is-invalid`, and the directive registers the component with the surrounding decorator so the same flag reaches that decorator's host — see **Field State** above. It is the only source of validity in the library, which is why the directive also pumps the field's `markForCheck()` — see **Field Accessibility**.
 
 | Input          | Type           | Description                 |
 | :------------- | :------------- | :-------------------------- |
@@ -374,6 +414,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `FieldHintAlignment`                 | `'start' \| 'center' \| 'end'`                                                                                   |
 | `FieldLabelPosition`                 | `'outside' \| 'inside' \| 'inside-floating' \| 'border' \| 'border-prefix'`                                      |
 | `FieldOptionLayout`                  | `'inline' \| 'radio-group' \| 'checkbox-group'`                                                                  |
+| `FieldOptionRole`                    | `'option' \| 'radio' \| 'checkbox'`                                                                              |
 | `FieldValueAlignment`                | `'center' \| 'top'`                                                                                              |
 | `FormidableEmptyHint`                | `'underscores' \| 'format'`                                                                                      |
 | `FormidablePanelPosition`            | `'left' \| 'right' \| 'full' \| 'bottom'`                                                                        |
@@ -381,6 +422,8 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `IFormidableFieldOption`             | `{ value: string; label?; template?; readonly?; disabled?; selected?; highlighted?; select?(); match?(filter) }` |
 
 `FieldDefaultOptionMode` decides when an option field renders its `defaultOption`: `always`, pinned first and exempt from both `sortFn` and the autocomplete filter, or as a `fallback` only when the list would otherwise be empty.
+
+`FieldOptionRole` is the optional `optionRole` member of `IFormidableOptionField` — the ARIA role that field's options take, and so also whether they report `aria-selected` or `aria-checked`. Optional, and an option falls back to `option` when its parent says nothing, so a custom option field that implements the interface without it still works.
 
 `FormidableEmptyHint` sets what the date/time fields show while empty **and unfocused** — `_` slots or the `unicodeTokenFormat` itself. A focused empty field always shows `_` slots, because ngx-mask's caret arithmetic only recognizes its own placeholder character.
 

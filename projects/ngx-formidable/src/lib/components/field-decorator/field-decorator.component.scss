@@ -110,10 +110,6 @@
   @include fieldset;
 }
 
-.legend {
-  @include legend;
-}
-
 .container-horizontal {
   @include decorator-container-horizontal;
 }

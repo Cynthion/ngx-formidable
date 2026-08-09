@@ -2,13 +2,11 @@ import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ContentChildren,
   ElementRef,
   EventEmitter,
   forwardRef,
-  inject,
   Input,
   OnChanges,
   OnInit,
@@ -30,6 +28,7 @@ import {
 import {
   FieldDecoratorLayout,
   FieldDefaultOptionMode,
+  FieldOptionRole,
   FORMIDABLE_FIELD,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
@@ -107,8 +106,6 @@ export class AutocompleteFieldComponent
 
   private _writtenValue: string | null = null;
   private _highlightedValue: string | null = null;
-
-  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   override ngOnInit(): void {
     super.ngOnInit();
@@ -246,6 +243,8 @@ export class AutocompleteFieldComponent
   @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
   @Input() noOptionsText: string = NO_OPTIONS_TEXT;
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
+
+  public readonly optionRole: FieldOptionRole = 'option';
 
   @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
   optionComponents?: QueryList<IFormidableFieldOption>;

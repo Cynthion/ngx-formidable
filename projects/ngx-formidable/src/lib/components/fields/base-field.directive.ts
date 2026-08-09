@@ -1,5 +1,6 @@
 import {
   AfterViewInit,
+  ChangeDetectorRef,
   Directive,
   ElementRef,
   EventEmitter,
@@ -14,6 +15,7 @@ import { ControlValueAccessor } from '@angular/forms';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { FieldDecoratorLayout, IFormidableField } from '../../models/formidable.model';
+import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
 
 @Directive()
 export abstract class BaseFieldDirective<T = string | null>
@@ -31,6 +33,11 @@ export abstract class BaseFieldDirective<T = string | null>
   protected focusChangeSubject$ = new Subject<boolean>();
 
   protected readonly ngZone: NgZone = inject(NgZone);
+
+  // Element injectors follow the declaring template, so a projected field really does see its decorator.
+  // Optional: a field used on its own has no label, hint or errors to point at.
+  private readonly decorator = inject(FieldDecoratorComponent, { optional: true });
+  protected readonly cdRef = inject(ChangeDetectorRef);
 
   protected readonly destroy$ = new Subject<void>();
 
@@ -131,6 +138,53 @@ export abstract class BaseFieldDirective<T = string | null>
   get fieldId(): string {
     return this.id;
   }
+
+  // #region ARIA
+
+  // The decorator owns the label, the hint and the errors, so it is what mints the ids these point at.
+
+  /**
+   * Names the fields a `<label for>` cannot reach: the groups, the toggle and the slider.
+   *
+   * Read once per repaint of this `OnPush` field, so a label added or removed at runtime (an `@if`
+   * around it) only lands the next time the field is checked. Every other projected decoration is the
+   * decorator's own to render, which is why it is the decorator — and not the field — that is not `OnPush`.
+   */
+  protected get labelledBy(): string | null {
+    return this.decorator?.labelledById ?? null;
+  }
+
+  protected get describedBy(): string | null {
+    return this.decorator?.describedByIds ?? null;
+  }
+
+  protected get isInvalid(): boolean {
+    return this.decorator?.isInvalid ?? false;
+  }
+
+  // The decorator mints the ids for what it renders around the field; the field mints the ids for what
+  // lives inside its own box — its panel, and each option in it.
+
+  /** Names the popup a panel field's `aria-controls` points at, whether that is a listbox or a dialog. */
+  protected get panelId(): string {
+    return `${this.fieldId}-panel`;
+  }
+
+  /** `null` for a negative index, so a field with nothing highlighted emits no `aria-activedescendant`. */
+  protected optionId(index: number): string | null {
+    return index >= 0 ? `${this.fieldId}-option-${index}` : null;
+  }
+
+  /**
+   * Repaints the field when its validity changes. Validity lives in the errors component, whose
+   * `markForCheck` marks its own ancestors and never this sibling — so `FieldErrorsDirective` calls this
+   * as well, or `aria-invalid` would bind once and go stale.
+   */
+  public markForCheck(): void {
+    this.cdRef.markForCheck();
+  }
+
+  // #endregion
 
   abstract get value(): T;
 

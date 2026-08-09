@@ -70,18 +70,6 @@
   @include fieldset-reset;
 }
 
-@mixin legend {
-  position: absolute;
-  width: utils.spacing(1);
-  height: utils.spacing(1);
-  padding: 0;
-  margin: calc(utils.spacing(1) * -1);
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 @mixin fieldset-reset {
   border: 0;
   min-height: fit-content;
@@ -1386,6 +1374,14 @@
 
   padding: var(--formidable-field-group-option-padding, #{tokens.$formidable-field-group-option-padding});
   padding-inline: field-padding-x();
+}
+
+// Same reason inside a panel, where an option row's padding is `field-option-inline`'s rather than the
+// group's. The panels render their empty state as text too, so a listbox has no fake option to offer.
+@mixin panel-no-option {
+  @include no-option;
+
+  padding: utils.spacing(8) utils.spacing(16);
 }
 
 @mixin date-picker-wrapper {

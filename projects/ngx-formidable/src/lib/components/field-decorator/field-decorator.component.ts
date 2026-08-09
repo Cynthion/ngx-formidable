@@ -174,6 +174,35 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
     return this.projectedField?.placeholder ?? '';
   }
 
+  // #region ARIA ids
+
+  get labelId(): string {
+    return `${this.fieldId}-label`;
+  }
+
+  get hintId(): string {
+    return `${this.fieldId}-hint`;
+  }
+
+  get errorsId(): string {
+    return `${this.fieldId}-errors`;
+  }
+
+  /** What names a field the `<label for>` cannot reach — the groups, the toggle and the slider. */
+  get labelledById(): string | null {
+    return this.hasLabel ? this.labelId : null;
+  }
+
+  /**
+   * Unconditional: both wrappers always render, and a reference to a hidden or empty element adds
+   * nothing to the accessible description — so there is no state here to track or to go stale.
+   */
+  get describedByIds(): string {
+    return `${this.hintId} ${this.errorsId}`;
+  }
+
+  // #endregion
+
   get readonly(): boolean {
     return this.projectedField?.readonly ?? false;
   }

@@ -120,6 +120,14 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
 
   // #endregion
 
+  /**
+   * What the value sounds like when it is not the bare number — "€50" rather than "50". Only set when
+   * the consumer transforms it: a native range already reports the number itself.
+   */
+  get valueText(): string | null {
+    return this.transformValueToThumbLabel && this.value != null ? this.transformValueToThumbLabel(this.value) : null;
+  }
+
   get thumbLabel(): string {
     if (this.value == null) return '';
     return this.transformValueToThumbLabel ? this.transformValueToThumbLabel(this.value) : String(this.value);

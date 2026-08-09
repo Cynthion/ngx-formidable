@@ -3,12 +3,10 @@ import {
   AfterContentInit,
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ContentChild,
   ElementRef,
   forwardRef,
-  inject,
   Input,
   OnChanges,
   OnDestroy,
@@ -135,8 +133,6 @@ export class DateFieldComponent
 
   private maskChar = '0';
   private readonly defaultUnicodeTokenFormat = 'yyyy-MM-dd';
-
-  private readonly cdRef: ChangeDetectorRef = inject(ChangeDetectorRef);
 
   private readonly staticOptions: PikadayOptions = {
     field: undefined, // not supported

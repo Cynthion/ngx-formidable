@@ -10,13 +10,22 @@
       #inputRef
       type="text"
       autocomplete="off"
+      role="combobox"
       class="wrapped-input"
+      aria-autocomplete="list"
       [id]="fieldId"
       [placeholder]="placeholder"
       [attr.name]="name"
       [attr.readonly]="readonly ? '' : null"
       [attr.disabled]="disabled ? '' : null"
       [attr.tabindex]="readonly || disabled ? -1 : null"
+      [attr.aria-required]="required || null"
+      [attr.aria-invalid]="isInvalid || null"
+      [attr.aria-describedby]="describedBy"
+      [attr.aria-readonly]="readonly || null"
+      [attr.aria-expanded]="isPanelOpen"
+      [attr.aria-controls]="panelId"
+      [attr.aria-activedescendant]="optionId((highlightedOptionIndex$ | async) ?? -1)"
       (input)="onInput($event)"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
@@ -28,12 +37,17 @@
     tabindex="-1"
     class="panel panel-{{ panelPosition }}"
     [class.open]="isPanelOpen">
-    <div class="panel-scrollcontainer">
+    <!-- The role sits here rather than on the panel, so the options it owns are its direct children. -->
+    <div
+      role="listbox"
+      class="panel-scrollcontainer"
+      [id]="panelId">
       <!-- Options -->
       <!-- Option components are re-created in order to control and filter them. -->
       @for (option of filteredOptions$ | async; track option.value; let i = $index) {
         <formidable-field-option
           #optionRef
+          [attr.id]="optionId(i)"
           [value]="option.value"
           [label]="option.label"
           [match]="option.match"
@@ -48,13 +62,8 @@
           <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
         </formidable-field-option>
       } @empty {
-        <formidable-field-option
-          #optionRef
-          [value]="''"
-          [label]="noOptionsText"
-          [readonly]="true">
-          <div class="no-option">{{ noOptionsText }}</div>
-        </formidable-field-option>
+        <!-- Plain text, not an option: a listbox must not offer its empty state as something to pick. -->
+        <div class="no-option">{{ noOptionsText }}</div>
       }
     </div>
   </div>

@@ -2,12 +2,10 @@ import { CommonModule } from '@angular/common';
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ContentChildren,
   ElementRef,
   forwardRef,
-  inject,
   Input,
   OnChanges,
   OnDestroy,
@@ -24,6 +22,7 @@ import { scrollHighlightedOptionIntoView } from '../../../helpers/position.helpe
 import {
   FieldDecoratorLayout,
   FieldDefaultOptionMode,
+  FieldOptionRole,
   FORMIDABLE_FIELD,
   FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
@@ -90,8 +89,6 @@ export class CheckboxGroupFieldComponent
 
   private _writtenValues: string[] = [];
   private _highlightedValue: string | null = null;
-
-  private readonly cdRef = inject(ChangeDetectorRef);
 
   ngOnChanges(changes: SimpleChanges): void {
     // react to changes of @Input properties
@@ -180,6 +177,8 @@ export class CheckboxGroupFieldComponent
   @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
   @Input() noOptionsText: string = NO_OPTIONS_TEXT;
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
+
+  public readonly optionRole: FieldOptionRole = 'checkbox';
 
   @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
   optionComponents?: QueryList<IFormidableFieldOption>;

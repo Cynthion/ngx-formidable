@@ -51,12 +51,18 @@
 <!-- Hint -->
 <div
   class="hint-wrapper"
-  [class.hidden]="!hasHint">
+  [class.hidden]="!hasHint"
+  [id]="hintId">
   <ng-content select="[formidableFieldHint]" />
 </div>
 
 <!-- Validation errors, rendered here by `FieldErrorsDirective`. -->
-<ng-container #errorsSlot />
+<div
+  class="errors-slot"
+  aria-live="polite"
+  [id]="errorsId">
+  <ng-container #errorsSlot />
+</div>
 
 <!-- Label & Adornment Template -->
 <!-- The label is only here while it renders in normal flow; over the field it lives in the container above,
@@ -77,7 +83,8 @@
   @if (decoratorLayout === 'vertical') {
     <div
       ngClass="label-wrapper label-{{ labelState }}"
-      [class.hidden]="!hasLabel">
+      [class.hidden]="!hasLabel"
+      [id]="labelId">
       <ng-container [ngTemplateOutlet]="projectedLabel" />
       <ng-container [ngTemplateOutlet]="requiredMarker" />
     </div>
@@ -85,7 +92,8 @@
     <label
       ngClass="label-wrapper label-{{ labelState }}"
       [class.hidden]="!hasLabel"
-      [attr.for]="fieldId">
+      [attr.for]="fieldId"
+      [id]="labelId">
       <ng-container [ngTemplateOutlet]="projectedLabel" />
       <ng-container [ngTemplateOutlet]="requiredMarker" />
     </label>
@@ -119,8 +127,6 @@
 <ng-template #content>
   @if (decoratorLayout === 'vertical') {
     <fieldset class="fieldset">
-      <legend class="legend">{{ name }}</legend>
-
       <ng-container [ngTemplateOutlet]="projectedContent" />
     </fieldset>
   } @else {

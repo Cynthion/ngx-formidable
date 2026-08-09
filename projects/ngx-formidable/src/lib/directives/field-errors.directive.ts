@@ -93,6 +93,9 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
       )
       .subscribe(() => {
         this.fieldErrorsComponentRef?.instance.markForCheck();
+        // The field is a sibling of the errors component, so nothing above marks it. Without this its
+        // `aria-invalid` would keep whatever it bound on the first pass.
+        this.decorator?.projectedField?.markForCheck?.();
       });
   }
 }

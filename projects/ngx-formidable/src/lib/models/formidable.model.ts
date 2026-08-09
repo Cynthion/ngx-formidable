@@ -64,6 +64,12 @@ export type FieldHintAlignment = 'start' | 'center' | 'end';
 export type FieldAdornmentAlignment = 'center' | 'value';
 export type FieldOptionLayout = 'inline' | 'radio-group' | 'checkbox-group';
 /**
+ * The ARIA role an option field's options take. It follows the container, not the option's `layout` —
+ * a `listbox` owns `option`s that report `aria-selected`, the two groups own `radio`s and `checkbox`es
+ * that report `aria-checked`.
+ */
+export type FieldOptionRole = 'option' | 'radio' | 'checkbox';
+/**
  * When an option field renders its `defaultOption`: `always` as the first entry, never sorted and never
  * filtered, or only as a `fallback` when the option list would otherwise be empty.
  */
@@ -110,6 +116,8 @@ export interface IFormidableField<T = string | null> {
   valueChanged: EventEmitter<T>;
   focusChanged: EventEmitter<boolean>;
   decoratorLayout: FieldDecoratorLayout;
+  /** Lets the errors directive repaint an `OnPush` field when its validity changes (`aria-invalid`). */
+  markForCheck?(): void;
 }
 
 /** Interface for all Formidable fields that support multiple options. */
@@ -120,6 +128,8 @@ export interface IFormidableOptionField {
   defaultOptionMode: FieldDefaultOptionMode;
   selectOption(option: IFormidableFieldOption): void;
   sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
+  /** The ARIA role its options take. Optional — an option falls back to `option` when its parent says nothing. */
+  optionRole?: FieldOptionRole;
 }
 
 /** Interface for all Formidable options. */

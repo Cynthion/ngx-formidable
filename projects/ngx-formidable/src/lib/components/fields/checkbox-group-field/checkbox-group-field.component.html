@@ -5,6 +5,13 @@
   [class.is-readonly]="readonly"
   [class.is-disabled]="disabled"
   [tabindex]="readonly || disabled ? -1 : null"
+  [attr.aria-labelledby]="labelledBy"
+  [attr.aria-required]="required || null"
+  [attr.aria-invalid]="isInvalid || null"
+  [attr.aria-describedby]="describedBy"
+  [attr.aria-readonly]="readonly || null"
+  [attr.aria-disabled]="disabled || null"
+  [attr.aria-activedescendant]="optionId((highlightedOptionIndex$ | async) ?? -1)"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <!-- Options -->
@@ -13,7 +20,6 @@
     <input
       hidden
       type="checkbox"
-      [id]="name + '-' + option.value"
       [tabindex]="-1"
       [attr.name]="name"
       [attr.readonly]="option.readonly || readonly ? '' : null"
@@ -21,6 +27,7 @@
       [checked]="isChecked(option.value)" />
     <formidable-field-option
       #optionRef
+      [attr.id]="optionId(i)"
       [layout]="'checkbox-group'"
       [value]="option.value"
       [label]="option.label"

@@ -14,7 +14,7 @@ Example:
 Improvements:
 
 - Add Storybook stories for layout options
-- ARIA attributes
+- extract a `BaseOptionFieldDirective` between `BaseFieldDirective` and the four option fields: `dropdown-field`, `autocomplete-field`, `radio-group-field` and `checkbox-group-field` each carry an identical `highlightedOptionIndex$` / `setHighlightedIndex` / `reconcileHighlightAfterOptionsChanged` block, and it would take `panelId` / `optionId` off the base with it
 
 # Bugs:
 
@@ -60,8 +60,8 @@ The idea is a product page, where users can come to and play around with options
 - i18n config should also be changeable to best demonstrate the date field
 - the portal has several pre-defined and well-designed themes that can be selected and applied to the example form, they serve as inspiration and starting point for users to create their own theme. The portal should also provide a way to export the theme configuration (copy-paste) and import it back into the portal. Add very different themes and variety in different token settings, since this is the super-power of this library: to pretty much customize everything.
 - provide to choose different fonts; can some open source fonts be "bundled in" or fetched via borwser?
-
-Before anything is implemented, propose a page structure and layout for the portal, including an optional navigation. The portal must be super intuitive and easy to use.
+- do you have an idea how accessibility can be demonstrated in the portal? e.g., a "screen reader" mode that shows how the form is read out by a screen reader. This could be a separate view or a toggle button in the portal.
+  Before anything is implemented, propose a page structure and layout for the portal, including an optional navigation. The portal must be super intuitive and easy to use.
 
 # Blog Post
 
