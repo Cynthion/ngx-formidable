@@ -212,7 +212,11 @@
   --formidable-color-field-placeholder: #{tokens.$formidable-color-field-placeholder};
   --formidable-color-field-selection: #{tokens.$formidable-color-field-selection};
 
-  --formidable-color-field-border: var(--formidable-color-field-text, #{tokens.$formidable-color-field-border});
+  // Declared outright rather than derived from the text: chrome and content are separate concerns, and the
+  // default theme wants a light border under dark text. Everything below still hangs off this one — the
+  // underline, the toggle thumb, the slider fills and the option prefixes — so it stays the single base to
+  // override for a field's chrome.
+  --formidable-color-field-border: #{tokens.$formidable-color-field-border};
   --formidable-color-field-border-hovered: var(
     --formidable-color-field-border,
     #{tokens.$formidable-color-field-border-hovered}

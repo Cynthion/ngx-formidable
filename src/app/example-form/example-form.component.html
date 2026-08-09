@@ -181,48 +181,29 @@
         </label>
       </fieldset>
 
-      <!-- Theme -->
+      <!-- Geometry Scheme -->
       <fieldset>
-        <legend>Theme:</legend>
-        <label>
+        <legend>Geometry Examples:</legend>
+        <label *ngFor="let option of geometryOptions">
           <input
             type="radio"
-            name="theme"
-            [checked]="theme === 'default'"
-            (change)="setTheme('default')" />
-          Default
+            name="geometry"
+            [checked]="geometry === option.key"
+            (change)="setGeometry(option.key)" />
+          {{ option.label }}
         </label>
-        <label>
+      </fieldset>
+
+      <!-- Colour Scheme -->
+      <fieldset>
+        <legend>Colour Examples:</legend>
+        <label *ngFor="let option of colorOptions">
           <input
             type="radio"
-            name="theme"
-            [checked]="theme === 'theme2'"
-            (change)="setTheme('theme2')" />
-          Theme 2
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="theme"
-            [checked]="theme === 'theme3'"
-            (change)="setTheme('theme3')" />
-          Theme 3
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="theme"
-            [checked]="theme === 'theme4'"
-            (change)="setTheme('theme4')" />
-          Theme 4
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="theme"
-            [checked]="theme === 'theme5'"
-            (change)="setTheme('theme5')" />
-          Theme 5 (Underline)
+            name="color"
+            [checked]="color === option.key"
+            (change)="setColor(option.key)" />
+          {{ option.label }}
         </label>
       </fieldset>
     </div>

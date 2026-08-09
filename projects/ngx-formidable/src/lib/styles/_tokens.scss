@@ -46,7 +46,7 @@ $formidable-field-before-margin-bottom: utils.spacing(8);
 
 // The library's base corner radius, and the fallback source for every rounded thing that is not a field
 // box: the toggle, the slider and the panels.
-$formidable-border-radius: utils.spacing(6);
+$formidable-border-radius: utils.spacing(8);
 
 $formidable-field-border-thickness: utils.spacing(1);
 
@@ -68,7 +68,7 @@ $formidable-field-group-border-thickness: $formidable-field-border-thickness;
 $formidable-field-group-border-radius: $formidable-field-border-radius;
 
 $formidable-label-height: $formidable-label-line-height * $formidable-label-font-size;
-$formidable-field-height: utils.spacing(60); // even number
+$formidable-field-height: utils.spacing(56); // even number
 
 // The field's horizontal padding — where its value starts, and where a projected prefix's text starts.
 // One named value because a `border-prefix` label aligns with the prefix by using it directly.
@@ -143,22 +143,21 @@ $formidable-field-support-min-height: $formidable-field-validation-error-line-he
 
 // #region Colors
 
-// 100: #f2faff
-// 200: #c7d7e2
-// 300: #9fb7c7
-// 400: #7b99af
-// 500: #5b7f99
-// 600: #3e6988
-// 700: #255476
-// 800: #114367
-// 900: #00345a
+// The default theme is neutral chrome plus a single accent — the palette a library should ship, because
+// it reads as deliberate without competing with the consumer's brand. Rebranding it is one variable:
+// `--formidable-color-field-border-focus`. The alternatives live in `theme-options.md`.
+// Neutral                     Accent                      Signal
+//  50: #f8fafc  field fill     200: #c7d2fe  selection     error: #dc2626
+// 400: #94a3b8  field border   600: #4f46e5  focus
+// 500: #5a6b82  placeholder    700: #4338ca  floating label
+// 800: #1e293b  field text
 
-$formidable-color-validation-error: #dc5858;
+$formidable-color-validation-error: #dc2626;
 
 // A field's colours come in one set per state. `hovered` and `focus` apply only while the field is
 // neither readonly nor disabled; `invalid` outranks both of those but not readonly/disabled — the
 // order the state blocks are written in inside the `field` mixin is what decides that.
-$formidable-color-field-text: #00345a; // 900
+$formidable-color-field-text: #1e293b; // 800
 $formidable-color-field-group-text: $formidable-color-field-text;
 $formidable-color-field-text-hovered: $formidable-color-field-text;
 $formidable-color-field-text-focus: $formidable-color-field-text;
@@ -166,12 +165,15 @@ $formidable-color-field-text-invalid: $formidable-color-field-text;
 $formidable-color-field-text-readonly: rgb($formidable-color-field-text, 75%);
 $formidable-color-field-text-disabled: rgb($formidable-color-field-text, 50%);
 
-$formidable-color-field-placeholder: #5b7f99; // 500
-$formidable-color-field-selection: #9fb7c7; // 300
+$formidable-color-field-placeholder: #5a6b82; // 500
+$formidable-color-field-selection: #c7d2fe; // accent 200
 
-$formidable-color-field-border: $formidable-color-field-text;
+// A colour of its own, not the text's. Chrome and content are separate concerns: a neutral default wants
+// a light border under dark text, and tying the two forces every field into a heavy outline the consumer
+// never asked for.
+$formidable-color-field-border: #94a3b8; // 400
 $formidable-color-field-border-hovered: $formidable-color-field-border;
-$formidable-color-field-border-focus: #5b7f99; // 500
+$formidable-color-field-border-focus: #4f46e5; // accent 600
 $formidable-color-field-border-invalid: $formidable-color-validation-error;
 $formidable-color-field-border-readonly: transparent;
 $formidable-color-field-border-disabled: $formidable-color-field-text-disabled;
@@ -189,7 +191,7 @@ $formidable-color-field-underline-invalid: $formidable-color-field-border-invali
 
 // The one state with a visible fill of its own: a hover is otherwise indistinguishable, since a field
 // keeps its border and its text colour throughout.
-$formidable-color-field-background: #f2faff; // 100
+$formidable-color-field-background: #f8fafc; // 50
 $formidable-color-field-group-background: $formidable-color-field-background;
 $formidable-color-field-background-hovered: color.mix(
   $formidable-color-field-selection,
@@ -206,7 +208,7 @@ $formidable-color-field-group-background-disabled: $formidable-color-field-backg
 // Every label — the one above the field, the floating one over it and the resting one standing in for
 // the placeholder — takes a single colour per state, so a state cannot recolour one and miss another.
 $formidable-color-field-label: $formidable-color-field-text;
-$formidable-color-field-label-floating: #255476; // 700
+$formidable-color-field-label-floating: #4338ca; // accent 700
 $formidable-color-field-label-resting: $formidable-color-field-placeholder;
 $formidable-color-field-label-hovered: $formidable-color-field-label;
 $formidable-color-field-label-focus: $formidable-color-field-border-focus;

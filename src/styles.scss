@@ -1,4 +1,4 @@
-@use 'styles/styles.scss';
+@use 'styles/styles';
 
 // use the formidable styles
 // angular.json stylePreprocessorOptions: "projects/formidable/src/lib/styles"
@@ -9,6 +9,14 @@
 :root {
   // --formidable-field-height: 50px;
   // --formidable-color-field-text: purple;
+}
+
+// Demo-only, not a library token: a dark colour scheme needs a dark host page, and no `--formidable-*`
+// variable can supply one — the library styles fields, never the surface they sit on. Only the
+// `midnight` scheme sets these; every other scheme leaves the fallbacks in place.
+body {
+  background: var(--example-page-background, #ffffff);
+  color: var(--example-page-text, inherit);
 }
 
 // Pikaday Overrides

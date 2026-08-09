@@ -59,6 +59,10 @@ fieldset {
   font-size: 0.7rem;
   padding: 1rem;
   background: #f9f9f9;
+  // Pinned, not inherited: this is the chrome you change the theme *with*, so no scheme may make it
+  // unreadable. Its surfaces are hardcoded light, so its text has to be too — a dark colour scheme
+  // sets a light `--example-page-text` on the body and would otherwise take this with it.
+  color: #1b1b1b;
 
   @media (width <= 768px) {
     position: static;

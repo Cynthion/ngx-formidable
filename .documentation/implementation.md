@@ -15,25 +15,22 @@ Sequenced execution view of `backlog.md`. `backlog.md` stays the raw source of t
 
 ---
 
-## Phase Overview
-
-|  Phase | Title                    | Depends On |
-| -----: | :----------------------- | :--------- |
-|     13 | API Doc Comments         | 1–12       |
-|     14 | README And Project Docs  | 13         |
-|     15 | Storybook                | 13         |
-|     16 | Release                  | 14         |
-|     P1 | Portal — Design Proposal | 16         |
-| P2–P10 | Portal — Build           | P1         |
-
----
-
 ## Library Phases
 
-### Phase 12.6 - Define Default Theme
+### Phase 12.7 Cleanup Backlog
 
-- Material has a default theme, and the this library should have one too. The default theme should be defined in `_tokens.scss` and `_formidable-vars.scss`, and it should be applied to all fields by default. The default theme should be consistent with the design system and the branding of the library. The default theme should be documented in the dedicated markdown document for tokens.
-- Propose some pretty default themes first. This can be done by extending the themes in the example so I can visually check. AskUserQuestions.
+All remaining bugs and features in `backlog.md` must be adressed.
+Add subphases here to address them.
+Cleanup the backlog. Only future work should be remaining. Make sure nothing is lost. AskUserQuestions if unclear.
+
+### Phase 12.8 Detach Validation Feature from Library
+
+- can we re-shape the library such that the validation is not concern of the library?
+- consumers might want to use their own validation library (e.g., Angular, vest, zod), or even no validation at all. The library should not force them to use Vest.
+- the library should focus on UI components and theming
+- is that even possible?
+- if validation is extracted, does it need wrappers? are these wrappers my current components?
+- I want to add documentation on how to use the library and connect it with other validators
 
 ### Phase 13 — API Doc Comments
 
@@ -67,22 +64,7 @@ Depends on Phase 13.
 
 **Clears**: the usage-docs, badges, feature-list, group-example, `CONTRIBUTING.md`, logo, custom-field and README items.
 
-### Phase 14.5 Cleanup Backlog
-
-All remaining bugs and features in `backlog.md` must be adressed.
-Add subphases here to address them.
-Cleanup the backlog. Only future work should be remaining. Make sure nothing is lost. AskUserQuestions if unclear.
-
-### Detach Validation Feature from Library
-
-- can we re-shape the library such that the validation is not concern of the library?
-- consumers might want to use their own validation library (e.g., Angular, vest, zod), or even no validation at all. The library should not force them to use Vest.
-- the library should focus on UI components and theming
-- is that even possible?
-- if validation is extracted, does it need wrappers? are these wrappers my current components?
-- I want to add documentation on how to use the library and connect it with other validators
-
-### Phase 14.5 - Angular Version Support
+### Phase 15 - Angular Version Support
 
 - the library is new and modern; it should support all latest Angular versions
 - how far back can it be supported? the main consumer (EnerQi) in sibling project is still on Angular 18; is it easier to upgrade EnerQi first?
@@ -109,15 +91,7 @@ Depends on Phase 13.
 
 ### Phase 18 — Portal
 
-### Phase 19 - AI Support
-
-I want to support developers to use AI to use this library. How can I do that?
-Should that be done with an MCP? What are other ways?
-
----
-
-## Portal Phases
-
+Re-evaluate all updates in backlog.md.
 `backlog.md` requires a page structure and layout proposal before any portal code, so P1 is a document needing sign-off.
 
 | Phase | Title                | Scope                                                                                                                                           |
@@ -135,6 +109,11 @@ Should that be done with an MCP? What are other ways?
 
 **P6 Note**: four variables are set imperatively and never declared in `:root` — the two value insets, the value padding top and the value top. A token editor cannot discover them without a generated manifest.
 
+### Phase 19 - AI Support
+
+I want to support developers to use AI to use this library. How can I do that?
+Should that be done with an MCP? What are other ways?
+
 ---
 
 ## Already Shipped
@@ -143,6 +122,7 @@ Kept for context only; the detail lived in the previous revision of this file an
 
 | Pass                           | Outcome                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Default Theme                  | The library already had a default — a blue ramp that existed only as a comment and was never designed. It became neutral chrome plus one accent (slate 50/400/500/800, indigo 200/600/700, `#dc2626`) on a `56px` / `1px` / `8px` field, which is what a library should ship: deliberate enough to use unthemed, quiet enough not to compete with a consumer's brand, and rebrandable from `--formidable-color-field-border-focus` alone. One structural change came with it — `--formidable-color-field-border` no longer resolves through `--formidable-color-field-text`, because a neutral default wants a light border under dark text and the old derivation forced them equal. The candidates were built first as two independent axes in the demo, nine geometries against ten palettes, and the losers stayed as the showcase set in `theme-options.md`. The geometry pick was forced: every borderless scheme needs four companion variables and still hits two limits with no escape hatch, both now filed as bugs                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | Bugs And UX Defects            | Date/time mask display, parse and caret fixes; readonly and disabled labels no longer float; single-line ellipsized labels                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | Decorator Layout Measurement   | Padding moved from inline styles to CSS, measured in a `ResizeObserver`; the in-field toggle joined the value inset; nested `package-lock.json` removed. The consumer tarball rebuild was dropped from the phase and stays in `backlog.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | Breaking API                   | `FieldDecoratorLayout` renamed to `horizontal` / `vertical` / `inline`; the whole `Form*` family prefixed `NgxFormidable`; icons externalized                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |

@@ -30,7 +30,20 @@ import { FieldDecoratorComponent } from './field-decorator.component';
  * `border-prefix` is the same but aligned with a projected prefix instead of with the value.
  */
 
-/** px per rem, so the expectations stay written in the tokens' own unit. */
+/**
+ * px per rem, so the expectations stay written in the tokens' own unit.
+ *
+ * The three constants below are computed by hand from the default theme rather than read from the tokens,
+ * on purpose — see the note above. With a `56px` field, a `1px` border, a `16px` value at `1.6` and a
+ * `12px` floating label at `1.6`, the inner height is `54px`, the value's line-box `25.6px` and the
+ * floating label's `19.2px`:
+ *
+ * - `0.8875rem` (`14.2px`) — the value centered on its own: `(54 - 25.6) / 2`
+ * - `0.2875rem` (`4.6px`)  — the slack above a centered label+value block: `(54 - 19.2 - 25.6) / 2`
+ * - `1.4875rem` (`23.8px`) — where the value starts under an inside label: `4.6 + 19.2`
+ *
+ * Change `--formidable-field-height` and all three move; recompute them, do not read them from the CSS.
+ */
 function rem(value: number): number {
   return value * parseFloat(getComputedStyle(document.documentElement).fontSize);
 }
@@ -297,7 +310,7 @@ describe('formidableFieldLabel [position]', () => {
     });
 
     it('centers the value in the field’s inner height', () => {
-      expect(valueTop()).toBeCloseTo(rem(1.0125), 1);
+      expect(valueTop()).toBeCloseTo(rem(0.8875), 1);
     });
 
     it('never moves, whatever the field does', () => {
@@ -327,7 +340,7 @@ describe('formidableFieldLabel [position]', () => {
       const innerHeight = input().clientHeight;
       const slackBelow = innerHeight - (valueTop() + parseFloat(getComputedStyle(input()).lineHeight));
 
-      expect(slackAbove).toBeCloseTo(rem(0.4125), 1);
+      expect(slackAbove).toBeCloseTo(rem(0.2875), 1);
       expect(slackBelow).toBeCloseTo(slackAbove, 1);
     });
 
@@ -348,7 +361,7 @@ describe('formidableFieldLabel [position]', () => {
       const height = labelWrapper().getBoundingClientRect().height;
 
       expect(height).toBeCloseTo(rem(1.6), 1);
-      expect(labelTop()).toBeCloseTo(rem(1.0125), 1);
+      expect(labelTop()).toBeCloseTo(rem(0.8875), 1);
       // equal space above and below it
       expect(innerHeight - (labelTop() + height)).toBeCloseTo(labelTop(), 1);
     });
@@ -482,7 +495,7 @@ describe('formidableFieldLabel [position]', () => {
     it('never rests, however empty the field is', () => {
       expect(labelWrapper().classList.contains('label-resting')).toBe(false);
       expect(labelWrapper().classList.contains('label-floating')).toBe(true);
-      expect(labelTop()).toBeCloseTo(rem(0.4125), 1);
+      expect(labelTop()).toBeCloseTo(rem(0.2875), 1);
     });
 
     it('stays put when the field is focused and filled', () => {
@@ -514,7 +527,7 @@ describe('formidableFieldLabel [position]', () => {
 
       expect(getComputedStyle(input()).paddingTop).toBe('0px');
       expect(onBorder).toBeCloseTo(valueTop(), 1);
-      expect(onBorder).toBeCloseTo(rem(1.0125), 1);
+      expect(onBorder).toBeCloseTo(rem(0.8875), 1);
     });
 
     it('starts its text where the value starts', () => {
@@ -601,7 +614,7 @@ describe('formidableFieldLabel [position]', () => {
 
     it('leaves the value centered, exactly as border does', () => {
       expect(getComputedStyle(input()).paddingTop).toBe('0px');
-      expect(valueTop()).toBeCloseTo(rem(1.0125), 1);
+      expect(valueTop()).toBeCloseTo(rem(0.8875), 1);
     });
 
     it('never rests, however empty the field is', () => {
@@ -739,7 +752,7 @@ describe('formidableFieldLabel [position]', () => {
     const textarea = textareaFixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
 
     // the value starts where the label+value block puts it, not at the textarea's own padding
-    expect(parseFloat(getComputedStyle(textarea).paddingTop)).toBeCloseTo(rem(1.6125), 1);
+    expect(parseFloat(getComputedStyle(textarea).paddingTop)).toBeCloseTo(rem(1.4875), 1);
 
     textareaFixture.componentInstance.position = 'outside';
     textareaFixture.detectChanges();
@@ -836,7 +849,7 @@ describe('a value rendered in a wrapped input', () => {
         const labelBottom = labelRect.top - innerTop + labelRect.height;
         const valueTop = paddingTop + (contentHeight - parseFloat(style.lineHeight)) / 2;
 
-        expect(labelBottom).toBeCloseTo(rem(1.6125), 1);
+        expect(labelBottom).toBeCloseTo(rem(1.4875), 1);
         expect(valueTop).toBeCloseTo(labelBottom, 1);
       });
     });

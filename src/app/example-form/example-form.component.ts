@@ -1,5 +1,5 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { ChangeDetectorRef, Component, Inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Fuse, { FuseResult } from 'fuse.js';
 import {
@@ -83,11 +83,15 @@ import {
     ExampleFuzzyOptionComponent
   ]
 })
-export class ExampleFormComponent {
+export class ExampleFormComponent implements OnInit {
   constructor(
     @Inject(DOCUMENT) private doc: Document,
     private cdRef: ChangeDetectorRef
   ) {}
+
+  ngOnInit(): void {
+    this.restoreSchemes();
+  }
 
   protected readonly formValue$ = new BehaviorSubject<ExampleFormModel>({
     firstName: 'Cynthion',
@@ -440,7 +444,8 @@ export class ExampleFormComponent {
   // #region Control Center & Debug Output
 
   protected logs: string[] = [];
-  protected theme: ThemeKey = 'default';
+  protected geometry: GeometryKey = 'outlined';
+  protected color: ColorKey = 'slate';
 
   log(message: string): void {
     this.logs.unshift(message);
@@ -502,133 +507,347 @@ export class ExampleFormComponent {
     this.clearLogs();
   }
 
-  setTheme(key: ThemeKey): void {
-    this.theme = key;
+  setGeometry(key: GeometryKey): void {
+    this.geometry = key;
+    this.applySchemes();
+  }
 
+  setColor(key: ColorKey): void {
+    this.color = key;
+    this.applySchemes();
+  }
+
+  // The two axes are independent: geometry sets dimensions, radii and thicknesses, colour sets colours.
+  // Applied together so a scheme on one axis can be judged against any scheme on the other.
+  private applySchemes(): void {
     const root = this.doc.documentElement;
 
     // 1) Clear previously applied custom vars
     this.appliedKeys.forEach((k) => root.style.removeProperty(k));
     this.appliedKeys.clear();
 
-    // 2) Apply selected theme vars (default = {} → applies nothing)
-    const vars = this.themes[key];
+    // 2) Apply both axes. Both always apply: A on each axis is the shipped default stated in full.
+    const vars = { ...this.geometrySchemes[this.geometry], ...this.colorSchemes[this.color] };
     for (const [k, v] of Object.entries(vars)) {
       root.style.setProperty(k, v);
       this.appliedKeys.add(k);
     }
 
     // 3) Persist + nudge CD if needed
-    localStorage.setItem('example.theme', key);
+    localStorage.setItem('example.geometry', this.geometry);
+    localStorage.setItem('example.color', this.color);
     this.cdRef.markForCheck();
   }
 
-  private readonly themes: Record<ThemeKey, ThemeVars> = {
-    default: {},
-    theme2: {
-      '--formidable-field-height': '64px',
-      '--formidable-field-border-thickness': '2px',
-      '--formidable-border-radius': '10px',
-      '--formidable-color-validation-error': '#d61f69',
-      '--formidable-color-field-text': '#1b1b1b',
-      '--formidable-color-field-label': '#1b1b1b',
-      '--formidable-color-field-label-floating': '#0e7490',
-      '--formidable-color-field-placeholder': '#6b7280',
-      '--formidable-color-field-selection': '#c084fc',
-      '--formidable-color-field-border': '#0ea5e9',
-      '--formidable-color-field-border-focus': '#3b82f6',
-      '--formidable-color-field-background': '#ecfeff',
-      '--formidable-color-field-background-readonly': '#bae6fd',
-      '--formidable-color-field-background-disabled': '#e5e7eb',
-      '--formidable-color-field-option-background-highlighted': 'rgba(14, 165, 233, 0.15)',
-      '--formidable-color-field-option-background-hovered': 'rgba(59, 130, 246, 0.2)',
-      '--formidable-date-field-panel-width': '260px',
-      '--formidable-panel-background': '#f0f9ff',
-      '--formidable-panel-box-shadow': '0 8px 32px rgba(0,0,0,0.15)'
-    },
-    theme3: {
-      '--formidable-field-height': '60px',
-      '--formidable-field-border-thickness': '3px',
-      '--formidable-border-radius': '14px',
-      '--formidable-color-validation-error': '#ff4d6d',
-      '--formidable-color-field-text': '#1e293b',
-      '--formidable-color-field-label': '#1e293b',
-      '--formidable-color-field-label-floating': '#f97316',
-      '--formidable-color-field-placeholder': '#f59e0b',
-      '--formidable-color-field-selection': '#fde047',
-      '--formidable-color-field-border': '#f97316',
-      '--formidable-color-field-border-focus': '#ea580c',
-      '--formidable-color-field-background': '#fffbeb',
-      '--formidable-color-field-background-readonly': '#fde68a',
-      '--formidable-color-field-background-disabled': '#fcd34d',
-      '--formidable-color-field-option-background-highlighted': 'rgba(251, 191, 36, 0.25)',
-      '--formidable-color-field-option-background-hovered': 'rgba(249, 115, 22, 0.2)',
-      '--formidable-date-field-panel-width': '260px',
-      '--formidable-panel-background': '#fff7ed',
-      '--formidable-panel-box-shadow': '0 8px 32px rgba(255, 140, 0, 0.25)'
-    },
-    theme4: {
-      '--formidable-field-height': '36px',
+  private restoreSchemes(): void {
+    const geometry = localStorage.getItem('example.geometry');
+    const color = localStorage.getItem('example.color');
+
+    if (geometry && geometry in this.geometrySchemes) this.geometry = geometry as GeometryKey;
+    if (color && color in this.colorSchemes) this.color = color as ColorKey;
+
+    this.applySchemes();
+  }
+
+  // The shipped default leads each axis and is what the form starts on. There is no separate "library
+  // default" entry: A on both axes *is* the default, stated in full, so if either ever stops matching
+  // `_tokens.scss` the drift is visible rather than hidden behind an empty option.
+  protected readonly geometryOptions: readonly { key: GeometryKey; label: string }[] = [
+    { key: 'outlined', label: 'A — Outlined ★' },
+    { key: 'underlined', label: 'B — Underlined' },
+    { key: 'soft', label: 'C — Soft' },
+    { key: 'compact', label: 'D — Compact' },
+    { key: 'pill', label: 'E — Pill' },
+    { key: 'leaf', label: 'F — Leaf' },
+    { key: 'tab', label: 'G — Tab' },
+    { key: 'brutalist', label: 'H — Brutalist' },
+    { key: 'airy', label: 'I — Airy' }
+  ];
+
+  protected readonly colorOptions: readonly { key: ColorKey; label: string }[] = [
+    { key: 'slate', label: 'A — Slate ★' },
+    { key: 'ocean', label: 'B — Ocean' },
+    { key: 'sand', label: 'C — Sand' },
+    { key: 'forest', label: 'D — Forest' },
+    { key: 'plum', label: 'E — Plum' },
+    { key: 'mono', label: 'F — Mono' },
+    { key: 'clinical', label: 'G — Clinical' },
+    { key: 'ledger', label: 'H — Ledger' },
+    { key: 'sunset', label: 'I — Sunset' },
+    { key: 'midnight', label: 'J — Midnight (dark)' }
+  ];
+
+  // Geometry only: dimensions, radii and thicknesses. No colour, so any scheme here combines with any
+  // scheme below. Catalogued in `theme-options.md`.
+  // Units are mandatory on every length: a unitless `0` is a `<number>` in `calc()`, not a `<length>`,
+  // and would invalidate every declaration that derives from it.
+  private readonly geometrySchemes: Record<GeometryKey, ThemeVars> = {
+    // A — Outlined ★ — the shipped default. Kept stated in full rather than aliased to `default`, so
+    // selecting it must render identically to `Library Default`; if the two ever diverge, `_tokens.scss`
+    // and this catalogue have drifted.
+    outlined: {
+      '--formidable-field-height': '56px',
       '--formidable-field-border-thickness': '1px',
-      '--formidable-border-radius': '0',
-      '--formidable-color-validation-error': '#b91c1c',
-      '--formidable-color-field-text': '#111827',
-      '--formidable-color-field-label': '#111827',
-      '--formidable-color-field-label-floating': '#374151',
-      '--formidable-color-field-placeholder': '#6b7280',
-      '--formidable-color-field-selection': '#93c5fd',
-      '--formidable-color-field-border': '#9ca3af',
-      '--formidable-color-field-border-focus': '#2563eb',
-      '--formidable-color-field-background': '#f9fafb',
-      '--formidable-color-field-background-readonly': '#e5e7eb',
-      '--formidable-color-field-background-disabled': '#e5e7eb',
-      '--formidable-color-field-group-background': 'transparent',
-      '--formidable-color-field-group-background-readonly': 'transparent',
-      '--formidable-color-field-group-background-disabled': 'transparent',
-      '--formidable-color-field-option-background-highlighted': 'rgba(37, 99, 235, 0.08)',
-      '--formidable-color-field-option-background-hovered': 'rgba(37, 99, 235, 0.15)',
-      '--formidable-date-field-panel-width': '180px',
-      '--formidable-panel-background': '#ffffff',
-      '--formidable-panel-box-shadow': '0 4px 20px rgba(0,0,0,0.08)'
+      '--formidable-border-radius': '8px',
+      '--formidable-field-padding-x': '16px'
     },
-    // Underlined style: no border at all, a line inside the bottom edge that thickens on
-    // focus, and a field rounded only at the top. Everything else keeps the shared radius, which is the
-    // point — the slider thumb, the toggle knob and the panels do not follow the field's corners.
-    // Note the units on the zeroes: a unitless `0` is a `<number>` in `calc()`, not a `<length>`, and
-    // would invalidate every declaration that derives from it.
-    theme5: {
+    // B — Underlined: no border, a line inside the bottom edge that thickens on focus, and a field
+    // rounded only at the top — so a panel opening below mirrors the square bottom and the pair reads as
+    // one box, while a panel that flips above picks up the 8px instead. Everything that is not a field
+    // box keeps the shared radius, which is the point: the slider thumb, the toggle knob and the panels
+    // do not follow the field's corners.
+    underlined: {
       '--formidable-field-height': '56px',
       '--formidable-field-border-thickness': '0px',
-      // Square at the bottom, so an open panel below mirrors that and the pair reads as one box — while
-      // a panel that flips above picks up the 8px instead.
+      '--formidable-border-radius': '8px',
       '--formidable-field-border-radius': '0px',
       '--formidable-field-border-start-start-radius': '8px',
       '--formidable-field-border-start-end-radius': '8px',
       '--formidable-field-underline-thickness': '1px',
       '--formidable-field-underline-thickness-focus': '2px',
       '--formidable-field-underline-thickness-invalid': '2px',
-      '--formidable-color-field-underline': '#6b7280',
-      '--formidable-color-field-underline-focus': '#7c3aed',
-      '--formidable-color-validation-error': '#dc2626',
-      '--formidable-color-field-text': '#1f2937',
-      '--formidable-color-field-label': '#1f2937',
-      '--formidable-color-field-label-floating': '#7c3aed',
-      '--formidable-color-field-placeholder': '#9ca3af',
-      '--formidable-color-field-selection': '#ddd6fe',
-      '--formidable-color-field-border-focus': '#7c3aed',
-      '--formidable-color-field-background': '#f5f3ff',
-      '--formidable-color-field-background-readonly': '#ede9fe',
-      '--formidable-color-field-background-disabled': '#e5e7eb',
-      '--formidable-color-field-option-background-highlighted': 'rgba(124, 58, 237, 0.12)',
-      '--formidable-color-field-option-background-hovered': 'rgba(124, 58, 237, 0.2)',
-      // The toggle's track is drawn by its border, and this theme has no field border — so the track
-      // keeps a thickness of its own rather than vanishing with it.
+      // A field group never takes an underline, and its border thickness follows the field's — which is
+      // `0px` here. Left to derive, a focused group would show no focus indicator at all.
+      '--formidable-field-group-border-thickness': '1px',
+      // The toggle's track is drawn by the field's border, so it needs a thickness of its own.
       '--formidable-toggle-field-track-border-thickness': '1px',
-      '--formidable-color-toggle-field-background-checked': '#c4b5fd',
-      '--formidable-color-toggle-thumb': '#7c3aed',
-      '--formidable-date-field-panel-width': '260px',
-      '--formidable-panel-background': '#ffffff',
-      '--formidable-panel-box-shadow': '0 8px 32px rgba(124, 58, 237, 0.2)'
+      '--formidable-slider-track-border-thickness': '1px'
+    },
+    // C — Soft: borderless, generously rounded, focus carried by a wide translucent ring.
+    soft: {
+      '--formidable-field-height': '60px',
+      '--formidable-field-border-thickness': '0px',
+      '--formidable-border-radius': '12px',
+      '--formidable-field-padding-x': '16px',
+      '--formidable-field-group-border-thickness': '1px',
+      '--formidable-toggle-field-track-border-thickness': '1px',
+      '--formidable-slider-track-border-thickness': '1px',
+      // The only place a geometry scheme touches a colour variable: the ring's width comes from the
+      // field's border thickness, which is `0px` here, so the ring has to be restated. It still reads its
+      // colour from the active colour scheme, which is what keeps the two axes independent.
+      '--formidable-color-field-focus-box-shadow':
+        '0 0 0 3px color-mix(in srgb, var(--formidable-color-field-border-focus) 35%, transparent)',
+      '--formidable-color-field-group-focus-box-shadow':
+        '0 0 0 3px color-mix(in srgb, var(--formidable-color-field-border-focus) 35%, transparent)',
+      '--formidable-color-field-focus-box-shadow-invalid':
+        '0 0 0 3px color-mix(in srgb, var(--formidable-color-validation-error) 35%, transparent)'
+    },
+    // D — Compact: dense rows for data-entry screens. 44px is the floor for the `inside` label
+    // positions — below it the floating label and the value no longer fit the field's inner height and
+    // the two start to overlap.
+    compact: {
+      '--formidable-field-height': '44px',
+      '--formidable-field-border-thickness': '1px',
+      '--formidable-border-radius': '4px',
+      '--formidable-field-padding-x': '12px',
+      '--formidable-field-font-size': '14px',
+      '--formidable-label-font-size': '14px',
+      '--formidable-label-floating-font-size': '11px',
+      '--formidable-field-toggle-size': '24px',
+      '--formidable-field-group-option-padding': '4px 0px',
+      '--formidable-option-prefix-dimension-outer': '16px',
+      '--formidable-option-prefix-dimension-inner': '6px',
+      '--formidable-option-prefix-gap': '10px',
+      '--formidable-toggle-field-width': '36px',
+      '--formidable-toggle-field-height': '20px',
+      '--formidable-toggle-field-thumb-size': '12px'
+    },
+    // E — Pill: the field radius is half its height, so it is fully round; everything else that is
+    // rounded goes round with it. An open panel mirrors the field's facing corners, so the panel's top
+    // arrives at 26px too.
+    pill: {
+      '--formidable-field-height': '52px',
+      '--formidable-field-border-thickness': '1px',
+      '--formidable-border-radius': '16px',
+      '--formidable-field-border-radius': '26px',
+      '--formidable-field-group-border-radius': '20px',
+      '--formidable-field-padding-x': '24px',
+      '--formidable-panel-border-radius': '20px',
+      '--formidable-toggle-field-track-border-radius': '999px',
+      '--formidable-toggle-field-thumb-border-radius': '999px',
+      '--formidable-slider-track-border-radius': '999px',
+      '--formidable-slider-thumb-border-radius': '999px',
+      '--formidable-slider-tick-mark-border-radius': '999px'
+    },
+    // F — Leaf: one diagonal pair of corners heavily rounded, the other pair nearly square. The four
+    // per-corner variables exist for exactly this, and they shape the field box alone — the toggle, the
+    // slider and the panels keep the shared 8px.
+    leaf: {
+      '--formidable-field-height': '56px',
+      '--formidable-field-border-thickness': '1px',
+      '--formidable-border-radius': '8px',
+      '--formidable-field-border-radius': '2px',
+      '--formidable-field-border-start-start-radius': '22px',
+      '--formidable-field-border-end-end-radius': '22px',
+      '--formidable-field-group-border-radius': '22px 2px',
+      '--formidable-field-padding-x': '18px'
+    },
+    // G — Tab: rounded on top, square on the bottom. A panel opening below mirrors that square edge, so
+    // the field and its panel read as a single card; one that flips above picks up the 18px instead.
+    tab: {
+      '--formidable-field-height': '56px',
+      '--formidable-field-border-thickness': '1px',
+      '--formidable-border-radius': '10px',
+      '--formidable-field-border-radius': '0px',
+      '--formidable-field-border-start-start-radius': '18px',
+      '--formidable-field-border-start-end-radius': '18px',
+      '--formidable-field-padding-x': '16px'
+    },
+    // H — Brutalist: no radius anywhere, heavy borders, and hard offset shadows instead of rings. The
+    // shadows read their colours from the active colour scheme, so the axes stay independent.
+    brutalist: {
+      '--formidable-field-height': '52px',
+      '--formidable-field-border-thickness': '3px',
+      '--formidable-border-radius': '0px',
+      '--formidable-field-padding-x': '14px',
+      '--formidable-slider-thumb-border-thickness': '3px',
+      '--formidable-color-field-focus-box-shadow': '5px 5px 0 0 var(--formidable-color-field-border-focus)',
+      '--formidable-color-field-group-focus-box-shadow': '5px 5px 0 0 var(--formidable-color-field-border-focus)',
+      '--formidable-color-field-focus-box-shadow-invalid': '5px 5px 0 0 var(--formidable-color-validation-error)',
+      '--formidable-panel-box-shadow': '6px 6px 0 0 var(--formidable-color-field-border)',
+      '--formidable-date-field-panel-box-shadow': '6px 6px 0 0 var(--formidable-color-field-border)'
+    },
+    // I — Airy: tall rows, generous padding, large radii. Reads calm rather than dense.
+    airy: {
+      '--formidable-field-height': '72px',
+      '--formidable-field-border-thickness': '1px',
+      '--formidable-border-radius': '18px',
+      '--formidable-field-padding-x': '22px',
+      '--formidable-field-before-margin-bottom': '16px',
+      '--formidable-textarea-padding-top': '20px'
+    }
+  };
+
+  // Colour only: eight seed variables per scheme. Everything else in the library derives from them —
+  // the border drives the underline, the toggle thumb, the slider fills and the option prefixes; the
+  // background drives the panels, the groups and the readonly/disabled fills; the placeholder drives the
+  // hints, the length indicator and the resting label. This is the "override the base, not the
+  // derivative" rule from `theming.md`, demonstrated.
+  private readonly colorSchemes: Record<ColorKey, ThemeVars> = {
+    // A — Ocean: the library's incumbent blue, cleaned up.
+    ocean: {
+      '--formidable-color-validation-error': '#c53030',
+      '--formidable-color-field-text': '#00345a',
+      '--formidable-color-field-placeholder': '#4a7189',
+      '--formidable-color-field-selection': '#9fb7c7',
+      '--formidable-color-field-border': '#3e6988',
+      '--formidable-color-field-border-focus': '#0b6fa4',
+      '--formidable-color-field-background': '#f2faff',
+      '--formidable-color-field-label-floating': '#255476'
+    },
+    // B — Slate ★ — the shipped default, for the reason stated: neutral chrome plus one accent reads as
+    // deliberate without competing with the consumer's brand, and rebranding is one variable. Kept stated
+    // in full so it must render identically to `Library Default`.
+    slate: {
+      '--formidable-color-validation-error': '#dc2626',
+      '--formidable-color-field-text': '#1e293b',
+      '--formidable-color-field-placeholder': '#5a6b82',
+      '--formidable-color-field-selection': '#c7d2fe',
+      '--formidable-color-field-border': '#94a3b8',
+      '--formidable-color-field-border-focus': '#4f46e5',
+      '--formidable-color-field-background': '#f8fafc',
+      '--formidable-color-field-label-floating': '#4338ca'
+    },
+    // C — Sand: warm, low-contrast fill.
+    sand: {
+      '--formidable-color-validation-error': '#b91c1c',
+      '--formidable-color-field-text': '#3f2d16',
+      '--formidable-color-field-placeholder': '#8a6d4a',
+      '--formidable-color-field-selection': '#fde68a',
+      '--formidable-color-field-border': '#c9a227',
+      '--formidable-color-field-border-focus': '#b45309',
+      '--formidable-color-field-background': '#fdf8f0',
+      '--formidable-color-field-label-floating': '#92400e'
+    },
+    // D — Forest: green accent on a cool neutral.
+    forest: {
+      '--formidable-color-validation-error': '#be123c',
+      '--formidable-color-field-text': '#14342a',
+      '--formidable-color-field-placeholder': '#4f6f63',
+      '--formidable-color-field-selection': '#a7f3d0',
+      '--formidable-color-field-border': '#3f6f5c',
+      '--formidable-color-field-border-focus': '#059669',
+      '--formidable-color-field-background': '#f4faf7',
+      '--formidable-color-field-label-floating': '#047857'
+    },
+    // E — Plum: tinted fill, saturated accent.
+    plum: {
+      '--formidable-color-validation-error': '#c2183f',
+      '--formidable-color-field-text': '#2e1065',
+      '--formidable-color-field-placeholder': '#6d5f8c',
+      '--formidable-color-field-selection': '#ddd6fe',
+      '--formidable-color-field-border': '#8b7bb8',
+      '--formidable-color-field-border-focus': '#7c3aed',
+      '--formidable-color-field-background': '#faf5ff',
+      '--formidable-color-field-label-floating': '#6d28d9'
+    },
+    // F — Mono: greyscale chrome, to prove the library reads with no brand colour at all. The error
+    // colour stays red on purpose — dropping it would leave validation signalled by shape alone.
+    mono: {
+      '--formidable-color-validation-error': '#b00020',
+      '--formidable-color-field-text': '#111111',
+      '--formidable-color-field-placeholder': '#595959',
+      '--formidable-color-field-selection': '#d4d4d4',
+      '--formidable-color-field-border': '#767676',
+      '--formidable-color-field-border-focus': '#111111',
+      '--formidable-color-field-background': '#fafafa',
+      '--formidable-color-field-label-floating': '#333333'
+    },
+    // G — Clinical: medical and pharma. Near-white, cool teal accent, deliberately high contrast.
+    clinical: {
+      '--formidable-color-validation-error': '#c2410c',
+      '--formidable-color-field-text': '#0f2b2e',
+      '--formidable-color-field-placeholder': '#4c6b6d',
+      '--formidable-color-field-selection': '#99f6e4',
+      '--formidable-color-field-border': '#7f9fa1',
+      '--formidable-color-field-border-focus': '#0f766e',
+      '--formidable-color-field-background': '#f7fdfd',
+      '--formidable-color-field-label-floating': '#115e59'
+    },
+    // H — Ledger: banking and insurance. Warm paper, navy text, muted gold accent — conservative on
+    // purpose, the palette a compliance department signs off on.
+    ledger: {
+      '--formidable-color-validation-error': '#991b1b',
+      '--formidable-color-field-text': '#1c2c45',
+      '--formidable-color-field-placeholder': '#6b6350',
+      '--formidable-color-field-selection': '#e7d9ae',
+      '--formidable-color-field-border': '#a9a190',
+      '--formidable-color-field-border-focus': '#8a6d1f',
+      '--formidable-color-field-background': '#fbfaf7',
+      '--formidable-color-field-label-floating': '#5b4a12'
+    },
+    // I — Sunset: consumer and lifestyle. Warm, vivid, high-energy.
+    sunset: {
+      '--formidable-color-validation-error': '#9f1239',
+      '--formidable-color-field-text': '#4c1d24',
+      '--formidable-color-field-placeholder': '#9a5f57',
+      '--formidable-color-field-selection': '#fecdd3',
+      '--formidable-color-field-border': '#f0a08c',
+      '--formidable-color-field-border-focus': '#e11d48',
+      '--formidable-color-field-background': '#fff7f5',
+      '--formidable-color-field-label-floating': '#be123c'
+    },
+    // J — Midnight: a dark field, to prove the seeds invert. Four extra variables are unavoidable and
+    // each marks a real limit — see the dark-scheme notes in `theme-options.md`. `--example-page-*` is
+    // the demo's own, not the library's: a dark theme needs a dark host page, which no token can supply.
+    midnight: {
+      '--formidable-color-validation-error': '#fb7185',
+      '--formidable-color-field-text': '#e8ecf5',
+      '--formidable-color-field-placeholder': '#8b95ab',
+      '--formidable-color-field-selection': '#334155',
+      '--formidable-color-field-border': '#3b465e',
+      '--formidable-color-field-border-focus': '#5eead4',
+      '--formidable-color-field-background': '#141824',
+      '--formidable-color-field-label-floating': '#5eead4',
+      // The readonly and disabled fills are the base mixed toward `transparent`, which lightens them
+      // against the page rather than dimming them. On a dark field they have to be stated outright.
+      '--formidable-color-field-background-readonly': '#1c2130',
+      '--formidable-color-field-background-disabled': '#191d29',
+      // The selected and highlighted option fills are black at low alpha — invisible on a dark panel.
+      '--formidable-color-field-option-background-selected': 'rgb(255 255 255 / 6%)',
+      '--formidable-color-field-option-background-highlighted': 'rgb(255 255 255 / 12%)',
+      '--example-page-background': '#0b0e16',
+      '--example-page-text': '#e8ecf5'
     }
   };
 
@@ -644,5 +863,6 @@ type ControlKey =
   | 'showHints'
   | 'showAsReadonly'
   | 'showAsDisabled';
-type ThemeKey = 'default' | 'theme2' | 'theme3' | 'theme4' | 'theme5';
+type GeometryKey = 'outlined' | 'underlined' | 'soft' | 'compact' | 'pill' | 'leaf' | 'tab' | 'brutalist' | 'airy';
+type ColorKey = 'slate' | 'ocean' | 'sand' | 'forest' | 'plum' | 'mono' | 'clinical' | 'ledger' | 'sunset' | 'midnight';
 type ThemeVars = Record<string, string>;
