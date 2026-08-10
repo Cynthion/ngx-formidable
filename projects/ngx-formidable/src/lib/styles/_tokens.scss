@@ -50,6 +50,10 @@ $formidable-border-radius: utils.spacing(8);
 
 $formidable-field-border-thickness: utils.spacing(1);
 
+// The focus ring's spread. Its own value, so a borderless theme can still have a ring and any theme can
+// have one wider than its border.
+$formidable-field-focus-ring-width: $formidable-field-border-thickness;
+
 // What every corner of a field falls back to. A single value: each corner is shaped on its own through
 // the four `--formidable-field-border-<corner>-radius` custom properties, which have no token of their
 // own because this *is* their default.
@@ -124,11 +128,14 @@ $formidable-label-border-gap: utils.spacing(4);
 $formidable-label-border-band-bleed: 1px;
 
 // How much further the band reaches *upwards*, past the bleed. Zero at rest; the decorator raises it to
-// the focus ring's width while focused, because that ring is a box-shadow painted outside the field's
-// border box and the band would otherwise stop short of it. Carries a unit for the same reason as the
-// underline above: it is summed inside `calc()`, where a unitless zero would invalidate the declaration.
+// the `-focus` value below while focused. Carries a unit for the same reason as the underline above: it is
+// summed inside `calc()`, where a unitless zero would invalidate the declaration.
 /* stylelint-disable-next-line length-zero-no-unit */
 $formidable-label-border-band-reach: 0rem;
+
+// What the reach becomes while the field is focused. The focus ring is a box-shadow painted outside the
+// field's border box, so the band has to cover that too or it stops short of it.
+$formidable-label-border-band-reach-focus: $formidable-field-focus-ring-width;
 
 // What a required field's label is suffixed with. A `content` string, so a theme can swap the glyph for a
 // word — ' (required)' — without touching markup.
@@ -229,12 +236,13 @@ $formidable-color-field-option-background-selected: rgb(0 0 0 / 2.5%);
 $formidable-color-field-option-background-highlighted: rgb(0 0 0 / 5%);
 $formidable-color-field-option-background-hovered: rgb($formidable-color-field-placeholder, 25%);
 
-$formidable-color-field-focus-box-shadow: 0 0 0 $formidable-field-border-thickness $formidable-color-field-border-focus;
-$formidable-color-field-group-focus-box-shadow: 0 0 0 $formidable-field-group-border-thickness
+// One ring width for all three: a ring differs by colour, never by size.
+$formidable-color-field-focus-box-shadow: 0 0 0 $formidable-field-focus-ring-width $formidable-color-field-border-focus;
+$formidable-color-field-group-focus-box-shadow: 0 0 0 $formidable-field-focus-ring-width
   $formidable-color-field-group-border-focus;
 
 // A focused field keeps its ring while invalid, so the ring takes the invalid colour with the border.
-$formidable-color-field-focus-box-shadow-invalid: 0 0 0 $formidable-field-border-thickness
+$formidable-color-field-focus-box-shadow-invalid: 0 0 0 $formidable-field-focus-ring-width
   $formidable-color-field-border-invalid;
 
 // #region Toggle

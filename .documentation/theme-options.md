@@ -15,41 +15,44 @@ Schemes come on two independent axes — **geometry** (dimensions, radii, thickn
 
 ## Geometry Schemes
 
-| Id  | Key          | Look                                                                                     | Reads As               |
-| :-- | :----------- | :--------------------------------------------------------------------------------------- | :--------------------- |
-| A   | `outlined`   | The boxed field, tightened. `56px` tall, `1px` border, `8px` radius                      | Neutral, universal     |
-| B   | `underlined` | No border; a line inside the bottom edge thickening on focus. Rounded on the top only    | Familiar, Material-ish |
-| C   | `soft`       | Borderless, `12px` radius, `60px` tall. Focus carried by a wide translucent ring         | Modern product UI      |
-| D   | `compact`    | Dense rows: `44px` tall, `14px` text, `4px` radius, smaller prefixes, toggle and padding | Admin, back office     |
-| E   | `pill`       | Field radius is half its height, so it is fully round; toggle and slider go round too    | Consumer, playful      |
-| F   | `leaf`       | One diagonal pair of corners at `22px`, the other pair at `2px`                          | Editorial, boutique    |
-| G   | `tab`        | `18px` on top, square on the bottom, so a panel below fuses into one card                | App-like, docked       |
-| H   | `brutalist`  | Zero radius, `3px` borders, hard `5px` offset shadows instead of rings                   | Bleeding-edge startup  |
-| I   | `airy`       | `72px` rows, `22px` padding, `18px` radius, roomy spacing                                | Premium, calm          |
+| Id  | Key          | Look                                                                                                                      | Reads As               |
+| :-- | :----------- | :------------------------------------------------------------------------------------------------------------------------ | :--------------------- |
+| A   | `outlined`   | The boxed field, tightened. `56px` tall, `1px` border, `8px` radius                                                       | Neutral, universal     |
+| B   | `underlined` | No border; a line inside the bottom edge thickening on focus. Rounded on the top only                                     | Familiar, Material-ish |
+| C   | `soft`       | Borderless, `12px` radius, `60px` tall. Focus carried by a wide translucent ring                                          | Modern product UI      |
+| D   | `compact`    | Dense rows: `44px` tall, `14px` text, `4px` radius, smaller prefixes, toggle and padding                                  | Admin, back office     |
+| E   | `pill`       | Field radius is half its height, so it is fully round; toggle and slider go round too                                     | Consumer, playful      |
+| F   | `leaf`       | One diagonal pair of corners at `22px`, the other pair at `2px`                                                           | Editorial, boutique    |
+| G   | `tab`        | `18px` on top, square on the bottom, so a panel below fuses into one card                                                 | App-like, docked       |
+| H   | `brutalist`  | Zero radius, `3px` borders, hard `5px` offset shadows instead of rings                                                    | Bleeding-edge startup  |
+| I   | `airy`       | `72px` rows, `22px` padding, `18px` radius, roomy spacing                                                                 | Premium, calm          |
+| J   | `borderless` | No border and nothing standing in for one. `4px` radius; the fill defines a field at rest and a solid `2px` ring on focus | Flat, chrome-free      |
 
 ### What Each Sets
 
-| Variable                                           |      A |      B |      C |      D |      E |          F |      G |      H |      I |
-| :------------------------------------------------- | -----: | -----: | -----: | -----: | -----: | ---------: | -----: | -----: | -----: |
-| `--formidable-field-height`                        | `56px` | `56px` | `60px` | `44px` | `52px` |     `56px` | `56px` | `52px` | `72px` |
-| `--formidable-field-border-thickness`              |  `1px` |  `0px` |  `0px` |  `1px` |  `1px` |      `1px` |  `1px` |  `3px` |  `1px` |
-| `--formidable-border-radius`                       |  `8px` |  `8px` | `12px` |  `4px` | `16px` |      `8px` | `10px` |  `0px` | `18px` |
-| `--formidable-field-padding-x`                     | `16px` |      — | `16px` | `12px` | `24px` |     `18px` | `16px` | `14px` | `22px` |
-| `--formidable-field-border-radius`                 |      — |  `0px` |      — |      — | `26px` |      `2px` |  `0px` |      — |      — |
-| `--formidable-field-border-start-start-radius`     |      — |  `8px` |      — |      — |      — |     `22px` | `18px` |      — |      — |
-| `--formidable-field-border-start-end-radius`       |      — |  `8px` |      — |      — |      — |          — | `18px` |      — |      — |
-| `--formidable-field-border-end-end-radius`         |      — |      — |      — |      — |      — |     `22px` |      — |      — |      — |
-| `--formidable-field-group-border-radius`           |      — |      — |      — |      — | `20px` | `22px 2px` |      — |      — |      — |
-| `--formidable-field-underline-thickness`           |      — |  `1px` |      — |      — |      — |          — |      — |      — |      — |
-| `--formidable-field-underline-thickness-focus`     |      — |  `2px` |      — |      — |      — |          — |      — |      — |      — |
-| `--formidable-field-underline-thickness-invalid`   |      — |  `2px` |      — |      — |      — |          — |      — |      — |      — |
-| `--formidable-field-group-border-thickness`        |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |
-| `--formidable-toggle-field-track-border-thickness` |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |
-| `--formidable-slider-track-border-thickness`       |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |
+| Variable                                           |      A |      B |      C |      D |      E |          F |      G |      H |      I |      J |
+| :------------------------------------------------- | -----: | -----: | -----: | -----: | -----: | ---------: | -----: | -----: | -----: | -----: |
+| `--formidable-field-height`                        | `56px` | `56px` | `60px` | `44px` | `52px` |     `56px` | `56px` | `52px` | `72px` | `56px` |
+| `--formidable-field-border-thickness`              |  `1px` |  `0px` |  `0px` |  `1px` |  `1px` |      `1px` |  `1px` |  `3px` |  `1px` |  `0px` |
+| `--formidable-border-radius`                       |  `8px` |  `8px` | `12px` |  `4px` | `16px` |      `8px` | `10px` |  `0px` | `18px` |  `4px` |
+| `--formidable-field-padding-x`                     | `16px` |      — | `16px` | `12px` | `24px` |     `18px` | `16px` | `14px` | `22px` | `16px` |
+| `--formidable-field-border-radius`                 |      — |  `0px` |      — |      — | `26px` |      `2px` |  `0px` |      — |      — |      — |
+| `--formidable-field-border-start-start-radius`     |      — |  `8px` |      — |      — |      — |     `22px` | `18px` |      — |      — |      — |
+| `--formidable-field-border-start-end-radius`       |      — |  `8px` |      — |      — |      — |          — | `18px` |      — |      — |      — |
+| `--formidable-field-border-end-end-radius`         |      — |      — |      — |      — |      — |     `22px` |      — |      — |      — |      — |
+| `--formidable-field-group-border-radius`           |      — |      — |      — |      — | `20px` | `22px 2px` |      — |      — |      — |      — |
+| `--formidable-field-underline-thickness`           |      — |  `1px` |      — |      — |      — |          — |      — |      — |      — |      — |
+| `--formidable-field-underline-thickness-focus`     |      — |  `2px` |      — |      — |      — |          — |      — |      — |      — |      — |
+| `--formidable-field-underline-thickness-invalid`   |      — |  `2px` |      — |      — |      — |          — |      — |      — |      — |      — |
+| `--formidable-field-group-border-thickness`        |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |  `1px` |
+| `--formidable-field-focus-ring-width`              |      — |  `1px` |  `3px` |      — |      — |          — |      — |      — |      — |  `2px` |
+| `--formidable-panel-border-thickness`              |      — |  `1px` |      — |      — |      — |          — |      — |      — |      — |  `1px` |
+| `--formidable-toggle-field-track-border-thickness` |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |  `1px` |
+| `--formidable-slider-track-border-thickness`       |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |  `1px` |
 
 Beyond the table:
 
-- **C** and **H** restate `--formidable-color-field-focus-box-shadow` and its group and invalid variants — C as a wide translucent ring, H as a hard offset shadow. Both reference colour variables rather than literal colours, so they still follow the active colour scheme.
+- **C** and **H** restate `--formidable-color-field-focus-box-shadow` and its group and invalid variants — C as a wide translucent ring, H as a hard offset shadow. Both reference colour variables rather than literal colours, so they still follow the active colour scheme. Only the colour needs restating: C takes its width from `--formidable-field-focus-ring-width` and substitutes it into all three.
 - **D** also sets `--formidable-field-font-size`, `--formidable-label-font-size`, `--formidable-label-floating-font-size`, `--formidable-field-toggle-size`, `--formidable-field-group-option-padding`, the three `--formidable-option-prefix-*` sizes and the three `--formidable-toggle-field-*` sizes.
 - **E** also rounds off everything the field's radius does not reach — `--formidable-panel-border-radius` and the toggle's, slider's and tick marks' radii.
 - **H** also sets `--formidable-slider-thumb-border-thickness` and replaces both panel shadows with hard offsets.
@@ -57,18 +60,21 @@ Beyond the table:
 
 ### Traps A Borderless Geometry Has To Handle
 
-Both **B** and **C** drop `--formidable-field-border-thickness` to `0px`, and four things are drawn by that border:
+**B**, **C** and **J** all drop `--formidable-field-border-thickness` to `0px`, and five things are drawn by that border:
 
 - **The toggle's track** — restore it with `--formidable-toggle-field-track-border-thickness`.
 - **The slider's track border** — restore it with `--formidable-slider-track-border-thickness`.
-- **A field group's focus ring** — a group never takes an underline, and its border thickness derives from the field's. Left to derive, a focused radio or checkbox group shows no focus indicator at all. Restore it with `--formidable-field-group-border-thickness`.
-- **A field's focus ring** — its width is the border thickness. **B** replaces it with the thickened underline; **C** restates the ring with an explicit width.
+- **A field group's border** — restore it with `--formidable-field-group-border-thickness`.
+- **A panel's outline** — every dropdown, autocomplete and date panel is left with its box-shadow alone. Restore it with `--formidable-panel-border-thickness`. **B** and **J** do; **C** stays borderless here deliberately, which is what a soft geometry wants.
+- **Every focus ring** — one `--formidable-field-focus-ring-width` covers fields and groups alike, and a group never takes an underline to fall back on. **B** restores a hairline ring, which its fields take alongside their thickened underline; **C** raises it to `3px` and restates only the ring's colour; **J** takes a solid `2px` and has nothing else, which is what makes it the scheme these five hatches were added for.
+
+**J** is the check that they are all reachable: it sets no underline and no shadow of its own, so any hatch that failed would show up as missing chrome rather than as a subtler shift.
 
 Two further constraints, both found while building these schemes:
 
-- **`44px` is the floor for the `inside` label positions.** Below it the floating label's line box and the value's line box no longer fit the field's inner height, `--formidable-label-inside-slack` goes negative and the two overlap. This is why **D** stops at `44px` rather than the `36px` a compact row would otherwise want.
+- **`44px` is the floor for the `inside` label positions.** Below it the floating label's line box and the value's line box no longer fit the field's inner height. `--formidable-label-inside-slack` is clamped at `0px`, so such a field overflows its own box instead of inverting the two into each other. This is why **D** stops at `44px` rather than the `36px` a compact row would otherwise want.
 - **Units are mandatory.** A unitless `0` is a `<number>` in `calc()`, not a `<length>`, and silently invalidates every derived offset — every label position and the panel alignment at once.
-- **The `border` label position assumes a bordered field.** Its band hides the field's top border, and the band's upward reach is taken from `--formidable-field-border-thickness`. On **B** and **C** there is no border to hide, so the band has nothing to do and C's wider ring passes over it. Use a different label position on a borderless geometry.
+- **The `border` label position assumes a bordered field.** Its band hides the field's top border, and while focused it reaches further up to cover the ring as well — `--formidable-label-border-band-reach-focus`, which follows the ring's width. On **B** and **C** there is no border to hide, so the band has little to do. Use a different label position on a borderless geometry.
 
 ### Playing With Distinct Corners
 

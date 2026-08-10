@@ -37,8 +37,9 @@
 
   // A `border` label's band hides the field's border behind it, but the focus ring is a box-shadow spread
   // *outside* that border box — so while focused the band has to reach up over the ring too, or the ring
-  // shows above the label on every theme whose border is thicker than the band's bleed.
-  --formidable-label-border-band-reach: var(--formidable-field-border-thickness);
+  // shows above the label on every theme whose border is thicker than the band's bleed. The value comes
+  // from `:root`: this selector outranks a consumer's, so naming a length here would pin it out of reach.
+  --formidable-label-border-band-reach: var(--formidable-label-border-band-reach-focus);
 }
 
 // The only state the decorator applies to the field as well as to the label: nothing else here knows the

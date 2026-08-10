@@ -561,7 +561,8 @@ export class ExampleFormComponent implements OnInit {
     { key: 'leaf', label: 'F — Leaf' },
     { key: 'tab', label: 'G — Tab' },
     { key: 'brutalist', label: 'H — Brutalist' },
-    { key: 'airy', label: 'I — Airy' }
+    { key: 'airy', label: 'I — Airy' },
+    { key: 'borderless', label: 'J — Borderless' }
   ];
 
   protected readonly colorOptions: readonly { key: ColorKey; label: string }[] = [
@@ -609,6 +610,12 @@ export class ExampleFormComponent implements OnInit {
       // A field group never takes an underline, and its border thickness follows the field's — which is
       // `0px` here. Left to derive, a focused group would show no focus indicator at all.
       '--formidable-field-group-border-thickness': '1px',
+      // The focus ring's width follows the field's border too, so a group's ring needs it back. One width
+      // covers every ring the library paints, so the fields take a hairline ring here alongside their
+      // thickened underline — the alternative is restating the group's whole box-shadow composite.
+      '--formidable-field-focus-ring-width': '1px',
+      // A panel is outlined by its own border, which is the field's unless it is given one.
+      '--formidable-panel-border-thickness': '1px',
       // The toggle's track is drawn by the field's border, so it needs a thickness of its own.
       '--formidable-toggle-field-track-border-thickness': '1px',
       '--formidable-slider-track-border-thickness': '1px'
@@ -622,15 +629,18 @@ export class ExampleFormComponent implements OnInit {
       '--formidable-field-group-border-thickness': '1px',
       '--formidable-toggle-field-track-border-thickness': '1px',
       '--formidable-slider-track-border-thickness': '1px',
-      // The only place a geometry scheme touches a colour variable: the ring's width comes from the
-      // field's border thickness, which is `0px` here, so the ring has to be restated. It still reads its
-      // colour from the active colour scheme, which is what keeps the two axes independent.
+      // Borderless, so the ring needs a width of its own — stated once, for every ring.
+      '--formidable-field-focus-ring-width': '3px',
+      // The only place a geometry scheme touches a colour variable, and the width is no longer why: this
+      // scheme wants a *translucent* ring, and the library has no variable for a ring colour on its own, so
+      // all three composites are restated. They still read their hue from the active colour scheme, which
+      // is what keeps the two axes independent.
       '--formidable-color-field-focus-box-shadow':
-        '0 0 0 3px color-mix(in srgb, var(--formidable-color-field-border-focus) 35%, transparent)',
+        '0 0 0 var(--formidable-field-focus-ring-width) color-mix(in srgb, var(--formidable-color-field-border-focus) 35%, transparent)',
       '--formidable-color-field-group-focus-box-shadow':
-        '0 0 0 3px color-mix(in srgb, var(--formidable-color-field-border-focus) 35%, transparent)',
+        '0 0 0 var(--formidable-field-focus-ring-width) color-mix(in srgb, var(--formidable-color-field-border-focus) 35%, transparent)',
       '--formidable-color-field-focus-box-shadow-invalid':
-        '0 0 0 3px color-mix(in srgb, var(--formidable-color-validation-error) 35%, transparent)'
+        '0 0 0 var(--formidable-field-focus-ring-width) color-mix(in srgb, var(--formidable-color-validation-error) 35%, transparent)'
     },
     // D — Compact: dense rows for data-entry screens. 44px is the floor for the `inside` label
     // positions — below it the floating label and the value no longer fit the field's inner height and
@@ -715,6 +725,27 @@ export class ExampleFormComponent implements OnInit {
       '--formidable-field-padding-x': '22px',
       '--formidable-field-before-margin-bottom': '16px',
       '--formidable-textarea-padding-top': '20px'
+    },
+    // J — Borderless: no border and, unlike B, nothing standing in for one — no underline at all. The fill
+    // defines a field at rest and the ring defines it on focus, which makes this the scheme that proves the
+    // escape hatches: every one of the five lengths below defaults to the field's border thickness, so at
+    // `0px` a theme without them has no panel outline, no group box, and no focus indicator anywhere.
+    borderless: {
+      '--formidable-field-height': '56px',
+      '--formidable-field-border-thickness': '0px',
+      '--formidable-border-radius': '4px',
+      '--formidable-field-padding-x': '16px',
+      // The only focus indicator this scheme has, on fields and groups alike — there is no underline to
+      // fall back on, and one width covers every ring the library paints.
+      '--formidable-field-focus-ring-width': '2px',
+      // A panel is outlined by its own border, which is the field's unless it is given one. Without this the
+      // panels would be shadow-only, which at a 4px radius reads as detached rather than as the field's.
+      '--formidable-panel-border-thickness': '1px',
+      // A group is a box, not a filled row, so it keeps a hairline of its own.
+      '--formidable-field-group-border-thickness': '1px',
+      // The toggle's track and the slider's track are drawn by the field's border.
+      '--formidable-toggle-field-track-border-thickness': '1px',
+      '--formidable-slider-track-border-thickness': '1px'
     }
   };
 
@@ -863,6 +894,16 @@ type ControlKey =
   | 'showHints'
   | 'showAsReadonly'
   | 'showAsDisabled';
-type GeometryKey = 'outlined' | 'underlined' | 'soft' | 'compact' | 'pill' | 'leaf' | 'tab' | 'brutalist' | 'airy';
+type GeometryKey =
+  | 'outlined'
+  | 'underlined'
+  | 'soft'
+  | 'compact'
+  | 'pill'
+  | 'leaf'
+  | 'tab'
+  | 'brutalist'
+  | 'airy'
+  | 'borderless';
 type ColorKey = 'slate' | 'ocean' | 'sand' | 'forest' | 'plum' | 'mono' | 'clinical' | 'ledger' | 'sunset' | 'midnight';
 type ThemeVars = Record<string, string>;

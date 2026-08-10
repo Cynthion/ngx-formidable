@@ -245,7 +245,8 @@
   --formidable-color-field-group-text: var(--formidable-color-field-text-disabled);
 }
 
-// Same set, but the group's own ring: it is sized off the group's border thickness.
+// Same set, but the group's own ring: it takes the group's focus colour. The width is the field's — one
+// `--formidable-field-focus-ring-width` for every ring the library paints.
 @mixin focused-group-colors {
   @include focused-colors;
 
@@ -1358,9 +1359,18 @@
 
   outline: 0;
   position: absolute;
+  // The alignments above size the panel's *box* to the field's border box, so its own border has to paint
+  // inside that box rather than grow past it.
+  box-sizing: border-box;
   box-shadow: var(--formidable-panel-box-shadow, #{tokens.$formidable-panel-box-shadow});
-  border: var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) solid
-    var(--formidable-color-field-border, #{tokens.$formidable-color-field-border});
+  // The panel is outlined by its own border, so it needs a thickness of its own: a theme that drops the
+  // field's border to go underlined would otherwise leave the panel with nothing but its box-shadow.
+  // Written out here rather than declared in `_formidable-vars.scss`, for the reason `field-radius()` gives.
+  border: var(
+      --formidable-panel-border-thickness,
+      var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
+    )
+    solid var(--formidable-color-field-border, #{tokens.$formidable-color-field-border});
   // The panel's own radius, so a top-rounded field does not make a top-rounded panel. Its far corners keep
   // it; the two facing the field are mirrored from the field below.
   border-radius: var(--formidable-panel-border-radius, #{tokens.$formidable-panel-border-radius});

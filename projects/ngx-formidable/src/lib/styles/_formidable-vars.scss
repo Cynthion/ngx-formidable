@@ -49,6 +49,12 @@
   --formidable-border-radius: #{tokens.$formidable-border-radius};
 
   --formidable-field-border-thickness: #{tokens.$formidable-field-border-thickness};
+  // The focus ring's spread. Follows the border's thickness unless set, so a borderless theme can keep a
+  // ring instead of having to restate the whole `box-shadow` composite it is a slot of.
+  --formidable-field-focus-ring-width: var(
+    --formidable-field-border-thickness,
+    #{tokens.$formidable-field-focus-ring-width}
+  );
   // What every corner of a field falls back to. Shape a single corner with one of
   // `--formidable-field-border-{start-start,start-end,end-end,end-start}-radius` (logical corners:
   // start-start is the top-left in a left-to-right, top-to-bottom writing mode). Those four are read at
@@ -107,8 +113,11 @@
   );
 
   // With the label inside, the floating label and the value are centered as one block: this is the
-  // leftover space above the block — and, by symmetry, below it.
-  --formidable-label-inside-slack: calc(
+  // leftover space above the block — and, by symmetry, below it. Clamped at zero: below the `44px` field
+  // floor the two no longer fit the inner height, and an unclamped slack would push a *negative* offset
+  // into both readers below. Zero makes such a field overflow its box instead of inverting inside it.
+  --formidable-label-inside-slack: max(
+    0px,
     (
         var(--formidable-field-inner-height, #{tokens.$formidable-field-inner-height}) - var(
             --formidable-label-floating-height,
@@ -164,9 +173,15 @@
   // outgrows the border above and below so pixel rounding cannot leave a hairline of it showing.
   --formidable-label-border-gap: #{tokens.$formidable-label-border-gap};
   --formidable-label-border-band-bleed: #{tokens.$formidable-label-border-band-bleed};
-  // Extra upward reach past the bleed. The decorator raises it to the focus ring's width while focused —
-  // the ring is painted outside the field's border box, and the band has to cover that too.
+  // Extra upward reach past the bleed. The decorator raises it to the `-focus` value below while focused —
+  // the ring is painted outside the field's border box, and the band has to cover that too. The focused
+  // value is declared here rather than inline on the decorator, whose `:host(.is-focused)` would outrank a
+  // consumer's `:root` and make it the one label variable that is unreachable while focused.
   --formidable-label-border-band-reach: #{tokens.$formidable-label-border-band-reach};
+  --formidable-label-border-band-reach-focus: var(
+    --formidable-field-focus-ring-width,
+    #{tokens.$formidable-label-border-band-reach-focus}
+  );
 
   // Quoted here rather than in the token: interpolation drops the quotes, and `content` needs a string.
   --formidable-label-required-marker: '#{tokens.$formidable-label-required-marker}';
@@ -359,17 +374,19 @@
     transparent
   );
 
+  // One ring width for all three: a ring differs by colour, never by size. Change the width through
+  // `--formidable-field-focus-ring-width` rather than by restating a composite.
   --formidable-color-field-focus-box-shadow: 0 0 0
-    var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
+    var(--formidable-field-focus-ring-width, #{tokens.$formidable-field-focus-ring-width})
     var(--formidable-color-field-border-focus, #{tokens.$formidable-color-field-border-focus});
 
   --formidable-color-field-group-focus-box-shadow: 0 0 0
-    var(--formidable-field-group-border-thickness, #{tokens.$formidable-field-group-border-thickness})
+    var(--formidable-field-focus-ring-width, #{tokens.$formidable-field-focus-ring-width})
     var(--formidable-color-field-group-border-focus, #{tokens.$formidable-color-field-group-border-focus});
 
   // A focused field keeps its ring while invalid, so the ring takes the invalid colour with the border.
   --formidable-color-field-focus-box-shadow-invalid: 0 0 0
-    var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness})
+    var(--formidable-field-focus-ring-width, #{tokens.$formidable-field-focus-ring-width})
     var(--formidable-color-field-border-invalid, #{tokens.$formidable-color-field-border-invalid});
 
   // #region Toggle

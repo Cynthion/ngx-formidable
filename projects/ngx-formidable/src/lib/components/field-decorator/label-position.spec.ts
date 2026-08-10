@@ -248,6 +248,7 @@ class ProjectedOptionHostComponent {}
 describe('formidableFieldLabel [position]', () => {
   let fixture: ComponentFixture<InputHostComponent>;
   let host: InputHostComponent;
+  const themed = new Set<string>();
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
@@ -259,6 +260,22 @@ describe('formidableFieldLabel [position]', () => {
     // start of the transition. These assertions are about where the label lands, not how it gets there.
     fixture.nativeElement.style.setProperty('--formidable-animation-duration', '0s');
   });
+
+  afterEach(() => {
+    themed.forEach((property) => document.documentElement.style.removeProperty(property));
+    themed.clear();
+  });
+
+  /**
+   * Overrides a variable other variables are *derived* from. Substitution happens where the derived
+   * property is declared — `:root` — so a base has to be overridden there, which is also the only place a
+   * consumer is asked to theme from.
+   */
+  function theme(property: string, value: string): void {
+    document.documentElement.style.setProperty(property, value);
+    themed.add(property);
+    fixture.detectChanges();
+  }
 
   /** `placeholder` and `mask` are declarative: configure the field, then render. */
   function render(): void {
@@ -436,6 +453,46 @@ describe('formidableFieldLabel [position]', () => {
       expect(label.left - field.left).toBeCloseTo(inset, 1);
       expect(field.right - label.right).toBeCloseTo(inset, 1);
     });
+
+    /**
+     * `44px` is the floor for this position: below it the floating label's line box and the value's no
+     * longer both fit the field's inner height, and the slack between them — half of what is left over —
+     * goes negative. Unclamped that negative reached the floating label's own `top`, sliding it up out of
+     * the field it labels. Clamped, such a field simply overflows its box instead. The floor itself stays
+     * documentation-only; this is only about how a shorter field degrades.
+     */
+    it('never lets the slack go negative below the field height floor', () => {
+      /**
+       * Resolved on the field's container as a `top`, not as a `width`: a negative width is invalid and
+       * clamps to zero on its own, which would make this pass with or without the clamp.
+       */
+      const slack = (): number => {
+        const container = input().parentElement!;
+        const probe = document.createElement('div');
+
+        probe.style.position = 'absolute';
+        probe.style.top = 'var(--formidable-label-inside-slack)';
+        container.appendChild(probe);
+
+        const offset = probe.getBoundingClientRect().top - container.getBoundingClientRect().top;
+        probe.remove();
+
+        return offset;
+      };
+
+      setPosition('inside');
+      focus();
+
+      // the control: at the default height there is slack to distribute, and the label floats below the top
+      expect(slack()).toBeGreaterThan(0);
+      expect(labelTop()).toBeGreaterThan(0);
+
+      theme('--formidable-field-height', '32px');
+
+      // 30px of inner height against a 19.2px label and a 25.6px value: the leftover is negative
+      expect(slack()).toBe(0);
+      expect(labelTop()).toBeCloseTo(0, 1);
+    });
   });
 
   describe('inside — when the label may rest', () => {
@@ -592,16 +649,32 @@ describe('formidableFieldLabel [position]', () => {
 
       focus();
 
-      // The ring is sized off the border's thickness, and so is the reach that has to cover it.
-      expect(bandReach()).toBeCloseTo(parseFloat(getComputedStyle(input()).borderTopWidth), 2);
+      expect(bandReach()).toBeCloseTo(1, 2);
       expect(getComputedStyle(labelWrapper()).backgroundImage).not.toBe(resting);
     });
 
-    it('reaches further over a thicker ring', () => {
-      fixture.nativeElement.style.setProperty('--formidable-field-border-thickness', '3px');
+    // It covers the *ring*, so it is sized off the ring's own width rather than off the border. The two are
+    // set apart here so the assertion can only pass one way: a reach still reading the border returns 3.
+    it('reaches as far as the ring, not as far as the border', () => {
+      theme('--formidable-field-border-thickness', '3px');
+      theme('--formidable-field-focus-ring-width', '6px');
       focus();
 
-      expect(bandReach()).toBeCloseTo(3, 2);
+      expect(bandReach()).toBeCloseTo(6, 2);
+    });
+
+    // The reach used to be a length written straight into the decorator's `:host(.is-focused)`, which is
+    // (0,2,0) against a consumer's `:root` at (0,1,0): overridable at rest, unreachable focused. The value
+    // comes from `:root` now, so a theme can reach it in both states.
+    it('takes a themed focused reach, which the decorator used to outrank', () => {
+      theme('--formidable-label-border-band-reach', '4px');
+
+      expect(bandReach()).toBeCloseTo(4, 2);
+
+      theme('--formidable-label-border-band-reach-focus', '7px');
+      focus();
+
+      expect(bandReach()).toBeCloseTo(7, 2);
     });
 
     // `readonly`/`disabled` remap the fill on the field element, which the label — a sibling — cannot see,

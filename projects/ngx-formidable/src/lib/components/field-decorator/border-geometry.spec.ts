@@ -372,6 +372,80 @@ describe('border geometry', () => {
     });
   });
 
+  /**
+   * The ring's width used to be buried inside three colour-named composites, each of them literally
+   * `0 0 0 <a border thickness> <colour>`. A theme that wanted a wider ring — or any ring at all on a
+   * borderless field — had to restate all three. It is one length now, and the composites are colour only.
+   */
+  describe('the focus ring', () => {
+    /** The spread of the ring layer: the shadow layer that is not the inset underline. */
+    function ring(element: HTMLElement): number {
+      const layer = getComputedStyle(element)
+        .boxShadow.split(/,(?![^(]*\))/)
+        .find((shadow) => !shadow.includes('inset'));
+      const lengths = layer?.match(/-?[\d.]+px/g) ?? [];
+
+      // <color> <offset-x> <offset-y> <blur> <spread>
+      return parseFloat(lengths[3] ?? '0');
+    }
+
+    it('follows the border thickness by default', () => {
+      theme('--formidable-field-border-thickness', '3px');
+      setState('focused');
+
+      expect(ring(input())).toBe(3);
+    });
+
+    // The bug: a borderless theme had no ring at all, and no way to ask for one short of restating the
+    // whole composite. The border stays at `0px` throughout, so only the ring's own width can be read here.
+    it('is reachable on a borderless field', () => {
+      theme('--formidable-field-border-thickness', '0px');
+      setState('focused');
+
+      expect(ring(input())).toBe(0);
+
+      theme('--formidable-field-focus-ring-width', '2px');
+
+      expect(ring(input())).toBe(2);
+    });
+
+    it('takes that width on a group too, which has no underline to fall back on', () => {
+      theme('--formidable-field-border-thickness', '0px');
+      theme('--formidable-field-focus-ring-width', '2px');
+      group().classList.add('focused');
+
+      expect(ring(group())).toBe(2);
+    });
+
+    // A focused field keeps its ring while invalid, so the invalid composite carries the width as well.
+    it('keeps that width while invalid', () => {
+      theme('--formidable-field-border-thickness', '0px');
+      theme('--formidable-field-focus-ring-width', '2px');
+      setState('focused-invalid');
+
+      expect(ring(input())).toBe(2);
+      expect(ring(group())).toBe(0); // not focused: an invalid group has no ring to size
+
+      group().classList.add('focused');
+
+      expect(ring(group())).toBe(2);
+    });
+
+    // One width for every ring the library paints. The group's composite used to size itself off the
+    // group's *border*, which made the width two concepts and left a borderless group ring unreachable
+    // without thickening a border the theme had deliberately removed.
+    it('is one width, not one per family', () => {
+      theme('--formidable-field-border-thickness', '0px');
+      theme('--formidable-field-group-border-thickness', '4px');
+      theme('--formidable-field-focus-ring-width', '2px');
+      setState('focused');
+      group().classList.add('focused');
+
+      expect(ring(input())).toBe(2);
+      expect(ring(group())).toBe(2);
+    });
+  });
+
   describe('panel corner mirroring', () => {
     // Distinct radii throughout, so an assertion cannot pass by the two happening to agree.
     beforeEach(() => {
@@ -429,6 +503,62 @@ describe('border geometry', () => {
       expect(corners(dropdown())).toEqual(['8px', '8px', '8px', '8px']);
       expect(dropdown().classList.contains('has-panel-below')).toBe(false);
       expect(dropdown().classList.contains('has-panel-above')).toBe(false);
+    });
+  });
+
+  /**
+   * A panel is outlined by its own border, so a theme that dropped the field's border to go underlined lost
+   * every panel's outline with it and was left with the box-shadow alone. The alignments still read the
+   * *field's* thickness — they put the panel's box on the field's border-box edges, which is the field's
+   * geometry and not the panel's — so the two are independent and the panel's own border paints inside.
+   */
+  describe("a panel's border", () => {
+    function panelBorder(): number {
+      return parseFloat(getComputedStyle(panel()).borderTopWidth);
+    }
+
+    it('follows the field thickness by default', () => {
+      theme('--formidable-field-border-thickness', '3px');
+
+      expect(panelBorder()).toBe(3);
+    });
+
+    // The bug, pinned: borderless erased the outline, and the hatch is the only way back.
+    it('survives a borderless field', () => {
+      theme('--formidable-field-border-thickness', '0px');
+
+      expect(panelBorder()).toBe(0);
+
+      theme('--formidable-panel-border-thickness', '1px');
+
+      expect(panelBorder()).toBe(1);
+    });
+
+    it('can be dropped on its own, leaving the field its border', () => {
+      theme('--formidable-panel-border-thickness', '0px');
+
+      expect(panelBorder()).toBe(0);
+      expect(parseFloat(getComputedStyle(dropdown()).borderTopWidth)).toBe(1);
+    });
+
+    // Written out at the use site rather than declared in `:root` for the reason `field-radius()` gives: a
+    // `var()` in a custom property's *value* is substituted where that property is declared, so routing the
+    // chain through `:root` would freeze it there and quietly ignore a thickness set further down the tree.
+    // This is the test that fails the day someone "tidies that up".
+    it('follows a field thickness set below the document root', () => {
+      dropdown().style.setProperty('--formidable-field-border-thickness', '4px');
+
+      expect(panelBorder()).toBe(4);
+    });
+
+    // The alignments size the panel's box to the field's border box, so a panel border of its own has to
+    // paint inside that box. Without `box-sizing: border-box` it was added on top, and every panel sat two
+    // of its own borders wider than the field it belonged to.
+    it('paints inside the width the alignment gave it', () => {
+      theme('--formidable-panel-border-thickness', '5px');
+      openPanel();
+
+      expect(panel().getBoundingClientRect().width).toBeCloseTo(dropdown().getBoundingClientRect().width, 1);
     });
   });
 
