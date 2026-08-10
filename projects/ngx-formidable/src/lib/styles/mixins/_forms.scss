@@ -325,6 +325,49 @@
 
 // #endregion
 
+// #region Layering
+
+// A field is an atom: one stacking context, so every layer it paints — labels, adornments, panel, sheet —
+// is ordered inside it by `$formidable-layer-*` alone, and none of it can reach a consumer's own layers.
+// `isolation` and not `transform`, which would additionally make this the containing block of a sheet's
+// `position: fixed` and pin the sheet to the field instead of to the viewport. See `layering.md`.
+@mixin field-atom {
+  isolation: isolate;
+}
+
+// The one thing that does reach out. An open panel has to cover what is around it, so the whole atom rises
+// — for exactly as long as one is open, which is why a closed field can never disturb a consumer's stack.
+@mixin field-atom-panel-lift {
+  position: relative;
+  z-index: var(--formidable-panel-z-index, #{tokens.$formidable-panel-z-index});
+}
+
+// A sheet spans the viewport rather than sitting against the field, so it covers more and ranks above an
+// anchored panel — including the anchored panel of any other field it happens to cross.
+@mixin field-atom-sheet-lift {
+  position: relative;
+  z-index: var(--formidable-sheet-z-index, #{tokens.$formidable-sheet-z-index});
+}
+
+// The decorator is normally the atom. A field used without one has nothing above it to be one, so its own
+// host takes the job — same three rules, keyed off the class `BaseFieldDirective` sets in that case. Only
+// the fields with a panel need it: nothing else a bare field renders leaves its box.
+@mixin field-atom-undecorated {
+  :host(.is-undecorated) {
+    @include field-atom;
+  }
+
+  :host(.is-undecorated.has-open-panel) {
+    @include field-atom-panel-lift;
+  }
+
+  :host(.is-undecorated.has-open-sheet) {
+    @include field-atom-sheet-lift;
+  }
+}
+
+// #endregion
+
 // #region Fields
 
 // Internal: the root of the field hierarchy — reset, type, colours, border, shadow and the state chain.
@@ -579,7 +622,7 @@
   text-overflow: ellipsis; // for label content projected as a bare text node; `_globals.scss` covers elements
   white-space: nowrap;
   pointer-events: none;
-  z-index: 1; // keep on top of field
+  z-index: tokens.$formidable-layer-label;
 }
 
 // Spans the value's own horizontal band, so the label stays aligned with it.
@@ -631,6 +674,10 @@
   right: auto;
   padding: 0 #{label-border-gap()};
   top: var(--formidable-label-border-offset, #{tokens.$formidable-label-border-offset});
+  // A panel flipped above the field lands its bottom edge on the field's top border — the very strip this
+  // label straddles — so it has to out-paint the panel. Only the border positions reach above the field's
+  // box, so only they need this.
+  z-index: tokens.$formidable-layer-label-border;
   // Half the band, measured from the label's own centre — which sits on the border's centre.
   $band-half: calc(
     var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) / 2 +
@@ -784,7 +831,7 @@
   transform: translateY(-50%);
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
   pointer-events: none;
-  z-index: 1; // keep on top of field
+  z-index: tokens.$formidable-layer-label;
 }
 
 // A suffix and an in-field panel toggle both sit at the field's right edge without colliding: the suffix
@@ -1284,13 +1331,16 @@
 // A sheet: pinned to the bottom of the viewport rather than to the field, so a narrow screen gets the full
 // width instead of the field's column. `fixed` is defeated by an ancestor `transform` / `filter` / `contain`,
 // which is the consumer's to avoid.
-@mixin panel-bottom-aligned {
+@mixin panel-sheet {
   position: fixed;
   inset: auto 0 0;
   width: auto;
   border-inline-width: 0; // flush with the screen edges
   padding-bottom: env(safe-area-inset-bottom, 0); // clear of a phone's home indicator
   transform: translateY(100%); // closed: slid down out of view
+  // Above its own field's `border` label: a sheet covers whatever is behind it, and that label reaches
+  // higher than any other part of the field.
+  z-index: tokens.$formidable-layer-sheet;
 }
 
 // Internal: the flyout panel itself — the alignments, the open/above transforms, and the corners
@@ -1316,7 +1366,7 @@
   border-radius: var(--formidable-panel-border-radius, #{tokens.$formidable-panel-border-radius});
   background: var(--formidable-panel-background, #{tokens.$formidable-panel-background});
   overflow: hidden; // clip inner content to border-radius
-  z-index: var(--formidable-flyout-z-index, #{tokens.$formidable-flyout-z-index}); // keep on top of field
+  z-index: tokens.$formidable-layer-panel;
 
   // scroll
   display: flex;
@@ -1353,10 +1403,10 @@
     transform: translateY(calc(-100% - var(--formidable-field-height, #{tokens.$formidable-field-height})));
   }
 
-  // Last, because `.panel-bottom` and `.above` weigh the same and source order decides. A sheet is never
+  // Last, because `.panel-sheet` and `.above` weigh the same and source order decides. A sheet is never
   // marked `above` — `updatePanelPosition` skips it — but a stale class must not be able to move it.
-  &.panel-bottom {
-    @include panel-bottom-aligned;
+  &.panel-sheet {
+    @include panel-sheet;
 
     // A sheet sits against the screen edge, not against the field, so it keeps its own top corners and
     // squares off at the bottom instead of mirroring anything.

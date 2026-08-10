@@ -10,6 +10,13 @@
   align-items: center;
 }
 
+// The same rule the library applies to a field: no z-index at rest, lifted only while open. This tooltip is
+// projected into a decorator, so it shares that field's stacking context — without the lift it ties with the
+// field's own labels at `$formidable-layer-label` and loses on source order.
+.tooltip-host:has(.tooltip-panel.open) {
+  z-index: var(--formidable-panel-z-index);
+}
+
 .tooltip-trigger {
   border: 0;
   background: none;

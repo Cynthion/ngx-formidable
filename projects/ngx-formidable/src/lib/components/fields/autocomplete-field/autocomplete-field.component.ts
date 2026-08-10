@@ -48,7 +48,7 @@ import { BaseFieldDirective } from '../base-field.directive';
  * - `<formidable-field-option>` children
  * - `[noOptionText]`, `[sortFn]`
  * - `isPanelOpen` two-way
- * - `panelPosition: 'left'|'right'|'full'|'bottom'`
+ * - `panelPosition: 'left'|'right'|'full'|'sheet'`
  *
  * @example
  * ```html

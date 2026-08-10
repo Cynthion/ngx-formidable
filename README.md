@@ -584,12 +584,12 @@ For the full API of every field and directive — selectors, value types and all
 
 ### Panel Placement
 
-`panelPosition` places the panel of a dropdown, autocomplete or date field. `left`, `right` and `full` anchor it to the field and flip it above when there is no room below. `bottom` makes it a sheet instead — fixed across the bottom of the viewport, full width, and it never flips:
+`panelPosition` places the panel of a dropdown, autocomplete or date field. `left`, `right` and `full` anchor it to the field and flip it above when there is no room below. `sheet` makes it a sheet instead — fixed across the bottom of the viewport, full width, and it never flips:
 
 ```html
 <formidable-date-field
   name="birthdate"
-  [panelPosition]="'bottom'" />
+  [panelPosition]="'sheet'" />
 ```
 
 This is what a phone wants; an anchored panel in a narrow column is not. Two things to know before you reach for it:

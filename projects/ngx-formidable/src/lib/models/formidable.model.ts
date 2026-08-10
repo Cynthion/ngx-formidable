@@ -79,7 +79,7 @@ export type FieldDefaultOptionMode = 'always' | 'fallback';
  * as a `bottom` sheet pinned to the bottom of the viewport. The first three flip above the field when there
  * is no room below; a sheet does not move.
  */
-export type FormidablePanelPosition = 'left' | 'right' | 'full' | 'bottom';
+export type FormidablePanelPosition = 'left' | 'right' | 'full' | 'sheet';
 export type FormidableToggleFieldLabelPosition = 'before' | 'after';
 export type FormidableTranslateErrorFn = (error: string) => string;
 /**

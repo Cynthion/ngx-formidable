@@ -6,7 +6,7 @@ import { updatePanelPosition } from './position.helpers';
  *
  * It picks the side the panel opens on — below unless there is no room there and there is room above —
  * and marks the panel with it. It touches the panel only: a field's corners are its own, and it is the
- * open panel that adopts the two it sits against. A bottom sheet is exempt: it is pinned to the viewport
+ * open panel that adopts the two it sits against. A sheet is exempt: it is pinned to the viewport
  * rather than to the field, so there is no side to pick.
  */
 
@@ -87,10 +87,10 @@ describe('updatePanelPosition', () => {
   });
 
   // A sheet sits on the viewport, not on the field, so the space around the field says nothing about it.
-  it('never flips a bottom sheet, however little room the field leaves', () => {
+  it('never flips a sheet, however little room the field leaves', () => {
     const panel = panelOf(200);
 
-    panel.nativeElement.classList.add('panel-bottom');
+    panel.nativeElement.classList.add('panel-sheet');
 
     updatePanelPosition(elementAt(viewport - 70, 60), panel);
 
@@ -106,7 +106,7 @@ describe('updatePanelPosition', () => {
 
     expect(panel.nativeElement.classList.contains('above')).toBe(true);
 
-    panel.nativeElement.classList.add('panel-bottom');
+    panel.nativeElement.classList.add('panel-sheet');
 
     updatePanelPosition(elementAt(viewport - 70, 60), panel);
 

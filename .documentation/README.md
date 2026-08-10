@@ -10,6 +10,7 @@ Source of truth for outstanding work: `implementation.md`. How to write docs: `d
 | `conventions.md`    | Coding conventions, Definition of Done                              |
 | `documentation.md`  | Documentation style and authoring guide                             |
 | `implementation.md` | Phased roadmap — the source of truth for outstanding work           |
+| `tech/layering.md`  | Stacking contexts, the layer ordinals and the two public z-indices  |
 | `testing.md`        | Testing strategy (helpers-first)                                    |
 | `theme-options.md`  | Candidate colour and geometry schemes for the default theme         |
 | `theming.md`        | CSS custom property reference and how to theme                      |

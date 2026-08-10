@@ -52,9 +52,11 @@ fieldset {
 }
 
 .panel {
-  // Below --formidable-flyout-z-index (999): this is the demo's own sticky chrome, and an open field
-  // panel — a bottom sheet always, an anchored one near the page foot — has to sit over it.
-  z-index: 998;
+  // One above the library's highest layer, derived rather than hardcoded so the two cannot drift apart.
+  // This is the chrome you change the theme *with*, so it stays legible and clickable over anything the
+  // form does — an open panel included. That is the whole point of the field being an atom: a consumer
+  // decides where the library sits in their stack, and it is this one number. See `tech/layering.md`.
+  z-index: calc(var(--formidable-sheet-z-index, 1000) + 1);
   font-family: monospace;
   font-size: 0.7rem;
   padding: 1rem;
@@ -63,10 +65,6 @@ fieldset {
   // unreadable. Its surfaces are hardcoded light, so its text has to be too — a dark colour scheme
   // sets a light `--example-page-text` on the body and would otherwise take this with it.
   color: #1b1b1b;
-
-  @media (width <= 768px) {
-    position: static;
-  }
 
   fieldset {
     max-height: 300px;
@@ -179,10 +177,20 @@ fieldset {
   }
 }
 
-.control-center {
+// Both sticky bars. Declared after `.panel` so `@extend` cannot emit the mobile override ahead of the
+// `position: sticky` it is meant to undo — at equal specificity, source order is all there is.
+.control-center,
+.debug-output {
   @extend .panel;
 
   position: sticky;
+
+  @media (width <= 768px) {
+    position: static;
+  }
+}
+
+.control-center {
   top: 0;
   border-bottom: 1px solid #e5e7eb;
 
@@ -193,9 +201,6 @@ fieldset {
 }
 
 .debug-output {
-  @extend .panel;
-
-  position: sticky;
   bottom: 0;
   border-top: 1px solid #e5e7eb;
 }

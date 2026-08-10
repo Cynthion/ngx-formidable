@@ -72,7 +72,7 @@ import { BaseFieldDirective } from '../base-field.directive';
  *   All map to PikadayOptions for calendar behavior.
  *
  * @input isPanelOpen: boolean
- * @input panelPosition?: 'left' | 'right' | 'full' | 'bottom'
+ * @input panelPosition?: 'left' | 'right' | 'full' | 'sheet'
  *   Controls popup open state and positioning.
  *
  * @output valueChanged: EventEmitter<Date|null>

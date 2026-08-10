@@ -368,11 +368,18 @@ $formidable-hover-easing: cubic-bezier(0.4, 0.6, 0.6, 1);
 
 // #endregion
 
-// #region Z-Index
+// #region Layering
 
-$formidable-flyout-z-index: 999;
-$formidable-overlay-z-index: 9999;
-$formidable-above-overlay-z-index: 99999;
+// `layer` is a private ordinal inside a field's own stacking context; `z-index` is a public number in the
+// consumer's page stack. A closed field never carries one, so nothing of it can escape. See `layering.md`.
+
+$formidable-layer-label: 1;
+$formidable-layer-panel: 2;
+$formidable-layer-label-border: 3;
+$formidable-layer-sheet: 4;
+
+$formidable-panel-z-index: 999;
+$formidable-sheet-z-index: 1000;
 
 // #endregion
 

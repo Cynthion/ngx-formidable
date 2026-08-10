@@ -84,6 +84,7 @@
     <div
       ngClass="label-wrapper label-{{ labelState }}"
       [class.hidden]="!hasLabel"
+      [class.label-animated]="isLabelAnimated"
       [id]="labelId">
       <ng-container [ngTemplateOutlet]="projectedLabel" />
       <ng-container [ngTemplateOutlet]="requiredMarker" />
@@ -92,6 +93,7 @@
     <label
       ngClass="label-wrapper label-{{ labelState }}"
       [class.hidden]="!hasLabel"
+      [class.label-animated]="isLabelAnimated"
       [attr.for]="fieldId"
       [id]="labelId">
       <ng-container [ngTemplateOutlet]="projectedLabel" />

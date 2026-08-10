@@ -396,13 +396,22 @@ Ten palettes and nine field shapes — outlined, underlined, soft, compact, pill
 | `--formidable-hover-duration`     | Transition duration for hover effects.           |
 | `--formidable-hover-easing`       | Easing curve for hover transitions.              |
 
-### Z-Index
+### Layering
 
-| Variable                             | Description                                        |
-| :----------------------------------- | :------------------------------------------------- |
-| `--formidable-flyout-z-index`        | z-index applied to dropdown/flyout panels.         |
-| `--formidable-overlay-z-index`       | z-index applied to any full-screen overlays.       |
-| `--formidable-above-overlay-z-index` | z-index for elements that must sit above overlays. |
+| Variable                     | Description                                               |
+| :--------------------------- | :-------------------------------------------------------- |
+| `--formidable-panel-z-index` | z-index a field rises to while an anchored panel is open. |
+| `--formidable-sheet-z-index` | z-index a field rises to while a `sheet` panel is open.   |
+
+**To keep your own chrome above an open panel**, put it one above the higher of the two rather than picking a number — the two cannot then drift apart:
+
+```scss
+.app-header {
+  z-index: calc(var(--formidable-sheet-z-index, 1000) + 1);
+}
+```
+
+Weigh it first: a header that wins covers an open dropdown scrolled underneath it, and a footer that wins covers the bottom edge of a `sheet`. The defaults are the other way round because a panel the user just opened is usually the thing they need to see.
 
 ### Date Field Panel
 
@@ -452,7 +461,7 @@ Every corner of a field falls back to `--formidable-field-border-radius`, and ea
 
 They shape the field box and nothing else. Everything else that is rounded — the toggle, the slider, the panels — falls back to `--formidable-border-radius` instead, which is what to override to round the whole library at once. A field group takes its shape from `--formidable-field-group-border-radius`, which accepts the whole `border-radius` shorthand.
 
-While a dropdown, autocomplete or date panel is open, it adopts the two corners of the field it sits against: opened below, its top corners take the field's bottom ones; flipped above, its bottom corners take the field's top ones. Its far side keeps `--formidable-panel-border-radius`. The field never reshapes itself — its corners are what you declared, panel or no panel. A `bottom` sheet is the exception: it sits against the screen, not the field, so it keeps its own radius on top and squares off where it meets the edge.
+While a dropdown, autocomplete or date panel is open, it adopts the two corners of the field it sits against: opened below, its top corners take the field's bottom ones; flipped above, its bottom corners take the field's top ones. Its far side keeps `--formidable-panel-border-radius`. The field never reshapes itself — its corners are what you declared, panel or no panel. A `sheet` is the exception: it sits against the screen, not the field, so it keeps its own radius on top and squares off where it meets the edge.
 
 ---
 

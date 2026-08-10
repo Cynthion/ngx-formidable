@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
+import { FormidablePanelPosition } from '../../models/formidable.model';
 import { DropdownFieldComponent } from '../fields/dropdown-field/dropdown-field.component';
 import { InputFieldComponent } from '../fields/input-field/input-field.component';
 import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
@@ -22,6 +23,10 @@ import { FieldDecoratorComponent } from './field-decorator.component';
  * 3. The underline is paint, not layout. It is an inset shadow rather than a `border-bottom-width` so a
  *    state can thicken it without shrinking the field's content box, which would nudge the value. Groups
  *    do not get one at all.
+ * 4. A `border` label owns the field's top edge. A panel flipped above the field lands its bottom edge on
+ *    that edge, so the two overlap and paint order decides: label above an anchored panel, both below a
+ *    sheet. Those three are private ordinals inside the decorator's own stacking context; the only public
+ *    numbers are the two the whole field rises to while a panel is open. See `layering.md`.
  *
  * Radii are read back through a probe rather than off the tokens, so a fallback pointing at the wrong
  * source cannot pass.
@@ -98,7 +103,14 @@ function underline(element: HTMLElement): number {
       <formidable-toggle-field name="toggle" />
     </formidable-field-decorator>
     <formidable-field-decorator>
-      <formidable-dropdown-field name="dropdown" />
+      <formidable-dropdown-field
+        name="dropdown"
+        [panelPosition]="panelPosition" />
+      <div
+        formidableFieldLabel
+        position="border">
+        Label
+      </div>
     </formidable-field-decorator>
     <formidable-field-decorator>
       <formidable-radio-group-field name="group" />
@@ -107,6 +119,7 @@ function underline(element: HTMLElement): number {
 })
 class HostComponent {
   readonly = false;
+  panelPosition: FormidablePanelPosition = 'full';
 }
 
 describe('border geometry', () => {
@@ -155,6 +168,27 @@ describe('border geometry', () => {
 
   function decorator(): HTMLElement {
     return root.querySelector('formidable-field-decorator') as HTMLElement;
+  }
+
+  /** The `border` label of the dropdown's own decorator — `label()` above is the input field's. */
+  function borderLabel(): HTMLElement {
+    return dropdown().closest('formidable-field-decorator')!.querySelector('.label-border') as HTMLElement;
+  }
+
+  function openPanel(): void {
+    (dropdown().querySelector('.input-wrapper') as HTMLElement).dispatchEvent(
+      new MouseEvent('mousedown', { bubbles: true })
+    );
+    fixture.detectChanges();
+  }
+
+  /** The panel flips by class; which way it flips is `updatePanelPosition`'s call, pinned in its spec. */
+  function flipAbove(): void {
+    panel().classList.add('above');
+  }
+
+  function layer(element: HTMLElement): number {
+    return parseInt(getComputedStyle(element).zIndex, 10);
   }
 
   /**
@@ -345,18 +379,6 @@ describe('border geometry', () => {
       set('--formidable-panel-border-radius', '2px');
     });
 
-    function openPanel(): void {
-      (dropdown().querySelector('.input-wrapper') as HTMLElement).dispatchEvent(
-        new MouseEvent('mousedown', { bubbles: true })
-      );
-      fixture.detectChanges();
-    }
-
-    /** The panel flips by class; which way it flips is `updatePanelPosition`'s call, pinned in its spec. */
-    function flipAbove(): void {
-      panel().classList.add('above');
-    }
-
     // What gating the mirroring on `open` buys: a closed panel is still laid out, and has no field to
     // agree with yet.
     it('keeps its own corners while closed', () => {
@@ -407,6 +429,107 @@ describe('border geometry', () => {
       expect(corners(dropdown())).toEqual(['8px', '8px', '8px', '8px']);
       expect(dropdown().classList.contains('has-panel-below')).toBe(false);
       expect(dropdown().classList.contains('has-panel-above')).toBe(false);
+    });
+  });
+
+  /**
+   * A flipped panel's bottom edge lands on the field's top border-box edge, which is the one stretch of the
+   * field a `border` label reaches above. Both live inside the decorator's own stacking context, so the
+   * ordinals alone decide, and they are the same ordinals whatever the consumer's page is doing.
+   */
+  describe('a border label against a flipped panel', () => {
+    it('really is overlapped by the panel it has to beat', () => {
+      openPanel();
+      flipAbove();
+
+      // The panel's rect covers everything the label has above the field's top edge — its band included.
+      expect(panel().getBoundingClientRect().bottom).toBeGreaterThan(borderLabel().getBoundingClientRect().top);
+    });
+
+    it('paints over it', () => {
+      openPanel();
+      flipAbove();
+
+      expect(layer(borderLabel())).toBeGreaterThan(layer(panel()));
+    });
+
+    // The ordinals are private: they order the atom's own contents and mean nothing outside it, so no
+    // public variable may move them. The values are picked so that a ladder derived from the public
+    // variable — which is what these used to be — cannot land on them by coincidence.
+    it('keeps its ordinal whatever the public variables are set to', () => {
+      theme('--formidable-panel-z-index', '7');
+      theme('--formidable-sheet-z-index', '9');
+
+      expect(layer(panel())).toBe(2);
+      expect(layer(borderLabel())).toBe(3);
+    });
+
+    // A sheet spans the viewport and covers whatever is behind it, its own field's border label included.
+    it('still yields to a sheet', () => {
+      host.panelPosition = 'sheet';
+      fixture.detectChanges();
+
+      expect(layer(panel())).toBeGreaterThan(layer(borderLabel()));
+    });
+  });
+
+  /**
+   * The reason the ordinals can stay small: the decorator is a stacking context, so a closed field cannot
+   * reach anything a consumer stacks around it — and an open panel rises as a whole rather than by leaking
+   * one part of itself upwards.
+   */
+  describe('the atom', () => {
+    function dropdownDecorator(): HTMLElement {
+      return dropdown().closest('formidable-field-decorator') as HTMLElement;
+    }
+
+    it('is a stacking context, so nothing inside it competes with the page', () => {
+      expect(getComputedStyle(decorator()).isolation).toBe('isolate');
+    });
+
+    // The defect this architecture exists for: a `border` label used to carry z-index 1000 in the *page's*
+    // stacking context, so it painted over a consumer's sticky chrome even with the field closed.
+    it('carries no z-index of its own while closed', () => {
+      expect(getComputedStyle(dropdownDecorator()).zIndex).toBe('auto');
+      expect(layer(borderLabel())).toBeLessThan(10);
+    });
+
+    it('rises to the panel layer while an anchored panel is open', () => {
+      openPanel();
+
+      expect(dropdownDecorator().classList.contains('has-open-panel')).toBe(true);
+      expect(layer(dropdownDecorator())).toBe(999);
+    });
+
+    it('rises to the sheet layer instead when the panel is a sheet', () => {
+      host.panelPosition = 'sheet';
+      fixture.detectChanges();
+      openPanel();
+
+      expect(dropdownDecorator().classList.contains('has-open-sheet')).toBe(true);
+      expect(dropdownDecorator().classList.contains('has-open-panel')).toBe(false);
+      expect(layer(dropdownDecorator())).toBe(1000);
+    });
+
+    it('drops back to no z-index once the panel closes', () => {
+      openPanel();
+      openPanel();
+
+      expect(dropdownDecorator().classList.contains('has-open-panel')).toBe(false);
+      expect(getComputedStyle(dropdownDecorator()).zIndex).toBe('auto');
+    });
+
+    it('takes both layers from the theme', () => {
+      theme('--formidable-panel-z-index', '40');
+      theme('--formidable-sheet-z-index', '60');
+      openPanel();
+
+      expect(layer(dropdownDecorator())).toBe(40);
+
+      host.panelPosition = 'sheet';
+      fixture.detectChanges();
+
+      expect(layer(dropdownDecorator())).toBe(60);
     });
   });
 });

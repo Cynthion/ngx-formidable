@@ -1,7 +1,18 @@
 @use '../../styles/variables' as *;
 
 :host {
+  @include field-atom;
+
   display: block;
+}
+
+// Only while a panel is open, so a closed field never competes with anything the consumer stacks around it.
+:host(.has-open-panel) {
+  @include field-atom-panel-lift;
+}
+
+:host(.has-open-sheet) {
+  @include field-atom-sheet-lift;
 }
 
 :host(.label-inside) {
@@ -77,6 +88,13 @@
 .label-wrapper {
   @include field-label;
   @include field-label-layout;
+
+  // Nothing animates itself into place on load. The mixin's transition is what moves a label between its
+  // states, and the decorator only turns it on a frame after its first render — until then the field may
+  // still be correcting the state it rendered with, and a correction is not a transition.
+  &:not(.label-animated) {
+    transition: none;
+  }
 
   &.label-resting {
     @include field-label-resting;

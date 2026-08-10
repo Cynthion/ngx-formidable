@@ -4,6 +4,8 @@
   display: block;
 }
 
+@include field-atom-undecorated;
+
 .field {
   @include dropdown-field;
 }

@@ -26,6 +26,7 @@ import {
   FORMIDABLE_FIELD,
   IFormidableField
 } from '../../models/formidable.model';
+import { openPanelPosition } from '../../helpers/position.helpers';
 import { FieldErrorsComponent } from '../field-errors/field-errors.component';
 
 /** How a label renders once its configured position is resolved against the field's own state. */
@@ -135,6 +136,13 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
   private isFocused = false;
 
   /**
+   * Whether the label may transition yet. False until one frame after the first render: `NgModel` writes
+   * through a microtask, so a field with an initial value has none while it first renders and its label is
+   * rendered resting, then corrected to floating. That correction is nobody's state change.
+   */
+  protected isLabelAnimated = false;
+
+  /**
    * Called by `FieldErrorsDirective` with the errors component it renders into this decorator's slot,
    * so the invalid state it already computes can surface as a host class the stylesheets target.
    */
@@ -146,6 +154,7 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
     // interact with the projected field content
     this.forwardEvents();
     this.observeInsets();
+    this.allowLabelAnimation();
   }
 
   ngOnDestroy() {
@@ -318,6 +327,24 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
     return !!this.projectedField?.hasInFieldToggle;
   }
 
+  /**
+   * The decorator is a stacking context, so everything it renders is ordered inside it and none of it can
+   * reach a consumer's own layers. An open panel is the exception the consumer wants — it has to cover what
+   * is around it — so the host itself rises for as long as one is open, and only then. Which of the two it
+   * rises to is the panel's kind: a sheet spans the viewport and outranks an anchored panel.
+   */
+  @HostBinding('class.has-open-panel')
+  get hasOpenPanel(): boolean {
+    const position = openPanelPosition(this.projectedField);
+
+    return position !== null && position !== 'sheet';
+  }
+
+  @HostBinding('class.has-open-sheet')
+  get hasOpenSheet(): boolean {
+    return openPanelPosition(this.projectedField) === 'sheet';
+  }
+
   get fieldRef(): ElementRef<HTMLElement> {
     if (!this.projectedField) {
       throw new Error('FieldDecoratorComponent: projectedField is not available yet.');
@@ -346,6 +373,15 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
   }
 
   // #endregion
+
+  /**
+   * Releases the label's transition once the field has settled on its first state. A `requestAnimationFrame`
+   * and not a microtask: every option field resolves its projected options in a `queueMicrotask`, so only a
+   * frame is reliably after all of them, and the class flip they cause is then not a transition to play.
+   */
+  private allowLabelAnimation(): void {
+    requestAnimationFrame(() => (this.isLabelAnimated = true));
+  }
 
   /**
    * A projected prefix/suffix takes horizontal space from the field's box, which the stylesheet turns

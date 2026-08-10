@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
 import { NgxMaskConfig, provideNgxMask } from 'ngx-mask';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
@@ -9,6 +10,7 @@ import { AutocompleteFieldComponent } from '../fields/autocomplete-field/autocom
 import { DateFieldComponent } from '../fields/date-field/date-field.component';
 import { DropdownFieldComponent } from '../fields/dropdown-field/dropdown-field.component';
 import { InputFieldComponent } from '../fields/input-field/input-field.component';
+import { FieldOptionComponent } from '../field-option/field-option.component';
 import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
 import { SelectFieldComponent } from '../fields/select-field/select-field.component';
 import { TextareaFieldComponent } from '../fields/textarea-field/textarea-field.component';
@@ -217,6 +219,31 @@ class WrappedInputHostComponent {}
   `
 })
 class RadioGroupHostComponent {}
+
+/**
+ * The demo's `Nationality` field, reduced: a dropdown with an initial `ngModel` value that only a projected
+ * option can resolve. `NgModel` writes through a microtask, so the first render happens before the field
+ * has a value at all and the label is rendered resting — then corrected to floating a microtask later.
+ */
+@Component({
+  standalone: true,
+  imports: [FormsModule, FieldDecoratorComponent, DropdownFieldComponent, FieldOptionComponent, FieldLabelDirective],
+  template: `
+    <formidable-field-decorator>
+      <formidable-dropdown-field
+        name="field"
+        [ngModel]="'ch'">
+        <formidable-field-option value="ch" />
+      </formidable-dropdown-field>
+      <div
+        formidableFieldLabel
+        position="inside">
+        Label
+      </div>
+    </formidable-field-decorator>
+  `
+})
+class ProjectedOptionHostComponent {}
 
 describe('formidableFieldLabel [position]', () => {
   let fixture: ComponentFixture<InputHostComponent>;
@@ -890,5 +917,56 @@ describe('IFormidableField.canLabelRest', () => {
     fixture.componentRef.setInput('readonly', false);
     fixture.componentRef.setInput('disabled', true);
     expect(fixture.componentInstance.canLabelRest).toBe(false);
+  });
+});
+
+/**
+ * A label never animates itself into place on load. An option field resolves its projected options in a
+ * microtask, so a value that only matches one of them leaves the first render resting and floats a moment
+ * later — a correction, not a state change anyone made. The decorator suppresses the transition until a
+ * frame after its first render, which is after every field's microtask.
+ *
+ * Its own fixture on purpose: the suite above zeroes `--formidable-animation-duration`, which would hide
+ * the whole thing.
+ */
+describe('a label never animates itself into place on load', () => {
+  let fixture: ComponentFixture<ProjectedOptionHostComponent>;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+
+    fixture = TestBed.createComponent(ProjectedOptionHostComponent);
+  });
+
+  function labelWrapper(): HTMLElement {
+    return fixture.nativeElement.querySelector('.label-wrapper') as HTMLElement;
+  }
+
+  /** `none` while suppressed; the three properties the label moves between its states once released. */
+  function transitions(): string {
+    return getComputedStyle(labelWrapper()).transitionProperty;
+  }
+
+  it('holds the transition back over the resting-to-floating correction, then releases it', async () => {
+    // Nothing has been written yet, so the field is empty and the label is rendered resting.
+    fixture.detectChanges();
+
+    expect(labelWrapper().classList.contains('label-resting')).toBe(true);
+    expect(transitions()).toBe('none');
+
+    // `NgModel` writes through a microtask, the option resolves, and the label floats.
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(labelWrapper().classList.contains('label-floating')).toBe(true);
+    expect(transitions()).toBe('none');
+
+    // One frame later the label is live again, so a state change the user makes still animates.
+    await new Promise(requestAnimationFrame);
+    fixture.detectChanges();
+
+    expect(labelWrapper().classList.contains('label-animated')).toBe(true);
+    expect(transitions()).toBe('top, font-size, color');
+    expect(parseFloat(getComputedStyle(labelWrapper()).transitionDuration)).toBeGreaterThan(0);
   });
 });

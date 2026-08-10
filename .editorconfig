@@ -2,16 +2,21 @@ root = true
 
 [*]
 charset = utf-8
-tab_width = 2                     # configures Prettier's tabWidth
-indent_size = 2                   # configures Prettier's tabWidth and tabs
+# configures Prettier's tabWidth
+tab_width = 2
+# configures Prettier's tabWidth and tabs
+indent_size = 2
 indent_style = space
 insert_final_newline = true
-max_line_length = 120             # configures Prettier's printWidth
-end_of_line = lf                  # configures Prettier's endOfLine
+# configures Prettier's printWidth
+max_line_length = 120
+# configures Prettier's endOfLine
+end_of_line = lf
 trim_trailing_whitespace = true
 
 [*.html]
-max_line_length = 160             # also change in .vscode/settings.json
+# also change in .vscode/settings.json
+max_line_length = 160
 
 [*.ts]
 quote_type = single

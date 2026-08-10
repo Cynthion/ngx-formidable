@@ -1,5 +1,5 @@
 <!-- Control Center -->
-<div class="control-center debug-output">
+<div class="control-center">
   <div class="control-toggle debug-toggle">
     <button (click)="toggleControlCenter()">
       {{ controlCenterExpanded ? 'Hide Control Center' : 'Show Control Center' }}
@@ -175,9 +175,9 @@
           <input
             type="radio"
             name="panelPosition"
-            [checked]="panelPosition === 'bottom'"
-            (change)="setPanelPosition('bottom')" />
-          Bottom Sheet
+            [checked]="panelPosition === 'sheet'"
+            (change)="setPanelPosition('sheet')" />
+          Sheet
         </label>
       </fieldset>
 

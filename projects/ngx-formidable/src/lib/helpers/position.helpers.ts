@@ -1,10 +1,21 @@
 import { ElementRef, QueryList } from '@angular/core';
+import { FormidablePanelPosition, IFormidablePanelField } from '../models/formidable.model';
+
+/**
+ * The position of a field's panel while it is open, or `null` — a field without a panel never opens one.
+ * This is what decides whether a field rises out of its resting layer, and how far; see `layering.md`.
+ */
+export function openPanelPosition(field?: unknown): FormidablePanelPosition | null {
+  const panelField = field as Partial<IFormidablePanelField> | undefined;
+
+  return panelField?.isPanelOpen ? (panelField.panelPosition ?? null) : null;
+}
 
 /**
  * Opens the panel below the field, or above it when there is no room below and there is above. The panel
  * carries the direction so its own styling can follow it — the field is never touched: its corners are its
- * own, and an open panel mirrors them rather than the other way round. A bottom sheet is exempt: it is
- * pinned to the viewport, not to the field, so there is no side to pick.
+ * own, and an open panel mirrors them rather than the other way round. A sheet is exempt: it is pinned to
+ * the viewport, not to the field, so there is no side to pick.
  */
 export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef?: ElementRef<HTMLElement>): void {
   const field = fieldRef?.nativeElement;
@@ -13,7 +24,7 @@ export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef
   if (!field || !panel) return;
 
   // A sheet never flips, and must not keep a flip it picked up while it was still anchored to the field.
-  if (panel.classList.contains('panel-bottom')) {
+  if (panel.classList.contains('panel-sheet')) {
     panel.classList.remove('above');
 
     return;

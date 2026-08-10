@@ -116,7 +116,7 @@ describe('date panel responsiveness', () => {
       set('--formidable-field-border-radius', '8px');
       set('--formidable-panel-border-radius', '2px');
 
-      fixture.componentInstance.roomyPosition = 'bottom';
+      fixture.componentInstance.roomyPosition = 'sheet';
       fixture.detectChanges();
     });
 

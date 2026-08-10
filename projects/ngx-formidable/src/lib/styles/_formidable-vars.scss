@@ -637,11 +637,10 @@
 
   // #endregion
 
-  // #region Z-Index
+  // #region Layering
 
-  --formidable-flyout-z-index: #{tokens.$formidable-flyout-z-index};
-  --formidable-overlay-z-index: #{tokens.$formidable-overlay-z-index};
-  --formidable-above-overlay-z-index: #{tokens.$formidable-above-overlay-z-index};
+  --formidable-panel-z-index: #{tokens.$formidable-panel-z-index};
+  --formidable-sheet-z-index: #{tokens.$formidable-sheet-z-index};
 
   // #endregion
 

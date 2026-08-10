@@ -4,6 +4,7 @@ import {
   Directive,
   ElementRef,
   EventEmitter,
+  HostBinding,
   inject,
   Input,
   NgZone,
@@ -14,6 +15,7 @@ import {
 import { ControlValueAccessor } from '@angular/forms';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
+import { openPanelPosition } from '../../helpers/position.helpers';
 import { FieldDecoratorLayout, IFormidableField } from '../../models/formidable.model';
 import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
 
@@ -42,6 +44,28 @@ export abstract class BaseFieldDirective<T = string | null>
   protected readonly destroy$ = new Subject<void>();
 
   private _valuePrevious: T | null = null;
+
+  /**
+   * The decorator is normally the atom that owns the field's stacking context and rises while a panel is
+   * open. Without one there is nothing above the field to be it, so the field's own host takes the job —
+   * hence the same two state classes here, and only here. See `layering.md`.
+   */
+  @HostBinding('class.is-undecorated')
+  protected get isUndecorated(): boolean {
+    return !this.decorator;
+  }
+
+  @HostBinding('class.has-open-panel')
+  protected get hasOpenPanel(): boolean {
+    const position = this.isUndecorated ? openPanelPosition(this) : null;
+
+    return position !== null && position !== 'sheet';
+  }
+
+  @HostBinding('class.has-open-sheet')
+  protected get hasOpenSheet(): boolean {
+    return this.isUndecorated && openPanelPosition(this) === 'sheet';
+  }
 
   ngOnInit(): void {
     this.registerGlobalListeners();
