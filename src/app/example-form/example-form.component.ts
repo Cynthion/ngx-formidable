@@ -562,7 +562,8 @@ export class ExampleFormComponent implements OnInit {
     { key: 'tab', label: 'G — Tab' },
     { key: 'brutalist', label: 'H — Brutalist' },
     { key: 'airy', label: 'I — Airy' },
-    { key: 'borderless', label: 'J — Borderless' }
+    { key: 'borderless', label: 'J — Borderless' },
+    { key: 'unboxed', label: 'K — Unboxed' }
   ];
 
   protected readonly colorOptions: readonly { key: ColorKey; label: string }[] = [
@@ -746,6 +747,24 @@ export class ExampleFormComponent implements OnInit {
       // The toggle's track and the slider's track are drawn by the field's border.
       '--formidable-toggle-field-track-border-thickness': '1px',
       '--formidable-slider-track-border-thickness': '1px'
+    },
+    // K — Unboxed: a group stops being a box. No border, no fill, and its markers pulled out to the form's
+    // left edge, so a group reads as a list on the page rather than as a field. That last part is what
+    // splitting the prefix inset off the gap bought — `0px` here left-aligns the markers without also
+    // collapsing the space between a marker and its label, and the empty state follows them out. The
+    // fields keep A's geometry, so the groups are the only thing that changes. `transparent` is the one
+    // colour a geometry scheme may set: it names no hue, so the two axes stay independent.
+    unboxed: {
+      '--formidable-field-height': '56px',
+      '--formidable-field-border-thickness': '1px',
+      '--formidable-border-radius': '8px',
+      '--formidable-field-padding-x': '16px',
+      '--formidable-option-prefix-inset': '0px',
+      '--formidable-field-group-border-thickness': '0px',
+      '--formidable-color-field-group-background': 'transparent',
+      // A hover fill needs a box to fill. Without this the group would flash a panel-shaped rectangle on
+      // hover, which is the box this scheme just took away. The options keep their own hover.
+      '--formidable-color-field-group-background-hovered': 'transparent'
     }
   };
 
@@ -904,6 +923,7 @@ type GeometryKey =
   | 'tab'
   | 'brutalist'
   | 'airy'
-  | 'borderless';
+  | 'borderless'
+  | 'unboxed';
 type ColorKey = 'slate' | 'ocean' | 'sand' | 'forest' | 'plum' | 'mono' | 'clinical' | 'ledger' | 'sunset' | 'midnight';
 type ThemeVars = Record<string, string>;

@@ -304,6 +304,10 @@
     --formidable-color-field-background-readonly,
     #{tokens.$formidable-color-field-background-disabled}
   );
+  --formidable-color-field-group-background-hovered: var(
+    --formidable-color-field-background-hovered,
+    #{tokens.$formidable-color-field-group-background-hovered}
+  );
   --formidable-color-field-group-background-readonly: var(
     --formidable-color-field-background-readonly,
     #{tokens.$formidable-color-field-group-background-readonly}
@@ -496,6 +500,10 @@
     --formidable-color-field-option-background-hovered,
     #{tokens.$formidable-color-date-field-panel-date-hovered}
   );
+  --formidable-color-date-field-panel-date-today: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-date-field-panel-date-today}
+  );
   --formidable-color-date-field-panel-date-out-of-range: var(
     --formidable-color-field-option-text-disabled,
     #{tokens.$formidable-color-date-field-panel-date-out-of-range}
@@ -679,6 +687,7 @@
 
   --formidable-option-prefix-dimension-outer: #{tokens.$formidable-option-prefix-dimension-outer};
   --formidable-option-prefix-dimension-inner: #{tokens.$formidable-option-prefix-dimension-inner};
+  --formidable-option-prefix-inset: var(--formidable-field-padding-x, #{tokens.$formidable-option-prefix-inset});
   --formidable-option-prefix-gap: #{tokens.$formidable-option-prefix-gap};
   --formidable-option-prefix-border-thickness: #{tokens.$formidable-option-prefix-border-thickness};
 

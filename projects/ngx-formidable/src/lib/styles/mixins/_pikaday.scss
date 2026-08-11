@@ -220,6 +220,13 @@
       }
     }
 
+    &.is-today:not(.is-selected)::before {
+      background-color: transparent;
+      box-shadow: inset 0 0 0 1px
+        var(--formidable-color-date-field-panel-date-today, #{tokens.$formidable-color-date-field-panel-date-today});
+      opacity: 1;
+    }
+
     &.is-disabled {
       opacity: 0.3;
 
@@ -230,6 +237,10 @@
 
     @include utils.hover {
       &:not(.is-selected, .is-empty, .is-disabled)::before {
+        background-color: var(
+          --formidable-color-date-field-panel-date-hovered,
+          #{tokens.$formidable-color-date-field-panel-date-hovered}
+        );
         opacity: 1;
       }
     }

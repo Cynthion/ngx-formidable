@@ -209,6 +209,7 @@ $formidable-color-field-background-focus: $formidable-color-field-background;
 $formidable-color-field-background-invalid: $formidable-color-field-background;
 $formidable-color-field-background-readonly: rgb($formidable-color-field-background, 75%);
 $formidable-color-field-background-disabled: $formidable-color-field-background-readonly;
+$formidable-color-field-group-background-hovered: $formidable-color-field-background-hovered;
 $formidable-color-field-group-background-readonly: $formidable-color-field-background-readonly;
 $formidable-color-field-group-background-disabled: $formidable-color-field-background-disabled;
 
@@ -282,6 +283,7 @@ $formidable-color-date-field-panel-select-hovered: $formidable-color-field-optio
 $formidable-color-date-field-panel-date-highlighted-text: $formidable-color-field-text;
 $formidable-color-date-field-panel-date-highlighted: $formidable-color-field-option-background-highlighted;
 $formidable-color-date-field-panel-date-hovered: $formidable-color-field-option-background-hovered;
+$formidable-color-date-field-panel-date-today: $formidable-color-field-border;
 $formidable-color-date-field-panel-date-out-of-range: $formidable-color-field-option-text-disabled;
 $formidable-color-date-field-panel-day-label: $formidable-color-field-label-floating;
 
@@ -403,6 +405,7 @@ $formidable-date-field-panel-box-shadow: $formidable-panel-box-shadow;
 
 $formidable-option-prefix-dimension-outer: utils.spacing(20);
 $formidable-option-prefix-dimension-inner: utils.spacing(8);
+$formidable-option-prefix-inset: $formidable-field-padding-x;
 $formidable-option-prefix-gap: utils.spacing(16);
 $formidable-option-prefix-border-thickness: utils.spacing(2);
 

@@ -169,7 +169,7 @@
   --formidable-color-field-underline: var(--formidable-color-field-border-hovered);
 
   --formidable-color-field-background: var(--formidable-color-field-background-hovered);
-  --formidable-color-field-group-background: var(--formidable-color-field-background-hovered);
+  --formidable-color-field-group-background: var(--formidable-color-field-group-background-hovered);
   --formidable-color-field-text: var(--formidable-color-field-text-hovered);
   --formidable-color-field-group-text: var(--formidable-color-field-text-hovered);
 }
@@ -421,6 +421,10 @@
   @include field-font;
   @include field-group-colors;
   @include field-group-border;
+
+  // An option row's fill spans the full width with square corners, so the top and bottom rows have to be
+  // clipped to the box's radius — the same reason `panel` clips its own rows.
+  overflow: hidden;
 
   // A ring but no underline: a group is a tall multi-row box, and a full-width line across its bottom
   // reads as a stray divider between its options rather than as the field's own edge.
@@ -1594,11 +1598,14 @@
 
 // #region Option Prefixes
 
-// The box holding an option's radio or checkbox marker.
+// The box holding an option's radio or checkbox marker. Two jobs, so two variables: the inline-start
+// padding is the marker's inset from the group's edge, the inline-end one the gap to its label. They used
+// to be one token, which is why zeroing the inset to left-align a group also collapsed the gap.
 @mixin field-option-prefix {
   display: flex;
   align-items: center;
-  padding: utils.spacing(0) var(--formidable-option-prefix-gap, #{tokens.$formidable-option-prefix-gap});
+  padding-inline: var(--formidable-option-prefix-inset, #{tokens.$formidable-option-prefix-inset})
+    var(--formidable-option-prefix-gap, #{tokens.$formidable-option-prefix-gap});
 }
 
 // A checkbox marker's outer box; also the base for the radio one.
@@ -1645,13 +1652,14 @@
 }
 
 // The group fields render their empty state as bare text rather than as an option, so it has to bring its
-// own padding: the option row's vertical rhythm, plus the field's horizontal padding — an option gets that
-// inset from its prefix marker, which this text has none of, and without it the text sits on the border.
+// own padding: the option row's vertical rhythm, plus the very inset an option gets from its prefix
+// marker, which this text has none of. The same variable, so a left-aligned group moves its message with
+// its options.
 @mixin group-no-option {
   @include no-option;
 
   padding: var(--formidable-field-group-option-padding, #{tokens.$formidable-field-group-option-padding});
-  padding-inline: field-padding-x();
+  padding-inline: var(--formidable-option-prefix-inset, #{tokens.$formidable-option-prefix-inset});
 }
 
 // Same reason inside a panel, where an option row's padding is `field-option-inline`'s rather than the

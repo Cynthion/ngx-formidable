@@ -27,28 +27,30 @@ Schemes come on two independent axes — **geometry** (dimensions, radii, thickn
 | H   | `brutalist`  | Zero radius, `3px` borders, hard `5px` offset shadows instead of rings                                                    | Bleeding-edge startup  |
 | I   | `airy`       | `72px` rows, `22px` padding, `18px` radius, roomy spacing                                                                 | Premium, calm          |
 | J   | `borderless` | No border and nothing standing in for one. `4px` radius; the fill defines a field at rest and a solid `2px` ring on focus | Flat, chrome-free      |
+| K   | `unboxed`    | A's fields, but a group loses its box and its markers move out to the form's left edge                                    | Checklist on a page    |
 
 ### What Each Sets
 
-| Variable                                           |      A |      B |      C |      D |      E |          F |      G |      H |      I |      J |
-| :------------------------------------------------- | -----: | -----: | -----: | -----: | -----: | ---------: | -----: | -----: | -----: | -----: |
-| `--formidable-field-height`                        | `56px` | `56px` | `60px` | `44px` | `52px` |     `56px` | `56px` | `52px` | `72px` | `56px` |
-| `--formidable-field-border-thickness`              |  `1px` |  `0px` |  `0px` |  `1px` |  `1px` |      `1px` |  `1px` |  `3px` |  `1px` |  `0px` |
-| `--formidable-border-radius`                       |  `8px` |  `8px` | `12px` |  `4px` | `16px` |      `8px` | `10px` |  `0px` | `18px` |  `4px` |
-| `--formidable-field-padding-x`                     | `16px` |      — | `16px` | `12px` | `24px` |     `18px` | `16px` | `14px` | `22px` | `16px` |
-| `--formidable-field-border-radius`                 |      — |  `0px` |      — |      — | `26px` |      `2px` |  `0px` |      — |      — |      — |
-| `--formidable-field-border-start-start-radius`     |      — |  `8px` |      — |      — |      — |     `22px` | `18px` |      — |      — |      — |
-| `--formidable-field-border-start-end-radius`       |      — |  `8px` |      — |      — |      — |          — | `18px` |      — |      — |      — |
-| `--formidable-field-border-end-end-radius`         |      — |      — |      — |      — |      — |     `22px` |      — |      — |      — |      — |
-| `--formidable-field-group-border-radius`           |      — |      — |      — |      — | `20px` | `22px 2px` |      — |      — |      — |      — |
-| `--formidable-field-underline-thickness`           |      — |  `1px` |      — |      — |      — |          — |      — |      — |      — |      — |
-| `--formidable-field-underline-thickness-focus`     |      — |  `2px` |      — |      — |      — |          — |      — |      — |      — |      — |
-| `--formidable-field-underline-thickness-invalid`   |      — |  `2px` |      — |      — |      — |          — |      — |      — |      — |      — |
-| `--formidable-field-group-border-thickness`        |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |  `1px` |
-| `--formidable-field-focus-ring-width`              |      — |  `1px` |  `3px` |      — |      — |          — |      — |      — |      — |  `2px` |
-| `--formidable-panel-border-thickness`              |      — |  `1px` |      — |      — |      — |          — |      — |      — |      — |  `1px` |
-| `--formidable-toggle-field-track-border-thickness` |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |  `1px` |
-| `--formidable-slider-track-border-thickness`       |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |  `1px` |
+| Variable                                           |      A |      B |      C |      D |      E |          F |      G |      H |      I |      J |      K |
+| :------------------------------------------------- | -----: | -----: | -----: | -----: | -----: | ---------: | -----: | -----: | -----: | -----: | -----: |
+| `--formidable-field-height`                        | `56px` | `56px` | `60px` | `44px` | `52px` |     `56px` | `56px` | `52px` | `72px` | `56px` | `56px` |
+| `--formidable-field-border-thickness`              |  `1px` |  `0px` |  `0px` |  `1px` |  `1px` |      `1px` |  `1px` |  `3px` |  `1px` |  `0px` |  `1px` |
+| `--formidable-border-radius`                       |  `8px` |  `8px` | `12px` |  `4px` | `16px` |      `8px` | `10px` |  `0px` | `18px` |  `4px` |  `8px` |
+| `--formidable-field-padding-x`                     | `16px` |      — | `16px` | `12px` | `24px` |     `18px` | `16px` | `14px` | `22px` | `16px` | `16px` |
+| `--formidable-field-border-radius`                 |      — |  `0px` |      — |      — | `26px` |      `2px` |  `0px` |      — |      — |      — |      — |
+| `--formidable-field-border-start-start-radius`     |      — |  `8px` |      — |      — |      — |     `22px` | `18px` |      — |      — |      — |      — |
+| `--formidable-field-border-start-end-radius`       |      — |  `8px` |      — |      — |      — |          — | `18px` |      — |      — |      — |      — |
+| `--formidable-field-border-end-end-radius`         |      — |      — |      — |      — |      — |     `22px` |      — |      — |      — |      — |      — |
+| `--formidable-field-group-border-radius`           |      — |      — |      — |      — | `20px` | `22px 2px` |      — |      — |      — |      — |      — |
+| `--formidable-field-underline-thickness`           |      — |  `1px` |      — |      — |      — |          — |      — |      — |      — |      — |      — |
+| `--formidable-field-underline-thickness-focus`     |      — |  `2px` |      — |      — |      — |          — |      — |      — |      — |      — |      — |
+| `--formidable-field-underline-thickness-invalid`   |      — |  `2px` |      — |      — |      — |          — |      — |      — |      — |      — |      — |
+| `--formidable-field-group-border-thickness`        |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |  `1px` |  `0px` |
+| `--formidable-field-focus-ring-width`              |      — |  `1px` |  `3px` |      — |      — |          — |      — |      — |      — |  `2px` |      — |
+| `--formidable-panel-border-thickness`              |      — |  `1px` |      — |      — |      — |          — |      — |      — |      — |  `1px` |      — |
+| `--formidable-toggle-field-track-border-thickness` |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |  `1px` |      — |
+| `--formidable-slider-track-border-thickness`       |      — |  `1px` |  `1px` |      — |      — |          — |      — |      — |      — |  `1px` |      — |
+| `--formidable-option-prefix-inset`                 |      — |      — |      — |      — |      — |          — |      — |      — |      — |      — |  `0px` |
 
 Beyond the table:
 
@@ -57,6 +59,7 @@ Beyond the table:
 - **E** also rounds off everything the field's radius does not reach — `--formidable-panel-border-radius` and the toggle's, slider's and tick marks' radii.
 - **H** also sets `--formidable-slider-thumb-border-thickness` and replaces both panel shadows with hard offsets.
 - **I** also raises `--formidable-field-before-margin-bottom` and `--formidable-textarea-padding-top`.
+- **K** also sets `--formidable-color-field-group-background: transparent` and `--formidable-color-field-group-background-hovered: transparent` — the only colours a geometry scheme sets outright rather than through a `var()`. They are allowed because `transparent` names no hue, so the axes stay independent; there is no length that clears a fill. The hover one exists for this scheme: a hover fill needs a box to fill, and without it the group would flash back the rectangle the scheme just removed. The options keep their own hover, which is what still shows the pointer's target. Its `--formidable-option-prefix-inset: 0px` is the reason that variable exists: it was the same token as `--formidable-option-prefix-gap` until Phase 12.7.4, so zeroing the inset collapsed the label onto the marker and a left-aligned group was unreachable. The group's empty state reads the inset too, so it moves out with the options.
 
 ### Traps A Borderless Geometry Has To Handle
 
@@ -164,4 +167,4 @@ Why those two:
 
 Promoting Slate needed one structural change: `--formidable-color-field-border` no longer resolves through `--formidable-color-field-text`. A neutral default wants a light border under dark text, and the old derivation forced them to be the same colour.
 
-The other eight geometries and nine palettes stay here and in the demo as the showcase set, and feed the portal's pre-defined themes in Phase 18 P6, which retires this file.
+The other ten geometries and nine palettes stay here and in the demo as the showcase set, and feed the portal's pre-defined themes in Phase 18 P6, which retires this file.

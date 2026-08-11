@@ -26,7 +26,7 @@ The library ships neutral chrome plus a single accent — deliberate enough to u
 
 Everything else in this document derives from those twelve. **To rebrand, set `--formidable-color-field-border-focus`** — it carries the focus border, the focused label, the focused underline and both focus rings. Add `--formidable-color-field-label-floating` if you want the accent on resting labels too.
 
-Alternative colour and geometry schemes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, and ten palettes including a dark one — are catalogued in `theme-options.md` and selectable in the demo.
+Alternative colour and geometry schemes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one — are catalogued in `theme-options.md` and selectable in the demo.
 
 ---
 
@@ -136,7 +136,7 @@ Set these and the rest of the library follows. Do not set the derived variables 
 
 ### 5. Start From A Scheme Instead
 
-Ten palettes and ten field shapes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless — are written out variable by variable in `theme-options.md`, and every combination is selectable in the demo. Copying one and adjusting it is usually faster than starting from this page.
+Ten palettes and eleven field shapes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed — are written out variable by variable in `theme-options.md`, and every combination is selectable in the demo. Copying one and adjusting it is usually faster than starting from this page.
 
 ---
 
@@ -242,11 +242,12 @@ Ten palettes and ten field shapes — outlined, underlined, soft, compact, pill,
 | `--formidable-color-field-underline-invalid`             | Underline color while the field is invalid.                                                                                 |
 | `--formidable-color-field-background`                    | Background color for fields.                                                                                                |
 | `--formidable-color-field-group-background`              | Background color for field groups.                                                                                          |
-| `--formidable-color-field-background-hovered`            | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when the field is hovered.  |
+| `--formidable-color-field-background-hovered`            | Overrides `--formidable-color-field-background` when the field is hovered, and is what a group's hover fill defaults to.    |
 | `--formidable-color-field-background-focus`              | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when the field is focused.  |
 | `--formidable-color-field-background-invalid`            | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when the field is invalid.  |
 | `--formidable-color-field-background-readonly`           | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when the field is readonly. |
 | `--formidable-color-field-background-disabled`           | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when the field is disabled. |
+| `--formidable-color-field-group-background-hovered`      | Overrides `--formidable-color-field-group-background` when the field group is hovered.                                      |
 | `--formidable-color-field-group-background-readonly`     | Overrides `--formidable-color-field-group-background` when the field group is readonly.                                     |
 | `--formidable-color-field-group-background-disabled`     | Overrides `--formidable-color-field-group-background` when the field group is disabled.                                     |
 | `--formidable-color-field-label`                         | Text color for labels.                                                                                                      |
@@ -310,6 +311,7 @@ Ten palettes and ten field shapes — outlined, underlined, soft, compact, pill,
 | `--formidable-color-date-field-panel-date-highlighted-text` | Text color for highlighted dates inside the calendar.      |
 | `--formidable-color-date-field-panel-date-highlighted`      | Background color for highlighted dates.                    |
 | `--formidable-color-date-field-panel-date-hovered`          | Background color when hovering a date.                     |
+| `--formidable-color-date-field-panel-date-today`            | Ring marking today, unless today is the selected date.     |
 | `--formidable-color-date-field-panel-date-out-of-range`     | Color for dates outside the min/max range.                 |
 | `--formidable-color-date-field-panel-day-label`             | Color for weekday labels in the calendar header.           |
 
@@ -428,12 +430,13 @@ Weigh it first: a header that wins covers an open dropdown scrolled underneath i
 
 ### Option Prefix Dimensions
 
-| Variable                                      | Description                                                           |
-| :-------------------------------------------- | :-------------------------------------------------------------------- |
-| `--formidable-option-prefix-dimension-outer`  | Size of the outer circle/box for radio/checkbox prefixes.             |
-| `--formidable-option-prefix-dimension-inner`  | Size of the inner indicator for selected radio/checkbox prefixes.     |
-| `--formidable-option-prefix-gap`              | Gap between a radio/checkbox prefix and its option label.             |
-| `--formidable-option-prefix-border-thickness` | Border thickness of the outer circle/box for radio/checkbox prefixes. |
+| Variable                                      | Description                                                                                                     |
+| :-------------------------------------------- | :-------------------------------------------------------------------------------------------------------------- |
+| `--formidable-option-prefix-dimension-outer`  | Size of the outer circle/box for radio/checkbox prefixes.                                                       |
+| `--formidable-option-prefix-dimension-inner`  | Size of the inner indicator for selected radio/checkbox prefixes.                                               |
+| `--formidable-option-prefix-inset`            | Where a radio/checkbox prefix starts, and a group's empty state with it. Set it to `0px` to left-align a group. |
+| `--formidable-option-prefix-gap`              | Gap between a radio/checkbox prefix and its option label.                                                       |
+| `--formidable-option-prefix-border-thickness` | Border thickness of the outer circle/box for radio/checkbox prefixes.                                           |
 
 ---
 
