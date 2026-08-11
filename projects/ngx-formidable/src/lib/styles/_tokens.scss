@@ -6,33 +6,33 @@
 
 // #region Font Sizes & Line Heights
 
-$formidable-field-font-size: utils.spacing(16);
+$formidable-field-font-size: utils.rem(16);
 $formidable-field-font-weight: normal;
 $formidable-field-line-height: math.div(25.6, 16); // 1.6
 
-$formidable-label-font-size: utils.spacing(16);
+$formidable-label-font-size: utils.rem(16);
 $formidable-label-font-weight: bold;
 $formidable-label-line-height: math.div(25.6, 16); // 1.6
 
-$formidable-label-floating-font-size: utils.spacing(12);
+$formidable-label-floating-font-size: utils.rem(12);
 $formidable-label-floating-font-weight: normal;
 $formidable-label-floating-line-height: math.div(19.2, 12); // 1.6
 
-$formidable-field-validation-error-font-size: utils.spacing(12);
+$formidable-field-validation-error-font-size: utils.rem(12);
 $formidable-field-validation-error-font-weight: normal;
 $formidable-field-validation-error-line-height: math.div(19.2, 12); // 1.6
 
-$formidable-field-hint-font-size: utils.spacing(12);
+$formidable-field-hint-font-size: utils.rem(12);
 $formidable-field-hint-font-weight: normal;
 $formidable-field-hint-line-height: math.div(19.2, 12); // 1.6
 
-$formidable-length-indicator-font-size: utils.spacing(12);
+$formidable-length-indicator-font-size: utils.rem(12);
 $formidable-length-indicator-font-weight: normal;
 $formidable-length-indicator-line-height: math.div(19.2, 12); // 1.6
 
 // #region Slider
 
-$formidable-slider-label-font-size: utils.spacing(12);
+$formidable-slider-label-font-size: utils.rem(12);
 $formidable-slider-label-font-weight: normal;
 $formidable-slider-label-line-height: math.div(19.2, 12); // 1.6
 
@@ -42,13 +42,13 @@ $formidable-slider-label-line-height: math.div(19.2, 12); // 1.6
 
 // #region Field Dimensions
 
-$formidable-field-before-margin-bottom: utils.spacing(8);
+$formidable-field-before-margin-bottom: utils.rem(8);
 
 // The library's base corner radius, and the fallback source for every rounded thing that is not a field
 // box: the toggle, the slider and the panels.
-$formidable-border-radius: utils.spacing(8);
+$formidable-border-radius: utils.rem(8);
 
-$formidable-field-border-thickness: utils.spacing(1);
+$formidable-field-border-thickness: utils.rem(1);
 
 // The focus ring's spread. Its own value, so a borderless theme can still have a ring and any theme can
 // have one wider than its border.
@@ -72,15 +72,15 @@ $formidable-field-group-border-thickness: $formidable-field-border-thickness;
 $formidable-field-group-border-radius: $formidable-field-border-radius;
 
 $formidable-label-height: $formidable-label-line-height * $formidable-label-font-size;
-$formidable-field-height: utils.spacing(56); // even number
+$formidable-field-height: utils.rem(56); // even number
 
 // The field's horizontal padding — where its value starts, and where a projected prefix's text starts.
 // One named value because a `border-prefix` label aligns with the prefix by using it directly.
-$formidable-field-padding-x: utils.spacing(16);
+$formidable-field-padding-x: utils.rem(16);
 
 // The square panel toggle `dropdown-field` and `date-field` render inside their own box, at the field's
 // inner right edge.
-$formidable-field-toggle-size: utils.spacing(32);
+$formidable-field-toggle-size: utils.rem(32);
 
 // Line-box heights of the two things that share the field's inner height when the label is inside.
 $formidable-field-inner-height: $formidable-field-height - 2 * $formidable-field-border-thickness;
@@ -120,7 +120,7 @@ $formidable-label-border-offset: math.div($formidable-field-border-thickness, 2)
   );
 
 // How far a `border` label's border-hiding band reaches either side of its text.
-$formidable-label-border-gap: utils.spacing(4);
+$formidable-label-border-gap: utils.rem(4);
 
 // How far that band outgrows the border it hides, above and below. Both are sub-pixel positioned, so a
 // band exactly as thick as the border leaves a hairline of it showing once rasterized. Deliberately a
@@ -141,7 +141,7 @@ $formidable-label-border-band-reach-focus: $formidable-field-focus-ring-width;
 // word — ' (required)' — without touching markup.
 $formidable-label-required-marker: '*';
 
-$formidable-field-group-option-padding: utils.spacing(8) utils.spacing(0);
+$formidable-field-group-option-padding: utils.rem(8) utils.rem(0);
 
 $formidable-field-support-min-height: $formidable-field-validation-error-line-height *
   $formidable-field-validation-error-font-size;
@@ -320,41 +320,41 @@ $formidable-color-length-indicator: $formidable-color-field-placeholder;
 
 // #region Textarea
 
-$formidable-textarea-min-height: utils.spacing(96); // ~2 lines
+$formidable-textarea-min-height: utils.rem(96); // ~2 lines
 $formidable-textarea-max-height: none;
-$formidable-textarea-padding-top: utils.spacing(16);
+$formidable-textarea-padding-top: utils.rem(16);
 
 // #endregion
 
 // #region Toggle
 
-$formidable-toggle-field-width: utils.spacing(48);
-$formidable-toggle-field-height: utils.spacing(24);
+$formidable-toggle-field-width: utils.rem(48);
+$formidable-toggle-field-height: utils.rem(24);
 $formidable-toggle-field-track-border-radius: $formidable-border-radius;
-$formidable-toggle-field-thumb-size: utils.spacing(16);
+$formidable-toggle-field-thumb-size: utils.rem(16);
 $formidable-toggle-field-thumb-border-radius: $formidable-border-radius;
-$formidable-toggle-field-thumb-gap: utils.spacing(4);
-$formidable-toggle-field-gap: utils.spacing(8);
+$formidable-toggle-field-thumb-gap: utils.rem(4);
+$formidable-toggle-field-gap: utils.rem(8);
 
 // #endregion
 
 // #region Slider
 
-$formidable-slider-thumb-size: utils.spacing(16);
-$formidable-slider-track-height: utils.spacing(6);
-$formidable-slider-track-fill-height: utils.spacing(6);
+$formidable-slider-thumb-size: utils.rem(16);
+$formidable-slider-track-height: utils.rem(6);
+$formidable-slider-track-fill-height: utils.rem(6);
 $formidable-slider-track-border-thickness: $formidable-field-border-thickness;
 $formidable-slider-track-border-radius: $formidable-border-radius;
-$formidable-slider-tick-mark-width: utils.spacing(4);
-$formidable-slider-tick-mark-height: utils.spacing(4);
+$formidable-slider-tick-mark-width: utils.rem(4);
+$formidable-slider-tick-mark-height: utils.rem(4);
 $formidable-slider-tick-mark-border-radius: $formidable-border-radius;
-$formidable-slider-thumb-border-thickness: utils.spacing(0);
+$formidable-slider-thumb-border-thickness: utils.rem(0);
 $formidable-slider-thumb-border-radius: $formidable-border-radius;
-$formidable-slider-thumb-label-distance: utils.spacing(2);
-$formidable-slider-thumb-label-padding: utils.spacing(2) utils.spacing(4);
+$formidable-slider-thumb-label-distance: utils.rem(2);
+$formidable-slider-thumb-label-padding: utils.rem(2) utils.rem(4);
 $formidable-slider-thumb-label-border-thickness: $formidable-field-border-thickness;
 $formidable-slider-thumb-label-border-radius: $formidable-border-radius;
-$formidable-slider-tick-labels-margin-top: utils.spacing(2);
+$formidable-slider-tick-labels-margin-top: utils.rem(2);
 
 // #endregion
 
@@ -362,8 +362,7 @@ $formidable-slider-tick-labels-margin-top: utils.spacing(2);
 
 $formidable-panel-background: $formidable-color-field-background;
 $formidable-panel-border-radius: $formidable-border-radius;
-$formidable-panel-box-shadow: utils.spacing(0) utils.spacing(12) utils.spacing(48) calc(utils.spacing(8) * -1)
-  rgb(0 0 0 / 12%);
+$formidable-panel-box-shadow: utils.rem(0) utils.rem(12) utils.rem(48) calc(utils.rem(8) * -1) rgb(0 0 0 / 12%);
 $formidable-panel-max-height: 33dvh; // 1/3 of the viewport actually visible — mobile chrome collapses `vh`
 
 // #endregion
@@ -395,18 +394,17 @@ $formidable-sheet-z-index: 1000;
 
 // #region Date Field Panel
 
-$formidable-date-field-panel-width: utils.spacing(300);
+$formidable-date-field-panel-width: utils.rem(300);
 $formidable-date-field-panel-border-radius: $formidable-panel-border-radius;
-$formidable-date-field-panel-box-shadow: $formidable-panel-box-shadow;
 
 // #endregion
 
 // #region Option Prefix Dimensions
 
-$formidable-option-prefix-dimension-outer: utils.spacing(20);
-$formidable-option-prefix-dimension-inner: utils.spacing(8);
+$formidable-option-prefix-dimension-outer: utils.rem(20);
+$formidable-option-prefix-dimension-inner: utils.rem(8);
 $formidable-option-prefix-inset: $formidable-field-padding-x;
-$formidable-option-prefix-gap: utils.spacing(16);
-$formidable-option-prefix-border-thickness: utils.spacing(2);
+$formidable-option-prefix-gap: utils.rem(16);
+$formidable-option-prefix-border-thickness: utils.rem(2);
 
 // #endregion

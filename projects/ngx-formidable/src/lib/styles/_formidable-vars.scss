@@ -1,5 +1,4 @@
 @use './tokens';
-@use './mixins/utils' as utils;
 
 // This file defines the exposed CSS variables (run-time), which keep track of relationships/calculations between each other.
 
@@ -675,10 +674,6 @@
   --formidable-date-field-panel-border-radius: var(
     --formidable-panel-border-radius,
     #{tokens.$formidable-date-field-panel-border-radius}
-  );
-  --formidable-date-field-panel-box-shadow: var(
-    --formidable-panel-box-shadow,
-    #{tokens.$formidable-date-field-panel-box-shadow}
   );
 
   // #endregion

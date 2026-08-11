@@ -715,8 +715,7 @@ export class ExampleFormComponent implements OnInit {
       '--formidable-color-field-focus-box-shadow': '5px 5px 0 0 var(--formidable-color-field-border-focus)',
       '--formidable-color-field-group-focus-box-shadow': '5px 5px 0 0 var(--formidable-color-field-border-focus)',
       '--formidable-color-field-focus-box-shadow-invalid': '5px 5px 0 0 var(--formidable-color-validation-error)',
-      '--formidable-panel-box-shadow': '6px 6px 0 0 var(--formidable-color-field-border)',
-      '--formidable-date-field-panel-box-shadow': '6px 6px 0 0 var(--formidable-color-field-border)'
+      '--formidable-panel-box-shadow': '6px 6px 0 0 var(--formidable-color-field-border)'
     },
     // I — Airy: tall rows, generous padding, large radii. Reads calm rather than dense.
     airy: {

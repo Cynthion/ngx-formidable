@@ -18,7 +18,7 @@
 
   &.length-indicator-enabled {
     textarea.field {
-      padding-bottom: spacing(32); // ensure space for the indicator if needed
+      padding-bottom: rem(32); // ensure space for the indicator if needed
     }
   }
 }

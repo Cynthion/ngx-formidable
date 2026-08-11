@@ -64,21 +64,6 @@
 
 // #region Shared Resets
 
-// An inline-flex icon box that sizes its `svg` to fill it. Currently unused.
-@mixin icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  svg {
-    width: 100%;
-    height: 100%;
-    fill: currentcolor;
-    stroke: currentcolor;
-    display: block;
-  }
-}
-
 // The decorator's `<fieldset>` wrapper.
 @mixin fieldset {
   @include fieldset-reset;
@@ -578,13 +563,13 @@
   justify-content: center;
 
   &.arrow-up {
-    top: calc(utils.spacing(2));
-    @include icons.css-icon('arrow-up', utils.spacing(10), utils.spacing(2));
+    top: calc(utils.rem(2));
+    @include icons.css-icon('arrow-up', utils.rem(10), utils.rem(2));
   }
 
   &.arrow-down {
-    top: calc(utils.spacing(2) * -1);
-    @include icons.css-icon('arrow-down', utils.spacing(10), utils.spacing(2));
+    top: calc(utils.rem(2) * -1);
+    @include icons.css-icon('arrow-down', utils.rem(10), utils.rem(2));
   }
 }
 
@@ -722,7 +707,7 @@
 @mixin field-label-layout {
   display: flex;
   align-items: baseline;
-  column-gap: utils.spacing(4);
+  column-gap: utils.rem(4);
 }
 
 // Suffixed to a required field's label. `flex: none` so the label's text is what ellipsizes when room runs
@@ -784,7 +769,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  column-gap: utils.spacing(4);
+  column-gap: utils.rem(4);
 }
 
 // The `inline` layout: label and field side by side.
@@ -814,7 +799,7 @@
 @mixin decorator-container-inline {
   display: flex;
   align-items: center;
-  column-gap: utils.spacing(8);
+  column-gap: utils.rem(8);
 }
 
 // #endregion
@@ -870,13 +855,13 @@
 // A projected prefix in an `inline` layout, where it sits in flow rather than over the field.
 @mixin field-prefix-inline {
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
-  margin-right: utils.spacing(8);
+  margin-right: utils.rem(8);
 }
 
 // A projected suffix in an `inline` layout.
 @mixin field-suffix-inline {
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
-  margin-left: utils.spacing(8);
+  margin-left: utils.rem(8);
 }
 
 // #endregion
@@ -885,7 +870,7 @@
 
 // The error list under a field. Reserves its min-height so a message appearing does not shift the form.
 @mixin field-validation-errors {
-  margin-top: utils.spacing(8);
+  margin-top: utils.rem(8);
   min-height: var(--formidable-field-support-min-height, #{tokens.$formidable-field-support-min-height});
 }
 
@@ -908,8 +893,8 @@
 // here; `flex` and each hint's own `text-align` do not, and live in `_globals.scss`.
 @mixin field-hint {
   display: flex;
-  column-gap: utils.spacing(8);
-  margin-top: utils.spacing(8);
+  column-gap: utils.rem(8);
+  margin-top: utils.rem(8);
   min-height: var(--formidable-field-support-min-height, #{tokens.$formidable-field-support-min-height});
   font-size: var(--formidable-field-hint-font-size, #{tokens.$formidable-field-hint-font-size});
   font-weight: var(--formidable-field-hint-font-weight, #{tokens.$formidable-field-hint-font-weight});
@@ -920,7 +905,7 @@
 // A textarea's character counter, pinned to its bottom right.
 @mixin length-indicator {
   position: absolute;
-  bottom: utils.spacing(8);
+  bottom: utils.rem(8);
   right: 0;
   color: var(--formidable-color-length-indicator, #{tokens.$formidable-color-length-indicator});
   pointer-events: none;
@@ -1079,7 +1064,7 @@
     align-items: center;
 
     // reasonable hit area
-    height: utils.spacing(24);
+    height: utils.rem(24);
   }
 
   .slider-track {
@@ -1389,7 +1374,7 @@
   top: calc(100% + var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}));
   visibility: hidden;
   pointer-events: none;
-  transform: translateY(calc(utils.spacing(4) * -1));
+  transform: translateY(calc(utils.rem(4) * -1));
   transition: transform var(--formidable-animation-duration, #{tokens.$formidable-animation-duration})
     var(--formidable-animation-easing, #{tokens.$formidable-animation-easing});
 
@@ -1471,7 +1456,7 @@
 @mixin date-picker-wrapper {
   display: flex;
   justify-content: center;
-  margin: utils.spacing(16);
+  margin: utils.rem(16);
 }
 
 // Pikaday builds the calendar into this. It is a flex item, and a flex item floors at its content's
@@ -1572,7 +1557,7 @@
   @include field-option;
   @include field-option-selected-highlighted-logic;
 
-  padding: utils.spacing(8) utils.spacing(16);
+  padding: utils.rem(8) utils.rem(16);
 }
 
 // An option in a radio group. Selected and highlighted only show while the group has focus.
@@ -1667,7 +1652,7 @@
 @mixin panel-no-option {
   @include no-option;
 
-  padding: utils.spacing(8) utils.spacing(16);
+  padding: utils.rem(8) utils.rem(16);
 }
 
 // #endregion

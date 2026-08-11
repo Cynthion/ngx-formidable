@@ -426,7 +426,6 @@ Weigh it first: a header that wins covers an open dropdown scrolled underneath i
 | :-------------------------------------------- | :---------------------------------------------------------------- |
 | `--formidable-date-field-panel-width`         | Width the calendar prefers; it scales down into a narrower panel. |
 | `--formidable-date-field-panel-border-radius` | Border-radius for the date-picker panel.                          |
-| `--formidable-date-field-panel-box-shadow`    | Box-shadow override for the date-picker panel.                    |
 
 ### Option Prefix Dimensions
 

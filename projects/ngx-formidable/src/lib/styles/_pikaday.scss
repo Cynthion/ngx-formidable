@@ -1,28 +1,13 @@
 @use 'sass:math';
-@use 'css-icons' as icons;
-@use 'utils' as utils;
-@use '../tokens' as tokens;
+@use './mixins/css-icons' as icons;
+@use './mixins/utils' as utils;
+@use './tokens' as tokens;
 
-// These CSS classes customize the pikaday components.
+// These CSS classes customize the pikaday components. They live beside `_globals.scss` rather than under
+// `mixins/` because they are unscoped emitting rules, not mixins: Pikaday builds its calendar outside
+// Angular's encapsulation, so nothing component-scoped can reach it.
 // Alternatively, the CSS classes provided by the pikaday library can be used and customized:
 // https://github.com/Pikaday/Pikaday#styles
-
-@keyframes animation-date-in {
-  0% {
-    transform: translateY(-10px);
-    opacity: 0;
-  }
-
-  99% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  100% {
-    transform: none;
-    opacity: 1;
-  }
-}
 
 @mixin button-normalize {
   background: transparent;
@@ -38,7 +23,7 @@
 
 .pika-single {
   font: inherit;
-  font-size: utils.spacing(14);
+  font-size: utils.rem(14);
   font-weight: bold;
   color: inherit;
   line-height: math.div(22.4, 14);
@@ -55,14 +40,14 @@
   max-width: 100%;
 
   & + & {
-    margin-left: utils.spacing(16);
+    margin-left: utils.rem(16);
   }
 }
 
 .pika-title {
   display: flex;
   align-items: center;
-  margin-bottom: utils.spacing(8);
+  margin-bottom: utils.rem(8);
 
   select {
     cursor: pointer;
@@ -79,7 +64,7 @@
   border-radius: var(--formidable-date-field-panel-border-radius, #{tokens.$formidable-date-field-panel-border-radius});
 
   & + & {
-    margin-left: utils.spacing(4);
+    margin-left: utils.rem(4);
   }
 
   // hover
@@ -170,7 +155,7 @@
 
   th {
     text-align: center;
-    padding-bottom: utils.spacing(8);
+    padding-bottom: utils.rem(8);
   }
 
   td {
