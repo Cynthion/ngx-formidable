@@ -1,44 +1,31 @@
 import { CommonModule } from '@angular/common';
 import {
-  AfterContentInit,
   ChangeDetectionStrategy,
   Component,
-  ContentChildren,
   ElementRef,
   EventEmitter,
   forwardRef,
   Input,
-  OnChanges,
   OnInit,
   Output,
-  QueryList,
-  SimpleChanges,
-  ViewChild,
-  ViewChildren
+  ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
 import { applyDefaultOption, combineFieldOptions, getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
-import {
-  scrollHighlightedOptionIntoView,
-  scrollIntoView,
-  updatePanelPosition
-} from '../../../helpers/position.helpers';
+import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import {
   FieldDecoratorLayout,
-  FieldDefaultOptionMode,
   FieldOptionRole,
   FORMIDABLE_FIELD,
-  FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
   FormidablePanelPosition,
   IFormidableAutocompleteField,
-  IFormidableFieldOption,
-  NO_OPTIONS_TEXT
+  IFormidableFieldOption
 } from '../../../models/formidable.model';
 import { FieldOptionComponent } from '../../field-option/field-option.component';
-import { BaseFieldDirective } from '../base-field.directive';
+import { BaseOptionFieldDirective } from '../base-option-field.directive';
 
 /**
  * A configurable text input with an overlayed list of filtered options.
@@ -90,12 +77,11 @@ import { BaseFieldDirective } from '../base-field.directive';
   ]
 })
 export class AutocompleteFieldComponent
-  extends BaseFieldDirective<string | null>
-  implements IFormidableAutocompleteField, OnInit, OnChanges, AfterContentInit
+  extends BaseOptionFieldDirective<string | null>
+  implements IFormidableAutocompleteField, OnInit
 {
   @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
   @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
-  @ViewChildren('optionRef') optionRefs?: QueryList<FieldOptionComponent>;
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = () => this.handleExternalClick();
@@ -105,29 +91,10 @@ export class AutocompleteFieldComponent
   protected filterChangeSubject$ = new BehaviorSubject<string>('');
 
   private _writtenValue: string | null = null;
-  private _highlightedValue: string | null = null;
 
   override ngOnInit(): void {
     super.ngOnInit();
     this.registerAutocomplete();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    // react to changes of @Input properties
-    if (changes['options'] || changes['sortFn'] || changes['defaultOption'] || changes['defaultOptionMode']) {
-      queueMicrotask(() => this.onOptionsChanged());
-    }
-  }
-
-  ngAfterContentInit(): void {
-    // The projected options (option.template) might not be available immediately after content initialization,
-    // so we use queueMicrotask to ensure they are processed after the current change detection cycle.
-    queueMicrotask(() => this.onOptionsChanged());
-
-    // react to the changes of projected options
-    this.optionComponents?.changes
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
   }
 
   protected onInput(event: Event): void {
@@ -145,7 +112,7 @@ export class AutocompleteFieldComponent
 
   protected doOnFocusChange(isFocused: boolean): void {
     if (!isFocused) {
-      this._highlightedValue = null;
+      this.highlightedOptionValue = null;
     }
   }
 
@@ -238,21 +205,19 @@ export class AutocompleteFieldComponent
 
   // #region IFormidableOptionField
 
-  @Input() options?: IFormidableFieldOption[] = [];
-  @Input() defaultOption?: IFormidableFieldOption;
-  @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
-  @Input() noOptionsText: string = NO_OPTIONS_TEXT;
-  @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
-
   public readonly optionRole: FieldOptionRole = 'option';
 
-  @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
-  optionComponents?: QueryList<IFormidableFieldOption>;
-
   protected readonly filteredOptions$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
-  protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
 
   protected selectedOption?: IFormidableFieldOption = undefined;
+
+  protected get activeOptions(): IFormidableFieldOption[] {
+    return this.filteredOptions$.value;
+  }
+
+  protected override get selectedOptionValue(): string | null {
+    return this.selectedOption?.value ?? null;
+  }
 
   public selectOption(option: IFormidableFieldOption): void {
     if (option.disabled) return;
@@ -307,7 +272,7 @@ export class AutocompleteFieldComponent
     this.cdRef.markForCheck();
   }
 
-  private onOptionsChanged(): void {
+  protected onOptionsChanged(): void {
     const allOptions = this.computeAllOptions();
 
     this.updateFilteredOptions(allOptions);
@@ -396,7 +361,6 @@ export class AutocompleteFieldComponent
       // already laid out and measurable. Deferring would flip it after paint, which is a visible jump.
       updatePanelPosition(this.autocompleteRef, this.panelRef);
     } else {
-      this._highlightedValue = null;
       this.setHighlightedIndex(-1);
     }
 
@@ -410,72 +374,6 @@ export class AutocompleteFieldComponent
   }
 
   // #endregion
-
-  private highlightSelectedOption(): void {
-    const selectedIndex = this.filteredOptions$.value.findIndex((opt) => opt.value === this.selectedOption?.value);
-
-    this.setHighlightedIndex(selectedIndex);
-  }
-
-  private reconcileHighlightAfterOptionsChanged(): void {
-    if (!this.isPanelOpen) return;
-
-    const options = this.filteredOptions$.value;
-    const count = options.length;
-
-    // empty list
-    if (count === 0) {
-      this.setHighlightedIndex(-1);
-      return;
-    }
-
-    // selection wins
-    if (this.selectedOption) {
-      const selectedIndex = options.findIndex((o) => o.value === this.selectedOption!.value);
-      if (selectedIndex >= 0) {
-        this.setHighlightedIndex(selectedIndex);
-        return;
-      }
-    }
-
-    // try keep previously highlighted value
-    if (this._highlightedValue) {
-      const keepIndex = options.findIndex((o) => o.value === this._highlightedValue);
-      if (keepIndex >= 0) {
-        this.setHighlightedIndex(keepIndex);
-        return;
-      }
-    }
-
-    // clamp old index into new bounds
-    const prevHighlightIndex = this.highlightedOptionIndex$.value;
-
-    let nextIndex = prevHighlightIndex;
-    if (nextIndex < 0) nextIndex = 0;
-    if (nextIndex >= count) nextIndex = count - 1;
-
-    // skip disabled
-    if (options[nextIndex]?.disabled) {
-      const fixed = getNextAvailableOptionIndex(nextIndex, options, 'down');
-      nextIndex = fixed >= 0 ? fixed : getNextAvailableOptionIndex(nextIndex, options, 'up');
-    }
-
-    this.setHighlightedIndex(nextIndex >= 0 ? nextIndex : -1);
-  }
-
-  private setHighlightedIndex(index: number): void {
-    this.highlightedOptionIndex$.next(index);
-
-    const option = index >= 0 ? this.filteredOptions$.value[index] : undefined;
-    this._highlightedValue = option?.value ?? null;
-
-    if (!this.isFieldFocused) return;
-    if (index < 0) return;
-
-    // `optionRefs` is only repopulated once the new highlight has rendered, so a microtask would
-    // resolve the wrong element.
-    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
-  }
 
   private registerAutocomplete(): void {
     this.filterChangeSubject$

@@ -22,7 +22,7 @@ The library source lives under `projects/ngx-formidable/src/lib/`. Everything pu
 ```txt
 lib/
 ├── components/
-│   ├── fields/          # the field components, each a folder (.ts/.html/.scss) + base-field.directive.ts
+│   ├── fields/          # the field components, each a folder (.ts/.html/.scss) + the two base directives
 │   ├── field-decorator/ # wraps a field with label, adornment, prefix, suffix, hints, errors
 │   ├── field-errors/    # renders validation errors
 │   ├── field-option/    # a single option inside option-based fields
@@ -35,7 +35,7 @@ lib/
 └── provide-ngx-formidable.ts    # provideNgxFormidable() — provider function (standalone path)
 ```
 
-**Composition Model**: field components implement `ControlValueAccessor` and register the `FORMIDABLE_FIELD` token; `FieldDecoratorComponent` projects a field plus its label/adornment/prefix/suffix/errors; option-based fields collect `FieldOptionComponent` children via `@ContentChildren`. The abstract `BaseFieldDirective` is the shared base and the extension point for custom fields. See `ui_components.md`.
+**Composition Model**: field components implement `ControlValueAccessor` and register the `FORMIDABLE_FIELD` token; `FieldDecoratorComponent` projects a field plus its label/adornment/prefix/suffix/errors; option-based fields collect `FieldOptionComponent` children via `@ContentChildren`. The abstract `BaseFieldDirective` is the shared base and the extension point for custom fields; the abstract `BaseOptionFieldDirective` extends it for the four fields that walk an option list with a highlight. See `ui_components.md`.
 
 **Validation**: `NgxFormidableFormDirective` bridges Angular template-driven forms to Vest static suites, exposing errors/validity as observables and producing async validators per field path.
 

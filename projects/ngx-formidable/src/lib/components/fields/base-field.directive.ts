@@ -187,16 +187,11 @@ export abstract class BaseFieldDirective<T = string | null>
   }
 
   // The decorator mints the ids for what it renders around the field; the field mints the ids for what
-  // lives inside its own box — its panel, and each option in it.
+  // lives inside its own box — its panel here, and each option in `BaseOptionFieldDirective`.
 
   /** Names the popup a panel field's `aria-controls` points at, whether that is a listbox or a dialog. */
   protected get panelId(): string {
     return `${this.fieldId}-panel`;
-  }
-
-  /** `null` for a negative index, so a field with nothing highlighted emits no `aria-activedescendant`. */
-  protected optionId(index: number): string | null {
-    return index >= 0 ? `${this.fieldId}-option-${index}` : null;
   }
 
   /**

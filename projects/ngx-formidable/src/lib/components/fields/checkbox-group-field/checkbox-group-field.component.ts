@@ -1,37 +1,26 @@
 import { CommonModule } from '@angular/common';
 import {
-  AfterContentInit,
   ChangeDetectionStrategy,
   Component,
-  ContentChildren,
   ElementRef,
   forwardRef,
-  Input,
-  OnChanges,
   OnDestroy,
   OnInit,
-  QueryList,
-  SimpleChanges,
-  ViewChild,
-  ViewChildren
+  ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject, takeUntil } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { applyDefaultOption, combineFieldOptions, getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
-import { scrollHighlightedOptionIntoView } from '../../../helpers/position.helpers';
 import {
   FieldDecoratorLayout,
-  FieldDefaultOptionMode,
   FieldOptionRole,
   FORMIDABLE_FIELD,
-  FORMIDABLE_FIELD_OPTION,
   FORMIDABLE_OPTION_FIELD,
   IFormidableCheckboxGroupField,
-  IFormidableFieldOption,
-  NO_OPTIONS_TEXT
+  IFormidableFieldOption
 } from '../../../models/formidable.model';
 import { FieldOptionComponent } from '../../field-option/field-option.component';
-import { BaseFieldDirective } from '../base-field.directive';
+import { BaseOptionFieldDirective } from '../base-option-field.directive';
 
 /**
  * A configurable group of selectable checkbox options.
@@ -76,11 +65,10 @@ import { BaseFieldDirective } from '../base-field.directive';
   ]
 })
 export class CheckboxGroupFieldComponent
-  extends BaseFieldDirective<string[]>
-  implements IFormidableCheckboxGroupField, OnInit, OnChanges, AfterContentInit, OnDestroy
+  extends BaseOptionFieldDirective<string[]>
+  implements IFormidableCheckboxGroupField, OnInit, OnDestroy
 {
   @ViewChild('checkboxGroupRef', { static: true }) checkboxGroupRef!: ElementRef<HTMLDivElement>;
-  @ViewChildren('optionRef') optionRefs?: QueryList<FieldOptionComponent>;
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
@@ -88,25 +76,6 @@ export class CheckboxGroupFieldComponent
   protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
   private _writtenValues: string[] = [];
-  private _highlightedValue: string | null = null;
-
-  ngOnChanges(changes: SimpleChanges): void {
-    // react to changes of @Input properties
-    if (changes['options'] || changes['sortFn'] || changes['defaultOption'] || changes['defaultOptionMode']) {
-      queueMicrotask(() => this.onOptionsChanged());
-    }
-  }
-
-  ngAfterContentInit(): void {
-    // The projected options (option.template) might not be available immediately after content initialization,
-    // so we use queueMicrotask to ensure they are processed after the current change detection cycle.
-    queueMicrotask(() => this.onOptionsChanged());
-
-    // react to the changes of projected options
-    this.optionComponents?.changes
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
-  }
 
   protected doOnValueChange(): void {
     // No additional actions needed
@@ -172,19 +141,13 @@ export class CheckboxGroupFieldComponent
 
   // #region IFormidableOptionField
 
-  @Input() options?: IFormidableFieldOption[] = [];
-  @Input() defaultOption?: IFormidableFieldOption;
-  @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
-  @Input() noOptionsText: string = NO_OPTIONS_TEXT;
-  @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
-
   public readonly optionRole: FieldOptionRole = 'checkbox';
 
-  @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
-  optionComponents?: QueryList<IFormidableFieldOption>;
-
   protected readonly options$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
-  protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
+
+  protected get activeOptions(): IFormidableFieldOption[] {
+    return this.options$.value;
+  }
 
   public selectOption(option: IFormidableFieldOption): void {
     if (option.disabled) return;
@@ -207,7 +170,7 @@ export class CheckboxGroupFieldComponent
     this.cdRef.markForCheck();
   }
 
-  private onOptionsChanged(): void {
+  protected onOptionsChanged(): void {
     const allOptions = this.computeAllOptions();
 
     this.updateOptions(allOptions);
@@ -255,54 +218,5 @@ export class CheckboxGroupFieldComponent
 
   protected isChecked(value: string): boolean {
     return this._writtenValues.includes(value);
-  }
-
-  private reconcileHighlightAfterOptionsChanged(): void {
-    const options = this.options$.value;
-    const count = options.length;
-
-    // empty list
-    if (count === 0) {
-      this.setHighlightedIndex(-1);
-      return;
-    }
-
-    // try keep previous highlighted value
-    if (this._highlightedValue) {
-      const keepIndex = options.findIndex((o) => o.value === this._highlightedValue);
-      if (keepIndex >= 0) {
-        this.setHighlightedIndex(keepIndex);
-        return;
-      }
-    }
-
-    // clamp previous index into new bounds
-    const prevHighlightIndex = this.highlightedOptionIndex$.value;
-
-    let nextIndex = prevHighlightIndex;
-    if (nextIndex < 0) nextIndex = 0;
-    if (nextIndex >= count) nextIndex = count - 1;
-
-    // skip disabled
-    if (options[nextIndex]?.disabled) {
-      const fixed = getNextAvailableOptionIndex(nextIndex, options, 'down');
-      nextIndex = fixed >= 0 ? fixed : getNextAvailableOptionIndex(nextIndex, options, 'up');
-    }
-
-    this.setHighlightedIndex(nextIndex >= 0 ? nextIndex : -1);
-  }
-
-  private setHighlightedIndex(index: number): void {
-    this.highlightedOptionIndex$.next(index);
-
-    const opt = index >= 0 ? this.options$.value[index] : undefined;
-    this._highlightedValue = opt?.value ?? null;
-
-    if (!this.isFieldFocused) return;
-    if (index < 0) return;
-
-    // `optionRefs` is only repopulated once the new highlight has rendered, so a microtask would
-    // resolve the wrong element.
-    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
   }
 }

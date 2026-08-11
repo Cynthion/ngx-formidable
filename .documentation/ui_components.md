@@ -36,15 +36,37 @@ Inherited by every field:
 
 **Accessibility**: the base gives every field three protected getters its template binds onto whichever element actually takes focus — `labelledBy`, `describedBy` and `isInvalid`. All three come from the surrounding decorator, injected optionally, so a field used on its own emits none of the attributes rather than pointing at ids that do not exist. See **Field Accessibility** under **Field Decorator** for the ids and what each field carries.
 
-The base also **mints** two ids of its own from `fieldId`, the mirror of the decorator's rule: the decorator owns what it renders around the field, the field owns what lives inside its own box. `panelId` (`{fieldId}-panel`) names the popup a panel field's `aria-controls` points at, and `optionId(index)` (`{fieldId}-option-{index}`) names one option, or `null` for a negative index so an unhighlighted field emits no `aria-activedescendant` at all. See **Combobox And Options** below.
+The base also **mints** an id of its own from `fieldId`, the mirror of the decorator's rule: the decorator owns what it renders around the field, the field owns what lives inside its own box. `panelId` (`{fieldId}-panel`) names the popup a panel field's `aria-controls` points at. The matching `optionId(index)` sits one level down, on **Base Option Field Directive**, because only an option field has options to name. See **Combobox And Options** below.
 
 `markForCheck()` exists for the one attribute the field cannot see coming: validity lives in the `FieldErrorsComponent`, whose own `markForCheck` marks its ancestors and never this sibling, so `FieldErrorsDirective` pumps the field too and `aria-invalid` repaints with the errors. It is an optional member of `IFormidableField` — a field that implements the interface without extending the base simply does not get pumped. `labelledBy` is read on the same schedule: a label added or removed at runtime lands the next time the field is checked.
 
 ---
 
+## Base Option Field Directive
+
+`BaseOptionFieldDirective<T = string | null>` — exported abstract `@Directive()` (no selector), extends `BaseFieldDirective<T>`. The base for the four fields that render a list of options and walk it with a highlight: `dropdown-field`, `autocomplete-field`, `radio-group-field` and `checkbox-group-field`. `select-field` is an option field too but stays on `BaseFieldDirective` — a native `<select>` has no highlight of its own, so it would only inherit dead state.
+
+Inherited by those four:
+
+| Member                    | Kind               | Description                                                                                     |
+| :------------------------ | :----------------- | :---------------------------------------------------------------------------------------------- |
+| `options`                 | `@Input()`         | The option list (`[]`)                                                                          |
+| `defaultOption`           | `@Input()`         | An option pinned to the top of the list                                                         |
+| `defaultOptionMode`       | `@Input()`         | When the default renders: `'always'` (default) or `'fallback'`                                  |
+| `noOptionsText`           | `@Input()`         | Text for the empty list (`NO_OPTIONS_TEXT`)                                                     |
+| `sortFn`                  | `@Input()`         | Comparator applied to the combined list                                                         |
+| `optionComponents`        | `@ContentChildren` | The projected `<formidable-field-option>` children, `{ descendants: true }`                     |
+| `optionRefs`              | `@ViewChildren`    | The rendered `#optionRef` options, used to scroll the highlight into view                       |
+| `highlightedOptionIndex$` | Observable         | The highlighted index, `-1` for none — drives both `is-highlighted` and `aria-activedescendant` |
+| `optionId(index)`         | method             | `{fieldId}-option-{index}`, or `null` for a negative index                                      |
+
+**Extension Contract**: subclasses supply `onOptionsChanged()` — recombine the options, then reconcile selection and highlight against them — and `activeOptions`, the rendered list the highlight walks (`autocomplete-field` returns its filtered list, the other three their full one). A single-select field additionally overrides `selectedOptionValue` so the selection can claim the highlight; the multi-select `checkbox-group-field` leaves it `null`, which is what drops the selection-wins step for it. The base owns the rest: it calls `onOptionsChanged()` from `ngOnChanges` (on any of the four option inputs) and from `ngAfterContentInit` (once, plus on every `optionComponents` change), and it implements `setHighlightedIndex`, `highlightSelectedOption` and `reconcileHighlightAfterOptionsChanged`. The last one follows the previously highlighted **value** across a changed list before falling back to a clamped index, and skips disabled options either way; a field that only wants a live highlight while its panel is open guards its own call, as the two panel fields do.
+
+---
+
 ## Field Components
 
-All extend `BaseFieldDirective<T>` (inherited API above). Tables list each field's OWN inputs only.
+All extend `BaseFieldDirective<T>` (inherited API above); the four option fields extend `BaseOptionFieldDirective<T>`. Tables list each field's OWN inputs only.
 
 ### Input Field
 
@@ -100,17 +122,12 @@ Collects options via `@ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: t
 
 **Selector** `formidable-dropdown-field` · **Value** `string | null`
 
-Custom single-select with a floating panel.
+Custom single-select with a floating panel. Option inputs come from **Base Option Field Directive**.
 
-| Input               | Type                       | Default                   | Description                |
-| :------------------ | :------------------------- | :------------------------ | :------------------------- |
-| `options`           | `IFormidableFieldOption[]` | `[]`                      | Option list                |
-| `defaultOption`     | `IFormidableFieldOption`   | —                         | Option pinned first        |
-| `defaultOptionMode` | `FieldDefaultOptionMode`   | `'always'`                | When it renders            |
-| `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text           |
-| `sortFn`            | `(a, b) => number`         | —                         | Optional option sorter     |
-| `isPanelOpen`       | `boolean`                  | `false`                   | Panel open state (get/set) |
-| `panelPosition`     | `FormidablePanelPosition`  | `'full'`                  | Panel placement            |
+| Input           | Type                      | Default  | Description                |
+| :-------------- | :------------------------ | :------- | :------------------------- |
+| `isPanelOpen`   | `boolean`                 | `false`  | Panel open state (get/set) |
+| `panelPosition` | `FormidablePanelPosition` | `'full'` | Panel placement            |
 
 Supports projected `formidable-field-option` children. **Use when** you need a styled dropdown with rich option content.
 
@@ -118,17 +135,12 @@ Supports projected `formidable-field-option` children. **Use when** you need a s
 
 **Selector** `formidable-autocomplete-field` · **Value** `string | null`
 
-Dropdown panel plus a filter input. Emits filter text; the consumer supplies filtered options (the demo pairs it with fuse.js).
+Dropdown panel plus a filter input. Emits filter text; the consumer supplies filtered options (the demo pairs it with fuse.js). Option inputs come from **Base Option Field Directive**.
 
-| Input               | Type                       | Default                   | Description                |
-| :------------------ | :------------------------- | :------------------------ | :------------------------- |
-| `options`           | `IFormidableFieldOption[]` | `[]`                      | Option list                |
-| `defaultOption`     | `IFormidableFieldOption`   | —                         | Option pinned first        |
-| `defaultOptionMode` | `FieldDefaultOptionMode`   | `'always'`                | When it renders            |
-| `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text           |
-| `sortFn`            | `(a, b) => number`         | —                         | Optional option sorter     |
-| `isPanelOpen`       | `boolean`                  | `false`                   | Panel open state (get/set) |
-| `panelPosition`     | `FormidablePanelPosition`  | `'full'`                  | Panel placement            |
+| Input           | Type                      | Default  | Description                |
+| :-------------- | :------------------------ | :------- | :------------------------- |
+| `isPanelOpen`   | `boolean`                 | `false`  | Panel open state (get/set) |
+| `panelPosition` | `FormidablePanelPosition` | `'full'` | Panel placement            |
 
 The default option is pinned after filtering, so an `always` default stays visible even when the filter matches nothing. **Output** `filterChanged: EventEmitter<string>` (+ `filterChange$`). **Use when** the option set is large or fetched/filtered dynamically.
 
@@ -209,15 +221,7 @@ Range slider with optional tick marks and labels.
 
 **Selector** `formidable-radio-group-field` · **Value** `string | null`
 
-Single choice from projected options.
-
-| Input               | Type                       | Default                   | Description         |
-| :------------------ | :------------------------- | :------------------------ | :------------------ |
-| `options`           | `IFormidableFieldOption[]` | `[]`                      | Option list         |
-| `defaultOption`     | `IFormidableFieldOption`   | —                         | Option pinned first |
-| `defaultOptionMode` | `FieldDefaultOptionMode`   | `'always'`                | When it renders     |
-| `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text    |
-| `sortFn`            | `(a, b) => number`         | —                         | Optional sorter     |
+Single choice from projected options. No inputs of its own — everything comes from **Base Option Field Directive**.
 
 Collects `formidable-field-option` children. With no options it renders `noOptionsText` as plain text, not as an option. **Use when** all choices should be visible and mutually exclusive.
 
@@ -225,15 +229,7 @@ Collects `formidable-field-option` children. With no options it renders `noOptio
 
 **Selector** `formidable-checkbox-group-field` · **Value** `string[]`
 
-Multi-select from projected options.
-
-| Input               | Type                       | Default                   | Description         |
-| :------------------ | :------------------------- | :------------------------ | :------------------ |
-| `options`           | `IFormidableFieldOption[]` | `[]`                      | Option list         |
-| `defaultOption`     | `IFormidableFieldOption`   | —                         | Option pinned first |
-| `defaultOptionMode` | `FieldDefaultOptionMode`   | `'always'`                | When it renders     |
-| `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text    |
-| `sortFn`            | `(a, b) => number`         | —                         | Optional sorter     |
+Multi-select from projected options. No inputs of its own — everything comes from **Base Option Field Directive**.
 
 Collects `formidable-field-option` children. With no options it renders `noOptionsText` as plain text, not as an option. **Use when** multiple choices may be selected.
 

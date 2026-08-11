@@ -1,0 +1,152 @@
+import {
+  AfterContentInit,
+  ContentChildren,
+  Directive,
+  Input,
+  OnChanges,
+  QueryList,
+  SimpleChanges,
+  ViewChildren
+} from '@angular/core';
+import { BehaviorSubject, takeUntil } from 'rxjs';
+import { getNextAvailableOptionIndex } from '../../helpers/option.helpers';
+import { scrollHighlightedOptionIntoView } from '../../helpers/position.helpers';
+import {
+  FieldDefaultOptionMode,
+  FORMIDABLE_FIELD_OPTION,
+  IFormidableFieldOption,
+  NO_OPTIONS_TEXT
+} from '../../models/formidable.model';
+import { FieldOptionComponent } from '../field-option/field-option.component';
+import { BaseFieldDirective } from './base-field.directive';
+
+/**
+ * The base class for the fields that render a list of options and walk it with a highlight —
+ * `dropdown-field`, `autocomplete-field`, `radio-group-field` and `checkbox-group-field`.
+ *
+ * `select-field` is an option field too but stays on `BaseFieldDirective`: a native `<select>` has no
+ * highlight of its own, so it would only inherit dead state.
+ */
+@Directive()
+export abstract class BaseOptionFieldDirective<T = string | null>
+  extends BaseFieldDirective<T>
+  implements OnChanges, AfterContentInit
+{
+  @Input() options?: IFormidableFieldOption[] = [];
+  @Input() defaultOption?: IFormidableFieldOption;
+  @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
+  @Input() noOptionsText: string = NO_OPTIONS_TEXT;
+  @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
+
+  @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
+  optionComponents?: QueryList<IFormidableFieldOption>;
+
+  @ViewChildren('optionRef') protected optionRefs?: QueryList<FieldOptionComponent>;
+
+  protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
+
+  /** The highlighted option's value, so a reconcile can follow it across a changed list. */
+  protected highlightedOptionValue: string | null = null;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // react to changes of @Input properties
+    if (changes['options'] || changes['sortFn'] || changes['defaultOption'] || changes['defaultOptionMode']) {
+      queueMicrotask(() => this.onOptionsChanged());
+    }
+  }
+
+  ngAfterContentInit(): void {
+    // The projected options (option.template) might not be available immediately after content initialization,
+    // so we use queueMicrotask to ensure they are processed after the current change detection cycle.
+    queueMicrotask(() => this.onOptionsChanged());
+
+    // react to the changes of projected options
+    this.optionComponents?.changes
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
+  }
+
+  /** Recombines the options and re-reconciles selection and highlight against them. */
+  protected abstract onOptionsChanged(): void;
+
+  /** The options the highlight walks — the rendered list, which `autocomplete-field` filters. */
+  protected abstract get activeOptions(): IFormidableFieldOption[];
+
+  /**
+   * The value the selection claims the highlight for. `null` for a multi-select field, which has no
+   * single selection to claim it.
+   */
+  // eslint-disable-next-line @typescript-eslint/class-literal-property-style
+  protected get selectedOptionValue(): string | null {
+    return null;
+  }
+
+  /** `null` for a negative index, so a field with nothing highlighted emits no `aria-activedescendant`. */
+  protected optionId(index: number): string | null {
+    return index >= 0 ? `${this.fieldId}-option-${index}` : null;
+  }
+
+  protected highlightSelectedOption(): void {
+    this.setHighlightedIndex(this.selectedOptionIndex);
+  }
+
+  protected reconcileHighlightAfterOptionsChanged(): void {
+    const options = this.activeOptions;
+    const count = options.length;
+
+    // empty list
+    if (count === 0) {
+      this.setHighlightedIndex(-1);
+      return;
+    }
+
+    // selection wins
+    const selectedIndex = this.selectedOptionIndex;
+    if (selectedIndex >= 0) {
+      this.setHighlightedIndex(selectedIndex);
+      return;
+    }
+
+    // try keep previously highlighted value
+    if (this.highlightedOptionValue) {
+      const keepIndex = options.findIndex((o) => o.value === this.highlightedOptionValue);
+      if (keepIndex >= 0) {
+        this.setHighlightedIndex(keepIndex);
+        return;
+      }
+    }
+
+    // clamp previous index into new bounds
+    let nextIndex = this.highlightedOptionIndex$.value;
+    if (nextIndex < 0) nextIndex = 0;
+    if (nextIndex >= count) nextIndex = count - 1;
+
+    // skip disabled
+    if (options[nextIndex]?.disabled) {
+      const fixed = getNextAvailableOptionIndex(nextIndex, options, 'down');
+      nextIndex = fixed >= 0 ? fixed : getNextAvailableOptionIndex(nextIndex, options, 'up');
+    }
+
+    this.setHighlightedIndex(nextIndex >= 0 ? nextIndex : -1);
+  }
+
+  protected setHighlightedIndex(index: number): void {
+    this.highlightedOptionIndex$.next(index);
+
+    const option = index >= 0 ? this.activeOptions[index] : undefined;
+    this.highlightedOptionValue = option?.value ?? null;
+
+    if (!this.isFieldFocused) return;
+    if (index < 0) return;
+
+    // `optionRefs` is only repopulated once the new highlight has rendered, so a microtask would
+    // resolve the wrong element.
+    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
+  }
+
+  private get selectedOptionIndex(): number {
+    const value = this.selectedOptionValue;
+
+    return value === null ? -1 : this.activeOptions.findIndex((o) => o.value === value);
+  }
+}
