@@ -19,6 +19,8 @@ import { FieldLabelAdornmentDirective } from '../../directives/field-label-adorn
 import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
 import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
+import { NgxFormidableFormDirective } from '../../forms/form.directive';
+import { openPanelPosition } from '../../helpers/position.helpers';
 import {
   FieldAdornmentAlignment,
   FieldDecoratorLayout,
@@ -26,7 +28,6 @@ import {
   FORMIDABLE_FIELD,
   IFormidableField
 } from '../../models/formidable.model';
-import { openPanelPosition } from '../../helpers/position.helpers';
 import { FieldErrorsComponent } from '../field-errors/field-errors.component';
 
 /** How a label renders once its configured position is resolved against the field's own state. */
@@ -74,6 +75,8 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
   imports: [CommonModule]
 })
 export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormidableField<unknown> {
+  private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true });
+
   // View children are used to access the prefix and suffix wrappers
   @ViewChild('prefixWrapperRef') prefixWrapper?: ElementRef<HTMLDivElement>;
   @ViewChild('suffixWrapperRef') suffixWrapper?: ElementRef<HTMLDivElement>;
@@ -220,9 +223,9 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
     return this.projectedField?.disabled ?? false;
   }
 
-  /** Drives the label's required marker. Presentational only. */
-  get required(): boolean {
-    return this.projectedField?.required ?? false;
+  /** Drives the label's required marker. Presentational only, and the form may switch it off for all fields. */
+  get showRequiredMarker(): boolean {
+    return (this.formDirective?.showRequiredMarkers() ?? true) && (this.projectedField?.showRequiredMarker ?? false);
   }
 
   get value(): unknown {

@@ -124,6 +124,10 @@ export abstract class BaseFieldDirective<T = string | null>
 
   writeValue(value: T): void {
     this.isFieldFilled = BaseFieldDirective.isFilled(value);
+    // What the field now displays, so `onValueChange` compares against it and not against the last value a
+    // user typed. Without this a written-in value cleared by a user reads as no change, and never reaches
+    // the model.
+    this._valuePrevious = value;
 
     this.doWriteValue(value);
   }
@@ -150,7 +154,7 @@ export abstract class BaseFieldDirective<T = string | null>
   @Input() placeholder = '';
   @Input() readonly = false;
   @Input() disabled = false;
-  @Input() required = false;
+  @Input() showRequiredMarker = false;
   @Input() autoFocus = false;
 
   public valueChange$ = this.valueChangeSubject$.asObservable();

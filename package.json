@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "eslint projects/ngx-formidable/src",
+    "lint": "eslint projects/ngx-formidable/src projects/ngx-formidable/vest",
     "style-lint": "stylelint \"projects/ngx-formidable/src/**/*.scss\"",
     "prettier:check": "prettier --check .",
     "prebuild:lib": "cp README.md projects/ngx-formidable/README.md && cp LICENSE projects/ngx-formidable/LICENSE",

@@ -23,7 +23,7 @@
       [attr.readonly]="true"
       [attr.disabled]="disabled ? '' : null"
       [attr.tabindex]="readonly || disabled ? -1 : null"
-      [attr.aria-required]="required || null"
+      [attr.aria-required]="showRequiredMarker || null"
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
       [attr.aria-readonly]="readonly || null"

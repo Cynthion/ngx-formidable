@@ -50,6 +50,13 @@
         <label>
           <input
             type="checkbox"
+            [checked]="controlCenter.showRequiredMarkers"
+            (change)="onToggle('showRequiredMarkers', $any($event.target).checked)" />
+          Show Required Markers
+        </label>
+        <label>
+          <input
+            type="checkbox"
             [checked]="controlCenter.showHints"
             (change)="onToggle('showHints', $any($event.target).checked)" />
           Show Hints
@@ -265,13 +272,15 @@
 
 <ng-template #form>
   <form
-    formidableRootValidate
+    formidableValidateWholeForm
     formidableForm
     class="form"
-    [validationOptions]="validationOptions"
+    [debounceMs]="debounceMs"
+    [dependentFields]="dependentFields"
     [formValue]="formValue$ | async"
-    [formFrame]="formFrame"
+    [formShape]="formShape"
     [formSuite]="formSuite"
+    [showRequiredMarkers]="controlCenter.showRequiredMarkers"
     (dirtyChange$)="isDirty$.next($event)"
     (validChange$)="isValid$.next($event)"
     (errorsChange$)="errors$.next($event)"
@@ -313,7 +322,7 @@
             name="firstName"
             [readonly]="controlCenter.showAsReadonly"
             [disabled]="controlCenter.showAsDisabled"
-            [required]="true"
+            [showRequiredMarker]="true"
             [maxLength]="150"
             [ngModel]="vm.formValue$.firstName"
             (valueChanged)="onValueChanged('firstName', $event)"
@@ -421,7 +430,7 @@
             name="lastName"
             [readonly]="controlCenter.showAsReadonly"
             [disabled]="controlCenter.showAsDisabled"
-            [required]="true"
+            [showRequiredMarker]="true"
             [enableAutosize]="true"
             [showLengthIndicator]="true"
             [maxLength]="300"
@@ -1005,8 +1014,67 @@
           </div>
         </formidable-field-decorator>
 
-        <!-- Passwords Group -->
-        <!-- TODO add form group -->
+        <!-- Passwords Group: a group rule reports on `passwords`, not on either field, so the errors
+             directive sits on the `ngModelGroup` itself. -->
+        <div
+          formidableFieldErrors
+          ngModelGroup="passwords"
+          class="password-group">
+          <formidable-field-decorator>
+            <formidable-input-field
+              formidableFieldErrors
+              placeholder="Your password"
+              autocomplete="new-password"
+              name="password"
+              [readonly]="controlCenter.showAsReadonly"
+              [disabled]="controlCenter.showAsDisabled"
+              [showRequiredMarker]="true"
+              [ngModel]="vm.formValue$.passwords?.password"
+              (valueChanged)="onValueChanged('passwords.password', $event)"
+              (focusChanged)="onFocusChanged('passwords.password', $event)">
+            </formidable-input-field>
+            <div
+              *ngIf="controlCenter.showLabels"
+              formidableFieldLabel
+              [position]="labelPosition">
+              Password
+            </div>
+            <div
+              *ngIf="controlCenter.showHints"
+              formidableFieldHint>
+              Try '1234' with the first name 'Test' for a whole-form rule.
+            </div>
+          </formidable-field-decorator>
+
+          <formidable-field-decorator>
+            <formidable-input-field
+              formidableFieldErrors
+              placeholder="Repeat your password"
+              autocomplete="new-password"
+              name="confirmPassword"
+              [readonly]="controlCenter.showAsReadonly"
+              [disabled]="controlCenter.showAsDisabled || vm.confirmPasswordDisabled"
+              [showRequiredMarker]="true"
+              [ngModel]="vm.formValue$.passwords?.confirmPassword"
+              (valueChanged)="onValueChanged('passwords.confirmPassword', $event)"
+              (focusChanged)="onFocusChanged('passwords.confirmPassword', $event)">
+            </formidable-input-field>
+            <div
+              *ngIf="controlCenter.showLabels"
+              formidableFieldLabel
+              [position]="labelPosition">
+              Confirm Password
+            </div>
+          </formidable-field-decorator>
+        </div>
+
+        <!-- Whole-Form Errors: they report on the form, so no field renders them. -->
+        <div
+          *ngIf="vm.errors$[wholeForm]?.length"
+          class="whole-form-errors">
+          <p *ngFor="let error of vm.errors$[wholeForm]">{{ error }}</p>
+        </div>
+
         <!-- Submit -->
         <div class="footer">
           <button

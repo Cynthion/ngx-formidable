@@ -223,6 +223,20 @@ fieldset {
   gap: 6px;
 }
 
+// The group's own errors render after its fields, where a decorator would have put a field's own.
+.password-group {
+  display: contents;
+}
+
+.whole-form-errors {
+  margin-bottom: 16px;
+  color: var(--formidable-color-validation-error);
+
+  p {
+    margin: 0;
+  }
+}
+
 .adornment-action {
   padding: 2px 6px;
   border: 1px solid var(--formidable-color-field-border);

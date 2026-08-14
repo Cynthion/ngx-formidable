@@ -2,11 +2,11 @@ import { Component } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { enforce, only, staticSuite, test as vestTest } from 'vest';
 import { FieldErrorsDirective } from '../../directives/field-errors.directive';
+import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { NgxFormidableFormModelDirective } from '../../directives/form-model.directive';
-import { NgxFormidableFormDirective } from '../../directives/form.directive';
+import { NgxFormidableFieldValidateDirective } from '../../forms/field-validate.directive';
+import { NgxFormidableFormDirective } from '../../forms/form.directive';
 import { InputFieldComponent } from '../fields/input-field/input-field.component';
 import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
 import { FieldDecoratorComponent } from './field-decorator.component';
@@ -74,13 +74,14 @@ interface NameModel {
   name?: string;
 }
 
-/** A real form, so the flag is proven to travel from the Vest suite all the way to the host class. */
+/** A real form, so the flag is proven to travel from a validator all the way to the host class. */
 @Component({
   standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
-    NgxFormidableFormModelDirective,
+    StubValidatorDirective,
+    NgxFormidableFieldValidateDirective,
     FieldDecoratorComponent,
     InputFieldComponent,
     FieldErrorsDirective,
@@ -90,8 +91,8 @@ interface NameModel {
     <form
       formidableForm
       [formValue]="formValue"
-      [formFrame]="frame"
-      [formSuite]="suite"
+      [formShape]="frame"
+      [stubValidator]="required"
       (formValueChange$)="formValue = $event">
       <formidable-field-decorator>
         <formidable-input-field
@@ -106,13 +107,7 @@ interface NameModel {
 class ValidatedHostComponent {
   formValue: NameModel = {};
   frame: Required<NameModel> = { name: '' };
-  suite = staticSuite((model: NameModel, field?: string) => {
-    if (field) only(field);
-
-    vestTest('name', 'Required', () => {
-      enforce(model.name).isNotBlank();
-    });
-  });
+  required = { name: 'Required' };
 }
 
 describe('field state colors', () => {

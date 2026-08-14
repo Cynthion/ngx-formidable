@@ -3,8 +3,6 @@ import { NgxMaskConfig } from 'ngx-mask';
 import { PikadayOptions } from 'pikaday';
 import { Observable } from 'rxjs';
 
-export const ROOT_FORM = 'rootForm';
-
 /** InjectionToken for field components. */
 export const FORMIDABLE_FIELD = new InjectionToken<IFormidableField>('FORMIDABLE_FIELD');
 
@@ -16,12 +14,6 @@ export const FORMIDABLE_FIELD_OPTION = new InjectionToken<IFormidableFieldOption
 
 /** InjectionToken for providing global default options for input masking. */
 export const FORMIDABLE_MASK_DEFAULTS = new InjectionToken<Partial<NgxMaskConfig>>('FORMIDABLE_MASK_DEFAULTS');
-
-/** InjectionToken for providing a translation function for error messages. */
-export const FORMIDABLE_ERROR_TRANSLATOR = new InjectionToken<FormidableTranslateErrorFn>(
-  'FORMIDABLE_ERROR_TRANSLATOR',
-  { factory: () => (e) => e }
-);
 
 export const NO_OPTIONS_TEXT = 'No options available.';
 
@@ -81,17 +73,12 @@ export type FieldDefaultOptionMode = 'always' | 'fallback';
  */
 export type FormidablePanelPosition = 'left' | 'right' | 'full' | 'sheet';
 export type FormidableToggleFieldLabelPosition = 'before' | 'after';
-export type FormidableTranslateErrorFn = (error: string) => string;
 /**
  * What an empty date/time field shows in its mask slots while **unfocused**: underscores
  * (default, e.g. `____-__-__`), or the `unicodeTokenFormat` (e.g. `dd . MM . yyyy`).
  * A focused empty field always shows underscores — ngxMask's caret arithmetic only recognizes its own placeholder.
  */
 export type FormidableEmptyHint = 'underscores' | 'format';
-
-export interface NgxFormidableFormValidationOptions {
-  debounceValidationInMs: number;
-}
 
 /**
  * Interface for all Formidable fields.
@@ -103,8 +90,10 @@ export interface IFormidableField<T = string | null> {
   placeholder: string;
   readonly: boolean;
   disabled: boolean;
-  /** Marks the field's label as required. Presentational only — the validation suite stays the only validator. */
-  required: boolean;
+  /**
+   * Marks the field's label with the required marker. Presentational only.
+   */
+  showRequiredMarker: boolean;
   value: T;
   /** Whether nothing is rendered where the value goes, so a label may rest there like a placeholder. */
   canLabelRest: boolean;

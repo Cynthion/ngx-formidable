@@ -3,11 +3,11 @@ import { fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { provideNgxMask } from 'ngx-mask';
-import { enforce, staticSuite, test as vestTest } from 'vest';
 import { FieldErrorsDirective } from '../../directives/field-errors.directive';
+import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
 import { FieldHintDirective } from '../../directives/field-hint.directive';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { NgxFormidableFormDirective } from '../../directives/form.directive';
+import { NgxFormidableFormDirective } from '../../forms/form.directive';
 import { IFormidableFieldOption } from '../../models/formidable.model';
 import { CheckboxGroupFieldComponent } from '../fields/checkbox-group-field/checkbox-group-field.component';
 import { InputFieldComponent } from '../fields/input-field/input-field.component';
@@ -41,14 +41,6 @@ interface Model {
   field?: string;
 }
 
-const suite = staticSuite((model: Model, field?: string) => {
-  if (field) {
-    vestTest(field, 'Required.', () => {
-      enforce(model.field).isNotBlank();
-    });
-  }
-});
-
 const frame = { field: '' };
 
 const options: IFormidableFieldOption[] = [
@@ -73,7 +65,7 @@ const options: IFormidableFieldOption[] = [
       <formidable-radio-group-field
         name="colour"
         [options]="options"
-        [required]="required"
+        [showRequiredMarker]="showRequiredMarker"
         [readonly]="readonly"
         [disabled]="disabled" />
       <div formidableFieldLabel>Favourite colour</div>
@@ -106,7 +98,7 @@ const options: IFormidableFieldOption[] = [
 })
 class NamedFieldsHostComponent {
   options = options;
-  required = false;
+  showRequiredMarker = false;
   readonly = false;
   disabled = false;
   hasHint = true;
@@ -131,6 +123,7 @@ class UnlabelledHostComponent {}
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
+    StubValidatorDirective,
     FieldDecoratorComponent,
     InputFieldComponent,
     FieldErrorsDirective,
@@ -141,8 +134,8 @@ class UnlabelledHostComponent {}
     <form
       formidableForm
       [formValue]="value"
-      [formFrame]="frame"
-      [formSuite]="suite">
+      [formShape]="frame"
+      [stubValidator]="required">
       <formidable-field-decorator>
         <formidable-input-field
           formidableFieldErrors
@@ -157,7 +150,7 @@ class UnlabelledHostComponent {}
 class ErrorsHostComponent {
   value: Model = {};
   frame = frame;
-  suite = suite;
+  required = { field: 'Required.' };
 }
 
 /** The shape a consumer uses for a bare field: no decorator, so nothing to point at. */
@@ -250,7 +243,7 @@ describe('field ARIA', () => {
     it('reports required only while the field is required', () => {
       expect(group().getAttribute('aria-required')).toBeNull();
 
-      fixture.componentInstance.required = true;
+      fixture.componentInstance.showRequiredMarker = true;
       fixture.detectChanges();
 
       expect(group().getAttribute('aria-required')).toBe('true');

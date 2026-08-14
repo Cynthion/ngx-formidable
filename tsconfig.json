@@ -18,7 +18,9 @@
     "removeComments": true,
     "sourceMap": true,
     "paths": {
-      "ngx-formidable": ["projects/ngx-formidable/src/public-api.ts"]
+      "ngx-formidable": ["projects/ngx-formidable/src/public-api.ts"],
+      "ngx-formidable/vest": ["projects/ngx-formidable/vest/src/public-api.ts"],
+      "@cynthion/ngx-formidable": ["projects/ngx-formidable/src/public-api.ts"]
     },
 
     /* JavaScript Support */

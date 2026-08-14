@@ -18,19 +18,22 @@ import {
   FieldPrefixDirective,
   FieldSuffixDirective,
   FieldToggleIconDirective,
+  FormidableFormErrors,
   FormidablePanelPosition,
   IFormidableFieldOption,
   InputFieldComponent,
+  NgxFormidableFieldValidateDirective,
   NgxFormidableFormDirective,
-  NgxFormidableFormModelDirective,
-  NgxFormidableFormRootValidateDirective,
-  NgxFormidableFormValidationOptions,
+  NgxFormidableGroupValidateDirective,
+  NgxFormidableWholeFormValidateDirective,
   RadioGroupFieldComponent,
   SelectFieldComponent,
   SliderFieldComponent,
   TextareaFieldComponent,
-  TimeFieldComponent
+  TimeFieldComponent,
+  WHOLE_FORM
 } from 'ngx-formidable';
+import { NgxFormidableVestValidatorDirective } from 'ngx-formidable/vest';
 import { BehaviorSubject, combineLatest, map, Observable, startWith, Subject } from 'rxjs';
 import { StaticSuite } from 'vest';
 import { ToggleFieldComponent } from '../../../projects/ngx-formidable/src/lib/components/fields/toggle-field/toggle-field.component';
@@ -39,8 +42,8 @@ import { ExampleIconComponent } from '../example-icon/example-icon.component';
 import { ExampleTooltipComponent } from '../example-tooltip/example-tooltip.component';
 import {
   AnimalFormFieldOption,
-  exampleFormFrame,
   ExampleFormModel,
+  exampleFormShape,
   exampleFormValidationSuite,
   HighlightedEntries
 } from './example-form.model';
@@ -67,9 +70,10 @@ import {
     ToggleFieldComponent,
     SliderFieldComponent,
     NgxFormidableFormDirective,
-    NgxFormidableFormModelDirective,
-    // NgxFormidableFormModelGroupDirective,
-    NgxFormidableFormRootValidateDirective,
+    NgxFormidableFieldValidateDirective,
+    NgxFormidableGroupValidateDirective,
+    NgxFormidableWholeFormValidateDirective,
+    NgxFormidableVestValidatorDirective,
     FieldLabelAdornmentDirective,
     FieldLabelDirective,
     FieldPrefixDirective,
@@ -106,16 +110,23 @@ export class ExampleFormComponent implements OnInit {
     religion: 'agnostic',
     allergies: ['dust', 'lactose'],
     isSingle: undefined, // true
-    age: 50 // undefined
+    age: 50, // undefined
+    passwords: { password: undefined, confirmPassword: undefined }
   });
-  protected readonly formFrame = exampleFormFrame;
+  protected readonly formShape = exampleFormShape;
   protected readonly formSuite: StaticSuite<string, string, (model: ExampleFormModel, field?: string) => void> =
     exampleFormValidationSuite;
-  protected readonly validationOptions: NgxFormidableFormValidationOptions = { debounceValidationInMs: 0 };
+  protected readonly debounceMs = 0;
+
+  // The confirm rule sits behind `omitWhen(!password)`, so it has to re-run when the password moves.
+  protected readonly dependentFields = { 'passwords.password': ['passwords.confirmPassword'] };
+
+  // The key `errorsChange$` files a whole-form rule's messages under.
+  protected readonly wholeForm = WHOLE_FORM;
 
   protected readonly isDirty$ = new BehaviorSubject<boolean | null>(null);
   protected readonly isValid$ = new BehaviorSubject<boolean | null>(null);
-  protected readonly errors$ = new BehaviorSubject<Record<string, string>>({});
+  protected readonly errors$ = new BehaviorSubject<FormidableFormErrors>({});
 
   protected readonly viewModel$ = combineLatest({
     formValue$: this.formValue$,
@@ -472,6 +483,7 @@ export class ExampleFormComponent implements OnInit {
     showActions: false,
     showLabelAdornments: true,
     showLabels: true,
+    showRequiredMarkers: true,
     showHints: true,
     showAsReadonly: false,
     showAsDisabled: false
@@ -909,6 +921,7 @@ type ControlKey =
   | 'showActions'
   | 'showLabelAdornments'
   | 'showLabels'
+  | 'showRequiredMarkers'
   | 'showHints'
   | 'showAsReadonly'
   | 'showAsDisabled';

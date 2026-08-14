@@ -10,10 +10,10 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import { NgModel, NgModelGroup } from '@angular/forms';
-import { of, Subject, switchMap, takeUntil } from 'rxjs';
+import { defer, of, Subject, switchMap, takeUntil } from 'rxjs';
 import { FieldDecoratorComponent } from '../components/field-decorator/field-decorator.component';
 import { FieldErrorsComponent } from '../components/field-errors/field-errors.component';
-import { NgxFormidableFormDirective } from './form.directive';
+import { NgxFormidableFormDirective } from '../forms/form.directive';
 
 /**
  * Dynamically instantiates a `<formidable-field-errors>` component for any form control decorated with
@@ -27,7 +27,9 @@ import { NgxFormidableFormDirective } from './form.directive';
  * - Registers the errors component with that decorator, which is what turns the invalid state into the
  *   `.is-invalid` host class the field and label styling targets. Without a decorator there is no such
  *   host, so a field used on its own gets the errors but not the invalid styling
- * - Subscribes to the parent NgxFormidableFormDirective’s `idle$` stream to mark the errors component for check on every model change
+ * - Marks the errors component for check on every control event, waiting for the parent
+ *   NgxFormidableFormDirective to go `idle$` first when there is one. Without it — a field validated by
+ *   Angular's own validators, or not at all — the control's events drive the repaint directly
  * - Cleans up component instance on destroy
  *
  * @example
@@ -46,7 +48,8 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly environmentInjector = inject(EnvironmentInjector);
-  private readonly formDirective = inject(NgxFormidableFormDirective);
+  // Optional: errors render for any validator, and for none — the harness is not required.
+  private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true });
   private readonly destroy$ = new Subject<void>();
 
   // Element injectors follow the declaring template, so a projected field really does see its decorator.
@@ -84,13 +87,14 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
 
     // When the form is idle, listen to all events of the ngModel or ngModelgroup
     // and mark the component and its ancestors as dirty. (Allows use of OnPush.)
-    const control = this.ngModelGroup?.control ?? this.ngModel?.control;
+    // Deferred: an `ngModelGroup` registers its control a microtask after this hook, so resolving it here
+    // and now would leave a group's errors component with nothing to repaint on.
+    const events$ = defer(() => (this.ngModelGroup?.control ?? this.ngModel?.control)?.events ?? of(null));
 
-    this.formDirective.idle$
-      .pipe(
-        switchMap(() => control?.events ?? of(null)),
-        takeUntil(this.destroy$)
-      )
+    // Async validation leaves the harness PENDING, so its errors are only readable once it settles.
+    // Synchronous validators have no such gap, so without a harness the events are already the signal.
+    (this.formDirective ? this.formDirective.idle$.pipe(switchMap(() => events$)) : events$)
+      .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.fieldErrorsComponentRef?.instance.markForCheck();
         // The field is a sibling of the errors component, so nothing above marks it. Without this its

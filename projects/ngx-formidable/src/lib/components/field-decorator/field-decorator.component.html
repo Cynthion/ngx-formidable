@@ -108,7 +108,7 @@
   <!-- Sibling of the projected label, not part of it, so a label long enough to ellipsize loses its own
        text and never the marker. Hidden from assistive tech: a glyph is no way to say "required". -->
   <ng-template #requiredMarker>
-    @if (required) {
+    @if (showRequiredMarker) {
       <span
         class="required-marker"
         aria-hidden="true"></span>

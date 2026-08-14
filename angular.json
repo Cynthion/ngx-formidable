@@ -89,7 +89,10 @@
               }
             ],
             "styles": ["src/styles.scss"],
-            "scripts": []
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": ["projects/ngx-formidable/src/lib/styles"]
+            }
           }
         }
       }

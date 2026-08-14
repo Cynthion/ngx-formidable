@@ -26,13 +26,14 @@ export * from './lib/directives/field-label.directive';
 export * from './lib/directives/field-prefix.directive';
 export * from './lib/directives/field-suffix.directive';
 export * from './lib/directives/field-toggle-icon.directive';
-export * from './lib/directives/form-model-group.directive';
-export * from './lib/directives/form-model.directive';
-export * from './lib/directives/form-root-validate.directive';
-export * from './lib/directives/form.directive';
+export * from './lib/forms/group-validate.directive';
+export * from './lib/forms/field-validate.directive';
+export * from './lib/forms/whole-form-validate.directive';
+export * from './lib/forms/form.directive';
 
 export * from './lib/models/formidable.model';
 export * from './lib/models/utility-types';
+export * from './lib/models/validation.model';
 
 export * from './lib/ngx-formidable.module';
 export * from './lib/provide-ngx-formidable';

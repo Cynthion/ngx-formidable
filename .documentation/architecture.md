@@ -1,43 +1,59 @@
 # Architecture
 
-Structure of the `ngx-formidable` workspace — a publishable Angular library plus a demo app. For coding conventions see `conventions.md`; for the component/directive catalogue see `ui_components.md`.
+Structure of the `ngx-formidable` repository:
+— a publishable Angular library
 
-## Workspace Structure
+- a demo app
+
+For coding conventions see `conventions.md`; for the component/directive catalogue see `ui_components.md`.
+
+## Repository Structure
 
 ```txt
 ngx-formidable/
-├── projects/ngx-formidable/   # the publishable library (ng-packagr) → @cynthion/ngx-formidable
-├── src/                       # the demo app (GitHub Pages showcase + dev playground)
-├── dist/                      # build output (dist/ngx-formidable is the published package)
-├── .documentation/            # contributor docs (see README.md)
+├── projects/ngx-formidable/   # the publishable library → @cynthion/ngx-formidable
+├── src/                       # the demo app
+├── dist/                      # build output
+├── .documentation/            # contributor docs
 └── .github/workflows/         # deploy.yml — GitHub Pages deploy of the demo
 ```
 
-Two Angular projects are declared: the `ngx-formidable` library (`projectType: library`, ng-packagr builder) and the `ngx-formidable-demo` application (root project, sources under `src/`). The demo resolves the library through the `tsconfig.json` path alias `ngx-formidable` → the library's `public-api.ts`.
+Two Angular projects are declared:
+
+- `ngx-formidable` library
+- `ngx-formidable-demo` application
 
 ## Library
 
-The library source lives under `projects/ngx-formidable/src/lib/`. Everything public is re-exported from `public-api.ts` (the ng-packagr entry point).
+The library ships two entry points. The primary source lives under `projects/ngx-formidable/src/lib/`; everything public is re-exported from `public-api.ts`.
 
 ```txt
-lib/
-├── components/
-│   ├── fields/          # the field components, each a folder (.ts/.html/.scss) + the two base directives
-│   ├── field-decorator/ # wraps a field with label, adornment, prefix, suffix, hints, errors
-│   ├── field-errors/    # renders validation errors
-│   ├── field-option/    # a single option inside option-based fields
-│   └── icon/            # inline SVG icon
-├── directives/          # form-level + field-decoration directives
-├── helpers/             # pure functions: mask, input, format, form, form-validate, position, option, utility
-├── models/              # formidable.model.ts (interfaces, tokens, constants), utility-types.ts, icons.ts
-├── styles/              # SCSS tokens, the :root CSS-variable block, field mixins
-├── ngx-formidable.module.ts     # NgxFormidableModule — aggregates all standalone pieces (NgModule path)
-└── provide-ngx-formidable.ts    # provideNgxFormidable() — provider function (standalone path)
+projects/ngx-formidable/
+├── src/                                  # → @cynthion/ngx-formidable
+│   └── lib/
+│       ├── components/
+│       │   ├── field-decorator/          # wraps a field with label, adornment, prefix, suffix, hints, errors
+│       │   ├── field-errors/             # renders validation errors
+│       │   ├── field-option/             # a single option inside option-based fields
+│       │   └── fields/                   # field components, base directives
+│       ├── directives/                   # field-decoration directives
+│       ├── forms/                        # the form-level directives and their helpers
+│       ├── helpers/                      # pure functions: mask, input, format, position, option, utility
+│       ├── models/                       # formidable.model.ts (UI), validation.model.ts (the validation seam), utility-types.ts
+│       ├── styles/                       # SCSS tokens, the :root CSS-variable block, field mixins
+│       ├── ngx-formidable.module.ts.     # NgxFormidableModule (NgModule path)
+│       └── provide-ngx-formidable.ts.    # provideNgxFormidable() (standalone path)
+└── vest/                                 # → @cynthion/ngx-formidable/vest — the Vest adapter, `vest` as an optional peer
 ```
 
 **Composition Model**: field components implement `ControlValueAccessor` and register the `FORMIDABLE_FIELD` token; `FieldDecoratorComponent` projects a field plus its label/adornment/prefix/suffix/errors; option-based fields collect `FieldOptionComponent` children via `@ContentChildren`. The abstract `BaseFieldDirective` is the shared base and the extension point for custom fields; the abstract `BaseOptionFieldDirective` extends it for the four fields that walk an option list with a highlight. See `ui_components.md`.
 
-**Validation**: `NgxFormidableFormDirective` bridges Angular template-driven forms to Vest static suites, exposing errors/validity as observables and producing async validators per field path.
+**Validation**:
+
+- `NgxFormidableFormDirective` owns the model, the targets and the debouncing, then delegates the rules to whatever `FORMIDABLE_VALIDATOR` is provided; errors surface through Angular's own `AbstractControl.errors`.
+- The Vest validator is the second entry point, and Angular's built-in validators work with nothing wired at all.
+
+See `tech/validation.md` and `user/validation.md`.
 
 ## Demo App
 
@@ -54,7 +70,10 @@ The demo (`src/`) is a standalone-bootstrapped app that showcases every field an
 | `publish:lib`  | Publish the built library                                     |
 | `test`         | Run tests (see `testing.md`)                                  |
 
-ng-packagr config (`ng-package.json`) sets the entry file to `public-api.ts`, outputs to `dist/ngx-formidable`, and ships the library SCSS as assets under `dist/ngx-formidable/styles/`. The package is published as `@cynthion/ngx-formidable` to GitHub Packages (`publishConfig.registry`). Note the rough edge: `publish:lib` still passes `--access public`, which is a public-npm flag — reconcile it with the GitHub Packages registry when finalizing the release flow.
+ng-packagr config:
+
+- `ng-package.json` sets the entry file to `public-api.ts`, outputs to `dist/ngx-formidable`, and ships the library SCSS as assets under `dist/ngx-formidable/styles/`.
+- `vest/ng-package.json` declares the secondary entry point; ng-packagr builds it after the primary and it imports the primary by package name (see `tech/validation.md`). The package is published as `@cynthion/ngx-formidable` to GitHub Packages (`publishConfig.registry`).
 
 ## Consumer Setup
 
@@ -67,11 +86,13 @@ Both register ngx-mask and the mask-defaults token; the `config` accepts `global
 
 ## Key Paths
 
-| Path                                                 | Purpose                                                          |
-| :--------------------------------------------------- | :--------------------------------------------------------------- |
-| `projects/ngx-formidable/src/lib/`                   | Library source (components, directives, helpers, models, styles) |
-| `projects/ngx-formidable/src/public-api.ts`          | Public API — everything the package exports                      |
-| `projects/ngx-formidable/src/lib/components/fields/` | Field components (extend `BaseFieldDirective`)                   |
-| `projects/ngx-formidable/src/lib/styles/`            | SCSS tokens, `:root` CSS-variable block, field mixins            |
-| `src/app/`                                           | Demo app (GitHub Pages showcase, dev playground)                 |
-| `dist/ngx-formidable/`                               | ng-packagr output — the published package                        |
+| Path                                                 | Purpose                                                                 |
+| :--------------------------------------------------- | :---------------------------------------------------------------------- |
+| `projects/ngx-formidable/src/lib/`                   | Library source (components, directives, forms, helpers, models, styles) |
+| `projects/ngx-formidable/src/public-api.ts`          | Public API — everything the package exports                             |
+| `projects/ngx-formidable/src/lib/components/fields/` | Field components                                                        |
+| `projects/ngx-formidable/src/lib/forms/`             | The form-level directives and the `FORMIDABLE_VALIDATOR` boundary       |
+| `projects/ngx-formidable/src/lib/styles/`            | SCSS tokens, `:root` CSS-variable block, field mixins                   |
+| `projects/ngx-formidable/vest/`                      | The Vest adapter, `@cynthion/ngx-formidable/vest`                       |
+| `src/app/`                                           | Demo app                                                                |
+| `dist/ngx-formidable/`                               | ng-packagr output                                                       |

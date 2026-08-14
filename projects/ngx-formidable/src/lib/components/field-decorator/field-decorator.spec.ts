@@ -4,12 +4,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { provideNgxMask } from 'ngx-mask';
-import { enforce, staticSuite, test } from 'vest';
 import { FieldErrorsDirective } from '../../directives/field-errors.directive';
+import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
 import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
-import { NgxFormidableFormDirective } from '../../directives/form.directive';
+import { NgxFormidableFormDirective } from '../../forms/form.directive';
 import { FieldAdornmentAlignment, FieldLabelPosition } from '../../models/formidable.model';
 import { FieldErrorsComponent } from '../field-errors/field-errors.component';
 import { AutocompleteFieldComponent } from '../fields/autocomplete-field/autocomplete-field.component';
@@ -39,14 +39,6 @@ interface Model {
   field?: string;
 }
 
-const suite = staticSuite((model: Model, field?: string) => {
-  if (field) {
-    test(field, 'Required.', () => {
-      enforce(model.field).isNotBlank();
-    });
-  }
-});
-
 const frame = { field: '' };
 
 @Component({
@@ -54,6 +46,7 @@ const frame = { field: '' };
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
+    StubValidatorDirective,
     FieldDecoratorComponent,
     InputFieldComponent,
     FieldErrorsDirective,
@@ -64,8 +57,8 @@ const frame = { field: '' };
     <form
       formidableForm
       [formValue]="value"
-      [formFrame]="frame"
-      [formSuite]="suite">
+      [formShape]="frame"
+      [stubValidator]="required">
       <formidable-field-decorator>
         <formidable-input-field
           formidableFieldErrors
@@ -80,19 +73,19 @@ const frame = { field: '' };
 class PrefixWithErrorsHostComponent {
   value: Model = {};
   frame = frame;
-  suite = suite;
+  required = { field: 'Required.' };
 }
 
 /** The same field with no decorator around it — the shape a consumer's custom field uses. */
 @Component({
   standalone: true,
-  imports: [FormsModule, NgxFormidableFormDirective, InputFieldComponent, FieldErrorsDirective],
+  imports: [FormsModule, NgxFormidableFormDirective, StubValidatorDirective, InputFieldComponent, FieldErrorsDirective],
   template: `
     <form
       formidableForm
       [formValue]="value"
-      [formFrame]="frame"
-      [formSuite]="suite">
+      [formShape]="frame"
+      [stubValidator]="required">
       <formidable-input-field
         formidableFieldErrors
         name="field"
@@ -103,7 +96,7 @@ class PrefixWithErrorsHostComponent {
 class NoDecoratorHostComponent {
   value: Model = {};
   frame = frame;
-  suite = suite;
+  required = { field: 'Required.' };
 }
 
 @Component({

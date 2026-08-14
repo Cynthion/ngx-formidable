@@ -3,10 +3,10 @@ import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { enforce, staticSuite, test } from 'vest';
 import { FieldErrorsDirective } from '../../directives/field-errors.directive';
+import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
 import { FieldHintDirective } from '../../directives/field-hint.directive';
-import { NgxFormidableFormDirective } from '../../directives/form.directive';
+import { NgxFormidableFormDirective } from '../../forms/form.directive';
 import { FieldHintAlignment } from '../../models/formidable.model';
 import { InputFieldComponent } from '../fields/input-field/input-field.component';
 import { FieldDecoratorComponent } from './field-decorator.component';
@@ -24,14 +24,6 @@ interface Model {
   field?: string;
 }
 
-const suite = staticSuite((model: Model, field?: string) => {
-  if (field) {
-    test(field, 'Required.', () => {
-      enforce(model.field).isNotBlank();
-    });
-  }
-});
-
 const frame = { field: '' };
 
 /** Two hints that come and go, the way a consumer's own `*ngIf` moves them. */
@@ -41,6 +33,7 @@ const frame = { field: '' };
     NgIf,
     FormsModule,
     NgxFormidableFormDirective,
+    StubValidatorDirective,
     FieldDecoratorComponent,
     InputFieldComponent,
     FieldErrorsDirective,
@@ -50,8 +43,8 @@ const frame = { field: '' };
     <form
       formidableForm
       [formValue]="value"
-      [formFrame]="frame"
-      [formSuite]="suite">
+      [formShape]="frame"
+      [stubValidator]="required">
       <formidable-field-decorator>
         <formidable-input-field
           formidableFieldErrors
@@ -75,7 +68,7 @@ const frame = { field: '' };
 class HintHostComponent {
   value: Model = {};
   frame = frame;
-  suite = suite;
+  required = { field: 'Required.' };
   showHints = true;
   showCounter = true;
   counterAlign: FieldHintAlignment = 'end';

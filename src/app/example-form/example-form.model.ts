@@ -1,4 +1,4 @@
-import { DeepPartial, DeepRequired, IFormidableFieldOption, ROOT_FORM } from 'ngx-formidable';
+import { DeepPartial, DeepRequired, IFormidableFieldOption, WHOLE_FORM } from 'ngx-formidable';
 import { enforce, mode, Modes, omitWhen, only, StaticSuite, staticSuite, test } from 'vest';
 
 // #region FormModel
@@ -45,9 +45,9 @@ export type ExampleFormModel = DeepPartial<User>;
 
 // #region FormModel Validation
 
-export type ExampleFormFrame = DeepRequired<ExampleFormModel>;
+export type ExampleFormShape = DeepRequired<ExampleFormModel>;
 
-export const exampleFormFrame: ExampleFormFrame = {
+export const exampleFormShape: ExampleFormShape = {
   firstName: '',
   middleName: '',
   lastName: '',
@@ -79,20 +79,17 @@ export const exampleFormValidationSuite: StaticSuite<
     only(field);
   }
 
-  test(ROOT_FORM, `Test User, your PW should not be '1234'!`, () => {
-    enforce(model.firstName === 'Test' && model.lastName === 'User' && model.passwords?.password === '1234').isFalsy();
+  // A whole-form rule: it reads two fields and reports on neither of them.
+  test(WHOLE_FORM, `Test user, your password should not be '1234'!`, () => {
+    enforce(model.firstName === 'Test' && model.passwords?.password === '1234').isFalsy();
   });
 
   test('firstName', 'First name is required.', () => {
     enforce(model.firstName).isNotBlank();
   });
 
-  test('firstName', 'First name does not start with A.', () => {
-    enforce(model.firstName?.toLowerCase()).startsWith('a');
-  });
-
-  test('firstName', 'First name does not start with B.', () => {
-    enforce(model.firstName?.toLowerCase()).startsWith('b');
+  test('firstName', 'First name does not start with T.', () => {
+    enforce(model.firstName?.toLowerCase()).startsWith('t');
   });
 
   test('lastName', 'Last name is required.', () => {

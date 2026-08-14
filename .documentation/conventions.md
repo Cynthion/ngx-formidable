@@ -2,13 +2,30 @@
 
 Coding conventions for the library. See also: `architecture.md` (structure, key paths), `ui_components.md` (component/directive API), `testing.md`, `documentation.md`.
 
+## Ubiquitous Language
+
+One name per concept, in code and in docs. Check a new name against this table before introducing it; a synonym is a defect.
+
+| Concept                                       | Term           | Never                                                          |
+| :-------------------------------------------- | :------------- | :------------------------------------------------------------- |
+| The object a form edits                       | **model**      | "form value" when the model is meant                           |
+| The all-keys-required reference for the model | **shape**      | "frame"                                                        |
+| What a rule reports on                        | **target**     | "field path", "control path", "field name" when a target fits  |
+| The form as a target                          | **whole form** | "root form", "root-level", "cross-field", "composite"          |
+| The pluggable rule runner                     | **validator**  | "adapter", "seam", "bridge", "harness" in consumer-facing text |
+| Angular's raw error bag                       | **errors**     | —                                                              |
+| The strings a field displays                  | **messages**   | "errors" when the displayed text is meant                      |
+
+A rule has exactly one target, and its name follows it: a **field rule**, a **group rule** or a **whole-form rule**. "Cross-field" describes what a rule _reads_, never what it reports on — a group rule reading two fields is cross-field, and so is a whole-form rule. Full reference: `user/validation.md`.
+
 ## Components And Directives
 
 - **Standalone**: every component and directive is `standalone: true`. Consumers import them directly or via `NgxFormidableModule`.
 - **Change Detection**: every component uses `ChangeDetectionStrategy.OnPush`.
-- **Selectors**: components are elements, kebab-case, `formidable-` prefix (`formidable-input-field`). Field-decoration directives are attributes, camelCase, `formidable` prefix (`[formidableFieldLabel]`, `form[formidableForm]`). Two directives intentionally hijack Angular's own selectors — `NgxFormidableFormModelDirective` on `[ngModel]` and `NgxFormidableFormModelGroupDirective` on `[ngModelGroup]` — so they attach to every model-bound control (they no-op outside a formidable form).
-- **File Naming**: components are folders with external `*.component.ts` / `.html` / `.scss` (never inline templates or styles). Directives are single `*.directive.ts` files. The shared bases are `base-field.directive.ts` and `base-option-field.directive.ts`. Filenames drop the `NgxFormidable` prefix (`form-model.directive.ts`, not `ngx-formidable-form-model.directive.ts`) — consumers import from the package root, so the prefix would only add path noise.
-- **Class Naming**: every public symbol whose name starts with `Form` carries the `NgxFormidable` prefix (`NgxFormidableFormDirective`, `NgxFormidableFormModelDirective`, `NgxFormidableFormModelGroupDirective`, `NgxFormidableFormRootValidateDirective`, `NgxFormidableFormValidationOptions`). `Form*` is Angular's namespace (`FormGroupDirective`, `FormControlDirective`, `NgForm`), so an unprefixed name reads as if it came from `@angular/forms`. Everything else keeps the library's own vocabulary unprefixed — `Field*`, `*FieldComponent`, `IFormidable*`, `FORMIDABLE_*` — because none of it overlaps with Angular.
+- **Selectors**: components are elements, kebab-case, `formidable-` prefix (`formidable-input-field`). Field-decoration directives are attributes, camelCase, `formidable` prefix (`[formidableFieldLabel]`, `form[formidableForm]`). Two directives intentionally hijack Angular's own selectors — `NgxFormidableFieldValidateDirective` on `[ngModel]` and `NgxFormidableGroupValidateDirective` on `[ngModelGroup]` — so they attach to every model-bound control (they no-op outside a formidable form).
+- **File Naming**: components are folders with external `*.component.ts` / `.html` / `.scss` (never inline templates or styles). Directives are single `*.directive.ts` files. The shared bases are `base-field.directive.ts` and `base-option-field.directive.ts`. Filenames drop the `NgxFormidable` prefix (`field-validate.directive.ts`, not `ngx-formidable-field-validate.directive.ts`) — consumers import from the package root, so the prefix would only add path noise.
+- **Folder Placement**: `directives/` holds only the `formidableField*` attribute directives that decorate a field; the form-level directives and their helpers live in `forms/`. Test-only code goes in a `testing/` folder and stays unreachable from `public-api.ts`, which is what keeps ng-packagr from compiling it.
+- **Class Naming**: every form-level directive carries the `NgxFormidable` prefix (`NgxFormidableFormDirective`, `NgxFormidableFieldValidateDirective`, `NgxFormidableGroupValidateDirective`, `NgxFormidableWholeFormValidateDirective`, `NgxFormidableVestValidatorDirective`). That family is what overlaps Angular's own namespace (`FormGroupDirective`, `FormControlDirective`, `NgForm`), so an unprefixed name would read as if it came from `@angular/forms`. Everything else keeps the library's own vocabulary unprefixed — `Field*`, `*FieldComponent`, `IFormidable*`, `FORMIDABLE_*` — because none of it overlaps.
 
 ## Field Contract
 
@@ -18,7 +35,7 @@ Coding conventions for the library. See also: `architecture.md` (structure, key 
 
 ## Inputs, Outputs And Observables
 
-- **Inputs**: components and fields use classic `@Input()`; the newer signal `input()` API is used only in the form-level directives (`NgxFormidableFormDirective`, `NgxFormidableFormModelDirective`, `NgxFormidableFormModelGroupDirective`, `NgxFormidableFormRootValidateDirective`).
+- **Inputs**: components and fields use classic `@Input()`; the newer signal `input()` API is used only in the form-level directives (`NgxFormidableFormDirective`, `NgxFormidableFieldValidateDirective`, `NgxFormidableGroupValidateDirective`, `NgxFormidableWholeFormValidateDirective`).
 - **Outputs**: a mix of `@Output() EventEmitter` and RxJS observable outputs.
 - **Observable Naming**: append `$` (`valueChange$`, `formValueChange$`). Enforced by the `rxjs-x/finnish` ESLint rule (exempts `EventEmitter` and Angular lifecycle hooks like `canActivate`/`validate`).
 
@@ -64,6 +81,7 @@ Coding conventions for the library. See also: `architecture.md` (structure, key 
 - **Conventions**: selectors, standalone/OnPush, field contract, naming followed.
 - **Formatting**: `prettier:check`, `lint` and `style-lint` pass.
 - **Component Docs**: any component/directive API change is reflected in `ui_components.md`.
+- **User And Tech Docs**: a change to public usage updates the matching `user/*.md`; a change to a design decision or an internal boundary updates the matching `tech/*.md`. Neither restates the other — see `documentation.md`.
 - **Demo**: new or changed fields and features are exercised in the demo app (`example-form`); a new field component is wired into it so it renders and can be tried. The demo is the showcase and the only visual-test surface — see `architecture.md`.
 - **Documentation**: new behavior documented per `documentation.md`; the user-facing `README.md` updated when public usage changes.
 - **Tests**: implemented per `testing.md` (helpers-first).

@@ -21,18 +21,18 @@ import { FieldLabelDirective } from './directives/field-label.directive';
 import { FieldPrefixDirective } from './directives/field-prefix.directive';
 import { FieldSuffixDirective } from './directives/field-suffix.directive';
 import { FieldToggleIconDirective } from './directives/field-toggle-icon.directive';
-import { NgxFormidableFormModelGroupDirective } from './directives/form-model-group.directive';
-import { NgxFormidableFormModelDirective } from './directives/form-model.directive';
-import { NgxFormidableFormRootValidateDirective } from './directives/form-root-validate.directive';
-import { NgxFormidableFormDirective } from './directives/form.directive';
+import { NgxFormidableGroupValidateDirective } from './forms/group-validate.directive';
+import { NgxFormidableFieldValidateDirective } from './forms/field-validate.directive';
+import { NgxFormidableWholeFormValidateDirective } from './forms/whole-form-validate.directive';
+import { NgxFormidableFormDirective } from './forms/form.directive';
 import { NgxFormidableConfig, provideNgxFormidable } from './provide-ngx-formidable';
 
 const components = [
   // Form Directives
   NgxFormidableFormDirective,
-  NgxFormidableFormModelDirective,
-  NgxFormidableFormModelGroupDirective,
-  NgxFormidableFormRootValidateDirective,
+  NgxFormidableFieldValidateDirective,
+  NgxFormidableGroupValidateDirective,
+  NgxFormidableWholeFormValidateDirective,
   // Field Directives
   FieldLabelAdornmentDirective,
   FieldLabelDirective,

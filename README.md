@@ -36,7 +36,8 @@ A powerful Angular component library for building rich, validated forms.
 - [Field Decorator](#field-decorator)
 - [Field Components](#field-components)
 - [Theming & Styles](#theming--styles)
-- [Root-Level / Cross-Field Validation](#root-level--cross-field-validation)
+- [Validation](#validation)
+- [Whole-Form Rules](#whole-form-rules)
 - [Error Message Translation (i18n)](#error-message-translation-i18n)
 - [Keyboard Navigation](#keyboard-navigation)
 - [Masking](#masking)
@@ -61,10 +62,10 @@ A powerful Angular component library for building rich, validated forms.
 </td>
 <td width="33%" valign="top">
 
-### <h5><a href="#root-level--cross-field-validation">✅ Async Validation</a></h5>
+### <h5><a href="#validation">✅ Bring Your Own Validator</a></h5>
 
-• Per-Field or Cross-Field / Root-Level
-• Powered by <code>Vest</code>
+• <code>Vest</code>, <code>zod</code>, Angular's own, or none
+• Field, group or whole-form rules
 • Live errors &amp; validity
 • Simple <code>formidable-field-errors</code> directive
 • Optional i18n via `FORMIDABLE_ERROR_TRANSLATOR`
@@ -155,8 +156,11 @@ Explore and play with live examples on our GitHub Pages:
 Install the package and its peer dependencies:
 
 ```bash
-npm install ngx-formidable vest pikaday date-fns ngx-mask
+npm install ngx-formidable pikaday date-fns ngx-mask
 ```
+
+The library does not validate, so it brings no validation library.
+Add one only if you want it, e.g. with `npm i vest` for the adapter that ships in `@cynthion/ngx-formidable/vest`, or wire your own. See [Validation](#validation).
 
 ## Quick Start
 
@@ -196,6 +200,8 @@ export class AppModule {}
 
 ## Setup Your Form
 
+The example below validates with [Vest](https://vestjs.dev), which is what `@cynthion/ngx-formidable/vest` adapts. Any other validator plugs into the same place. See [Validation](#validation).
+
 1. Define your model, form model, frame, and Vest validation suite:
 
 ```ts
@@ -209,7 +215,7 @@ export interface User {
 }
 
 export type UserFormModel = DeepPartial<User>;
-export type UserFormFrame = DeepRequired<UserFormModel>;
+export type UserFormShape = DeepRequired<UserFormModel>;
 
 export const userFormModel: UserFormModel = {
   // set initial values here, if any
@@ -218,7 +224,7 @@ export const userFormModel: UserFormModel = {
   birthdate: undefined // e.g., new Date(1989, 5, 29),
 };
 
-export const userFormFrame: UserFormFrame = {
+export const userFormShape: UserFormShape = {
   name: '',
   hobby: 'other',
   birthdate: new Date()
@@ -246,9 +252,9 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
 <form
   formidableForm
   [formValue]="userFormModel"
-  [formFrame]="userFormFrame"
+  [formShape]="userFormShape"
   [formSuite]="userFormValidationSuite"
-  [validationOptions]="{ debounceValidationInMs: 200 }"
+  [debounceMs]="200"
   (formValueChange$)="userFormModel = $event"
   (validChange$)="isValid = $event"
   (dirtyChange$)="isDirty = $event"
@@ -307,12 +313,12 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
 
 ### NgxFormidableFormDirective (`formidableForm`)
 
-- Binds your form model, frame, and Vest suite.
+- Binds your form model and frame, and delegates validation to whatever `FORMIDABLE_VALIDATOR` you provide.
 - Emits `formValueChange$`, `errorsChange$`, `dirtyChange$`, `validChange$`.
 
-### NgxFormidableFormRootValidateDirective (`formidableRootValidate`)
+### NgxFormidableWholeFormValidateDirective (`formidableValidateWholeForm`)
 
-Adds a root-level async validator for cross-field Vest tests on `ROOT_FORM`.
+Adds a whole-form async validator, so a rule about the form rather than about any one field has somewhere to report. See [Whole-Form Rules](#whole-form-rules).
 
 ### FieldErrorsDirective (`formidableFieldErrors`)
 
@@ -341,11 +347,11 @@ row in equal parts, so a note and a counter sit on one line:
 </formidable-field-decorator>
 ```
 
-### NgxFormidableFormModelDirective
+### NgxFormidableFieldValidateDirective
 
-Hooks into each `ngModel` to run per-field async Vest tests.
+Hooks into each `ngModel` to run per-field async validation. No-ops outside a formidable form, and again when no `FORMIDABLE_VALIDATOR` is provided.
 
-### NgxFormidableFormModelGroupDirective
+### NgxFormidableGroupValidateDirective
 
 Hooks into `ngModelGroup` to validate nested groups.
 
@@ -418,27 +424,24 @@ line, and ellipsizes.
 
 ### Required Marker
 
-Set `required` on a field and its label is suffixed with a marker, in every label position:
+Set `showRequiredMarker` on a field and its label is suffixed with a marker, in every label position:
 
 ```html
 <formidable-field-decorator>
   <formidable-input-field
     name="firstName"
-    [required]="true"
+    [showRequiredMarker]="true"
     ngModel />
   <div formidableFieldLabel>First Name</div>
 </formidable-field-decorator>
 ```
 
+`showRequiredMarkers` on the `<form>` withholds the marker from every field on it, so one switch decides whether this form marks its required fields at all.
+
 The glyph is the `--formidable-label-required-marker` variable, so a theme can swap `'*'` for a word —
 `--formidable-label-required-marker: ' (required)'` — without touching markup. It inherits the label's
 colour and so follows every field state, and it is never the thing that gets cut off when a label is too
 long to fit.
-
-`required` marks the label and nothing else. It does **not** validate: your Vest suite stays the only
-validator, so mark the fields your suite enforces and keep the two in step yourself. The library
-deliberately sets no native `required` attribute and no Angular validator — either would put a second
-error channel next to your suite.
 
 ### Focus
 
@@ -619,19 +622,50 @@ Every visual property is an overridable CSS custom property. Import the library'
 
 All customizable variables and some recipes are listed in the [theming guide](.documentation/theming.md).
 
-## Root-Level / Cross-Field Validation
+## Validation
 
-Sometimes your form needs rules that depend on more than one field — for example, you might require that **both** `name` and `birthdate` be provided together. You can implement that with a `ROOT_FORM`–level test in your Vest suite. Here is how to do that:
+The library does not validate. It renders fields, themes them, and displays whatever errors it finds on
+Angular's own `AbstractControl.errors`, so any validator works, including none.
 
-1. Add the `formidableRootValidate` directive to your `<form>`.
-2. Include a `ROOT_FORM` test in your Vest suite.
+| Approach                        | What you write                                             |
+| :------------------------------ | :--------------------------------------------------------- |
+| Angular's built-in validators   | Nothing — `required`, `minlength` and friends already work |
+| `@cynthion/ngx-formidable/vest` | One import; `vest` is an optional peer dependency          |
+| Your own adapter                | One class implementing `IFormidableValidator`              |
+| Nothing                         | Nothing                                                    |
+
+`NgxFormidableFormDirective` owns the model, the field paths and the debouncing, and delegates the rules to
+whatever `FORMIDABLE_VALIDATOR` is provided on the `<form>`:
+
+```ts
+export interface IFormidableValidator<T = Record<string, unknown>> {
+  /** Runs the rules for one field path against the whole model. `null` means valid. */
+  validate(model: T, target: string): Observable<string[] | null>;
+}
+```
+
+For Vest, that adapter ships with the library — add it to your imports and keep `[formSuite]` as it is:
+
+```ts
+import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/vest';
+```
+
+**Full guide, with worked Vest, Angular, zod and no-validation examples:**
+[`.documentation/user/validation.md`](.documentation/user/validation.md).
+
+## Whole-Form Rules
+
+Sometimes your form needs rules that depend on more than one field — for example, you might require that **both** `name` and `birthdate` be provided together. Those go under the `WHOLE_FORM` field path, which your validator receives like any other. Here is how to do that with Vest:
+
+1. Add the `formidableValidateWholeForm` directive to your `<form>`.
+2. Include a `WHOLE_FORM` test in your Vest suite.
 
 ```html
 <form
   formidableForm
-  formidableRootValidate
+  formidableValidateWholeForm
   [formValue]="userFormModel"
-  [formFrame]="userFormFrame"
+  [formShape]="userFormShape"
   [formSuite]="userFormValidationSuite"
   ...>
   <!-- ... -->
@@ -640,14 +674,14 @@ Sometimes your form needs rules that depend on more than one field — for examp
 
 ```ts
 import { staticSuite, test, Modes, only, enforce } from 'vest';
-import { ROOT_FORM } from 'ngx-formidable';
+import { WHOLE_FORM } from 'ngx-formidable';
 
 export const userFormValidationSuite = staticSuite((model: UserFormModel, field?: string) => {
   mode(Modes.ALL);
   if (field) only(field);
 
-  // Root-Level / Cross‐field rule: name AND birthdate must both be filled
-  test(ROOT_FORM, 'Please enter both name and birthdate.', () => {
+  // Whole-form rule: name AND birthdate must both be filled
+  test(WHOLE_FORM, 'Please enter both name and birthdate.', () => {
     enforce(!!model.name && !!model.birthdate).isTruthy();
   });
 
@@ -657,13 +691,15 @@ export const userFormValidationSuite = staticSuite((model: UserFormModel, field?
 
 ## Error Message Translation (i18n)
 
-By default, `ngx-formidable` displays validation errors exactly as they are produced by your validation suite (e.g. Vest test messages).
+By default, `ngx-formidable` displays validation errors exactly as your validator produced them.
 
 For i18n use-cases, it’s common to emit **translation keys** from your validation suite and translate them when rendering.
 
 ### Configure a Global Error Translator
 
-Instead of returning human-readable text in Vest, return a translation key:
+Instead of returning human-readable text in your validator, return a translation key:
+
+Example using `Vest`:
 
 ```ts
 import { enforce, staticSuite, test } from 'vest';
@@ -719,13 +755,16 @@ export class AppModule {}
 
 ### What gets translated?
 
-Any string returned from your validation layer and rendered by `<formidable-field-errors>`:
+Any string `FORMIDABLE_ERROR_EXTRACTOR` pulls out of `control.errors` and `<formidable-field-errors>` renders:
 
-- Vest messages (`test('field', 'some.key', ...)`)
-- Root-level errors (when rendered)
+- validator messages
+- Angular's own error keys (`required`, `minlength`, …)
+- Whole-form errors (when rendered)
 - Any custom error strings you attach to `control.errors['errors']`
 
-If you do not provide `FORMIDABLE_ERROR_TRANSLATOR`, errors are rendered unchanged.
+If your validator writes a shape none of those cover, override `FORMIDABLE_ERROR_EXTRACTOR` — see
+[`.documentation/user/validation.md`](.documentation/user/validation.md). If you do not provide
+`FORMIDABLE_ERROR_TRANSLATOR`, errors are rendered unchanged.
 
 ## Keyboard Navigation
 
@@ -835,8 +874,8 @@ That’s it: Set a `[mask]` when you want masking and optionally tweak behavior 
 
 When you add your own field component (by implementing `IFormidableField` or `IFormidableOptionField` and providing it via `FORMIDABLE_FIELD`/`FORMIDABLE_OPTION_FIELD`), it immediately gains:
 
-- **Async validation** via `NgxFormidableFormModelDirective`
-- **Root-level / cross-field validation** if you use `formidableRootValidate`
+- **Async validation** via `NgxFormidableFieldValidateDirective`
+- **whole-form rules** if you use `formidableValidateWholeForm`
 - **Error rendering** simply by adding `formidableFieldErrors` — with or without a decorator around the field
 - **Hints** simply by projecting `formidableFieldHint` elements into the decorator
 - **Decorator support** — labels, label adornments, prefixes, suffixes and hints work out of the box. A
