@@ -225,7 +225,7 @@ export class DropdownFieldComponent
     this.valueChangeSubject$.next(this.selectedOption.value);
     this.valueChanged.emit(this.selectedOption.value);
     this.isFieldFilled = this.selectedOption.value.length > 0;
-    this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
+    this.commit(this.selectedOption.value); // notify ControlValueAccessor of the change
     this.touch();
 
     // simulate blur (field-state blur, not necessarily native blur)
@@ -251,7 +251,7 @@ export class DropdownFieldComponent
     this.valueChangeSubject$.next(null);
     this.valueChanged.emit(null);
     this.isFieldFilled = this.inputRef.nativeElement.value.length > 0;
-    this.onChange(null);
+    this.commit(null);
     this.touch();
 
     this.cdRef.markForCheck();
@@ -260,9 +260,11 @@ export class DropdownFieldComponent
   protected onOptionsChanged(): void {
     const allOptions = this.computeAllOptions();
 
-    this.updateOptions(allOptions);
+    // Reconciled before the options are applied: `updateOptions` re-applies the written value, which
+    // clears `selectedOption` and would leave the reconcile nothing to find.
     // A changed options list is not the user, so the reconcile may correct the model but not touch.
-    this.runSilently(() => this.reconcileSelectionAgainstOptions(allOptions));
+    this.runSilently('correction', () => this.reconcileSelectionAgainstOptions(allOptions));
+    this.updateOptions(allOptions);
 
     // keep highlight consistent if panel is open
     if (this.isPanelOpen) {

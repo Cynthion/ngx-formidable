@@ -176,7 +176,7 @@ export class RadioGroupFieldComponent
     this.valueChangeSubject$.next(newValue);
     this.valueChanged.emit(newValue);
     this.isFieldFilled = newValue.length > 0;
-    this.onChange(newValue); // notify ControlValueAccessor of the change
+    this.commit(newValue); // notify ControlValueAccessor of the change
     this.touch();
 
     // immediately highlight the selected option
@@ -197,7 +197,7 @@ export class RadioGroupFieldComponent
 
     this.valueChangeSubject$.next(null);
     this.valueChanged.emit(null);
-    this.onChange(null);
+    this.commit(null);
     this.touch();
 
     this.cdRef.markForCheck();
@@ -206,9 +206,11 @@ export class RadioGroupFieldComponent
   protected onOptionsChanged(): void {
     const allOptions = this.computeAllOptions();
 
-    this.updateOptions(allOptions);
+    // Reconciled before the options are applied: `updateOptions` re-applies the written value, which
+    // clears `selectedOption` and would leave the reconcile nothing to find.
     // A changed options list is not the user, so the reconcile may correct the model but not touch.
-    this.runSilently(() => this.reconcileSelectionAgainstOptions(allOptions));
+    this.runSilently('correction', () => this.reconcileSelectionAgainstOptions(allOptions));
+    this.updateOptions(allOptions);
     this.reconcileHighlightAfterOptionsChanged();
 
     this.cdRef.markForCheck();

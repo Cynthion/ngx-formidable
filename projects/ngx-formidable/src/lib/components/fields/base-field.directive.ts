@@ -6,13 +6,14 @@ import {
   EventEmitter,
   HostBinding,
   inject,
+  Injector,
   Input,
   NgZone,
   OnDestroy,
   OnInit,
   Output
 } from '@angular/core';
-import { ControlValueAccessor } from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, NgControl } from '@angular/forms';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { openPanelPosition } from '../../helpers/position.helpers';
@@ -40,6 +41,14 @@ export abstract class BaseFieldDirective<T = string | null>
   // Optional: a field used on its own has no label, hint or errors to point at.
   private readonly decorator = inject(FieldDecoratorComponent, { optional: true });
   protected readonly cdRef = inject(ChangeDetectorRef);
+  private readonly injector = inject(Injector);
+
+  private ngControl?: NgControl | null;
+
+  /** The control this field is bound to, if it is bound to one at all. */
+  private get control(): AbstractControl | null {
+    return this.ngControl?.control ?? null;
+  }
 
   protected readonly destroy$ = new Subject<void>();
 
@@ -68,6 +77,10 @@ export abstract class BaseFieldDirective<T = string | null>
   }
 
   ngOnInit(): void {
+    // Resolved here rather than injected: `NgModel` picks its value accessor inside its own constructor, so
+    // asking for it from this field's would close the loop and throw NG0200. By this hook it is built.
+    this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true });
+
     this.registerGlobalListeners();
   }
 
@@ -92,7 +105,7 @@ export abstract class BaseFieldDirective<T = string | null>
 
     this.valueChangeSubject$.next(value);
     this.valueChanged.emit(value);
-    this.onChange(value); // notify ControlValueAccessor of the change
+    this.commit(value); // notify ControlValueAccessor of the change
 
     this.doOnValueChange();
   }
@@ -134,29 +147,45 @@ export abstract class BaseFieldDirective<T = string | null>
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected onTouched: () => void = () => {};
 
-  private isSilent = false;
+  /** What is driving the work now running, when it is not the user. */
+  private silence: 'write' | 'correction' | null = null;
 
   /**
    * The single touch channel every field goes through. Under `updateOn: 'blur'` a touch is also the commit
    * and under `updateOn: 'submit'` it pre-sets the pending touch, so a touch the user did not cause would
-   * commit and reveal a field nobody has visited.
+   * commit and reveal a field nobody has visited. Neither a write nor a correction is the user.
    */
   protected touch(): void {
-    if (!this.isSilent) this.onTouched();
+    if (this.silence === null) this.onTouched();
   }
 
   /**
-   * Runs work the form or a changed options list caused rather than the user, so nothing on it touches the
-   * control. The value still travels: a reconcile that drops a vanished option has to reach the model.
+   * The single value channel every field goes through. A write is the form's own value arriving, so there is
+   * nothing to report back. A correction is not: a clamped number, a masked string, or a selection an
+   * options list no longer offers all have to reach the model.
    */
-  protected runSilently(work: () => void): void {
-    const previous = this.isSilent;
-    this.isSilent = true;
+  protected commit(value: T): void {
+    if (this.silence !== 'write') this.onChange(value);
+  }
+
+  /**
+   * Runs work the user did not cause: the form writing a value, or the field correcting one it was given.
+   * Neither may touch the control or leave it dirty, and a write reports nothing back besides.
+   *
+   * Angular raises its pending dirty flag on every change a value accessor reports and offers no way to opt
+   * out, so a control that was pristine on the way in is put back on the way out.
+   */
+  protected runSilently(cause: 'write' | 'correction', work: () => void): void {
+    const previous = this.silence;
+    const wasPristine = this.control?.pristine ?? false;
+
+    this.silence = cause;
 
     try {
       work();
     } finally {
-      this.isSilent = previous;
+      this.silence = previous;
+      if (wasPristine) this.control?.markAsPristine();
     }
   }
 
@@ -167,8 +196,8 @@ export abstract class BaseFieldDirective<T = string | null>
     // the model.
     this._valuePrevious = value;
 
-    // The form wrote this, so nothing on the way down may touch the control.
-    this.runSilently(() => this.doWriteValue(value));
+    // The form wrote this, so nothing on the way down may touch the control or report the value back.
+    this.runSilently('write', () => this.doWriteValue(value));
   }
 
   registerOnChange(fn: (value: T) => void): void {

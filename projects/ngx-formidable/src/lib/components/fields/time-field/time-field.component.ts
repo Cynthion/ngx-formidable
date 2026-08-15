@@ -262,7 +262,7 @@ export class TimeFieldComponent
     this.valueChangeSubject$.next(this.selectedTime);
     this.valueChanged.emit(this.selectedTime);
     this.isFieldFilled = !!this.selectedTime;
-    this.onChange(this.selectedTime); // notify ControlValueAccessor of the change
+    this.commit(this.selectedTime); // notify ControlValueAccessor of the change
     this.touch();
   }
 

@@ -466,7 +466,7 @@ export class DateFieldComponent
     this.valueChangeSubject$.next(this.selectedDate);
     this.valueChanged.emit(this.selectedDate);
     this.isFieldFilled = !!this.selectedDate;
-    this.onChange(this.selectedDate); // notify ControlValueAccessor of the change
+    this.commit(this.selectedDate); // notify ControlValueAccessor of the change
     this.touch();
     this.togglePanel(false);
   }

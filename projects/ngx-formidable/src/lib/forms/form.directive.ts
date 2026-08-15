@@ -287,16 +287,13 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
     }
 
     return (value: unknown) => {
-      if (!this.formValue()) {
-        return of(null);
-      }
-
       // The bound model lags the form by one change: Angular runs this validator before it emits the
       // `ValueChangeEvent` that `formValueChange$` turns into the next `formValue`. So the live control
-      // values lead, and the bound model only fills in what has no control of its own.
+      // values lead, and the bound model only fills in what has no control of its own — which is why a form
+      // whose model has not arrived yet, or has none at all, still validates against what its controls hold.
       const mod = fillMissing(
         cloneDeep(mergeValuesAndRawValues<T>(this.ngForm.form)),
-        cloneDeep(this.formValue() as T)
+        cloneDeep((this.formValue() ?? {}) as T)
       );
 
       // A field's or a group's own validator runs before the root recomputes its value, so its own target is

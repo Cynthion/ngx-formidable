@@ -123,7 +123,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
 
         // notify the form control again (since usually done in base directive)
         if (newValue) {
-          this.onValueChange();
+          this.runSilently('correction', () => this.onValueChange());
         }
       });
     } else {

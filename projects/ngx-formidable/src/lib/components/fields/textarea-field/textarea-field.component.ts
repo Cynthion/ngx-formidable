@@ -140,7 +140,7 @@ export class TextareaFieldComponent
 
         // notify the form control again (since usually done in base directive)
         if (newValue) {
-          this.onValueChange();
+          this.runSilently('correction', () => this.onValueChange());
         }
       });
     } else {

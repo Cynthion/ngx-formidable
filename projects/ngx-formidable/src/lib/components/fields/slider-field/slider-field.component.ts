@@ -65,7 +65,7 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
     // push the corrected value back so model === UI.
     // Only correct real numeric values; do not "correct" null/undefined to something else.
     if (value != null && normalized !== value) {
-      queueMicrotask(() => this.onChange(normalized));
+      queueMicrotask(() => this.runSilently('correction', () => this.commit(normalized)));
     }
   }
 

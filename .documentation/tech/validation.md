@@ -63,6 +63,8 @@ Putting the seam any lower would force each adapter to re-implement path computa
 
 The form's **live control values lead**, and `formValue` fills in only what has no control of its own. It cannot be the other way round: Angular calls `_runAsyncValidator` before it emits the `ValueChangeEvent` that `formValueChange$` turns into the next `formValue`, so the bound model is one change behind at the moment a rule runs.
 
+That is also why `formValue` is optional at every moment, including the first. A form whose model arrives through `| async`, or never binds one at all, validates against its control values alone.
+
 `mergeValuesAndRawValues` supplies the live values, so a disabled control is included. `fillMissing` overlays `formValue` under them: it writes a key only where the target has none, so a cleared control's `null` stands rather than yielding to the value the model still holds.
 
 Step 2 is what keeps the target itself current. A field's or a group's own validator runs during that control's own `updateValueAndValidity`, before the root recomputes its value, so its own target is the one place the live values lag.
@@ -86,10 +88,21 @@ Step 2 is what keeps the target itself current. A field's or a group's own valid
 The run axis only works because every field keeps to two rules. Angular commits a `blur` control's value from inside `onTouched`, and only when a change is already pending, so:
 
 - **Touch Last**: `onTouched()` is the last act of a blur. `BaseFieldDirective.onFocusChange` calls `doOnFocusChange` first, so a field that commits on blur, as `date-field` and `time-field` do, has written its value before the touch that commits it.
-- **Programmatic Paths Are Silent**: a value the form wrote, or a selection an options list invalidated, corrects the model but never touches the control. `runSilently` marks such a path and `touch()` respects it. `onChange` is not silenced: a reconcile that drops a vanished option has to reach the model.
+- **Programmatic Paths Are Silent**: `runSilently(cause, work)` marks work the user did not cause, and both `touch()` and `commit()` respect it. Nothing on such a path touches the control or leaves it dirty.
 - **A Field May Disown A Blur**: `ignoresBlur()` suppresses both the commit and the touch, for a field that moved focus onto something it owns. `date-field` does this so a control inside its panel stays clickable.
 
-A touch is not cosmetic. Under `blur` it is the commit, and under `submit` it pre-sets the pending touch, so a touch nobody made would commit and reveal a field nobody has visited.
+A touch is not cosmetic. Under `blur` it is the commit, and under `submit` it pre-sets the pending touch, so a touch nobody made would commit and reveal a field nobody has visited. Dirty is not cosmetic either: it is what `revealOn="dirty"` reads.
+
+There are two causes, and they differ in one thing only:
+
+| Cause        | Raised by                                      | Reports the value | Touches | Dirties |
+| :----------- | :--------------------------------------------- | :---------------: | :-----: | :-----: |
+| `write`      | `writeValue`                                   |        No         |   No    |   No    |
+| `correction` | A reconcile, a clamped number, a masked string |        Yes        |   No    |   No    |
+
+A write reports nothing because the form is where the value came from. A correction has to report, because the model holds a value the field cannot render: an option that no longer exists, a number off the step grid, an unmasked string.
+
+Angular raises its pending dirty flag on every change a value accessor reports and offers no way to opt out, so `runSilently` puts a pristine control back. The two deferred corrections, `slider-field`'s clamp and the masked `doWriteValue`, run inside their own scope from the `queueMicrotask` or `setTimeout` that carries them, since the write scope has closed by then.
 
 ### Reveal Resolution And Repaint
 

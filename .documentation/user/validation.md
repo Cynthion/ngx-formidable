@@ -158,7 +158,7 @@ Three things follow from the table:
 
 - **None Of Them Reset Themselves.** `touched` and `dirty` latch on the first blur or the first edit and stay set, so a field that becomes valid again simply stops having messages to show. They are gates, not conditions.
 - **`touched` Also Reveals On Submit.** Submitting marks every control on the form touched, so a submit reveals the whole form under `touched` as well as under `submitted`. The difference is that `submitted` reveals nothing before that, however much the user has clicked around.
-- **`dirty` Is About The Value, `touched` Is About The Focus.** A user who tabs through a field without typing has touched it and not dirtied it. A field the code writes into is dirtied without being touched.
+- **`dirty` Is About The Value, `touched` Is About The Focus.** A user who tabs through a field without typing has touched it and not dirtied it. Neither flag is ever raised by the library: a value the form writes, and a value a field corrects, leave the control untouched and pristine.
 
 While a control is validating, its previous messages stay on screen rather than blanking and returning. This holds for `always` too, so a debounce window does not make the messages flicker.
 
