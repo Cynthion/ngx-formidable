@@ -1352,6 +1352,10 @@
   // inside that box rather than grow past it.
   box-sizing: border-box;
   box-shadow: var(--formidable-panel-box-shadow, #{tokens.$formidable-panel-box-shadow});
+  // A panel sits flush on its field's border-box edge, so a shadow cast across that seam lands on the field
+  // — a smudge with the default shadow, a solid block with a hard offset one. Clip the edge that meets the
+  // field and leave the other three open, which keeps any shadow a theme sets working in both directions.
+  clip-path: inset(0 -100vmax -100vmax); // below the field: no shadow above the panel's top edge
   // The panel is outlined by its own border, so it needs a thickness of its own: a theme that drops the
   // field's border to go underlined would otherwise leave the panel with nothing but its box-shadow.
   // Written out here rather than declared in `_formidable-vars.scss`, for the reason `field-radius()` gives.
@@ -1400,12 +1404,15 @@
 
   &.above {
     transform: translateY(calc(-100% - var(--formidable-field-height, #{tokens.$formidable-field-height})));
+    clip-path: inset(-100vmax -100vmax 0); // flipped: the bottom edge is the one meeting the field
   }
 
   // Last, because `.panel-sheet` and `.above` weigh the same and source order decides. A sheet is never
   // marked `above` — `updatePanelPosition` skips it — but a stale class must not be able to move it.
   &.panel-sheet {
     @include panel-sheet;
+
+    clip-path: none; // a sheet never meets its field, so it keeps its shadow on all four edges
 
     // A sheet sits against the screen edge, not against the field, so it keeps its own top corners and
     // squares off at the bottom instead of mirroring anything.

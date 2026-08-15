@@ -391,7 +391,7 @@ Ten palettes and eleven field shapes — outlined, underlined, soft, compact, pi
 | `--formidable-panel-background`       | Background color for dropdown/autocomplete/date panels.                                                                               |
 | `--formidable-panel-border-thickness` | Thickness of a panel's outline. Follows the field's border thickness unless set, so a borderless theme states it to keep the outline. |
 | `--formidable-panel-border-radius`    | Border-radius for all panels. The two corners a panel sits against its field with mirror that field instead.                          |
-| `--formidable-panel-box-shadow`       | Box-shadow for all panels.                                                                                                            |
+| `--formidable-panel-box-shadow`       | Box-shadow for all panels. The edge a panel meets its field with does not cast.                                                       |
 | `--formidable-panel-max-height`       | Maximum vertical height for panels (before scrolling).                                                                                |
 
 ### Animations
