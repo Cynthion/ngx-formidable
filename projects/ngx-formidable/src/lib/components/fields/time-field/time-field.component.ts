@@ -263,7 +263,7 @@ export class TimeFieldComponent
     this.valueChanged.emit(this.selectedTime);
     this.isFieldFilled = !!this.selectedTime;
     this.onChange(this.selectedTime); // notify ControlValueAccessor of the change
-    this.onTouched();
+    this.touch();
   }
 
   // #endregion

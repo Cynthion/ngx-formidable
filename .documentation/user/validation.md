@@ -67,6 +67,119 @@ Both are presentational and register no validator.
 
 ---
 
+## Validation Timing
+
+Two independent settings, and most forms want a mismatch between them.
+
+| Axis         | Question                     | Set with                                     | Default   |
+| :----------- | :--------------------------- | :------------------------------------------- | :-------- |
+| **Run**      | When does the validator run? | Angular's `ngFormOptions` / `ngModelOptions` | `change`  |
+| **Reveal**   | When do the messages appear? | `revealOn`                                   | `touched` |
+| **Debounce** | How long after a run?        | `debounceMs`                                 | `0`       |
+
+### The Pairings Worth Using
+
+| Run      | Reveal      | Behaviour                                                                                         |
+| :------- | :---------- | :------------------------------------------------------------------------------------------------ |
+| `change` | `touched`   | The default. Quiet while a field is first typed into, live while it is corrected.                 |
+| `change` | `submitted` | Validity is current, so a submit button can be trusted, but nothing is said until the user tries. |
+| `blur`   | `touched`   | One run per field, reported as the user leaves it.                                                |
+| `submit` | `submitted` | Nothing runs and nothing appears until submit.                                                    |
+
+The first two are mismatches by construction, which is why the two axes stay separate.
+
+### Run
+
+Angular owns this one, so there is no library input for it. `ngFormOptions` on the `<form>` cascades to every control under it, and `ngModelOptions` on one field overrides it:
+
+```html
+<form
+  formidableForm
+  [ngFormOptions]="{ updateOn: 'blur' }">
+  <formidable-input-field
+    name="firstName"
+    [ngModel]="model.firstName" />
+
+  <!-- this one field validates on every keystroke anyway -->
+  <formidable-input-field
+    name="lastName"
+    [ngModel]="model.lastName"
+    [ngModelOptions]="{ updateOn: 'change' }" />
+</form>
+```
+
+A validator never runs on a schedule of its own. It runs because the control **committed** its value, which is the same moment the model updates, so `updateOn` moves the value and both the sync and the async validators together.
+
+| Value    | The control commits, and so validates          | Until then                                                               |
+| :------- | :--------------------------------------------- | :----------------------------------------------------------------------- |
+| `change` | On every keystroke, and every other value edit | Nothing waits. This is Angular's default and the library's.              |
+| `blur`   | When the control loses focus                   | What the user typed sits in the DOM only                                 |
+| `submit` | When the form is submitted                     | What the user typed sits in the DOM only, across every field on the form |
+
+The "until then" column is the part that surprises people. Under `blur` and `submit` the control's value, and therefore the model and `formValueChange$`, do not move while the user types. A field that reads its own value mid-typing reads the old one.
+
+### Reveal
+
+| Input      | On       | Does                                                   |
+| :--------- | :------- | :----------------------------------------------------- |
+| `revealOn` | `<form>` | Sets when every field on the form reveals its messages |
+| `revealOn` | a field  | Overrides the form's setting for that field            |
+
+A field takes it on `formidableFieldErrors`, which is the directive that renders the messages:
+
+```html
+<form
+  formidableForm
+  revealOn="submitted">
+  <formidable-input-field
+    formidableFieldErrors
+    name="firstName"
+    [ngModel]="model.firstName" />
+
+  <!-- this one reports as soon as it is edited -->
+  <formidable-input-field
+    formidableFieldErrors
+    name="lastName"
+    revealOn="dirty"
+    [ngModel]="model.lastName" />
+</form>
+```
+
+Each value names a state Angular already tracks, so the wording is Angular's:
+
+| Value       | Messages appear once         | Which means                                                          | Scope       | Cleared by                     |
+| :---------- | :--------------------------- | :------------------------------------------------------------------- | :---------- | :----------------------------- |
+| `touched`   | `control.touched` is `true`  | The user has focused the control and left it again, at least once    | Per control | `reset()`, `markAsUntouched()` |
+| `dirty`     | `control.dirty` is `true`    | The control's value has been changed since it was set, at least once | Per control | `reset()`, `markAsPristine()`  |
+| `submitted` | `NgForm.submitted` is `true` | The form has been submitted, at least once                           | Per form    | `resetForm()`                  |
+| `always`    | There is anything to say     | No gate at all                                                       | Per control | Nothing                        |
+
+Three things follow from the table:
+
+- **None Of Them Reset Themselves.** `touched` and `dirty` latch on the first blur or the first edit and stay set, so a field that becomes valid again simply stops having messages to show. They are gates, not conditions.
+- **`touched` Also Reveals On Submit.** Submitting marks every control on the form touched, so a submit reveals the whole form under `touched` as well as under `submitted`. The difference is that `submitted` reveals nothing before that, however much the user has clicked around.
+- **`dirty` Is About The Value, `touched` Is About The Focus.** A user who tabs through a field without typing has touched it and not dirtied it. A field the code writes into is dirtied without being touched.
+
+While a control is validating, its previous messages stay on screen rather than blanking and returning. This holds for `always` too, so a debounce window does not make the messages flicker.
+
+### Debounce
+
+`debounceMs` on the `<form>` delays every target on it. It only earns its place under `change`: under `blur` and `submit` Angular already coalesces to one commit per blur or per submit, so a window there only delays the messages.
+
+### Reading Validity After A Submit
+
+Every rule this library runs is asynchronous, so the form is `PENDING` at the moment `ngSubmit` fires. A submit handler that reads `form.valid` synchronously reads a stale answer. Gate on `validChange$` or `idle$` instead:
+
+```typescript
+onSubmit(): void {
+  this.isValid$.pipe(take(1)).subscribe((isValid) => {
+    if (isValid) this.save();
+  });
+}
+```
+
+---
+
 ## The Validator Contract
 
 Everything else goes through one interface. `NgxFormidableFormDirective` owns the model, the targets and the debouncing; your validator owns the rules.
@@ -266,4 +379,4 @@ Two tokens sit between `control.errors` and the text on screen.
 }
 ```
 
-Errors only display once the control is `touched`. Submitting marks every control touched, so a submit reveals the whole form's errors at once.
+When the messages appear is a separate setting from when the validator runs: see [Validation Timing](#validation-timing).

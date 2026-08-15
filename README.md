@@ -650,6 +650,41 @@ For Vest, that adapter ships with the library — add it to your imports and kee
 import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/vest';
 ```
 
+### Validation Timing
+
+Two separate settings decide when a field validates and when it says so, and most forms want a mismatch
+between them.
+
+| Axis   | Question                     | Set with                                     | Default   |
+| :----- | :--------------------------- | :------------------------------------------- | :-------- |
+| Run    | When does the validator run? | Angular's `ngFormOptions` / `ngModelOptions` | `change`  |
+| Reveal | When do the messages appear? | `revealOn`                                   | `touched` |
+
+The run axis is Angular's own, so there is no input for it: `ngFormOptions` on the `<form>` cascades and
+`ngModelOptions` on a field overrides. The reveal axis is the library's, takes `touched`, `dirty`,
+`submitted` or `always`, and a field overrides the form on its `formidableFieldErrors`:
+
+```html
+<form
+  formidableForm
+  revealOn="submitted"
+  [ngFormOptions]="{ updateOn: 'blur' }">
+  <formidable-input-field
+    formidableFieldErrors
+    name="firstName"
+    [ngModel]="model.firstName" />
+
+  <!-- this one reports as soon as it is edited -->
+  <formidable-input-field
+    formidableFieldErrors
+    name="lastName"
+    revealOn="dirty"
+    [ngModel]="model.lastName" />
+</form>
+```
+
+Every rule runs asynchronously, so the form is still `PENDING` when `ngSubmit` fires. Gate a submit handler on `validChange$` or `idle$` rather than reading `form.valid` synchronously.
+
 **Full guide, with worked Vest, Angular, zod and no-validation examples:**
 [`.documentation/user/validation.md`](.documentation/user/validation.md).
 

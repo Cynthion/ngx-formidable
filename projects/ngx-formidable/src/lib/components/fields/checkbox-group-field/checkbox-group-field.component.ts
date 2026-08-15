@@ -165,7 +165,7 @@ export class CheckboxGroupFieldComponent
     this.valueChanged.emit(next);
     this.isFieldFilled = next.length > 0;
     this.onChange(next); // notify ControlValueAccessor of the change
-    this.onTouched();
+    this.touch();
 
     this.cdRef.markForCheck();
   }
@@ -174,7 +174,8 @@ export class CheckboxGroupFieldComponent
     const allOptions = this.computeAllOptions();
 
     this.updateOptions(allOptions);
-    this.reconcileSelectionAgainstOptions(allOptions);
+    // A changed options list is not the user, so the reconcile may correct the model but not touch.
+    this.runSilently(() => this.reconcileSelectionAgainstOptions(allOptions));
     this.reconcileHighlightAfterOptionsChanged();
 
     this.cdRef.markForCheck();
@@ -209,7 +210,7 @@ export class CheckboxGroupFieldComponent
     this.valueChanged.emit(filtered);
     this.isFieldFilled = filtered.length > 0;
     this.onChange(filtered);
-    this.onTouched();
+    this.touch();
 
     this.cdRef.markForCheck();
   }

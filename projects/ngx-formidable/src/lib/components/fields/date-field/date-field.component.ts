@@ -274,12 +274,15 @@ export class DateFieldComponent
     }
 
     // try set date on blur
-    if (this.ignoreNextBlur) {
-      this.ignoreNextBlur = false;
-      return;
-    }
-
     this.trySetDateFromInput(this.inputRef.nativeElement.value);
+  }
+
+  /** Focus moved onto this field's own panel, so the blur that follows is neither a commit nor a touch. */
+  protected override ignoresBlur(): boolean {
+    const ignore = this.ignoreNextBlur;
+    this.ignoreNextBlur = false;
+
+    return ignore;
   }
 
   private handleKeydown(event: KeyboardEvent): void {
@@ -464,7 +467,7 @@ export class DateFieldComponent
     this.valueChanged.emit(this.selectedDate);
     this.isFieldFilled = !!this.selectedDate;
     this.onChange(this.selectedDate); // notify ControlValueAccessor of the change
-    this.onTouched();
+    this.touch();
     this.togglePanel(false);
   }
 

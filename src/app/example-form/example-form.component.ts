@@ -20,6 +20,7 @@ import {
   FieldToggleIconDirective,
   FormidableFormErrors,
   FormidablePanelPosition,
+  FormidableReveal,
   IFormidableFieldOption,
   InputFieldComponent,
   NgxFormidableFieldValidateDirective,
@@ -493,6 +494,25 @@ export class ExampleFormComponent implements OnInit {
   protected adornmentAlignment: FieldAdornmentAlignment = 'center';
   protected panelPosition: FormidablePanelPosition = 'right';
 
+  // The two timing axes. `updateOn` is Angular's and decides when the validator runs; `revealOn` is the
+  // library's and decides when the messages appear. They are independent: the default pairing runs on every
+  // keystroke and still stays quiet until a field is left.
+  protected ngFormOptions: { updateOn: UpdateOn } = { updateOn: 'change' };
+  protected revealOn: FormidableReveal = 'touched';
+
+  protected readonly updateOnOptions: readonly { key: UpdateOn; label: string }[] = [
+    { key: 'change', label: 'Change ★' },
+    { key: 'blur', label: 'Blur' },
+    { key: 'submit', label: 'Submit' }
+  ];
+
+  protected readonly revealOnOptions: readonly { key: FormidableReveal; label: string }[] = [
+    { key: 'touched', label: 'Touched ★' },
+    { key: 'dirty', label: 'Dirty' },
+    { key: 'submitted', label: 'Submitted' },
+    { key: 'always', label: 'Always' }
+  ];
+
   // Since all components are change-detection OnPush, we need to trigger a change detection cycle
   protected renderFlip = true;
   private appliedKeys = new Set<string>(); // track what we’ve set on :root
@@ -516,6 +536,22 @@ export class ExampleFormComponent implements OnInit {
 
   setPanelPosition(position: FormidablePanelPosition): void {
     this.panelPosition = position;
+    this.clearLogs();
+  }
+
+  /**
+   * `NgForm` reads its options once, in `ngAfterViewInit`, so the form has to be rebuilt for a new run
+   * setting to reach the controls — which is what the render flip does.
+   */
+  setUpdateOn(updateOn: UpdateOn): void {
+    this.ngFormOptions = { updateOn };
+    this.renderFlip = !this.renderFlip;
+    this.clearLogs();
+  }
+
+  /** No render flip: the switch has to be live, or it would reset the touched and dirty state it reads. */
+  setRevealOn(revealOn: FormidableReveal): void {
+    this.revealOn = revealOn;
     this.clearLogs();
   }
 
@@ -914,6 +950,9 @@ export class ExampleFormComponent implements OnInit {
 
   // #endregion
 }
+
+/** Angular's run axis, which it takes through `ngFormOptions` and `ngModelOptions`. */
+type UpdateOn = 'change' | 'blur' | 'submit';
 
 type ControlKey =
   | 'showPrefixes'

@@ -41,6 +41,10 @@ export class NgxFormidableGroupValidateDirective implements AsyncValidator {
 
     const target = getGroupTarget(this.formDirective.ngForm.control, control);
 
-    return this.formDirective.createAsyncValidator(target)(control.value) as Observable<ValidationErrors | null>;
+    // Raw, like the field and whole-form paths: a group holding a disabled control is still validated
+    // against a model that has that control's key.
+    return this.formDirective.createAsyncValidator(target)(
+      control.getRawValue()
+    ) as Observable<ValidationErrors | null>;
   }
 }

@@ -12,6 +12,12 @@ export const WHOLE_FORM = 'wholeForm';
 export type FormidableFormErrors = Record<string, string[]>;
 
 /**
+ * When a field's messages appear. Independent of when the validator runs, which is Angular's `updateOn`:
+ * `change` with `touched` is the default pairing, and stays quiet while a field is first typed into.
+ */
+export type FormidableReveal = 'touched' | 'dirty' | 'submitted' | 'always';
+
+/**
  * What a validator is asked, and what the form directive does with the answer.
  * The form directive owns the model, the targets and the debouncing; an implementation owns the rules.
  */

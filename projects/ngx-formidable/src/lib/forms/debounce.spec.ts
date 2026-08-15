@@ -24,7 +24,7 @@ interface Model extends Record<string, unknown> {
     <form
       formidableForm
       [formValue]="value"
-      [debounceMs]="200"
+      [debounceMs]="debounceMs"
       [stubValidator]="rules">
       <input
         name="name"
@@ -33,6 +33,7 @@ interface Model extends Record<string, unknown> {
   `
 })
 class DebouncedHostComponent {
+  debounceMs = 200;
   value: Model = { name: 'filled' };
   rules: Record<string, string> = { name: 'Required' };
 }
@@ -71,6 +72,32 @@ describe('validation debounce', () => {
     expect(control()?.errors).toBeNull();
 
     tick(200);
+    fixture.detectChanges();
+
+    expect(control()?.errors?.['errors']).toEqual(['Required']);
+  }));
+
+  // The window used to be read once per target and cached for the life of the form, so a consumer could
+  // widen it and every field already seen kept the old one.
+  it('takes a new debounce window after a target has already validated', fakeAsync(() => {
+    fixture = TestBed.createComponent(DebouncedHostComponent);
+    fixture.detectChanges();
+    tick(500);
+    fixture.detectChanges();
+
+    // Widened after this target has been through the validator once, which is what used to be too late.
+    fixture.componentInstance.debounceMs = 1000;
+    fixture.detectChanges();
+
+    type('');
+    tick(500);
+    fixture.detectChanges();
+
+    // Half a second in, the old 200ms window would long since have reported.
+    expect(control()?.status).toBe('PENDING');
+    expect(control()?.errors).toBeNull();
+
+    tick(600);
     fixture.detectChanges();
 
     expect(control()?.errors?.['errors']).toEqual(['Required']);

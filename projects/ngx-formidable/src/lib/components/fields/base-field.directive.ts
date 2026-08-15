@@ -105,11 +105,23 @@ export abstract class BaseFieldDirective<T = string | null>
     this.focusChangeSubject$.next(isFocused);
     this.focusChanged.emit(isFocused);
 
-    if (!isFocused) {
-      this.onTouched(); // on blur, notify ControlValueAccessor that the field was touched
-    }
+    // A blur the field caused itself — focus moved onto its own panel — is not the user leaving it, so it
+    // neither commits nor touches.
+    if (!isFocused && this.ignoresBlur()) return;
 
     this.doOnFocusChange(isFocused);
+
+    // The last act of a blur: under `updateOn: 'blur'` this is what commits the value, so whatever the
+    // field writes above has to be written by now.
+    if (!isFocused) this.touch();
+  }
+
+  /**
+   * Whether this blur is the field's own doing, because focus moved to something the field itself owns.
+   * Consumes the flag it reads, so the blur after it counts again. Overridden by the fields that move focus.
+   */
+  protected ignoresBlur(): boolean {
+    return false;
   }
 
   protected abstract doOnValueChange(): void;
@@ -122,6 +134,32 @@ export abstract class BaseFieldDirective<T = string | null>
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected onTouched: () => void = () => {};
 
+  private isSilent = false;
+
+  /**
+   * The single touch channel every field goes through. Under `updateOn: 'blur'` a touch is also the commit
+   * and under `updateOn: 'submit'` it pre-sets the pending touch, so a touch the user did not cause would
+   * commit and reveal a field nobody has visited.
+   */
+  protected touch(): void {
+    if (!this.isSilent) this.onTouched();
+  }
+
+  /**
+   * Runs work the form or a changed options list caused rather than the user, so nothing on it touches the
+   * control. The value still travels: a reconcile that drops a vanished option has to reach the model.
+   */
+  protected runSilently(work: () => void): void {
+    const previous = this.isSilent;
+    this.isSilent = true;
+
+    try {
+      work();
+    } finally {
+      this.isSilent = previous;
+    }
+  }
+
   writeValue(value: T): void {
     this.isFieldFilled = BaseFieldDirective.isFilled(value);
     // What the field now displays, so `onValueChange` compares against it and not against the last value a
@@ -129,7 +167,8 @@ export abstract class BaseFieldDirective<T = string | null>
     // the model.
     this._valuePrevious = value;
 
-    this.doWriteValue(value);
+    // The form wrote this, so nothing on the way down may touch the control.
+    this.runSilently(() => this.doWriteValue(value));
   }
 
   registerOnChange(fn: (value: T) => void): void {

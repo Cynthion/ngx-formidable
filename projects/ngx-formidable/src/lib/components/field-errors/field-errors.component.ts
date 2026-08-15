@@ -1,17 +1,27 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, Inject, Input } from '@angular/core';
-import { AbstractControl, NgModel, NgModelGroup } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  HostBinding,
+  Inject,
+  inject,
+  Input
+} from '@angular/core';
+import { AbstractControl, NgForm, NgModel, NgModelGroup } from '@angular/forms';
+import { NgxFormidableFormDirective } from '../../forms/form.directive';
 import {
   FORMIDABLE_ERROR_EXTRACTOR,
   FORMIDABLE_ERROR_TRANSLATOR,
   FormidableErrorExtractorFn,
-  FormidableErrorTranslatorFn
+  FormidableErrorTranslatorFn,
+  FormidableReveal
 } from '../../models/validation.model';
 
 /**
  * Renders the list of validation error messages for a single NgModel or NgModelGroup.
  * - Automatically tracks previous errors while control is pending.
- * - Exposes `invalid` flag once the control is touched and has errors, mirrored onto its host as
- *   `.is-invalid` and onto the surrounding decorator, which is what the state styling targets.
+ * - Exposes `invalid` flag once the control has errors and `revealOn` says they may be shown, mirrored onto
+ *   its host as `.is-invalid` and onto the surrounding decorator, which is what the state styling targets.
  * - Reads Angular's `AbstractControl.errors`, so it displays whatever wrote them — the form harness,
  *   Angular's built-in validators, or a consumer's own.
  * > Tip: provide `FORMIDABLE_ERROR_EXTRACTOR` to read a different error shape, and
@@ -20,6 +30,7 @@ import {
  * Inputs:
  * - `@Input() ngModel?: NgModel`
  * - `@Input() ngModelGroup?: NgModelGroup`
+ * - `@Input() revealOn?: FormidableReveal`
  *
  * @example
  * ```html
@@ -37,6 +48,13 @@ import {
 export class FieldErrorsComponent {
   @Input() ngModel?: NgModel;
   @Input() ngModelGroup?: NgModelGroup;
+
+  /** This field's own reveal setting, which beats the form's. Pushed by `FieldErrorsDirective`. */
+  @Input() revealOn?: FormidableReveal;
+
+  // Optional: messages render for any validator, and for none — neither the harness nor a form is required.
+  private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true });
+  private readonly ngForm = inject(NgForm, { optional: true });
 
   private previousError?: string[];
 
@@ -61,9 +79,25 @@ export class FieldErrorsComponent {
     return this.previousError;
   }
 
+  /** This field's setting first, then the form's, then the default. */
+  private get reveal(): FormidableReveal {
+    return this.revealOn ?? this.formDirective?.revealOn() ?? 'touched';
+  }
+
   @HostBinding('class.is-invalid')
   get invalid(): boolean {
-    return !!this.control?.touched && !!this.errors?.length;
+    if (!this.errors?.length) return false;
+
+    switch (this.reveal) {
+      case 'always':
+        return true;
+      case 'dirty':
+        return !!this.control?.dirty;
+      case 'submitted':
+        return !!this.ngForm?.submitted;
+      default:
+        return !!this.control?.touched;
+    }
   }
 
   markForCheck(): void {

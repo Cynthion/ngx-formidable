@@ -10,24 +10,27 @@ import {
   ValueChangeEvent
 } from '@angular/forms';
 import {
-  debounceTime,
   distinctUntilChanged,
   filter,
   map,
   merge,
   Observable,
   of,
-  ReplaySubject,
   startWith,
   Subject,
   switchMap,
-  take,
   takeUntil,
-  tap
+  tap,
+  timer
 } from 'rxjs';
 import { cloneDeep } from '../helpers/utility.helpers';
 import { DeepRequired } from '../models/utility-types';
-import { FORMIDABLE_ERROR_EXTRACTOR, FORMIDABLE_VALIDATOR, WHOLE_FORM } from '../models/validation.model';
+import {
+  FORMIDABLE_ERROR_EXTRACTOR,
+  FORMIDABLE_VALIDATOR,
+  FormidableReveal,
+  WHOLE_FORM
+} from '../models/validation.model';
 import { validateFormShape } from './form-validate.helpers';
 import { fillMissing, getAllFormErrors, mergeValuesAndRawValues, set } from './form.helpers';
 
@@ -54,6 +57,10 @@ import { fillMissing, getAllFormErrors, mergeValuesAndRawValues, set } from './f
  *
  * - `@Input() showRequiredMarkers: boolean`
  *   Whether the fields on this form may render their required marker. Presentational only.
+ *
+ * - `@Input() revealOn: FormidableReveal`
+ *   When the fields on this form reveal their messages. Independent of Angular's `updateOn`, which decides
+ *   when the validator runs.
  *
  * Outputs:
  * - `@Output() formValueChange$: Observable<T>`
@@ -129,6 +136,12 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
    * A field still has to ask for its own with `showRequiredMarker`. Presentational only.
    */
   public readonly showRequiredMarkers = input(true);
+
+  /**
+   * When the fields on this form reveal their messages. A field overrides it with its own `revealOn` on
+   * `formidableFieldErrors`. Independent of when the validator runs, which is Angular's `updateOn`.
+   */
+  public readonly revealOn = input<FormidableReveal>('touched');
 
   /**
    * Maps a target to the targets that depend on it, so a rule reading more than one field re-runs when any of
@@ -207,22 +220,12 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
     distinctUntilChanged()
   );
 
-  // Debounces the model per target, so the validator is not run on every keystroke.
-  private readonly formValueCache: Record<
-    string,
-    Partial<{
-      sub$: ReplaySubject<unknown>;
-      debounced$: Observable<unknown>;
-    }>
-  > = {};
-
   private readonly destroy$ = new Subject<void>();
 
   public constructor() {
     // re-validate dependants when the dependency map changes
     toObservable(this.dependentFields)
       .pipe(
-        filter((config) => !!config),
         switchMap((conf) => {
           if (!conf) {
             return of(null);
@@ -264,7 +267,7 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
     });
 
     // mark all form fields as touched when the form is submitted
-    this.ngForm.ngSubmit.subscribe(() => this.ngForm.form.markAllAsTouched());
+    this.ngForm.ngSubmit.pipe(takeUntil(this.destroy$)).subscribe(() => this.ngForm.form.markAllAsTouched());
   }
 
   ngOnDestroy(): void {
@@ -303,24 +306,10 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
         set(mod as object, target, value);
       }
 
-      if (!this.formValueCache[target]) {
-        this.formValueCache[target] = {
-          // keep track of the last model
-          sub$: new ReplaySubject(1)
-        };
-
-        this.formValueCache[target].debounced$ = this.formValueCache[target].sub$!.pipe(
-          debounceTime(this.debounceMs())
-        );
-      }
-
-      // Provide the latest model to the cache.
-      this.formValueCache[target].sub$!.next(mod);
-
-      // When debounced, take the latest value and perform the asynchronous validation.
-      return this.formValueCache[target].debounced$!.pipe(
-        take(1),
-        switchMap((latest) => validator.validate(latest as T, target)),
+      // Angular cancels a control's pending async validator when the next run starts, so a newer change
+      // restarts this window. The setting is read per run, so changing it takes effect at once.
+      return timer(this.debounceMs()).pipe(
+        switchMap(() => validator.validate(mod, target)),
         map((errors): ValidationErrors | null => (errors?.length ? { error: errors[0], errors } : null)),
         takeUntil(this.destroy$)
       );

@@ -237,7 +237,7 @@ export class AutocompleteFieldComponent
     this.valueChanged.emit(this.selectedOption.value);
     this.isFieldFilled = this.selectedOption.value.length > 0;
     this.onChange(this.selectedOption.value); // notify ControlValueAccessor of the change
-    this.onTouched();
+    this.touch();
 
     // simulate blur (field-state blur, not necessarily native blur)
     this.focusChangeSubject$.next(false); // simulate blur on selection
@@ -267,7 +267,7 @@ export class AutocompleteFieldComponent
     this.valueChanged.emit(null);
     this.isFieldFilled = this.inputRef.nativeElement.value.length > 0;
     this.onChange(null);
-    this.onTouched();
+    this.touch();
 
     this.cdRef.markForCheck();
   }
@@ -284,7 +284,8 @@ export class AutocompleteFieldComponent
       this.writeValue(this._writtenValue);
     }
 
-    this.reconcileSelectionAgainstOptions(this.computeSelectableOptions(allOptions));
+    // A changed options list is not the user, so the reconcile may correct the model but not touch.
+    this.runSilently(() => this.reconcileSelectionAgainstOptions(this.computeSelectableOptions(allOptions)));
 
     // keep highlight consistent if panel is open
     if (this.isPanelOpen) {

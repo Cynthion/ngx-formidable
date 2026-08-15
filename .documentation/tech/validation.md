@@ -39,7 +39,7 @@ flowchart TB
 Nothing in L1 or L2a is coupled to a validator because both rest on things Angular already guarantees:
 
 - **`AbstractControl.errors`** — every validator writes here. `FieldErrorsComponent` reads it and nothing else, through `FORMIDABLE_ERROR_EXTRACTOR`; `getAllFormErrors` runs every entry through the same extractor, so `errorsChange$` is one homogeneous `FormidableFormErrors` map however many validators wrote into it.
-- **`.is-invalid`** — one class on `FieldDecoratorComponent`'s host, computed from `control.touched && messages.length`. The whole SCSS state layer hangs off it, and it means nothing about who decided the field was invalid.
+- **`.is-invalid`** — one class on `FieldDecoratorComponent`'s host, computed from the messages and the reveal setting that gates them. The whole SCSS state layer hangs off it, and it means nothing about who decided the field was invalid.
 
 `FORMIDABLE_ERROR_EXTRACTOR` is what makes `AbstractControl.errors` genuinely universal. The harness writes `{ error, errors }`; Angular's validators write `{ required: true }`; a schema library writes something else. The extractor's default handles the first two and an override handles the third, so the same UI serves all of them.
 
@@ -51,7 +51,7 @@ One naming trap worth knowing: `IFormidableValidator.validate(model, target)` an
 
 1. Assemble the model. (See **The Model A Rule Sees** below.)
 2. Patch the changed value in at the control's dotted field path.
-3. Debounce per the form's `debounceMs`, latched per target.
+3. Debounce per the form's `debounceMs`, read afresh on every run.
 4. **Run the rules.** ← the only validator-specific step
 5. Map the result into `ValidationErrors`.
 
@@ -66,6 +66,38 @@ The form's **live control values lead**, and `formValue` fills in only what has 
 `mergeValuesAndRawValues` supplies the live values, so a disabled control is included. `fillMissing` overlays `formValue` under them: it writes a key only where the target has none, so a cleared control's `null` stands rather than yielding to the value the model still holds.
 
 Step 2 is what keeps the target itself current. A field's or a group's own validator runs during that control's own `updateValueAndValidity`, before the root recomputes its value, so its own target is the one place the live values lag.
+
+## The Two Timing Axes
+
+**Run** is when the validator runs, **reveal** is when the messages appear, and they are separate mechanisms with separate owners. Consumer-facing reference: `user/validation.md`.
+
+| Axis     | Owner   | Mechanism    | Read by                        |
+| :------- | :------ | :----------- | :----------------------------- |
+| Run      | Angular | `updateOn`   | `AbstractControl`              |
+| Reveal   | Library | `revealOn`   | `FieldErrorsComponent.invalid` |
+| Debounce | Library | `debounceMs` | `createAsyncValidator`         |
+
+### Why Run Gets No Input
+
+`updateOn` resolves by walking to the parent when a control sets nothing of its own, so `ngFormOptions` already cascades and `ngModelOptions` already overrides. A library input would restate that and could drift from it, and it could not see a per-field `ngModelOptions` a consumer set directly. So no library code sits in that path.
+
+### The Field Contract
+
+The run axis only works because every field keeps to two rules. Angular commits a `blur` control's value from inside `onTouched`, and only when a change is already pending, so:
+
+- **Touch Last**: `onTouched()` is the last act of a blur. `BaseFieldDirective.onFocusChange` calls `doOnFocusChange` first, so a field that commits on blur, as `date-field` and `time-field` do, has written its value before the touch that commits it.
+- **Programmatic Paths Are Silent**: a value the form wrote, or a selection an options list invalidated, corrects the model but never touches the control. `runSilently` marks such a path and `touch()` respects it. `onChange` is not silenced: a reconcile that drops a vanished option has to reach the model.
+- **A Field May Disown A Blur**: `ignoresBlur()` suppresses both the commit and the touch, for a field that moved focus onto something it owns. `date-field` does this so a control inside its panel stays clickable.
+
+A touch is not cosmetic. Under `blur` it is the commit, and under `submit` it pre-sets the pending touch, so a touch nobody made would commit and reveal a field nobody has visited.
+
+### Reveal Resolution And Repaint
+
+`FieldErrorsComponent` resolves its own field's `revealOn` first, then the form's, then `touched`. `FieldErrorsDirective` pushes the field's value and drives the repaint, because the `OnPush` component is not reactive to either of the other two gates: `NgForm.submitted` reads through `untracked`, and the form's `revealOn` is a signal on a directive the component does not own. Both join the repaint stream alongside the control's own events.
+
+### Debounce
+
+`debounceMs` is read per run, inside a `timer` the validator returns. Angular cancels a control's pending async validator when the next run starts, so a newer change restarts the window; that cancellation is the debounce. There is no per-target cache to freeze the setting or to leak.
 
 ## Package Layout
 

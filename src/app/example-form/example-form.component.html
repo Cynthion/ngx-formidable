@@ -188,6 +188,32 @@
         </label>
       </fieldset>
 
+      <!-- Run Axis: when the validator runs. Angular's, through ngFormOptions. -->
+      <fieldset>
+        <legend>Validation Run (updateOn):</legend>
+        <label *ngFor="let option of updateOnOptions">
+          <input
+            type="radio"
+            name="updateOn"
+            [checked]="ngFormOptions.updateOn === option.key"
+            (change)="setUpdateOn(option.key)" />
+          {{ option.label }}
+        </label>
+      </fieldset>
+
+      <!-- Reveal Axis: when the messages appear. The library's, through revealOn. -->
+      <fieldset>
+        <legend>Validation Reveal (revealOn):</legend>
+        <label *ngFor="let option of revealOnOptions">
+          <input
+            type="radio"
+            name="revealOn"
+            [checked]="revealOn === option.key"
+            (change)="setRevealOn(option.key)" />
+          {{ option.label }}
+        </label>
+      </fieldset>
+
       <!-- Geometry Scheme -->
       <fieldset>
         <legend>Geometry Examples:</legend>
@@ -280,6 +306,8 @@
     [formValue]="formValue$ | async"
     [formShape]="formShape"
     [formSuite]="formSuite"
+    [ngFormOptions]="ngFormOptions"
+    [revealOn]="revealOn"
     [showRequiredMarkers]="controlCenter.showRequiredMarkers"
     (dirtyChange$)="isDirty$.next($event)"
     (validChange$)="isValid$.next($event)"

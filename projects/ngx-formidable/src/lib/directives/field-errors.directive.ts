@@ -5,15 +5,18 @@ import {
   EnvironmentInjector,
   inject,
   Injector,
+  Input,
   OnDestroy,
   Optional,
   ViewContainerRef
 } from '@angular/core';
-import { NgModel, NgModelGroup } from '@angular/forms';
-import { defer, of, Subject, switchMap, takeUntil } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { NgForm, NgModel, NgModelGroup } from '@angular/forms';
+import { defer, EMPTY, merge, Observable, of, startWith, Subject, switchMap, takeUntil } from 'rxjs';
 import { FieldDecoratorComponent } from '../components/field-decorator/field-decorator.component';
 import { FieldErrorsComponent } from '../components/field-errors/field-errors.component';
 import { NgxFormidableFormDirective } from '../forms/form.directive';
+import { FormidableReveal } from '../models/validation.model';
 
 /**
  * Dynamically instantiates a `<formidable-field-errors>` component for any form control decorated with
@@ -50,7 +53,11 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly environmentInjector = inject(EnvironmentInjector);
   // Optional: errors render for any validator, and for none — the harness is not required.
   private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true });
+  private readonly ngForm = inject(NgForm, { optional: true });
   private readonly destroy$ = new Subject<void>();
+
+  /** When this field's messages appear, overriding whatever the form set. */
+  @Input() revealOn?: FormidableReveal;
 
   // Element injectors follow the declaring template, so a projected field really does see its decorator.
   private readonly decorator = inject(FieldDecoratorComponent, { optional: true });
@@ -80,6 +87,7 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
 
     this.fieldErrorsComponentRef.instance.ngModel = this.ngModel ?? undefined;
     this.fieldErrorsComponentRef.instance.ngModelGroup = this.ngModelGroup ?? undefined;
+    this.fieldErrorsComponentRef.instance.revealOn = this.revealOn;
 
     // The decorator owns the label and is the ancestor every field's stylesheet reaches with
     // `:host-context(.is-invalid)`, so it is where the flag has to surface.
@@ -93,7 +101,21 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
 
     // Async validation leaves the harness PENDING, so its errors are only readable once it settles.
     // Synchronous validators have no such gap, so without a harness the events are already the signal.
-    (this.formDirective ? this.formDirective.idle$.pipe(switchMap(() => events$)) : events$)
+    // `startWith` so each settle repaints once: under `updateOn: 'submit'` the touches land while the form
+    // is still pending, and would otherwise never be painted.
+    const controlEvents$ = this.formDirective
+      ? this.formDirective.idle$.pipe(switchMap(() => events$.pipe(startWith(null))))
+      : events$;
+
+    // `NgForm.submitted` is untracked, and the form's `revealOn` is a signal this OnPush component does not
+    // own, so neither repaints on its own. Both gate the messages, so both have to.
+    const repaints: Observable<unknown>[] = [
+      controlEvents$,
+      this.ngForm?.ngSubmit ?? EMPTY,
+      this.formDirective ? toObservable(this.formDirective.revealOn, { injector: this.injector }) : EMPTY
+    ];
+
+    merge(...repaints)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.fieldErrorsComponentRef?.instance.markForCheck();
