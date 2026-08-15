@@ -21,19 +21,19 @@ The source of truth for outstanding work. `backlog.md` is the raw intake buffer 
 
 I want to have release-ready documentation:
 
-- I want .documentation to be structured like follows:
+- Follow the conventions in `documentation.md` for documentation and update it, if necessary. AskUserQuestions.
+- I want the .documentation directory to be structured like follows:
   - root README.md -> public entry point for users (and developers) to understand the library and its features
   - .documentation/user: contains markdown files with user documentation (e.g., theming.md) that are relevant for users and consumers of this library; cross-referenced from README.md and each other, when relevant; not too detailed, too prose or chatty; keep it brief, short and relevant; update definition of done to update it
   - .documentation/tech: contains markdown files with technical documentation (e.g., architecture.md, ui_components.md, the foundations, architecture, design decisions and similar) with technical details that are relevant for maintainers of this library; cross-referenced, when relevant; update definition of done to update it
   - **Both directories already exist**: `user/validation.md`, `tech/validation.md` and `tech/layering.md` were written in the target shape, and the Definition of Done in `conventions.md` already names them. What is left is migrating the remaining whole-form files into the split.
   - .documentation/impl: contains markdown files for development (backlog.md, implementation.md, testing.md, conventions.md, documentation.md)
-- Keep the technical documentation of the source code minimal. Rather move it to the technical documentation
+- Keep the technical documentation of the source code minimal. Rather move it to the technical documentation.
 - "Code is the documentation" — the code should be self-explanatory, and the doc comments should be minimal and concise. The technical documentation should contain the details of the implementation, design decisions, and architecture.
 - The public facing interfaces of the library should be documented for the users and consumers.
 - Internal helpers and getters should be documented for maintainers and developers of the library.
-- **Keep It Short**: one line of intent per symbol. This is a library — users read these in their editor.
-- **Re-Verify `ui_components.md`** against the shipped reality. Brief and exact, not prose. Keep the details relevant or avoid them. It will be the catalogue of the library's public API, so it must be correct. The current version is out of date and has drifted from the code. May rename the file.
-- make sure to follow the conventions in `documentation.md` for doc blocks and update them, if necessary. AskUserQuestions.
+- **Keep It Short**: strive for one to two lines of intent per symbol. This is a library — users read these in their editor.
+- **Re-Verify `ui_components.md`** against the shipped reality. Move it to user documentation. Documentation in it must be brief and exact, not prose. Keep the details relevant or avoid them. It will be the catalogue of the library's public API, so it must be correct. The current version is out of date and has drifted from the code. May rename the file.
 
 ### Phase 14 — README And Project Docs
 
