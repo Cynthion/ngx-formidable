@@ -1,6 +1,6 @@
 # Conventions
 
-Coding conventions for the library. See also: `architecture.md` (structure, key paths), `ui_components.md` (component/directive API), `testing.md`, `documentation.md`.
+Coding conventions for the library. See also: `tech/architecture.md` (structure, key paths), `user/components.md` (component/directive API), `impl/testing.md`, `impl/documentation.md`.
 
 ## Ubiquitous Language
 
@@ -35,11 +35,11 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 - Field components extend `BaseFieldDirective<T>` and register two providers: `NG_VALUE_ACCESSOR` (via `forwardRef`, `multi: true`) and `FORMIDABLE_FIELD` (`useExisting`) — this is what makes them work with `ngModel` and be discovered by `FieldDecoratorComponent`.
 - Option-based fields additionally collect options with `@ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })` and provide `FORMIDABLE_OPTION_FIELD`. `descendants` is what lets an option sit inside a wrapper element; a shallow query already reaches into `@for` / `*ngIf` / `<ng-template>`. The four that walk their list with a highlight take the query — and the option inputs, the option lifecycle and the highlight itself — from `BaseOptionFieldDirective` instead of declaring it; only `select-field` still declares its own, because a native `<select>` has no highlight.
-- `BaseFieldDirective` is the extension point for custom fields; `example-custom-color-picker` in the demo is the reference implementation. The full contract is documented in `ui_components.md`.
+- `BaseFieldDirective` is the extension point for custom fields; `example-custom-color-picker` in the demo is the reference implementation. The full contract is documented in `user/components.md`.
 
 ## Inputs, Outputs And Observables
 
-- **Inputs**: components and fields use classic `@Input()`; the newer signal `input()` API is used only in the form-level directives (`NgxFormidableFormDirective`, `NgxFormidableFieldValidateDirective`, `NgxFormidableGroupValidateDirective`, `NgxFormidableWholeFormValidateDirective`).
+- **Inputs**: components and fields use classic `@Input()`; the newer signal `input()` API is used only in the form-level directives that have inputs at all (`NgxFormidableFormDirective`, `NgxFormidableWholeFormValidateDirective`, and `NgxFormidableVestValidatorDirective` in the `vest` entry point). `NgxFormidableFieldValidateDirective` and `NgxFormidableGroupValidateDirective` declare none.
 - **Outputs**: a mix of `@Output() EventEmitter` and RxJS observable outputs.
 - **Observable Naming**: append `$` (`valueChange$`, `formValueChange$`). Enforced by the `rxjs-x/finnish` ESLint rule (exempts `EventEmitter` and Angular lifecycle hooks like `canActivate`/`validate`).
 
@@ -52,8 +52,11 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 ## Code Comments
 
-- Minimize inline comments; prefer self-explanatory code and names.
-- Add a brief doc comment only on exported/public members whose intent is not obvious from the signature.
+- **Public Surface**: every exported symbol, every `@Input()` / `@Output()`, and every protected member a custom field overrides carries a doc comment. One to two lines of intent, stating what a caller cannot read off the signature. Consumers read these in their editor.
+- **Not A Second Signature**: never restate what the code says. No hand-maintained `Inputs:` / `Outputs:` lists on a class, and no `@input` / `@output` tags, which are not JSDoc and render as literal text.
+- **Usage Lives Elsewhere**: no `@example` blocks. Usage belongs in the root `README.md` and `user/components.md`, which have exactly one copy of it.
+- **Inline Comments**: minimize them; prefer self-explanatory code and names. The exception is a trap, where the comment stays at the line it protects rather than moving to `tech/`.
+- **Rationale Goes To `tech/`**: a comment explaining a cross-file design belongs in the matching `tech/*.md`, with a one-line pointer left behind.
 
 ## Styling
 
@@ -62,7 +65,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 - **Field Styling**: all field CSS lives in `mixins/_forms.scss` (with `_css-icons.scss`, `_utils.scss`).
 - **Global Rules**: `_globals.scss` and `_pikaday.scss` hold the rules that cannot be scoped to a component — those that must reach consumer-projected content or third-party DOM, which view encapsulation puts out of a component stylesheet's reach.
 - **Closed SCSS Surface**: `_ngx-formidable.scss` only ever `@use`s its parts, never `@forward`s them — the public entry point ships CSS, not an API, so no internal mixin or function reaches a consumer's namespace. Component stylesheets take the internal surface from `variables.scss` by relative path instead.
-- **Consuming Styles**: the demo imports `@use 'ngx-formidable'` (resolved via the `angular.json` `includePaths`); an external consumer imports `@use '@cynthion/ngx-formidable/styles/ngx-formidable'` (resolved from the published package). The full overridable-variable list lives in `theming.md`.
+- **Consuming Styles**: the demo imports `@use 'ngx-formidable'` (resolved via the `angular.json` `includePaths`); an external consumer imports `@use '@cynthion/ngx-formidable/styles/ngx-formidable'` (resolved from the published package). The full overridable-variable list lives in `user/theme-reference.md`.
 
 ## TypeScript
 
@@ -77,17 +80,18 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 ## Development Workflow
 
 - **Branches**: `main` is production — push triggers the GitHub Pages deploy of the demo. `feature/*` for work in progress.
-- **Publishing**: `build:lib` then `publish:lib` to GitHub Packages; `@cynthion` scope needs `~/.npmrc` auth. See `architecture.md`.
-- **Roadmap**: `implementation.md` is the source of truth for outstanding work — check it before starting. `backlog.md` is the intake buffer for ideas that have not been triaged into a phase yet.
+- **Publishing**: `build:lib` then `publish:lib` to GitHub Packages; `@cynthion` scope needs `~/.npmrc` auth. See `tech/architecture.md`.
+- **Roadmap**: `impl/implementation.md` is the source of truth for outstanding work — check it before starting. `impl/backlog.md` is the intake buffer for ideas that have not been triaged into a phase yet.
 
 ## Definition Of Done
 
 - **Conventions**: selectors, standalone/OnPush, field contract, naming followed.
 - **Formatting**: `prettier:check`, `lint` and `style-lint` pass.
-- **Component Docs**: any component/directive API change is reflected in `ui_components.md`.
-- **User And Tech Docs**: a change to public usage updates the matching `user/*.md`; a change to a design decision or an internal boundary updates the matching `tech/*.md`. Neither restates the other — see `documentation.md`.
-- **Demo**: new or changed fields and features are exercised in the demo app (`example-form`); a new field component is wired into it so it renders and can be tried. The demo is the showcase and the only visual-test surface — see `architecture.md`.
-- **Documentation**: new behavior documented per `documentation.md`; the user-facing `README.md` updated when public usage changes.
-- **Tests**: implemented per `testing.md` (helpers-first).
+- **Component Docs**: any component/directive API change is reflected in `user/components.md`.
+- **User And Tech Docs**: a change to public usage updates the matching `user/*.md`; a change to a design decision or an internal boundary updates the matching `tech/*.md`. Neither restates the other — see `impl/documentation.md`.
+- **Demo**: new or changed fields and features are exercised in the demo app (`example-form`); a new field component is wired into it so it renders and can be tried. The demo is the showcase and the only visual-test surface — see `tech/architecture.md`.
+- **Documentation**: new behavior documented per `impl/documentation.md`; the user-facing `README.md` updated when public usage changes.
+- **Doc Comments**: a new or changed public symbol carries a doc comment per **Code Comments** above.
+- **Tests**: implemented per `impl/testing.md` (helpers-first).
 - **Build**: `build:lib` compiles without errors.
-- **Roadmap**: the shipped phase is deleted from `implementation.md`, leaving only its `Already Shipped` row. Anything found on the way that is not part of the phase goes to `backlog.md`.
+- **Roadmap**: the shipped phase is deleted from `impl/implementation.md`, leaving only its `Already Shipped` row. Anything found on the way that is not part of the phase goes to `impl/backlog.md`.

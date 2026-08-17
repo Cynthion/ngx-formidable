@@ -17,4 +17,4 @@ One phase at a time — STOP for human review between each:
 Agents seed handoff files from `.claude/skills/sdd/templates/*` and run in isolated context —
 all handoff info must be written to the file. Do not auto-chain.
 
-Conventions + Definition of Done: @.documentation/conventions.md
+Conventions + Definition of Done: @.documentation/impl/conventions.md

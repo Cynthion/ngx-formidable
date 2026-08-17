@@ -1,6 +1,6 @@
 # Testing Strategy
 
-Prioritize testing **logic** over Angular rendering: fast, reliable tests that catch real bugs, not tests that re-verify framework binding. See `conventions.md` for the Definition of Done.
+Prioritize testing **logic** over Angular rendering: fast, reliable tests that catch real bugs, not tests that re-verify framework binding. See `impl/conventions.md` for the Definition of Done.
 
 ---
 
@@ -70,4 +70,4 @@ Prove work by pasting command output — do not claim success. When a change is 
 
 ## Visual Testing
 
-There is no Storybook or visual-regression layer yet; it is Phase 17 in `implementation.md`. Until then, the demo app (`example-form`) is the manual visual check — run `npm start` and exercise the changed field.
+There is no Storybook or visual-regression layer yet; it is Phase 17 in `impl/implementation.md`. Until then, the demo app (`example-form`) is the manual visual check — run `npm start` and exercise the changed field.

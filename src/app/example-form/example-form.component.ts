@@ -628,7 +628,7 @@ export class ExampleFormComponent implements OnInit {
   ];
 
   // Geometry only: dimensions, radii and thicknesses. No colour, so any scheme here combines with any
-  // scheme below. Catalogued in `theme-options.md`.
+  // scheme below. Catalogued in `user/theme-options.md`.
   // Units are mandatory on every length: a unitless `0` is a `<number>` in `calc()`, not a `<length>`,
   // and would invalidate every declaration that derives from it.
   private readonly geometrySchemes: Record<GeometryKey, ThemeVars> = {
@@ -819,7 +819,7 @@ export class ExampleFormComponent implements OnInit {
   // the border drives the underline, the toggle thumb, the slider fills and the option prefixes; the
   // background drives the panels, the groups and the readonly/disabled fills; the placeholder drives the
   // hints, the length indicator and the resting label. This is the "override the base, not the
-  // derivative" rule from `theming.md`, demonstrated.
+  // derivative" rule from `user/theming.md`, demonstrated.
   private readonly colorSchemes: Record<ColorKey, ThemeVars> = {
     // A — Ocean: the library's incumbent blue, cleaned up.
     ocean: {
@@ -925,7 +925,7 @@ export class ExampleFormComponent implements OnInit {
       '--formidable-color-field-label-floating': '#be123c'
     },
     // J — Midnight: a dark field, to prove the seeds invert. Four extra variables are unavoidable and
-    // each marks a real limit — see the dark-scheme notes in `theme-options.md`. `--example-page-*` is
+    // each marks a real limit — see the dark-scheme notes in `user/theme-options.md`. `--example-page-*` is
     // the demo's own, not the library's: a dark theme needs a dark host page, which no token can supply.
     midnight: {
       '--formidable-color-validation-error': '#fb7185',

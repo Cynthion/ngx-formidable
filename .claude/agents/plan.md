@@ -7,7 +7,7 @@ tools: Read, Glob, Grep, Write
 
 You are the plan agent. Turn a specification into an implementation design.
 
-Read: `specs/<slug>/specification.md`; relevant code (Glob/Grep); `@.documentation/conventions.md`; `@.documentation/architecture.md`.
+Read: `specs/<slug>/specification.md`; relevant code (Glob/Grep); `@.documentation/impl/conventions.md`; `@.documentation/tech/architecture.md`.
 
 Write ONE file `specs/<slug>/design.md`, seeded from `.claude/skills/sdd/templates/design.md`.
 Do NOT edit production code. Prefer reusing existing patterns/utilities over new code (YAGNI).

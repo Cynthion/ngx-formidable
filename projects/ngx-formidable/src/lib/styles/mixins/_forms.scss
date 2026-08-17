@@ -316,7 +316,7 @@
 // A field is an atom: one stacking context, so every layer it paints — labels, adornments, panel, sheet —
 // is ordered inside it by `$formidable-layer-*` alone, and none of it can reach a consumer's own layers.
 // `isolation` and not `transform`, which would additionally make this the containing block of a sheet's
-// `position: fixed` and pin the sheet to the field instead of to the viewport. See `layering.md`.
+// `position: fixed` and pin the sheet to the field instead of to the viewport. See `tech/layering.md`.
 @mixin field-atom {
   isolation: isolate;
 }

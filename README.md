@@ -570,7 +570,7 @@ swaps its content re-insets the field on its own. No refresh call exists because
 
 ## Field Components
 
-For the full API of every field and directive — selectors, value types and all inputs — see the [component catalogue](.documentation/ui_components.md).
+For the full API of every field and directive — selectors, value types and all inputs — see the [component catalogue](.documentation/user/components.md).
 
 | Category          | Component                           | Description                                        |
 | ----------------- | ----------------------------------- | -------------------------------------------------- |
@@ -620,7 +620,7 @@ Every visual property is an overridable CSS custom property. Import the library'
 }
 ```
 
-All customizable variables and some recipes are listed in the [theming guide](.documentation/theming.md).
+All customizable variables and some recipes are listed in the [theming guide](.documentation/user/theming.md) and the [token reference](.documentation/user/theme-reference.md).
 
 ## Validation
 

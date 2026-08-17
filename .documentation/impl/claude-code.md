@@ -4,7 +4,7 @@ This repo uses Claude Code. It mirrors the setup of the sibling EnerQi project, 
 
 ## CLAUDE.md Is Intentionally Minimal
 
-Root `CLAUDE.md` holds only behavioral directives. Project knowledge lives in `.documentation/` (index in `README.md`) and is cross-linked from `conventions.md` (structure in `architecture.md`; component API in `ui_components.md`; tests in `testing.md`).
+Root `CLAUDE.md` holds only behavioral directives. Project knowledge lives in `.documentation/`, split into `user/`, `tech/` and `impl/` (index in `.documentation/README.md`) and cross-linked from `impl/conventions.md` (structure in `tech/architecture.md`; component API in `user/components.md`; tests in `impl/testing.md`).
 
 ## Agents
 
@@ -26,7 +26,7 @@ Skills live in `.claude/skills/`:
 
 ## Verification
 
-Prove work (from repo root): `npm run build:lib` (compiles the library), `npm run lint`, `npm run style-lint`, `npm run prettier:check`, and `ng test ngx-formidable` once specs exist. `build:lib` is the primary type/template check. Paste output — do not just claim success. See `testing.md`.
+Prove work (from repo root): `npm run build:lib` (compiles the library), `npm run lint`, `npm run style-lint`, `npm run prettier:check`, and `ng test ngx-formidable` once specs exist. `build:lib` is the primary type/template check. Paste output — do not just claim success. See `impl/testing.md`.
 
 ## Formatting And Linting
 

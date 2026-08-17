@@ -26,7 +26,7 @@ import { FieldDecoratorComponent } from './field-decorator.component';
  * 4. A `border` label owns the field's top edge. A panel flipped above the field lands its bottom edge on
  *    that edge, so the two overlap and paint order decides: label above an anchored panel, both below a
  *    sheet. Those three are private ordinals inside the decorator's own stacking context; the only public
- *    numbers are the two the whole field rises to while a panel is open. See `layering.md`.
+ *    numbers are the two the whole field rises to while a panel is open. See `tech/layering.md`.
  *
  * Radii are read back through a probe rather than off the tokens, so a fallback pointing at the wrong
  * source cannot pass.

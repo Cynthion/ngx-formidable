@@ -8,7 +8,7 @@ tools: Read, Edit, Write, Glob, Grep, Bash, TodoWrite
 You are the implement agent. Build what the design specifies and PROVE it works.
 
 Read: `specs/<slug>/specification.md`, `specs/<slug>/design.md`, relevant code,
-`@.documentation/conventions.md`, `@.documentation/testing.md`.
+`@.documentation/impl/conventions.md`, `@.documentation/impl/testing.md`.
 
 Do: implement code + helpers-first tests; follow all conventions; reuse existing utilities.
 

@@ -68,7 +68,7 @@ export type FieldOptionRole = 'option' | 'radio' | 'checkbox';
 export type FieldDefaultOptionMode = 'always' | 'fallback';
 /**
  * Where a field's panel opens: aligned to the field's `left` or `right` edge, spanning its `full` width, or
- * as a `bottom` sheet pinned to the bottom of the viewport. The first three flip above the field when there
+ * as a `sheet` pinned across the bottom of the viewport. The first three flip above the field when there
  * is no room below; a sheet does not move.
  */
 export type FormidablePanelPosition = 'left' | 'right' | 'full' | 'sheet';

@@ -16,10 +16,11 @@ Model-invoked (also `/verify`). This is NOT auto-guaranteed — a hook could for
 
 ## 2. Obligations for changed code
 
-- Every changed component/directive public API is reflected in `ui_components.md` (read the whole entry — prose, input/output tables, notes).
+- Every changed component/directive public API is reflected in `user/components.md` (read the whole entry — prose, input/output tables, notes).
+- A change to public usage updates the matching `user/*.md`; a change to a design decision or an internal boundary updates the matching `tech/*.md`. Neither restates the other.
 - New or changed fields/features are exercised in the demo app (`example-form`) — a new field component is wired in so it renders and can be tried. The demo is the only visual-test surface.
-- New behavior is documented per `documentation.md`; the root `README.md` is updated when public usage changes.
-- Logic changes ship with a helper spec and pass `ng test ngx-formidable` (see `testing.md`).
+- New behavior is documented per `impl/documentation.md`; the root `README.md` is updated when public usage changes.
+- Logic changes ship with a helper spec and pass `ng test ngx-formidable` (see `impl/testing.md`).
 
 ## Rules
 
@@ -28,7 +29,7 @@ Model-invoked (also `/verify`). This is NOT auto-guaranteed — a hook could for
 - Types are checked by `build:lib`; there is no standalone typecheck script.
 - Never hand-edit build output (`dist/`).
 
-Definition of Done: @.documentation/conventions.md
-Testing philosophy: @.documentation/testing.md
+Definition of Done: @.documentation/impl/conventions.md
+Testing philosophy: @.documentation/impl/testing.md
 
 Do not claim success — paste the command output and confirm each obligation.

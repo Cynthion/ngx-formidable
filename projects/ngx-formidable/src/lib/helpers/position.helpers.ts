@@ -3,7 +3,7 @@ import { FormidablePanelPosition, IFormidablePanelField } from '../models/formid
 
 /**
  * The position of a field's panel while it is open, or `null` — a field without a panel never opens one.
- * This is what decides whether a field rises out of its resting layer, and how far; see `layering.md`.
+ * This is what decides whether a field rises out of its resting layer, and how far; see `tech/layering.md`.
  */
 export function openPanelPosition(field?: unknown): FormidablePanelPosition | null {
   const panelField = field as Partial<IFormidablePanelField> | undefined;

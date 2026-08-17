@@ -1,6 +1,6 @@
 # Theme Options
 
-Candidate schemes for the library's default theme, shown in the demo's control center. The variable reference itself lives in `theming.md`; this file only names the schemes and records what each one sets.
+Candidate schemes for the library's default theme, shown in the demo's control center. The variable reference itself lives in `user/theme-reference.md`; this file only names the schemes and records what each one sets.
 
 Schemes come on two independent axes — **geometry** (dimensions, radii, thicknesses) and **colour**. Any geometry combines with any colour, so a pick is named as a pair: _colour F with geometry B_.
 
@@ -96,7 +96,7 @@ An open panel adopts the two corners of the field it sits against, so these choi
 
 ## Colour Schemes
 
-Each scheme sets the same eight seed variables; everything else in the library derives from them. Overriding eight values repaints the whole thing — this is the "override the base, not the derivative" rule in `theming.md`, demonstrated.
+Each scheme sets the same eight seed variables; everything else in the library derives from them. Overriding eight values repaints the whole thing — this is the "override the base, not the derivative" rule in `user/theming.md`, demonstrated.
 
 | Id  | Key        | Identity                                                      | Fits                      |
 | :-- | :--------- | :------------------------------------------------------------ | :------------------------ |
@@ -158,11 +158,11 @@ Two further consequences worth knowing before picking a dark default:
 
 ## Shipped Default
 
-**Colour A — Slate with geometry A — Outlined.** Their values are what `_tokens.scss` now holds, and the shipped set is recorded in `theming.md`. Both lead their axis in the demo's control center, marked ★, and are stated in full rather than aliased to the demo has no separate `Library Default` entry — A on each axis _is_ the default and is what the form starts on, so drift between the tokens and this catalogue shows up as a visible change rather than hiding behind an empty option.
+**Colour A — Slate with geometry A — Outlined.** Their values are what `_tokens.scss` now holds, and the shipped set is recorded in `user/theming.md`. Both lead their axis in the demo's control center, marked ★, and are stated in full rather than aliased to the demo has no separate `Library Default` entry — A on each axis _is_ the default and is what the form starts on, so drift between the tokens and this catalogue shows up as a visible change rather than hiding behind an empty option.
 
 Why those two:
 
-- **Geometry A is the only scheme with no footguns.** Its `1px` border lets the toggle track, the slider track, the group's focus ring and the panel outline all derive correctly, with no companion variables. Every borderless geometry needs four and still hits two limits with no escape hatch — see _Traps A Borderless Geometry Has To Handle_ above and Phase 12.7.3 in `implementation.md`. A default that trips the library's own known defects would meet a consumer on day one.
+- **Geometry A is the only scheme with no footguns.** Its `1px` border lets the toggle track, the slider track, the group's focus ring and the panel outline all derive correctly, with no companion variables. Every borderless geometry needs four and still hits two limits with no escape hatch — see _Traps A Borderless Geometry Has To Handle_ above and Phase 12.7.3 in `impl/implementation.md`. A default that trips the library's own known defects would meet a consumer on day one.
 - **Colour A is neutral chrome plus one accent**, which is what a library should ship: it reads as deliberate without competing with the consumer's brand, and rebranding is one variable rather than eight. `ocean` was rejected because keeping the incumbent blue commits every consumer to a brand nobody chose; `mono` because its focus border matches its text in contrast, leaving focus signalled by geometry alone.
 
 Promoting Slate needed one structural change: `--formidable-color-field-border` no longer resolves through `--formidable-color-field-text`. A neutral default wants a light border under dark text, and the old derivation forced them to be the same colour.

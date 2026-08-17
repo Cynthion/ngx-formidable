@@ -1,11 +1,11 @@
 ---
 name: documentation
-description: Rules for editing .documentation/*.md — follow the authoring guide and avoid noisy reformatting.
+description: Rules for editing .documentation/**/*.md — follow the authoring guide and avoid noisy reformatting.
 ---
 
 # Editing documentation
 
-Style, Open-Close, DRY and docs index: @.documentation/documentation.md and @.documentation/README.md
+Style, Open-Close, DRY and docs index: @.documentation/impl/documentation.md and @.documentation/README.md
 
 Operational reminders:
 

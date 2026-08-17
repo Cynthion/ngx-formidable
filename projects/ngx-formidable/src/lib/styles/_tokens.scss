@@ -152,7 +152,7 @@ $formidable-field-support-min-height: $formidable-field-validation-error-line-he
 
 // The default theme is neutral chrome plus a single accent — the palette a library should ship, because
 // it reads as deliberate without competing with the consumer's brand. Rebranding it is one variable:
-// `--formidable-color-field-border-focus`. The alternatives live in `theme-options.md`.
+// `--formidable-color-field-border-focus`. The alternatives live in `user/theme-options.md`.
 // Neutral                     Accent                      Signal
 //  50: #f8fafc  field fill     200: #c7d2fe  selection     error: #dc2626
 // 400: #94a3b8  field border   600: #4f46e5  focus
@@ -380,7 +380,7 @@ $formidable-hover-easing: cubic-bezier(0.4, 0.6, 0.6, 1);
 // #region Layering
 
 // `layer` is a private ordinal inside a field's own stacking context; `z-index` is a public number in the
-// consumer's page stack. A closed field never carries one, so nothing of it can escape. See `layering.md`.
+// consumer's page stack. A closed field never carries one, so nothing of it can escape. See `tech/layering.md`.
 
 $formidable-layer-label: 1;
 $formidable-layer-panel: 2;

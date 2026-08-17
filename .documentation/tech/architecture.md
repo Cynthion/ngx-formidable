@@ -1,11 +1,8 @@
 # Architecture
 
-Structure of the `ngx-formidable` repository:
-— a publishable Angular library
+Structure of the `ngx-formidable` repository: a publishable Angular library and a demo app.
 
-- a demo app
-
-For coding conventions see `conventions.md`; for the component/directive catalogue see `ui_components.md`.
+For coding conventions see `impl/conventions.md`; for the component/directive catalogue see `user/components.md`.
 
 ## Repository Structure
 
@@ -14,7 +11,7 @@ ngx-formidable/
 ├── projects/ngx-formidable/   # the publishable library → @cynthion/ngx-formidable
 ├── src/                       # the demo app
 ├── dist/                      # build output
-├── .documentation/            # contributor docs
+├── .documentation/            # docs: user/ for consumers, tech/ for maintainers, impl/ for repo work
 └── .github/workflows/         # deploy.yml — GitHub Pages deploy of the demo
 ```
 
@@ -46,7 +43,7 @@ projects/ngx-formidable/
 └── vest/                                 # → @cynthion/ngx-formidable/vest — the Vest adapter, `vest` as an optional peer
 ```
 
-**Composition Model**: field components implement `ControlValueAccessor` and register the `FORMIDABLE_FIELD` token; `FieldDecoratorComponent` projects a field plus its label/adornment/prefix/suffix/errors; option-based fields collect `FieldOptionComponent` children via `@ContentChildren`. The abstract `BaseFieldDirective` is the shared base and the extension point for custom fields; the abstract `BaseOptionFieldDirective` extends it for the four fields that walk an option list with a highlight. See `ui_components.md`.
+**Composition Model**: field components implement `ControlValueAccessor` and register the `FORMIDABLE_FIELD` token; `FieldDecoratorComponent` projects a field plus its label/adornment/prefix/suffix/errors; option-based fields collect `FieldOptionComponent` children via `@ContentChildren`. The abstract `BaseFieldDirective` is the shared base and the extension point for custom fields; the abstract `BaseOptionFieldDirective` extends it for the four fields that walk an option list with a highlight. See `user/components.md`.
 
 **Validation**:
 
@@ -68,7 +65,7 @@ The demo (`src/`) is a standalone-bootstrapped app that showcases every field an
 | `build:lib`    | Build the library with ng-packagr into `dist/ngx-formidable`  |
 | `prebuild:lib` | Copy `README.md` + `LICENSE` into the library before building |
 | `publish:lib`  | Publish the built library                                     |
-| `test`         | Run tests (see `testing.md`)                                  |
+| `test`         | Run tests (see `impl/testing.md`)                             |
 
 ng-packagr config:
 
@@ -77,12 +74,7 @@ ng-packagr config:
 
 ## Consumer Setup
 
-Consumers wire the library once, then import the standalone components (or `NgxFormidableModule`) where used:
-
-- **Standalone**: `provideNgxFormidable(config?)` in `app.config.ts`.
-- **NgModule**: `NgxFormidableModule.forRoot(config?)` in the root module.
-
-Both register ngx-mask and the mask-defaults token; the `config` accepts `globalMaskConfig`. Styling is imported separately — see `conventions.md`.
+Two wiring paths, `provideNgxFormidable()` and `NgxFormidableModule.forRoot()`, differing only in how they are registered: both return the same providers, so neither is the primary. Styling is imported separately, because it is a stylesheet and not a provider. The steps a consumer follows are in the root `README.md`; the API is in `user/components.md`.
 
 ## Key Paths
 

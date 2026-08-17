@@ -19,4 +19,4 @@
 ## Your runtime environment
 
 - You run inside a Visual Studio Code workspace: the `ngx-formidable` Angular library plus a demo app.
-- Project knowledge lives in `.documentation/` (index: `.documentation/README.md`). The Claude Code setup is described in `.documentation/claude-code.md`.
+- Project knowledge lives in `.documentation/` (index: `.documentation/README.md`), split into `user/` for consumers, `tech/` for maintainers and `impl/` for repo work. The Claude Code setup is described in `.documentation/impl/claude-code.md`.

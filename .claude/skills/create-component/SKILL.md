@@ -11,11 +11,11 @@ description: Guidance for adding a field or structural component to ngx-formidab
   → field: `projects/ngx-formidable/src/lib/components/fields/<name>/`; structural: `components/<name>/`
   → element selector `formidable-<name>`, `standalone: true`, `ChangeDetectionStrategy.OnPush`
   → export from `public-api.ts` and add to `NgxFormidableModule`
-  → **must** add or update its entry in @.documentation/ui_components.md
+  → **must** add or update its entry in @.documentation/user/components.md
   → **must** showcase it in the demo (`example-form`) — add the field to its template + model so it renders and can be tried.
 - **Demo example** (showcase/playground only, not published)
   → `src/app/example-<name>/`, element selector `example-<name>`
-  → not exported, not listed in `ui_components.md`.
+  → not exported, not listed in `user/components.md`.
 
 ## 2. Field contract (for a new field)
 
@@ -26,9 +26,9 @@ A field extends `BaseFieldDirective<T>` and registers two providers:
 
 Option-based fields also `@ContentChildren(FORMIDABLE_FIELD_OPTION)` and provide `FORMIDABLE_OPTION_FIELD`. Implement the abstract members (`fieldRef`, `decoratorLayout`, `value`, `doWriteValue` / `doOnValueChange` / `doOnFocusChange`, the keyboard/click/resize callbacks + `registeredKeys`).
 
-Reference implementation: `example-custom-color-picker` in the demo. Full contract: @.documentation/ui_components.md.
+Reference implementation: `example-custom-color-picker` in the demo. Full contract: @.documentation/user/components.md.
 
-## 3. Conventions (see @.documentation/conventions.md)
+## 3. Conventions (see @.documentation/impl/conventions.md)
 
 - External `*.component.ts` / `.html` / `.scss` — never inline templates or styles.
 - Style via the SCSS mixins + `--formidable-*` CSS custom properties; expose new theming as a CSS variable, never a hardcoded value.

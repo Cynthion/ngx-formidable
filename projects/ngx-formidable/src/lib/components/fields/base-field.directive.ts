@@ -57,7 +57,7 @@ export abstract class BaseFieldDirective<T = string | null>
   /**
    * The decorator is normally the atom that owns the field's stacking context and rises while a panel is
    * open. Without one there is nothing above the field to be it, so the field's own host takes the job —
-   * hence the same two state classes here, and only here. See `layering.md`.
+   * hence the same two state classes here, and only here. See `tech/layering.md`.
    */
   @HostBinding('class.is-undecorated')
   protected get isUndecorated(): boolean {
