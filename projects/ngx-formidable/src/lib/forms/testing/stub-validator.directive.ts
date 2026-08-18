@@ -4,7 +4,7 @@ import { FORMIDABLE_VALIDATOR, IFormidableValidator } from '../../models/validat
 
 /**
  * Test-only stand-in for a validator adapter, so the specs that prove UI state travels from validity do not
- * need a validation library. Takes a map of field path → message, and reports that message while the value
+ * need a validation library. Takes a map of target → message, and reports that message while the value
  * at that path is blank.
  */
 @Directive({

@@ -6,7 +6,7 @@
 //   .catch((err: Error) => console.error(err));
 
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideNgxFormidable } from 'ngx-formidable';
+import { provideNgxFormidable } from '@cynthion/ngx-formidable';
 import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, {

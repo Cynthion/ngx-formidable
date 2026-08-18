@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, forwardRef, Input } from '@angular/core';
-import { FieldOptionComponent, FORMIDABLE_FIELD_OPTION } from 'ngx-formidable';
+import { FieldOptionComponent, FORMIDABLE_FIELD_OPTION } from '@cynthion/ngx-formidable';
 import { HighlightedEntries } from '../example-form/example-form.model';
 
 @Component({

@@ -91,7 +91,7 @@ interface NameModel {
     <form
       formidableForm
       [formValue]="formValue"
-      [formShape]="frame"
+      [formShape]="shape"
       [stubValidator]="required"
       (formValueChange$)="formValue = $event">
       <formidable-field-decorator>
@@ -106,7 +106,7 @@ interface NameModel {
 })
 class ValidatedHostComponent {
   formValue: NameModel = {};
-  frame: Required<NameModel> = { name: '' };
+  shape: Required<NameModel> = { name: '' };
   required = { name: 'Required' };
 }
 

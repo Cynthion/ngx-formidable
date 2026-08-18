@@ -11,17 +11,18 @@ import {
   NgxFormidableGroupValidateDirective,
   NgxFormidableWholeFormValidateDirective,
   WHOLE_FORM
-} from 'ngx-formidable';
-import { NgxFormidableVestValidatorDirective } from 'ngx-formidable/vest';
+} from '@cynthion/ngx-formidable';
+import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/vest';
 import { provideNgxMask } from 'ngx-mask';
 import { ExampleFormModel, exampleFormValidationSuite } from './example-form.model';
 
 /**
  * End-to-end proof of the demo's own wiring, from the consumer's side of both entry points.
  *
- * The demo imports `ngx-formidable` for the fields and the harness and `ngx-formidable/vest` for the
- * adapter, then keeps `[formSuite]` in the template. This mounts exactly that, with the demo's real Vest
- * suite, and follows a message from a `test(...)` in the suite all the way to the rendered `<li>`.
+ * The demo imports `@cynthion/ngx-formidable` for the fields and the form directive and
+ * `@cynthion/ngx-formidable/vest` for the validator, then keeps `[formSuite]` in the template. This mounts
+ * exactly that, with the demo's real Vest suite, and follows a message from a `test(...)` in the suite all
+ * the way to the rendered `<li>`.
  */
 
 @Component({
@@ -148,7 +149,7 @@ class WholeFormTypingHostComponent {
   errors: FormidableFormErrors = {};
 }
 
-describe('demo wiring: ngx-formidable + ngx-formidable/vest', () => {
+describe('demo wiring: @cynthion/ngx-formidable + @cynthion/ngx-formidable/vest', () => {
   let fixture: ComponentFixture<DemoWiringHostComponent>;
   let host: DemoWiringHostComponent;
   let root: HTMLElement;

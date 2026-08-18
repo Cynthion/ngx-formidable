@@ -54,7 +54,7 @@ See `tech/validation.md` and `user/validation.md`.
 
 ## Demo App
 
-The demo (`src/`) is a standalone-bootstrapped app that showcases every field and serves as the dev playground; `example-form` is the main showcase and `example-custom-color-picker` demonstrates building a custom field on `BaseFieldDirective`. It is deployed to GitHub Pages by `deploy.yml` on push to `main` (builds and publishes `dist/ngx-formidable-demo`). The demo consumes the library, not the other way round.
+The demo (`src/`) is a standalone-bootstrapped app that showcases every field and serves as the dev playground; `example-form` is the main showcase and `example-counter-field` demonstrates building a custom field on `BaseFieldDirective`. It is deployed to GitHub Pages by `deploy.yml` on push to `main` (builds and publishes `dist/ngx-formidable-demo`). The demo consumes the library, not the other way round.
 
 ## Build And Publish
 
@@ -74,7 +74,7 @@ ng-packagr config:
 
 ## Consumer Setup
 
-Two wiring paths, `provideNgxFormidable()` and `NgxFormidableModule.forRoot()`, differing only in how they are registered: both return the same providers, so neither is the primary. Styling is imported separately, because it is a stylesheet and not a provider. The steps a consumer follows are in the root `README.md`; the API is in `user/components.md`.
+Two wiring paths, `provideNgxFormidable()` and `NgxFormidableModule.forRoot()`, differing only in how they are registered: both return the same providers, so neither is the primary. Styling is imported separately, because it is a stylesheet and not a provider. The steps a consumer follows are in `user/getting-started.md`; the API is in `user/components.md`.
 
 ## Key Paths
 

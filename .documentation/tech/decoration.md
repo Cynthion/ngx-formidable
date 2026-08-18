@@ -1,6 +1,6 @@
 # Decoration
 
-How a field, the decorator around it and its error messages are wired together.
+How a field, the decorator around it and its error messages are wired together. What a consumer does with the slots is in `user/decoration.md`, which this file does not restate.
 
 `FieldDecoratorComponent` renders everything around a field and nothing inside it. The field is projected, so the decorator reads it rather than configuring it. Every value below is pulled off `IFormidableField`, never pushed in. What paints over what is a separate concern; see `tech/layering.md`.
 

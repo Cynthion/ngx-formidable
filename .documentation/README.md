@@ -2,21 +2,25 @@
 
 How to write docs: `impl/documentation.md`. Source of truth for outstanding work: `impl/implementation.md`.
 
-Three buckets, one per audience. The root `README.md` is the entry point for consumers and links in here.
+Three buckets, one per audience. The root `README.md` is the entry point for consumers and links in here; `CONTRIBUTING.md` beside it is the entry point for contributors.
 
 ---
 
 ## User
 
-For consumers of the library.
+For consumers of the library. A **guide** teaches a topic; a **reference** lists what it accepts.
 
-| File                      | Purpose                                                        |
-| :------------------------ | :------------------------------------------------------------- |
-| `user/components.md`      | Catalogue of every public component, directive, token and type |
-| `user/theming.md`         | The default theme, how theming works, and how to find your own |
-| `user/theme-reference.md` | Every overridable `--formidable-*` custom property             |
-| `user/theme-options.md`   | Colour and geometry schemes to start from                      |
-| `user/validation.md`      | How to connect a validator: Vest, Angular, zod or none         |
+| File                      |   Kind    | Purpose                                                        |
+| :------------------------ | :-------: | :------------------------------------------------------------- |
+| `user/getting-started.md` |   Guide   | Registry, install, wiring, the stylesheet, a first form        |
+| `user/fields.md`          |   Guide   | Options, panels, keyboard, dates and times, masking, focus     |
+| `user/decoration.md`      |   Guide   | Labels, adornments, prefixes, suffixes, hints, required marker |
+| `user/validation.md`      |   Guide   | How to connect a validator: Vest, Angular, zod or none         |
+| `user/theming.md`         |   Guide   | The default theme, how theming works, and how to find your own |
+| `user/custom-fields.md`   |   Guide   | Building a field, an option or a validator of your own         |
+| `user/components.md`      | Reference | Catalogue of every public component, directive, token and type |
+| `user/theme-reference.md` | Reference | Every overridable `--formidable-*` custom property             |
+| `user/theme-options.md`   | Reference | Colour and geometry schemes to start from                      |
 
 ---
 

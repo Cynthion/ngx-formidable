@@ -1,6 +1,6 @@
 # Theming
 
-Every visual property of every field is a CSS custom property you can override. This page is how to decide which ones to set; every variable is listed in `user/theme-reference.md`. To wire the stylesheet up, see the root `README.md`.
+Every visual property of every field is a CSS custom property you can override. This page is how to decide which ones to set; every variable is listed in `user/theme-reference.md`. To wire the stylesheet up, see `user/getting-started.md`.
 
 ## The Default Theme
 

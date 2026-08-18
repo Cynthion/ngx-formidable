@@ -1,4 +1,4 @@
-import { DeepPartial, DeepRequired, IFormidableFieldOption, WHOLE_FORM } from 'ngx-formidable';
+import { DeepPartial, DeepRequired, IFormidableFieldOption, WHOLE_FORM } from '@cynthion/ngx-formidable';
 import { enforce, mode, Modes, omitWhen, only, StaticSuite, staticSuite, test } from 'vest';
 
 // #region FormModel
@@ -36,7 +36,7 @@ export interface User {
   isSingle?: boolean;
   age?: number;
   passwords: Password;
-  color: string;
+  pets: number;
 }
 
 export type ExampleFormModel = DeepPartial<User>;
@@ -65,7 +65,7 @@ export const exampleFormShape: ExampleFormShape = {
     password: '',
     confirmPassword: ''
   },
-  color: '#000000'
+  pets: 0
 };
 
 export const exampleFormValidationSuite: StaticSuite<
@@ -94,6 +94,11 @@ export const exampleFormValidationSuite: StaticSuite<
 
   test('lastName', 'Last name is required.', () => {
     enforce(model.lastName).isNotBlank();
+  });
+
+  // A custom field validates like any other: the rule names it, nothing knows it is not a library field.
+  test('pets', 'Three pets is plenty.', () => {
+    enforce(model.pets ?? 0).lessThanOrEquals(3);
   });
 
   test('passwords.password', 'Password is required.', () => {

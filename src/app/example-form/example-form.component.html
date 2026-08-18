@@ -1042,6 +1042,45 @@
           </div>
         </formidable-field-decorator>
 
+        <!-- Pets: not a library field. A custom field on `BaseFieldDirective` is decorated, validated and
+             themed exactly like the ones above — see the custom-field guide. -->
+        <formidable-field-decorator>
+          <example-counter-field
+            formidableFieldErrors
+            name="pets"
+            [min]="0"
+            [max]="10"
+            [step]="1"
+            [readonly]="controlCenter.showAsReadonly"
+            [disabled]="controlCenter.showAsDisabled"
+            [showRequiredMarker]="true"
+            [ngModel]="vm.formValue$.pets"
+            (valueChanged)="onValueChanged('pets', $event)"
+            (focusChanged)="onFocusChanged('pets', $event)">
+          </example-counter-field>
+          <div
+            *ngIf="controlCenter.showLabels"
+            formidableFieldLabel
+            [position]="labelPosition">
+            Pets
+          </div>
+          <div
+            *ngIf="controlCenter.showLabelAdornments"
+            formidableFieldLabelAdornment>
+            <example-tooltip
+              placement="right"
+              trigger="click"
+              [icon]="exampleTooltipSvg"
+              [text]="'This is a custom field, built on BaseFieldDirective.'">
+            </example-tooltip>
+          </div>
+          <div
+            *ngIf="controlCenter.showHints"
+            formidableFieldHint>
+            Arrow keys step it
+          </div>
+        </formidable-field-decorator>
+
         <!-- Passwords Group: a group rule reports on `passwords`, not on either field, so the errors
              directive sits on the `ngModelGroup` itself. -->
         <div

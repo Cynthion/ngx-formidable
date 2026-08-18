@@ -1,6 +1,6 @@
 # Components
 
-Catalogue of the library's public API: everything exported from `public-api.ts`, plus `NgxFormidableVestValidatorDirective` from the `@cynthion/ngx-formidable/vest` entry point. This is the authoritative detailed reference — the root `README.md` lists components abstractly and links here for the full API.
+Catalogue of the library's public API: everything exported from `public-api.ts`, plus `NgxFormidableVestValidatorDirective` from the `@cynthion/ngx-formidable/vest` entry point. This is the authoritative detailed reference — the root `README.md` lists components abstractly and links here for the full API, and the `user/` guides teach the topics this file only lists.
 
 Every component is `standalone`, and uses `ChangeDetectionStrategy.OnPush` except `FieldDecoratorComponent` — it resolves its label state from field state it cannot observe, so it is checked every cycle. Field components implement `ControlValueAccessor` (usable with `ngModel`) and extend `BaseFieldDirective`; their shared surface is documented once below and not repeated per entry.
 
@@ -15,13 +15,13 @@ Wire the library once, then import the standalone components where they are used
 | `NgxFormidableModule`                  | NgModule  | Re-exports every component and directive, for NgModule consumers      |
 | `NgxFormidableConfig`                  | interface | `{ globalMaskConfig?: Partial<NgxMaskConfig> }`, the argument to both |
 
-Both register ngx-mask and set `FORMIDABLE_MASK_DEFAULTS` from `globalMaskConfig`. Styling is a separate stylesheet import — see the root `README.md`.
+Both register ngx-mask and set `FORMIDABLE_MASK_DEFAULTS` from `globalMaskConfig`. Styling is a separate stylesheet import — see `user/getting-started.md`.
 
 ---
 
 ## Base Field Directive
 
-`BaseFieldDirective<T = string | null>` — exported abstract `@Directive()` (no selector). The base class for every field and the extension point for custom fields (reference implementation: `example-custom-color-picker` in the demo). Implements `ControlValueAccessor` + `IFormidableField<T>`.
+`BaseFieldDirective<T = string | null>` — exported abstract `@Directive()` (no selector). The base class for every field and the extension point for custom fields (reference implementation: `example-counter-field` in the demo, walked through in `user/custom-fields.md`). Implements `ControlValueAccessor` + `IFormidableField<T>`.
 
 Inherited by every field:
 
@@ -178,7 +178,7 @@ Date picker backed by Pikaday.
 
 **Pikaday passthrough** inputs, each applied to the calendar when it changes at runtime: `ariaLabel`, `defaultDate`, `setDefaultDate`, `firstDay`, `minDate`, `maxDate`, `disableWeekends`, `disableDayFn`, `yearRange`, `i18n`, `yearSuffix`, `showMonthAfterYear`, `showDaysInNextAndPreviousMonths`, `enableSelectionDaysInNextAndPreviousMonths`, `numberOfMonths`.
 
-**Keyboard**: `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret — year, month or day — and leave it selected; a step outside `minDate`/`maxDate` is refused. `Alt` + those keys work the panel, and while it is open the arrows move the calendar instead. Plain arrows never open it. Full table in `README.md`.
+**Keyboard**: `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret — year, month or day — and leave it selected; a step outside `minDate`/`maxDate` is refused. `Alt` + those keys work the panel, and while it is open the arrows move the calendar instead. Plain arrows never open it. Full table in `user/fields.md`.
 
 **Use when** you need calendar date selection.
 
@@ -193,7 +193,7 @@ Masked time input.
 | `unicodeTokenFormat` | `string`              | `'HH.mm'`       | date-fns parse/format token |
 | `emptyHint`          | `FormidableEmptyHint` | `'underscores'` | Resting empty display       |
 
-**Keyboard**: `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret — hour, minute, second or AM/PM — and leave it selected. Full table in `README.md`.
+**Keyboard**: `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret — hour, minute, second or AM/PM — and leave it selected. Full table in `user/fields.md`.
 
 **Use when** you need time-of-day entry.
 
@@ -454,14 +454,14 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 
 The contracts a custom field, option or validator implements. Every field component already satisfies its own through `BaseFieldDirective`; these matter when writing one from scratch.
 
-| Interface                   | Implemented by                 | Contract                                                                           |
-| :-------------------------- | :----------------------------- | :--------------------------------------------------------------------------------- |
-| `IFormidableField<T>`       | every field, and the decorator | What the decorator reads off a field: refs, id, state, value and both streams      |
-| `IFormidableOptionField`    | the five option fields         | `options`, `defaultOption`, `defaultOptionMode`, `selectOption`, `optionRole`      |
-| `IFormidableFieldOption<T>` | `FieldOptionComponent`         | One option: `value`, `label`, `template`, its flags, `select` and `match`          |
-| `IFormidablePanelField`     | dropdown, autocomplete, date   | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                          |
-| `IFormidableMaskField`      | input, textarea                | `mask`, `maskConfig`                                                               |
-| `IFormidableValidator<T>`   | the Vest adapter, or your own  | `validate(model, target): Observable<string[] \| null>` — see `user/validation.md` |
+| Interface                   | Implemented by                  | Contract                                                                           |
+| :-------------------------- | :------------------------------ | :--------------------------------------------------------------------------------- |
+| `IFormidableField<T>`       | every field, and the decorator  | What the decorator reads off a field: refs, id, state, value and both streams      |
+| `IFormidableOptionField`    | the five option fields          | `options`, `defaultOption`, `defaultOptionMode`, `selectOption`, `optionRole`      |
+| `IFormidableFieldOption<T>` | `FieldOptionComponent`          | One option: `value`, `label`, `template`, its flags, `select` and `match`          |
+| `IFormidablePanelField`     | dropdown, autocomplete, date    | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                          |
+| `IFormidableMaskField`      | input, textarea                 | `mask`, `maskConfig`                                                               |
+| `IFormidableValidator<T>`   | the Vest validator, or your own | `validate(model, target): Observable<string[] \| null>` — see `user/validation.md` |
 
 Per-field interfaces name the exact surface of one component: `IFormidableInputField`, `IFormidableTextareaField`, `IFormidableSelectField`, `IFormidableDropdownField`, `IFormidableAutocompleteField`, `IFormidableRadioGroupField`, `IFormidableCheckboxGroupField`, `IFormidableDateField`, `IFormidableTimeField`, `IFormidableToggleField`, `IFormidableSliderField`, and `IFormidablePikadayOptions` for the calendar passthrough set.
 

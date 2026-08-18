@@ -1,0 +1,221 @@
+# Getting Started
+
+Install the package, wire it once, import the stylesheet, build a form. Every step below is the whole step — there is no further configuration.
+
+The API each symbol carries is in `user/components.md`.
+
+## Install
+
+The package is published to GitHub Packages under the `@cynthion` scope, so npm needs to be told where the scope lives. Put this in the `.npmrc` beside your `package.json`:
+
+```ini
+@cynthion:registry=https://npm.pkg.github.com
+```
+
+GitHub Packages authenticates every read, public package or not, so the same file (or `~/.npmrc`) needs a personal access token with the `read:packages` scope:
+
+```ini
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+Then install the package and its peer dependencies:
+
+```bash
+npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday uuid
+```
+
+| Peer       | Needed for                                          |
+| :--------- | :-------------------------------------------------- |
+| `date-fns` | Parsing and formatting the date and time fields     |
+| `ngx-mask` | Input masking                                       |
+| `pikaday`  | The date field's calendar                           |
+| `uuid`     | The ids the library mints for accessible names      |
+| `vest`     | Optional — only for `@cynthion/ngx-formidable/vest` |
+
+Angular's `common`, `core` and `forms`, and `rxjs`, are peers you already have.
+
+---
+
+## Wire It
+
+Two paths, registering the same providers. Neither is primary — pick the one that matches your app.
+
+**Standalone**
+
+```ts
+// main.ts
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideNgxFormidable } from '@cynthion/ngx-formidable';
+import { AppComponent } from './app/app.component';
+
+bootstrapApplication(AppComponent, {
+  providers: [...provideNgxFormidable()]
+}).catch(console.error);
+```
+
+**NgModule**
+
+```ts
+// app.module.ts
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { NgxFormidableModule } from '@cynthion/ngx-formidable';
+import { AppComponent } from './app.component';
+
+@NgModule({
+  imports: [BrowserModule, NgxFormidableModule.forRoot()],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+```
+
+Both accept a `NgxFormidableConfig`, whose only member is `globalMaskConfig` — see `user/fields.md`.
+
+---
+
+## Import The Stylesheet
+
+Styling is a stylesheet, not a provider, so it is imported separately:
+
+```scss
+// styles.scss
+@use '@cynthion/ngx-formidable/styles/ngx-formidable';
+```
+
+That is the whole default theme. To change it, redeclare the variables you want in your own `:root` after the import — see `user/theming.md`.
+
+---
+
+## Build A Form
+
+The library holds the model and renders the fields. Rules come from whatever validator you provide, or from none at all — see `user/validation.md`. The example below uses Vest, whose validator ships in the `@cynthion/ngx-formidable/vest` entry point.
+
+### 1. Declare The Model, The Shape And The Rules
+
+Keep them in one `*.form.ts` per form.
+
+```ts
+// user.form.ts
+import { DeepPartial, DeepRequired } from '@cynthion/ngx-formidable';
+import { enforce, Modes, mode, only, StaticSuite, staticSuite, test } from 'vest';
+
+export interface User {
+  name: string;
+  hobby: 'reading' | 'gaming' | 'swimming';
+  birthdate: Date;
+}
+
+export type UserFormModel = DeepPartial<User>;
+export type UserFormShape = DeepRequired<UserFormModel>;
+
+/** Initial values. Every key the form edits, `undefined` where it starts empty. */
+export const initialUserFormModel: UserFormModel = {
+  name: undefined,
+  hobby: undefined,
+  birthdate: undefined
+};
+
+/** Every key the model may carry, all required — a dev-mode typo check, not a validator. */
+export const userFormShape: UserFormShape = {
+  name: '',
+  hobby: 'reading',
+  birthdate: new Date()
+};
+
+export const userFormSuite: StaticSuite<string, string, (model: UserFormModel, field?: string) => void> = staticSuite((model: UserFormModel, field?: string) => {
+  mode(Modes.ALL);
+  if (field) only(field); // the form asks about one target at a time
+
+  test('name', 'Name is required.', () => {
+    enforce(model.name).isNotBlank();
+  });
+});
+```
+
+### 2. Write The Template
+
+```html
+<form
+  formidableForm
+  [formValue]="formValue$ | async"
+  [formShape]="formShape"
+  [formSuite]="formSuite"
+  (formValueChange$)="formValue$.next($event)"
+  (validChange$)="isValid$.next($event)"
+  (errorsChange$)="errors$.next($event)"
+  (ngSubmit)="onSubmit()">
+  <formidable-field-decorator>
+    <formidable-input-field
+      formidableFieldErrors
+      name="name"
+      [showRequiredMarker]="true"
+      [ngModel]="(formValue$ | async)?.name" />
+    <div formidableFieldLabel>Name</div>
+    <div formidableFieldHint>As it appears on your passport</div>
+  </formidable-field-decorator>
+
+  <formidable-field-decorator>
+    <formidable-dropdown-field
+      formidableFieldErrors
+      name="hobby"
+      [options]="hobbyOptions"
+      [ngModel]="(formValue$ | async)?.hobby" />
+    <div
+      formidableFieldLabel
+      [position]="'inside'">
+      Hobby
+    </div>
+  </formidable-field-decorator>
+
+  <formidable-field-decorator>
+    <formidable-date-field
+      formidableFieldErrors
+      name="birthdate"
+      [maxDate]="today"
+      [unicodeTokenFormat]="'dd.MM.yyyy'"
+      [ngModel]="(formValue$ | async)?.birthdate" />
+    <div formidableFieldLabel>Birthdate</div>
+  </formidable-field-decorator>
+
+  <button type="submit">Submit</button>
+</form>
+```
+
+### 3. Hold The State
+
+The form directive reports through observable outputs, so the component keeps subjects and derives from them.
+
+```ts
+readonly formShape = userFormShape;
+readonly formSuite = userFormSuite;
+
+readonly formValue$ = new BehaviorSubject<UserFormModel>(initialUserFormModel);
+readonly isValid$ = new BehaviorSubject<boolean | null>(null);
+readonly errors$ = new BehaviorSubject<FormidableFormErrors>({});
+
+readonly hobbyOptions: IFormidableFieldOption[] = [
+  { value: 'reading', label: 'Reading' },
+  { value: 'gaming', label: 'Gaming' },
+  { value: 'swimming', label: 'Swimming' }
+];
+
+onSubmit(): void {
+  // Every rule runs asynchronously, so the form is still PENDING when ngSubmit fires.
+  this.isValid$.pipe(take(1)).subscribe((isValid) => {
+    if (isValid) this.save(this.formValue$.value);
+  });
+}
+```
+
+---
+
+## Where To Go Next
+
+| To do this                                                | Read                    |
+| :-------------------------------------------------------- | :---------------------- |
+| Pick a field, work its keyboard, mask it, place its panel | `user/fields.md`        |
+| Label it, prefix it, hint it, mark it required            | `user/decoration.md`    |
+| Connect Vest, zod, Angular's validators, or none          | `user/validation.md`    |
+| Repaint and reshape it                                    | `user/theming.md`       |
+| Build a field the library does not have                   | `user/custom-fields.md` |
+| Look up an input, a type or a token                       | `user/components.md`    |

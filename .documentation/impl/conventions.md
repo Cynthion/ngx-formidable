@@ -35,7 +35,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 - Field components extend `BaseFieldDirective<T>` and register two providers: `NG_VALUE_ACCESSOR` (via `forwardRef`, `multi: true`) and `FORMIDABLE_FIELD` (`useExisting`) — this is what makes them work with `ngModel` and be discovered by `FieldDecoratorComponent`.
 - Option-based fields additionally collect options with `@ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })` and provide `FORMIDABLE_OPTION_FIELD`. `descendants` is what lets an option sit inside a wrapper element; a shallow query already reaches into `@for` / `*ngIf` / `<ng-template>`. The four that walk their list with a highlight take the query — and the option inputs, the option lifecycle and the highlight itself — from `BaseOptionFieldDirective` instead of declaring it; only `select-field` still declares its own, because a native `<select>` has no highlight.
-- `BaseFieldDirective` is the extension point for custom fields; `example-custom-color-picker` in the demo is the reference implementation. The full contract is documented in `user/components.md`.
+- `BaseFieldDirective` is the extension point for custom fields; `example-counter-field` in the demo is the reference implementation, quoted as the worked example in `user/custom-fields.md`. The full contract is documented in `user/components.md`.
 
 ## Inputs, Outputs And Observables
 
@@ -54,7 +54,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 - **Public Surface**: every exported symbol, every `@Input()` / `@Output()`, and every protected member a custom field overrides carries a doc comment. One to two lines of intent, stating what a caller cannot read off the signature. Consumers read these in their editor.
 - **Not A Second Signature**: never restate what the code says. No hand-maintained `Inputs:` / `Outputs:` lists on a class, and no `@input` / `@output` tags, which are not JSDoc and render as literal text.
-- **Usage Lives Elsewhere**: no `@example` blocks. Usage belongs in the root `README.md` and `user/components.md`, which have exactly one copy of it.
+- **Usage Lives Elsewhere**: no `@example` blocks. Usage belongs in the `user/` guides and `user/components.md`, which have exactly one copy of it.
 - **Inline Comments**: minimize them; prefer self-explanatory code and names. The exception is a trap, where the comment stays at the line it protects rather than moving to `tech/`.
 - **Rationale Goes To `tech/`**: a comment explaining a cross-file design belongs in the matching `tech/*.md`, with a one-line pointer left behind.
 - **Consumer Perspective**: a doc comment answers what a consumer does with the symbol — what it is, what it accepts, and which sibling to pick instead. It never explains how the library is built. State the differences between components explicitly, because that is what a consumer reads the comment for.

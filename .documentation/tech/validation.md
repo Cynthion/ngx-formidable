@@ -9,7 +9,7 @@ flowchart TB
   subgraph Core["@cynthion/ngx-formidable"]
     L1["L1<br/>UI And Theming<br/><br/>Field Components, BaseFieldDirective,<br/>FieldDecoratorComponent, SCSS Tokens<br/>No Validation Concept"]
     L2a["L2a<br/>Error Rendering<br/><br/>FieldErrorsDirective, FieldErrorsComponent<br/>FORMIDABLE_ERROR_EXTRACTOR<br/>FORMIDABLE_ERROR_TRANSLATOR"]
-    L2b["L2b<br/>Form Harness<br/><br/>formidableForm, ngModel, ngModelGroup,<br/>formidableValidateWholeForm<br/>Model, Field Paths, Debouncing"]
+    L2b["L2b<br/>Form Harness<br/><br/>formidableForm, ngModel, ngModelGroup,<br/>formidableValidateWholeForm<br/>Model, Targets, Debouncing"]
     Seam["FORMIDABLE_VALIDATOR<br/>validate(model, target)"]
   end
   subgraph Adapters["L3 Validator Adapters"]
@@ -27,12 +27,12 @@ flowchart TB
   L2a --> L1
 ```
 
-| Layer | Owns                                                             | Knows About A Validator |
-| :---- | :--------------------------------------------------------------- | :---------------------: |
-| L1    | Rendering, theming, masking, keyboard, ARIA                      |           No            |
-| L2a   | Turning `AbstractControl.errors` into displayed messages         |           No            |
-| L2b   | The model, field paths, debouncing, async validator registration |           No            |
-| L3    | The validation rules                                             |           Yes           |
+| Layer | Owns                                                         | Knows About A Validator |
+| :---- | :----------------------------------------------------------- | :---------------------: |
+| L1    | Rendering, theming, masking, keyboard, ARIA                  |           No            |
+| L2a   | Turning `AbstractControl.errors` into displayed messages     |           No            |
+| L2b   | The model, targets, debouncing, async validator registration |           No            |
+| L3    | The validation rules                                         |           Yes           |
 
 ## The Two Universal Channels
 
@@ -50,7 +50,7 @@ One naming trap worth knowing: `IFormidableValidator.validate(model, target)` an
 `createAsyncValidator` in `form.directive.ts` does five things. Four are generic:
 
 1. Assemble the model. (See **The Model A Rule Sees** below.)
-2. Patch the changed value in at the control's dotted field path.
+2. Patch the changed value in at the control's dotted target.
 3. Debounce per the form's `debounceMs`, read afresh on every run.
 4. **Run the rules.** ← the only validator-specific step
 5. Map the result into `ValidationErrors`.

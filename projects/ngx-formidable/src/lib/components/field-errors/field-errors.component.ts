@@ -42,7 +42,7 @@ export class FieldErrorsComponent {
   /** When the messages appear for this control. Overrides whatever the form set. */
   @Input() revealOn?: FormidableReveal;
 
-  // Optional: messages render for any validator, and for none — neither the harness nor a form is required.
+  // Optional: messages render for any validator, and for none — neither the form directive nor a form is required.
   private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true });
   private readonly ngForm = inject(NgForm, { optional: true });
 

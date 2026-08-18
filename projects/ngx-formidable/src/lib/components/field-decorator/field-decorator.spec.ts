@@ -39,7 +39,7 @@ interface Model {
   field?: string;
 }
 
-const frame = { field: '' };
+const shape = { field: '' };
 
 @Component({
   standalone: true,
@@ -57,7 +57,7 @@ const frame = { field: '' };
     <form
       formidableForm
       [formValue]="value"
-      [formShape]="frame"
+      [formShape]="shape"
       [stubValidator]="required">
       <formidable-field-decorator>
         <formidable-input-field
@@ -72,7 +72,7 @@ const frame = { field: '' };
 })
 class PrefixWithErrorsHostComponent {
   value: Model = {};
-  frame = frame;
+  shape = shape;
   required = { field: 'Required.' };
 }
 
@@ -84,7 +84,7 @@ class PrefixWithErrorsHostComponent {
     <form
       formidableForm
       [formValue]="value"
-      [formShape]="frame"
+      [formShape]="shape"
       [stubValidator]="required">
       <formidable-input-field
         formidableFieldErrors
@@ -95,7 +95,7 @@ class PrefixWithErrorsHostComponent {
 })
 class NoDecoratorHostComponent {
   value: Model = {};
-  frame = frame;
+  shape = shape;
   required = { field: 'Required.' };
 }
 

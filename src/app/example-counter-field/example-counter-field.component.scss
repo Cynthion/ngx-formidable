@@ -1,0 +1,69 @@
+// A custom field styles itself. The library's `--formidable-*` variables are public, so reading them here is
+// what keeps the counter on whatever theme the page is running.
+
+:host {
+  display: block;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--formidable-field-height, 56px);
+  // The decorator publishes these two on the field's host when a prefix or a suffix is projected.
+  padding-right: var(--formidable-field-suffix-inset, var(--formidable-field-padding-x, 16px));
+  padding-left: var(--formidable-field-prefix-inset, var(--formidable-field-padding-x, 16px));
+  // Set by the decorator while a label sits inside the field, so the value clears it. Zero otherwise.
+  padding-top: var(--formidable-field-value-padding-top, 0);
+  color: var(--formidable-color-field-text, #1e293b);
+  font-size: var(--formidable-field-font-size, 16px);
+  background: var(--formidable-color-field-background, #f8fafc);
+  border: var(--formidable-field-border-thickness, 1px) solid var(--formidable-color-field-border, #94a3b8);
+  border-radius: var(--formidable-field-border-radius, var(--formidable-border-radius, 8px));
+  cursor: default;
+}
+
+.counter:focus {
+  border-color: var(--formidable-color-field-border-focus, #4f46e5);
+  outline: none;
+  box-shadow: 0 0 0 var(--formidable-field-focus-ring-width, 1px) var(--formidable-color-field-border-focus, #4f46e5);
+}
+
+.counter.is-readonly,
+.counter.is-disabled {
+  color: var(--formidable-color-field-text-disabled, #94a3b8);
+}
+
+.counter.is-disabled {
+  cursor: not-allowed;
+}
+
+.counter-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: inherit;
+  font-size: 1.125rem;
+  line-height: 1;
+  background: none;
+  border: none;
+  border-radius: var(--formidable-border-radius, 8px);
+  cursor: pointer;
+}
+
+.counter-button:hover:not(:disabled) {
+  background: var(--formidable-color-field-selection, #c7d2fe);
+}
+
+.counter-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

@@ -32,7 +32,7 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly viewContainerRef = inject(ViewContainerRef);
   private readonly injector = inject(Injector);
   private readonly environmentInjector = inject(EnvironmentInjector);
-  // Optional: errors render for any validator, and for none — the harness is not required.
+  // Optional: errors render for any validator, and for none — the form directive is not required.
   private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true });
   private readonly ngForm = inject(NgForm, { optional: true });
   private readonly destroy$ = new Subject<void>();
@@ -80,8 +80,8 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
     // and now would leave a group's errors component with nothing to repaint on.
     const events$ = defer(() => (this.ngModelGroup?.control ?? this.ngModel?.control)?.events ?? of(null));
 
-    // Async validation leaves the harness PENDING, so its errors are only readable once it settles.
-    // Synchronous validators have no such gap, so without a harness the events are already the signal.
+    // Async validation leaves the control PENDING, so its errors are only readable once it settles.
+    // Synchronous validators have no such gap, so without a form directive the events are already the signal.
     // `startWith` so each settle repaints once: under `updateOn: 'submit'` the touches land while the form
     // is still pending, and would otherwise never be painted.
     const controlEvents$ = this.formDirective

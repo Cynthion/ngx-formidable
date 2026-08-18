@@ -6,9 +6,8 @@
     "module": "ES2022",
     "moduleResolution": "bundler",
     "paths": {
-      "ngx-formidable": ["./projects/ngx-formidable/src/public-api.ts"],
-      "ngx-formidable/vest": ["./projects/ngx-formidable/vest/src/public-api.ts"],
-      "@cynthion/ngx-formidable": ["./projects/ngx-formidable/src/public-api.ts"]
+      "@cynthion/ngx-formidable": ["./projects/ngx-formidable/src/public-api.ts"],
+      "@cynthion/ngx-formidable/vest": ["./projects/ngx-formidable/vest/src/public-api.ts"]
     },
 
     /* Emit */

@@ -32,12 +32,13 @@ import {
   SliderFieldComponent,
   TextareaFieldComponent,
   TimeFieldComponent,
+  ToggleFieldComponent,
   WHOLE_FORM
-} from 'ngx-formidable';
-import { NgxFormidableVestValidatorDirective } from 'ngx-formidable/vest';
+} from '@cynthion/ngx-formidable';
+import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/vest';
 import { BehaviorSubject, combineLatest, map, Observable, startWith, Subject } from 'rxjs';
 import { StaticSuite } from 'vest';
-import { ToggleFieldComponent } from '../../../projects/ngx-formidable/src/lib/components/fields/toggle-field/toggle-field.component';
+import { ExampleCounterFieldComponent } from '../example-counter-field/example-counter-field.component';
 import { ExampleFuzzyOptionComponent } from '../example-fuzzy-option/example-fuzzy-option.component';
 import { ExampleIconComponent } from '../example-icon/example-icon.component';
 import { ExampleTooltipComponent } from '../example-tooltip/example-tooltip.component';
@@ -83,6 +84,7 @@ import {
     FieldErrorsDirective,
     FieldHintDirective,
     // Example
+    ExampleCounterFieldComponent,
     ExampleIconComponent,
     ExampleTooltipComponent,
     ExampleFuzzyOptionComponent

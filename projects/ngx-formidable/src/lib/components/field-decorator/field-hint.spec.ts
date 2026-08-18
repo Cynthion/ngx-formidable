@@ -24,7 +24,7 @@ interface Model {
   field?: string;
 }
 
-const frame = { field: '' };
+const shape = { field: '' };
 
 /** Two hints that come and go, the way a consumer's own `*ngIf` moves them. */
 @Component({
@@ -43,7 +43,7 @@ const frame = { field: '' };
     <form
       formidableForm
       [formValue]="value"
-      [formShape]="frame"
+      [formShape]="shape"
       [stubValidator]="required">
       <formidable-field-decorator>
         <formidable-input-field
@@ -67,7 +67,7 @@ const frame = { field: '' };
 })
 class HintHostComponent {
   value: Model = {};
-  frame = frame;
+  shape = shape;
   required = { field: 'Required.' };
   showHints = true;
   showCounter = true;

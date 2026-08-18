@@ -41,7 +41,7 @@ interface Model {
   field?: string;
 }
 
-const frame = { field: '' };
+const shape = { field: '' };
 
 const options: IFormidableFieldOption[] = [
   { value: 'red', label: 'Red' },
@@ -134,7 +134,7 @@ class UnlabelledHostComponent {}
     <form
       formidableForm
       [formValue]="value"
-      [formShape]="frame"
+      [formShape]="shape"
       [stubValidator]="required">
       <formidable-field-decorator>
         <formidable-input-field
@@ -149,7 +149,7 @@ class UnlabelledHostComponent {}
 })
 class ErrorsHostComponent {
   value: Model = {};
-  frame = frame;
+  shape = shape;
   required = { field: 'Required.' };
 }
 
