@@ -8,6 +8,7 @@
 // Angular's encapsulation, so nothing component-scoped can reach it.
 // Alternatively, the CSS classes provided by the pikaday library can be used and customized:
 // https://github.com/Pikaday/Pikaday#styles
+// The selectors are Pikaday's (Copyright David Bushell, BSD & MIT); the rules below are our own.
 
 @mixin button-normalize {
   background: transparent;

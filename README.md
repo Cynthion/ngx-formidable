@@ -363,4 +363,8 @@ Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 Everything in this repository is licensed under the [MIT License](./LICENSE) unless otherwise specified.
 
-Copyright (c) 2026 - present Christian Lüthold
+In plain English: use it commercially, modify it, ship it inside a closed-source product, sublicense it — nothing has to be published back. The one condition is that the copyright notice and the license text travel with any copy or substantial portion of the code. It comes with no warranty and no liability.
+
+Every runtime peer dependency is permissive too — MIT, 0BSD or Apache-2.0, no copyleft anywhere — so adding this library puts no obligation on you beyond MIT's own notice.
+
+Copyright (c) 2025 - present Christian Lüthold
