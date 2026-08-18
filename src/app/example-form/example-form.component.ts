@@ -21,7 +21,7 @@ import {
   FormidableFormErrors,
   FormidablePanelPosition,
   FormidableReveal,
-  IFormidableFieldOption,
+  IFormidableOption,
   InputFieldComponent,
   NgxFormidableFieldValidateDirective,
   NgxFormidableFormDirective,
@@ -148,22 +148,22 @@ export class ExampleFormComponent implements OnInit {
     }))
   );
 
-  protected genderOptions: IFormidableFieldOption[] = [
+  protected genderOptions: IFormidableOption[] = [
     { value: 'male', label: 'Male' },
     { value: 'female', label: 'Female' }
   ];
 
   // pinned first, ahead of the sortFn
-  protected genderDefaultOption: IFormidableFieldOption = { value: 'unspecified', label: 'Prefer not to say' };
+  protected genderDefaultOption: IFormidableOption = { value: 'unspecified', label: 'Prefer not to say' };
 
-  protected nationalityOptions: IFormidableFieldOption[] = [
+  protected nationalityOptions: IFormidableOption[] = [
     { value: 'jp', label: 'Japan 🇯🇵' },
     { value: 'de', label: 'Germany 🇩🇪' },
     { value: 'fr', label: 'France 🇫🇷' }
     // { value: 'uk (no label)', label: '' }
   ];
 
-  protected sortAlphabetically = (a: IFormidableFieldOption, b: IFormidableFieldOption): number => {
+  protected sortAlphabetically = (a: IFormidableOption, b: IFormidableOption): number => {
     if (!a.label && !b.label) {
       return a.value.localeCompare(b.value);
     }
@@ -172,11 +172,11 @@ export class ExampleFormComponent implements OnInit {
     return a.label.localeCompare(b.label);
   };
 
-  protected nationalityDefaultOption: IFormidableFieldOption = { value: 'other', label: 'Other…' };
+  protected nationalityDefaultOption: IFormidableOption = { value: 'other', label: 'Other…' };
 
   protected nationalityNoOptionText = 'No nationality available.';
 
-  protected hobbyOptions: IFormidableFieldOption[] = [
+  protected hobbyOptions: IFormidableOption[] = [
     { value: 'dev', label: 'Software Development' },
     { value: 'gaming (no label)', label: '' },
     { value: 'reading', label: 'Reading' },
@@ -191,11 +191,11 @@ export class ExampleFormComponent implements OnInit {
   ];
 
   // only rendered when the filter matches nothing
-  protected hobbyDefaultOption: IFormidableFieldOption = { value: 'add-new', label: 'Add a new hobby…' };
+  protected hobbyDefaultOption: IFormidableOption = { value: 'add-new', label: 'Add a new hobby…' };
 
   protected hobbyNoOptionText = 'No hobby available.';
 
-  protected animalOptionsDefault: IFormidableFieldOption[] = [
+  protected animalOptionsDefault: IFormidableOption[] = [
     { value: 'cat', label: 'Cat' },
     { value: 'dog', label: 'Dog' }
   ];
@@ -215,17 +215,17 @@ export class ExampleFormComponent implements OnInit {
 
   protected animalNoOptionText = 'No animal available.';
 
-  protected religionOptions: IFormidableFieldOption[] = [
+  protected religionOptions: IFormidableOption[] = [
     { value: 'christian', label: 'Christianity' },
     { value: 'hindu', label: 'Hinduism' },
     { value: 'buddhist', label: 'Buddhism' }
   ];
 
-  protected religionDefaultOption: IFormidableFieldOption = { value: 'none', label: 'None' };
+  protected religionDefaultOption: IFormidableOption = { value: 'none', label: 'None' };
 
   protected religionNoOptionText = 'No religion available.';
 
-  protected allergiesOptions: IFormidableFieldOption[] = [
+  protected allergiesOptions: IFormidableOption[] = [
     { value: 'pollen', label: 'Pollen' },
     { value: 'dust', label: 'Dust' },
     { value: 'peanuts', label: 'Peanuts' },
@@ -233,14 +233,14 @@ export class ExampleFormComponent implements OnInit {
   ];
 
   // projected inside a wrapper element — only reachable with { descendants: true }
-  protected allergiesProjectedOptions: IFormidableFieldOption[] = [
+  protected allergiesProjectedOptions: IFormidableOption[] = [
     { value: 'lactose', label: 'Lactose (disabled)', disabled: true },
     { value: 'gluten', label: 'GLUTEN' },
     { value: 'soy', label: 'Soy' }
   ];
 
   // only rendered when the group has no other option
-  protected allergiesDefaultOption: IFormidableFieldOption = { value: 'unknown', label: 'Not known yet' };
+  protected allergiesDefaultOption: IFormidableOption = { value: 'unknown', label: 'Not known yet' };
 
   protected allergiesNoOptionText = 'No allergies available.';
 

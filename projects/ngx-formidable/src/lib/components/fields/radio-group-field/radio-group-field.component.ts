@@ -16,7 +16,7 @@ import {
   FieldOptionRole,
   FORMIDABLE_FIELD,
   FORMIDABLE_OPTION_FIELD,
-  IFormidableFieldOption,
+  IFormidableOption,
   IFormidableRadioGroupField
 } from '../../../models/formidable.model';
 import { FieldOptionComponent } from '../../field-option/field-option.component';
@@ -137,11 +137,11 @@ export class RadioGroupFieldComponent
 
   public readonly optionRole: FieldOptionRole = 'radio';
 
-  protected readonly options$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
+  protected readonly options$ = new BehaviorSubject<IFormidableOption[]>([]);
 
-  private selectedOption?: IFormidableFieldOption = undefined;
+  private selectedOption?: IFormidableOption = undefined;
 
-  protected get activeOptions(): IFormidableFieldOption[] {
+  protected get activeOptions(): IFormidableOption[] {
     return this.options$.value;
   }
 
@@ -149,10 +149,10 @@ export class RadioGroupFieldComponent
     return this.selectedOption?.value ?? null;
   }
 
-  public selectOption(option: IFormidableFieldOption): void {
+  public selectOption(option: IFormidableOption): void {
     if (option.disabled) return;
 
-    const newOption: IFormidableFieldOption = {
+    const newOption: IFormidableOption = {
       value: option.value,
       label: option.label || option.value, // value as fallback for optional label
       disabled: option.disabled
@@ -207,20 +207,20 @@ export class RadioGroupFieldComponent
     this.cdRef.markForCheck();
   }
 
-  private computeAllOptions(): IFormidableFieldOption[] {
+  private computeAllOptions(): IFormidableOption[] {
     const combined = combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
 
     return applyDefaultOption(combined, this.defaultOption, this.defaultOptionMode);
   }
 
-  private updateOptions(allOptions: IFormidableFieldOption[]): void {
+  private updateOptions(allOptions: IFormidableOption[]): void {
     this.options$.next(allOptions);
 
     // keep current value in sync with newly combined options
     this.writeValue(this._writtenValue);
   }
 
-  private reconcileSelectionAgainstOptions(allOptions: IFormidableFieldOption[]): void {
+  private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {
     if (!this.selectedOption) return;
 
     const stillExists = allOptions.some((o) => o.value === this.selectedOption!.value);

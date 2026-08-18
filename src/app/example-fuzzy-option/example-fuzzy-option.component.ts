@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, forwardRef, Input } from '@angular/core';
-import { FieldOptionComponent, FORMIDABLE_FIELD_OPTION } from '@cynthion/ngx-formidable';
+import { FieldOptionComponent, FORMIDABLE_OPTION } from '@cynthion/ngx-formidable';
 import { HighlightedEntries } from '../example-form/example-form.model';
 
 @Component({
@@ -12,8 +12,8 @@ import { HighlightedEntries } from '../example-form/example-form.model';
   imports: [CommonModule],
   providers: [
     {
-      // required to provide this component as IFormidableFieldOption
-      provide: FORMIDABLE_FIELD_OPTION,
+      // required to provide this component as IFormidableOption
+      provide: FORMIDABLE_OPTION,
       useExisting: forwardRef(() => ExampleFuzzyOptionComponent)
     }
   ]

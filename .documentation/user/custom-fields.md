@@ -271,7 +271,7 @@ A rule naming `pets` reports on it like any other target — nothing about the r
 
 ## Custom Options
 
-An option is a component too. Extend `FieldOptionComponent`, register `FORMIDABLE_FIELD_OPTION`, and project whatever content the option should render:
+An option is a component too. Extend `FieldOptionComponent`, register `FORMIDABLE_OPTION`, and project whatever content the option should render:
 
 ```ts
 @Component({
@@ -280,9 +280,9 @@ An option is a component too. Extend `FieldOptionComponent`, register `FORMIDABL
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   providers: [
-    // required to provide this component as IFormidableFieldOption
+    // required to provide this component as IFormidableOption
     {
-      provide: FORMIDABLE_FIELD_OPTION,
+      provide: FORMIDABLE_OPTION,
       useExisting: forwardRef(() => ExampleFuzzyOptionComponent)
     }
   ]

@@ -19,9 +19,9 @@ import {
   FieldDecoratorLayout,
   FieldDefaultOptionMode,
   FORMIDABLE_FIELD,
-  FORMIDABLE_FIELD_OPTION,
+  FORMIDABLE_OPTION,
   FORMIDABLE_OPTION_FIELD,
-  IFormidableFieldOption,
+  IFormidableOption,
   IFormidableSelectField,
   NO_OPTIONS_TEXT
 } from '../../../models/formidable.model';
@@ -130,10 +130,10 @@ export class SelectFieldComponent
   // #region IFormidableOptionField
 
   /** Options bound as data. Merged with any projected `<formidable-field-option>` children, not replaced. */
-  @Input() options?: IFormidableFieldOption[] = [];
+  @Input() options?: IFormidableOption[] = [];
 
   /** An option pinned to the top of the list — the usual home for a "please choose" entry. */
-  @Input() defaultOption?: IFormidableFieldOption;
+  @Input() defaultOption?: IFormidableOption;
 
   /** Whether the `defaultOption` always renders, or only when there would otherwise be no options. */
   @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
@@ -142,14 +142,14 @@ export class SelectFieldComponent
   @Input() noOptionsText: string = NO_OPTIONS_TEXT;
 
   /** Orders the merged list. Applied after the merge, so bound and projected options interleave. */
-  @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
+  @Input() sortFn?: (a: IFormidableOption, b: IFormidableOption) => number;
 
-  @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
-  optionComponents?: QueryList<IFormidableFieldOption>;
+  @ContentChildren(FORMIDABLE_OPTION, { descendants: true })
+  optionComponents?: QueryList<IFormidableOption>;
 
-  protected readonly options$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
+  protected readonly options$ = new BehaviorSubject<IFormidableOption[]>([]);
 
-  public selectOption(_option: IFormidableFieldOption): void {
+  public selectOption(_option: IFormidableOption): void {
     // Native <select> chooses options; not used.
   }
 
@@ -162,20 +162,20 @@ export class SelectFieldComponent
     this.cdRef.markForCheck();
   }
 
-  private computeAllOptions(): IFormidableFieldOption[] {
+  private computeAllOptions(): IFormidableOption[] {
     const combined = combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
 
     return applyDefaultOption(combined, this.defaultOption, this.defaultOptionMode);
   }
 
-  private updateOptions(allOptions: IFormidableFieldOption[]): void {
+  private updateOptions(allOptions: IFormidableOption[]): void {
     this.options$.next(allOptions);
 
     // keep current value consistent with updated options
     this.writeValue(this.selectRef?.nativeElement?.value ?? '');
   }
 
-  private reconcileSelectionAgainstOptions(allOptions: IFormidableFieldOption[]): void {
+  private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {
     const current = this.selectRef.nativeElement.value;
     if (!current) return;
 

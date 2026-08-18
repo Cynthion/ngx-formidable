@@ -2,7 +2,7 @@ import { Component, Type, ViewChild } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { IFormidableFieldOption } from '../../models/formidable.model';
+import { IFormidableOption } from '../../models/formidable.model';
 import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
 import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
 import { DateFieldComponent } from './date-field/date-field.component';
@@ -29,7 +29,7 @@ import { SelectFieldComponent } from './select-field/select-field.component';
  * cells are third-party markup with no ids of ours, so it is a `dialog` and names no active descendant.
  */
 
-const options: IFormidableFieldOption[] = [
+const options: IFormidableOption[] = [
   { value: 'red', label: 'Red' },
   { value: 'blue', label: 'Blue' },
   { value: 'green', label: 'Green', disabled: true }
@@ -49,7 +49,7 @@ const options: IFormidableFieldOption[] = [
 })
 class PanelHostComponent {
   options = options;
-  autocompleteOptions: IFormidableFieldOption[] = options;
+  autocompleteOptions: IFormidableOption[] = options;
 }
 
 @Component({

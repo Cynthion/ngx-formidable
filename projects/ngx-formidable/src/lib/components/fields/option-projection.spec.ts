@@ -2,7 +2,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { IFormidableFieldOption } from '../../models/formidable.model';
+import { IFormidableOption } from '../../models/formidable.model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
 import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
 import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
@@ -14,7 +14,7 @@ import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.
  * Ivy's shallow (`descendants: false`) query already reaches into embedded views, so `@for`, `*ngIf` and
  * `<ng-template>` were never the problem. What it does not reach is an option nested inside an *element*
  * — a `<div>` grouping options, or a wrapper component projecting them on. That is what the
- * `{ descendants: true }` on every `@ContentChildren(FORMIDABLE_FIELD_OPTION)` adds; remove it and the
+ * `{ descendants: true }` on every `@ContentChildren(FORMIDABLE_OPTION)` adds; remove it and the
  * `nested` case below is the one that drops out.
  *
  * Also covers `defaultOption`, which is pinned ahead of the sorted list rather than sorted into it.
@@ -56,9 +56,9 @@ class WrappedOptionsHostComponent {
 
   showConditional = true;
   loopedValues = ['looped-a', 'looped-b'];
-  defaultOption?: IFormidableFieldOption;
+  defaultOption?: IFormidableOption;
   defaultOptionMode: 'always' | 'fallback' = 'always';
-  sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
+  sortFn?: (a: IFormidableOption, b: IFormidableOption) => number;
 }
 
 @Component({
@@ -98,8 +98,8 @@ class LoopedCheckboxHostComponent {
 class FilteredAutocompleteHostComponent {
   @ViewChild(AutocompleteFieldComponent, { static: true }) field!: AutocompleteFieldComponent;
 
-  options: IFormidableFieldOption[] = [{ value: 'cat', label: 'Cat' }];
-  defaultOption: IFormidableFieldOption = { value: 'add-new', label: 'Add a new one…' };
+  options: IFormidableOption[] = [{ value: 'cat', label: 'Cat' }];
+  defaultOption: IFormidableOption = { value: 'add-new', label: 'Add a new one…' };
   defaultOptionMode: 'always' | 'fallback' = 'fallback';
 }
 

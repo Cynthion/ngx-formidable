@@ -1,7 +1,7 @@
 import { Component, Type } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { IFormidableFieldOption } from '../../models/formidable.model';
+import { IFormidableOption } from '../../models/formidable.model';
 import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
 import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.component';
 
@@ -20,7 +20,7 @@ import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.
  * so while their panel is open, and reach the same base code by the same route.
  */
 
-const options: IFormidableFieldOption[] = [
+const options: IFormidableOption[] = [
   { value: 'red', label: 'Red' },
   { value: 'blue', label: 'Blue' },
   { value: 'green', label: 'Green' }
@@ -39,7 +39,7 @@ const options: IFormidableFieldOption[] = [
   `
 })
 class GroupHostComponent {
-  options: IFormidableFieldOption[] = options;
+  options: IFormidableOption[] = options;
 }
 
 describe('option field highlight', () => {
@@ -69,7 +69,7 @@ describe('option field highlight', () => {
   }
 
   /** A new array reference is what `ngOnChanges` reacts to; the reconcile then runs in a microtask. */
-  function setOptions(host: { options: IFormidableFieldOption[] }, next: IFormidableFieldOption[]): void {
+  function setOptions(host: { options: IFormidableOption[] }, next: IFormidableOption[]): void {
     host.options = next;
     fixture.detectChanges();
     tick();

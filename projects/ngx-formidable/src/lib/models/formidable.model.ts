@@ -13,7 +13,7 @@ export const FORMIDABLE_FIELD = new InjectionToken<IFormidableField>('FORMIDABLE
 export const FORMIDABLE_OPTION_FIELD = new InjectionToken<IFormidableOptionField>('FORMIDABLE_OPTION_FIELD');
 
 /** What an option provides so its field's `@ContentChildren` query finds it, whatever component it is. */
-export const FORMIDABLE_FIELD_OPTION = new InjectionToken<IFormidableFieldOption>('FORMIDABLE_FIELD_OPTION');
+export const FORMIDABLE_OPTION = new InjectionToken<IFormidableOption>('FORMIDABLE_OPTION');
 
 /** App-wide ngx-mask defaults, which a field's own `maskConfig` overrides. Set via `provideNgxFormidable`. */
 export const FORMIDABLE_MASK_DEFAULTS = new InjectionToken<Partial<NgxMaskConfig>>('FORMIDABLE_MASK_DEFAULTS');
@@ -139,19 +139,19 @@ export interface IFormidableField<T = string | null> {
 
 /** What a field walking a list of options adds to the contract. Provided as `FORMIDABLE_OPTION_FIELD`. */
 export interface IFormidableOptionField {
-  options?: IFormidableFieldOption[];
+  options?: IFormidableOption[];
   /** An option pinned to the top of the list — see `defaultOptionMode` for when it renders. */
-  defaultOption?: IFormidableFieldOption;
+  defaultOption?: IFormidableOption;
   defaultOptionMode: FieldDefaultOptionMode;
   /** Called by an option that was activated, so the field commits it and closes any panel. */
-  selectOption(option: IFormidableFieldOption): void;
-  sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
+  selectOption(option: IFormidableOption): void;
+  sortFn?: (a: IFormidableOption, b: IFormidableOption) => number;
   /** The ARIA role its options take. Optional — an option falls back to `option` when its parent says nothing. */
   optionRole?: FieldOptionRole;
 }
 
-/** What a single option exposes to the field that owns it. Provided as `FORMIDABLE_FIELD_OPTION`. */
-export interface IFormidableFieldOption<T = unknown> {
+/** What a single option exposes to the field that owns it. Provided as `FORMIDABLE_OPTION`. */
+export interface IFormidableOption<T = unknown> {
   /** What reaches the model, and the identity the field compares selection against. */
   value: string;
   /** Display text. Falls back to `value` when absent. */

@@ -125,15 +125,15 @@ Multi-line text with optional autosize and a length indicator.
 
 Native-style single select. Options come from the `options` input or projected `formidable-field-option` children.
 
-| Input               | Type                       | Default                   | Description                                                                                  |
-| :------------------ | :------------------------- | :------------------------ | :------------------------------------------------------------------------------------------- |
-| `options`           | `IFormidableFieldOption[]` | `[]`                      | Option list                                                                                  |
-| `defaultOption`     | `IFormidableFieldOption`   | —                         | Option pinned first                                                                          |
-| `defaultOptionMode` | `FieldDefaultOptionMode`   | `'always'`                | When it renders                                                                              |
-| `noOptionsText`     | `string`                   | `'No options available.'` | Empty-state text, rendered as a disabled `<option>` — the one field that puts it in the list |
-| `sortFn`            | `(a, b) => number`         | —                         | Optional option sorter                                                                       |
+| Input               | Type                     | Default                   | Description                                                                                  |
+| :------------------ | :----------------------- | :------------------------ | :------------------------------------------------------------------------------------------- |
+| `options`           | `IFormidableOption[]`    | `[]`                      | Option list                                                                                  |
+| `defaultOption`     | `IFormidableOption`      | —                         | Option pinned first                                                                          |
+| `defaultOptionMode` | `FieldDefaultOptionMode` | `'always'`                | When it renders                                                                              |
+| `noOptionsText`     | `string`                 | `'No options available.'` | Empty-state text, rendered as a disabled `<option>` — the one field that puts it in the list |
+| `sortFn`            | `(a, b) => number`       | —                         | Optional option sorter                                                                       |
 
-These five look like the option inputs above but are declared on the field itself, because `select-field` stays on `BaseFieldDirective`: a native `<select>` has no highlight, so inheriting the option base would only add dead state. Collects options via `@ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })` and provides `FORMIDABLE_OPTION_FIELD`. **Use when** a compact single-choice control fits.
+These five look like the option inputs above but are declared on the field itself, because `select-field` stays on `BaseFieldDirective`: a native `<select>` has no highlight, so inheriting the option base would only add dead state. Collects options via `@ContentChildren(FORMIDABLE_OPTION, { descendants: true })` and provides `FORMIDABLE_OPTION_FIELD`. **Use when** a compact single-choice control fits.
 
 ### Dropdown Field
 
@@ -345,7 +345,7 @@ A floating label's value clears it because the `label-inside` host hands the fie
 
 **Selector** `formidable-field-option`
 
-A single option inside an option-based field. Provides `FORMIDABLE_FIELD_OPTION` and throws if used outside a `FORMIDABLE_OPTION_FIELD` parent. Supports projected template content. It may sit anywhere inside the field element — directly, inside a `@for` / `*ngIf` / `<ng-template>`, or nested in a wrapper element — but it must be **written inside** that element: Angular resolves both the parent injection and the content query from where the option is declared, not from where it renders.
+A single option inside an option-based field. Provides `FORMIDABLE_OPTION` and throws if used outside a `FORMIDABLE_OPTION_FIELD` parent. Supports projected template content. It may sit anywhere inside the field element — directly, inside a `@for` / `*ngIf` / `<ng-template>`, or nested in a wrapper element — but it must be **written inside** that element: Angular resolves both the parent injection and the content query from where the option is declared, not from where it renders.
 
 | Input         | Type                  | Default                            | Description                                                        |
 | :------------ | :-------------------- | :--------------------------------- | :----------------------------------------------------------------- |
@@ -412,7 +412,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | :---------------------------- | :----------------------------------------------------------------------------------------- |
 | `FORMIDABLE_FIELD`            | Identifies a field component to the decorator                                              |
 | `FORMIDABLE_OPTION_FIELD`     | Identifies an option-hosting field                                                         |
-| `FORMIDABLE_FIELD_OPTION`     | Identifies an option within an option field                                                |
+| `FORMIDABLE_OPTION`           | Identifies an option within an option field                                                |
 | `FORMIDABLE_MASK_DEFAULTS`    | Global ngx-mask config (set via `provideNgxFormidable`)                                    |
 | `FORMIDABLE_ERROR_EXTRACTOR`  | `ValidationErrors` → displayed messages (default: the `errors` array, else the error keys) |
 | `FORMIDABLE_ERROR_TRANSLATOR` | i18n hook for error strings (default: identity)                                            |
@@ -438,7 +438,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `FormidablePanelPosition`            | `'left' \| 'right' \| 'full' \| 'sheet'`                                                                         |
 | `FormidableReveal`                   | `'touched' \| 'dirty' \| 'submitted' \| 'always'`                                                                |
 | `FormidableToggleFieldLabelPosition` | `'before' \| 'after'`                                                                                            |
-| `IFormidableFieldOption`             | `{ value: string; label?; template?; readonly?; disabled?; selected?; highlighted?; select?(); match?(filter) }` |
+| `IFormidableOption`                  | `{ value: string; label?; template?; readonly?; disabled?; selected?; highlighted?; select?(); match?(filter) }` |
 
 `FieldDefaultOptionMode` decides when an option field renders its `defaultOption`: `always`, pinned first and exempt from both `sortFn` and the autocomplete filter, or as a `fallback` only when the list would otherwise be empty.
 
@@ -454,14 +454,14 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 
 The contracts a custom field, option or validator implements. Every field component already satisfies its own through `BaseFieldDirective`; these matter when writing one from scratch.
 
-| Interface                   | Implemented by                  | Contract                                                                           |
-| :-------------------------- | :------------------------------ | :--------------------------------------------------------------------------------- |
-| `IFormidableField<T>`       | every field, and the decorator  | What the decorator reads off a field: refs, id, state, value and both streams      |
-| `IFormidableOptionField`    | the five option fields          | `options`, `defaultOption`, `defaultOptionMode`, `selectOption`, `optionRole`      |
-| `IFormidableFieldOption<T>` | `FieldOptionComponent`          | One option: `value`, `label`, `template`, its flags, `select` and `match`          |
-| `IFormidablePanelField`     | dropdown, autocomplete, date    | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                          |
-| `IFormidableMaskField`      | input, textarea                 | `mask`, `maskConfig`                                                               |
-| `IFormidableValidator<T>`   | the Vest validator, or your own | `validate(model, target): Observable<string[] \| null>` — see `user/validation.md` |
+| Interface                 | Implemented by                  | Contract                                                                           |
+| :------------------------ | :------------------------------ | :--------------------------------------------------------------------------------- |
+| `IFormidableField<T>`     | every field, and the decorator  | What the decorator reads off a field: refs, id, state, value and both streams      |
+| `IFormidableOptionField`  | the five option fields          | `options`, `defaultOption`, `defaultOptionMode`, `selectOption`, `optionRole`      |
+| `IFormidableOption<T>`    | `FieldOptionComponent`          | One option: `value`, `label`, `template`, its flags, `select` and `match`          |
+| `IFormidablePanelField`   | dropdown, autocomplete, date    | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                          |
+| `IFormidableMaskField`    | input, textarea                 | `mask`, `maskConfig`                                                               |
+| `IFormidableValidator<T>` | the Vest validator, or your own | `validate(model, target): Observable<string[] \| null>` — see `user/validation.md` |
 
 Per-field interfaces name the exact surface of one component: `IFormidableInputField`, `IFormidableTextareaField`, `IFormidableSelectField`, `IFormidableDropdownField`, `IFormidableAutocompleteField`, `IFormidableRadioGroupField`, `IFormidableCheckboxGroupField`, `IFormidableDateField`, `IFormidableTimeField`, `IFormidableToggleField`, `IFormidableSliderField`, and `IFormidablePikadayOptions` for the calendar passthrough set.
 

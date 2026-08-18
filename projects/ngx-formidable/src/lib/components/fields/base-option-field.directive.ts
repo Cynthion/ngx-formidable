@@ -13,8 +13,8 @@ import { getNextAvailableOptionIndex } from '../../helpers/option.helpers';
 import { scrollHighlightedOptionIntoView } from '../../helpers/position.helpers';
 import {
   FieldDefaultOptionMode,
-  FORMIDABLE_FIELD_OPTION,
-  IFormidableFieldOption,
+  FORMIDABLE_OPTION,
+  IFormidableOption,
   NO_OPTIONS_TEXT
 } from '../../models/formidable.model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
@@ -33,10 +33,10 @@ export abstract class BaseOptionFieldDirective<T = string | null>
   implements OnChanges, AfterContentInit
 {
   /** Options bound as data. Merged with any projected `<formidable-field-option>` children, not replaced. */
-  @Input() options?: IFormidableFieldOption[] = [];
+  @Input() options?: IFormidableOption[] = [];
 
   /** An option pinned to the top of the list, never sorted and never filtered. See `defaultOptionMode`. */
-  @Input() defaultOption?: IFormidableFieldOption;
+  @Input() defaultOption?: IFormidableOption;
 
   /** Whether the `defaultOption` always renders, or only when there would otherwise be no options. */
   @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
@@ -45,11 +45,11 @@ export abstract class BaseOptionFieldDirective<T = string | null>
   @Input() noOptionsText: string = NO_OPTIONS_TEXT;
 
   /** Orders the merged list. Applied after the merge, so bound and projected options interleave. */
-  @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
+  @Input() sortFn?: (a: IFormidableOption, b: IFormidableOption) => number;
 
   /** The projected options. One may sit inside a wrapper element rather than directly in the field. */
-  @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
-  optionComponents?: QueryList<IFormidableFieldOption>;
+  @ContentChildren(FORMIDABLE_OPTION, { descendants: true })
+  optionComponents?: QueryList<IFormidableOption>;
 
   @ViewChildren('optionRef') protected optionRefs?: QueryList<FieldOptionComponent>;
 
@@ -80,7 +80,7 @@ export abstract class BaseOptionFieldDirective<T = string | null>
   protected abstract onOptionsChanged(): void;
 
   // The options the highlight walks — the rendered list, which `autocomplete-field` filters.
-  protected abstract get activeOptions(): IFormidableFieldOption[];
+  protected abstract get activeOptions(): IFormidableOption[];
 
   // The value the selection claims the highlight for. `null` for a multi-select field, which has no single
   // selection to claim it.

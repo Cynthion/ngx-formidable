@@ -1,11 +1,11 @@
-import { FieldDefaultOptionMode, IFormidableFieldOption } from '../models/formidable.model';
+import { FieldDefaultOptionMode, IFormidableOption } from '../models/formidable.model';
 
 /** Merges an option field's `options` input with its projected option components, sorted if a `sortFn` is given. */
 export function combineFieldOptions(
-  inlineOptions: IFormidableFieldOption[] | undefined,
-  projectedOptions: IFormidableFieldOption[] | undefined,
-  sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number
-): IFormidableFieldOption[] {
+  inlineOptions: IFormidableOption[] | undefined,
+  projectedOptions: IFormidableOption[] | undefined,
+  sortFn?: (a: IFormidableOption, b: IFormidableOption) => number
+): IFormidableOption[] {
   const combined = [...(inlineOptions ?? []), ...(projectedOptions ?? [])];
 
   return sortFn ? [...combined].sort(sortFn) : combined;
@@ -13,10 +13,10 @@ export function combineFieldOptions(
 
 /** Puts a field's `defaultOption` in front of its options, or in their place — see `FieldDefaultOptionMode`. */
 export function applyDefaultOption(
-  options: IFormidableFieldOption[],
-  defaultOption?: IFormidableFieldOption,
+  options: IFormidableOption[],
+  defaultOption?: IFormidableOption,
   mode: FieldDefaultOptionMode = 'always'
-): IFormidableFieldOption[] {
+): IFormidableOption[] {
   if (!defaultOption) return options;
 
   if (mode === 'fallback') {
@@ -32,13 +32,13 @@ export function applyDefaultOption(
  */
 export function getNextAvailableOptionIndex(
   currentIndex: number,
-  options: IFormidableFieldOption[],
+  options: IFormidableOption[],
   direction: 'up' | 'down'
 ): number {
   const n = options.length;
   if (!n) return -1;
 
-  const isAvailable = (o?: IFormidableFieldOption) => !!o && !o.disabled && !o.readonly;
+  const isAvailable = (o?: IFormidableOption) => !!o && !o.disabled && !o.readonly;
 
   if (options.every((o) => !isAvailable(o))) return -1;
 

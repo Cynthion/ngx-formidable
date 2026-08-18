@@ -22,7 +22,7 @@ import {
   FORMIDABLE_OPTION_FIELD,
   FormidablePanelPosition,
   IFormidableAutocompleteField,
-  IFormidableFieldOption
+  IFormidableOption
 } from '../../../models/formidable.model';
 import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseOptionFieldDirective } from '../base-option-field.directive';
@@ -190,11 +190,11 @@ export class AutocompleteFieldComponent
 
   public readonly optionRole: FieldOptionRole = 'option';
 
-  protected readonly filteredOptions$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
+  protected readonly filteredOptions$ = new BehaviorSubject<IFormidableOption[]>([]);
 
-  protected selectedOption?: IFormidableFieldOption = undefined;
+  protected selectedOption?: IFormidableOption = undefined;
 
-  protected get activeOptions(): IFormidableFieldOption[] {
+  protected get activeOptions(): IFormidableOption[] {
     return this.filteredOptions$.value;
   }
 
@@ -202,10 +202,10 @@ export class AutocompleteFieldComponent
     return this.selectedOption?.value ?? null;
   }
 
-  public selectOption(option: IFormidableFieldOption): void {
+  public selectOption(option: IFormidableOption): void {
     if (option.disabled) return;
 
-    const newOption: IFormidableFieldOption = {
+    const newOption: IFormidableOption = {
       value: option.value,
       label: option.label || option.value, // value as fallback for optional label
       disabled: option.disabled
@@ -281,17 +281,17 @@ export class AutocompleteFieldComponent
     this.cdRef.markForCheck();
   }
 
-  private computeAllOptions(): IFormidableFieldOption[] {
+  private computeAllOptions(): IFormidableOption[] {
     return combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
   }
 
   // A configured default option is always selectable, whatever its mode: in `fallback` mode whether it
   // renders depends on the current filter, so excluding it here would deselect it on the next keystroke.
-  private computeSelectableOptions(allOptions: IFormidableFieldOption[]): IFormidableFieldOption[] {
+  private computeSelectableOptions(allOptions: IFormidableOption[]): IFormidableOption[] {
     return this.defaultOption ? [this.defaultOption, ...allOptions] : allOptions;
   }
 
-  private updateFilteredOptions(allOptions: IFormidableFieldOption[]): void {
+  private updateFilteredOptions(allOptions: IFormidableOption[]): void {
     const filterValue = this.filterChangeSubject$.value;
 
     const filteredOptions = filterValue
@@ -304,7 +304,7 @@ export class AutocompleteFieldComponent
     this.filteredOptions$.next(applyDefaultOption(filteredOptions, this.defaultOption, this.defaultOptionMode));
   }
 
-  private reconcileSelectionAgainstOptions(allOptions: IFormidableFieldOption[]): void {
+  private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {
     if (!this.selectedOption) return;
 
     const stillExists = allOptions.some((o) => o.value === this.selectedOption!.value);
@@ -394,7 +394,7 @@ export class AutocompleteFieldComponent
       });
   }
 
-  private tryAutoSelectExactValue(allOptions: IFormidableFieldOption[]): void {
+  private tryAutoSelectExactValue(allOptions: IFormidableOption[]): void {
     const typed = this.inputRef.nativeElement.value;
     if (!typed) return;
 

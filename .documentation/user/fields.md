@@ -64,7 +64,7 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 | Input               | Does                                                                                           |
 | :------------------ | :--------------------------------------------------------------------------------------------- |
-| `options`           | The option list, as `IFormidableFieldOption[]`                                                 |
+| `options`           | The option list, as `IFormidableOption[]`                                                      |
 | `defaultOption`     | One option pinned to the top, exempt from `sortFn` and from filtering                          |
 | `defaultOptionMode` | `'always'` (pinned whatever else is there) or `'fallback'` (only when the list would be empty) |
 | `sortFn`            | Comparator applied to the combined list                                                        |

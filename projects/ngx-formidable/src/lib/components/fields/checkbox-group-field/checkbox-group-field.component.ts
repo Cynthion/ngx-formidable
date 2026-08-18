@@ -17,7 +17,7 @@ import {
   FORMIDABLE_FIELD,
   FORMIDABLE_OPTION_FIELD,
   IFormidableCheckboxGroupField,
-  IFormidableFieldOption
+  IFormidableOption
 } from '../../../models/formidable.model';
 import { FieldOptionComponent } from '../../field-option/field-option.component';
 import { BaseOptionFieldDirective } from '../base-option-field.directive';
@@ -134,13 +134,13 @@ export class CheckboxGroupFieldComponent
 
   public readonly optionRole: FieldOptionRole = 'checkbox';
 
-  protected readonly options$ = new BehaviorSubject<IFormidableFieldOption[]>([]);
+  protected readonly options$ = new BehaviorSubject<IFormidableOption[]>([]);
 
-  protected get activeOptions(): IFormidableFieldOption[] {
+  protected get activeOptions(): IFormidableOption[] {
     return this.options$.value;
   }
 
-  public selectOption(option: IFormidableFieldOption): void {
+  public selectOption(option: IFormidableOption): void {
     if (option.disabled) return;
 
     const curr = this._writtenValues;
@@ -172,20 +172,20 @@ export class CheckboxGroupFieldComponent
     this.cdRef.markForCheck();
   }
 
-  private computeAllOptions(): IFormidableFieldOption[] {
+  private computeAllOptions(): IFormidableOption[] {
     const combined = combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
 
     return applyDefaultOption(combined, this.defaultOption, this.defaultOptionMode);
   }
 
-  private updateOptions(allOptions: IFormidableFieldOption[]): void {
+  private updateOptions(allOptions: IFormidableOption[]): void {
     this.options$.next(allOptions);
 
     // keep current value in sync with newly combined options
     this.writeValue(this._writtenValues);
   }
 
-  private reconcileSelectionAgainstOptions(allOptions: IFormidableFieldOption[]): void {
+  private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {
     if (!this._writtenValues.length) return;
 
     const allowed = new Set(allOptions.map((o) => o.value));

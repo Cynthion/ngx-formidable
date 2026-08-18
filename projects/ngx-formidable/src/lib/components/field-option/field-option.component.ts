@@ -18,9 +18,9 @@ import {
 import {
   FieldOptionLayout,
   FieldOptionRole,
-  FORMIDABLE_FIELD_OPTION,
+  FORMIDABLE_OPTION,
   FORMIDABLE_OPTION_FIELD,
-  IFormidableFieldOption,
+  IFormidableOption,
   IFormidableOptionField
 } from '../../models/formidable.model';
 
@@ -41,13 +41,13 @@ import {
   imports: [CommonModule],
   providers: [
     {
-      // required to provide this component as IFormidableFieldOption
-      provide: FORMIDABLE_FIELD_OPTION,
+      // required to provide this component as IFormidableOption
+      provide: FORMIDABLE_OPTION,
       useExisting: forwardRef(() => FieldOptionComponent)
     }
   ]
 })
-export class FieldOptionComponent implements IFormidableFieldOption, OnInit, AfterContentInit {
+export class FieldOptionComponent implements IFormidableOption, OnInit, AfterContentInit {
   @ViewChild('contentTemplate', { static: true }) private contentTemplate!: TemplateRef<unknown>;
 
   /** What reaches the model when this option is picked. */

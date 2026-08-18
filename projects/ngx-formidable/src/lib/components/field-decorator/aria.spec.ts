@@ -8,7 +8,7 @@ import { StubValidatorDirective } from '../../forms/testing/stub-validator.direc
 import { FieldHintDirective } from '../../directives/field-hint.directive';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { NgxFormidableFormDirective } from '../../forms/form.directive';
-import { IFormidableFieldOption } from '../../models/formidable.model';
+import { IFormidableOption } from '../../models/formidable.model';
 import { CheckboxGroupFieldComponent } from '../fields/checkbox-group-field/checkbox-group-field.component';
 import { InputFieldComponent } from '../fields/input-field/input-field.component';
 import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
@@ -43,7 +43,7 @@ interface Model {
 
 const shape = { field: '' };
 
-const options: IFormidableFieldOption[] = [
+const options: IFormidableOption[] = [
   { value: 'red', label: 'Red' },
   { value: 'blue', label: 'Blue' }
 ];

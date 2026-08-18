@@ -24,7 +24,7 @@ A field extends `BaseFieldDirective<T>` and registers two providers:
 - `{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => XComponent), multi: true }`
 - `{ provide: FORMIDABLE_FIELD, useExisting: XComponent }`
 
-Option-based fields also `@ContentChildren(FORMIDABLE_FIELD_OPTION)` and provide `FORMIDABLE_OPTION_FIELD`. Implement the abstract members (`fieldRef`, `decoratorLayout`, `value`, `doWriteValue` / `doOnValueChange` / `doOnFocusChange`, the keyboard/click/resize callbacks + `registeredKeys`).
+Option-based fields also `@ContentChildren(FORMIDABLE_OPTION)` and provide `FORMIDABLE_OPTION_FIELD`. Implement the abstract members (`fieldRef`, `decoratorLayout`, `value`, `doWriteValue` / `doOnValueChange` / `doOnFocusChange`, the keyboard/click/resize callbacks + `registeredKeys`).
 
 Reference implementation: `example-custom-color-picker` in the demo. Full contract: @.documentation/user/components.md.
 

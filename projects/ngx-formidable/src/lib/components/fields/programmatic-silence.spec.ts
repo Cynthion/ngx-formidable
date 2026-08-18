@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { IFormidableFieldOption } from '../../models/formidable.model';
+import { IFormidableOption } from '../../models/formidable.model';
 import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
 import { DateFieldComponent } from './date-field/date-field.component';
 import { DropdownFieldComponent } from './dropdown-field/dropdown-field.component';
@@ -32,7 +32,7 @@ import { SliderFieldComponent } from './slider-field/slider-field.component';
 })
 class CheckboxHostComponent {
   value: string[] = ['a', 'b'];
-  options: IFormidableFieldOption[] = [
+  options: IFormidableOption[] = [
     { value: 'a', label: 'A' },
     { value: 'b', label: 'B' }
   ];
@@ -103,7 +103,7 @@ class MaskedHostComponent {
 })
 class DropdownHostComponent {
   value: string | null = 'a';
-  options: IFormidableFieldOption[] = [{ value: 'a', label: 'A' }];
+  options: IFormidableOption[] = [{ value: 'a', label: 'A' }];
 }
 
 describe('programmatic paths stay silent', () => {

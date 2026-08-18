@@ -193,7 +193,7 @@ readonly formValue$ = new BehaviorSubject<UserFormModel>(initialUserFormModel);
 readonly isValid$ = new BehaviorSubject<boolean | null>(null);
 readonly errors$ = new BehaviorSubject<FormidableFormErrors>({});
 
-readonly hobbyOptions: IFormidableFieldOption[] = [
+readonly hobbyOptions: IFormidableOption[] = [
   { value: 'reading', label: 'Reading' },
   { value: 'gaming', label: 'Gaming' },
   { value: 'swimming', label: 'Swimming' }

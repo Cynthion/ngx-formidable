@@ -1,4 +1,4 @@
-import { DeepPartial, DeepRequired, IFormidableFieldOption, WHOLE_FORM } from '@cynthion/ngx-formidable';
+import { DeepPartial, DeepRequired, IFormidableOption, WHOLE_FORM } from '@cynthion/ngx-formidable';
 import { enforce, mode, Modes, omitWhen, only, StaticSuite, staticSuite, test } from 'vest';
 
 // #region FormModel
@@ -132,7 +132,7 @@ export interface HighlightedEntries {
   subtitleEntries: HighlightEntry[];
 }
 
-export interface AnimalFormFieldOption extends IFormidableFieldOption {
+export interface AnimalFormFieldOption extends IFormidableOption {
   subtitle?: string;
   highlightedEntries?: HighlightedEntries;
 }
