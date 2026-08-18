@@ -5,6 +5,8 @@
     "declaration": true,
     "declarationMap": true,
     "inlineSources": true,
+    // Overrides the root `true`, so the shipped `.d.ts` carry their doc comments.
+    "removeComments": false,
     "types": []
   },
   "exclude": ["**/*.spec.ts"]

@@ -19,33 +19,14 @@ import { NgxFormidableFormDirective } from '../forms/form.directive';
 import { FormidableReveal } from '../models/validation.model';
 
 /**
- * Dynamically instantiates a `<formidable-field-errors>` component for any form control decorated with
- * this `formidableFieldErrors` directive, and synchronizes its display with the host `NgModel` or
- * `NgModelGroup`.
+ * Put this on the `ngModel` or `ngModelGroup` whose validation messages should render. It renders them into
+ * the surrounding `formidable-field-decorator` when there is one, and beside the host control when there is
+ * not — so a decorated field needs nothing else to show its errors.
  *
- * - Automatically picks up `NgModel` or `NgModelGroup` from DI
- * - Renders into the surrounding `formidable-field-decorator`'s errors slot when there is one, so the
- *   errors land below the field instead of inside the container that positions its label and prefix;
- *   falls back to rendering beside the host control when the field is used without a decorator
- * - Registers the errors component with that decorator, which is what turns the invalid state into the
- *   `.is-invalid` host class the field and label styling targets. Without a decorator there is no such
- *   host, so a field used on its own gets the errors but not the invalid styling
- * - Marks the errors component for check on every control event, waiting for the parent
- *   NgxFormidableFormDirective to go `idle$` first when there is one. Without it — a field validated by
- *   Angular's own validators, or not at all — the control's events drive the repaint directly
- * - Cleans up component instance on destroy
- *
- * @example
- * ```html
- * <input
- *   ngModel
- *   name="username"
- *   placeholder="Enter username"
- *   formControlName="username"
- *   formidableFieldErrors
- * />
- * ```
+ * `revealOn` decides when they appear. The messages themselves are whatever the connected validator wrote.
  */
+// Also the repaint pump for both the messages and the field's `aria-invalid`, and what registers the
+// invalid state with the decorator. See `tech/decoration.md`.
 @Directive({ selector: '[formidableFieldErrors]', standalone: true })
 export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly viewContainerRef = inject(ViewContainerRef);

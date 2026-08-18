@@ -34,27 +34,12 @@ import {
 import { BaseFieldDirective } from '../base-field.directive';
 
 /**
- * An input field for selecting times via masked text entry.
- * Provides:
- * - Masked input (ngx-mask) according to a Unicode time format (e.g. "HH.mm").
- * - Automatic parsing/formatting.
- * - Simple keyboard handling.
+ * A time of day, typed into a mask derived from `unicodeTokenFormat` or stepped with the arrow keys on the
+ * segment under the caret. No panel — the mask and the arrows are the whole interface.
  *
- * @input unicodeTokenFormat?: string
- *   Unicode time format mask (defaults to "HH.mm").
- *
- * @output valueChanged: EventEmitter<Date|null>
- * @output focusChanged: EventEmitter<boolean>
- *   Emitted when the time is parsed/selected or focus changes.
- *
- * Example:
- * ```html
- * <formidable-time-field
- *   name="appointmentTime"
- *   ngModel
- *   [unicodeTokenFormat]="'HH:mm'"
- * ></formidable-time-field>
- * ```
+ * The value is a full `Date` whose date part is normalized away, so only the time carries meaning. Typing
+ * commits on blur; clearing the field and the arrows commit at once. `date-field` is the same interface for
+ * a date, with a calendar panel added.
  */
 @Component({
   selector: 'formidable-time-field',
@@ -115,11 +100,9 @@ export class TimeFieldComponent
     }
   }
 
-  /**
-   * Typing commits on blur — a half-typed time is not a time — so value changes are handled in the
-   * selectTime method. Wiping the text is the exception: it commits at once, or the cleared time would
-   * stay the model's and `stepSegment` would keep stepping from it.
-   */
+  // Typing commits on blur — a half-typed time is not a time — so value changes are handled in the
+  // selectTime method. Wiping the text is the exception: it commits at once, or the cleared time would stay
+  // the model's and `stepSegment` would keep stepping from it.
   protected override onValueChange(): void {
     if (this.selectedTime && this.isInputCleared) {
       this.setTime(null);
@@ -161,13 +144,11 @@ export class TimeFieldComponent
     }
   }
 
-  /**
-   * Steps the time part under the caret by one, and leaves that part selected so repeated arrows
-   * keep to it — and so the next digit typed replaces it.
-   *
-   * The input text is what gets stepped, not `selectedTime`: it also carries what was typed but not
-   * yet committed. An empty field is seeded with midnight, so arrows alone can fill it.
-   */
+  // Steps the time part under the caret by one, and leaves that part selected so repeated arrows keep to
+  // it — and so the next digit typed replaces it.
+  //
+  // The input text is what gets stepped, not `selectedTime`: it also carries what was typed but not yet
+  // committed. An empty field is seeded with midnight, so arrows alone can fill it.
   private stepSegment(direction: 1 | -1): void {
     const input = this.inputRef.nativeElement;
     const segment = findSegmentAtCaret(this.unicodeTokenFormat, input.selectionStart ?? 0);
@@ -209,6 +190,10 @@ export class TimeFieldComponent
 
   // #region IFormidableTimeField
 
+  /**
+   * A Unicode time format (`H`, `h`, `m`, `s`, `a` tokens). Decides the mask, the display, and which segment
+   * the arrow keys step. An unrecognized format warns and falls back to the default.
+   */
   @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
   /** What an empty, unfocused field shows: underscores (default, "__ : __") or the `unicodeTokenFormat` ("HH : mm"). */
   @Input() emptyHint: FormidableEmptyHint = 'underscores';
@@ -226,24 +211,25 @@ export class TimeFieldComponent
     return true;
   }
 
-  /** ngxMask's own empty display: the mask with every slot as its placeholder character. */
+  // ngxMask's own empty display: the mask with every slot as its placeholder character.
   private get maskPlaceholder(): string {
     return this.ngxMask.replace(/\w/g, '_');
   }
 
-  /** The resting display of an empty field for the current `emptyHint`: the format string, or `maskPlaceholder`. */
+  // The resting display of an empty field for the current `emptyHint`: the format string, or
+  // `maskPlaceholder`.
   private get emptyDisplay(): string {
     return this.emptyHint === 'format' ? (this.unicodeTokenFormat ?? '') : this.maskPlaceholder;
   }
 
-  /** ngxMask either empties the input outright or leaves the slots it renders for a focused empty field. */
+  // ngxMask either empties the input outright or leaves the slots it renders for a focused empty field.
   private get isInputCleared(): boolean {
     const value = this.inputRef.nativeElement.value;
 
     return value === '' || value === this.maskPlaceholder;
   }
 
-  /** Shows the `emptyHint` at rest, but lets ngxMask own the text while focused. */
+  // Shows the `emptyHint` at rest, but lets ngxMask own the text while focused.
   private renderEmpty(): void {
     renderEmptyMask(this.inputRef.nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused);
   }
@@ -270,7 +256,7 @@ export class TimeFieldComponent
 
   // #region Time
 
-  /** Uses the entered string, parses it and returns the resulting Date. */
+  // Uses the entered string, parses it and returns the resulting Date.
   private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
     return parseUnicodeDateTime(dateString, unicodeTokenFormat);
   }

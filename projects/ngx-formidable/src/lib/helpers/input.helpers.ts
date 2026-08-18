@@ -1,3 +1,4 @@
+/** Collapses the selection to the end of the text, so typing continues rather than replacing it. */
 export function setCaretPositionToEnd(elementRef: HTMLInputElement | HTMLTextAreaElement): void {
   const len = elementRef.value.length;
   elementRef.setSelectionRange(len, len);
@@ -22,6 +23,7 @@ export function renderEmptyMask(
   if (isFocused) elementRef.setSelectionRange(0, 0);
 }
 
+/** Whether a keystroke is one that types a character, which is what starts a type-ahead. */
 export function isPrintableCharacter(event: KeyboardEvent): boolean {
   const key = event.key;
 

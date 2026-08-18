@@ -7,23 +7,10 @@ import { StaticSuite } from 'vest';
  * Validates a `formidableForm` with a Vest static suite.
  *
  * Provides `FORMIDABLE_VALIDATOR`, which is what `NgxFormidableFormDirective` delegates to. Put it on the
- * same `<form>` and the harness handles the rest — field paths, the debounce, and reporting the messages
- * to the field that owns them.
+ * same `<form>` and the form directive handles the rest — the targets, the debounce, and reporting the
+ * messages to the field that owns them.
  *
- * Inputs:
- * - `@Input() formSuite: StaticSuite<string, string, (model: T, field: string) => void> | null`
- *   A Vest `staticSuite` defining all field and root-level tests. Root-level tests use the `WHOLE_FORM` path.
- *
- * @example
- * ```html
- * <form
- *   formidableForm
- *   [formValue]="user$ | async"
- *   [formSuite]="userSuite"
- * >
- *   <!-- form fields here -->
- * </form>
- * ```
+ * Lives in the `@cynthion/ngx-formidable/vest` entry point, so `vest` stays an optional peer dependency.
  */
 @Directive({
   selector: 'form[formSuite]',
@@ -36,6 +23,10 @@ import { StaticSuite } from 'vest';
   ]
 })
 export class NgxFormidableVestValidatorDirective<T extends Record<string, unknown>> implements IFormidableValidator<T> {
+  /**
+   * A Vest `staticSuite` holding the rules for every target on this form. A whole-form rule is written
+   * against the `WHOLE_FORM` target.
+   */
   public readonly formSuite = input<StaticSuite<string, string, (model: T, field: string) => void> | null>(null);
 
   public validate(model: T, target: string): Observable<string[] | null> {

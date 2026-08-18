@@ -10,22 +10,6 @@ import { NgxFormidableFormDirective } from './form.directive';
  * It runs the provided validator once for the `WHOLE_FORM` target and reports the result on the `<form>`'s
  * own control, which is where `errorsChange$` picks it up. A rule that reads several fields but is *about*
  * one of them, or about a group, belongs on that field or group instead.
- *
- * Inputs:
- * - `@Input() formidableValidateWholeForm: boolean`
- *   Defaults to `true`, so the bare attribute switches it on.
- *
- * @example
- * ```html
- * <form
- *   formidableForm
- *   formidableValidateWholeForm
- *   [formValue]="user$ | async"
- *   (errorsChange$)="errors = $event"
- * >
- *   <!-- form fields here -->
- * </form>
- * ```
  */
 @Directive({
   selector: 'form[formidableValidateWholeForm]',
@@ -39,6 +23,7 @@ import { NgxFormidableFormDirective } from './form.directive';
   ]
 })
 export class NgxFormidableWholeFormValidateDirective implements AsyncValidator, OnInit {
+  /** Switches the whole-form rule off without removing the attribute. The bare attribute means `true`. */
   public readonly formidableValidateWholeForm = input(true, { transform: booleanAttribute });
 
   private readonly injector = inject(Injector);

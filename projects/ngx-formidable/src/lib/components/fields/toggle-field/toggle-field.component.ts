@@ -9,6 +9,12 @@ import {
 } from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.directive';
 
+/**
+ * A boolean rendered as a switch, with an optional label on either side of it.
+ *
+ * Its decorator renders in the `inline` layout, so the label always sits outside whatever position is set on
+ * it — the switch is a fixed-size pill with no value area for a label to rest in.
+ */
 @Component({
   selector: 'formidable-toggle-field',
   templateUrl: './toggle-field.component.html',
@@ -82,10 +88,16 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
 
   // #region IFormidableToggleField
 
+  /** Which side of the switch `onLabel` / `offLabel` sits on. Unrelated to a projected label's position. */
   @Input() labelPosition?: FormidableToggleFieldLabelPosition = 'before';
+
+  /** Text shown beside the switch while on. The field's own, not a projected label. */
   @Input() onLabel?: string;
+
+  /** Text shown beside the switch while off. Leave unset to show `onLabel` in both states. */
   @Input() offLabel?: string;
 
+  /** Flips the value, as clicking the switch or pressing Space or Enter does. No-op while readonly. */
   public toggle(): void {
     if (this.readonly || this.disabled) return;
 

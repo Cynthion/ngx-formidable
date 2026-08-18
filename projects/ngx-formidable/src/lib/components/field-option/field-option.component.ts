@@ -25,23 +25,12 @@ import {
 } from '../../models/formidable.model';
 
 /**
- * Represents a single option in select, dropdown, autocomplete, radio or checkbox group.
- * Provides template outlet for custom content, and handles:
- * - `value: string`         (required)
- * - `label?: string`        (display text fallback)
- * - `disabled`, `readonly`, `selected`, `highlighted`
- * - `match?(filter: string)` custom filter predicate
- * - `select?()` custom select callback
+ * One option of a select, dropdown, autocomplete, radio group or checkbox group, projected into the field
+ * that owns it. Its content is optional: with none it renders its `label`, with some it renders that instead
+ * and takes the text as the label.
  *
- * Takes its ARIA role from the parent field's `optionRole`, and reports its state as `aria-selected`
- * (in a listbox) or `aria-checked` (in a radio or checkbox group).
- *
- * @example
- * ```html
- * <formidable-select-field name="gender">
- *   <formidable-field-option [value]="'other'" [label]="'Other'"></formidable-field-option>
- * </formidable-select-field>
- * ```
+ * Must sit inside one of those fields. The alternative is the field's `options` input, which takes the same
+ * options as plain data; a field accepts both at once and merges them.
  */
 @Component({
   selector: 'formidable-field-option',
@@ -61,31 +50,41 @@ import {
 export class FieldOptionComponent implements IFormidableFieldOption, OnInit, AfterContentInit {
   @ViewChild('contentTemplate', { static: true }) private contentTemplate!: TemplateRef<unknown>;
 
+  /** What reaches the model when this option is picked. */
   @Input({ required: true }) value!: string;
+
+  /** Display text. Taken from the projected content when that is given instead. */
   @Input() label?: string;
 
+  /** Cannot be picked, and is skipped by the keyboard, but reads as available. */
   @Input()
   readonly = false;
 
+  /** Cannot be picked, and is skipped by the keyboard. */
   @Input()
   disabled = false;
 
+  /** Whether this option is the current selection. Driven by the field — do not bind it yourself. */
   @Input()
   selected = false;
 
+  /** Whether the keyboard cursor is on this option. Driven by the field — do not bind it yourself. */
   @Input()
   highlighted = false;
 
+  /** Replaces the field's own selection handling, for an option that does something else instead. */
   @Input() select?: () => void = () => {
     // default select
     this.parent.selectOption(this);
   };
 
+  /** Whether an autocomplete's filter text matches. The default is a case-insensitive substring test. */
   @Input() match?: (filterValue: string) => boolean = (filterValue: string) => {
     // default match
     return this.label?.toLowerCase().includes(filterValue.toLowerCase()) ?? false;
   };
 
+  /** How the option paints itself. Independent of its ARIA role, which the owning field decides. */
   @Input() layout: FieldOptionLayout = 'inline';
 
   hasContent = false;
@@ -102,7 +101,7 @@ export class FieldOptionComponent implements IFormidableFieldOption, OnInit, Aft
   // `listbox` / `radiogroup` / `group` that owns the option, and an element with no role in between
   // would break that ownership. The id is bound by the parent, which is what knows the index.
 
-  /** The container decides, not the option's `layout` — that is a look a consumer may set freely. */
+  // The container decides, not the option's `layout` — that is a look a consumer may set freely.
   get role(): FieldOptionRole {
     return this.parent?.optionRole ?? 'option';
   }
@@ -112,7 +111,7 @@ export class FieldOptionComponent implements IFormidableFieldOption, OnInit, Aft
     return this.role;
   }
 
-  /** Bound raw rather than `|| null`: an unselected option has to report `false`, not stay silent. */
+  // Bound raw rather than `|| null`: an unselected option has to report `false`, not stay silent.
   @HostBinding('attr.aria-selected')
   get ariaSelected(): boolean | null {
     return this.role === 'option' ? this.selected : null;
@@ -123,7 +122,7 @@ export class FieldOptionComponent implements IFormidableFieldOption, OnInit, Aft
     return this.role === 'option' ? null : this.selected;
   }
 
-  /** ARIA has no `aria-readonly` for these roles, and both flags mean the same thing here: unselectable. */
+  // ARIA has no `aria-readonly` for these roles, and both flags mean the same thing here: unselectable.
   @HostBinding('attr.aria-disabled')
   get ariaDisabled(): true | null {
     return this.disabled || this.readonly || null;

@@ -2,6 +2,7 @@ import { NgxMaskConfig } from 'ngx-mask';
 
 // #region Configuration
 
+/** ngx-mask's token table: one entry per mask character, mapping it to the characters it accepts. */
 export type MaskPatterns = Record<string, { pattern: RegExp; optional?: boolean; symbol?: string }>;
 
 /** Defaults from https://github.com/JsDaddy/ngx-mask/blob/develop/USAGE.md */
@@ -55,6 +56,7 @@ export type MaskConfigSubset = Partial<
 
 // #region MinLeght/MaxLength Validation
 
+/** How long a masked value can render. `variable` is what makes a length indicator show a range, not a total. */
 export interface MaskLengthInfo {
   min: number;
   max: number;

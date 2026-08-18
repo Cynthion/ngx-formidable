@@ -26,6 +26,10 @@ export function applyDefaultOption(
   return [defaultOption, ...options];
 }
 
+/**
+ * Where the keyboard highlight lands next, skipping disabled and readonly options and wrapping at both ends.
+ * Returns `-1` when no option can take it, so a list of nothing but disabled entries highlights none.
+ */
 export function getNextAvailableOptionIndex(
   currentIndex: number,
   options: IFormidableFieldOption[],

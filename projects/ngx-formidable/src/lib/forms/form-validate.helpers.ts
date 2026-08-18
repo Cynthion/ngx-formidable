@@ -1,5 +1,6 @@
 import { isDevMode } from '@angular/core';
 
+/** Thrown in dev mode when the form's value carries a key its `formShape` does not declare. */
 export class FormShapeMismatchError extends Error {
   constructor(errorList: string[]) {
     super(`Form shape mismatch:\n\n${errorList.join('\n')}\n\n`);

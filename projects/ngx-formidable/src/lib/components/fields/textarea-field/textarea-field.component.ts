@@ -31,24 +31,11 @@ import {
 import { BaseFieldDirective } from '../base-field.directive';
 
 /**
- * A configurable multi-line textarea with optional autosizing and length indicator.
- * Supports:
- * - `name`, `placeholder`, `readonly`, `disabled`
- * - `autocomplete` (`'off'|'on'|'given-name'|…`)
- * - `minLength`, `maxLength`
- * - `enableAutosize` (auto height)
- * - `showLengthIndicator` (character count)
+ * A multi-line text input, optionally masked, that can grow with its content (`enableAutosize`) and show a
+ * character count against `maxLength` (`showLengthIndicator`). `input-field` is the single-line one.
  *
- * @example
- * ```html
- * <formidable-textarea-field
- *   name="bio"
- *   ngModel
- *   [maxLength]="200"
- *   [enableAutosize]="true"
- *   [showLengthIndicator]="true"
- * ></formidable-textarea-field>
- * ```
+ * Its box grows downward, so it top-aligns its value and a projected prefix follows that rather than
+ * centring.
  */
 @Component({
   selector: 'formidable-textarea-field',
@@ -185,17 +172,29 @@ export class TextareaFieldComponent
 
   // #region IFormidableTextareaField
 
+  /** The native autofill hint. Off by default, so a form does not leak values a consumer did not ask for. */
   @Input() autocomplete: AutoFill = 'off';
+
+  /** The native attribute. Reported to the browser and used to sanity-check a `mask`; it does not validate. */
   @Input() minLength = -1;
+
+  /** The native attribute, which does cap what can be typed. `-1` for no cap. */
   @Input() maxLength = -1;
+
+  /** Grows the box with the content instead of scrolling it. */
   @Input() enableAutosize = true;
+
+  /** Shows the character count below the value, against `maxLength` when there is one. */
   @Input() showLengthIndicator = false;
 
   // #endregion
 
   // #region IFormidableMaskField
 
+  /** An ngx-mask pattern. Setting one changes what the model receives — see `dropSpecialCharacters`. */
   @Input() mask?: string = undefined;
+
+  /** Per-field ngx-mask overrides, layered over `FORMIDABLE_MASK_DEFAULTS` and the library's own defaults. */
   @Input() maskConfig?: Partial<NgxMaskConfig>;
 
   protected override get showsEmptyValueHint(): boolean {
@@ -218,7 +217,7 @@ export class TextareaFieldComponent
     clearIfNotMatch: false
   };
 
-  /** Merged mask config (local defaults <- global defaults <- per-field) */
+  /** The mask config actually in force: the library's defaults, then `FORMIDABLE_MASK_DEFAULTS`, then `maskConfig`. */
   get mergedMaskConfig(): Required<MaskConfigSubset> {
     return {
       ...this.LOCAL_MASK_DEFAULTS,

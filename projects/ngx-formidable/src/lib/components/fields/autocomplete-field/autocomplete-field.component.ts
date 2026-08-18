@@ -28,27 +28,9 @@ import { FieldOptionComponent } from '../../field-option/field-option.component'
 import { BaseOptionFieldDirective } from '../base-option-field.directive';
 
 /**
- * A configurable text input with an overlayed list of filtered options.
- * Supports:
- * - `name`, `placeholder`, `readonly`, `disabled`
- * - `[options]`: IFormidableFieldOption[]
- * - `<formidable-field-option>` children
- * - `[noOptionText]`, `[sortFn]`
- * - `isPanelOpen` two-way
- * - `panelPosition: 'left'|'right'|'full'|'sheet'`
- *
- * @example
- * ```html
- * <formidable-autocomplete-field
- *   name="hobby"
- *   ngModel
- *   [options]="hobbyOptions"
- * >
- *   <!-- Optional inline options -->
- *   <formidable-field-option [value]="'reading'" [label]="'Reading'"></formidable-field-option>
- *   <formidable-field-option [value]="'gaming'" [label]="'Gaming'"></formidable-field-option>
- * </formidable-autocomplete-field>
- * ```
+ * A dropdown filtered by a text input inside its panel. The filter narrows the list by each option's `match`,
+ * and `filterChanged` also carries it out, so a consumer can fetch options for it instead of filtering a list
+ * it already holds. Only a projected or bound option can be committed. Free text is not a value.
  */
 @Component({
   selector: 'formidable-autocomplete-field',
@@ -199,6 +181,7 @@ export class AutocompleteFieldComponent
 
   public filterChange$ = this.filterChangeSubject$.asObservable();
 
+  /** The filter text, so options can be fetched for it rather than filtered out of a list already bound. */
   @Output() filterChanged = new EventEmitter<string>();
 
   // #endregion
@@ -302,10 +285,8 @@ export class AutocompleteFieldComponent
     return combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
   }
 
-  /**
-   * A configured default option is always selectable, whatever its mode: in `fallback` mode whether it
-   * renders depends on the current filter, so excluding it here would deselect it on the next keystroke.
-   */
+  // A configured default option is always selectable, whatever its mode: in `fallback` mode whether it
+  // renders depends on the current filter, so excluding it here would deselect it on the next keystroke.
   private computeSelectableOptions(allOptions: IFormidableFieldOption[]): IFormidableFieldOption[] {
     return this.defaultOption ? [this.defaultOption, ...allOptions] : allOptions;
   }
@@ -339,6 +320,7 @@ export class AutocompleteFieldComponent
 
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
+  /** Opens and closes the panel from outside. */
   @Input()
   get isPanelOpen(): boolean {
     return this._isPanelOpen;
@@ -347,6 +329,10 @@ export class AutocompleteFieldComponent
     this.togglePanel(val);
   }
 
+  /**
+   * Where the panel opens. The three anchored positions flip above the field when there is no room below; a
+   * `sheet` keeps focus in its own filter input, so a soft keyboard can cover it.
+   */
   @Input() panelPosition: FormidablePanelPosition = 'full';
 
   private _isPanelOpen = false;
@@ -370,8 +356,8 @@ export class AutocompleteFieldComponent
     this.cdRef.markForCheck();
   }
 
-  /** Deferred, unlike the call in `togglePanel`: the option list changed, so the panel's height is only
-   * correct once change detection has rendered it. */
+  // Deferred, unlike the call in `togglePanel`: the option list changed, so the panel's height is only
+  // correct once change detection has rendered it.
   private updatePanelPosition(): void {
     setTimeout(() => updatePanelPosition(this.autocompleteRef, this.panelRef));
   }

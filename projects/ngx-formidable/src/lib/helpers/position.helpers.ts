@@ -1,10 +1,8 @@
 import { ElementRef, QueryList } from '@angular/core';
 import { FormidablePanelPosition, IFormidablePanelField } from '../models/formidable.model';
 
-/**
- * The position of a field's panel while it is open, or `null` — a field without a panel never opens one.
- * This is what decides whether a field rises out of its resting layer, and how far; see `tech/layering.md`.
- */
+// The position of a field's panel while it is open, or `null` — a field without a panel never opens one.
+// This is what decides whether a field rises out of its resting layer, and how far; see `tech/layering.md`.
 export function openPanelPosition(field?: unknown): FormidablePanelPosition | null {
   const panelField = field as Partial<IFormidablePanelField> | undefined;
 
@@ -42,6 +40,10 @@ export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef
   panel.classList.toggle('above', spaceBelow < panelHeight && spaceAbove >= panelHeight);
 }
 
+/**
+ * Brings the field, and optionally its open panel, back into the viewport — but only the one that has left
+ * it, so opening a panel on a fully visible field never scrolls the page.
+ */
 export function scrollIntoView(
   fieldRef?: ElementRef<HTMLElement>,
   panelRef?: ElementRef<HTMLElement>,
@@ -82,6 +84,10 @@ export function scrollIntoView(
   }
 }
 
+/**
+ * Scrolls the highlighted option inside its own scroll container. Takes either shape of query result, since
+ * an option may be a component exposing an `elementRef` or a plain element query.
+ */
 export function scrollHighlightedOptionIntoView(
   index: number,
   optionRefs: QueryList<{ elementRef: ElementRef<HTMLElement> } | ElementRef<HTMLElement>> | undefined

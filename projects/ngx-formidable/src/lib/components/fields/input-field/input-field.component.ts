@@ -30,21 +30,11 @@ import {
 import { BaseFieldDirective } from '../base-field.directive';
 
 /**
- * A configurable single-line text input.
- * Supports:
- * - `name`, `placeholder`, `readonly`, `disabled`
- * - `autocomplete` (`'off'|'on'|'given-name'|…`)
- * - `minLength`, `maxLength`
+ * A single-line text input, optionally masked — a phone number, an IBAN. `textarea-field` is the multi-line
+ * one.
  *
- * @example
- * ```html
- * <formidable-input-field
- *   name="firstName"
- *   ngModel
- *   placeholder="First Name"
- *   [minLength]="2"
- * ></formidable-input-field>
- * ```
+ * `minLength` and `maxLength` are the native attributes and do not validate on their own; a rule in the
+ * connected validator does that. Setting either alongside a `mask` that cannot satisfy it logs a warning.
  */
 @Component({
   selector: 'formidable-input-field',
@@ -162,15 +152,23 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
 
   // #region IFormidableInputField
 
+  /** The native autofill hint. Off by default, so a form does not leak values a consumer did not ask for. */
   @Input() autocomplete: AutoFill = 'off';
+
+  /** The native attribute. Reported to the browser and used to sanity-check a `mask`; it does not validate. */
   @Input() minLength = -1;
+
+  /** The native attribute, which does cap what can be typed. `-1` for no cap. */
   @Input() maxLength = -1;
 
   // #endregion
 
   // #region IFormidableMaskField
 
+  /** An ngx-mask pattern. Setting one changes what the model receives — see `dropSpecialCharacters`. */
   @Input() mask?: string = undefined;
+
+  /** Per-field ngx-mask overrides, layered over `FORMIDABLE_MASK_DEFAULTS` and the library's own defaults. */
   @Input() maskConfig?: Partial<NgxMaskConfig>;
 
   protected override get showsEmptyValueHint(): boolean {
@@ -193,7 +191,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     clearIfNotMatch: false
   };
 
-  /** Merged mask config (local defaults <- global defaults <- per-field) */
+  /** The mask config actually in force: the library's defaults, then `FORMIDABLE_MASK_DEFAULTS`, then `maskConfig`. */
   get mergedMaskConfig(): Required<MaskConfigSubset> {
     return {
       ...this.LOCAL_MASK_DEFAULTS,

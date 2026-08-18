@@ -12,13 +12,6 @@ import { getFieldTarget } from './form.helpers';
  * The `[ngModel]` selector matches every model-bound control in the app, so this no-ops twice over — once
  * outside a formidable form, and again when no `FORMIDABLE_VALIDATOR` is provided. Angular's own validators
  * on the same control are untouched either way.
- *
- * @example
- * ```html
- * <form formidableForm [formValue]="user" [debounceMs]="200">
- *   <formidable-input-field name="email" [ngModel]="user.email" />
- * </form>
- * ```
  */
 @Directive({
   selector: '[ngModel]',

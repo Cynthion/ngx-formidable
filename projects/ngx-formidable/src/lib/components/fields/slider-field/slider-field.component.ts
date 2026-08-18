@@ -12,6 +12,14 @@ interface SliderLabelItem {
   align: SliderLabelAlign;
 }
 
+/**
+ * A number from a bounded range, over a native range input — so the arrow keys, Home and End are the
+ * platform's. A value outside `min`/`max` or off the `step` grid is corrected, and the correction is written
+ * back to the model, so what the slider shows and what the form holds cannot disagree.
+ *
+ * Its decorator renders in the `vertical` layout, so the label always sits outside whatever position is set
+ * on it, and a projected prefix or suffix is not rendered.
+ */
 @Component({
   selector: 'formidable-slider-field',
   templateUrl: './slider-field.component.html',
@@ -91,22 +99,46 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
 
   // #region IFormidableSliderField
 
+  /** Lower bound, inclusive. A value below it is clamped and the correction is written back to the model. */
   @Input() min = 0;
+
+  /** Upper bound, inclusive. A value above it is clamped and the correction is written back to the model. */
   @Input() max = 100;
+
+  /** Granularity. A value off the step grid is snapped onto it and the correction written back. */
   @Input() step = 1;
 
+  /** Text for the low end of the track. Falls back to `min`. */
   @Input() minLabel?: string;
+
+  /** Text for the high end of the track. Falls back to `max`. */
   @Input() maxLabel?: string;
 
+  /** Shows the current value in a bubble above the thumb. */
   @Input() showThumbLabel = true;
+
+  /** Draws a mark on the track at every `tickInterval`. */
   @Input() showTickMarks = false;
+
+  /** Shows `minLabel` and `maxLabel` at the ends of the track. */
   @Input() showMinMaxLabels = false;
+
+  /** Labels each tick mark with its value. Needs `showTickMarks`. */
   @Input() showTickLabels = false;
+
+  /** Spacing between tick marks. Falls back to `step`, which on a fine step means a mark per value. */
   @Input() tickInterval?: number;
 
+  /**
+   * Renders the value as something other than the bare number — a currency, a category name. Also what the
+   * slider reports as `aria-valuetext`, which is the one thing a native range cannot infer.
+   */
   @Input() transformValueToThumbLabel?: (value: number) => string;
+
+  /** Renders a tick's value as something other than the bare number. Independent of the thumb's transform. */
   @Input() transformTickToTickLabel?: (value: number) => string;
 
+  /** Commits a value from outside the field, clamped and snapped as a drag would be. */
   public selectValue(value: number): void {
     const normalized = this.normalizeValue(value);
 

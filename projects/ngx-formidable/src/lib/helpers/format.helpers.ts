@@ -1,5 +1,6 @@
 import { addDays, addHours, addMinutes, addMonths, addSeconds, addYears, format, isValid, parse } from 'date-fns';
 
+/** Both halves of the check a `Date` needs: that it is one, and that it is not `Invalid Date`. */
 export function isValidDateObject(value: unknown): boolean {
   return value instanceof Date && isValid(value);
 }

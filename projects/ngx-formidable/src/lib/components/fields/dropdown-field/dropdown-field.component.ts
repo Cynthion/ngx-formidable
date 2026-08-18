@@ -27,28 +27,9 @@ import { FieldOptionComponent } from '../../field-option/field-option.component'
 import { BaseOptionFieldDirective } from '../base-option-field.directive';
 
 /**
- * A configurable dropdown input.
- * Supports:
- * - `name`, `placeholder`, `readonly`, `disabled`
- * - `[options]`: IFormidableFieldOption[]
- * - `<formidable-field-option>` children
- * - `[noOptionText]`, `[sortFn]`
- * - `isPanelOpen` two-way
- * - `panelPosition: 'left'|'right'|'full'|'sheet'`
-
- * @example
- * ```html
- * <formidable-dropdown-field
- *   name="language"
- *   ngModel
- *   [options]="languageOptions"
- *   panelPosition="left"
- * >
- *   <!-- Optional inline options -->
- *   <formidable-field-option [value]="'en'" [label]="'English'"></formidable-field-option>
- *   <formidable-field-option [value]="'fr'" [label]="'French'"></formidable-field-option>
- * </formidable-dropdown-field>
- * ```
+ * A single choice from a styled panel of options, walked with the keyboard and reachable by type-ahead. The
+ * value is not typed into, so the field itself is read-only to the keyboard; `autocomplete-field` is the one
+ * that filters as you type, and `select-field` the one that uses the platform's own picker.
  */
 @Component({
   selector: 'formidable-dropdown-field',
@@ -176,7 +157,7 @@ export class DropdownFieldComponent
     return this.inputRef.nativeElement;
   }
 
-  /** Mirrors the template: there is nothing to open once the field is readonly or disabled. */
+  // Mirrors the template: there is nothing to open once the field is readonly or disabled.
   get hasInFieldToggle(): boolean {
     return !this.readonly && !this.disabled;
   }
@@ -304,6 +285,7 @@ export class DropdownFieldComponent
 
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
+  /** Opens and closes the panel from outside. Setting it runs the same path a click on the toggle does. */
   @Input()
   get isPanelOpen(): boolean {
     return this._isPanelOpen;
@@ -312,11 +294,12 @@ export class DropdownFieldComponent
     this.togglePanel(val);
   }
 
+  /** Where the panel opens. The three anchored positions flip above the field when there is no room below. */
   @Input() panelPosition: FormidablePanelPosition = 'full';
 
   private _isPanelOpen = false;
 
-  /** Mousedown is used to prevent sending focusChanged events. */
+  // Mousedown is used to prevent sending focusChanged events.
   protected toggleMouseDown(event: MouseEvent): void {
     event.preventDefault();
     this.inputRef.nativeElement.focus(); // ensure input remains focused, so keyboard events work
@@ -348,8 +331,8 @@ export class DropdownFieldComponent
     this.cdRef.markForCheck();
   }
 
-  /** Deferred, unlike the call in `togglePanel`: the option list changed, so the panel's height is only
-   * correct once change detection has rendered it. */
+  // Deferred, unlike the call in `togglePanel`: the option list changed, so the panel's height is only
+  // correct once change detection has rendered it.
   private updatePanelPosition(): void {
     setTimeout(() => updatePanelPosition(this.dropdownRef, this.panelRef));
   }

@@ -20,13 +20,31 @@ import { openPanelPosition } from '../../helpers/position.helpers';
 import { FieldDecoratorLayout, IFormidableField } from '../../models/formidable.model';
 import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
 
+/**
+ * The base class a custom field extends. It supplies the value and focus channels, the `ControlValueAccessor`
+ * plumbing, the accessible names, and the keyboard, outside-click and resize listeners; a subclass supplies
+ * the control it renders and fills in the `do*` hooks.
+ *
+ * Extending it is not enough on its own — a custom field must also register itself as `NG_VALUE_ACCESSOR`, so
+ * `ngModel` can bind it, and as `FORMIDABLE_FIELD`, so `formidable-field-decorator` can find it.
+ */
 @Directive()
 export abstract class BaseFieldDirective<T = string | null>
   implements ControlValueAccessor, IFormidableField<T>, OnInit, AfterViewInit, OnDestroy
 {
+  /** Handles the keys named in `registeredKeys`. `null` for a field with no keyboard behaviour of its own. */
   protected abstract keyboardCallback: ((event: KeyboardEvent) => void) | null;
+
+  /** Runs on a click landing outside the field — how a panel field closes. `null` to not listen. */
   protected abstract externalClickCallback: (() => void) | null;
+
+  /** Runs on a debounced window resize or scroll — how an open panel is repositioned. `null` to not listen. */
   protected abstract windowResizeScrollCallback: (() => void) | null;
+
+  /**
+   * Which keys reach `keyboardCallback`. Everything listed is `preventDefault`ed on the way in, except
+   * `Tab` and the horizontal arrows, which must keep their native behaviour.
+   */
   protected abstract registeredKeys: string[];
 
   protected id = uuid();
@@ -54,11 +72,9 @@ export abstract class BaseFieldDirective<T = string | null>
 
   private _valuePrevious: T | null = null;
 
-  /**
-   * The decorator is normally the atom that owns the field's stacking context and rises while a panel is
-   * open. Without one there is nothing above the field to be it, so the field's own host takes the job —
-   * hence the same two state classes here, and only here. See `tech/layering.md`.
-   */
+  // The decorator is normally the atom that owns the field's stacking context and rises while a panel is
+  // open. Without one there is nothing above the field to be it, so the field's own host takes the job —
+  // hence the same two state classes here, and only here. See `tech/layering.md`.
   @HostBinding('class.is-undecorated')
   protected get isUndecorated(): boolean {
     return !this.decorator;
@@ -130,14 +146,20 @@ export abstract class BaseFieldDirective<T = string | null>
   }
 
   /**
-   * Whether this blur is the field's own doing, because focus moved to something the field itself owns.
-   * Consumes the flag it reads, so the blur after it counts again. Overridden by the fields that move focus.
+   * Whether this blur is the field's own doing, because focus moved to something the field itself owns — a
+   * panel, say. Override it in a field that moves focus, so such a blur neither commits nor touches.
    */
   protected ignoresBlur(): boolean {
     return false;
   }
 
+  /** The subclass's half of a value change, after the base has committed it and told everyone. */
   protected abstract doOnValueChange(): void;
+
+  /**
+   * The subclass's half of a focus change. A field that must not respond while `readonly` guards it here and
+   * not in `onFocusChange`, which all eleven fields share and which owns the focus ring and the touch.
+   */
   protected abstract doOnFocusChange(isFocused: boolean): void;
 
   // #region ControlValueAccessor
@@ -147,23 +169,17 @@ export abstract class BaseFieldDirective<T = string | null>
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   protected onTouched: () => void = () => {};
 
-  /** What is driving the work now running, when it is not the user. */
+  // What is driving the work now running, when it is not the user.
   private silence: 'write' | 'correction' | null = null;
 
-  /**
-   * The single touch channel every field goes through. Under `updateOn: 'blur'` a touch is also the commit
-   * and under `updateOn: 'submit'` it pre-sets the pending touch, so a touch the user did not cause would
-   * commit and reveal a field nobody has visited. Neither a write nor a correction is the user.
-   */
+  /** Marks the control touched. Ignored while `runSilently` is in effect, because that is not the user. */
   protected touch(): void {
+    // Under `updateOn: 'blur'` a touch is also the commit and under `updateOn: 'submit'` it pre-sets the
+    // pending touch, so a touch the user did not cause would commit and reveal a field nobody has visited.
     if (this.silence === null) this.onTouched();
   }
 
-  /**
-   * The single value channel every field goes through. A write is the form's own value arriving, so there is
-   * nothing to report back. A correction is not: a clamped number, a masked string, or a selection an
-   * options list no longer offers all have to reach the model.
-   */
+  /** Reports a value to the bound control. Ignored while a write is in effect, since the form sent that one. */
   protected commit(value: T): void {
     if (this.silence !== 'write') this.onChange(value);
   }
@@ -171,11 +187,10 @@ export abstract class BaseFieldDirective<T = string | null>
   /**
    * Runs work the user did not cause: the form writing a value, or the field correcting one it was given.
    * Neither may touch the control or leave it dirty, and a write reports nothing back besides.
-   *
-   * Angular raises its pending dirty flag on every change a value accessor reports and offers no way to opt
-   * out, so a control that was pristine on the way in is put back on the way out.
    */
   protected runSilently(cause: 'write' | 'correction', work: () => void): void {
+    // Angular raises its pending dirty flag on every change a value accessor reports and offers no way to
+    // opt out, so a control that was pristine on the way in is put back on the way out.
     const previous = this.silence;
     const wasPristine = this.control?.pristine ?? false;
 
@@ -212,23 +227,47 @@ export abstract class BaseFieldDirective<T = string | null>
     this.disabled = isDisabled;
   }
 
+  /**
+   * Puts a value the form wrote into whatever the subclass renders. Runs inside `runSilently`, so it may not
+   * report anything back and must not leave the control dirty or touched.
+   */
   protected abstract doWriteValue(value: T): void;
 
   // #endregion
 
   // #region IFormidableField
 
+  /** The control's name, which is also the key it takes in the model and its validation target. */
   @Input() name = '';
+
+  /** Placeholder text. A field with one has nothing for an `inside` label to rest in, so that label floats. */
   @Input() placeholder = '';
+
+  /** Blocks edits but stays focusable and keeps its focus ring, unlike `disabled`. */
   @Input() readonly = false;
+
+  /** Blocks edits and takes the field out of the tab order. Also set by Angular's own `disabled` handling. */
   @Input() disabled = false;
+
+  /**
+   * Suffixes the required marker to the label. Presentational only — nothing is inferred from a validator,
+   * so this and the rules are the consumer's to keep in step. The form can switch all of them off at once.
+   */
   @Input() showRequiredMarker = false;
+
+  /** Focuses the field once it has rendered. Does not open a panel. */
   @Input() autoFocus = false;
 
+  /** For the decorator, which subscribes on the way in. `valueChanged` is the same signal for a consumer. */
   public valueChange$ = this.valueChangeSubject$.asObservable();
+
+  /** For the decorator, which subscribes on the way in. `focusChanged` is the same signal for a consumer. */
   public focusChange$ = this.focusChangeSubject$.asObservable();
 
+  /** Emits the committed value on every change. Distinct-checked, so writing the same value twice is silent. */
   @Output() public valueChanged = new EventEmitter<T>();
+
+  /** Emits `true` on focus and `false` on blur — including a blur the field caused itself. */
   @Output() public focusChanged = new EventEmitter<boolean>();
 
   get fieldId(): string {
@@ -239,13 +278,10 @@ export abstract class BaseFieldDirective<T = string | null>
 
   // The decorator owns the label, the hint and the errors, so it is what mints the ids these point at.
 
-  /**
-   * Names the fields a `<label for>` cannot reach: the groups, the toggle and the slider.
-   *
-   * Read once per repaint of this `OnPush` field, so a label added or removed at runtime (an `@if`
-   * around it) only lands the next time the field is checked. Every other projected decoration is the
-   * decorator's own to render, which is why it is the decorator — and not the field — that is not `OnPush`.
-   */
+  /** Binds `aria-labelledby` for a control a `<label for>` cannot reach: the groups, the toggle, the slider. */
+  // Read once per repaint of this `OnPush` field, so a label added or removed at runtime (an `@if` around
+  // it) only lands the next time the field is checked. Every other projected decoration is the decorator's
+  // own to render, which is why it is the decorator — and not the field — that is not `OnPush`.
   protected get labelledBy(): string | null {
     return this.decorator?.labelledById ?? null;
   }
@@ -261,22 +297,21 @@ export abstract class BaseFieldDirective<T = string | null>
   // The decorator mints the ids for what it renders around the field; the field mints the ids for what
   // lives inside its own box — its panel here, and each option in `BaseOptionFieldDirective`.
 
-  /** Names the popup a panel field's `aria-controls` points at, whether that is a listbox or a dialog. */
+  /** Binds `aria-controls` on a field that opens a panel, whether that panel is a listbox or a dialog. */
   protected get panelId(): string {
     return `${this.fieldId}-panel`;
   }
 
-  /**
-   * Repaints the field when its validity changes. Validity lives in the errors component, whose
-   * `markForCheck` marks its own ancestors and never this sibling — so `FieldErrorsDirective` calls this
-   * as well, or `aria-invalid` would bind once and go stale.
-   */
+  /** Repaints the field. Called by the errors directive when validity changes, so `aria-invalid` follows it. */
+  // Validity lives in the errors component, whose own `markForCheck` marks its ancestors and never this
+  // sibling — so `FieldErrorsDirective` calls this as well, or `aria-invalid` would bind once and go stale.
   public markForCheck(): void {
     this.cdRef.markForCheck();
   }
 
   // #endregion
 
+  /** What the field currently holds, read straight off whatever it renders rather than cached. */
   abstract get value(): T;
 
   private static isFilled(value: unknown): boolean {
@@ -302,8 +337,10 @@ export abstract class BaseFieldDirective<T = string | null>
     return false;
   }
 
+  /** The field's outer element. The decorator measures it, and the global listeners are scoped to it. */
   abstract fieldRef: ElementRef<HTMLElement>;
 
+  /** The shape this field asks its decorator to render in. The field's own call, not a consumer's. */
   abstract decoratorLayout: FieldDecoratorLayout;
 
   /**
@@ -321,6 +358,7 @@ export abstract class BaseFieldDirective<T = string | null>
     this.focusElement?.focus();
   }
 
+  /** Keeps a readonly or disabled field from being edited by pointer, while leaving it focusable. */
   protected preventPointerDown(event: PointerEvent): void {
     if (!this.readonly && !this.disabled) return;
 
@@ -330,6 +368,7 @@ export abstract class BaseFieldDirective<T = string | null>
     setTimeout(() => this.focusElement?.focus());
   }
 
+  /** Blocks the keys a native control would act on while readonly or disabled — a `select`, a range input. */
   protected preventKeydown(event: KeyboardEvent): void {
     if (!this.readonly && !this.disabled) return;
 

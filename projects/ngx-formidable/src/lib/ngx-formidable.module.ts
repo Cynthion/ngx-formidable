@@ -58,11 +58,16 @@ const components = [
   SliderFieldComponent
 ];
 
+/**
+ * Re-exports every component and directive, plus `FormsModule`, for an app that is not standalone. Everything
+ * in it is standalone regardless, so importing the pieces directly works just as well.
+ */
 @NgModule({
   imports: [...components, FormsModule],
   exports: [...components, FormsModule]
 })
 export class NgxFormidableModule {
+  /** Import this once, at the root, to register the providers. Elsewhere import the module plain. */
   static forRoot(config: NgxFormidableConfig = {}): ModuleWithProviders<NgxFormidableModule> {
     return {
       ngModule: NgxFormidableModule,

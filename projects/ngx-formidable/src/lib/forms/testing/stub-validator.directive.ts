@@ -18,6 +18,7 @@ import { FORMIDABLE_VALIDATOR, IFormidableValidator } from '../../models/validat
   ]
 })
 export class StubValidatorDirective implements IFormidableValidator {
+  /** Target → message. A target absent from the map never reports anything. */
   public readonly stubValidator = input<Record<string, string>>({});
 
   public validate(model: Record<string, unknown>, target: string): Observable<string[] | null> {

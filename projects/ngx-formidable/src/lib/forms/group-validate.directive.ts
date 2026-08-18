@@ -11,14 +11,6 @@ import { getGroupTarget } from './form.helpers';
  * This is where a rule that reads several fields at once belongs when its result is about the group rather
  * than about one of them — a password and its confirmation, for instance. A rule about the form as a whole
  * uses `WHOLE_FORM` instead; see `NgxFormidableWholeFormValidateDirective`.
- *
- * @example
- * ```html
- * <div ngModelGroup="passwords">
- *   <formidable-input-field name="password" [ngModel]="user.passwords?.password" />
- *   <formidable-input-field name="confirmPassword" [ngModel]="user.passwords?.confirmPassword" />
- * </div>
- * ```
  */
 @Directive({
   selector: '[ngModelGroup]',

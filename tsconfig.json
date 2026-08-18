@@ -3,59 +3,44 @@
   "compileOnSave": false,
   "compilerOptions": {
     /* Modules */
-    "baseUrl": "./",
     "module": "ES2022",
     "moduleResolution": "bundler",
+    "paths": {
+      "ngx-formidable": ["./projects/ngx-formidable/src/public-api.ts"],
+      "ngx-formidable/vest": ["./projects/ngx-formidable/vest/src/public-api.ts"],
+      "@cynthion/ngx-formidable": ["./projects/ngx-formidable/src/public-api.ts"]
+    },
 
     /* Emit */
     "declaration": false,
-    "declarationMap": false,
-    "downlevelIteration": true,
-    "emitDeclarationOnly": false,
     "importHelpers": true,
-    "inlineSources": false,
     "outDir": "./dist/out-tsc",
     "removeComments": true,
     "sourceMap": true,
-    "paths": {
-      "ngx-formidable": ["projects/ngx-formidable/src/public-api.ts"],
-      "ngx-formidable/vest": ["projects/ngx-formidable/vest/src/public-api.ts"],
-      "@cynthion/ngx-formidable": ["projects/ngx-formidable/src/public-api.ts"]
-    },
-
-    /* JavaScript Support */
-    "allowJs": false,
 
     /* Interop Constraints */
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
 
     /* Language and Environment */
     "experimentalDecorators": true,
     "lib": ["ES2022", "dom"],
     "target": "ES2022",
-    "types": ["jasmine"],
     "useDefineForClassFields": false,
 
     /* Type Checking */
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    "alwaysStrict": true,
-    "esModuleInterop": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
-    "noImplicitThis": true,
     "noPropertyAccessFromIndexSignature": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "skipLibCheck": true,
-    "strict": true,
-    "strictBindCallApply": true,
-    "strictFunctionTypes": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true
+    "strict": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

@@ -21,23 +21,33 @@ import { FieldOptionComponent } from '../field-option/field-option.component';
 import { BaseFieldDirective } from './base-field.directive';
 
 /**
- * The base class for the fields that render a list of options and walk it with a highlight —
- * `dropdown-field`, `autocomplete-field`, `radio-group-field` and `checkbox-group-field`.
+ * The base class behind the fields that render a list of options and walk it with a highlight —
+ * `dropdown-field`, `autocomplete-field`, `radio-group-field` and `checkbox-group-field`. It adds the option
+ * inputs below to everything `BaseFieldDirective` already gives a field.
  *
- * `select-field` is an option field too but stays on `BaseFieldDirective`: a native `<select>` has no
- * highlight of its own, so it would only inherit dead state.
+ * Options come from the `options` input, from projected `<formidable-field-option>` children, or from both.
  */
 @Directive()
 export abstract class BaseOptionFieldDirective<T = string | null>
   extends BaseFieldDirective<T>
   implements OnChanges, AfterContentInit
 {
+  /** Options bound as data. Merged with any projected `<formidable-field-option>` children, not replaced. */
   @Input() options?: IFormidableFieldOption[] = [];
+
+  /** An option pinned to the top of the list, never sorted and never filtered. See `defaultOptionMode`. */
   @Input() defaultOption?: IFormidableFieldOption;
+
+  /** Whether the `defaultOption` always renders, or only when there would otherwise be no options. */
   @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
+
+  /** What renders in place of an empty list. Plain text, not an option — there is nothing there to pick. */
   @Input() noOptionsText: string = NO_OPTIONS_TEXT;
+
+  /** Orders the merged list. Applied after the merge, so bound and projected options interleave. */
   @Input() sortFn?: (a: IFormidableFieldOption, b: IFormidableFieldOption) => number;
 
+  /** The projected options. One may sit inside a wrapper element rather than directly in the field. */
   @ContentChildren(FORMIDABLE_FIELD_OPTION, { descendants: true })
   optionComponents?: QueryList<IFormidableFieldOption>;
 
@@ -45,7 +55,7 @@ export abstract class BaseOptionFieldDirective<T = string | null>
 
   protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
 
-  /** The highlighted option's value, so a reconcile can follow it across a changed list. */
+  // The highlighted option's value, so a reconcile can follow it across a changed list.
   protected highlightedOptionValue: string | null = null;
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -66,22 +76,20 @@ export abstract class BaseOptionFieldDirective<T = string | null>
       .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
   }
 
-  /** Recombines the options and re-reconciles selection and highlight against them. */
+  // Recombines the options and re-reconciles selection and highlight against them.
   protected abstract onOptionsChanged(): void;
 
-  /** The options the highlight walks — the rendered list, which `autocomplete-field` filters. */
+  // The options the highlight walks — the rendered list, which `autocomplete-field` filters.
   protected abstract get activeOptions(): IFormidableFieldOption[];
 
-  /**
-   * The value the selection claims the highlight for. `null` for a multi-select field, which has no
-   * single selection to claim it.
-   */
+  // The value the selection claims the highlight for. `null` for a multi-select field, which has no single
+  // selection to claim it.
   // eslint-disable-next-line @typescript-eslint/class-literal-property-style
   protected get selectedOptionValue(): string | null {
     return null;
   }
 
-  /** `null` for a negative index, so a field with nothing highlighted emits no `aria-activedescendant`. */
+  // `null` for a negative index, so a field with nothing highlighted emits no `aria-activedescendant`.
   protected optionId(index: number): string | null {
     return index >= 0 ? `${this.fieldId}-option-${index}` : null;
   }

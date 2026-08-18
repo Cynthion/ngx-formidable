@@ -57,6 +57,9 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 - **Usage Lives Elsewhere**: no `@example` blocks. Usage belongs in the root `README.md` and `user/components.md`, which have exactly one copy of it.
 - **Inline Comments**: minimize them; prefer self-explanatory code and names. The exception is a trap, where the comment stays at the line it protects rather than moving to `tech/`.
 - **Rationale Goes To `tech/`**: a comment explaining a cross-file design belongs in the matching `tech/*.md`, with a one-line pointer left behind.
+- **Consumer Perspective**: a doc comment answers what a consumer does with the symbol — what it is, what it accepts, and which sibling to pick instead. It never explains how the library is built. State the differences between components explicitly, because that is what a consumer reads the comment for.
+- **Shipped, Not Repo-Relative**: doc comments reach a consumer's editor through the published `.d.ts`. `.documentation/` is not published, so no doc comment references a `user/` or `tech/` path; state the fact inline instead. Such a pointer lives in a `//` comment, which no `.d.ts` carries.
+- **Visibility Decides Audience**: a `public` member's doc is consumer-facing. A `protected` member's is extender-facing, and earns a doc comment only where it is part of the extension contract on `BaseFieldDirective` or `BaseOptionFieldDirective`. A `private` member's doc is stripped from the `.d.ts` altogether, so its rationale belongs in a `//` comment.
 
 ## Styling
 

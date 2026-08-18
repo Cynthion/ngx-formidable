@@ -33,6 +33,7 @@ export interface IFormidableValidator<T = Record<string, unknown>> {
 /** InjectionToken for the validator the form directive delegates to. Without it, nothing is validated. */
 export const FORMIDABLE_VALIDATOR = new InjectionToken<IFormidableValidator>('FORMIDABLE_VALIDATOR');
 
+/** Reads the messages a field should display out of Angular's raw error bag. */
 export type FormidableErrorExtractorFn = (errors: ValidationErrors | null) => string[];
 
 /**
@@ -44,6 +45,7 @@ export const FORMIDABLE_ERROR_EXTRACTOR = new InjectionToken<FormidableErrorExtr
   factory: () => (errors) => (errors?.['errors'] as string[] | undefined) ?? (errors ? Object.keys(errors) : [])
 });
 
+/** Maps one extracted message to the text a user reads. Applied to every message the library renders. */
 export type FormidableErrorTranslatorFn = (error: string) => string;
 
 /** InjectionToken for providing a translation function for error messages. */

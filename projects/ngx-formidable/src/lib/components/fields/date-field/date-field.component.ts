@@ -41,55 +41,17 @@ import {
 import { BaseFieldDirective } from '../base-field.directive';
 
 /**
- * An input field for selecting dates via masked text entry or a Pikaday calendar popup.
- * Provides:
- * - Masked input (ngx-mask) according to a Unicode date format (e.g. "yyyy-MM-dd").
- * - Automatic parsing/formatting.
- * - Simple keyboard handling.
- * - Pikaday calendar panel (with customizable options: minDate, maxDate, firstDay, i18n labels, yearRange, etc.).
+ * A date entered three ways over one value: typed into a mask derived from `unicodeTokenFormat`, picked from a
+ * Pikaday calendar in the panel, or stepped with the arrow keys on the segment under the caret.
  *
- * @input unicodeTokenFormat?: string
- *   Unicode date format mask (defaults to "yyyy-MM-dd").
+ * Typing commits on blur, because a half-typed date is not a date — the exception is clearing the field,
+ * which commits at once so the arrows step from the default again. The calendar and the arrows commit
+ * immediately. A step outside `minDate`/`maxDate` is refused rather than clamped.
  *
- * Project `[formidableFieldToggleIcon]` content to replace the default CSS arrow of the panel toggle.
- * The consumer styles it (size, color, hover); the toggle centers it and carries the `open` class while the panel is open.
+ * Project `[formidableFieldToggleIcon]` content to replace the calendar toggle's default icon. The inputs
+ * below `unicodeTokenFormat` are passed straight through to Pikaday under the same names.
  *
- * @input ariaLabel?: string
- * @input defaultDate?: Date
- * @input setDefaultDate?: boolean
- * @input firstDay?: number
- * @input minDate?: Date
- * @input maxDate?: Date
- * @input disableWeekends?: boolean
- * @input disableDayFn?: (date: Date) => boolean
- * @input yearRange?: number | number[]
- * @input i18n?: PikadayI18nConfig
- * @input yearSuffix?: string
- * @input showMonthAfterYear?: boolean
- * @input showDaysInNextAndPreviousMonths?: boolean
- * @input enableSelectionDaysInNextAndPreviousMonths?: boolean
- * @input numberOfMonths?: number
- *   All map to PikadayOptions for calendar behavior.
- *
- * @input isPanelOpen: boolean
- * @input panelPosition?: 'left' | 'right' | 'full' | 'sheet'
- *   Controls popup open state and positioning.
- *
- * @output valueChanged: EventEmitter<Date|null>
- * @output focusChanged: EventEmitter<boolean>
- *   Emitted when the date is selected/cleared or focus changes.
- *
- * Example:
- * ```html
- * <formidable-date-field
- *   name="birthdate"
- *   ngModel
- *   [unicodeTokenFormat]="'dd.MM.yyyy'"
- *   [minDate]="minDate"
- *   [maxDate]="maxDate"
- *   [yearRange]="[1900, 2025]"
- * ></formidable-date-field>
- * ```
+ * `time-field` is the same interface for a time of day, without a panel.
  */
 @Component({
   selector: 'formidable-date-field',
@@ -122,7 +84,7 @@ export class DateFieldComponent
 
   @ContentChild(FieldToggleIconDirective) private projectedToggleIcon?: FieldToggleIconDirective;
 
-  /** False while no `[formidableFieldToggleIcon]` is projected, which is when the default CSS arrow is drawn. */
+  // False while no `[formidableFieldToggleIcon]` is projected, which is when the default CSS arrow is drawn.
   protected hasToggleIcon = false;
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
@@ -195,10 +157,8 @@ export class DateFieldComponent
     numberOfMonths: 1
   };
 
-  /**
-   * The inputs `updateOptions()` reads. Every Pikaday passthrough input has a `defaultOptions` key
-   * of the same name (it needs one for its fallback); only `format` is fed by `unicodeTokenFormat`.
-   */
+  // The inputs `updateOptions()` reads. Every Pikaday passthrough input has a `defaultOptions` key of the
+  // same name (it needs one for its fallback); only `format` is fed by `unicodeTokenFormat`.
   private readonly optionInputs = new Set([...Object.keys(this.defaultOptions), 'unicodeTokenFormat']);
 
   private picker?: Pikaday;
@@ -245,11 +205,9 @@ export class DateFieldComponent
     if (changedOptions.includes('unicodeTokenFormat')) this.setDate(this.selectedDate);
   }
 
-  /**
-   * Typing commits on blur — a half-typed date is not a date — so value changes are handled in the
-   * selectDate method. Wiping the text is the exception: it commits at once, or the cleared date would
-   * stay the model's and `stepSegment` would keep stepping from it.
-   */
+  // Typing commits on blur — a half-typed date is not a date — so value changes are handled in the
+  // selectDate method. Wiping the text is the exception: it commits at once, or the cleared date would stay
+  // the model's and `stepSegment` would keep stepping from it.
   protected override onValueChange(): void {
     if (this.selectedDate && this.isInputCleared) {
       this.setDate(null);
@@ -277,7 +235,7 @@ export class DateFieldComponent
     this.trySetDateFromInput(this.inputRef.nativeElement.value);
   }
 
-  /** Focus moved onto this field's own panel, so the blur that follows is neither a commit nor a touch. */
+  // Focus moved onto this field's own panel, so the blur that follows is neither a commit nor a touch.
   protected override ignoresBlur(): boolean {
     const ignore = this.ignoreNextBlur;
     this.ignoreNextBlur = false;
@@ -340,13 +298,11 @@ export class DateFieldComponent
     }
   }
 
-  /**
-   * Steps the date part under the caret by one, and leaves that part selected so repeated arrows
-   * keep to it — and so the next digit typed replaces it.
-   *
-   * The input text is what gets stepped, not `selectedDate`: it also carries what was typed but not
-   * yet committed. An empty field is seeded first, so arrows alone can fill it.
-   */
+  // Steps the date part under the caret by one, and leaves that part selected so repeated arrows keep to
+  // it — and so the next digit typed replaces it.
+  //
+  // The input text is what gets stepped, not `selectedDate`: it also carries what was typed but not yet
+  // committed. An empty field is seeded first, so arrows alone can fill it.
   private stepSegment(direction: 1 | -1): void {
     const input = this.inputRef.nativeElement;
     const segment = findSegmentAtCaret(this.unicodeTokenFormat, input.selectionStart ?? 0);
@@ -366,7 +322,7 @@ export class DateFieldComponent
     setTimeout(() => input.setSelectionRange(segment.start, segment.end));
   }
 
-  /** A step is refused rather than clamped, so arrows can never reach a date the calendar forbids. */
+  // A step is refused rather than clamped, so arrows can never reach a date the calendar forbids.
   private isOutOfRange(date: Date): boolean {
     if (this.minDate && date < normalizeTimePart(this.minDate)) return true;
     if (this.maxDate && date > normalizeTimePart(this.maxDate)) return true;
@@ -402,7 +358,7 @@ export class DateFieldComponent
     return this.inputRef.nativeElement;
   }
 
-  /** Mirrors the template: there is nothing to open once the field is readonly or disabled. */
+  // Mirrors the template: there is nothing to open once the field is readonly or disabled.
   get hasInFieldToggle(): boolean {
     return !this.readonly && !this.disabled;
   }
@@ -413,6 +369,10 @@ export class DateFieldComponent
 
   // #region IFormidableDateField
 
+  /**
+   * A Unicode date format (`y`, `M`, `d` tokens). Decides the mask, the display, and which segment the arrow
+   * keys step. An unrecognized format warns and falls back to the default.
+   */
   @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
   /** What an empty, unfocused field shows: underscores (default, "____-__-__") or the `unicodeTokenFormat` ("dd . MM . yyyy"). */
   @Input() emptyHint: FormidableEmptyHint = 'underscores';
@@ -430,24 +390,25 @@ export class DateFieldComponent
     return true;
   }
 
-  /** ngxMask's own empty display: the mask with every slot as its placeholder character. */
+  // ngxMask's own empty display: the mask with every slot as its placeholder character.
   private get maskPlaceholder(): string {
     return this.ngxMask.replace(/\w/g, '_');
   }
 
-  /** The resting display of an empty field for the current `emptyHint`: the format string, or `maskPlaceholder`. */
+  // The resting display of an empty field for the current `emptyHint`: the format string, or
+  // `maskPlaceholder`.
   private get emptyDisplay(): string {
     return this.emptyHint === 'format' ? (this.unicodeTokenFormat ?? '') : this.maskPlaceholder;
   }
 
-  /** ngxMask either empties the input outright or leaves the slots it renders for a focused empty field. */
+  // ngxMask either empties the input outright or leaves the slots it renders for a focused empty field.
   private get isInputCleared(): boolean {
     const value = this.inputRef.nativeElement.value;
 
     return value === '' || value === this.maskPlaceholder;
   }
 
-  /** Shows the `emptyHint` at rest, but lets ngxMask own the text while focused. */
+  // Shows the `emptyHint` at rest, but lets ngxMask own the text while focused.
   private renderEmpty(): void {
     renderEmptyMask(this.inputRef.nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused);
   }
@@ -475,20 +436,49 @@ export class DateFieldComponent
 
   // #region IFormidablePikadayOptions
 
+  /** Accessible name for the calendar itself, which is a `dialog` and so needs one of its own. */
   @Input() ariaLabel?: string;
+
+  /** Where the calendar opens, and what an arrow key steps from, when the field is empty. */
   @Input() defaultDate?: Date;
+
+  /** Whether `defaultDate` is also selected on open, rather than only shown. */
   @Input() setDefaultDate?: boolean;
+
+  /** First day of the week, `0` for Sunday. */
   @Input() firstDay?: number;
+
+  /** Earliest selectable date. Also refuses an arrow step past it, rather than clamping to it. */
   @Input() minDate?: Date;
+
+  /** Latest selectable date. Also refuses an arrow step past it, rather than clamping to it. */
   @Input() maxDate?: Date;
+
+  /** Makes Saturdays and Sundays unselectable, without needing a `disableDayFn` for it. */
   @Input() disableWeekends?: boolean;
+
+  /** Returns `true` for a date that cannot be selected — holidays, blackout dates. */
   @Input() disableDayFn?: (date: Date) => boolean;
+
+  /** A number of years either side of the current one, or an explicit `[from, to]` pair. */
   @Input() yearRange?: number | number[];
+
+  /** Month and weekday names, and the navigation labels. Replace it whole; there is no per-key merge. */
   @Input() i18n?: PikadayI18nConfig = undefined;
+
+  /** Appended to the year in the calendar's header — a era marker, or a localized "year" word. */
   @Input() yearSuffix?: string;
+
+  /** Puts the year before the month in the header, for locales that read it that way. */
   @Input() showMonthAfterYear?: boolean;
+
+  /** Fills the leading and trailing cells of the grid with the neighbouring months' days. */
   @Input() showDaysInNextAndPreviousMonths?: boolean;
+
+  /** Makes those neighbouring-month days selectable rather than only visible. */
   @Input() enableSelectionDaysInNextAndPreviousMonths?: boolean;
+
+  /** How many months the calendar shows side by side. */
   @Input() numberOfMonths?: number;
 
   private updateOptions(): void {
@@ -550,6 +540,10 @@ export class DateFieldComponent
 
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
+  /**
+   * Opens and closes the calendar from outside. Nothing opens it on focus, and a plain `ArrowDown` steps the
+   * value rather than opening it — `Alt` with an arrow is what opens it from the keyboard.
+   */
   @Input()
   get isPanelOpen(): boolean {
     return this._isPanelOpen;
@@ -558,22 +552,22 @@ export class DateFieldComponent
     this.togglePanel(val);
   }
 
+  /** Where the calendar opens. The three anchored positions flip above the field when there is no room below. */
   @Input() panelPosition: FormidablePanelPosition = 'right';
 
   private _isPanelOpen = false;
   private ignoreNextBlur = false;
 
-  /** Mousedown is used to prevent sending focusChanged events. */
+  // Mousedown is used to prevent sending focusChanged events.
   protected toggleMouseDown(event: MouseEvent): void {
     event.preventDefault();
     this.inputRef.nativeElement.focus(); // ensure input remains focused, so keyboard events work
     this.togglePanel(!this.isPanelOpen);
   }
 
-  /**
-   * Workaround: Because the <input> element might have regained focus (for keyboard events), the focus needs to be set to the panel first.
-   * Otherwise, clicking the nested <select>, etc. would not work as expected.
-   */
+  // Workaround: Because the <input> element might have regained focus (for keyboard events), the focus
+  // needs to be set to the panel first. Otherwise, clicking the nested <select>, etc. would not work as
+  // expected.
   protected panelMouseDown(event: MouseEvent): void {
     const target = event.target as HTMLElement;
 
@@ -686,22 +680,18 @@ export class DateFieldComponent
 
   // #region Pikaday fix
 
-  /**
-   * Developer Note:
-   * Pikaday’s internal <select> elements for month/year do not include `id` or `name`
-   * attributes by default. This triggers Chrome’s "A form field element should have
-   * an id or name" warning during audits. While it’s not strictly required for
-   * functionality, adding these attributes:
-   *   - Removes the Chrome warning.
-   *   - Improves accessibility (screen readers can target the controls).
-   *   - Produces predictable, unique IDs for easier testing/debugging.
-   *
-   * We hook into Pikaday’s `onDraw` (and run once on init) to set both `id` and `name`
-   * based on the field’s `name`/`fieldId`. A MutationObserver is also attached to catch
-   * any DOM rebuilds outside of `onDraw`.
-   *
-   * This is a cosmetic/accessibility fix — it does not affect Pikaday’s behavior.
-   */
+  // Developer Note:
+  // Pikaday’s internal <select> elements for month/year do not include `id` or `name` attributes by
+  // default. This triggers Chrome’s "A form field element should have an id or name" warning during
+  // audits. While it’s not strictly required for functionality, adding these attributes:
+  //   - Removes the Chrome warning.
+  //   - Improves accessibility (screen readers can target the controls).
+  //   - Produces predictable, unique IDs for easier testing/debugging.
+  //
+  // We hook into Pikaday’s `onDraw` (and run once on init) to set both `id` and `name` based on the field’s
+  // `name`/`fieldId`. A MutationObserver is also attached to catch any DOM rebuilds outside of `onDraw`.
+  //
+  // This is a cosmetic/accessibility fix — it does not affect Pikaday’s behavior.
 
   private mo?: MutationObserver;
 

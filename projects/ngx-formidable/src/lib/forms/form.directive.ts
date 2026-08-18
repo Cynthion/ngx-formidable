@@ -38,69 +38,10 @@ import { fillMissing, getAllFormErrors, mergeValuesAndRawValues, set } from './f
  * Turns an Angular `<form>` into a reactive value, validity and error surface.
  *
  * Validator-agnostic: it owns the model, the targets and the debouncing, and delegates the rules to whatever
- * `FORMIDABLE_VALIDATOR` is provided on the form — the Vest adapter, a consumer's own, or nothing at all, in
+ * `FORMIDABLE_VALIDATOR` is provided on the form — the Vest adapter, one of your own, or nothing at all, in
  * which case the form is still observable but nothing validates.
- *
- * Inputs:
- * - `@Input() formValue: T | null`
- *   The current model value of the form (including disabled controls).
- *
- * - `@Input() formShape: DeepRequired<T> | null`
- *   The shape of your form model — every key required — used to catch typos in dev mode.
- *
- * - `@Input() debounceMs: number`
- *   How long to wait after a change before running the validator, for every target on this form.
- *
- * - `@Input() dependentFields: Record<string, string[]> | null`
- *   Maps a target to the targets that depend on it. When the source's value changes, each dependant is
- *   re-validated, so a rule reading more than one field re-runs when any of them moves.
- *
- * - `@Input() showRequiredMarkers: boolean`
- *   Whether the fields on this form may render their required marker. Presentational only.
- *
- * - `@Input() revealOn: FormidableReveal`
- *   When the fields on this form reveal their messages. Independent of Angular's `updateOn`, which decides
- *   when the validator runs.
- *
- * Outputs:
- * - `@Output() formValueChange$: Observable<T>`
- *   Emits the merged value+rawValue on every control add/remove or value change.
- *
- * - `@Output() errorsChange$: Observable<FormidableFormErrors>`
- *   Emits every message on the form keyed by the target that reported it — including `WHOLE_FORM` — whenever
- *   validation status changes.
- *
- * - `@Output() dirtyChange$: Observable<boolean>`
- *   Emits `true` when any control becomes dirty, `false` when reset-to-pristine.
- *
- * - `@Output() validChange$: Observable<boolean>`
- *   Emits `true` if the form is VALID, `false` if INVALID (filtering out PENDING).
- *
- * - `pending$` and `idle$: Observable<FormControlStatus>`
- *   Streams you can subscribe to to show spinners or block submissions.
- *
- * Methods:
- * - `createAsyncValidator(target: string): AsyncValidatorFn`
- *   Returns an Angular async validator that debounces and runs the provided `FORMIDABLE_VALIDATOR`
- *   for the given target within the form model.
- *
- * @example A validator is supplied separately — see `NgxFormidableVestValidatorDirective` or the
- * `FORMIDABLE_VALIDATOR` token.
- * ```html
- * <form
- *   formidableForm
- *   [formValue]="user$ | async"
- *   [formShape]="userShape"
- *   [debounceMs]="200"
- *   (formValueChange$)="onModelChange($event)"
- *   (errorsChange$)="errors = $event"
- *   (validChange$)="isValid = $event"
- *   (dirtyChange$)="isDirty = $event"
- * >
- *   <!-- form fields here -->
- * </form>
- * ```
  */
+// The validation seam and its three layers: `tech/validation.md`.
 @Directive({
   selector: 'form[formidableForm]',
   standalone: true
@@ -155,9 +96,7 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
    */
   public readonly dependentFields = input<Record<string, string[]> | null>(null);
 
-  /**
-   * Emits every time the form status changes to PENDING.
-   */
+  /** The form has validation in flight — what a spinner or a disabled submit button binds to. */
   public readonly pending$: Observable<FormControlStatus> = this.ngForm.form.events.pipe(
     filter((v) => v instanceof StatusChangeEvent),
     map((v) => (v as StatusChangeEvent).status),
@@ -166,7 +105,8 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
   );
 
   /**
-   * Emits every time the form status changes to a state other than PENDING.
+   * Validation has settled, so the errors are readable. Also what gates the messages' repaint: async
+   * validation leaves the form PENDING with no errors on it yet.
    */
   public readonly idle$: Observable<FormControlStatus> = this.ngForm.form.events.pipe(
     filter((v) => v instanceof StatusChangeEvent),
@@ -176,8 +116,8 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
   );
 
   /**
-   * Emits when the form value changes or when a new FormControl or FormGroup is created.
-   * It also contains the disabled values (raw values).
+   * The whole model on every value change, and on every control added or removed. Merged with the raw values,
+   * so a disabled control's value is included rather than dropped.
    */
   @Output() public readonly formValueChange$ = this.ngForm.form.events.pipe(
     filter((v) => v instanceof ValueChangeEvent),
@@ -186,8 +126,9 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
   );
 
   /**
-   * Emits an object with all the errors of the form.
-   * every time a form control or form groups changes its status to valid or invalid
+   * Every message on the form, keyed by the target that reported it — a field or group path, or `WHOLE_FORM`.
+   * Each entry is normalized through `FORMIDABLE_ERROR_EXTRACTOR`, so a form mixing the validator with
+   * Angular's own validators still yields one homogeneous map.
    */
   @Output() public readonly errorsChange$ = this.ngForm.form.events.pipe(
     filter((v) => v instanceof StatusChangeEvent),
@@ -196,9 +137,7 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
     map(() => getAllFormErrors(this.ngForm.form, this.extractErrors))
   );
 
-  /**
-   * Emits when the form becomes dirty.
-   */
+  /** `true` once any control has been edited, `false` again on a reset to pristine. */
   @Output() public readonly dirtyChange$ = this.ngForm.form.events.pipe(
     filter((v) => v instanceof PristineChangeEvent),
     map((v) => !(v as PristineChangeEvent).pristine),
@@ -211,9 +150,7 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
     distinctUntilChanged()
   );
 
-  /**
-   * Emits when the form becomes valid.
-   */
+  /** `true` when the form is valid and `false` when it is invalid. Silent while pending, never `null`. */
   @Output() public readonly validChange$ = this.statusChanges$.pipe(
     filter((s: FormControlStatus) => s === 'VALID' || s === 'INVALID'),
     map((s: FormControlStatus) => s === 'VALID'),

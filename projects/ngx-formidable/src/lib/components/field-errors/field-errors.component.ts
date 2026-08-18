@@ -18,25 +18,12 @@ import {
 } from '../../models/validation.model';
 
 /**
- * Renders the list of validation error messages for a single NgModel or NgModelGroup.
- * - Automatically tracks previous errors while control is pending.
- * - Exposes `invalid` flag once the control has errors and `revealOn` says they may be shown, mirrored onto
- *   its host as `.is-invalid` and onto the surrounding decorator, which is what the state styling targets.
- * - Reads Angular's `AbstractControl.errors`, so it displays whatever wrote them — the form harness,
- *   Angular's built-in validators, or a consumer's own.
- * > Tip: provide `FORMIDABLE_ERROR_EXTRACTOR` to read a different error shape, and
- * > `FORMIDABLE_ERROR_TRANSLATOR` to globally translate the messages.
+ * Renders the validation messages for one control. Reach for `formidableFieldErrors` instead — it places
+ * this component for you, in the right spot. Place it by hand only to put the messages somewhere else.
  *
- * Inputs:
- * - `@Input() ngModel?: NgModel`
- * - `@Input() ngModelGroup?: NgModelGroup`
- * - `@Input() revealOn?: FormidableReveal`
- *
- * @example
- * ```html
- * <input name="username" ngModel required />
- * <formidable-field-errors [ngModel]="usernameModel"></formidable-field-errors>
- * ```
+ * The messages are whatever wrote the control's errors: the connected validator, Angular's own validators,
+ * or nothing at all. Provide `FORMIDABLE_ERROR_EXTRACTOR` to read a different error shape, and
+ * `FORMIDABLE_ERROR_TRANSLATOR` to run every message through a translation of your own.
  */
 @Component({
   selector: 'formidable-field-errors',
@@ -46,10 +33,13 @@ import {
   standalone: true
 })
 export class FieldErrorsComponent {
+  /** The control to report on. Exactly one of this and `ngModelGroup` is set. */
   @Input() ngModel?: NgModel;
+
+  /** The group to report on, for a rule whose target is the group rather than a field inside it. */
   @Input() ngModelGroup?: NgModelGroup;
 
-  /** This field's own reveal setting, which beats the form's. Pushed by `FieldErrorsDirective`. */
+  /** When the messages appear for this control. Overrides whatever the form set. */
   @Input() revealOn?: FormidableReveal;
 
   // Optional: messages render for any validator, and for none — neither the harness nor a form is required.
@@ -79,7 +69,7 @@ export class FieldErrorsComponent {
     return this.previousError;
   }
 
-  /** This field's setting first, then the form's, then the default. */
+  // This field's setting first, then the form's, then the default.
   private get reveal(): FormidableReveal {
     return this.revealOn ?? this.formDirective?.revealOn() ?? 'touched';
   }

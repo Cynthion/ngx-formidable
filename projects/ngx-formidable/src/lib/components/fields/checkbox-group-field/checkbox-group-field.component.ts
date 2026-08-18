@@ -23,20 +23,11 @@ import { FieldOptionComponent } from '../../field-option/field-option.component'
 import { BaseOptionFieldDirective } from '../base-option-field.directive';
 
 /**
- * A configurable group of selectable checkbox options.
- * Supports:
- * - `name`, `readonly`, `disabled`
- * - `[options]`: IFormidableFieldOption[]
- * - `<formidable-field-option>` children
- * - `[noOptionText]`, `[sortFn]`
+ * Several choices from options laid out in place rather than in a panel. The only field whose value is an
+ * array — every other option field commits a single value.
  *
- * @example
- * ```html
- * <formidable-checkbox-group-field name="allergies" ngModel [options]="allergyOptions">
- *   <!-- Optional inline options -->
- *   <formidable-field-option [value]="'nuts'" [label]="'Nuts'"></formidable-field-option>
- * </formidable-checkbox-group-field>
- * ```
+ * Its decorator renders in the `vertical` layout, so the label always sits outside whatever position is set
+ * on it, and a projected prefix or suffix is not rendered. `radio-group-field` is the single-choice one.
  */
 @Component({
   selector: 'formidable-checkbox-group-field',
