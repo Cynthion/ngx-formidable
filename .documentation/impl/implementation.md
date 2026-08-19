@@ -19,13 +19,53 @@ The source of truth for outstanding work. `impl/backlog.md` is the raw intake bu
 
 ### Phase 15 — Angular Version Support
 
-- the library is new and modern; it should support all latest Angular versions
-- how far back can it be supported? the main consumer (EnerQi) in sibling project is still on Angular 18; is it easier to upgrade EnerQi first?
-- should anything be changed in this library because modern Angular is zoneless and has Signals?
-- prepare a dedicated roadmap document with phases to go through
-- **Dependency Refresh**: this is where all dependencies are updated. It was held back so every feature phase ran on one baseline; the cost is that the release ships on the current Angular major with `ngx-mask` already a major ahead of it.
-- **Timer Re-Audit**: re-run the audit once the app is zoneless. Under zone change detection a `queueMicrotask` runs _before_ change detection, which is why nothing converted in Phase 10 — every remaining `setTimeout` waits on rendered DOM or on ngxMask init. Zoneless makes `afterNextRender` the candidate rather than `queueMicrotask`.
-- update typescript config
+The four decisions the sub-phases execute. They are not themselves work; 15a through 15d are.
+
+- **Support Floor Is Angular 22**: the floor a consumer must meet is the major the library is **built** with, because ng-packagr emits partial compilation and the consumer's linker requires the app to be at or above it. A newer app consuming an older build always works, so the range is one-sided and the floor is the only lever. Nothing is published yet and the only consumer is EnerQi's tarball, which makes the choice free — and Angular now supports a major for twelve months active plus twelve LTS, so everything below the two most recent majors is already end of life.
+- **EnerQi Is Independent**: the tarball EnerQi holds keeps working in a newer app, so neither project blocks the other and there is no sequencing question. This repo goes first, being the smaller surface with no router, SSR, Ionic, Storybook or Jest builder — the cheap place to find what four majors of migrations break. The one consequence is that EnerQi takes no further library version until it reaches the new floor.
+- **Zoneless Is Mandatory**: zoneless is what a new app runs by default, and there `NgZone.run()` does not schedule change detection. Every field relies on zone patching in at least one path; the worst is `date-field`, whose Pikaday `onSelect` commits the value and closes the panel with no repaint of its own.
+- **Signals Before Zoneless**: converting the public surface to the signal API is breaking, and pre-release is the only free moment for that. It also comes first because signal-backed state notifies zoneless change detection by itself, so most of the zoneless work disappears rather than being done twice.
+
+### Phase 15a — Toolchain And Dependency Refresh
+
+Depends on nothing. Zone-based throughout, and no behavior change.
+
+- **Node First**: the installed Node is below what the next Angular major requires, so nothing else starts until it moves.
+- **One Major At A Time**: `ng update @angular/core @angular/cli` per major, four times, 18 to 22. Read each migration's output rather than accepting it — one of them prunes unused standalone imports, and `CommonModule` is imported by thirteen files that do not all still need it.
+- **Builders**: `browser-esbuild` becomes the application builder, and the Karma builder becomes the unified unit-test builder. That builder still runs Karma and Jasmine, which is what keeps the specs' `fakeAsync` usage alive.
+- **TypeScript Config**: `module` becomes `preserve` and `moduleResolution` goes with it; `useDefineForClassFields: false` is dropped, which changes class-field emit and has to be proven rather than assumed; `strictStandalone` is added, since `impl/conventions.md` already requires it. Everything stricter than the Angular template stays, the library's own `removeComments` override included.
+- **Host Binding Type Checking**: `typeCheckHostBindings` defaults on in one of the majors crossed here. Expect new errors in `host` literals and in `@HostBinding` / `@HostListener`.
+- **Dependency Refresh**: every dependency moves in this sub-phase. `ngx-mask` is the only one that pins an Angular major, and it pins the one being adopted. The date library's major carries no signature change for the functions in use, and Pikaday has no update at all.
+- **Delete The `uuid` Peer**: it backs one line, the field id in `BaseFieldDirective`. A module-level counter replaces it, and one peer dependency leaves every consumer's install.
+- **Peers And Engines**: the peer range and `engines.node` in the library's `package.json` follow the new floor.
+- **Proof**: `lint`, `style-lint`, `prettier:check`, `test`, `build:lib` and the demo, green at every major rather than only at the end. Then the tarball installed into a scratch app on the new floor, which is what proves the peer range and the linker floor together.
+
+### Phase 15b — Signal Public API
+
+Depends on Phase 15a. Breaking, and the last chance to be.
+
+- **Inputs And Outputs**: `@Input()` becomes `input()` or `input.required()`, `@Output()` becomes `output()`, and the `IFormidable*` interfaces move with them — an output is no longer an `EventEmitter`, which every custom field sees.
+- **The Three Setter Inputs**: `isPanelOpen` is a getter and setter with a side effect on the dropdown, autocomplete and date fields. A signal input has no setter, so it becomes a model input or an explicit open and close pair.
+- **The Self-Written Label**: `FieldOptionComponent` assigns its own `label` input from projected content. A signal input is read-only from inside as well, so it needs a linked signal or a separate internal one.
+- **`ngOnChanges` Survives**: signal inputs still report through it, so the six implementations keep working across this sub-phase and are retired in 15c.
+- **Definition Of Done**: `user/components.md`, `user/custom-fields.md`, the root `README.md`, the doc comments and the demo's `example-counter-field`, which is the quoted reference implementation.
+
+### Phase 15c — Signal Queries And State
+
+Depends on Phase 15b.
+
+- **Queries**: every `@ViewChild`, `@ViewChildren`, `@ContentChild` and `@ContentChildren` becomes a signal query, and the two `changes` subscriptions in the option fields become effects.
+- **State**: the state a template reads — panel open, highlighted index, field focused, field filled, label animated — becomes signals and computed values.
+- **Deletion Is The Point**: the manual `markForCheck` plumbing this makes redundant goes, `IFormidableField.markForCheck()` from the ARIA phase included, and the six `ngOnChanges` implementations with it.
+
+### Phase 15d — Zoneless And Timer Re-Audit
+
+Depends on Phase 15c.
+
+- **Flip The Demo**: drop `provideZoneChangeDetection` and the `zone.js` build polyfill. Keep `zone.js` and `zone.js/testing` in the **test** polyfills, which is what the specs' `fakeAsync` calls need.
+- **Close The Residue**: whatever 15b and 15c did not already cover — Pikaday's callbacks, the `ngZone.run` re-entries around the global keydown, outside-click and resize listeners, and the decorator's `requestAnimationFrame` label gate.
+- **Timer Re-Audit**: the audit deferred from Phase 10. Under zone change detection a `queueMicrotask` runs _before_ change detection, which is why nothing converted then — every remaining `setTimeout` waits on rendered DOM or on ngxMask init. Zoneless makes `afterNextRender` the candidate rather than `queueMicrotask`.
+- **Proof**: zoneless specs, with `provideZonelessChangeDetection()` in the TestBed, for a calendar pick closing the panel and rendering its value, an outside click closing a dropdown, the label animation gate and option projection. Each runs again with its own fix reverted.
 
 ### Phase 15.5 — CI Workflow
 
@@ -41,7 +81,6 @@ Depends on nothing; do it before Release.
 - **Package Registry**: change from GitHub Package registry to npm.
 - **Registry**: reconcile `publish:lib --access public` with the GitHub Packages registry.
 - **Tag**: tag the release commit. Final step.
-- **Known Trade-Off**: this releases on the current Angular major with the existing `ngx-mask` peer mismatch, because the dependency refresh belongs to Phase 15.
 
 ### Phase 16.5 — Date Range Field
 
@@ -213,6 +252,7 @@ Defects found while shipping a phase rather than filed ahead of it. Recorded her
 | A unitless `0` on any length variable is a `<number>`, not a `<length>`, and invalidates every `calc()` deriving from it — silently taking out all label offsets and the panel's alignment at once. Cost real time to diagnose twice; the library's own SCSS already carries `0rem` with a stylelint waiver for it                                                                                                                                                                                                                                                                                                                                                                                     | Documented in `README.md`                                       |
 | Stale `package-lock.json` in the library project                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Removed, with a `.gitignore` guard                              |
 | The demo writes the selected theme to `localStorage` but never reads it back on init                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Fixed while shipping Phase 12.5                                 |
+| The `ngx-mask` peer mismatch the roadmap carried was never one. It declared `@angular/*` as `>=14.0.0` across three consecutive majors, so being a major ahead of the library cost nothing; only its newest major pins an Angular major, and that is the one Phase 15a adopts                                                                                                                                                                                                                                                                                                                                                                                                                          | Premise corrected while scoping Phase 15                        |
 | No CI workflow; `deploy.yml` reinstalls from scratch rather than from the lockfile                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Scheduled as Phase 15.5                                         |
 | A `decoratorLayout` input on the toggle does not make sense. The decorator gates behavior on the layout, not on the field: `horizontal` unlocks the inside/border label positions and absolutely positioned adornments, `vertical` wraps the field in a `fieldset`/`legend`. A toggle is a fixed-size pill, so an inside label lands on it and a prefix overlaps the switch, and a fieldset around a single control is wrong. `inline` is the only layout it does not break in                                                                                                                                                                                                                         | Item dropped while shipping Phase 10                            |
 | `date-field`'s `togglePanel(true)` focused `panelRef` synchronously, before the open state had rendered — a `visibility: hidden` element is not focusable, so the call never did anything. Deferring it until it could would pull focus off the input and run its commit-on-blur path, so it was removed rather than fixed; `focus.spec.ts` pins both halves                                                                                                                                                                                                                                                                                                                                           | Removed while shipping Phase 10                                 |
