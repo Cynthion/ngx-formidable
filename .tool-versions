@@ -1,3 +1,3 @@
-# Note: Also update GitHub Workflow variables!
+# Note: Also update GitHub Workflow & package.json variables!
 
-nodejs 20.17.0
+nodejs 26.7.0
