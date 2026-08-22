@@ -36,7 +36,6 @@ import { BaseOptionFieldDirective } from '../base-option-field.directive';
   templateUrl: './dropdown-field.component.html',
   styleUrls: ['./dropdown-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [CommonModule, FieldOptionComponent],
   providers: [
     // required for ControlValueAccessor to work with Angular forms

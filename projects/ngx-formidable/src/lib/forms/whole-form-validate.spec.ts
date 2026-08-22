@@ -1,4 +1,4 @@
-import { Component, Directive } from '@angular/core';
+import { Component, Directive, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -28,7 +28,6 @@ interface Model extends Record<string, unknown> {
 }
 
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
@@ -37,6 +36,7 @@ interface Model extends Record<string, unknown> {
     StubValidatorDirective,
     InputFieldComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -55,7 +55,6 @@ class BareAttributeHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
@@ -64,6 +63,7 @@ class BareAttributeHostComponent {
     StubValidatorDirective,
     InputFieldComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -83,8 +83,8 @@ class SwitchedOffHostComponent {
 
 /** A form whose only rule is Angular's own `required`, so `errorsChange$` has a non-message shape to fold. */
 @Component({
-  standalone: true,
   imports: [FormsModule, NgxFormidableFormDirective, InputFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -119,7 +119,6 @@ class CrossFieldValidatorDirective implements IFormidableValidator {
  * back into it. A plain `<input ngModel>` keeps this clear of a field component's mask and render timing.
  */
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
@@ -127,6 +126,7 @@ class CrossFieldValidatorDirective implements IFormidableValidator {
     NgxFormidableWholeFormValidateDirective,
     CrossFieldValidatorDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm

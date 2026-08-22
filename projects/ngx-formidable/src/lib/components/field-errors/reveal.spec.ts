@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { FieldErrorsDirective } from '../../directives/field-errors.directive';
@@ -27,8 +27,8 @@ const IMPORTS = [
 
 /** Asks for nothing, so it gets the default. */
 @Component({
-  standalone: true,
   imports: IMPORTS,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -47,8 +47,8 @@ class DefaultHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: IMPORTS,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -70,8 +70,8 @@ class RevealHostComponent {
 
 /** The form says one thing, this field says another. The field wins. */
 @Component({
-  standalone: true,
   imports: IMPORTS,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm

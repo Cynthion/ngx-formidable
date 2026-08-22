@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
 import { FormidablePanelPosition } from '../../models/formidable.model';
@@ -20,8 +20,8 @@ import { DateFieldComponent } from './date-field/date-field.component';
  */
 
 @Component({
-  standalone: true,
   imports: [DateFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div [style.width.px]="narrowWidth">
       <formidable-date-field

@@ -1,4 +1,4 @@
-import { Component, ElementRef, forwardRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, forwardRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NG_VALUE_ACCESSOR, NgForm } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -23,6 +23,7 @@ import { DateFieldComponent } from './date-field/date-field.component';
     #inputRef
     (blur)="onFocusChange(false)"
     (focus)="onFocusChange(true)" />`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -69,8 +70,8 @@ class BlurCommitFieldComponent extends BaseFieldDirective<string> {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, BlurCommitFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form [ngFormOptions]="{ updateOn: 'blur' }">
       <formidable-blur-commit-field
@@ -84,8 +85,8 @@ class BlurCommitHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, DateFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-date-field

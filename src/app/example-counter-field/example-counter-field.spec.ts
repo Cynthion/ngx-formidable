@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import {
@@ -16,7 +16,6 @@ import { ExampleCounterFieldComponent } from './example-counter-field.component'
  */
 
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
@@ -25,6 +24,7 @@ import { ExampleCounterFieldComponent } from './example-counter-field.component'
     FieldLabelDirective,
     ExampleCounterFieldComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -88,8 +88,7 @@ describe('custom field contract: example-counter-field', () => {
     const labelId = counter().getAttribute('aria-labelledby');
 
     expect(labelId).toBeTruthy();
-    // An attribute selector, not `#id`: `fieldId` is a uuid, and one starting with a digit is not a
-    // valid CSS identifier — `querySelector('#1219927b-…')` throws.
+    // An attribute selector, not `#id`: the assertion is about the idref, never the id's spelling.
     expect(root.querySelector(`[id="${labelId}"]`)?.textContent?.trim()).toBe('Pets');
   }));
 

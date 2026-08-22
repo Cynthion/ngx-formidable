@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
@@ -49,7 +49,6 @@ const options: IFormidableOption[] = [
 ];
 
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     FieldDecoratorComponent,
@@ -60,6 +59,7 @@ const options: IFormidableOption[] = [
     FieldLabelDirective,
     FieldHintDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field
@@ -107,8 +107,8 @@ class NamedFieldsHostComponent {
 
 /** The same group with nothing projected to name it. */
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, RadioGroupFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field name="colour" />
@@ -119,7 +119,6 @@ class UnlabelledHostComponent {}
 
 /** An input with real validation behind it — the only way to reach the invalid state honestly. */
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
@@ -130,6 +129,7 @@ class UnlabelledHostComponent {}
     FieldLabelDirective,
     FieldHintDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -155,8 +155,8 @@ class ErrorsHostComponent {
 
 /** The shape a consumer uses for a bare field: no decorator, so nothing to point at. */
 @Component({
-  standalone: true,
   imports: [FormsModule, InputFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<formidable-input-field name="field" />`
 })
 class NoDecoratorHostComponent {}
@@ -164,7 +164,7 @@ class NoDecoratorHostComponent {}
 describe('field ARIA', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideNgxMask()] }));
 
-  /** Ids are uuid-based and may start with a digit, which `#id` cannot select. */
+  /** An attribute selector, not `#id`: the assertions are about the idref, never the id's spelling. */
   function byId(root: HTMLElement, id: string): HTMLElement | null {
     return root.querySelector(`[id="${id}"]`);
   }

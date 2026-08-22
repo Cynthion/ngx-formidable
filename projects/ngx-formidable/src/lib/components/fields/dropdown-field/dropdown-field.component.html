@@ -18,7 +18,7 @@
       class="wrapped-input"
       [id]="fieldId"
       [placeholder]="placeholder"
-      [value]="selectedOption?.label"
+      [value]="selectedOption?.label ?? null"
       [attr.name]="name"
       [attr.readonly]="true"
       [attr.disabled]="disabled ? '' : null"
@@ -70,11 +70,11 @@
           [disabled]="option.disabled || false"
           [selected]="option.value === value"
           [highlighted]="i === (highlightedOptionIndex$ | async)">
-          <ng-container
-            *ngIf="option.template; else labelContent"
-            [ngTemplateOutlet]="option.template">
-          </ng-container>
-          <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
+          @if (option.template) {
+            <ng-container [ngTemplateOutlet]="option.template"> </ng-container>
+          } @else {
+            {{ option.label || option.value }}
+          }
         </formidable-field-option>
       } @empty {
         <!-- Plain text, not an option: a listbox must not offer its empty state as something to pick. -->

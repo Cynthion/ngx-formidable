@@ -34,7 +34,6 @@ import { BaseOptionFieldDirective } from '../base-option-field.directive';
   templateUrl: './radio-group-field.component.html',
   styleUrls: ['./radio-group-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [CommonModule, FieldOptionComponent],
   providers: [
     // required for ControlValueAccessor to work with Angular forms

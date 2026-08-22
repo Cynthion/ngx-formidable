@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { NgxMaskConfig, provideNgxMask } from 'ngx-mask';
@@ -61,8 +61,8 @@ function valueLeft(field: HTMLElement): number {
 }
 
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field
@@ -91,8 +91,8 @@ class InputHostComponent {
 
 /** Same field, but with a prefix wide enough to push the value inwards. */
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective, FieldPrefixDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field name="field" />
@@ -115,8 +115,8 @@ class PrefixHostComponent {
 
 /** Same field, but with an adornment sharing the label's row. */
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective, FieldLabelAdornmentDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field name="field" />
@@ -135,8 +135,8 @@ class LabelAdornmentHostComponent {
 
 /** A textarea top-aligns its value, so it clears an inside label with an offset rather than the padding. */
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, TextareaFieldComponent, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-textarea-field name="field" />
@@ -158,7 +158,6 @@ class TextareaHostComponent {
  * every one of them floats, whatever it shows while empty.
  */
 @Component({
-  standalone: true,
   imports: [
     FieldDecoratorComponent,
     DateFieldComponent,
@@ -167,6 +166,7 @@ class TextareaHostComponent {
     DropdownFieldComponent,
     FieldLabelDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-date-field name="date" />
@@ -205,8 +205,8 @@ class TextareaHostComponent {
 class WrappedInputHostComponent {}
 
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, RadioGroupFieldComponent, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field name="field" />
@@ -226,8 +226,8 @@ class RadioGroupHostComponent {}
  * has a value at all and the label is rendered resting — then corrected to floating a microtask later.
  */
 @Component({
-  standalone: true,
   imports: [FormsModule, FieldDecoratorComponent, DropdownFieldComponent, FieldOptionComponent, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-dropdown-field

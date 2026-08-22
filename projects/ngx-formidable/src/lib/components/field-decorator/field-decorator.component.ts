@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
   ContentChild,
   ElementRef,
@@ -41,12 +42,13 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
  * It reads the field rather than configuring it, so each field keeps its own layout — and a label position
  * that layout cannot honour falls back to `outside`.
  */
-// Deliberately not `OnPush` — see `tech/decoration.md`.
 @Component({
   selector: 'formidable-field-decorator',
   templateUrl: './field-decorator.component.html',
   styleUrls: ['./field-decorator.component.scss'],
-  standalone: true,
+  // Deliberately not `OnPush` — see `tech/decoration.md`.
+  // eslint-disable-next-line @angular-eslint/prefer-on-push-component-change-detection
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule]
 })
 export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormidableField<unknown> {

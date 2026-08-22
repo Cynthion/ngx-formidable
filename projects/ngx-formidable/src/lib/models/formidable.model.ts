@@ -41,12 +41,7 @@ export type FieldDecoratorLayout = 'horizontal' | 'vertical' | 'inline';
  * - `border-prefix`: as `border`, but aligned with a projected prefix instead of with the value.
  */
 export type FieldLabelPosition =
-  | 'outside'
-  | 'inside'
-  | 'inside-placeholder'
-  | 'inside-floating'
-  | 'border'
-  | 'border-prefix';
+  'outside' | 'inside' | 'inside-placeholder' | 'inside-floating' | 'border' | 'border-prefix';
 
 /**
  * Where the field's value sits vertically, which a projected prefix/suffix aligns itself with: the
@@ -194,29 +189,21 @@ type FormidableSelectFieldsKeys = 'name' | 'disabled';
 
 /** The subset of `<input/>` properties that are supported. */
 export interface IFormidableInputField
-  extends Pick<HTMLInputElement, FormidableInputFieldsKeys>,
-    IFormidableField,
-    IFormidableMaskField {}
+  extends Pick<HTMLInputElement, FormidableInputFieldsKeys>, IFormidableField, IFormidableMaskField {}
 
 type FormidableGroupFieldsKeys = 'name' | 'disabled';
 
 /** The subset of `<input type="radio"/> properties that are supported.` */
 export interface IFormidableRadioGroupField
-  extends Pick<HTMLInputElement, FormidableGroupFieldsKeys>,
-    IFormidableField,
-    IFormidableOptionField {}
+  extends Pick<HTMLInputElement, FormidableGroupFieldsKeys>, IFormidableField, IFormidableOptionField {}
 
 /** The subset of `<input type="checkbox"/> properties that are supported.` */
 export interface IFormidableCheckboxGroupField
-  extends Pick<HTMLInputElement, FormidableGroupFieldsKeys>,
-    IFormidableField<string[]>,
-    IFormidableOptionField {}
+  extends Pick<HTMLInputElement, FormidableGroupFieldsKeys>, IFormidableField<string[]>, IFormidableOptionField {}
 
 /** The subset of `<textarea/>` properties that are supported. */
 export interface IFormidableTextareaField
-  extends Pick<HTMLTextAreaElement, FormidableTextareaFieldsKeys>,
-    IFormidableField,
-    IFormidableMaskField {
+  extends Pick<HTMLTextAreaElement, FormidableTextareaFieldsKeys>, IFormidableField, IFormidableMaskField {
   /**
    * Enable or disable autosizing of the textarea.
    * If true, the textarea will automatically adjust its height based on the content.
@@ -227,9 +214,7 @@ export interface IFormidableTextareaField
 
 /** The subset of `<select/>` properties that are supported. */
 export interface IFormidableSelectField
-  extends Pick<HTMLSelectElement, FormidableSelectFieldsKeys>,
-    IFormidableField,
-    IFormidableOptionField {}
+  extends Pick<HTMLSelectElement, FormidableSelectFieldsKeys>, IFormidableField, IFormidableOptionField {}
 
 /** A dropdown adds nothing of its own: it is an option field whose list lives in a panel. */
 export interface IFormidableDropdownField extends IFormidableField, IFormidableOptionField {}
@@ -243,26 +228,25 @@ export interface IFormidableAutocompleteField extends IFormidableDropdownField {
 
 /** The subset of `PikadayOptions` that are supported. */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface IFormidablePikadayOptions
-  extends Pick<
-    PikadayOptions,
-    | 'ariaLabel'
-    | 'format'
-    | 'defaultDate'
-    | 'setDefaultDate'
-    | 'firstDay'
-    | 'minDate'
-    | 'maxDate'
-    | 'disableWeekends'
-    | 'disableDayFn'
-    | 'yearRange'
-    | 'i18n'
-    | 'yearSuffix'
-    | 'showMonthAfterYear'
-    | 'showDaysInNextAndPreviousMonths'
-    | 'enableSelectionDaysInNextAndPreviousMonths'
-    | 'numberOfMonths'
-  > {}
+export interface IFormidablePikadayOptions extends Pick<
+  PikadayOptions,
+  | 'ariaLabel'
+  | 'format'
+  | 'defaultDate'
+  | 'setDefaultDate'
+  | 'firstDay'
+  | 'minDate'
+  | 'maxDate'
+  | 'disableWeekends'
+  | 'disableDayFn'
+  | 'yearRange'
+  | 'i18n'
+  | 'yearSuffix'
+  | 'showMonthAfterYear'
+  | 'showDaysInNextAndPreviousMonths'
+  | 'enableSelectionDaysInNextAndPreviousMonths'
+  | 'numberOfMonths'
+> {}
 
 /** A date value entered through a mask, a calendar panel, or the arrow keys. */
 export interface IFormidableDateField extends IFormidableField<Date | null>, IFormidablePikadayOptions {

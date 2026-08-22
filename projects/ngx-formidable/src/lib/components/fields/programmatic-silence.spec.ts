@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -19,8 +19,8 @@ import { SliderFieldComponent } from './slider-field/slider-field.component';
  */
 
 @Component({
-  standalone: true,
   imports: [FormsModule, CheckboxGroupFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-checkbox-group-field
@@ -39,8 +39,8 @@ class CheckboxHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, DateFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-date-field
@@ -56,8 +56,8 @@ class DateHostComponent {
 
 /** 47 is neither on the step grid nor what the user asked for: the field corrects it to 50. */
 @Component({
-  standalone: true,
   imports: [FormsModule, SliderFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-slider-field
@@ -74,8 +74,8 @@ class SliderHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, InputFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-input-field
@@ -90,8 +90,8 @@ class MaskedHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, DropdownFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-dropdown-field

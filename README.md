@@ -16,7 +16,7 @@ Angular form fields you can actually theme, validated by whatever you already us
     <img src="https://img.shields.io/badge/demo-live-4f46e5" alt="Live demo">
   </a>
   <a href="https://angular.dev">
-    <img src="https://img.shields.io/badge/Angular-%5E18-dd0031" alt="Angular ^18">
+    <img src="https://img.shields.io/badge/Angular-%5E22-dd0031" alt="Angular ^22">
   </a>
   <a href="./LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License">
@@ -201,7 +201,7 @@ The package is published to GitHub Packages under the `@cynthion` scope, so npm 
 GitHub Packages authenticates every read, public package or not, so the token needs the `read:packages` scope. Then:
 
 ```bash
-npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday uuid
+npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday
 ```
 
 The library does not validate, so it brings no validation library. Add one only if you want it — `npm i vest` for the validator that ships in `@cynthion/ngx-formidable/vest`, or wire your own.
@@ -264,8 +264,8 @@ export type UserFormShape = DeepRequired<UserFormModel>;
 /** Every key the model may carry, all required — a dev-mode typo check, not a validator. */
 export const userFormShape: UserFormShape = { name: '', birthdate: new Date() };
 
-export const userFormSuite = staticSuite((model: UserFormModel, field?: string) => {
-	mode(Modes.ALL);
+export const userFormSuite = create((model: UserFormModel, field?: string) => {
+	mode(Modes.ALL); // Vest 6 defaults to `EAGER`, which reports only a field's first failing message
 	if (field) only(field); // the form asks about one target at a time
 
 	test('name', 'Name is required.', () => {

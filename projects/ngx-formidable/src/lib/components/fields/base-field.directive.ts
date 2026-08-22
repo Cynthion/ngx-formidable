@@ -15,10 +15,12 @@ import {
 } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NgControl } from '@angular/forms';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
-import { v4 as uuid } from 'uuid';
 import { openPanelPosition } from '../../helpers/position.helpers';
 import { FieldDecoratorLayout, IFormidableField } from '../../models/formidable.model';
 import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
+
+// Seeds every id the library mints.
+let nextFieldId = 0;
 
 /**
  * The base class a custom field extends. It supplies the value and focus channels, the `ControlValueAccessor`
@@ -47,7 +49,7 @@ export abstract class BaseFieldDirective<T = string | null>
    */
   protected abstract registeredKeys: string[];
 
-  protected id = uuid();
+  protected id = `formidable-field-${nextFieldId++}`;
   protected isFieldFocused = false;
   protected isFieldFilled = false;
   protected valueChangeSubject$ = new Subject<T>();

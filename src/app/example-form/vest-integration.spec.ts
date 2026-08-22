@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import {
@@ -26,7 +26,6 @@ import { ExampleFormModel, exampleFormValidationSuite } from './example-form.mod
  */
 
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
@@ -37,6 +36,7 @@ import { ExampleFormModel, exampleFormValidationSuite } from './example-form.mod
     InputFieldComponent,
     FieldErrorsDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -64,7 +64,6 @@ class DemoWiringHostComponent {
 
 /** The demo's `ngModelGroup`, so the group rule has the target it reports on. */
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
@@ -75,6 +74,7 @@ class DemoWiringHostComponent {
     InputFieldComponent,
     FieldErrorsDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -90,13 +90,13 @@ class DemoWiringHostComponent {
           <formidable-input-field
             formidableFieldErrors
             name="password"
-            [ngModel]="formValue.passwords?.password" />
+            [ngModel]="formValue.passwords?.password ?? null" />
         </formidable-field-decorator>
         <formidable-field-decorator>
           <formidable-input-field
             formidableFieldErrors
             name="confirmPassword"
-            [ngModel]="formValue.passwords?.confirmPassword" />
+            [ngModel]="formValue.passwords?.confirmPassword ?? null" />
         </formidable-field-decorator>
       </div>
     </form>
@@ -114,7 +114,6 @@ class GroupWiringHostComponent {
  * user actually takes, and the one where the bound model trails the form's own values.
  */
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
@@ -124,6 +123,7 @@ class GroupWiringHostComponent {
     NgxFormidableVestValidatorDirective,
     InputFieldComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -138,7 +138,7 @@ class GroupWiringHostComponent {
       <div ngModelGroup="passwords">
         <formidable-input-field
           name="password"
-          [ngModel]="formValue.passwords?.password" />
+          [ngModel]="formValue.passwords?.password ?? null" />
       </div>
     </form>
   `

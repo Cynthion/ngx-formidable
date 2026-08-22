@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { IFormidableOption } from '../../models/formidable.model';
@@ -21,8 +21,8 @@ import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.
  */
 
 @Component({
-  standalone: true,
   imports: [FormsModule, NgTemplateOutlet, RadioGroupFieldComponent, FieldOptionComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-radio-group-field
       name="wrapped"
@@ -62,8 +62,8 @@ class WrappedOptionsHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, CheckboxGroupFieldComponent, FieldOptionComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-checkbox-group-field
       name="looped"
@@ -85,8 +85,8 @@ class LoopedCheckboxHostComponent {
 // deliberately without ngModel: NgModel writes its own (empty) model back on every change detection,
 // which would clear the selection this suite is about
 @Component({
-  standalone: true,
   imports: [AutocompleteFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-autocomplete-field
       name="filtered"

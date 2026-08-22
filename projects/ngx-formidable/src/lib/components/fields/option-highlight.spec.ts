@@ -1,4 +1,4 @@
-import { Component, Type } from '@angular/core';
+import { Component, Type, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { IFormidableOption } from '../../models/formidable.model';
@@ -27,8 +27,8 @@ const options: IFormidableOption[] = [
 ];
 
 @Component({
-  standalone: true,
   imports: [FormsModule, RadioGroupFieldComponent, CheckboxGroupFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-radio-group-field
       name="colour"

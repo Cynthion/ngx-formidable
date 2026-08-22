@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -46,8 +45,7 @@ import { BaseFieldDirective } from '../base-field.directive';
   templateUrl: './time-field.component.html',
   styleUrls: ['./time-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [CommonModule, NgxMaskDirective],
+  imports: [NgxMaskDirective],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {

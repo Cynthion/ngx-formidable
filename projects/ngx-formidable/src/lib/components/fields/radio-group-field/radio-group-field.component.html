@@ -35,11 +35,11 @@
       [disabled]="option.disabled || disabled"
       [selected]="option.value === value"
       [highlighted]="i === (highlightedOptionIndex$ | async)">
-      <ng-container
-        *ngIf="option.template; else labelContent"
-        [ngTemplateOutlet]="option.template">
-      </ng-container>
-      <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
+      @if (option.template) {
+        <ng-container [ngTemplateOutlet]="option.template"> </ng-container>
+      } @else {
+        {{ option.label || option.value }}
+      }
     </formidable-field-option>
   } @empty {
     <div class="no-option">{{ noOptionsText }}</div>

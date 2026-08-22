@@ -1,4 +1,4 @@
-import { Component, Type } from '@angular/core';
+import { Component, Type, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -21,8 +21,8 @@ import { InputFieldComponent } from '../fields/input-field/input-field.component
  */
 
 @Component({
-  standalone: true,
   imports: [FormsModule, FieldDecoratorComponent, InputFieldComponent, FieldErrorsDirective, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-field-decorator>
@@ -43,7 +43,6 @@ class AngularValidatorsHostComponent {
 
 /** The same field with the `[ngModel]` hijack directive imported and no harness above it. */
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFieldValidateDirective,
@@ -51,6 +50,7 @@ class AngularValidatorsHostComponent {
     InputFieldComponent,
     FieldErrorsDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-field-decorator>

@@ -1,5 +1,13 @@
-import { CommonModule, DOCUMENT } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DOCUMENT,
+  ElementRef,
+  Input,
+  OnDestroy,
+  OnInit,
+  inject
+} from '@angular/core';
 import { ExampleIconComponent } from '../example-icon/example-icon.component';
 
 type Placement = 'right' | 'left' | 'top' | 'bottom';
@@ -10,8 +18,7 @@ type TriggerMode = 'click' | 'hover';
   templateUrl: './example-tooltip.component.html',
   styleUrls: ['./example-tooltip.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [CommonModule, ExampleIconComponent]
+  imports: [ExampleIconComponent]
 })
 export class ExampleTooltipComponent implements OnInit, OnDestroy {
   @Input() text = '';

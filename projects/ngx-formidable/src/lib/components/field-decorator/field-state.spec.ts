@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -37,8 +37,8 @@ function token(name: string): string {
 }
 
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field
@@ -59,8 +59,8 @@ class InputHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, RadioGroupFieldComponent, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field name="field" />
@@ -76,7 +76,6 @@ interface NameModel {
 
 /** A real form, so the flag is proven to travel from a validator all the way to the host class. */
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
@@ -87,6 +86,7 @@ interface NameModel {
     FieldErrorsDirective,
     FieldLabelDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm

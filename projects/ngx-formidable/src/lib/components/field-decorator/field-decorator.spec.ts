@@ -1,5 +1,4 @@
-import { NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
@@ -42,7 +41,6 @@ interface Model {
 const shape = { field: '' };
 
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
@@ -53,6 +51,7 @@ const shape = { field: '' };
     FieldPrefixDirective,
     FieldSuffixDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -78,8 +77,8 @@ class PrefixWithErrorsHostComponent {
 
 /** The same field with no decorator around it — the shape a consumer's custom field uses. */
 @Component({
-  standalone: true,
   imports: [FormsModule, NgxFormidableFormDirective, StubValidatorDirective, InputFieldComponent, FieldErrorsDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -100,8 +99,8 @@ class NoDecoratorHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, TextareaFieldComponent, FieldDecoratorComponent, FieldPrefixDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-textarea-field
@@ -122,7 +121,6 @@ class TextareaPrefixHostComponent {
 
 /** An adornment over a label that pushes the value down, so the two alignments visibly disagree. */
 @Component({
-  standalone: true,
   imports: [
     InputFieldComponent,
     FieldDecoratorComponent,
@@ -130,6 +128,7 @@ class TextareaPrefixHostComponent {
     FieldPrefixDirective,
     FieldSuffixDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field name="field" />
@@ -158,8 +157,8 @@ class AdornmentAlignmentHostComponent {
 
 /** An action in one slot and plain text in the other — the two have to answer a click differently. */
 @Component({
-  standalone: true,
   imports: [InputFieldComponent, FieldDecoratorComponent, FieldPrefixDirective, FieldSuffixDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field name="field" />
@@ -180,17 +179,18 @@ class AdornmentActionHostComponent {
 
 /** A prefix and a suffix that come and go, the way a consumer's own `*ngIf` moves them. */
 @Component({
-  standalone: true,
-  imports: [NgIf, InputFieldComponent, FieldDecoratorComponent, FieldPrefixDirective],
+  imports: [InputFieldComponent, FieldDecoratorComponent, FieldPrefixDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field name="field" />
-      <div
-        *ngIf="showPrefix"
-        formidableFieldPrefix
-        style="width: 4rem">
-        Prefix
-      </div>
+      @if (showPrefix) {
+        <div
+          formidableFieldPrefix
+          style="width: 4rem">
+          Prefix
+        </div>
+      }
     </formidable-field-decorator>
   `
 })
@@ -200,8 +200,8 @@ class TogglablePrefixHostComponent {
 
 /** A group field, whose decorator lays out vertically. */
 @Component({
-  standalone: true,
   imports: [RadioGroupFieldComponent, FieldDecoratorComponent, FieldPrefixDirective, FieldSuffixDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field name="field" />
@@ -214,8 +214,8 @@ class VerticalPrefixHostComponent {}
 
 /** A field that renders its own panel toggle, with an inside label and an optional suffix beside it. */
 @Component({
-  standalone: true,
-  imports: [NgIf, DropdownFieldComponent, FieldDecoratorComponent, FieldLabelDirective, FieldSuffixDirective],
+  imports: [DropdownFieldComponent, FieldDecoratorComponent, FieldLabelDirective, FieldSuffixDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-dropdown-field
@@ -226,11 +226,9 @@ class VerticalPrefixHostComponent {}
         [position]="'inside'">
         Label
       </div>
-      <div
-        *ngIf="showSuffix"
-        formidableFieldSuffix>
-        Suffix
-      </div>
+      @if (showSuffix) {
+        <div formidableFieldSuffix>Suffix</div>
+      }
     </formidable-field-decorator>
   `
 })
@@ -241,7 +239,6 @@ class ToggleFieldHostComponent {
 
 /** The four panel-ish fields: only two of them draw a toggle inside the field. */
 @Component({
-  standalone: true,
   imports: [
     FieldDecoratorComponent,
     DropdownFieldComponent,
@@ -249,6 +246,7 @@ class ToggleFieldHostComponent {
     AutocompleteFieldComponent,
     TimeFieldComponent
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator><formidable-dropdown-field name="a" /></formidable-field-decorator>
     <formidable-field-decorator><formidable-date-field name="b" /></formidable-field-decorator>

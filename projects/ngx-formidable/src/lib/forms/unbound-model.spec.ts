@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
 import { NgxFormidableFieldValidateDirective } from './field-validate.directive';
@@ -19,8 +19,8 @@ interface Model extends Record<string, unknown> {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, NgxFormidableFormDirective, NgxFormidableFieldValidateDirective, StubValidatorDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -41,8 +41,8 @@ class AsyncModelHostComponent {
 
 /** No `[formValue]` at all. The controls are the whole truth. */
 @Component({
-  standalone: true,
   imports: [FormsModule, NgxFormidableFormDirective, NgxFormidableFieldValidateDirective, StubValidatorDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm

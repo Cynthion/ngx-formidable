@@ -1,7 +1,6 @@
-import { CommonModule, DOCUMENT } from '@angular/common';
-import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DOCUMENT, Inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import Fuse, { FuseResult } from 'fuse.js';
 import {
   AutocompleteFieldComponent,
   CheckboxGroupFieldComponent,
@@ -36,8 +35,9 @@ import {
   WHOLE_FORM
 } from '@cynthion/ngx-formidable';
 import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/vest';
+import Fuse, { FuseResult } from 'fuse.js';
 import { BehaviorSubject, combineLatest, map, Observable, startWith, Subject } from 'rxjs';
-import { StaticSuite } from 'vest';
+import { Suite } from 'vest';
 import { ExampleCounterFieldComponent } from '../example-counter-field/example-counter-field.component';
 import { ExampleFuzzyOptionComponent } from '../example-fuzzy-option/example-fuzzy-option.component';
 import { ExampleIconComponent } from '../example-icon/example-icon.component';
@@ -54,7 +54,7 @@ import {
   selector: 'example-form',
   templateUrl: './example-form.component.html',
   styleUrls: ['./example-form.component.scss'],
-  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     FormsModule,
@@ -117,7 +117,7 @@ export class ExampleFormComponent implements OnInit {
     passwords: { password: undefined, confirmPassword: undefined }
   });
   protected readonly formShape = exampleFormShape;
-  protected readonly formSuite: StaticSuite<string, string, (model: ExampleFormModel, field?: string) => void> =
+  protected readonly formSuite: Suite<string, string, (model: ExampleFormModel, field?: string) => void> =
     exampleFormValidationSuite;
   protected readonly debounceMs = 0;
 

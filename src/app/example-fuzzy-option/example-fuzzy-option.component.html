@@ -3,7 +3,7 @@
     <!-- Custom Template -->
     <p class="option-label">
       @if (highlightedEntries?.labelEntries?.length) {
-        @for (entry of highlightedEntries?.labelEntries; track entry.text) {
+        @for (entry of highlightedEntries.labelEntries; track entry.text) {
           <span [class.option-highlight]="entry.isHighlighted">{{ entry.text }}</span>
         }
       } @else {
@@ -12,7 +12,7 @@
     </p>
     <p class="option-subtitle">
       @if (highlightedEntries?.subtitleEntries?.length) {
-        @for (entry of highlightedEntries?.subtitleEntries; track entry.text) {
+        @for (entry of highlightedEntries.subtitleEntries; track entry.text) {
           <span [class.option-highlight]="entry.isHighlighted">{{ entry.text }}</span>
         }
       } @else {

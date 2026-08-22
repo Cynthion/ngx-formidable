@@ -42,12 +42,10 @@
 
 <ng-template #label>
   <div class="toggle-label toggle-label-{{ labelPosition }}">
-    <ng-container *ngIf="internalLabel; else projectedLabel">
+    @if (internalLabel) {
       {{ internalLabel }}
-    </ng-container>
-
-    <ng-template #projectedLabel>
+    } @else {
       <ng-content></ng-content>
-    </ng-template>
+    }
   </div>
 </ng-template>

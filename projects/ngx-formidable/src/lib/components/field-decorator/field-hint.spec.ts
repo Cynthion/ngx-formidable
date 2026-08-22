@@ -1,5 +1,4 @@
-import { NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -28,9 +27,7 @@ const shape = { field: '' };
 
 /** Two hints that come and go, the way a consumer's own `*ngIf` moves them. */
 @Component({
-  standalone: true,
   imports: [
-    NgIf,
     FormsModule,
     NgxFormidableFormDirective,
     StubValidatorDirective,
@@ -39,6 +36,7 @@ const shape = { field: '' };
     FieldErrorsDirective,
     FieldHintDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -50,17 +48,16 @@ const shape = { field: '' };
           formidableFieldErrors
           name="field"
           [ngModel]="value.field" />
-        <div
-          *ngIf="showHints"
-          formidableFieldHint>
-          Note
-        </div>
-        <div
-          *ngIf="showHints && showCounter"
-          formidableFieldHint
-          [align]="counterAlign">
-          3 / 150
-        </div>
+        @if (showHints) {
+          <div formidableFieldHint>Note</div>
+        }
+        @if (showHints && showCounter) {
+          <div
+            formidableFieldHint
+            [align]="counterAlign">
+            3 / 150
+          </div>
+        }
       </formidable-field-decorator>
     </form>
   `

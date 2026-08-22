@@ -42,7 +42,7 @@ flowchart LR
 
 ## The Ids
 
-Every id in the library derives from one `fieldId`, a uuid minted per field instance. Which side mints which follows one rule: **the decorator mints the ids for what it renders around the field; the field mints the ids for what lives inside its own box.**
+Every id in the library derives from one `fieldId`, minted per field instance from a module-level counter in `base-field.directive.ts`.
 
 | Id                     | Minted by                  | Named by                            |
 | :--------------------- | :------------------------- | :---------------------------------- |

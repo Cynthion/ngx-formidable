@@ -55,7 +55,7 @@ One naming trap worth knowing: `IFormidableValidator.validate(model, target)` an
 4. **Run the rules.** ← the only validator-specific step
 5. Map the result into `ValidationErrors`.
 
-So the seam is a single method that takes `(model, target)` and returns messages. A validator is the smallest thing that can exist — the Vest one is about thirty lines, all of it the `suite(model, target).done(…)` call.
+So the seam is a single method that takes `(model, target)` and returns messages. A validator is the smallest thing that can exist — the Vest one is about thirty lines, all of it the `suite.runStatic(model, target)` call and the `getErrors(target)` read off its result.
 
 Putting the seam any lower would force each adapter to re-implement path computation and debouncing. Putting it any higher would drag the validator's own types into `form.directive.ts`.
 

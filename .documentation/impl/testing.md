@@ -4,14 +4,6 @@ Prioritize testing **logic** over Angular rendering: fast, reliable tests that c
 
 ---
 
-## Current State
-
-Testing is sparse, and lives mostly in the library: specs for the pure helpers, plus one contract spec per feature area, each colocated with the code it pins down and opening with a comment stating the contract. The demo has one, `vest-integration.spec.ts`, which mounts the demo's own suite and wiring from a consumer's side of both entry points. This doc is therefore both a description of the stack and the strategy to follow when adding further tests.
-
-The library's specs need the root `node_modules` only. A nested `projects/ngx-formidable/node_modules` (from running `npm install` inside the library folder) shadows it with a second copy of `@angular/core`, which breaks `TestBed` with `Need to call TestBed.initTestEnvironment() first`. Delete it and install from the workspace root.
-
----
-
 ## Test Stack
 
 | Tool             | Role                                       |
@@ -20,7 +12,11 @@ The library's specs need the root `node_modules` only. A nested `projects/ngx-fo
 | Jasmine          | Assertion + spec framework                 |
 | ng-packagr build | Type + template checking (via `build:lib`) |
 
-The Angular Karma builder is configured for both projects; there is no `karma.conf.js` or `test.ts` (builder defaults). Type errors are caught by `build:lib`, so there is no separate typecheck spec.
+`@angular/build:karma` is configured for both projects; there is no `karma.conf.js` or `test.ts` (builder defaults). Type errors are caught by `build:lib`, so there is no separate typecheck spec.
+
+Not the newer `@angular/build:unit-test`: it is still experimental, its own `migrate-karma-to-vitest` migration skips library projects outright, and it takes no `polyfills`, `styles` or `stylePreprocessorOptions` of its own — it reads them from a `buildTarget`, which a library built by ng-packagr does not have. The library's specs need all three: `zone.js/testing` for `fakeAsync`, and `test-styles.scss` for the geometry specs that measure computed CSS.
+
+The library's `test` target sets `include` explicitly, as `['**/*.spec.ts', '../vest/**/*.spec.ts']`. The builder resolves those globs against `sourceRoot` and not, as its schema says, the project root — so the default glob covers `src/` only and the `vest/` entry point's spec is silently skipped. It was skipped for a long time; the second glob is what runs it.
 
 ---
 

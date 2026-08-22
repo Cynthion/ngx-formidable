@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input } from '@angular/core';
+import { Directive, ElementRef, Input, inject } from '@angular/core';
 import { FieldAdornmentAlignment } from '../models/formidable.model';
 
 /**
@@ -9,8 +9,8 @@ import { FieldAdornmentAlignment } from '../models/formidable.model';
  */
 @Directive({ selector: '[formidableFieldSuffix]', standalone: true })
 export class FieldSuffixDirective {
+  elementRef = inject(ElementRef);
+
   /** What the suffix lines up with vertically: the field's box (`center`) or its value (`value`). */
   @Input() align: FieldAdornmentAlignment = 'center';
-
-  constructor(public elementRef: ElementRef) {}
 }

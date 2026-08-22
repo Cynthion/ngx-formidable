@@ -1,14 +1,12 @@
-import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
   forwardRef,
-  Inject,
+  inject,
   Input,
   OnChanges,
-  Optional,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
@@ -41,8 +39,7 @@ import { BaseFieldDirective } from '../base-field.directive';
   templateUrl: './input-field.component.html',
   styleUrls: ['./input-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [CommonModule, NgxMaskDirective],
+  imports: [NgxMaskDirective],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -59,19 +56,15 @@ import { BaseFieldDirective } from '../base-field.directive';
   ]
 })
 export class InputFieldComponent extends BaseFieldDirective implements IFormidableInputField, AfterViewInit, OnChanges {
+  private maskPipe = inject(NgxMaskPipe);
+  private maskDefaults = inject<Partial<NgxMaskConfig>>(FORMIDABLE_MASK_DEFAULTS, { optional: true });
+
   @ViewChild('inputRef', { static: false }) inputRef!: ElementRef<HTMLInputElement>;
 
   protected keyboardCallback = null;
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
-
-  constructor(
-    private maskPipe: NgxMaskPipe,
-    @Optional() @Inject(FORMIDABLE_MASK_DEFAULTS) private maskDefaults?: Partial<NgxMaskConfig>
-  ) {
-    super();
-  }
 
   override ngAfterViewInit(): void {
     super.ngAfterViewInit();

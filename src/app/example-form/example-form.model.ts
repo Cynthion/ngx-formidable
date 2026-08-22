@@ -1,5 +1,5 @@
 import { DeepPartial, DeepRequired, IFormidableOption, WHOLE_FORM } from '@cynthion/ngx-formidable';
-import { enforce, mode, Modes, omitWhen, only, StaticSuite, staticSuite, test } from 'vest';
+import { create, enforce, mode, Modes, omitWhen, only, Suite, test } from 'vest';
 
 // #region FormModel
 
@@ -11,15 +11,7 @@ export interface Password {
 export type UserGender = 'male' | 'female' | 'unspecified';
 export type UserNationality = 'ch' | 'de' | 'fr' | 'jp' | 'other';
 export type UserReligion =
-  | 'christian'
-  | 'islam'
-  | 'hindu'
-  | 'buddhism'
-  | 'buddhist'
-  | 'agnostic'
-  | 'atheist'
-  | 'custom'
-  | 'none';
+  'christian' | 'islam' | 'hindu' | 'buddhism' | 'buddhist' | 'agnostic' | 'atheist' | 'custom' | 'none';
 
 export interface User {
   firstName: string;
@@ -68,55 +60,52 @@ export const exampleFormShape: ExampleFormShape = {
   pets: 0
 };
 
-export const exampleFormValidationSuite: StaticSuite<
-  string,
-  string,
-  (model: ExampleFormModel, field?: string) => void
-> = staticSuite((model: ExampleFormModel, field?: string) => {
-  mode(Modes.ALL); // use EAGER to just use first
+export const exampleFormValidationSuite: Suite<string, string, (model: ExampleFormModel, field?: string) => void> =
+  create((model: ExampleFormModel, field?: string) => {
+    mode(Modes.ALL); // use EAGER to just use first
 
-  if (field) {
-    only(field);
-  }
+    if (field) {
+      only(field);
+    }
 
-  // A whole-form rule: it reads two fields and reports on neither of them.
-  test(WHOLE_FORM, `Test user, your password should not be '1234'!`, () => {
-    enforce(model.firstName === 'Test' && model.passwords?.password === '1234').isFalsy();
-  });
+    // A whole-form rule: it reads two fields and reports on neither of them.
+    test(WHOLE_FORM, `Test user, your password should not be '1234'!`, () => {
+      enforce(model.firstName === 'Test' && model.passwords?.password === '1234').isFalsy();
+    });
 
-  test('firstName', 'First name is required.', () => {
-    enforce(model.firstName).isNotBlank();
-  });
+    test('firstName', 'First name is required.', () => {
+      enforce(model.firstName).isNotBlank();
+    });
 
-  test('firstName', 'First name does not start with T.', () => {
-    enforce(model.firstName?.toLowerCase()).startsWith('t');
-  });
+    test('firstName', 'First name does not start with T.', () => {
+      enforce(model.firstName?.toLowerCase()).startsWith('t');
+    });
 
-  test('lastName', 'Last name is required.', () => {
-    enforce(model.lastName).isNotBlank();
-  });
+    test('lastName', 'Last name is required.', () => {
+      enforce(model.lastName).isNotBlank();
+    });
 
-  // A custom field validates like any other: the rule names it, nothing knows it is not a library field.
-  test('pets', 'Three pets is plenty.', () => {
-    enforce(model.pets ?? 0).lessThanOrEquals(3);
-  });
+    // A custom field validates like any other: the rule names it, nothing knows it is not a library field.
+    test('pets', 'Three pets is plenty.', () => {
+      enforce(model.pets ?? 0).lessThanOrEquals(3);
+    });
 
-  test('passwords.password', 'Password is required.', () => {
-    enforce(model.passwords?.password).isNotBlank();
-  });
+    test('passwords.password', 'Password is required.', () => {
+      enforce(model.passwords?.password).isNotBlank();
+    });
 
-  omitWhen(!model.passwords?.password, () => {
-    test('passwords.confirmPassword', 'Confirm password is required.', () => {
-      enforce(model.passwords?.confirmPassword).isNotBlank();
+    omitWhen(!model.passwords?.password, () => {
+      test('passwords.confirmPassword', 'Confirm password is required.', () => {
+        enforce(model.passwords?.confirmPassword).isNotBlank();
+      });
+    });
+
+    omitWhen(!model.passwords?.password || !model.passwords?.confirmPassword, () => {
+      test('passwords', 'Passwords do not match!', () => {
+        enforce(model.passwords?.confirmPassword).equals(model.passwords?.password);
+      });
     });
   });
-
-  omitWhen(!model.passwords?.password || !model.passwords?.confirmPassword, () => {
-    test('passwords', 'Passwords do not match!', () => {
-      enforce(model.passwords?.confirmPassword).equals(model.passwords?.password);
-    });
-  });
-});
 
 // #endregion
 

@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -20,7 +20,6 @@ import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
  */
 
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     InputFieldComponent,
@@ -32,6 +31,7 @@ import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
   ],
   // Inside a `<form>`, like real usage: a standalone `ngModel` writes its value synchronously, before
   // the fields whose control sits in an `@if` branch have resolved their view refs.
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-input-field

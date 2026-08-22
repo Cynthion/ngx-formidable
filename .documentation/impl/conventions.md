@@ -24,8 +24,8 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 ## Components And Directives
 
-- **Standalone**: every component and directive is `standalone: true`. Consumers import them directly or via `NgxFormidableModule`.
-- **Change Detection**: every component uses `ChangeDetectionStrategy.OnPush`.
+- **Standalone**: every component and directive is standalone
+- **Change Detection**: every component uses `ChangeDetectionStrategy.OnPush`, with one deliberate exception — `FieldDecoratorComponent`, which is `Eager` for the reasons in `tech/decoration.md` and carries the only `prefer-on-push-component-change-detection` waiver in the library.
 - **Selectors**: components are elements, kebab-case, `formidable-` prefix (`formidable-input-field`). Field-decoration directives are attributes, camelCase, `formidable` prefix (`[formidableFieldLabel]`, `form[formidableForm]`). Two directives intentionally hijack Angular's own selectors — `NgxFormidableFieldValidateDirective` on `[ngModel]` and `NgxFormidableGroupValidateDirective` on `[ngModelGroup]` — so they attach to every model-bound control (they no-op outside a formidable form).
 - **File Naming**: components are folders with external `*.component.ts` / `.html` / `.scss` (never inline templates or styles). Directives are single `*.directive.ts` files. The shared bases are `base-field.directive.ts` and `base-option-field.directive.ts`. Filenames drop the `NgxFormidable` prefix (`field-validate.directive.ts`, not `ngx-formidable-field-validate.directive.ts`) — consumers import from the package root, so the prefix would only add path noise.
 - **Folder Placement**: `directives/` holds only the `formidableField*` attribute directives that decorate a field; the form-level directives and their helpers live in `forms/`. Test-only code goes in a `testing/` folder and stays unreachable from `public-api.ts`, which is what keeps ng-packagr from compiling it.
@@ -72,11 +72,14 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 ## TypeScript
 
-- Strict everything: `strict`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noPropertyAccessFromIndexSignature`, `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`. Angular compiler runs `strictTemplates`, `strictInjectionParameters`, `strictInputAccessModifiers`.
+- Strict everything: `strict`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noPropertyAccessFromIndexSignature`, `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`. Angular compiler runs `strictTemplates`, `strictInjectionParameters`, `strictInputAccessModifiers`, `strictStandalone`.
+- `module` is `preserve`, which implies `moduleResolution: bundler` and forces `esModuleInterop`, so neither is declared. `useDefineForClassFields` is left at its `ES2022` default of `true`; the extended diagnostics Angular 22 promoted to errors are **not** suppressed, so `nullishCoalescingNotNullable` and `optionalChainNotNullable` both fail the build.
+- **Version ceilings**: TypeScript is capped by `@angular/compiler-cli` and `ng-packagr`, which both peer `>=6.0 <6.1` — so TypeScript 7 is unavailable while Angular 22 is the floor. `jasmine-core` is capped at 6: Jasmine 7 makes `describe`/`it` read-only on the global, which breaks `zone.js`'s `patchJasmine` and with it every `fakeAsync` spec.
 
 ## Tooling
 
-- **ESLint**: flat config (`typescript-eslint` + `angular-eslint` + `eslint-plugin-rxjs-x`), type-aware. Specs are not linted. Custom: `@typescript-eslint/no-unused-vars` with `^_` ignore; `rxjs-x/finnish`.
+- **ESLint**: flat config (`typescript-eslint` + `angular-eslint` + `eslint-plugin-rxjs-x`), type-aware. Specs are not linted. Custom: `@typescript-eslint/no-unused-vars` with `^_` ignore; `rxjs-x/finnish`. `eslint-plugin-rxjs-x` is ESM-only, so the config takes its `.default` — a bare `require` yields the module namespace and the plugin's rules are then invisible.
+- **Stylelint**: `stylelint-config-standard-scss` only
 - **Prettier**: single quotes, no trailing commas, `bracketSameLine`, one attribute per line; HTML attribute order via `prettier-plugin-organize-attributes`.
 - **Stylelint**: `stylelint-config-standard-scss` + `stylelint-config-prettier-scss`; modern color-function notation, long hex.
 

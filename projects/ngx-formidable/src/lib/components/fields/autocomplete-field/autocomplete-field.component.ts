@@ -37,7 +37,6 @@ import { BaseOptionFieldDirective } from '../base-option-field.directive';
   templateUrl: './autocomplete-field.component.html',
   styleUrls: ['./autocomplete-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [CommonModule, FieldOptionComponent],
   providers: [
     // required for ControlValueAccessor to work with Angular forms

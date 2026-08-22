@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  HostBinding,
-  Inject,
-  inject,
-  Input
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, inject, Input } from '@angular/core';
 import { AbstractControl, NgForm, NgModel, NgModelGroup } from '@angular/forms';
 import { NgxFormidableFormDirective } from '../../forms/form.directive';
 import {
@@ -33,6 +25,10 @@ import {
   standalone: true
 })
 export class FieldErrorsComponent {
+  private readonly cdRef = inject(ChangeDetectorRef);
+  protected readonly translateError = inject<FormidableErrorTranslatorFn>(FORMIDABLE_ERROR_TRANSLATOR);
+  private readonly extractErrors = inject<FormidableErrorExtractorFn>(FORMIDABLE_ERROR_EXTRACTOR);
+
   /** The control to report on. Exactly one of this and `ngModelGroup` is set. */
   @Input() ngModel?: NgModel;
 
@@ -47,12 +43,6 @@ export class FieldErrorsComponent {
   private readonly ngForm = inject(NgForm, { optional: true });
 
   private previousError?: string[];
-
-  constructor(
-    private readonly cdRef: ChangeDetectorRef,
-    @Inject(FORMIDABLE_ERROR_TRANSLATOR) protected readonly translateError: FormidableErrorTranslatorFn,
-    @Inject(FORMIDABLE_ERROR_EXTRACTOR) private readonly extractErrors: FormidableErrorExtractorFn
-  ) {}
 
   get control(): AbstractControl | undefined {
     return this.ngModelGroup?.control ?? this.ngModel?.control;

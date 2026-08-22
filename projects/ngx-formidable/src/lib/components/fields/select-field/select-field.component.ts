@@ -37,7 +37,6 @@ import { BaseFieldDirective } from '../base-field.directive';
   templateUrl: './select-field.component.html',
   styleUrls: ['./select-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [CommonModule],
   providers: [
     // required for ControlValueAccessor to work with Angular forms

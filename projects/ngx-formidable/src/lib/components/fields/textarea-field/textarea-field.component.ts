@@ -1,14 +1,12 @@
-import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
   forwardRef,
-  Inject,
+  inject,
   Input,
   OnChanges,
-  Optional,
   SimpleChanges,
   ViewChild
 } from '@angular/core';
@@ -42,8 +40,7 @@ import { BaseFieldDirective } from '../base-field.directive';
   templateUrl: './textarea-field.component.html',
   styleUrls: ['./textarea-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [CommonModule, NgxMaskDirective],
+  imports: [NgxMaskDirective],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -63,6 +60,9 @@ export class TextareaFieldComponent
   extends BaseFieldDirective
   implements IFormidableTextareaField, AfterViewInit, OnChanges
 {
+  private maskPipe = inject(NgxMaskPipe);
+  private maskDefaults = inject<Partial<NgxMaskConfig>>(FORMIDABLE_MASK_DEFAULTS, { optional: true });
+
   // @ViewChild('textareaRef', { static: false }) textareaRef!: ElementRef<HTMLTextAreaElement>;
   @ViewChild('maskedTextareaRef', { static: false }) maskedTextareaRef?: ElementRef<HTMLTextAreaElement>;
   @ViewChild('plainTextareaRef', { static: false }) plainTextareaRef?: ElementRef<HTMLTextAreaElement>;
@@ -72,13 +72,6 @@ export class TextareaFieldComponent
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
-
-  constructor(
-    private maskPipe: NgxMaskPipe,
-    @Optional() @Inject(FORMIDABLE_MASK_DEFAULTS) private maskDefaults?: Partial<NgxMaskConfig>
-  ) {
-    super();
-  }
 
   override ngAfterViewInit(): void {
     super.ngAfterViewInit();

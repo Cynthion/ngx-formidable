@@ -5,251 +5,251 @@
       {{ controlCenterExpanded ? 'Hide Control Center' : 'Show Control Center' }}
     </button>
   </div>
-  <div
-    *ngIf="controlCenterExpanded"
-    class="control-body">
-    <div class="control-content">
-      <!-- Decorators -->
-      <fieldset>
-        <legend>Decorators:</legend>
-        <label>
-          <input
-            type="checkbox"
-            [checked]="controlCenter.showPrefixes"
-            (change)="onToggle('showPrefixes', $any($event.target).checked)" />
-          Show Prefixes
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            [checked]="controlCenter.showSuffixes"
-            (change)="onToggle('showSuffixes', $any($event.target).checked)" />
-          Show Suffixes
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            [checked]="controlCenter.showActions"
-            (change)="onToggle('showActions', $any($event.target).checked)" />
-          Show Adornment Actions
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            [checked]="controlCenter.showLabelAdornments"
-            (change)="onToggle('showLabelAdornments', $any($event.target).checked)" />
-          Show Label Adornments
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            [checked]="controlCenter.showLabels"
-            (change)="onToggle('showLabels', $any($event.target).checked)" />
-          Show Labels
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            [checked]="controlCenter.showRequiredMarkers"
-            (change)="onToggle('showRequiredMarkers', $any($event.target).checked)" />
-          Show Required Markers
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            [checked]="controlCenter.showHints"
-            (change)="onToggle('showHints', $any($event.target).checked)" />
-          Show Hints
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            [checked]="controlCenter.showAsReadonly"
-            (change)="onToggle('showAsReadonly', $any($event.target).checked)" />
-          Show as Readonly
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            [checked]="controlCenter.showAsDisabled"
-            (change)="onToggle('showAsDisabled', $any($event.target).checked)" />
-          Show as Disabled
-        </label>
-      </fieldset>
-
-      <!-- Label Position -->
-      <fieldset>
-        <legend>Label Position:</legend>
-        <label>
-          <input
-            type="radio"
-            name="labelPosition"
-            [checked]="labelPosition === 'outside'"
-            (change)="setLabelPosition('outside')" />
-          Outside
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="labelPosition"
-            [checked]="labelPosition === 'inside'"
-            (change)="setLabelPosition('inside')" />
-          Inside
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="labelPosition"
-            [checked]="labelPosition === 'inside-placeholder'"
-            (change)="setLabelPosition('inside-placeholder')" />
-          Inside, As Placeholder
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="labelPosition"
-            [checked]="labelPosition === 'inside-floating'"
-            (change)="setLabelPosition('inside-floating')" />
-          Inside, Floating Only
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="labelPosition"
-            [checked]="labelPosition === 'border'"
-            (change)="setLabelPosition('border')" />
-          Border
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="labelPosition"
-            [checked]="labelPosition === 'border-prefix'"
-            (change)="setLabelPosition('border-prefix')" />
-          Border, Prefix-Aligned
-        </label>
-      </fieldset>
-
-      <!-- Adornment Alignment -->
-      <fieldset>
-        <legend>Prefix / Suffix Alignment:</legend>
-        <label>
-          <input
-            type="radio"
-            name="adornmentAlignment"
-            [checked]="adornmentAlignment === 'center'"
-            (change)="setAdornmentAlignment('center')" />
-          Centered
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="adornmentAlignment"
-            [checked]="adornmentAlignment === 'value'"
-            (change)="setAdornmentAlignment('value')" />
-          With the Value
-        </label>
-      </fieldset>
-
-      <!-- Panel Position -->
-      <fieldset>
-        <legend>Panel Position:</legend>
-        <label>
-          <input
-            type="radio"
-            name="panelPosition"
-            [checked]="panelPosition === 'left'"
-            (change)="setPanelPosition('left')" />
-          Left
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="panelPosition"
-            [checked]="panelPosition === 'right'"
-            (change)="setPanelPosition('right')" />
-          Right
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="panelPosition"
-            [checked]="panelPosition === 'full'"
-            (change)="setPanelPosition('full')" />
-          Full
-        </label>
-        <label>
-          <input
-            type="radio"
-            name="panelPosition"
-            [checked]="panelPosition === 'sheet'"
-            (change)="setPanelPosition('sheet')" />
-          Sheet
-        </label>
-      </fieldset>
-
-      <!-- Run Axis: when the validator runs. Angular's, through ngFormOptions. -->
-      <fieldset>
-        <legend>Validation Run (updateOn):</legend>
-        <label *ngFor="let option of updateOnOptions">
-          <input
-            type="radio"
-            name="updateOn"
-            [checked]="ngFormOptions.updateOn === option.key"
-            (change)="setUpdateOn(option.key)" />
-          {{ option.label }}
-        </label>
-      </fieldset>
-
-      <!-- Reveal Axis: when the messages appear. The library's, through revealOn. -->
-      <fieldset>
-        <legend>Validation Reveal (revealOn):</legend>
-        <label *ngFor="let option of revealOnOptions">
-          <input
-            type="radio"
-            name="revealOn"
-            [checked]="revealOn === option.key"
-            (change)="setRevealOn(option.key)" />
-          {{ option.label }}
-        </label>
-      </fieldset>
-
-      <!-- Geometry Scheme -->
-      <fieldset>
-        <legend>Geometry Examples:</legend>
-        <label *ngFor="let option of geometryOptions">
-          <input
-            type="radio"
-            name="geometry"
-            [checked]="geometry === option.key"
-            (change)="setGeometry(option.key)" />
-          {{ option.label }}
-        </label>
-      </fieldset>
-
-      <!-- Colour Scheme -->
-      <fieldset>
-        <legend>Colour Examples:</legend>
-        <label *ngFor="let option of colorOptions">
-          <input
-            type="radio"
-            name="color"
-            [checked]="color === option.key"
-            (change)="setColor(option.key)" />
-          {{ option.label }}
-        </label>
-      </fieldset>
+  @if (controlCenterExpanded) {
+    <div class="control-body">
+      <div class="control-content">
+        <!-- Decorators -->
+        <fieldset>
+          <legend>Decorators:</legend>
+          <label>
+            <input
+              type="checkbox"
+              [checked]="controlCenter.showPrefixes"
+              (change)="onToggle('showPrefixes', $any($event.target).checked)" />
+            Show Prefixes
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              [checked]="controlCenter.showSuffixes"
+              (change)="onToggle('showSuffixes', $any($event.target).checked)" />
+            Show Suffixes
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              [checked]="controlCenter.showActions"
+              (change)="onToggle('showActions', $any($event.target).checked)" />
+            Show Adornment Actions
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              [checked]="controlCenter.showLabelAdornments"
+              (change)="onToggle('showLabelAdornments', $any($event.target).checked)" />
+            Show Label Adornments
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              [checked]="controlCenter.showLabels"
+              (change)="onToggle('showLabels', $any($event.target).checked)" />
+            Show Labels
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              [checked]="controlCenter.showRequiredMarkers"
+              (change)="onToggle('showRequiredMarkers', $any($event.target).checked)" />
+            Show Required Markers
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              [checked]="controlCenter.showHints"
+              (change)="onToggle('showHints', $any($event.target).checked)" />
+            Show Hints
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              [checked]="controlCenter.showAsReadonly"
+              (change)="onToggle('showAsReadonly', $any($event.target).checked)" />
+            Show as Readonly
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              [checked]="controlCenter.showAsDisabled"
+              (change)="onToggle('showAsDisabled', $any($event.target).checked)" />
+            Show as Disabled
+          </label>
+        </fieldset>
+        <!-- Label Position -->
+        <fieldset>
+          <legend>Label Position:</legend>
+          <label>
+            <input
+              type="radio"
+              name="labelPosition"
+              [checked]="labelPosition === 'outside'"
+              (change)="setLabelPosition('outside')" />
+            Outside
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="labelPosition"
+              [checked]="labelPosition === 'inside'"
+              (change)="setLabelPosition('inside')" />
+            Inside
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="labelPosition"
+              [checked]="labelPosition === 'inside-placeholder'"
+              (change)="setLabelPosition('inside-placeholder')" />
+            Inside, As Placeholder
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="labelPosition"
+              [checked]="labelPosition === 'inside-floating'"
+              (change)="setLabelPosition('inside-floating')" />
+            Inside, Floating Only
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="labelPosition"
+              [checked]="labelPosition === 'border'"
+              (change)="setLabelPosition('border')" />
+            Border
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="labelPosition"
+              [checked]="labelPosition === 'border-prefix'"
+              (change)="setLabelPosition('border-prefix')" />
+            Border, Prefix-Aligned
+          </label>
+        </fieldset>
+        <!-- Adornment Alignment -->
+        <fieldset>
+          <legend>Prefix / Suffix Alignment:</legend>
+          <label>
+            <input
+              type="radio"
+              name="adornmentAlignment"
+              [checked]="adornmentAlignment === 'center'"
+              (change)="setAdornmentAlignment('center')" />
+            Centered
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="adornmentAlignment"
+              [checked]="adornmentAlignment === 'value'"
+              (change)="setAdornmentAlignment('value')" />
+            With the Value
+          </label>
+        </fieldset>
+        <!-- Panel Position -->
+        <fieldset>
+          <legend>Panel Position:</legend>
+          <label>
+            <input
+              type="radio"
+              name="panelPosition"
+              [checked]="panelPosition === 'left'"
+              (change)="setPanelPosition('left')" />
+            Left
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="panelPosition"
+              [checked]="panelPosition === 'right'"
+              (change)="setPanelPosition('right')" />
+            Right
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="panelPosition"
+              [checked]="panelPosition === 'full'"
+              (change)="setPanelPosition('full')" />
+            Full
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="panelPosition"
+              [checked]="panelPosition === 'sheet'"
+              (change)="setPanelPosition('sheet')" />
+            Sheet
+          </label>
+        </fieldset>
+        <!-- Run Axis: when the validator runs. Angular's, through ngFormOptions. -->
+        <fieldset>
+          <legend>Validation Run (updateOn):</legend>
+          @for (option of updateOnOptions; track option) {
+            <label>
+              <input
+                type="radio"
+                name="updateOn"
+                [checked]="ngFormOptions.updateOn === option.key"
+                (change)="setUpdateOn(option.key)" />
+              {{ option.label }}
+            </label>
+          }
+        </fieldset>
+        <!-- Reveal Axis: when the messages appear. The library's, through revealOn. -->
+        <fieldset>
+          <legend>Validation Reveal (revealOn):</legend>
+          @for (option of revealOnOptions; track option) {
+            <label>
+              <input
+                type="radio"
+                name="revealOn"
+                [checked]="revealOn === option.key"
+                (change)="setRevealOn(option.key)" />
+              {{ option.label }}
+            </label>
+          }
+        </fieldset>
+        <!-- Geometry Scheme -->
+        <fieldset>
+          <legend>Geometry Examples:</legend>
+          @for (option of geometryOptions; track option) {
+            <label>
+              <input
+                type="radio"
+                name="geometry"
+                [checked]="geometry === option.key"
+                (change)="setGeometry(option.key)" />
+              {{ option.label }}
+            </label>
+          }
+        </fieldset>
+        <!-- Colour Scheme -->
+        <fieldset>
+          <legend>Colour Examples:</legend>
+          @for (option of colorOptions; track option) {
+            <label>
+              <input
+                type="radio"
+                name="color"
+                [checked]="color === option.key"
+                (change)="setColor(option.key)" />
+              {{ option.label }}
+            </label>
+          }
+        </fieldset>
+      </div>
     </div>
-  </div>
+  }
 </div>
 
 <!-- Form -->
-<ng-container *ngIf="renderFlip; else formFieldsB">
+@if (renderFlip) {
   <ng-container *ngTemplateOutlet="form"></ng-container>
-</ng-container>
-<ng-template #formFieldsB>
+} @else {
   <ng-container *ngTemplateOutlet="form"></ng-container>
-</ng-template>
+}
 
 <!-- Debugging Output -->
 @if (viewModel$ | async; as vm) {
@@ -261,38 +261,36 @@
     </div>
 
     <!-- Collapsible Debug Section -->
-    <div
-      *ngIf="debugExpanded"
-      class="debug-columns">
-      <!-- Left Column -->
-      <div class="column left">
-        <pre>Value:<br />{{ vm.formValue$ | json }}</pre>
-      </div>
-
-      <!-- Middle Column -->
-      <div class="column middle">
-        <pre>Errors:<br />{{ vm.errors$ | json }}</pre>
-        <pre>Dirty: {{ vm.isDirty$ | json }}</pre>
-        <pre>Valid: {{ vm.isValid$ | json }}</pre>
-      </div>
-
-      <!-- Right Column (Log) -->
-      <div class="column right">
-        <div class="log-panel">
-          <div class="log-header">
-            <h4>Log Output</h4>
-            <button (click)="clearLogs()">Clear</button>
-          </div>
-          <div class="log-messages">
-            <div
-              *ngFor="let message of logs"
-              class="log-entry">
-              {{ message }}
+    @if (debugExpanded) {
+      <div class="debug-columns">
+        <!-- Left Column -->
+        <div class="column left">
+          <pre>Value:<br />{{ vm.formValue$ | json }}</pre>
+        </div>
+        <!-- Middle Column -->
+        <div class="column middle">
+          <pre>Errors:<br />{{ vm.errors$ | json }}</pre>
+          <pre>Dirty: {{ vm.isDirty$ | json }}</pre>
+          <pre>Valid: {{ vm.isValid$ | json }}</pre>
+        </div>
+        <!-- Right Column (Log) -->
+        <div class="column right">
+          <div class="log-panel">
+            <div class="log-header">
+              <h4>Log Output</h4>
+              <button (click)="clearLogs()">Clear</button>
+            </div>
+            <div class="log-messages">
+              @for (message of logs; track message) {
+                <div class="log-entry">
+                  {{ message }}
+                </div>
+              }
             </div>
           </div>
         </div>
       </div>
-    </div>
+    }
   </div>
 }
 
@@ -356,51 +354,56 @@
             (valueChanged)="onValueChanged('firstName', $event)"
             (focusChanged)="onFocusChanged('firstName', $event)">
           </formidable-input-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            First Name
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="hover"
-              [text]="'This is a input field. It has a tooltip.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix
-            [align]="adornmentAlignment">
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix
-            [align]="adornmentAlignment">
-            <ng-container
-              *ngIf="controlCenter.showActions; else textSuffix"
-              [ngTemplateOutlet]="clearAction"
-              [ngTemplateOutletContext]="{
-                $implicit: 'firstName',
-                value: vm.formValue$.firstName,
-                error: vm.errors$['firstName']
-              }" />
-          </div>
-          <div
-            *ngIf="controlCenter.showHints"
-            formidableFieldHint>
-            Your legal first name
-          </div>
-          <div
-            *ngIf="controlCenter.showHints"
-            formidableFieldHint
-            align="end">
-            {{ vm.formValue$.firstName?.length ?? 0 }} / 150
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              First Name
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="hover"
+                [text]="'This is a input field. It has a tooltip.'">
+              </example-tooltip>
+            </div>
+          }
+          @if (controlCenter.showPrefixes) {
+            <div
+              formidableFieldPrefix
+              [align]="adornmentAlignment">
+              Prefix
+            </div>
+          }
+          @if (controlCenter.showSuffixes) {
+            <div
+              formidableFieldSuffix
+              [align]="adornmentAlignment">
+              @if (controlCenter.showActions) {
+                <ng-container
+                  [ngTemplateOutlet]="clearAction"
+                  [ngTemplateOutletContext]="{
+                    $implicit: 'firstName',
+                    value: vm.formValue$.firstName,
+                    error: vm.errors$['firstName']
+                  }" />
+              } @else {
+                Suffix
+              }
+            </div>
+          }
+          @if (controlCenter.showHints) {
+            <div formidableFieldHint>Your legal first name</div>
+          }
+          @if (controlCenter.showHints) {
+            <div
+              formidableFieldHint
+              align="end">
+              {{ vm.formValue$.firstName?.length ?? 0 }} / 150
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Middle Name -->
@@ -417,36 +420,42 @@
             (valueChanged)="onValueChanged('middleName', $event)"
             (focusChanged)="onFocusChanged('middleName', $event)">
           </formidable-input-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Middle Name
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="hover"
-              [text]="'Fields can be masked, and have prefixes and suffixes.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix
-            [align]="adornmentAlignment">
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix
-            [align]="adornmentAlignment">
-            <ng-container
-              *ngIf="controlCenter.showActions; else textSuffix"
-              [ngTemplateOutlet]="copyAction"
-              [ngTemplateOutletContext]="{ $implicit: 'middleName', value: vm.formValue$.middleName }" />
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Middle Name
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="hover"
+                [text]="'Fields can be masked, and have prefixes and suffixes.'">
+              </example-tooltip>
+            </div>
+          }
+          @if (controlCenter.showPrefixes) {
+            <div
+              formidableFieldPrefix
+              [align]="adornmentAlignment">
+              Prefix
+            </div>
+          }
+          @if (controlCenter.showSuffixes) {
+            <div
+              formidableFieldSuffix
+              [align]="adornmentAlignment">
+              @if (controlCenter.showActions) {
+                <ng-container
+                  [ngTemplateOutlet]="copyAction"
+                  [ngTemplateOutletContext]="{ $implicit: 'middleName', value: vm.formValue$.middleName }" />
+              } @else {
+                Suffix
+              }
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Last Name -->
@@ -468,33 +477,36 @@
             (valueChanged)="onValueChanged('lastName', $event)"
             (focusChanged)="onFocusChanged('lastName', $event)">
           </formidable-textarea-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Last Name
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="bottom"
-              trigger="click"
-              [text]="'It opens on click. Below.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix
-            [align]="adornmentAlignment">
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix
-            [align]="adornmentAlignment">
-            Suffix
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Last Name
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="bottom"
+                trigger="click"
+                [text]="'It opens on click. Below.'">
+              </example-tooltip>
+            </div>
+          }
+          @if (controlCenter.showPrefixes) {
+            <div
+              formidableFieldPrefix
+              [align]="adornmentAlignment">
+              Prefix
+            </div>
+          }
+          @if (controlCenter.showSuffixes) {
+            <div
+              formidableFieldSuffix
+              [align]="adornmentAlignment">
+              Suffix
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Gender -->
@@ -518,34 +530,37 @@
               [disabled]="true" />
             <formidable-field-option [value]="'trans'">Trans</formidable-field-option>
           </formidable-select-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Gender
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="click"
-              [icon]="exampleTooltipSvg"
-              [text]="'This is a select field. And this tooltip has another content.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix
-            [align]="adornmentAlignment">
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix
-            [align]="adornmentAlignment">
-            Suffix
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Gender
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="click"
+                [icon]="exampleTooltipSvg"
+                [text]="'This is a select field. And this tooltip has another content.'">
+              </example-tooltip>
+            </div>
+          }
+          @if (controlCenter.showPrefixes) {
+            <div
+              formidableFieldPrefix
+              [align]="adornmentAlignment">
+              Prefix
+            </div>
+          }
+          @if (controlCenter.showSuffixes) {
+            <div
+              formidableFieldSuffix
+              [align]="adornmentAlignment">
+              Suffix
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Nationality -->
@@ -593,34 +608,37 @@
               <pre>And I can have any content</pre>
             </formidable-field-option>
           </formidable-dropdown-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Nationality - a long label to test the ellipsis overflow
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="click"
-              [icon]="exampleTooltipSvg"
-              [text]="'This is a dropdown field.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix
-            [align]="adornmentAlignment">
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix
-            [align]="adornmentAlignment">
-            Suffix
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Nationality - a long label to test the ellipsis overflow
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="click"
+                [icon]="exampleTooltipSvg"
+                [text]="'This is a dropdown field.'">
+              </example-tooltip>
+            </div>
+          }
+          @if (controlCenter.showPrefixes) {
+            <div
+              formidableFieldPrefix
+              [align]="adornmentAlignment">
+              Prefix
+            </div>
+          }
+          @if (controlCenter.showSuffixes) {
+            <div
+              formidableFieldSuffix
+              [align]="adornmentAlignment">
+              Suffix
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Hobby -->
@@ -660,36 +678,41 @@
               <pre>And I can have any content</pre>
             </formidable-field-option>
           </formidable-autocomplete-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Hobby
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="click"
-              [icon]="exampleTooltipSvg"
-              [text]="'This is a autocomplete field.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix
-            [align]="adornmentAlignment">
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix
-            [align]="adornmentAlignment">
-            <ng-container
-              *ngIf="controlCenter.showActions; else textSuffix"
-              [ngTemplateOutlet]="loadingAction" />
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Hobby
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="click"
+                [icon]="exampleTooltipSvg"
+                [text]="'This is a autocomplete field.'">
+              </example-tooltip>
+            </div>
+          }
+          @if (controlCenter.showPrefixes) {
+            <div
+              formidableFieldPrefix
+              [align]="adornmentAlignment">
+              Prefix
+            </div>
+          }
+          @if (controlCenter.showSuffixes) {
+            <div
+              formidableFieldSuffix
+              [align]="adornmentAlignment">
+              @if (controlCenter.showActions) {
+                <ng-container [ngTemplateOutlet]="loadingAction" />
+              } @else {
+                Suffix
+              }
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Animals -->
@@ -718,34 +741,37 @@
             }
           </formidable-autocomplete-field>
           <!-- deliberately long: an `inside` label stays on one line and ellipsizes -->
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Animal — pick your favourite one from this deliberately long list of animals
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="click"
-              [icon]="exampleTooltipSvg"
-              [text]="'This field uses custom options. With fuzzy matching.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix
-            [align]="adornmentAlignment">
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix
-            [align]="adornmentAlignment">
-            Suffix
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Animal — pick your favourite one from this deliberately long list of animals
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="click"
+                [icon]="exampleTooltipSvg"
+                [text]="'This field uses custom options. With fuzzy matching.'">
+              </example-tooltip>
+            </div>
+          }
+          @if (controlCenter.showPrefixes) {
+            <div
+              formidableFieldPrefix
+              [align]="adornmentAlignment">
+              Prefix
+            </div>
+          }
+          @if (controlCenter.showSuffixes) {
+            <div
+              formidableFieldSuffix
+              [align]="adornmentAlignment">
+              Suffix
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Birthdate -->
@@ -773,36 +799,41 @@
               [svg]="exampleCalendarSvg"
               [size]="24" />
           </formidable-date-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Birthdate - a rather long label to test the ellipsis
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="click"
-              [icon]="exampleTooltipSvg"
-              [text]="'This is a date field.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix
-            [align]="adornmentAlignment">
-            <ng-container
-              *ngIf="controlCenter.showActions; else textPrefix"
-              [ngTemplateOutlet]="todayAction" />
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix
-            [align]="adornmentAlignment">
-            Suffix
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Birthdate - a rather long label to test the ellipsis
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="click"
+                [icon]="exampleTooltipSvg"
+                [text]="'This is a date field.'">
+              </example-tooltip>
+            </div>
+          }
+          @if (controlCenter.showPrefixes) {
+            <div
+              formidableFieldPrefix
+              [align]="adornmentAlignment">
+              @if (controlCenter.showActions) {
+                <ng-container [ngTemplateOutlet]="todayAction" />
+              } @else {
+                Prefix
+              }
+            </div>
+          }
+          @if (controlCenter.showSuffixes) {
+            <div
+              formidableFieldSuffix
+              [align]="adornmentAlignment">
+              Suffix
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Time -->
@@ -818,34 +849,37 @@
             (valueChanged)="onValueChanged('time', $event)"
             (focusChanged)="onFocusChanged('time', $event)">
           </formidable-time-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Time
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="click"
-              [icon]="exampleTooltipSvg"
-              [text]="'This is a time field.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix
-            [align]="adornmentAlignment">
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix
-            [align]="adornmentAlignment">
-            Suffix
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Time
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="click"
+                [icon]="exampleTooltipSvg"
+                [text]="'This is a time field.'">
+              </example-tooltip>
+            </div>
+          }
+          @if (controlCenter.showPrefixes) {
+            <div
+              formidableFieldPrefix
+              [align]="adornmentAlignment">
+              Prefix
+            </div>
+          }
+          @if (controlCenter.showSuffixes) {
+            <div
+              formidableFieldSuffix
+              [align]="adornmentAlignment">
+              Suffix
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Religion -->
@@ -886,22 +920,23 @@
               </formidable-field-option>
             </ng-template>
           </formidable-radio-group-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Religion
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="click"
-              [icon]="exampleTooltipSvg"
-              [text]="'This is a radio group field. It can have a tooltip, too.'">
-            </example-tooltip>
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Religion
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="click"
+                [icon]="exampleTooltipSvg"
+                [text]="'This is a radio group field. It can have a tooltip, too.'">
+              </example-tooltip>
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Allergies -->
@@ -938,22 +973,23 @@
               <pre>And I can have any content</pre>
             </formidable-field-option>
           </formidable-checkbox-group-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Allergies
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="click"
-              [icon]="exampleTooltipSvg"
-              [text]="'This is a checkbox group field.'">
-            </example-tooltip>
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Allergies
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="click"
+                [icon]="exampleTooltipSvg"
+                [text]="'This is a checkbox group field.'">
+              </example-tooltip>
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- IsSingle -->
@@ -971,34 +1007,37 @@
             (focusChanged)="onFocusChanged('isSingle', $event)">
             {{ 'Content Label' }}
           </formidable-toggle-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Is Single?
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="click"
-              [icon]="exampleTooltipSvg"
-              [text]="'This is a toggle field.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showPrefixes"
-            formidableFieldPrefix
-            [align]="adornmentAlignment">
-            Prefix
-          </div>
-          <div
-            *ngIf="controlCenter.showSuffixes"
-            formidableFieldSuffix
-            [align]="adornmentAlignment">
-            Suffix
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Is Single?
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="click"
+                [icon]="exampleTooltipSvg"
+                [text]="'This is a toggle field.'">
+              </example-tooltip>
+            </div>
+          }
+          @if (controlCenter.showPrefixes) {
+            <div
+              formidableFieldPrefix
+              [align]="adornmentAlignment">
+              Prefix
+            </div>
+          }
+          @if (controlCenter.showSuffixes) {
+            <div
+              formidableFieldSuffix
+              [align]="adornmentAlignment">
+              Suffix
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Age -->
@@ -1024,26 +1063,27 @@
             (valueChanged)="onValueChanged('age', $event)"
             (focusChanged)="onFocusChanged('age', $event)">
           </formidable-slider-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Age
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="click"
-              [icon]="exampleTooltipSvg"
-              [text]="'This is a slider field.'">
-            </example-tooltip>
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Age
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="click"
+                [icon]="exampleTooltipSvg"
+                [text]="'This is a slider field.'">
+              </example-tooltip>
+            </div>
+          }
         </formidable-field-decorator>
 
         <!-- Pets: not a library field. A custom field on `BaseFieldDirective` is decorated, validated and
-             themed exactly like the ones above — see the custom-field guide. -->
+                  themed exactly like the ones above — see the custom-field guide. -->
         <formidable-field-decorator>
           <example-counter-field
             formidableFieldErrors
@@ -1058,31 +1098,30 @@
             (valueChanged)="onValueChanged('pets', $event)"
             (focusChanged)="onFocusChanged('pets', $event)">
           </example-counter-field>
-          <div
-            *ngIf="controlCenter.showLabels"
-            formidableFieldLabel
-            [position]="labelPosition">
-            Pets
-          </div>
-          <div
-            *ngIf="controlCenter.showLabelAdornments"
-            formidableFieldLabelAdornment>
-            <example-tooltip
-              placement="right"
-              trigger="click"
-              [icon]="exampleTooltipSvg"
-              [text]="'This is a custom field, built on BaseFieldDirective.'">
-            </example-tooltip>
-          </div>
-          <div
-            *ngIf="controlCenter.showHints"
-            formidableFieldHint>
-            Arrow keys step it
-          </div>
+          @if (controlCenter.showLabels) {
+            <div
+              formidableFieldLabel
+              [position]="labelPosition">
+              Pets
+            </div>
+          }
+          @if (controlCenter.showLabelAdornments) {
+            <div formidableFieldLabelAdornment>
+              <example-tooltip
+                placement="right"
+                trigger="click"
+                [icon]="exampleTooltipSvg"
+                [text]="'This is a custom field, built on BaseFieldDirective.'">
+              </example-tooltip>
+            </div>
+          }
+          @if (controlCenter.showHints) {
+            <div formidableFieldHint>Arrow keys step it</div>
+          }
         </formidable-field-decorator>
 
         <!-- Passwords Group: a group rule reports on `passwords`, not on either field, so the errors
-             directive sits on the `ngModelGroup` itself. -->
+                  directive sits on the `ngModelGroup` itself. -->
         <div
           formidableFieldErrors
           ngModelGroup="passwords"
@@ -1096,21 +1135,20 @@
               [readonly]="controlCenter.showAsReadonly"
               [disabled]="controlCenter.showAsDisabled"
               [showRequiredMarker]="true"
-              [ngModel]="vm.formValue$.passwords?.password"
+              [ngModel]="vm.formValue$.passwords?.password ?? null"
               (valueChanged)="onValueChanged('passwords.password', $event)"
               (focusChanged)="onFocusChanged('passwords.password', $event)">
             </formidable-input-field>
-            <div
-              *ngIf="controlCenter.showLabels"
-              formidableFieldLabel
-              [position]="labelPosition">
-              Password
-            </div>
-            <div
-              *ngIf="controlCenter.showHints"
-              formidableFieldHint>
-              Try '1234' with the first name 'Test' for a whole-form rule.
-            </div>
+            @if (controlCenter.showLabels) {
+              <div
+                formidableFieldLabel
+                [position]="labelPosition">
+                Password
+              </div>
+            }
+            @if (controlCenter.showHints) {
+              <div formidableFieldHint>Try '1234' with the first name 'Test' for a whole-form rule.</div>
+            }
           </formidable-field-decorator>
 
           <formidable-field-decorator>
@@ -1122,25 +1160,28 @@
               [readonly]="controlCenter.showAsReadonly"
               [disabled]="controlCenter.showAsDisabled || vm.confirmPasswordDisabled"
               [showRequiredMarker]="true"
-              [ngModel]="vm.formValue$.passwords?.confirmPassword"
+              [ngModel]="vm.formValue$.passwords?.confirmPassword ?? null"
               (valueChanged)="onValueChanged('passwords.confirmPassword', $event)"
               (focusChanged)="onFocusChanged('passwords.confirmPassword', $event)">
             </formidable-input-field>
-            <div
-              *ngIf="controlCenter.showLabels"
-              formidableFieldLabel
-              [position]="labelPosition">
-              Confirm Password
-            </div>
+            @if (controlCenter.showLabels) {
+              <div
+                formidableFieldLabel
+                [position]="labelPosition">
+                Confirm Password
+              </div>
+            }
           </formidable-field-decorator>
         </div>
 
         <!-- Whole-Form Errors: they report on the form, so no field renders them. -->
-        <div
-          *ngIf="vm.errors$[wholeForm]?.length"
-          class="whole-form-errors">
-          <p *ngFor="let error of vm.errors$[wholeForm]">{{ error }}</p>
-        </div>
+        @if (vm.errors$[wholeForm]?.length) {
+          <div class="whole-form-errors">
+            @for (error of vm.errors$[wholeForm]; track error) {
+              <p>{{ error }}</p>
+            }
+          </div>
+        }
 
         <!-- Submit -->
         <div class="footer">
@@ -1158,13 +1199,8 @@
 
 <!-- Adornment Action Templates -->
 <!-- The marker element itself has to stay a static child of the decorator — `ng-content select` matches
-     the nodes as written, so a `formidableFieldPrefix` reached through an outlet would land in the field's
-     own slot. Only the content comes from here. -->
-
-<!-- What a slot falls back to while the actions are off. The fields with no action of their own keep the
-     word inline; these two exist because an `*ngIf` else-branch needs a template. -->
-<ng-template #textPrefix>Prefix</ng-template>
-<ng-template #textSuffix>Suffix</ng-template>
+          the nodes as written, so a `formidableFieldPrefix` reached through an outlet would land in the field's
+          own slot. Only the content comes from here. -->
 
 <!-- Clear the value, beside a glyph for its validation state. Both come and go, which re-insets the field. -->
 <ng-template
@@ -1173,15 +1209,16 @@
   let-error="error"
   let-value="value">
   <div class="adornment-row">
-    <button
-      *ngIf="value"
-      type="button"
-      title="Clear"
-      class="adornment-action"
-      (mousedown)="$event.preventDefault()"
-      (click)="clearField(key)">
-      &times;
-    </button>
+    @if (value) {
+      <button
+        type="button"
+        title="Clear"
+        class="adornment-action"
+        (mousedown)="$event.preventDefault()"
+        (click)="clearField(key)">
+        &times;
+      </button>
+    }
     <span [class]="error ? 'adornment-state invalid' : 'adornment-state valid'">{{ error ? '✗' : '✓' }}</span>
   </div>
 </ng-template>
@@ -1203,11 +1240,13 @@
 </ng-template>
 
 <!-- A spinner is not interactive, so it stays click-through. It only exists while the lookup runs, and the
-     slot falling back to its text is what shows the inset following the width back and forth. -->
+          slot falling back to its text is what shows the inset following the width back and forth. -->
 <ng-template #loadingAction>
-  <span
-    *ngIf="isHobbyLoading; else textSuffix"
-    class="adornment-spinner"></span>
+  @if (isHobbyLoading) {
+    <span class="adornment-spinner"></span>
+  } @else {
+    Suffix
+  }
 </ng-template>
 
 <!-- An action works in either slot; this one is a prefix. -->

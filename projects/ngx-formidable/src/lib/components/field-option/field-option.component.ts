@@ -8,10 +8,8 @@ import {
   forwardRef,
   HostBinding,
   inject,
-  Inject,
   Input,
   OnInit,
-  Optional,
   TemplateRef,
   ViewChild
 } from '@angular/core';
@@ -37,7 +35,6 @@ import {
   templateUrl: './field-option.component.html',
   styleUrls: ['./field-option.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [CommonModule],
   providers: [
     {
@@ -48,6 +45,9 @@ import {
   ]
 })
 export class FieldOptionComponent implements IFormidableOption, OnInit, AfterContentInit {
+  private parent = inject<IFormidableOptionField>(FORMIDABLE_OPTION_FIELD, { optional: true })!;
+  readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
   @ViewChild('contentTemplate', { static: true }) private contentTemplate!: TemplateRef<unknown>;
 
   /** What reaches the model when this option is picked. */
@@ -129,11 +129,6 @@ export class FieldOptionComponent implements IFormidableOption, OnInit, AfterCon
   }
 
   // #endregion
-
-  constructor(
-    @Optional() @Inject(FORMIDABLE_OPTION_FIELD) private parent: IFormidableOptionField,
-    public readonly elementRef: ElementRef<HTMLElement>
-  ) {}
 
   ngOnInit() {
     if (!this.parent) {

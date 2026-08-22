@@ -7,7 +7,6 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   templateUrl: './example-icon.component.html',
   styleUrls: ['./example-icon.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [CommonModule]
 })
 export class ExampleIconComponent {

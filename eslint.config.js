@@ -1,7 +1,7 @@
 const eslint = require('@eslint/js');
 const tseslint = require('typescript-eslint');
 const angulareslint = require('angular-eslint');
-const rxjsX = require('eslint-plugin-rxjs-x');
+const rxjsX = require('eslint-plugin-rxjs-x').default;
 
 module.exports = tseslint.config(
   {

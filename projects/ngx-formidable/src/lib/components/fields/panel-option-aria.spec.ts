@@ -1,4 +1,4 @@
-import { Component, Type, ViewChild } from '@angular/core';
+import { Component, Type, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -15,7 +15,7 @@ import { SelectFieldComponent } from './select-field/select-field.component';
  *
  * The decorator mints the ids for what it renders around the field (`-label`, `-hint`, `-errors`); the
  * field mints the ids for what lives inside it, `{fieldId}-panel` and `{fieldId}-option-{index}`, from the
- * same uuid. Nothing else in the library points at those elements, so nothing else needs to know them —
+ * same `fieldId`. Nothing else in the library points at those elements, so nothing else needs to know them —
  * which is why every assertion here resolves an idref instead of comparing id strings.
  *
  * `aria-activedescendant` is bound off the very stream that drives the `is-highlighted` class, so the two
@@ -36,8 +36,8 @@ const options: IFormidableOption[] = [
 ];
 
 @Component({
-  standalone: true,
   imports: [FormsModule, DropdownFieldComponent, AutocompleteFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-dropdown-field
       name="dropdown"
@@ -53,8 +53,8 @@ class PanelHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, DateFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<formidable-date-field name="date" />`
 })
 class DateHostComponent {
@@ -62,8 +62,8 @@ class DateHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, RadioGroupFieldComponent, CheckboxGroupFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-radio-group-field
       name="colour"
@@ -79,8 +79,8 @@ class GroupHostComponent {
 
 /** The native control, which the platform already speaks for — a guard against the pattern spreading. */
 @Component({
-  standalone: true,
   imports: [FormsModule, SelectFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-select-field
       name="select"
@@ -91,7 +91,7 @@ class SelectHostComponent {
   options = options;
 }
 
-/** Ids are uuid-based and may start with a digit, which `#id` cannot select. */
+/** An attribute selector, not `#id`: the assertions are about the idref, never the id's spelling. */
 function byId(root: HTMLElement, id: string | null): HTMLElement | null {
   return id ? root.querySelector(`[id="${id}"]`) : null;
 }

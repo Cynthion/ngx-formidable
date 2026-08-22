@@ -18,10 +18,11 @@
     tabindex="-1"
     class="tooltip-panel"
     [class.open]="open">
-    <ng-container *ngIf="text; else projected">{{ text }}</ng-container>
-    <ng-template #projected>
+    @if (text) {
+      {{ text }}
+    } @else {
       <ng-content></ng-content>
-    </ng-template>
+    }
     <span
       class="tooltip-arrow"
       aria-hidden="true"></span>
