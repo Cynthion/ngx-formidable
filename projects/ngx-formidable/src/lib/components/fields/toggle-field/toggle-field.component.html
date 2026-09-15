@@ -2,18 +2,18 @@
   #toggleRef
   role="switch"
   class="field"
-  [class.is-readonly]="readonly"
-  [class.is-disabled]="disabled"
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
   [class.focused]="isFieldFocused"
   [class.checked]="value"
-  [tabindex]="readonly || disabled ? -1 : null"
+  [tabindex]="readonly() || disabled() ? -1 : null"
   [attr.aria-checked]="!!value"
   [attr.aria-labelledby]="labelledBy"
-  [attr.aria-required]="showRequiredMarker || null"
+  [attr.aria-required]="showRequiredMarker() || null"
   [attr.aria-invalid]="isInvalid || null"
   [attr.aria-describedby]="describedBy"
-  [attr.aria-readonly]="readonly || null"
-  [attr.aria-disabled]="disabled || null"
+  [attr.aria-readonly]="readonly() || null"
+  [attr.aria-disabled]="disabled() || null"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)"
   (click)="onToggleClick($event)">
@@ -22,12 +22,12 @@
     type="checkbox"
     [id]="fieldId"
     [tabindex]="-1"
-    [attr.name]="name"
-    [attr.readonly]="readonly ? '' : null"
-    [attr.disabled]="disabled ? '' : null"
+    [attr.name]="name()"
+    [attr.readonly]="readonly() ? '' : null"
+    [attr.disabled]="disabled() ? '' : null"
     [checked]="value" />
 
-  @if (labelPosition === 'before') {
+  @if (labelPosition() === 'before') {
     <ng-container [ngTemplateOutlet]="label" />
   }
 
@@ -35,13 +35,13 @@
     <div class="toggle-thumb"></div>
   </div>
 
-  @if (labelPosition === 'after') {
+  @if (labelPosition() === 'after') {
     <ng-container [ngTemplateOutlet]="label" />
   }
 </div>
 
 <ng-template #label>
-  <div class="toggle-label toggle-label-{{ labelPosition }}">
+  <div class="toggle-label toggle-label-{{ labelPosition() }}">
     @if (internalLabel) {
       {{ internalLabel }}
     } @else {

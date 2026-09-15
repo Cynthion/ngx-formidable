@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, inject } from '@angular/core';
+import { Directive, ElementRef, inject, input } from '@angular/core';
 import { FieldAdornmentAlignment } from '../models/formidable.model';
 
 /**
@@ -12,5 +12,5 @@ export class FieldSuffixDirective {
   elementRef = inject(ElementRef);
 
   /** What the suffix lines up with vertically: the field's box (`center`) or its value (`value`). */
-  @Input() align: FieldAdornmentAlignment = 'center';
+  public readonly align = input<FieldAdornmentAlignment>('center');
 }

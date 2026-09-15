@@ -103,6 +103,38 @@ class FilteredAutocompleteHostComponent {
   defaultOptionMode: 'always' | 'fallback' = 'fallback';
 }
 
+@Component({
+  imports: [FormsModule, RadioGroupFieldComponent, FieldOptionComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    <formidable-radio-group-field
+      name="projected"
+      ngModel>
+      <formidable-field-option value="a">Apple</formidable-field-option>
+      <formidable-field-option
+        value="b"
+        label="Bound Banana" />
+    </formidable-radio-group-field>
+  `
+})
+class ProjectedContentHostComponent {
+  @ViewChild(RadioGroupFieldComponent, { static: true }) field!: RadioGroupFieldComponent;
+}
+
+// An autocomplete, because its filter is what reads the label off the option — a group only displays it,
+// and a displayed label comes from the projected template rather than from the option.
+@Component({
+  imports: [AutocompleteFieldComponent, FieldOptionComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    <formidable-autocomplete-field name="projected-filter">
+      <formidable-field-option value="a">Apple</formidable-field-option>
+      <formidable-field-option value="b">Banana</formidable-field-option>
+    </formidable-autocomplete-field>
+  `
+})
+class ProjectedFilterHostComponent {}
+
 // The options are collected in a microtask, so a plain detectChanges() is not enough to see them.
 async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
   fixture.detectChanges();
@@ -147,6 +179,60 @@ describe('option projection', () => {
 
       expect(renderedOptionValues(fixture)).toEqual(['direct', 'looped-a', 'templated', 'nested']);
     });
+  });
+
+  /**
+   * The option a field reads off a projected component is `FieldOptionComponent.option` — one plain
+   * `IFormidableOption` folded out of its signal inputs and its projected content. These two claims are the
+   * whole boundary: the label falls back to the projected text, and the default `select` the computed
+   * resolves is what commits when the rendered option is clicked.
+   */
+  describe('the option a component hands over', () => {
+    let fixture: ComponentFixture<ProjectedContentHostComponent>;
+    let host: ProjectedContentHostComponent;
+
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({ imports: [ProjectedContentHostComponent] }).compileComponents();
+
+      fixture = TestBed.createComponent(ProjectedContentHostComponent);
+      host = fixture.componentInstance;
+      await settle(fixture);
+    });
+
+    it('renders the projected content, and the bound label where there is no content', () => {
+      expect(renderedOptionValues(fixture)).toEqual(['Apple', 'Bound Banana']);
+    });
+
+    it('commits through the select the option resolves for itself', async () => {
+      const option = fixture.nativeElement.querySelectorAll('formidable-field-option')[0] as HTMLElement;
+
+      // The `(click)` sits on the option's inner div, which is what the field renders.
+      option.querySelector('div')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await settle(fixture);
+
+      expect(host.field.value).toBe('a');
+    });
+
+    // The default `match` reads the option's own label, which for a projected option is the text taken
+    // off its content. Lose that and every content-only option stops matching its own name.
+    it('filters on the label taken from the projected content', fakeAsync(() => {
+      const filterFixture = TestBed.createComponent(ProjectedFilterHostComponent);
+      filterFixture.detectChanges();
+      tick();
+      filterFixture.detectChanges();
+
+      const filterInput = filterFixture.nativeElement.querySelector('input') as HTMLInputElement;
+      filterInput.dispatchEvent(new Event('focus'));
+      filterInput.value = 'app';
+      filterInput.dispatchEvent(new Event('input'));
+      tick(300); // clears the 200ms filter debounce
+      filterFixture.detectChanges();
+
+      expect(renderedOptionValues(filterFixture)).toEqual(['Apple']);
+
+      discardPeriodicTasks();
+      filterFixture.destroy();
+    }));
   });
 
   describe('defaultOption', () => {

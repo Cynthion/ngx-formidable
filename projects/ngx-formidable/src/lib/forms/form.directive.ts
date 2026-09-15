@@ -1,5 +1,5 @@
-import { Directive, inject, input, OnDestroy, Output } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Directive, inject, input, OnDestroy } from '@angular/core';
+import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import {
   AsyncValidatorFn,
   FormControlStatus,
@@ -119,7 +119,7 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
    * The whole model on every value change, and on every control added or removed. Merged with the raw values,
    * so a disabled control's value is included rather than dropped.
    */
-  @Output() public readonly formValueChange$ = this.ngForm.form.events.pipe(
+  private readonly formValueChange$ = this.ngForm.form.events.pipe(
     filter((v) => v instanceof ValueChangeEvent),
     map((v) => (v as ValueChangeEvent<unknown>).value),
     map(() => mergeValuesAndRawValues<T>(this.ngForm.form))
@@ -130,7 +130,7 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
    * Each entry is normalized through `FORMIDABLE_ERROR_EXTRACTOR`, so a form mixing the validator with
    * Angular's own validators still yields one homogeneous map.
    */
-  @Output() public readonly errorsChange$ = this.ngForm.form.events.pipe(
+  private readonly errorsChange$ = this.ngForm.form.events.pipe(
     filter((v) => v instanceof StatusChangeEvent),
     map((v) => (v as StatusChangeEvent).status),
     filter((v) => v !== 'PENDING'),
@@ -138,7 +138,7 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
   );
 
   /** `true` once any control has been edited, `false` again on a reset to pristine. */
-  @Output() public readonly dirtyChange$ = this.ngForm.form.events.pipe(
+  private readonly dirtyChange$ = this.ngForm.form.events.pipe(
     filter((v) => v instanceof PristineChangeEvent),
     map((v) => !(v as PristineChangeEvent).pristine),
     startWith(this.ngForm.form.dirty),
@@ -150,12 +150,23 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
     distinctUntilChanged()
   );
 
-  /** `true` when the form is valid and `false` when it is invalid. Silent while pending, never `null`. */
-  @Output() public readonly validChange$ = this.statusChanges$.pipe(
+  private readonly validChange$ = this.statusChanges$.pipe(
     filter((s: FormControlStatus) => s === 'VALID' || s === 'INVALID'),
     map((s: FormControlStatus) => s === 'VALID'),
     distinctUntilChanged()
   );
+
+  /** The whole model on every value change, and on every control added or removed. */
+  public readonly formValueChange = outputFromObservable(this.formValueChange$);
+
+  /** Every message on the form, keyed by the target that reported it. */
+  public readonly errorsChange = outputFromObservable(this.errorsChange$);
+
+  /** `true` once any control has been edited, `false` again on a reset to pristine. */
+  public readonly dirtyChange = outputFromObservable(this.dirtyChange$);
+
+  /** `true` when the form is valid and `false` when it is invalid. Silent while pending, never `null`. */
+  public readonly validChange = outputFromObservable(this.validChange$);
 
   private readonly destroy$ = new Subject<void>();
 

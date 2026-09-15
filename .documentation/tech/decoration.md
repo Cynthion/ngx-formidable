@@ -2,7 +2,9 @@
 
 How a field, the decorator around it and its error messages are wired together. What a consumer does with the slots is in `user/decoration.md`, which this file does not restate.
 
-`FieldDecoratorComponent` renders everything around a field and nothing inside it. The field is projected, so the decorator reads it rather than configuring it. Every value below is pulled off `IFormidableField`, never pushed in. What paints over what is a separate concern; see `tech/layering.md`.
+`FieldDecoratorComponent` renders everything around a field and nothing inside it. The field is projected, so the decorator reads it rather than configuring it. Every value below is pulled off `IFormidableField`, never pushed in.
+It does not itself implement that contract: the interface is signal-typed, while the decorator's mirrors are plain getters over a non-signal `@ContentChild` — a `computed` over one would cache the value it held before the query resolved.
+What paints over what is a separate concern; see `tech/layering.md`.
 
 ## The Three Parties
 

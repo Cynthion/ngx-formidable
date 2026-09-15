@@ -307,10 +307,10 @@
     [ngFormOptions]="ngFormOptions"
     [revealOn]="revealOn"
     [showRequiredMarkers]="controlCenter.showRequiredMarkers"
-    (dirtyChange$)="isDirty$.next($event)"
-    (validChange$)="isValid$.next($event)"
-    (errorsChange$)="errors$.next($event)"
-    (formValueChange$)="formValue$.next($event)"
+    (dirtyChange)="isDirty$.next($event)"
+    (validChange)="isValid$.next($event)"
+    (errorsChange)="errors$.next($event)"
+    (formValueChange)="formValue$.next($event)"
     (ngSubmit)="onSubmit()">
     <fieldset>
       @if (viewModel$ | async; as vm) {

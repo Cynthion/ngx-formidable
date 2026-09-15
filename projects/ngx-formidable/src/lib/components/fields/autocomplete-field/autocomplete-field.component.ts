@@ -3,11 +3,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   forwardRef,
-  Input,
+  input,
   OnInit,
-  Output,
+  output,
   ViewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -181,7 +180,7 @@ export class AutocompleteFieldComponent
   public filterChange$ = this.filterChangeSubject$.asObservable();
 
   /** The filter text, so options can be fetched for it rather than filtered out of a list already bound. */
-  @Output() filterChanged = new EventEmitter<string>();
+  public readonly filterChanged = output<string>();
 
   // #endregion
 
@@ -281,13 +280,19 @@ export class AutocompleteFieldComponent
   }
 
   private computeAllOptions(): IFormidableOption[] {
-    return combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
+    return combineFieldOptions(
+      this.options(),
+      this.optionComponents?.map((source) => source.option()),
+      this.sortFn()
+    );
   }
 
   // A configured default option is always selectable, whatever its mode: in `fallback` mode whether it
   // renders depends on the current filter, so excluding it here would deselect it on the next keystroke.
   private computeSelectableOptions(allOptions: IFormidableOption[]): IFormidableOption[] {
-    return this.defaultOption ? [this.defaultOption, ...allOptions] : allOptions;
+    const defaultOption = this.defaultOption();
+
+    return defaultOption ? [defaultOption, ...allOptions] : allOptions;
   }
 
   private updateFilteredOptions(allOptions: IFormidableOption[]): void {
@@ -300,7 +305,7 @@ export class AutocompleteFieldComponent
       : allOptions;
 
     // the default option is pinned after filtering, so an `always` default survives a non-matching filter
-    this.filteredOptions$.next(applyDefaultOption(filteredOptions, this.defaultOption, this.defaultOptionMode));
+    this.filteredOptions$.next(applyDefaultOption(filteredOptions, this.defaultOption(), this.defaultOptionMode()));
   }
 
   private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {
@@ -319,24 +324,21 @@ export class AutocompleteFieldComponent
 
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
-  /** Opens and closes the panel from outside. */
-  @Input()
+  /** Whether the panel is currently open. Call `togglePanel` to open or close it from outside. */
   get isPanelOpen(): boolean {
     return this._isPanelOpen;
-  }
-  set isPanelOpen(val: boolean) {
-    this.togglePanel(val);
   }
 
   /**
    * Where the panel opens. The three anchored positions flip above the field when there is no room below; a
    * `sheet` keeps focus in its own filter input, so a soft keyboard can cover it.
    */
-  @Input() panelPosition: FormidablePanelPosition = 'full';
+  public readonly panelPosition = input<FormidablePanelPosition>('full');
 
   private _isPanelOpen = false;
 
-  protected togglePanel(isOpen: boolean): void {
+  /** Opens or closes the panel. */
+  public togglePanel(isOpen: boolean): void {
     this._isPanelOpen = isOpen;
 
     // Reads the panel's box, so it has to wait for the open state to render — a microtask would run

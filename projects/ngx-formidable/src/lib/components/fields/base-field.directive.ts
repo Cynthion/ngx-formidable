@@ -3,15 +3,15 @@ import {
   ChangeDetectorRef,
   Directive,
   ElementRef,
-  EventEmitter,
   HostBinding,
   inject,
   Injector,
-  Input,
+  input,
+  model,
   NgZone,
   OnDestroy,
   OnInit,
-  Output
+  output
 } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NgControl } from '@angular/forms';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
@@ -105,7 +105,7 @@ export abstract class BaseFieldDirective<T = string | null>
   ngAfterViewInit(): void {
     // Focusing inside the change detection pass flips `isFieldFocused`, which the decorator reads through
     // `canLabelRest` — an ExpressionChanged error. A microtask lands after the pass, with the refs resolved.
-    if (this.autoFocus) queueMicrotask(() => this.focus());
+    if (this.autoFocus()) queueMicrotask(() => this.focus());
   }
 
   ngOnDestroy(): void {
@@ -129,7 +129,7 @@ export abstract class BaseFieldDirective<T = string | null>
   }
 
   protected onFocusChange(isFocused: boolean): void {
-    if (this.disabled) return;
+    if (this.disabled()) return;
 
     this.isFieldFocused = isFocused;
 
@@ -226,7 +226,7 @@ export abstract class BaseFieldDirective<T = string | null>
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
+    this.disabled.set(isDisabled);
   }
 
   /**
@@ -240,25 +240,28 @@ export abstract class BaseFieldDirective<T = string | null>
   // #region IFormidableField
 
   /** The control's name, which is also the key it takes in the model and its validation target. */
-  @Input() name = '';
+  public readonly name = input('');
 
   /** Placeholder text. A field with one has nothing for an `inside` label to rest in, so that label floats. */
-  @Input() placeholder = '';
+  public readonly placeholder = input('');
 
   /** Blocks edits but stays focusable and keeps its focus ring, unlike `disabled`. */
-  @Input() readonly = false;
+  public readonly readonly = input(false);
 
-  /** Blocks edits and takes the field out of the tab order. Also set by Angular's own `disabled` handling. */
-  @Input() disabled = false;
+  /**
+   * Blocks edits and takes the field out of the tab order. A `model` and not an `input`, because Angular's
+   * own `setDisabledState` writes it as well — so `disabledChange` also reports a `control.disable()`.
+   */
+  public readonly disabled = model(false);
 
   /**
    * Suffixes the required marker to the label. Presentational only — nothing is inferred from a validator,
    * so this and the rules are the consumer's to keep in step. The form can switch all of them off at once.
    */
-  @Input() showRequiredMarker = false;
+  public readonly showRequiredMarker = input(false);
 
   /** Focuses the field once it has rendered. Does not open a panel. */
-  @Input() autoFocus = false;
+  public readonly autoFocus = input(false);
 
   /** For the decorator, which subscribes on the way in. `valueChanged` is the same signal for a consumer. */
   public valueChange$ = this.valueChangeSubject$.asObservable();
@@ -267,10 +270,10 @@ export abstract class BaseFieldDirective<T = string | null>
   public focusChange$ = this.focusChangeSubject$.asObservable();
 
   /** Emits the committed value on every change. Distinct-checked, so writing the same value twice is silent. */
-  @Output() public valueChanged = new EventEmitter<T>();
+  public readonly valueChanged = output<T>();
 
   /** Emits `true` on focus and `false` on blur — including a blur the field caused itself. */
-  @Output() public focusChanged = new EventEmitter<boolean>();
+  public readonly focusChanged = output<boolean>();
 
   get fieldId(): string {
     return this.id;
@@ -323,7 +326,7 @@ export abstract class BaseFieldDirective<T = string | null>
   get canLabelRest(): boolean {
     // Readonly/disabled fields never rest — the label stays put instead of
     // dropping over the (often filled) value when the field gains focus.
-    if (this.disabled || this.readonly) return false;
+    if (this.disabled() || this.readonly()) return false;
     // Only what the field renders of its own accord counts here — its value, or mask slots. A
     // `placeholder` is the decorator's to weigh, because whether it blocks a resting label or is hidden
     // behind one depends on the label's position, which this field cannot see.
@@ -355,14 +358,14 @@ export abstract class BaseFieldDirective<T = string | null>
 
   /** Focuses the field without opening its panel — no panel field opens on focus. */
   public focus(): void {
-    if (this.disabled) return;
+    if (this.disabled()) return;
 
     this.focusElement?.focus();
   }
 
   /** Keeps a readonly or disabled field from being edited by pointer, while leaving it focusable. */
   protected preventPointerDown(event: PointerEvent): void {
-    if (!this.readonly && !this.disabled) return;
+    if (!this.readonly() && !this.disabled()) return;
 
     event.preventDefault();
     // Waits for the browser's default pointerdown handling: `preventDefault` suppresses the native focus,
@@ -372,7 +375,7 @@ export abstract class BaseFieldDirective<T = string | null>
 
   /** Blocks the keys a native control would act on while readonly or disabled — a `select`, a range input. */
   protected preventKeydown(event: KeyboardEvent): void {
-    if (!this.readonly && !this.disabled) return;
+    if (!this.readonly() && !this.disabled()) return;
 
     const nativeSelectKeys = [
       'ArrowUp',
@@ -401,7 +404,7 @@ export abstract class BaseFieldDirective<T = string | null>
         if (this.keyboardCallback && this.registeredKeys.length > 0) {
           fromEvent<KeyboardEvent>(this.fieldRef.nativeElement, 'keydown')
             .pipe(
-              filter(() => this.isFieldFocused && !this.readonly && !this.disabled),
+              filter(() => this.isFieldFocused && !this.readonly() && !this.disabled()),
               filter((event) => this.registeredKeys.includes(event.key)),
               tap((event) => {
                 // immediately prevent default, before debounceTime

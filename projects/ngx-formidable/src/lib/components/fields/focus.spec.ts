@@ -192,7 +192,7 @@ describe('field focus', () => {
   it('keeps focus on the date input while its panel opens', fakeAsync(() => {
     build('date');
 
-    host.date.isPanelOpen = true;
+    host.date.togglePanel(true);
     fixture.detectChanges();
     tick();
     discardPeriodicTasks();

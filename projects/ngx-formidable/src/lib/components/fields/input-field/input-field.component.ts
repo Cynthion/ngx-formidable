@@ -5,7 +5,7 @@ import {
   ElementRef,
   forwardRef,
   inject,
-  Input,
+  input,
   OnChanges,
   SimpleChanges,
   ViewChild
@@ -96,11 +96,11 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   protected doWriteValue(value: string): void {
     const newValue = value ?? '';
 
-    if (this.mask) {
+    if (this.mask()) {
       // Waits for the ngxMask directive to initialize on the control, which it does across a full
       // task — a microtask would land before it and the value would be written unmasked.
       setTimeout(() => {
-        const maskedValue = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
+        const maskedValue = this.maskPipe.transform(newValue, this.mask()!, this.mergedMaskConfig);
         this.inputRef.nativeElement.value = maskedValue;
         setCaretPositionToEnd(this.inputRef.nativeElement);
 
@@ -122,9 +122,9 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   get value(): string | null {
     const inputValue = this.inputRef.nativeElement.value;
 
-    if (this.mask) {
+    if (this.mask()) {
       // remove mask characters if mask is applied
-      const valueNoMaskTyped = this.maskPipe.transform(inputValue, this.mask!, {
+      const valueNoMaskTyped = this.maskPipe.transform(inputValue, this.mask()!, {
         ...this.mergedMaskConfig,
         showMaskTyped: false
       });
@@ -146,27 +146,27 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   // #region IFormidableInputField
 
   /** The native autofill hint. Off by default, so a form does not leak values a consumer did not ask for. */
-  @Input() autocomplete: AutoFill = 'off';
+  public readonly autocomplete = input<AutoFill>('off');
 
   /** The native attribute. Reported to the browser and used to sanity-check a `mask`; it does not validate. */
-  @Input() minLength = -1;
+  public readonly minLength = input(-1);
 
   /** The native attribute, which does cap what can be typed. `-1` for no cap. */
-  @Input() maxLength = -1;
+  public readonly maxLength = input(-1);
 
   // #endregion
 
   // #region IFormidableMaskField
 
   /** An ngx-mask pattern. Setting one changes what the model receives — see `dropSpecialCharacters`. */
-  @Input() mask?: string = undefined;
+  public readonly mask = input<string | undefined>(undefined);
 
   /** Per-field ngx-mask overrides, layered over `FORMIDABLE_MASK_DEFAULTS` and the library's own defaults. */
-  @Input() maskConfig?: Partial<NgxMaskConfig>;
+  public readonly maskConfig = input<Partial<NgxMaskConfig> | undefined>(undefined);
 
   protected override get showsEmptyValueHint(): boolean {
     // Only a mask that renders its slots while empty occupies the value area.
-    return !!this.mask && this.mergedMaskConfig.showMaskTyped;
+    return !!this.mask() && this.mergedMaskConfig.showMaskTyped;
   }
 
   private readonly LOCAL_MASK_DEFAULTS: Required<MaskConfigSubset> = {
@@ -189,33 +189,35 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     return {
       ...this.LOCAL_MASK_DEFAULTS,
       ...(this.maskDefaults ?? {}),
-      ...(this.maskConfig ?? {})
+      ...(this.maskConfig() ?? {})
     } as Required<MaskConfigSubset>;
   }
 
   private warnIfMaskConflictsWithMinMax(): void {
-    if (!this.mask) return;
+    const mask = this.mask();
+    if (!mask) return;
 
     const { prefix, suffix } = this.mergedMaskConfig;
-    const { min, max, variable } = analyzeMaskDisplayLength(this.mask, { prefix, suffix });
+    const { min, max, variable } = analyzeMaskDisplayLength(mask, { prefix, suffix });
+    const name = this.name() || 'input';
 
     // Only emit hard errors when we have a deterministic range
     if (!variable) {
-      if (this.minLength > -1 && this.minLength > max) {
+      if (this.minLength() > -1 && this.minLength() > max) {
         console.error(
-          `[ngx-formidable] <${this.name || 'input'}>: minlength=${this.minLength} exceeds mask's max display length=${max} (mask="${this.mask}", prefix="${prefix ?? ''}", suffix="${suffix ?? ''}").`
+          `[ngx-formidable] <${name}>: minlength=${this.minLength()} exceeds mask's max display length=${max} (mask="${mask}", prefix="${prefix ?? ''}", suffix="${suffix ?? ''}").`
         );
       }
-      if (this.maxLength > -1 && this.maxLength < min) {
+      if (this.maxLength() > -1 && this.maxLength() < min) {
         console.error(
-          `[ngx-formidable] <${this.name || 'input'}>: maxlength=${this.maxLength} is below mask's min display length=${min} (mask="${this.mask}", prefix="${prefix ?? ''}", suffix="${suffix ?? ''}").`
+          `[ngx-formidable] <${name}>: maxlength=${this.maxLength()} is below mask's min display length=${min} (mask="${mask}", prefix="${prefix ?? ''}", suffix="${suffix ?? ''}").`
         );
       }
     } else {
       // Optional: gentle heads-up for variable masks
-      if (this.minLength > -1 || this.maxLength > -1) {
+      if (this.minLength() > -1 || this.maxLength() > -1) {
         console.warn(
-          `[ngx-formidable] <${this.name || 'input'}>: mask "${this.mask}" has variable length; exact comparison with minlength/maxlength is not deterministic.`
+          `[ngx-formidable] <${name}>: mask "${mask}" has variable length; exact comparison with minlength/maxlength is not deterministic.`
         );
       }
     }

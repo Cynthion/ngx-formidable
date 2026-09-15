@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, inject, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, inject, input } from '@angular/core';
 import { AbstractControl, NgForm, NgModel, NgModelGroup } from '@angular/forms';
 import { NgxFormidableFormDirective } from '../../forms/form.directive';
 import {
@@ -30,13 +30,13 @@ export class FieldErrorsComponent {
   private readonly extractErrors = inject<FormidableErrorExtractorFn>(FORMIDABLE_ERROR_EXTRACTOR);
 
   /** The control to report on. Exactly one of this and `ngModelGroup` is set. */
-  @Input() ngModel?: NgModel;
+  public readonly ngModel = input<NgModel | undefined>(undefined);
 
   /** The group to report on, for a rule whose target is the group rather than a field inside it. */
-  @Input() ngModelGroup?: NgModelGroup;
+  public readonly ngModelGroup = input<NgModelGroup | undefined>(undefined);
 
   /** When the messages appear for this control. Overrides whatever the form set. */
-  @Input() revealOn?: FormidableReveal;
+  public readonly revealOn = input<FormidableReveal | undefined>(undefined);
 
   // Optional: messages render for any validator, and for none — neither the form directive nor a form is required.
   private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true });
@@ -45,7 +45,7 @@ export class FieldErrorsComponent {
   private previousError?: string[];
 
   get control(): AbstractControl | undefined {
-    return this.ngModelGroup?.control ?? this.ngModel?.control;
+    return this.ngModelGroup()?.control ?? this.ngModel()?.control;
   }
 
   get errors(): string[] | undefined {
@@ -61,7 +61,7 @@ export class FieldErrorsComponent {
 
   // This field's setting first, then the form's, then the default.
   private get reveal(): FormidableReveal {
-    return this.revealOn ?? this.formDirective?.revealOn() ?? 'touched';
+    return this.revealOn() ?? this.formDirective?.revealOn() ?? 'touched';
   }
 
   @HostBinding('class.is-invalid')

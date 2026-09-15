@@ -2,26 +2,26 @@
   #selectRef
   class="field"
   [id]="fieldId"
-  [attr.name]="name"
-  [attr.readonly]="readonly ? '' : null"
-  [attr.disabled]="disabled ? '' : null"
-  [attr.tabindex]="readonly || disabled ? -1 : null"
-  [attr.aria-required]="showRequiredMarker || null"
+  [attr.name]="name()"
+  [attr.readonly]="readonly() ? '' : null"
+  [attr.disabled]="disabled() ? '' : null"
+  [attr.tabindex]="readonly() || disabled() ? -1 : null"
+  [attr.aria-required]="showRequiredMarker() || null"
   [attr.aria-invalid]="isInvalid || null"
   [attr.aria-describedby]="describedBy"
-  [attr.aria-readonly]="readonly || null"
-  (pointerdown)="readonly || disabled ? preventPointerDown($event) : null"
-  (keydown)="readonly || disabled ? preventKeydown($event) : null"
+  [attr.aria-readonly]="readonly() || null"
+  (pointerdown)="readonly() || disabled() ? preventPointerDown($event) : null"
+  (keydown)="readonly() || disabled() ? preventKeydown($event) : null"
   (change)="onValueChange()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <!-- Placeholder -->
-  @if (placeholder && !value) {
+  @if (placeholder() && !value) {
     <option
       value=""
       disabled
       selected>
-      {{ placeholder }}
+      {{ placeholder() }}
     </option>
   }
 
@@ -37,9 +37,9 @@
   } @empty {
     <option
       [value]=""
-      [label]="noOptionsText"
+      [label]="noOptionsText()"
       [disabled]="true">
-      {{ noOptionsText }}
+      {{ noOptionsText() }}
     </option>
   }
 </select>

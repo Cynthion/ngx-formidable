@@ -89,7 +89,7 @@ class SwitchedOffHostComponent {
     <form
       formidableForm
       [formValue]="value"
-      (errorsChange$)="errors = $event">
+      (errorsChange)="errors = $event">
       <formidable-input-field
         name="name"
         [required]="true"
@@ -133,7 +133,7 @@ class CrossFieldValidatorDirective implements IFormidableValidator {
       formidableValidateWholeForm
       crossFieldValidator
       [formValue]="value"
-      (formValueChange$)="value = $event">
+      (formValueChange)="value = $event">
       <input
         name="name"
         [ngModel]="value.name" />

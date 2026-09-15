@@ -29,7 +29,7 @@ import { ExampleCounterFieldComponent } from './example-counter-field.component'
     <form
       formidableForm
       [formValue]="formValue"
-      (formValueChange$)="formValue = $event">
+      (formValueChange)="formValue = $event">
       <formidable-field-decorator>
         <example-counter-field
           name="pets"

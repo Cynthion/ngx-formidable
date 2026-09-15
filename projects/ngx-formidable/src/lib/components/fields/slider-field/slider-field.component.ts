@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, ViewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableSliderField } from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.directive';
@@ -98,43 +98,43 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   // #region IFormidableSliderField
 
   /** Lower bound, inclusive. A value below it is clamped and the correction is written back to the model. */
-  @Input() min = 0;
+  public readonly min = input(0);
 
   /** Upper bound, inclusive. A value above it is clamped and the correction is written back to the model. */
-  @Input() max = 100;
+  public readonly max = input(100);
 
   /** Granularity. A value off the step grid is snapped onto it and the correction written back. */
-  @Input() step = 1;
+  public readonly step = input(1);
 
   /** Text for the low end of the track. Falls back to `min`. */
-  @Input() minLabel?: string;
+  public readonly minLabel = input<string | undefined>(undefined);
 
   /** Text for the high end of the track. Falls back to `max`. */
-  @Input() maxLabel?: string;
+  public readonly maxLabel = input<string | undefined>(undefined);
 
   /** Shows the current value in a bubble above the thumb. */
-  @Input() showThumbLabel = true;
+  public readonly showThumbLabel = input(true);
 
   /** Draws a mark on the track at every `tickInterval`. */
-  @Input() showTickMarks = false;
+  public readonly showTickMarks = input(false);
 
   /** Shows `minLabel` and `maxLabel` at the ends of the track. */
-  @Input() showMinMaxLabels = false;
+  public readonly showMinMaxLabels = input(false);
 
   /** Labels each tick mark with its value. Needs `showTickMarks`. */
-  @Input() showTickLabels = false;
+  public readonly showTickLabels = input(false);
 
   /** Spacing between tick marks. Falls back to `step`, which on a fine step means a mark per value. */
-  @Input() tickInterval?: number;
+  public readonly tickInterval = input<number | undefined>(undefined);
 
   /**
    * Renders the value as something other than the bare number — a currency, a category name. Also what the
    * slider reports as `aria-valuetext`, which is the one thing a native range cannot infer.
    */
-  @Input() transformValueToThumbLabel?: (value: number) => string;
+  public readonly transformValueToThumbLabel = input<((value: number) => string) | undefined>(undefined);
 
   /** Renders a tick's value as something other than the bare number. Independent of the thumb's transform. */
-  @Input() transformTickToTickLabel?: (value: number) => string;
+  public readonly transformTickToTickLabel = input<((value: number) => string) | undefined>(undefined);
 
   /** Commits a value from outside the field, clamped and snapped as a drag would be. */
   public selectValue(value: number): void {
@@ -155,22 +155,29 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
    * the consumer transforms it: a native range already reports the number itself.
    */
   get valueText(): string | null {
-    return this.transformValueToThumbLabel && this.value != null ? this.transformValueToThumbLabel(this.value) : null;
+    const transform = this.transformValueToThumbLabel();
+
+    return transform && this.value != null ? transform(this.value) : null;
   }
 
   get thumbLabel(): string {
     if (this.value == null) return '';
-    return this.transformValueToThumbLabel ? this.transformValueToThumbLabel(this.value) : String(this.value);
+
+    const transform = this.transformValueToThumbLabel();
+
+    return transform ? transform(this.value) : String(this.value);
   }
 
   getTickLabel(tick: number): string {
-    return this.transformTickToTickLabel ? this.transformTickToTickLabel(tick) : String(tick);
+    const transform = this.transformTickToTickLabel();
+
+    return transform ? transform(tick) : String(tick);
   }
 
   get valuePercent(): number {
-    if (this.max === this.min) return 0;
-    const v = this.value ?? this.min;
-    return ((v - this.min) / (this.max - this.min)) * 100;
+    if (this.max() === this.min()) return 0;
+    const v = this.value ?? this.min();
+    return ((v - this.min()) / (this.max() - this.min())) * 100;
   }
 
   get thumbLabelAlign(): SliderLabelAlign {
@@ -184,24 +191,25 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   }
 
   get tickMarks(): number[] {
-    if (!this.showTickMarks) return [];
+    if (!this.showTickMarks()) return [];
 
-    const interval = (this.tickInterval && this.tickInterval > 0 ? this.tickInterval : this.step) || 1;
+    const tickInterval = this.tickInterval();
+    const interval = (tickInterval && tickInterval > 0 ? tickInterval : this.step()) || 1;
     const tickMarks: number[] = [];
 
-    if (this.max <= this.min) {
+    if (this.max() <= this.min()) {
       return tickMarks;
     }
 
-    tickMarks.push(this.min);
+    tickMarks.push(this.min());
 
-    let current = this.min + interval;
-    while (current < this.max) {
+    let current = this.min() + interval;
+    while (current < this.max()) {
       tickMarks.push(this.roundToStep(current));
       current += interval;
     }
 
-    tickMarks.push(this.max);
+    tickMarks.push(this.max());
 
     return Array.from(new Set(tickMarks)).sort((a, b) => a - b);
   }
@@ -211,20 +219,20 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   }
 
   get showLabelRow(): boolean {
-    return this.showMinMaxLabels || this.showAnyTickLabels;
+    return this.showMinMaxLabels() || this.showAnyTickLabels;
   }
 
   get showAnyTickLabels(): boolean {
-    return this.showTickMarks && this.showTickLabels && this.tickMarks.length > 0;
+    return this.showTickMarks() && this.showTickLabels() && this.tickMarks.length > 0;
   }
 
   get labelItems(): SliderLabelItem[] {
     const items: SliderLabelItem[] = [];
 
     // Case A: min/max labels shown, with optional tick labels for inner ticks
-    if (this.showMinMaxLabels) {
+    if (this.showMinMaxLabels()) {
       items.push({
-        text: String(this.minLabel ?? this.min),
+        text: String(this.minLabel() ?? this.min()),
         leftPercent: 0,
         align: 'start'
       });
@@ -240,7 +248,7 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
       }
 
       items.push({
-        text: String(this.maxLabel ?? this.max),
+        text: String(this.maxLabel() ?? this.max()),
         leftPercent: 100,
         align: 'end'
       });
@@ -269,13 +277,13 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   }
 
   getTickPercent(tick: number): number {
-    if (this.max === this.min) return 0;
+    if (this.max() === this.min()) return 0;
 
-    return ((tick - this.min) / (this.max - this.min)) * 100;
+    return ((tick - this.min()) / (this.max() - this.min())) * 100;
   }
 
   onRangeInput(event: Event): void {
-    if (this.readonly || this.disabled) return;
+    if (this.readonly() || this.disabled()) return;
 
     const raw = Number((event.target as HTMLInputElement).value);
 
@@ -285,24 +293,24 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   private normalizeValue(value: number | null): number | null {
     if (value == null || Number.isNaN(value)) return null;
 
-    const clamped = Math.min(this.max, Math.max(this.min, value));
+    const clamped = Math.min(this.max(), Math.max(this.min(), value));
     return this.roundToStep(clamped);
   }
 
   private roundToStep(value: number): number {
-    if (!this.step || this.step <= 0) return value;
+    if (!this.step() || this.step() <= 0) return value;
 
-    const offset = this.min;
-    const steps = Math.round((value - offset) / this.step);
-    const rounded = offset + steps * this.step;
+    const offset = this.min();
+    const steps = Math.round((value - offset) / this.step());
+    const rounded = offset + steps * this.step();
 
-    return Math.min(this.max, Math.max(this.min, rounded));
+    return Math.min(this.max(), Math.max(this.min(), rounded));
   }
 
   private syncRangeInput(): void {
     if (!this.rangeRef?.nativeElement) return;
 
-    const val = this.value ?? this.min;
+    const val = this.value ?? this.min();
     this.rangeRef.nativeElement.value = String(val);
   }
 
@@ -311,11 +319,11 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
     if (!el) return;
 
     // Decide what value to use when null: min makes sense for a slider UI
-    const v = this.value ?? this.min;
+    const v = this.value ?? this.min();
 
     // Avoid divide-by-zero when min === max
-    const range = this.max - this.min;
-    const p = range === 0 ? 0 : (v - this.min) / range; // 0..1
+    const range = this.max() - this.min();
+    const p = range === 0 ? 0 : (v - this.min()) / range; // 0..1
     const clampedP = Math.min(1, Math.max(0, p));
 
     // compensation to centers over the value)

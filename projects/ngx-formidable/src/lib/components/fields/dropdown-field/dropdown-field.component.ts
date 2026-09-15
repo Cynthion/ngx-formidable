@@ -4,7 +4,7 @@ import {
   Component,
   ElementRef,
   forwardRef,
-  Input,
+  input,
   OnDestroy,
   OnInit,
   ViewChild
@@ -158,7 +158,7 @@ export class DropdownFieldComponent
 
   // Mirrors the template: there is nothing to open once the field is readonly or disabled.
   get hasInFieldToggle(): boolean {
-    return !this.readonly && !this.disabled;
+    return !this.readonly() && !this.disabled();
   }
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
@@ -256,9 +256,13 @@ export class DropdownFieldComponent
   }
 
   private computeAllOptions(): IFormidableOption[] {
-    const combined = combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
+    const combined = combineFieldOptions(
+      this.options(),
+      this.optionComponents?.map((source) => source.option()),
+      this.sortFn()
+    );
 
-    return applyDefaultOption(combined, this.defaultOption, this.defaultOptionMode);
+    return applyDefaultOption(combined, this.defaultOption(), this.defaultOptionMode());
   }
 
   private updateOptions(allOptions: IFormidableOption[]): void {
@@ -284,17 +288,13 @@ export class DropdownFieldComponent
 
   @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
 
-  /** Opens and closes the panel from outside. Setting it runs the same path a click on the toggle does. */
-  @Input()
+  /** Whether the panel is currently open. Call `togglePanel` to open or close it from outside. */
   get isPanelOpen(): boolean {
     return this._isPanelOpen;
   }
-  set isPanelOpen(val: boolean) {
-    this.togglePanel(val);
-  }
 
   /** Where the panel opens. The three anchored positions flip above the field when there is no room below. */
-  @Input() panelPosition: FormidablePanelPosition = 'full';
+  public readonly panelPosition = input<FormidablePanelPosition>('full');
 
   private _isPanelOpen = false;
 
@@ -310,7 +310,8 @@ export class DropdownFieldComponent
     event.preventDefault();
   }
 
-  protected togglePanel(isOpen: boolean): void {
+  /** Opens or closes the panel. */
+  public togglePanel(isOpen: boolean): void {
     this._isPanelOpen = isOpen;
 
     // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
@@ -367,7 +368,7 @@ export class DropdownFieldComponent
   }
 
   protected onTypeaheadKeydown(event: KeyboardEvent): void {
-    if (isPrintableCharacter(event) && !this.readonly && !this.disabled) {
+    if (isPrintableCharacter(event) && !this.readonly() && !this.disabled()) {
       this._typedBuffer += event.key;
       this.typeahead$.next(this._typedBuffer);
 

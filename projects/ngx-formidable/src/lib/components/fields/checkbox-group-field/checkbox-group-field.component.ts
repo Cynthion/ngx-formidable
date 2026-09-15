@@ -172,9 +172,13 @@ export class CheckboxGroupFieldComponent
   }
 
   private computeAllOptions(): IFormidableOption[] {
-    const combined = combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
+    const combined = combineFieldOptions(
+      this.options(),
+      this.optionComponents?.map((source) => source.option()),
+      this.sortFn()
+    );
 
-    return applyDefaultOption(combined, this.defaultOption, this.defaultOptionMode);
+    return applyDefaultOption(combined, this.defaultOption(), this.defaultOptionMode());
   }
 
   private updateOptions(allOptions: IFormidableOption[]): void {

@@ -1,9 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   forwardRef,
-  Input,
+  input,
+  linkedSignal,
   OnChanges,
   OnDestroy,
   OnInit,
@@ -78,22 +80,18 @@ export class TimeFieldComponent
   override ngOnInit(): void {
     super.ngOnInit();
 
-    if (!validateUnicodeTimeTokenFormat(this.unicodeTokenFormat)) {
+    if (!validateUnicodeTimeTokenFormat(this.unicodeTokenFormat())) {
       console.warn(
-        `[ngx-formidable] Invalid unicodeTokenFormat: "${this.unicodeTokenFormat}". ` +
+        `[ngx-formidable] Invalid unicodeTokenFormat: "${this.unicodeTokenFormat()}". ` +
           `Falling back to default "${this.defaultUnicodeTokenFormat}". Supported tokens: ${UNICODE_TIME_TOKENS.join(', ')}.`
       );
 
-      this.unicodeTokenFormat = this.defaultUnicodeTokenFormat;
+      this.tokenFormat.set(this.defaultUnicodeTokenFormat);
     }
-
-    // must run before the first binding pass, so the input carries the correct mask
-    this.updateMask();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['unicodeTokenFormat'] && !changes['unicodeTokenFormat'].firstChange) {
-      this.updateMask();
       this.setTime(this.selectedTime); // re-render the current value in the new format
     }
   }
@@ -116,7 +114,7 @@ export class TimeFieldComponent
 
   protected doOnFocusChange(isFocused: boolean): void {
     // A readonly field has nothing to type into: it neither hands its display to ngxMask nor commits on blur.
-    if (this.readonly) return;
+    if (this.readonly()) return;
 
     // hand the empty display over to ngxMask while focused (see renderEmpty)
     if (isFocused) {
@@ -149,10 +147,10 @@ export class TimeFieldComponent
   // committed. An empty field is seeded with midnight, so arrows alone can fill it.
   private stepSegment(direction: 1 | -1): void {
     const input = this.inputRef.nativeElement;
-    const segment = findSegmentAtCaret(this.unicodeTokenFormat, input.selectionStart ?? 0);
+    const segment = findSegmentAtCaret(this.tokenFormat(), input.selectionStart ?? 0);
     if (!segment) return;
 
-    const base = this.onParse(input.value, this.unicodeTokenFormat) ?? this.selectedTime ?? new Date(1970, 0, 1);
+    const base = this.onParse(input.value, this.tokenFormat()) ?? this.selectedTime ?? new Date(1970, 0, 1);
 
     this.setTime(normalizeDatePart(stepDateTimeUnit(base, segment.unit, direction)));
 
@@ -192,11 +190,15 @@ export class TimeFieldComponent
    * A Unicode time format (`H`, `h`, `m`, `s`, `a` tokens). Decides the mask, the display, and which segment
    * the arrow keys step. An unrecognized format warns and falls back to the default.
    */
-  @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
+  public readonly unicodeTokenFormat = input(this.defaultUnicodeTokenFormat);
   /** What an empty, unfocused field shows: underscores (default, "__ : __") or the `unicodeTokenFormat` ("HH : mm"). */
-  @Input() emptyHint: FormidableEmptyHint = 'underscores';
+  public readonly emptyHint = input<FormidableEmptyHint>('underscores');
 
-  protected ngxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.maskChar);
+  // The format actually in force. A `linkedSignal` and not a `computed`, because the fallback also warns —
+  // which a computed must not do — so `ngOnInit` writes it once for an unrecognized format.
+  protected readonly tokenFormat = linkedSignal(() => this.unicodeTokenFormat());
+
+  protected readonly ngxMask = computed(() => formatToTimeTokenMask(this.tokenFormat(), this.maskChar));
 
   protected ngxMaskConfig: Pick<NgxMaskConfig, 'showMaskTyped' | 'leadZeroDateTime' | 'dropSpecialCharacters'> = {
     showMaskTyped: true,
@@ -211,13 +213,13 @@ export class TimeFieldComponent
 
   // ngxMask's own empty display: the mask with every slot as its placeholder character.
   private get maskPlaceholder(): string {
-    return this.ngxMask.replace(/\w/g, '_');
+    return this.ngxMask().replace(/\w/g, '_');
   }
 
   // The resting display of an empty field for the current `emptyHint`: the format string, or
   // `maskPlaceholder`.
   private get emptyDisplay(): string {
-    return this.emptyHint === 'format' ? (this.unicodeTokenFormat ?? '') : this.maskPlaceholder;
+    return this.emptyHint() === 'format' ? this.tokenFormat() : this.maskPlaceholder;
   }
 
   // ngxMask either empties the input outright or leaves the slots it renders for a focused empty field.
@@ -261,10 +263,6 @@ export class TimeFieldComponent
 
   // #endregion
 
-  private updateMask(): void {
-    this.ngxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.maskChar);
-  }
-
   private trySetTimeFromInput(value: Date | null | string): void {
     if (value === null || value === undefined || value === '') {
       this.setTime(null);
@@ -283,7 +281,7 @@ export class TimeFieldComponent
         return;
       }
 
-      const parsedDate = this.onParse(trimmed, this.unicodeTokenFormat || this.defaultUnicodeTokenFormat);
+      const parsedDate = this.onParse(trimmed, this.tokenFormat());
 
       if (parsedDate) {
         this.setTime(parsedDate);
@@ -307,7 +305,7 @@ export class TimeFieldComponent
         return;
       }
 
-      const formatted = format(this.selectedTime, this.unicodeTokenFormat || this.defaultUnicodeTokenFormat);
+      const formatted = format(this.selectedTime, this.tokenFormat());
       if (this.inputRef.nativeElement.value !== formatted) this.inputRef.nativeElement.value = formatted;
     });
   }

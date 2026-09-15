@@ -5,12 +5,11 @@ import {
   Component,
   ContentChild,
   ElementRef,
-  EventEmitter,
   HostBinding,
   inject,
   NgZone,
   OnDestroy,
-  Output,
+  output,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
@@ -51,7 +50,9 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule]
 })
-export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormidableField<unknown> {
+// It mirrors a field's surface but does not implement `IFormidableField`, because it is signal-typed,
+// and these are plain getters reading a non-signal `@ContentChild`.
+export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true });
 
   // View children are used to access the prefix and suffix wrappers
@@ -95,11 +96,11 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
   // Read off the projected directives rather than host-bound by them: the wrappers these style are the
   // decorator's own elements, so it needs no global rule to reach them (a hint does).
   protected get prefixAlignment(): FieldAdornmentAlignment {
-    return this.projectedPrefix?.align ?? 'center';
+    return this.projectedPrefix?.align() ?? 'center';
   }
 
   protected get suffixAlignment(): FieldAdornmentAlignment {
-    return this.projectedSuffix?.align ?? 'center';
+    return this.projectedSuffix?.align() ?? 'center';
   }
 
   private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
@@ -135,27 +136,27 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
     this.destroy$.complete();
   }
 
-  // #region IFormidableField
+  // #region IFormidableField Mirroring
 
   valueChange$ = this.valueChangeSubject$.asObservable();
   focusChange$ = this.focusChangeSubject$.asObservable();
 
   /** The projected field's own value stream, re-emitted so a consumer can bind it on the decorator instead. */
-  @Output() valueChanged = new EventEmitter<unknown>();
+  public readonly valueChanged = output<unknown>();
 
   /** The projected field's own focus stream, re-emitted so a consumer can bind it on the decorator instead. */
-  @Output() focusChanged = new EventEmitter<boolean>();
+  public readonly focusChanged = output<boolean>();
 
   get fieldId(): string {
     return this.projectedField?.fieldId ?? '';
   }
 
   get name(): string {
-    return this.projectedField?.name ?? '';
+    return this.projectedField?.name() ?? '';
   }
 
   get placeholder(): string {
-    return this.projectedField?.placeholder ?? '';
+    return this.projectedField?.placeholder() ?? '';
   }
 
   // #region ARIA ids
@@ -186,16 +187,16 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
   // #endregion
 
   get readonly(): boolean {
-    return this.projectedField?.readonly ?? false;
+    return this.projectedField?.readonly() ?? false;
   }
 
   get disabled(): boolean {
-    return this.projectedField?.disabled ?? false;
+    return this.projectedField?.disabled() ?? false;
   }
 
   /** Drives the label's required marker. Presentational only, and the form may switch it off for all fields. */
   get showRequiredMarker(): boolean {
-    return (this.formDirective?.showRequiredMarkers() ?? true) && (this.projectedField?.showRequiredMarker ?? false);
+    return (this.formDirective?.showRequiredMarkers() ?? true) && (this.projectedField?.showRequiredMarker() ?? false);
   }
 
   get value(): unknown {
@@ -209,7 +210,7 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy, IFormi
   // How the label actually renders — the configured `position` resolved against the field's own state and
   // layout.
   get labelState(): FieldLabelState {
-    const position = this.projectedLabel?.position;
+    const position = this.projectedLabel?.position();
 
     if (!position || position === 'outside' || this.projectedField?.decoratorLayout !== 'horizontal') {
       return 'outside';

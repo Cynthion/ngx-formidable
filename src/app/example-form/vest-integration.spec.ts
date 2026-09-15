@@ -43,9 +43,9 @@ import { ExampleFormModel, exampleFormValidationSuite } from './example-form.mod
       formidableValidateWholeForm
       [formValue]="formValue"
       [formSuite]="formSuite"
-      (formValueChange$)="formValue = $event"
-      (validChange$)="isValid = $event"
-      (errorsChange$)="errors = $event">
+      (formValueChange)="formValue = $event"
+      (validChange)="isValid = $event"
+      (errorsChange)="errors = $event">
       <formidable-field-decorator>
         <formidable-input-field
           formidableFieldErrors
@@ -81,8 +81,8 @@ class DemoWiringHostComponent {
       [formValue]="formValue"
       [formSuite]="formSuite"
       [dependentFields]="dependentFields"
-      (formValueChange$)="formValue = $event"
-      (errorsChange$)="errors = $event">
+      (formValueChange)="formValue = $event"
+      (errorsChange)="errors = $event">
       <div
         formidableFieldErrors
         ngModelGroup="passwords">
@@ -130,8 +130,8 @@ class GroupWiringHostComponent {
       formidableValidateWholeForm
       [formValue]="formValue"
       [formSuite]="formSuite"
-      (formValueChange$)="formValue = $event"
-      (errorsChange$)="errors = $event">
+      (formValueChange)="formValue = $event"
+      (errorsChange)="errors = $event">
       <formidable-input-field
         name="firstName"
         [ngModel]="formValue.firstName" />

@@ -69,8 +69,8 @@ function setup<T extends MaskedField>(
 ): { fixture: ComponentFixture<T>; input: HTMLInputElement } {
   const fixture = TestBed.createComponent(component);
 
-  fixture.componentInstance.unicodeTokenFormat = unicodeTokenFormat;
-  fixture.componentInstance.emptyHint = emptyHint;
+  fixture.componentRef.setInput('unicodeTokenFormat', unicodeTokenFormat);
+  fixture.componentRef.setInput('emptyHint', emptyHint);
 
   fixture.detectChanges(); // ngOnInit + ngAfterViewInit (recomputes the mask)
   fixture.detectChanges(); // propagate the recomputed mask to ngxMask

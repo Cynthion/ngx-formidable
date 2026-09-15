@@ -2,7 +2,7 @@ import {
   AfterContentInit,
   ContentChildren,
   Directive,
-  Input,
+  input,
   OnChanges,
   QueryList,
   SimpleChanges,
@@ -15,6 +15,7 @@ import {
   FieldDefaultOptionMode,
   FORMIDABLE_OPTION,
   IFormidableOption,
+  IFormidableOptionSource,
   NO_OPTIONS_TEXT
 } from '../../models/formidable.model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
@@ -33,23 +34,23 @@ export abstract class BaseOptionFieldDirective<T = string | null>
   implements OnChanges, AfterContentInit
 {
   /** Options bound as data. Merged with any projected `<formidable-field-option>` children, not replaced. */
-  @Input() options?: IFormidableOption[] = [];
+  public readonly options = input<IFormidableOption[] | undefined>([]);
 
   /** An option pinned to the top of the list, never sorted and never filtered. See `defaultOptionMode`. */
-  @Input() defaultOption?: IFormidableOption;
+  public readonly defaultOption = input<IFormidableOption | undefined>(undefined);
 
   /** Whether the `defaultOption` always renders, or only when there would otherwise be no options. */
-  @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
+  public readonly defaultOptionMode = input<FieldDefaultOptionMode>('always');
 
   /** What renders in place of an empty list. Plain text, not an option — there is nothing there to pick. */
-  @Input() noOptionsText: string = NO_OPTIONS_TEXT;
+  public readonly noOptionsText = input<string>(NO_OPTIONS_TEXT);
 
   /** Orders the merged list. Applied after the merge, so bound and projected options interleave. */
-  @Input() sortFn?: (a: IFormidableOption, b: IFormidableOption) => number;
+  public readonly sortFn = input<((a: IFormidableOption, b: IFormidableOption) => number) | undefined>(undefined);
 
   /** The projected options. One may sit inside a wrapper element rather than directly in the field. */
   @ContentChildren(FORMIDABLE_OPTION, { descendants: true })
-  optionComponents?: QueryList<IFormidableOption>;
+  optionComponents?: QueryList<IFormidableOptionSource>;
 
   @ViewChildren('optionRef') protected optionRefs?: QueryList<FieldOptionComponent>;
 
@@ -59,8 +60,8 @@ export abstract class BaseOptionFieldDirective<T = string | null>
   protected highlightedOptionValue: string | null = null;
 
   ngOnChanges(changes: SimpleChanges): void {
-    // react to changes of @Input properties
-    if (changes['options'] || changes['sortFn'] || changes['defaultOption'] || changes['defaultOptionMode']) {
+    // react to changes of the option inputs
+    if (changes['options'] || changes['defaultOption'] || changes['defaultOptionMode'] || changes['sortFn']) {
       queueMicrotask(() => this.onOptionsChanged());
     }
   }

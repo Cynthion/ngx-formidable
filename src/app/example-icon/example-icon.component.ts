@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
@@ -10,13 +10,11 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   imports: [CommonModule]
 })
 export class ExampleIconComponent {
-  @Input() set svg(val: string) {
-    this.sanitizedSvg = this.sanitizer.bypassSecurityTrustHtml(val);
-  }
-  @Input() size = 32;
-  @Input() color = 'currentColor';
+  readonly svg = input('');
+  readonly size = input(32);
+  readonly color = input('currentColor');
 
-  protected sanitizedSvg: SafeHtml = '';
+  private readonly sanitizer = inject(DomSanitizer);
 
-  constructor(private sanitizer: DomSanitizer) {}
+  protected readonly sanitizedSvg = computed<SafeHtml>(() => this.sanitizer.bypassSecurityTrustHtml(this.svg()));
 }

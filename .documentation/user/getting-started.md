@@ -143,9 +143,9 @@ export const userFormSuite: Suite<string, string, (model: UserFormModel, field?:
 	[formValue]="formValue$ | async"
 	[formShape]="formShape"
 	[formSuite]="formSuite"
-	(formValueChange$)="formValue$.next($event)"
-	(validChange$)="isValid$.next($event)"
-	(errorsChange$)="errors$.next($event)"
+	(formValueChange)="formValue$.next($event)"
+	(validChange)="isValid$.next($event)"
+	(errorsChange)="errors$.next($event)"
 	(ngSubmit)="onSubmit()">
 	<formidable-field-decorator>
 		<formidable-input-field

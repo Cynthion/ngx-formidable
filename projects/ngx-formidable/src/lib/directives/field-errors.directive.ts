@@ -5,7 +5,7 @@ import {
   EnvironmentInjector,
   inject,
   Injector,
-  Input,
+  input,
   OnDestroy,
   Optional,
   ViewContainerRef
@@ -38,7 +38,7 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   /** When this field's messages appear, overriding whatever the form set. */
-  @Input() revealOn?: FormidableReveal;
+  public readonly revealOn = input<FormidableReveal | undefined>(undefined);
 
   // Element injectors follow the declaring template, so a projected field really does see its decorator.
   private readonly decorator = inject(FieldDecoratorComponent, { optional: true });
@@ -66,9 +66,9 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
       { injector: this.injector, environmentInjector: this.environmentInjector }
     );
 
-    this.fieldErrorsComponentRef.instance.ngModel = this.ngModel ?? undefined;
-    this.fieldErrorsComponentRef.instance.ngModelGroup = this.ngModelGroup ?? undefined;
-    this.fieldErrorsComponentRef.instance.revealOn = this.revealOn;
+    this.fieldErrorsComponentRef.setInput('ngModel', this.ngModel ?? undefined);
+    this.fieldErrorsComponentRef.setInput('ngModelGroup', this.ngModelGroup ?? undefined);
+    this.fieldErrorsComponentRef.setInput('revealOn', this.revealOn());
 
     // The decorator owns the label and is the ancestor every field's stylesheet reaches with
     // `:host-context(.is-invalid)`, so it is where the flag has to surface.

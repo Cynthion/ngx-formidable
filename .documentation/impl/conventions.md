@@ -39,9 +39,11 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 ## Inputs, Outputs And Observables
 
-- **Inputs**: components and fields use classic `@Input()`; the newer signal `input()` API is used only in the form-level directives that have inputs at all (`NgxFormidableFormDirective`, `NgxFormidableWholeFormValidateDirective`, and `NgxFormidableVestValidatorDirective` in the `vest` entry point). `NgxFormidableFieldValidateDirective` and `NgxFormidableGroupValidateDirective` declare none.
-- **Outputs**: a mix of `@Output() EventEmitter` and RxJS observable outputs.
-- **Observable Naming**: append `$` (`valueChange$`, `formValueChange$`). Enforced by the `rxjs-x/finnish` ESLint rule (exempts `EventEmitter` and Angular lifecycle hooks like `canActivate`/`validate`).
+- **Inputs**: signal `input()` throughout, with no aliases
+- **Two Writers**: where an input has a second writer, the input keeps the public name and the effective value is a `linkedSignal` beside it under its own name. Nothing ever writes to an input.
+- **Outputs**: signal `output()`; a form-level output over an existing observable uses `outputFromObservable()`
+- **Observable Naming**: append `$` (`valueChange$`, `formValueChange$`)
+- **Setting An Input From Code**: `componentRef.setInput(name, value)`
 
 ## Immutable Programming
 

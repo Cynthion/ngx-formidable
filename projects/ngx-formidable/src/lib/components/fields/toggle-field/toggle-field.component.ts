@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, ViewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import {
   FieldDecoratorLayout,
@@ -88,17 +88,17 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
   // #region IFormidableToggleField
 
   /** Which side of the switch `onLabel` / `offLabel` sits on. Unrelated to a projected label's position. */
-  @Input() labelPosition?: FormidableToggleFieldLabelPosition = 'before';
+  public readonly labelPosition = input<FormidableToggleFieldLabelPosition | undefined>('before');
 
   /** Text shown beside the switch while on. The field's own, not a projected label. */
-  @Input() onLabel?: string;
+  public readonly onLabel = input<string | undefined>(undefined);
 
   /** Text shown beside the switch while off. Leave unset to show `onLabel` in both states. */
-  @Input() offLabel?: string;
+  public readonly offLabel = input<string | undefined>(undefined);
 
   /** Flips the value, as clicking the switch or pressing Space or Enter does. No-op while readonly. */
   public toggle(): void {
-    if (this.readonly || this.disabled) return;
+    if (this.readonly() || this.disabled()) return;
 
     this._value = !this._value;
     this.onValueChange();
@@ -110,8 +110,8 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
   }
 
   get internalLabel(): string | undefined {
-    if (this.value && this.onLabel != null) return this.onLabel;
-    if (!this.value && this.offLabel != null) return this.offLabel;
+    if (this.value && this.onLabel() != null) return this.onLabel();
+    if (!this.value && this.offLabel() != null) return this.offLabel();
     return undefined;
   }
 

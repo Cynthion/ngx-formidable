@@ -1,8 +1,8 @@
 <div
   #autocompleteRef
   class="field"
-  [class.is-readonly]="readonly"
-  [class.is-disabled]="disabled"
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
   [class.focused]="isFieldFocused">
   <div class="input-wrapper">
     <!-- Input Field -->
@@ -14,15 +14,15 @@
       class="wrapped-input"
       aria-autocomplete="list"
       [id]="fieldId"
-      [placeholder]="placeholder"
-      [attr.name]="name"
-      [attr.readonly]="readonly ? '' : null"
-      [attr.disabled]="disabled ? '' : null"
-      [attr.tabindex]="readonly || disabled ? -1 : null"
-      [attr.aria-required]="showRequiredMarker || null"
+      [placeholder]="placeholder()"
+      [attr.name]="name()"
+      [attr.readonly]="readonly() ? '' : null"
+      [attr.disabled]="disabled() ? '' : null"
+      [attr.tabindex]="readonly() || disabled() ? -1 : null"
+      [attr.aria-required]="showRequiredMarker() || null"
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
-      [attr.aria-readonly]="readonly || null"
+      [attr.aria-readonly]="readonly() || null"
       [attr.aria-expanded]="isPanelOpen"
       [attr.aria-controls]="panelId"
       [attr.aria-activedescendant]="optionId((highlightedOptionIndex$ | async) ?? -1)"
@@ -35,7 +35,7 @@
   <div
     #panelRef
     tabindex="-1"
-    class="panel panel-{{ panelPosition }}"
+    class="panel panel-{{ panelPosition() }}"
     [class.open]="isPanelOpen">
     <!-- The role sits here rather than on the panel, so the options it owns are its direct children. -->
     <div
@@ -63,7 +63,7 @@
         </formidable-field-option>
       } @empty {
         <!-- Plain text, not an option: a listbox must not offer its empty state as something to pick. -->
-        <div class="no-option">{{ noOptionsText }}</div>
+        <div class="no-option">{{ noOptionsText() }}</div>
       }
     </div>
   </div>

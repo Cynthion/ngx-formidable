@@ -6,7 +6,7 @@ import {
   ContentChildren,
   ElementRef,
   forwardRef,
-  Input,
+  input,
   OnChanges,
   QueryList,
   SimpleChanges,
@@ -22,6 +22,7 @@ import {
   FORMIDABLE_OPTION,
   FORMIDABLE_OPTION_FIELD,
   IFormidableOption,
+  IFormidableOptionSource,
   IFormidableSelectField,
   NO_OPTIONS_TEXT
 } from '../../../models/formidable.model';
@@ -69,8 +70,8 @@ export class SelectFieldComponent
   protected registeredKeys: string[] = [];
 
   ngOnChanges(changes: SimpleChanges): void {
-    // react to changes of @Input properties
-    if (changes['options'] || changes['sortFn'] || changes['defaultOption'] || changes['defaultOptionMode']) {
+    // react to changes of the option inputs
+    if (changes['options'] || changes['defaultOption'] || changes['defaultOptionMode'] || changes['sortFn']) {
       queueMicrotask(() => this.onOptionsChanged());
     }
   }
@@ -129,22 +130,22 @@ export class SelectFieldComponent
   // #region IFormidableOptionField
 
   /** Options bound as data. Merged with any projected `<formidable-field-option>` children, not replaced. */
-  @Input() options?: IFormidableOption[] = [];
+  public readonly options = input<IFormidableOption[] | undefined>([]);
 
   /** An option pinned to the top of the list — the usual home for a "please choose" entry. */
-  @Input() defaultOption?: IFormidableOption;
+  public readonly defaultOption = input<IFormidableOption | undefined>(undefined);
 
   /** Whether the `defaultOption` always renders, or only when there would otherwise be no options. */
-  @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
+  public readonly defaultOptionMode = input<FieldDefaultOptionMode>('always');
 
   /** What renders in place of an empty list. */
-  @Input() noOptionsText: string = NO_OPTIONS_TEXT;
+  public readonly noOptionsText = input<string>(NO_OPTIONS_TEXT);
 
   /** Orders the merged list. Applied after the merge, so bound and projected options interleave. */
-  @Input() sortFn?: (a: IFormidableOption, b: IFormidableOption) => number;
+  public readonly sortFn = input<((a: IFormidableOption, b: IFormidableOption) => number) | undefined>(undefined);
 
   @ContentChildren(FORMIDABLE_OPTION, { descendants: true })
-  optionComponents?: QueryList<IFormidableOption>;
+  optionComponents?: QueryList<IFormidableOptionSource>;
 
   protected readonly options$ = new BehaviorSubject<IFormidableOption[]>([]);
 
@@ -162,9 +163,13 @@ export class SelectFieldComponent
   }
 
   private computeAllOptions(): IFormidableOption[] {
-    const combined = combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
+    const combined = combineFieldOptions(
+      this.options(),
+      this.optionComponents?.map((source) => source.option()),
+      this.sortFn()
+    );
 
-    return applyDefaultOption(combined, this.defaultOption, this.defaultOptionMode);
+    return applyDefaultOption(combined, this.defaultOption(), this.defaultOptionMode());
   }
 
   private updateOptions(allOptions: IFormidableOption[]): void {

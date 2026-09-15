@@ -6,7 +6,7 @@ import { FormidablePanelPosition, IFormidablePanelField } from '../models/formid
 export function openPanelPosition(field?: unknown): FormidablePanelPosition | null {
   const panelField = field as Partial<IFormidablePanelField> | undefined;
 
-  return panelField?.isPanelOpen ? (panelField.panelPosition ?? null) : null;
+  return panelField?.isPanelOpen ? (panelField.panelPosition?.() ?? null) : null;
 }
 
 /**

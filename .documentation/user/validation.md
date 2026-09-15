@@ -20,7 +20,7 @@ Every rule has a **target** it reports on.
 | A nested object  | `'passwords'`                         | **group rule**      | that group |
 | The form itself  | `WHOLE_FORM`                          | **whole-form rule** | the form   |
 
-A target is what your validator receives as its second argument, and what `errorsChange$` keys its messages by.
+A target is what your validator receives as its second argument, and what `errorsChange` keys its messages by.
 
 > **"Cross-field" is not a target.** It describes what a rule _reads_. A group rule comparing a password with its confirmation is cross-field; so is a whole-form rule. Where the rule reports is the target; how many fields it reads is up to you.
 
@@ -116,7 +116,7 @@ A validator never runs on a schedule of its own. It runs because the control **c
 | `blur`   | When the control loses focus                   | What the user typed sits in the DOM only                                 |
 | `submit` | When the form is submitted                     | What the user typed sits in the DOM only, across every field on the form |
 
-The "until then" column is the part that surprises people. Under `blur` and `submit` the control's value, and therefore the model and `formValueChange$`, do not move while the user types. A field that reads its own value mid-typing reads the old one.
+The "until then" column is the part that surprises people. Under `blur` and `submit` the control's value, and therefore the model and `formValueChange`, do not move while the user types. A field that reads its own value mid-typing reads the old one.
 
 ### Reveal
 
@@ -168,7 +168,7 @@ While a control is validating, its previous messages stay on screen rather than 
 
 ### Reading Validity After A Submit
 
-Every rule this library runs is asynchronous, so the form is `PENDING` at the moment `ngSubmit` fires. A submit handler that reads `form.valid` synchronously reads a stale answer. Gate on `validChange$` or `idle$` instead:
+Every rule this library runs is asynchronous, so the form is `PENDING` at the moment `ngSubmit` fires. A submit handler that reads `form.valid` synchronously reads a stale answer. Gate on `validChange` or `idle$` instead:
 
 ```typescript
 onSubmit(): void {
@@ -240,10 +240,10 @@ import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/ve
 	[formShape]="formShape"
 	[formSuite]="formSuite"
 	[debounceMs]="0"
-	(formValueChange$)="formValue$.next($event)"
-	(validChange$)="isValid$.next($event)"
-	(dirtyChange$)="isDirty$.next($event)"
-	(errorsChange$)="errors$.next($event)"
+	(formValueChange)="formValue$.next($event)"
+	(validChange)="isValid$.next($event)"
+	(dirtyChange)="isDirty$.next($event)"
+	(errorsChange)="errors$.next($event)"
 	(ngSubmit)="onSubmit()">
 	<!-- fields -->
 </form>
@@ -364,7 +364,7 @@ Two tokens sit between `control.errors` and the text on screen.
 | `FORMIDABLE_ERROR_EXTRACTOR`  | `(errors: ValidationErrors \| null) => string[]` | `errors['errors']`, else `Object.keys(errors)` |
 | `FORMIDABLE_ERROR_TRANSLATOR` | `(error: string) => string`                      | identity                                       |
 
-**Extractor**: Override it when your validator writes a shape neither the form directive nor Angular uses. It also normalises `errorsChange$`, so a form mixing validators still reports one homogeneous `FormidableFormErrors` map:
+**Extractor**: Override it when your validator writes a shape neither the form directive nor Angular uses. It also normalises `errorsChange`, so a form mixing validators still reports one homogeneous `FormidableFormErrors` map:
 
 ```ts
 { provide: FORMIDABLE_ERROR_EXTRACTOR, useValue: (e) => (e?.['issues'] as Issue[])?.map((i) => i.message) ?? [] }

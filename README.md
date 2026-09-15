@@ -34,16 +34,7 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
-- [Features](#features)
-  - [🧩 Eleven Fields](#-eleven-fields)
-  - [🎀 One Decorator](#-one-decorator)
-  - [✅ Bring Your Own Validator](#-bring-your-own-validator)
-  - [🎨 Themeable To The Corner](#-themeable-to-the-corner)
-  - [⌨️ Keyboard And Screen Readers](#️-keyboard-and-screen-readers)
-  - [🛡️ Masking And Panels](#️-masking-and-panels)
-  - [🧠 Typed Model And Shape](#-typed-model-and-shape)
-  - [🛠️ Extensible](#️-extensible)
-  - [🚀 Zero Boilerplate](#-zero-boilerplate)
+- [Features](#features) - [🧩 Eleven Fields](#-eleven-fields) - [🎀 One Decorator](#-one-decorator) - [✅ Bring Your Own Validator](#-bring-your-own-validator) - [🎨 Themeable To The Corner](#-themeable-to-the-corner) - [⌨️ Keyboard And Screen Readers](#️-keyboard-and-screen-readers) - [🛡️ Masking And Panels](#️-masking-and-panels) - [🧠 Typed Model And Shape](#-typed-model-and-shape) - [🛠️ Extensible](#️-extensible) - [🚀 Zero Boilerplate](#-zero-boilerplate)
 - [When To Pick This Over Angular Material](#when-to-pick-this-over-angular-material)
 - [Installation](#installation)
 - [Setup](#setup)
@@ -93,7 +84,7 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 • `debounceMs` on the form
 • `FORMIDABLE_ERROR_EXTRACTOR` reads any error shape
 • `FORMIDABLE_ERROR_TRANSLATOR` for i18n
-• Live `formValueChange$`, `validChange$`, `dirtyChange$`, `errorsChange$`
+• Live `formValueChange`, `validChange`, `dirtyChange`, `errorsChange`
 
 </td>
 </tr>
@@ -282,8 +273,8 @@ Then the template:
 	[formValue]="formValue$ | async"
 	[formShape]="formShape"
 	[formSuite]="formSuite"
-	(formValueChange$)="formValue$.next($event)"
-	(validChange$)="isValid$.next($event)"
+	(formValueChange)="formValue$.next($event)"
+	(validChange)="isValid$.next($event)"
 	(ngSubmit)="onSubmit()">
 	<formidable-field-decorator>
 		<formidable-input-field
@@ -312,7 +303,7 @@ Then the template:
 </form>
 ```
 
-Every rule runs asynchronously, so the form is still `PENDING` when `ngSubmit` fires — gate a submit on `validChange$` rather than reading `form.valid`.
+Every rule runs asynchronously, so the form is still `PENDING` when `ngSubmit` fires — gate a submit on `validChange` rather than reading `form.valid`.
 
 The whole walkthrough, with the component state and where each piece goes: [Getting Started](.documentation/user/getting-started.md).
 

@@ -38,7 +38,7 @@ flowchart TB
 
 Nothing in L1 or L2a is coupled to a validator because both rest on things Angular already guarantees:
 
-- **`AbstractControl.errors`** — every validator writes here. `FieldErrorsComponent` reads it and nothing else, through `FORMIDABLE_ERROR_EXTRACTOR`; `getAllFormErrors` runs every entry through the same extractor, so `errorsChange$` is one homogeneous `FormidableFormErrors` map however many validators wrote into it.
+- **`AbstractControl.errors`** — every validator writes here. `FieldErrorsComponent` reads it and nothing else, through `FORMIDABLE_ERROR_EXTRACTOR`; `getAllFormErrors` runs every entry through the same extractor, so `errorsChange` is one homogeneous `FormidableFormErrors` map however many validators wrote into it.
 - **`.is-invalid`** — one class on `FieldDecoratorComponent`'s host, computed from the messages and the reveal setting that gates them. The whole SCSS state layer hangs off it, and it means nothing about who decided the field was invalid.
 
 `FORMIDABLE_ERROR_EXTRACTOR` is what makes `AbstractControl.errors` genuinely universal. The harness writes `{ error, errors }`; Angular's validators write `{ required: true }`; a schema library writes something else. The extractor's default handles the first two and an override handles the third, so the same UI serves all of them.
@@ -61,7 +61,7 @@ Putting the seam any lower would force each adapter to re-implement path computa
 
 ## The Model A Rule Sees
 
-The form's **live control values lead**, and `formValue` fills in only what has no control of its own. It cannot be the other way round: Angular calls `_runAsyncValidator` before it emits the `ValueChangeEvent` that `formValueChange$` turns into the next `formValue`, so the bound model is one change behind at the moment a rule runs.
+The form's **live control values lead**, and `formValue` fills in only what has no control of its own. It cannot be the other way round: Angular calls `_runAsyncValidator` before it emits the `ValueChangeEvent` that `formValueChange` turns into the next `formValue`, so the bound model is one change behind at the moment a rule runs.
 
 That is also why `formValue` is optional at every moment, including the first. A form whose model arrives through `| async`, or never binds one at all, validates against its control values alone.
 

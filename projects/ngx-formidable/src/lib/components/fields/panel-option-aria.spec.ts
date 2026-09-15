@@ -286,7 +286,7 @@ describe('panel and option field ARIA', () => {
 
       expect(input.getAttribute('aria-expanded')).toBe('false');
 
-      host.date.isPanelOpen = true;
+      host.date.togglePanel(true);
       fixture.detectChanges();
       flush();
       discardPeriodicTasks();

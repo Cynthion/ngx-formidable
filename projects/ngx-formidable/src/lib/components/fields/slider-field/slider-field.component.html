@@ -1,8 +1,8 @@
 <div
   #sliderRef
   class="field"
-  [class.is-readonly]="readonly"
-  [class.is-disabled]="disabled"
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
   [class.focused]="isFieldFocused">
   <div class="slider-track-wrapper">
     <div class="slider-track">
@@ -10,14 +10,14 @@
         class="slider-track-fill"
         [style.width.%]="valuePercent"></div>
     </div>
-    @if (showTickMarks && tickMarks.length > 0) {
+    @if (showTickMarks() && tickMarks.length > 0) {
       <div class="slider-tick-marks">
         @for (tick of tickMarks; track tick) {
           <div class="slider-tick-mark"></div>
         }
       </div>
     }
-    @if (showThumbLabel) {
+    @if (showThumbLabel()) {
       <div
         class="slider-thumb-label"
         [style.left.%]="valuePercent"
@@ -33,20 +33,20 @@
       type="range"
       class="slider-input"
       [id]="fieldId"
-      [min]="min"
-      [max]="max"
-      [step]="step"
-      [attr.name]="name"
-      [attr.readonly]="readonly ? '' : null"
-      [attr.disabled]="disabled ? '' : null"
-      [attr.tabindex]="readonly || disabled ? -1 : 0"
+      [min]="min()"
+      [max]="max()"
+      [step]="step()"
+      [attr.name]="name()"
+      [attr.readonly]="readonly() ? '' : null"
+      [attr.disabled]="disabled() ? '' : null"
+      [attr.tabindex]="readonly() || disabled() ? -1 : 0"
       [attr.aria-labelledby]="labelledBy"
-      [attr.aria-required]="showRequiredMarker || null"
+      [attr.aria-required]="showRequiredMarker() || null"
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
-      [attr.aria-readonly]="readonly || null"
+      [attr.aria-readonly]="readonly() || null"
       [attr.aria-valuetext]="valueText"
-      [value]="value ?? min"
+      [value]="value ?? min()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)"
       (input)="onRangeInput($event)" />

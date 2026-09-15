@@ -1,4 +1,4 @@
-import { Directive, Input } from '@angular/core';
+import { Directive, input } from '@angular/core';
 import { FieldLabelPosition } from '../models/formidable.model';
 
 /**
@@ -8,5 +8,5 @@ import { FieldLabelPosition } from '../models/formidable.model';
 @Directive({ selector: '[formidableFieldLabel]', standalone: true })
 export class FieldLabelDirective {
   /** Where the label renders. Every position other than `outside` needs a `horizontal` field. */
-  @Input() position: FieldLabelPosition = 'inside';
+  public readonly position = input<FieldLabelPosition>('inside');
 }

@@ -2,18 +2,18 @@
   #counterRef
   role="spinbutton"
   class="counter"
-  [tabindex]="disabled ? -1 : 0"
-  [class.is-readonly]="readonly"
-  [class.is-disabled]="disabled"
+  [tabindex]="disabled() ? -1 : 0"
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
   [attr.aria-valuenow]="value"
-  [attr.aria-valuemin]="min"
-  [attr.aria-valuemax]="max"
+  [attr.aria-valuemin]="min()"
+  [attr.aria-valuemax]="max()"
   [attr.aria-labelledby]="labelledBy"
   [attr.aria-describedby]="describedBy"
-  [attr.aria-required]="showRequiredMarker || null"
+  [attr.aria-required]="showRequiredMarker() || null"
   [attr.aria-invalid]="isInvalid || null"
-  [attr.aria-readonly]="readonly || null"
-  [attr.aria-disabled]="disabled || null"
+  [attr.aria-readonly]="readonly() || null"
+  [attr.aria-disabled]="disabled() || null"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <button
@@ -21,7 +21,7 @@
     tabindex="-1"
     class="counter-button"
     aria-hidden="true"
-    [disabled]="readonly || disabled || value <= min"
+    [disabled]="readonly() || disabled() || value <= min()"
     (pointerdown)="onButtonPointerDown($event)"
     (click)="decrement()">
     &minus;
@@ -34,7 +34,7 @@
     tabindex="-1"
     class="counter-button"
     aria-hidden="true"
-    [disabled]="readonly || disabled || value >= max"
+    [disabled]="readonly() || disabled() || value >= max()"
     (pointerdown)="onButtonPointerDown($event)"
     (click)="increment()">
     +
