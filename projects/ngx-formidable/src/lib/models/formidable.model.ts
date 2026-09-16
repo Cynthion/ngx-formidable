@@ -13,7 +13,7 @@ export const FORMIDABLE_FIELD = new InjectionToken<IFormidableField>('FORMIDABLE
 /** What an option field provides so a projected `FieldOptionComponent` can reach the field that owns it. */
 export const FORMIDABLE_OPTION_FIELD = new InjectionToken<IFormidableOptionField>('FORMIDABLE_OPTION_FIELD');
 
-/** What an option provides so its field's `@ContentChildren` query finds it, whatever component it is. */
+/** What an option provides so its field's `contentChildren` query finds it, whatever component it is. */
 export const FORMIDABLE_OPTION = new InjectionToken<IFormidableOptionSource>('FORMIDABLE_OPTION');
 
 /** App-wide ngx-mask defaults, which a field's own `maskConfig` overrides. Set via `provideNgxFormidable`. */
@@ -119,9 +119,9 @@ export interface IFormidableField<T = string | null> {
   showRequiredMarker: Signal<boolean>;
   value: T;
   /** Whether nothing is rendered where the value goes, so a label may rest there like a placeholder. */
-  canLabelRest: boolean;
+  canLabelRest: Signal<boolean>;
   /** Whether the field renders a panel toggle inside its own box, which the value and a label must clear. */
-  hasInFieldToggle?: boolean;
+  hasInFieldToggle?: Signal<boolean>;
   valueAlignment?: FieldValueAlignment;
   /** For the decorator, which subscribes on the way in. `valueChanged` is the same signal for a consumer. */
   valueChange$: Observable<T>;
@@ -129,8 +129,6 @@ export interface IFormidableField<T = string | null> {
   valueChanged: OutputEmitterRef<T>;
   focusChanged: OutputEmitterRef<boolean>;
   decoratorLayout: FieldDecoratorLayout;
-  /** Repaints the field. Implement it on an `OnPush` custom field, or its `aria-invalid` will go stale. */
-  markForCheck?(): void;
 }
 
 /** What a field walking a list of options adds to the contract. Provided as `FORMIDABLE_OPTION_FIELD`. */
@@ -176,8 +174,8 @@ export interface IFormidableOptionSource {
 
 /** What a field that opens a panel adds to the contract, and what the panel positioning helpers read. */
 export interface IFormidablePanelField {
-  panelRef?: ElementRef<HTMLElement>;
-  isPanelOpen: boolean;
+  panelRef: Signal<ElementRef<HTMLElement> | undefined>;
+  isPanelOpen: Signal<boolean>;
   togglePanel(isOpen: boolean): void;
   panelPosition: Signal<FormidablePanelPosition>;
 }

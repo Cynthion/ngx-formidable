@@ -7,7 +7,8 @@ import {
   input,
   OnInit,
   output,
-  ViewChild
+  signal,
+  viewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
@@ -60,8 +61,8 @@ export class AutocompleteFieldComponent
   extends BaseOptionFieldDirective<string | null>
   implements IFormidableAutocompleteField, OnInit
 {
-  @ViewChild('autocompleteRef', { static: true }) autocompleteRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
+  readonly autocompleteRef = viewChild.required<ElementRef<HTMLDivElement>>('autocompleteRef');
+  readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = () => this.handleExternalClick();
@@ -83,7 +84,7 @@ export class AutocompleteFieldComponent
     this.filterChangeSubject$.next(value);
     this.filterChanged.emit(value);
 
-    this.isFieldFilled = value.length > 0;
+    this.isFieldFilled.set(value.length > 0);
   }
 
   protected doOnValueChange(): void {
@@ -97,30 +98,30 @@ export class AutocompleteFieldComponent
   }
 
   private handleKeydown(event: KeyboardEvent): void {
-    const options = this.filteredOptions$.value;
+    const options = this.activeOptions();
     const count = options.length;
 
     switch (event.key) {
       case 'Escape':
       case 'Tab':
-        if (this.isPanelOpen) this.togglePanel(false);
+        if (this.isPanelOpen()) this.togglePanel(false);
         break;
       case 'ArrowDown':
-        if (!this.isPanelOpen) {
+        if (!this.isPanelOpen()) {
           this.togglePanel(true);
         } else if (count > 0) {
-          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'down'));
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex(), options, 'down'));
         }
         break;
       case 'ArrowUp':
-        if (this.isPanelOpen && count > 0) {
-          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'up'));
+        if (this.isPanelOpen() && count > 0) {
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex(), options, 'up'));
         }
         break;
       case 'Enter': {
-        if (!this.isPanelOpen) return;
-        const idx = this.highlightedOptionIndex$.value;
-        const option = this.filteredOptions$.value[idx];
+        if (!this.isPanelOpen()) return;
+        const idx = this.highlightedOptionIndex();
+        const option = this.activeOptions()[idx];
         if (option) this.selectOption(option);
         break;
       }
@@ -128,7 +129,7 @@ export class AutocompleteFieldComponent
   }
 
   private handleExternalClick(): void {
-    if (!this.isPanelOpen) return;
+    if (!this.isPanelOpen()) return;
 
     this.togglePanel(false);
   }
@@ -141,18 +142,17 @@ export class AutocompleteFieldComponent
     const found = this.computeSelectableOptions(this.computeAllOptions()).find(
       (opt) => opt.value === this._writtenValue
     );
-    this.selectedOption = found ? { ...found } : undefined;
+    this.selectedOption.set(found ? { ...found } : undefined);
 
     // write to wrapped input element — if the option isn't found yet (options may not be
     // loaded), the input stays empty; _writtenValue is kept so onOptionsChanged re-applies it
-    this.inputRef.nativeElement.value = this.selectedOption
-      ? this.selectedOption.label || this.selectedOption.value
-      : '';
+    const selected = this.selectedOption();
+    this.inputRef().nativeElement.value = selected ? selected.label || selected.value : '';
 
-    this.isFieldFilled = this.inputRef.nativeElement.value.length > 0;
+    this.isFieldFilled.set(this.inputRef().nativeElement.value.length > 0);
 
     // keep filter/list consistent with displayed value
-    this.filterChangeSubject$.next(this.inputRef.nativeElement.value);
+    this.filterChangeSubject$.next(this.inputRef().nativeElement.value);
   }
 
   // #endregion
@@ -160,15 +160,15 @@ export class AutocompleteFieldComponent
   // #region IFormidableField
 
   get value(): string | null {
-    return this.selectedOption?.value || null;
+    return this.selectedOption()?.value || null;
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.autocompleteRef as ElementRef<HTMLElement>;
+    return this.autocompleteRef() as ElementRef<HTMLElement>;
   }
 
   protected override get focusElement(): HTMLElement {
-    return this.inputRef.nativeElement;
+    return this.inputRef().nativeElement;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
@@ -188,16 +188,12 @@ export class AutocompleteFieldComponent
 
   public readonly optionRole: FieldOptionRole = 'option';
 
-  protected readonly filteredOptions$ = new BehaviorSubject<IFormidableOption[]>([]);
+  protected readonly activeOptions = signal<IFormidableOption[]>([]);
 
-  protected selectedOption?: IFormidableOption = undefined;
-
-  protected get activeOptions(): IFormidableOption[] {
-    return this.filteredOptions$.value;
-  }
+  protected readonly selectedOption = signal<IFormidableOption | undefined>(undefined);
 
   protected override get selectedOptionValue(): string | null {
-    return this.selectedOption?.value ?? null;
+    return this.selectedOption()?.value ?? null;
   }
 
   public selectOption(option: IFormidableOption): void {
@@ -210,14 +206,14 @@ export class AutocompleteFieldComponent
     };
 
     // commit selection + update displayed label
-    this.selectedOption = newOption;
-    this.inputRef.nativeElement.value = this.selectedOption.label!; // update input value with selected option label
+    this.selectedOption.set(newOption);
+    this.inputRef().nativeElement.value = newOption.label!; // update input value with selected option label
 
     // emit value change
-    this.valueChangeSubject$.next(this.selectedOption.value);
-    this.valueChanged.emit(this.selectedOption.value);
-    this.isFieldFilled = this.selectedOption.value.length > 0;
-    this.commit(this.selectedOption.value); // notify ControlValueAccessor of the change
+    this.valueChangeSubject$.next(newOption.value);
+    this.valueChanged.emit(newOption.value);
+    this.isFieldFilled.set(newOption.value.length > 0);
+    this.commit(newOption.value); // notify ControlValueAccessor of the change
     this.touch();
 
     // simulate blur (field-state blur, not necessarily native blur)
@@ -228,29 +224,27 @@ export class AutocompleteFieldComponent
     this.togglePanel(false);
 
     // move caret to end of input
-    setCaretPositionToEnd(this.inputRef.nativeElement);
+    setCaretPositionToEnd(this.inputRef().nativeElement);
   }
 
   private deselectOption(opts: { clearInput?: boolean } = {}): void {
     // only do work if there actually was a selection
-    if (!this.selectedOption) return;
+    if (!this.selectedOption()) return;
 
     this.setHighlightedIndex(-1);
-    this.selectedOption = undefined;
+    this.selectedOption.set(undefined);
     this._writtenValue = null; // clear pending value so it isn't re-applied when options change
 
     if (opts.clearInput) {
-      this.inputRef.nativeElement.value = '';
+      this.inputRef().nativeElement.value = '';
       this.filterChangeSubject$.next(''); // optional: keeps filter + list consistent
     }
 
     this.valueChangeSubject$.next(null);
     this.valueChanged.emit(null);
-    this.isFieldFilled = this.inputRef.nativeElement.value.length > 0;
+    this.isFieldFilled.set(this.inputRef().nativeElement.value.length > 0);
     this.commit(null);
     this.touch();
-
-    this.cdRef.markForCheck();
   }
 
   protected onOptionsChanged(): void {
@@ -271,18 +265,16 @@ export class AutocompleteFieldComponent
     );
 
     // keep highlight consistent if panel is open
-    if (this.isPanelOpen) {
+    if (this.isPanelOpen()) {
       this.reconcileHighlightAfterOptionsChanged();
       this.updatePanelPosition();
     }
-
-    this.cdRef.markForCheck();
   }
 
   private computeAllOptions(): IFormidableOption[] {
     return combineFieldOptions(
       this.options(),
-      this.optionComponents?.map((source) => source.option()),
+      this.optionComponents().map((source) => source.option()),
       this.sortFn()
     );
   }
@@ -305,13 +297,13 @@ export class AutocompleteFieldComponent
       : allOptions;
 
     // the default option is pinned after filtering, so an `always` default survives a non-matching filter
-    this.filteredOptions$.next(applyDefaultOption(filteredOptions, this.defaultOption(), this.defaultOptionMode()));
+    this.activeOptions.set(applyDefaultOption(filteredOptions, this.defaultOption(), this.defaultOptionMode()));
   }
 
   private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {
-    if (!this.selectedOption) return;
+    if (!this.selectedOption()) return;
 
-    const stillExists = allOptions.some((o) => o.value === this.selectedOption!.value);
+    const stillExists = allOptions.some((o) => o.value === this.selectedOption()!.value);
     if (!stillExists) {
       // selection is no longer valid
       this.deselectOption({ clearInput: true });
@@ -322,12 +314,10 @@ export class AutocompleteFieldComponent
 
   // #region IFormidablePanelField
 
-  @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
+  readonly panelRef = viewChild<ElementRef<HTMLDivElement>>('panelRef');
 
   /** Whether the panel is currently open. Call `togglePanel` to open or close it from outside. */
-  get isPanelOpen(): boolean {
-    return this._isPanelOpen;
-  }
+  public readonly isPanelOpen = signal(false);
 
   /**
    * Where the panel opens. The three anchored positions flip above the field when there is no room below; a
@@ -335,32 +325,28 @@ export class AutocompleteFieldComponent
    */
   public readonly panelPosition = input<FormidablePanelPosition>('full');
 
-  private _isPanelOpen = false;
-
   /** Opens or closes the panel. */
   public togglePanel(isOpen: boolean): void {
-    this._isPanelOpen = isOpen;
+    this.isPanelOpen.set(isOpen);
 
     // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
     // before change detection.
-    setTimeout(() => scrollIntoView(this.autocompleteRef, this.panelRef, isOpen));
+    setTimeout(() => scrollIntoView(this.autocompleteRef(), this.panelRef(), isOpen));
 
     if (isOpen) {
       this.highlightSelectedOption();
       // Synchronous on purpose: a closed panel is `visibility: hidden`, not `display: none`, so it is
       // already laid out and measurable. Deferring would flip it after paint, which is a visible jump.
-      updatePanelPosition(this.autocompleteRef, this.panelRef);
+      updatePanelPosition(this.autocompleteRef(), this.panelRef());
     } else {
       this.setHighlightedIndex(-1);
     }
-
-    this.cdRef.markForCheck();
   }
 
   // Deferred, unlike the call in `togglePanel`: the option list changed, so the panel's height is only
   // correct once change detection has rendered it.
   private updatePanelPosition(): void {
-    setTimeout(() => updatePanelPosition(this.autocompleteRef, this.panelRef));
+    setTimeout(() => updatePanelPosition(this.autocompleteRef(), this.panelRef()));
   }
 
   // #endregion
@@ -370,15 +356,15 @@ export class AutocompleteFieldComponent
       .pipe(
         debounceTime(200),
         distinctUntilChanged(),
-        filter(() => this.isFieldFocused),
+        filter(() => this.isFieldFocused()),
         takeUntil(this.destroy$)
       )
       .subscribe(() => {
-        const typed = this.inputRef.nativeElement.value ?? '';
-        const selectedLabel = this.selectedOption?.label ?? '';
+        const typed = this.inputRef().nativeElement.value ?? '';
+        const selectedLabel = this.selectedOption()?.label ?? '';
 
         // only deselect if the user actually diverged from the selected label
-        if (this.selectedOption && typed !== selectedLabel) {
+        if (this.selectedOption() && typed !== selectedLabel) {
           this.deselectOption(); // no clearInput
         }
 
@@ -387,7 +373,7 @@ export class AutocompleteFieldComponent
         this.updateFilteredOptions(allOptions);
         this.tryAutoSelectExactValue(this.computeSelectableOptions(allOptions));
 
-        if (!this.isPanelOpen) {
+        if (!this.isPanelOpen()) {
           this.togglePanel(true);
         } else {
           this.updatePanelPosition();
@@ -396,7 +382,7 @@ export class AutocompleteFieldComponent
   }
 
   private tryAutoSelectExactValue(allOptions: IFormidableOption[]): void {
-    const typed = this.inputRef.nativeElement.value;
+    const typed = this.inputRef().nativeElement.value;
     if (!typed) return;
 
     const match = allOptions.find((o) => !o.disabled && o.label === typed);

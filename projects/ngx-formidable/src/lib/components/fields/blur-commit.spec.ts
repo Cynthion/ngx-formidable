@@ -1,4 +1,4 @@
-import { Component, ElementRef, forwardRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, forwardRef, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NG_VALUE_ACCESSOR, NgForm } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -38,7 +38,7 @@ class BlurCommitFieldComponent extends BaseFieldDirective<string> {
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
-  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
+  readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
@@ -49,7 +49,7 @@ class BlurCommitFieldComponent extends BaseFieldDirective<string> {
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.inputRef as ElementRef<HTMLElement>;
+    return this.inputRef() as ElementRef<HTMLElement>;
   }
 
   protected doOnValueChange(): void {
@@ -58,13 +58,13 @@ class BlurCommitFieldComponent extends BaseFieldDirective<string> {
 
   protected doWriteValue(value: string): void {
     this.committed = value ?? '';
-    this.inputRef.nativeElement.value = this.committed;
+    this.inputRef().nativeElement.value = this.committed;
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
     if (isFocused) return;
 
-    this.committed = this.inputRef.nativeElement.value;
+    this.committed = this.inputRef().nativeElement.value;
     this.onChange(this.committed);
   }
 }

@@ -1,6 +1,6 @@
 import {
   AfterViewInit,
-  ChangeDetectorRef,
+  computed,
   Directive,
   ElementRef,
   HostBinding,
@@ -11,7 +11,9 @@ import {
   NgZone,
   OnDestroy,
   OnInit,
-  output
+  output,
+  signal,
+  Signal
 } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NgControl } from '@angular/forms';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
@@ -50,8 +52,8 @@ export abstract class BaseFieldDirective<T = string | null>
   protected abstract registeredKeys: string[];
 
   protected id = `formidable-field-${nextFieldId++}`;
-  protected isFieldFocused = false;
-  protected isFieldFilled = false;
+  protected readonly isFieldFocused = signal(false);
+  protected readonly isFieldFilled = signal(false);
   protected valueChangeSubject$ = new Subject<T>();
   protected focusChangeSubject$ = new Subject<boolean>();
 
@@ -60,7 +62,6 @@ export abstract class BaseFieldDirective<T = string | null>
   // Element injectors follow the declaring template, so a projected field really does see its decorator.
   // Optional: a field used on its own has no label, hint or errors to point at.
   private readonly decorator = inject(FieldDecoratorComponent, { optional: true });
-  protected readonly cdRef = inject(ChangeDetectorRef);
   private readonly injector = inject(Injector);
 
   private ngControl?: NgControl | null;
@@ -119,7 +120,7 @@ export abstract class BaseFieldDirective<T = string | null>
     if (value == this._valuePrevious) return;
     this._valuePrevious = value;
 
-    this.isFieldFilled = BaseFieldDirective.isFilled(value);
+    this.isFieldFilled.set(BaseFieldDirective.isFilled(value));
 
     this.valueChangeSubject$.next(value);
     this.valueChanged.emit(value);
@@ -131,7 +132,7 @@ export abstract class BaseFieldDirective<T = string | null>
   protected onFocusChange(isFocused: boolean): void {
     if (this.disabled()) return;
 
-    this.isFieldFocused = isFocused;
+    this.isFieldFocused.set(isFocused);
 
     this.focusChangeSubject$.next(isFocused);
     this.focusChanged.emit(isFocused);
@@ -207,7 +208,7 @@ export abstract class BaseFieldDirective<T = string | null>
   }
 
   writeValue(value: T): void {
-    this.isFieldFilled = BaseFieldDirective.isFilled(value);
+    this.isFieldFilled.set(BaseFieldDirective.isFilled(value));
     // What the field now displays, so `onValueChange` compares against it and not against the last value a
     // user typed. Without this a written-in value cleared by a user reads as no change, and never reaches
     // the model.
@@ -284,9 +285,8 @@ export abstract class BaseFieldDirective<T = string | null>
   // The decorator owns the label, the hint and the errors, so it is what mints the ids these point at.
 
   /** Binds `aria-labelledby` for a control a `<label for>` cannot reach: the groups, the toggle, the slider. */
-  // Read once per repaint of this `OnPush` field, so a label added or removed at runtime (an `@if` around
-  // it) only lands the next time the field is checked. Every other projected decoration is the decorator's
-  // own to render, which is why it is the decorator — and not the field — that is not `OnPush`.
+  // Reads the decorator's `contentChild()` query through its getter, so a label added or removed at
+  // runtime (an `@if` around it) marks this field on the pass that resolves the query.
   protected get labelledBy(): string | null {
     return this.decorator?.labelledById ?? null;
   }
@@ -307,13 +307,6 @@ export abstract class BaseFieldDirective<T = string | null>
     return `${this.fieldId}-panel`;
   }
 
-  /** Repaints the field. Called by the errors directive when validity changes, so `aria-invalid` follows it. */
-  // Validity lives in the errors component, whose own `markForCheck` marks its ancestors and never this
-  // sibling — so `FieldErrorsDirective` calls this as well, or `aria-invalid` would bind once and go stale.
-  public markForCheck(): void {
-    this.cdRef.markForCheck();
-  }
-
   // #endregion
 
   /** What the field currently holds, read straight off whatever it renders rather than cached. */
@@ -323,24 +316,23 @@ export abstract class BaseFieldDirective<T = string | null>
     return typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
   }
 
-  get canLabelRest(): boolean {
+  public readonly canLabelRest = computed(() => {
     // Readonly/disabled fields never rest — the label stays put instead of
     // dropping over the (often filled) value when the field gains focus.
     if (this.disabled() || this.readonly()) return false;
     // Only what the field renders of its own accord counts here — its value, or mask slots. A
     // `placeholder` is the decorator's to weigh, because whether it blocks a resting label or is hidden
     // behind one depends on the label's position, which this field cannot see.
-    return !this.isFieldFocused && !this.isFieldFilled && !this.showsEmptyValueHint;
-  }
+    return !this.isFieldFocused() && !this.isFieldFilled() && !this.showsEmptyValueHint();
+  });
 
   /**
    * Whether the field renders something where the value goes even while it has no value (e.g. mask
    * slots), which a resting label would collide with. Overridden by the fields that do.
    */
-  // eslint-disable-next-line @typescript-eslint/class-literal-property-style
-  protected get showsEmptyValueHint(): boolean {
-    return false;
-  }
+  // A signal and not a getter, because `canLabelRest` is a `computed` over it: a computed caches, so a
+  // plain getter here would pin whatever it returned the first time the label state was resolved.
+  protected readonly showsEmptyValueHint: Signal<boolean> = signal(false);
 
   /** The field's outer element. The decorator measures it, and the global listeners are scoped to it. */
   abstract fieldRef: ElementRef<HTMLElement>;
@@ -404,7 +396,7 @@ export abstract class BaseFieldDirective<T = string | null>
         if (this.keyboardCallback && this.registeredKeys.length > 0) {
           fromEvent<KeyboardEvent>(this.fieldRef.nativeElement, 'keydown')
             .pipe(
-              filter(() => this.isFieldFocused && !this.readonly() && !this.disabled()),
+              filter(() => this.isFieldFocused() && !this.readonly() && !this.disabled()),
               filter((event) => this.registeredKeys.includes(event.key)),
               tap((event) => {
                 // immediately prevent default, before debounceTime

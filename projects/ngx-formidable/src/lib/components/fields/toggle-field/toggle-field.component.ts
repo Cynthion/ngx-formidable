@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, signal, viewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import {
   FieldDecoratorLayout,
@@ -36,14 +36,14 @@ import { BaseFieldDirective } from '../base-field.directive';
   ]
 })
 export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> implements IFormidableToggleField {
-  @ViewChild('toggleRef', { static: true }) toggleRef!: ElementRef<HTMLDivElement>;
+  readonly toggleRef = viewChild.required<ElementRef<HTMLDivElement>>('toggleRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys = [' ', 'Space', 'Enter'];
 
-  private _value: boolean | null = null;
+  private readonly _value = signal<boolean | null>(null);
 
   protected doOnValueChange(): void {
     // No additional actions needed
@@ -66,7 +66,7 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
   // #region ControlValueAccessor
 
   protected doWriteValue(value: boolean): void {
-    this._value = !!value;
+    this._value.set(!!value);
   }
 
   // #endregion
@@ -74,11 +74,11 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
   // #region IFormidableField
 
   get value(): boolean | null {
-    return this._value;
+    return this._value();
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.toggleRef as ElementRef<HTMLElement>;
+    return this.toggleRef() as ElementRef<HTMLElement>;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'inline';
@@ -100,7 +100,7 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
   public toggle(): void {
     if (this.readonly() || this.disabled()) return;
 
-    this._value = !this._value;
+    this._value.set(!this._value());
     this.onValueChange();
   }
 

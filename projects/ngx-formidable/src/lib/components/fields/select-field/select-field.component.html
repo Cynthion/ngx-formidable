@@ -27,7 +27,7 @@
 
   <!-- Options -->
   <!-- Options are re-created in order to use native <option> elements. -->
-  @for (option of options$ | async; track option.value) {
+  @for (option of activeOptions(); track option.value) {
     <option
       [value]="option.value"
       [disabled]="option.disabled || false"

@@ -24,15 +24,15 @@ A field extends `BaseFieldDirective<T>` and registers two providers:
 - `{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => XComponent), multi: true }`
 - `{ provide: FORMIDABLE_FIELD, useExisting: XComponent }`
 
-Option-based fields also `@ContentChildren(FORMIDABLE_OPTION)` and provide `FORMIDABLE_OPTION_FIELD`. Implement the abstract members (`fieldRef`, `decoratorLayout`, `value`, `doWriteValue` / `doOnValueChange` / `doOnFocusChange`, the keyboard/click/resize callbacks + `registeredKeys`).
+Option-based fields also `contentChildren(FORMIDABLE_OPTION, { descendants: true })` and provide `FORMIDABLE_OPTION_FIELD`. Implement the abstract members (`fieldRef`, `decoratorLayout`, `value`, `doWriteValue` / `doOnValueChange` / `doOnFocusChange`, the keyboard/click/resize callbacks + `registeredKeys`).
 
-Reference implementation: `example-custom-color-picker` in the demo. Full contract: @.documentation/user/components.md.
+Reference implementation: `example-counter-field` in the demo. Full contract: @.documentation/user/components.md.
 
 ## 3. Conventions (see @.documentation/impl/conventions.md)
 
 - External `*.component.ts` / `.html` / `.scss` — never inline templates or styles.
 - Style via the SCSS mixins + `--formidable-*` CSS custom properties; expose new theming as a CSS variable, never a hardcoded value.
-- Classic `@Input()` on fields; observable outputs get the `$` suffix.
+- Signal `input()` / `output()` on fields; signal queries (`viewChild()`, `contentChildren()`); observable names get the `$` suffix.
 - Mirror sibling fields (input/output order, provider block, template attribute order).
 
 ## 4. Prove it — run the `verify` skill.

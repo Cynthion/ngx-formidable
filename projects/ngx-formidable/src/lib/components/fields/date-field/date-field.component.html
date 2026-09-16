@@ -3,7 +3,7 @@
   class="field"
   [class.is-readonly]="readonly()"
   [class.is-disabled]="disabled()"
-  [class.focused]="isFieldFocused">
+  [class.focused]="isFieldFocused()">
   <div class="input-wrapper">
     <!-- Input Field -->
     <input
@@ -27,7 +27,7 @@
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
       [attr.aria-readonly]="readonly() || null"
-      [attr.aria-expanded]="isPanelOpen"
+      [attr.aria-expanded]="isPanelOpen()"
       [attr.aria-controls]="panelId"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"
@@ -38,9 +38,9 @@
       <span
         #toggleRef
         class="toggle"
-        [class.open]="isPanelOpen"
-        [class.arrow-down]="!hasToggleIcon && !isPanelOpen"
-        [class.arrow-up]="!hasToggleIcon && isPanelOpen"
+        [class.open]="isPanelOpen()"
+        [class.arrow-down]="!hasToggleIcon() && !isPanelOpen()"
+        [class.arrow-up]="!hasToggleIcon() && isPanelOpen()"
         (mousedown)="toggleMouseDown($event)">
         <ng-content select="[formidableFieldToggleIcon]" />
       </span>
@@ -52,7 +52,7 @@
     #panelRef
     tabindex="-1"
     class="panel panel-{{ panelPosition() }}"
-    [class.open]="isPanelOpen"
+    [class.open]="isPanelOpen()"
     (mousedown)="panelMouseDown($event)">
     <!-- A calendar is not a list, so this is a dialog. It is named from the same label as the field, and
          stays unnamed without one — the same rule `labelledBy` follows everywhere else. -->

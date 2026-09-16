@@ -963,21 +963,21 @@ describe('IFormidableField.canLabelRest', () => {
     const fixture = TestBed.createComponent(DateFieldComponent);
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.canLabelRest).toBe(false);
+    expect(fixture.componentInstance.canLabelRest()).toBe(false);
   });
 
   it('is false for a time field, which always shows its mask slots', () => {
     const fixture = TestBed.createComponent(TimeFieldComponent);
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.canLabelRest).toBe(false);
+    expect(fixture.componentInstance.canLabelRest()).toBe(false);
   });
 
   it('is false for a select field, which always shows an option', () => {
     const fixture = TestBed.createComponent(SelectFieldComponent);
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.canLabelRest).toBe(false);
+    expect(fixture.componentInstance.canLabelRest()).toBe(false);
   });
 
   it('is false while readonly or disabled', () => {
@@ -985,11 +985,11 @@ describe('IFormidableField.canLabelRest', () => {
     fixture.detectChanges();
 
     fixture.componentRef.setInput('readonly', true);
-    expect(fixture.componentInstance.canLabelRest).toBe(false);
+    expect(fixture.componentInstance.canLabelRest()).toBe(false);
 
     fixture.componentRef.setInput('readonly', false);
     fixture.componentRef.setInput('disabled', true);
-    expect(fixture.componentInstance.canLabelRest).toBe(false);
+    expect(fixture.componentInstance.canLabelRest()).toBe(false);
   });
 });
 

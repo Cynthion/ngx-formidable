@@ -106,7 +106,7 @@ Angular raises its pending dirty flag on every change a value accessor reports a
 
 ### Reveal Resolution And Repaint
 
-`FieldErrorsComponent` resolves its own field's `revealOn` first, then the form's, then `touched`. `FieldErrorsDirective` pushes the field's value and drives the repaint, because the `OnPush` component is not reactive to either of the other two gates: `NgForm.submitted` reads through `untracked`, and the form's `revealOn` is a signal on a directive the component does not own. Both join the repaint stream alongside the control's own events.
+`FieldErrorsComponent` resolves its own field's `revealOn` first, then the form's, then `touched`. `FieldErrorsDirective` pushes the field's value and drives the repaint, because none of the state the component reads is signal-backed: `AbstractControl.errors`, `touched` and `dirty` are plain properties, `NgForm.submitted` reads through `untracked`, and the form's `revealOn` is a signal on a directive the component does not own. All three join one stream, and each emission calls `refresh()` — which bumps the revision the component's `errors` and `invalid` computeds read. See `tech/decoration.md` for what that one signal then reaches.
 
 ### Debounce
 

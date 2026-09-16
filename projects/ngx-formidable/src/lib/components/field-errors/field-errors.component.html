@@ -1,7 +1,7 @@
 <div class="errors">
-  @if (invalid) {
+  @if (invalid()) {
     <ul>
-      @for (error of errors; track error) {
+      @for (error of errors(); track error) {
         <li class="error">
           {{ translateError(error) }}
         </li>

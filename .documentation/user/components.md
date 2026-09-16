@@ -2,7 +2,7 @@
 
 Catalogue of the library's public API: everything exported from `public-api.ts`, plus `NgxFormidableVestValidatorDirective` from the `@cynthion/ngx-formidable/vest` entry point. This is the authoritative detailed reference — the root `README.md` lists components abstractly and links here for the full API, and the `user/` guides teach the topics this file only lists.
 
-Every component is `standalone`, and uses `ChangeDetectionStrategy.OnPush` except `FieldDecoratorComponent` — it resolves its label state from field state it cannot observe, so it is checked every cycle. Field components implement `ControlValueAccessor` (usable with `ngModel`) and extend `BaseFieldDirective`; their shared surface is documented once below and not repeated per entry.
+Every component is `standalone` and uses `ChangeDetectionStrategy.OnPush`, with no exception. Field components implement `ControlValueAccessor` (usable with `ngModel`) and extend `BaseFieldDirective`; their shared surface is documented once below and not repeated per entry.
 
 **Signal Surface**: every input is a signal `input()` and every output an `output()`. A template binds both exactly as a decorated one (`[readonly]="…"`, `(valueChanged)="…"`), so the tables below name the value a binding accepts rather than the signal wrapping it. Reaching one from code is Angular's own API in every case:
 
@@ -34,28 +34,27 @@ Both register ngx-mask and set `FORMIDABLE_MASK_DEFAULTS` from `globalMaskConfig
 
 Inherited by every field:
 
-| Member               | Kind       | Description                                                                                         |
-| :------------------- | :--------- | :-------------------------------------------------------------------------------------------------- |
-| `name`               | input      | Field name (`''`)                                                                                   |
-| `placeholder`        | input      | Placeholder text (`''`)                                                                             |
-| `readonly`           | input      | Blocks input, still focusable (`false`)                                                             |
-| `disabled`           | model      | Fully disabled (`false`) — see **Disabled**                                                         |
-| `showRequiredMarker` | input      | Suffixes the required marker to the label (`false`) — presentational, see **Required Marker**       |
-| `autoFocus`          | input      | Focuses the field once its view is ready (`false`) — see **Focus**                                  |
-| `valueChanged`       | output     | `T` on value change                                                                                 |
-| `focusChanged`       | output     | `boolean` on focus/blur                                                                             |
-| `disabledChange`     | output     | `boolean` — the `model`'s own output, see **Disabled**                                              |
-| `valueChange$`       | Observable | Value stream                                                                                        |
-| `focusChange$`       | Observable | Focus stream                                                                                        |
-| `fieldId`            | getter     | Generated unique id                                                                                 |
-| `value`              | getter     | Current value                                                                                       |
-| `canLabelRest`       | getter     | Whether nothing occupies the value area, so a label may rest there like a placeholder               |
-| `focus()`            | method     | Focuses the field — see **Focus**                                                                   |
-| `markForCheck()`     | method     | Repaints the field when state it does not own changes — see **Accessibility**                       |
-| `hasInFieldToggle`   | optional   | Whether the field renders a panel toggle inside its own box, which the value and a label must clear |
-| `valueAlignment`     | optional   | Where the value sits vertically, which a prefix/suffix aligns with: `'center'` (default) or `'top'` |
+| Member               | Kind            | Description                                                                                         |
+| :------------------- | :-------------- | :-------------------------------------------------------------------------------------------------- |
+| `name`               | input           | Field name (`''`)                                                                                   |
+| `placeholder`        | input           | Placeholder text (`''`)                                                                             |
+| `readonly`           | input           | Blocks input, still focusable (`false`)                                                             |
+| `disabled`           | model           | Fully disabled (`false`) — see **Disabled**                                                         |
+| `showRequiredMarker` | input           | Suffixes the required marker to the label (`false`) — presentational, see **Required Marker**       |
+| `autoFocus`          | input           | Focuses the field once its view is ready (`false`) — see **Focus**                                  |
+| `valueChanged`       | output          | `T` on value change                                                                                 |
+| `focusChanged`       | output          | `boolean` on focus/blur                                                                             |
+| `disabledChange`     | output          | `boolean` — the `model`'s own output, see **Disabled**                                              |
+| `valueChange$`       | Observable      | Value stream                                                                                        |
+| `focusChange$`       | Observable      | Focus stream                                                                                        |
+| `fieldId`            | getter          | Generated unique id                                                                                 |
+| `value`              | getter          | Current value                                                                                       |
+| `canLabelRest`       | signal          | Whether nothing occupies the value area, so a label may rest there like a placeholder               |
+| `focus()`            | method          | Focuses the field — see **Focus**                                                                   |
+| `hasInFieldToggle`   | optional signal | Whether the field renders a panel toggle inside its own box, which the value and a label must clear |
+| `valueAlignment`     | optional        | Where the value sits vertically, which a prefix/suffix aligns with: `'center'` (default) or `'top'` |
 
-**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners (run outside the Angular zone), readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly or disabled. A `placeholder` is not part of it — whether that blocks a resting label belongs to the label's position (see **Label As Placeholder** below). A field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` getter (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always). A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field`, with their panel toggle — declares `hasInFieldToggle`, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it. A field whose `fieldRef` is not the element that takes focus overrides the protected `focusElement` getter (see **Focus**).
+**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners (run outside the Angular zone), readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly or disabled. A `placeholder` is not part of it — whether that blocks a resting label belongs to the label's position (see **Label As Placeholder** below). A field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` **signal** (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always) — a signal and not a getter, because `canLabelRest` is a `computed` over it and a computed would cache whatever a getter returned first. A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field`, with their panel toggle — declares `hasInFieldToggle` as a signal, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it. A field whose `fieldRef` is not the element that takes focus overrides the protected `focusElement` getter (see **Focus**).
 
 **Disabled**: `disabled` has two writers, so it is the one member of the surface that is a `model` rather than an `input`. A consumer binds `[disabled]`, and Angular's own forms write the same state through `setDisabledState` when the control is disabled programmatically (`control.disable()`); neither goes through the other, and whichever wrote last is what the field renders. A binding that does not change is not a writer, so a `[disabled]="false"` left in place does not undo a `control.disable()`. The `model` brings a `disabledChange` output with it, which reports either writer — including Angular's.
 
@@ -65,7 +64,7 @@ Inherited by every field:
 
 The base also **mints** an id of its own from `fieldId`, the mirror of the decorator's rule: the decorator owns what it renders around the field, the field owns what lives inside its own box. `panelId` (`{fieldId}-panel`) names the popup a panel field's `aria-controls` points at; it is `protected`, for the field's own template. The matching `optionId(index)` sits one level down, on **Base Option Field Directive**, because only an option field has options to name. See **Combobox And Options** below.
 
-`markForCheck()` exists for the one attribute the field cannot see coming: validity lives in the `FieldErrorsComponent`, whose own `markForCheck` marks its ancestors and never this sibling, so `FieldErrorsDirective` pumps the field too and `aria-invalid` repaints with the errors. It is an optional member of `IFormidableField` — a field that implements the interface without extending the base simply does not get pumped. `labelledBy` is read on the same schedule: a label added or removed at runtime lands the next time the field is checked.
+All three repaint on their own. `isInvalid` reads the decorator, which reads the errors component's `invalid` signal, so `aria-invalid` follows validity across the sibling boundary with nothing pumping the field; `labelledBy` reads a `contentChild()` query on the decorator, so a label added or removed at runtime lands on the next pass.
 
 ---
 
@@ -75,21 +74,21 @@ The base also **mints** an id of its own from `fieldId`, the mirror of the decor
 
 Inherited by those four:
 
-| Member                    | Kind                       | Description                                                                                     |
-| :------------------------ | :------------------------- | :---------------------------------------------------------------------------------------------- |
-| `options`                 | input                      | The option list (`[]`)                                                                          |
-| `defaultOption`           | input                      | An option pinned to the top of the list                                                         |
-| `defaultOptionMode`       | input                      | When the default renders: `'always'` (default) or `'fallback'`                                  |
-| `noOptionsText`           | input                      | Text for the empty list (`NO_OPTIONS_TEXT`)                                                     |
-| `sortFn`                  | input                      | Comparator applied to the combined list                                                         |
-| `optionComponents`        | `@ContentChildren`         | The projected option components as `IFormidableOptionSource`, `{ descendants: true }`           |
-| `optionRefs`              | `@ViewChildren`, protected | The rendered `#optionRef` options, used to scroll the highlight into view                       |
-| `highlightedOptionIndex$` | Observable, protected      | The highlighted index, `-1` for none — drives both `is-highlighted` and `aria-activedescendant` |
-| `optionId(index)`         | method, protected          | `{fieldId}-option-{index}`, or `null` for a negative index                                      |
+| Member                   | Kind                        | Description                                                                                     |
+| :----------------------- | :-------------------------- | :---------------------------------------------------------------------------------------------- |
+| `options`                | input                       | The option list (`[]`)                                                                          |
+| `defaultOption`          | input                       | An option pinned to the top of the list                                                         |
+| `defaultOptionMode`      | input                       | When the default renders: `'always'` (default) or `'fallback'`                                  |
+| `noOptionsText`          | input                       | Text for the empty list (`NO_OPTIONS_TEXT`)                                                     |
+| `sortFn`                 | input                       | Comparator applied to the combined list                                                         |
+| `optionComponents`       | `contentChildren()`         | The projected option components as `IFormidableOptionSource`, `{ descendants: true }`           |
+| `optionRefs`             | `viewChildren()`, protected | The rendered `#optionRef` options, used to scroll the highlight into view                       |
+| `highlightedOptionIndex` | signal, protected           | The highlighted index, `-1` for none — drives both `is-highlighted` and `aria-activedescendant` |
+| `optionId(index)`        | method, protected           | `{fieldId}-option-{index}`, or `null` for a negative index                                      |
 
-`optionComponents` is the only public member of the four. The other three are `protected`: they exist for a subclass, not for a template or a `@ViewChild` handle.
+`optionComponents` is the only public member of the four. The other three are `protected`: they exist for a subclass, not for a template or a `viewChild()` handle.
 
-**Extension Contract**: subclasses supply `onOptionsChanged()` — recombine the options, then reconcile selection and highlight against them — and `activeOptions`, the rendered list the highlight walks (`autocomplete-field` returns its filtered list, the other three their full one). A single-select field additionally overrides `selectedOptionValue` so the selection can claim the highlight; the multi-select `checkbox-group-field` leaves it `null`, which is what drops the selection-wins step for it. The base owns the rest: it calls `onOptionsChanged()` from `ngOnChanges` (on any of the four option inputs) and from `ngAfterContentInit` (once, plus on every `optionComponents` change), and it implements `setHighlightedIndex`, `highlightSelectedOption` and `reconcileHighlightAfterOptionsChanged`. The last one follows the previously highlighted **value** across a changed list before falling back to a clamped index, and skips disabled options either way; a field that only wants a live highlight while its panel is open guards its own call, as the two panel fields do.
+**Extension Contract**: subclasses supply `onOptionsChanged()` — recombine the options, then reconcile selection and highlight against them — and `activeOptions`, a signal holding the rendered list the highlight walks (`autocomplete-field` holds its filtered list, the other three their full one) — the same signal the field's own template renders from. A single-select field additionally overrides `selectedOptionValue` so the selection can claim the highlight; the multi-select `checkbox-group-field` leaves it `null`, which is what drops the selection-wins step for it. The base owns the rest: one effect calls `onOptionsChanged()` whenever any of the four option inputs or the `optionComponents` query moves, and it implements `setHighlightedIndex`, `highlightSelectedOption` and `reconcileHighlightAfterOptionsChanged`. The last one follows the previously highlighted **value** across a changed list before falling back to a clamped index, and skips disabled options either way; a field that only wants a live highlight while its panel is open guards its own call, as the two panel fields do.
 
 ---
 
@@ -97,7 +96,7 @@ Inherited by those four:
 
 All extend `BaseFieldDirective<T>` (inherited API above); the four option fields extend `BaseOptionFieldDirective<T>`. Tables list each field's OWN inputs only.
 
-**Panel Control**: the three fields with a panel — `dropdown-field`, `autocomplete-field` and `date-field` — expose `isPanelOpen` as a read-only getter and `togglePanel(isOpen)` as the way to open or close it from outside. There is no `isPanelOpen` input: a panel is state the field owns and closes by itself (on a selection, an outside click, `Escape`), so a one-way binding would go stale the moment it did. Reach the method through a template reference (`#field`) or a `@ViewChild`, exactly as `focus()` is reached.
+**Panel Control**: the three fields with a panel — `dropdown-field`, `autocomplete-field` and `date-field` — expose `isPanelOpen` as a signal to read and `togglePanel(isOpen)` as the way to open or close it from outside. There is no `isPanelOpen` input: a panel is state the field owns and closes by itself (on a selection, an outside click, `Escape`), so a one-way binding would go stale the moment it did. Reach the method through a template reference (`#field`) or a `viewChild()`, exactly as `focus()` is reached.
 
 ### Input Field
 
@@ -147,7 +146,7 @@ Native-style single select. Options come from the `options` input or projected `
 | `noOptionsText`     | `string`                 | `'No options available.'` | Empty-state text, rendered as a disabled `<option>` — the one field that puts it in the list |
 | `sortFn`            | `(a, b) => number`       | —                         | Optional option sorter                                                                       |
 
-These five look like the option inputs above but are declared on the field itself, because `select-field` stays on `BaseFieldDirective`: a native `<select>` has no highlight, so inheriting the option base would only add dead state. Collects option components via `@ContentChildren(FORMIDABLE_OPTION, { descendants: true })` and provides `FORMIDABLE_OPTION_FIELD`. **Use when** a compact single-choice control fits.
+These five look like the option inputs above but are declared on the field itself, because `select-field` stays on `BaseFieldDirective`: a native `<select>` has no highlight, so inheriting the option base would only add dead state. Collects option components via `contentChildren(FORMIDABLE_OPTION, { descendants: true })` and provides `FORMIDABLE_OPTION_FIELD`. **Use when** a compact single-choice control fits.
 
 ### Dropdown Field
 
@@ -271,7 +270,7 @@ Collects `formidable-field-option` children. With no options it renders `noOptio
 
 **Selector** `formidable-field-decorator`
 
-Wraps a field and its label, label adornment, prefix, suffix, hints and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `@ContentChild`. Forwards the field's `valueChanged` / `focusChanged` as outputs of its own. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and measures a projected prefix/suffix in the `horizontal` layout. No inputs. It mirrors a field's surface as plain getters but does not implement `IFormidableField`, which is signal-typed.
+Wraps a field and its label, label adornment, prefix, suffix, hints and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `contentChild()`. Forwards the field's `valueChanged` / `focusChanged` as outputs of its own. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and measures a projected prefix/suffix in the `horizontal` layout. No inputs. It mirrors a field's surface as plain getters but does not implement `IFormidableField`, which is signal-typed; the getters are reactive all the same, since each reads a signal.
 
 **Label Adornment**: a slot beside the label, in the same row, for whatever the consumer wants next to it — the library owns the slot only, never its content. It collapses with that row: a label rendered over the field takes its row with it, and an adornment left above a field it no longer decorates is worse than no adornment, so it hides too.
 
@@ -334,7 +333,7 @@ The decorator resolves the configured position against the field's own state int
 | `label-border`        | `position: 'border'`                                                                        |
 | `label-border-prefix` | `position: 'border-prefix'`                                                                 |
 
-Because `labelState` reads field state the decorator cannot observe — `readonly`, `disabled`, `placeholder`, mask configuration — the decorator is deliberately **not** `OnPush`.
+`labelState` reads field state that is none of the decorator's own inputs — `readonly`, `disabled`, `placeholder`, mask configuration — so the decorator has nothing of its own to change. It follows them because each is a signal, and reading one is what marks the decorator's view.
 
 **Label As Placeholder**: `inside` and `inside-placeholder` differ only in what they do about the field's `placeholder`. `inside` yields the value area to it: a field with a placeholder has nothing left to rest in, so its label floats throughout. `inside-placeholder` takes the area over instead — the label rests in the placeholder's position and the decorator's `label-resting` host blanks `--formidable-color-field-placeholder`, so the field's own does not render behind it; focus floats the label and reveals it.
 
@@ -386,7 +385,7 @@ Renders validation error messages for a control. Reads `control.errors` through 
 
 Usually created by `FieldErrorsDirective` rather than written by hand. Inside a decorator it renders in that decorator's errors slot, after the field's layout container — never inside it, since that container is the positioning context for the label and the prefix/suffix and has to stay exactly the field's box. Placement is therefore the same for all three `decoratorLayout`s.
 
-`invalid` is mirrored onto its own host as `is-invalid`, and the directive registers the component with the surrounding decorator so the same flag reaches that decorator's host — see **Field State** above. It is the only source of validity in the library, which is why the directive also pumps the field's `markForCheck()` — see **Field Accessibility**.
+`invalid` is mirrored onto its own host as `is-invalid`, and the directive registers the component with the surrounding decorator so the same flag reaches that decorator's host — see **Field State** above. It is the only source of validity in the library, and `invalid` is a signal — which is what carries it to the decorator's host class and on to the field's `aria-invalid`, with nothing repainting either by hand. See **Field Accessibility**.
 
 | Input          | Type               | Default | Description                                                         |
 | :------------- | :----------------- | :------ | :------------------------------------------------------------------ |

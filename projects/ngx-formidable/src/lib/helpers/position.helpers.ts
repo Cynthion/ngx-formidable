@@ -1,4 +1,4 @@
-import { ElementRef, QueryList } from '@angular/core';
+import { ElementRef } from '@angular/core';
 import { FormidablePanelPosition, IFormidablePanelField } from '../models/formidable.model';
 
 // The position of a field's panel while it is open, or `null` — a field without a panel never opens one.
@@ -6,7 +6,7 @@ import { FormidablePanelPosition, IFormidablePanelField } from '../models/formid
 export function openPanelPosition(field?: unknown): FormidablePanelPosition | null {
   const panelField = field as Partial<IFormidablePanelField> | undefined;
 
-  return panelField?.isPanelOpen ? (panelField.panelPosition?.() ?? null) : null;
+  return panelField?.isPanelOpen?.() ? (panelField.panelPosition?.() ?? null) : null;
 }
 
 /**
@@ -90,9 +90,9 @@ export function scrollIntoView(
  */
 export function scrollHighlightedOptionIntoView(
   index: number,
-  optionRefs: QueryList<{ elementRef: ElementRef<HTMLElement> } | ElementRef<HTMLElement>> | undefined
+  optionRefs: readonly ({ elementRef: ElementRef<HTMLElement> } | ElementRef<HTMLElement>)[] | undefined
 ): void {
-  const item = optionRefs?.get(index);
+  const item = optionRefs?.[index];
 
   const optionElement = item instanceof ElementRef ? item.nativeElement : item?.elementRef?.nativeElement;
 

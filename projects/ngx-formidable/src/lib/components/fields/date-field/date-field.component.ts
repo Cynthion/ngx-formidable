@@ -1,19 +1,17 @@
 import {
-  AfterContentInit,
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
-  ContentChild,
+  contentChild,
   ElementRef,
   forwardRef,
   input,
   linkedSignal,
-  OnChanges,
   OnDestroy,
   OnInit,
-  SimpleChanges,
-  ViewChild
+  signal,
+  viewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { addDays, format, isEqual } from 'date-fns';
@@ -32,6 +30,7 @@ import {
 } from '../../../helpers/format.helpers';
 import { renderEmptyMask } from '../../../helpers/input.helpers';
 import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
+import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
@@ -76,21 +75,21 @@ import { BaseFieldDirective } from '../base-field.directive';
 })
 export class DateFieldComponent
   extends BaseFieldDirective<Date | null>
-  implements IFormidableDateField, OnInit, AfterContentInit, AfterViewInit, OnChanges, OnDestroy
+  implements IFormidableDateField, OnInit, AfterViewInit, OnDestroy
 {
-  @ViewChild('dateRef', { static: true }) dateRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
-  @ViewChild('pickerRef') pickerRef?: ElementRef<HTMLDivElement>;
+  readonly dateRef = viewChild.required<ElementRef<HTMLDivElement>>('dateRef');
+  readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
+  readonly pickerRef = viewChild<ElementRef<HTMLDivElement>>('pickerRef');
 
-  @ContentChild(FieldToggleIconDirective) private projectedToggleIcon?: FieldToggleIconDirective;
+  private readonly projectedToggleIcon = contentChild(FieldToggleIconDirective);
 
   // False while no `[formidableFieldToggleIcon]` is projected, which is when the default CSS arrow is drawn.
-  protected hasToggleIcon = false;
+  protected readonly hasToggleIcon = computed(() => !!this.projectedToggleIcon());
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = () => this.handleExternalClick();
   // Synchronous: the base debounces resize/scroll, so the new layout has already settled.
-  protected windowResizeScrollCallback = () => updatePanelPosition(this.dateRef, this.panelRef);
+  protected windowResizeScrollCallback = () => updatePanelPosition(this.dateRef(), this.panelRef());
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'];
 
   private maskChar = '0';
@@ -157,11 +156,49 @@ export class DateFieldComponent
     numberOfMonths: 1
   };
 
-  // The inputs `updateOptions()` reads. Every Pikaday passthrough input has a `defaultOptions` key of the
-  // same name (it needs one for its fallback); only `format` is fed by `unicodeTokenFormat`.
-  private readonly optionInputs = new Set([...Object.keys(this.defaultOptions), 'unicodeTokenFormat']);
-
   private picker?: Pikaday;
+
+  constructor() {
+    super();
+
+    // Every Pikaday passthrough input, which is exactly what `updateOptions()` reads. It is guarded on the
+    // picker rather than skipping the first run: the instance is built in `ngAfterViewInit`, because it
+    // needs `pickerRef` as its container, and there is nothing to reconfigure before that.
+    onSignalChange(
+      () => this.pikadayOptionInputs(),
+      () => {
+        if (this.picker) this.updateOptions();
+      }
+    );
+
+    // Re-renders the current value, since the format it was rendered with has changed.
+    onSignalChange(
+      () => this.tokenFormat(),
+      () => this.setDate(this.selectedDate)
+    );
+  }
+
+  // Read as one list so the effect above depends on all of them.
+  private pikadayOptionInputs(): unknown[] {
+    return [
+      this.tokenFormat(),
+      this.ariaLabel(),
+      this.defaultDate(),
+      this.setDefaultDate(),
+      this.firstDay(),
+      this.minDate(),
+      this.maxDate(),
+      this.disableWeekends(),
+      this.disableDayFn(),
+      this.yearRange(),
+      this.i18n(),
+      this.yearSuffix(),
+      this.showMonthAfterYear(),
+      this.showDaysInNextAndPreviousMonths(),
+      this.enableSelectionDaysInNextAndPreviousMonths(),
+      this.numberOfMonths()
+    ];
+  }
 
   override ngOnInit(): void {
     super.ngOnInit();
@@ -176,28 +213,10 @@ export class DateFieldComponent
     }
   }
 
-  ngAfterContentInit(): void {
-    this.hasToggleIcon = !!this.projectedToggleIcon;
-    this.cdRef.markForCheck();
-  }
-
   override ngAfterViewInit(): void {
     super.ngAfterViewInit();
 
     this.updateOptions();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    const changedOptions = Object.entries(changes)
-      .filter(([key, change]) => !change.firstChange && this.optionInputs.has(key))
-      .map(([key]) => key);
-
-    if (changedOptions.length === 0) return;
-
-    this.updateOptions();
-
-    // re-render the current value, since the format it was rendered with has changed
-    if (changedOptions.includes('unicodeTokenFormat')) this.setDate(this.selectedDate);
   }
 
   // Typing commits on blur — a half-typed date is not a date — so value changes are handled in the
@@ -209,7 +228,7 @@ export class DateFieldComponent
       return;
     }
 
-    this.isFieldFilled = !!this.value;
+    this.isFieldFilled.set(!!this.value);
   }
 
   protected doOnValueChange(): void {
@@ -227,7 +246,7 @@ export class DateFieldComponent
     }
 
     // try set date on blur
-    this.trySetDateFromInput(this.inputRef.nativeElement.value);
+    this.trySetDateFromInput(this.inputRef().nativeElement.value);
   }
 
   // Focus moved onto this field's own panel, so the blur that follows is neither a commit nor a touch.
@@ -243,7 +262,7 @@ export class DateFieldComponent
 
     // While the calendar is open, arrow keys navigate it — stop them from also
     // moving the text caret in the input (base directive lets Left/Right through).
-    if (this.isPanelOpen && event.key.startsWith('Arrow')) {
+    if (this.isPanelOpen() && event.key.startsWith('Arrow')) {
       event.preventDefault();
     }
 
@@ -251,17 +270,17 @@ export class DateFieldComponent
       case 'Escape':
       case 'Tab':
       case 'Enter':
-        if (this.isPanelOpen) this.togglePanel(false);
+        if (this.isPanelOpen()) this.togglePanel(false);
         // Commit what's in the input — it reflects both typing and calendar
         // arrow-navigation — never the picker's default cursor (which is "today").
-        this.trySetDateFromInput(this.inputRef.nativeElement.value);
+        this.trySetDateFromInput(this.inputRef().nativeElement.value);
         break;
       case 'ArrowDown':
         // Alt+Arrow works the panel, the way a native <select> and the ARIA combobox pattern do.
         // Plain arrows never open it — they belong to the value.
         if (event.altKey) {
           this.togglePanel(true);
-        } else if (!this.isPanelOpen) {
+        } else if (!this.isPanelOpen()) {
           this.stepSegment(-1);
         } else if (date) {
           const nextDate = addDays(date, 7);
@@ -271,7 +290,7 @@ export class DateFieldComponent
       case 'ArrowUp':
         if (event.altKey) {
           this.togglePanel(false);
-        } else if (!this.isPanelOpen) {
+        } else if (!this.isPanelOpen()) {
           this.stepSegment(1);
         } else if (date) {
           const nextDate = addDays(date, -7);
@@ -279,13 +298,13 @@ export class DateFieldComponent
         }
         break;
       case 'ArrowLeft':
-        if (this.isPanelOpen && date) {
+        if (this.isPanelOpen() && date) {
           const nextDate = addDays(date, -1);
           this.picker?.setDate(nextDate, true); // silent update
         }
         break;
       case 'ArrowRight':
-        if (this.isPanelOpen && date) {
+        if (this.isPanelOpen() && date) {
           const nextDate = addDays(date, 1);
           this.picker?.setDate(nextDate, true); // silent update
         }
@@ -299,7 +318,7 @@ export class DateFieldComponent
   // The input text is what gets stepped, not `selectedDate`: it also carries what was typed but not yet
   // committed. An empty field is seeded first, so arrows alone can fill it.
   private stepSegment(direction: 1 | -1): void {
-    const input = this.inputRef.nativeElement;
+    const input = this.inputRef().nativeElement;
     const segment = findSegmentAtCaret(this.tokenFormat(), input.selectionStart ?? 0);
     if (!segment) return;
 
@@ -329,7 +348,7 @@ export class DateFieldComponent
   }
 
   private handleExternalClick(): void {
-    if (!this.isPanelOpen) return;
+    if (!this.isPanelOpen()) return;
 
     this.togglePanel(false);
   }
@@ -349,17 +368,15 @@ export class DateFieldComponent
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.dateRef as ElementRef<HTMLElement>;
+    return this.dateRef() as ElementRef<HTMLElement>;
   }
 
   protected override get focusElement(): HTMLElement {
-    return this.inputRef.nativeElement;
+    return this.inputRef().nativeElement;
   }
 
   // Mirrors the template: there is nothing to open once the field is readonly or disabled.
-  get hasInFieldToggle(): boolean {
-    return !this.readonly() && !this.disabled();
-  }
+  readonly hasInFieldToggle = computed(() => !this.readonly() && !this.disabled());
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
@@ -388,9 +405,7 @@ export class DateFieldComponent
   };
 
   // An empty date field always shows its `emptyHint` in the value area, so a label can never rest there.
-  protected override get showsEmptyValueHint(): boolean {
-    return true;
-  }
+  protected override readonly showsEmptyValueHint = signal(true);
 
   // ngxMask's own empty display: the mask with every slot as its placeholder character.
   private get maskPlaceholder(): string {
@@ -405,14 +420,14 @@ export class DateFieldComponent
 
   // ngxMask either empties the input outright or leaves the slots it renders for a focused empty field.
   private get isInputCleared(): boolean {
-    const value = this.inputRef.nativeElement.value;
+    const value = this.inputRef().nativeElement.value;
 
     return value === '' || value === this.maskPlaceholder;
   }
 
   // Shows the `emptyHint` at rest, but lets ngxMask own the text while focused.
   private renderEmpty(): void {
-    renderEmptyMask(this.inputRef.nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused);
+    renderEmptyMask(this.inputRef().nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused());
   }
 
   private selectedDate: Date | null = null;
@@ -428,7 +443,7 @@ export class DateFieldComponent
 
     this.valueChangeSubject$.next(this.selectedDate);
     this.valueChanged.emit(this.selectedDate);
-    this.isFieldFilled = !!this.selectedDate;
+    this.isFieldFilled.set(!!this.selectedDate);
     this.commit(this.selectedDate); // notify ControlValueAccessor of the change
     this.touch();
     this.togglePanel(false);
@@ -512,9 +527,9 @@ export class DateFieldComponent
     const updatedOptions: PikadayOptions = {
       ...this.staticOptions,
       ...dynamicOptions,
-      field: this.inputRef.nativeElement, // must be set to use onFormat/onParse
+      field: this.inputRef().nativeElement, // must be set to use onFormat/onParse
       bound: false,
-      container: this.pickerRef?.nativeElement
+      container: this.pickerRef()?.nativeElement
     };
 
     if (!this.picker) {
@@ -536,24 +551,21 @@ export class DateFieldComponent
 
   // #region IFormidablePanelField
 
-  @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
+  readonly panelRef = viewChild<ElementRef<HTMLDivElement>>('panelRef');
 
   /** Whether the calendar is currently open. Call `togglePanel` to open or close it from outside. */
-  get isPanelOpen(): boolean {
-    return this._isPanelOpen;
-  }
+  public readonly isPanelOpen = signal(false);
 
   /** Where the calendar opens. The three anchored positions flip above the field when there is no room below. */
   public readonly panelPosition = input<FormidablePanelPosition>('right');
 
-  private _isPanelOpen = false;
   private ignoreNextBlur = false;
 
   // Mousedown is used to prevent sending focusChanged events.
   protected toggleMouseDown(event: MouseEvent): void {
     event.preventDefault();
-    this.inputRef.nativeElement.focus(); // ensure input remains focused, so keyboard events work
-    this.togglePanel(!this.isPanelOpen);
+    this.inputRef().nativeElement.focus(); // ensure input remains focused, so keyboard events work
+    this.togglePanel(!this.isPanelOpen());
   }
 
   // Workaround: Because the <input> element might have regained focus (for keyboard events), the focus
@@ -571,7 +583,7 @@ export class DateFieldComponent
 
     if (isFocusable) {
       this.ignoreNextBlur = true;
-      this.panelRef?.nativeElement.focus();
+      this.panelRef()?.nativeElement.focus();
     }
   }
 
@@ -579,11 +591,11 @@ export class DateFieldComponent
    * Opens or closes the calendar.
    */
   public togglePanel(isOpen: boolean): void {
-    this._isPanelOpen = isOpen;
+    this.isPanelOpen.set(isOpen);
 
     // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
     // before change detection.
-    setTimeout(() => scrollIntoView(this.dateRef, this.panelRef, isOpen));
+    setTimeout(() => scrollIntoView(this.dateRef(), this.panelRef(), isOpen));
 
     if (isOpen) {
       // Synchronous on purpose: a closed panel is `visibility: hidden`, not `display: none`, so it is
@@ -591,10 +603,8 @@ export class DateFieldComponent
       // The panel is not focused here: it is still `visibility: hidden` at this point and so cannot take
       // focus, and deferring the call until it can would pull focus off the input and run its
       // commit-on-blur path. `panelMouseDown` focuses it once it is open and visible.
-      updatePanelPosition(this.dateRef, this.panelRef);
+      updatePanelPosition(this.dateRef(), this.panelRef());
     }
-
-    this.cdRef.markForCheck();
   }
 
   // #endregion
@@ -690,7 +700,7 @@ export class DateFieldComponent
   private mo?: MutationObserver;
 
   private decoratePikadayControls(): void {
-    const host = this.pickerRef?.nativeElement;
+    const host = this.pickerRef()?.nativeElement;
     if (!host) return;
 
     const monthSelects = Array.from(host.querySelectorAll<HTMLSelectElement>('select.pika-select-month'));

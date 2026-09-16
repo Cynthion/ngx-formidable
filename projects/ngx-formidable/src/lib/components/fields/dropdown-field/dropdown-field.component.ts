@@ -2,12 +2,14 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   forwardRef,
   input,
   OnDestroy,
   OnInit,
-  ViewChild
+  signal,
+  viewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
@@ -60,8 +62,8 @@ export class DropdownFieldComponent
   extends BaseOptionFieldDirective
   implements IFormidableDropdownField, OnInit, OnDestroy
 {
-  @ViewChild('dropdownRef', { static: true }) dropdownRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
+  readonly dropdownRef = viewChild.required<ElementRef<HTMLDivElement>>('dropdownRef');
+  readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = () => this.handleExternalClick();
@@ -87,30 +89,30 @@ export class DropdownFieldComponent
   }
 
   private handleKeydown(event: KeyboardEvent): void {
-    const options = this.options$.value;
+    const options = this.activeOptions();
     const count = options.length;
 
     switch (event.key) {
       case 'Escape':
       case 'Tab':
-        if (this.isPanelOpen) this.togglePanel(false);
+        if (this.isPanelOpen()) this.togglePanel(false);
         break;
       case 'ArrowDown':
-        if (!this.isPanelOpen) {
+        if (!this.isPanelOpen()) {
           this.togglePanel(true);
         } else if (count > 0) {
-          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'down'));
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex(), options, 'down'));
         }
         break;
       case 'ArrowUp':
-        if (this.isPanelOpen && count > 0) {
-          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'up'));
+        if (this.isPanelOpen() && count > 0) {
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex(), options, 'up'));
         }
         break;
       case 'Enter': {
-        if (!this.isPanelOpen) return;
-        const idx = this.highlightedOptionIndex$.value;
-        const option = this.options$.value[idx];
+        if (!this.isPanelOpen()) return;
+        const idx = this.highlightedOptionIndex();
+        const option = this.activeOptions()[idx];
         if (option) this.selectOption(option);
         break;
       }
@@ -118,7 +120,7 @@ export class DropdownFieldComponent
   }
 
   private handleExternalClick(): void {
-    if (!this.isPanelOpen) return;
+    if (!this.isPanelOpen()) return;
 
     this.togglePanel(false);
   }
@@ -129,15 +131,14 @@ export class DropdownFieldComponent
     this._writtenValue = value ?? null;
 
     const found = this.computeAllOptions().find((opt) => opt.value === this._writtenValue);
-    this.selectedOption = found ? { ...found } : undefined;
+    this.selectedOption.set(found ? { ...found } : undefined);
 
     // write to wrapped input element — if the option isn't found yet (options may not be
     // loaded), the input stays empty; _writtenValue is kept so updateOptions re-applies it
-    this.inputRef.nativeElement.value = this.selectedOption
-      ? this.selectedOption.label || this.selectedOption.value
-      : '';
+    const selected = this.selectedOption();
+    this.inputRef().nativeElement.value = selected ? selected.label || selected.value : '';
 
-    this.isFieldFilled = this.inputRef.nativeElement.value.length > 0;
+    this.isFieldFilled.set(this.inputRef().nativeElement.value.length > 0);
   }
 
   // #endregion
@@ -145,21 +146,19 @@ export class DropdownFieldComponent
   // #region IFormidableField
 
   get value(): string | null {
-    return this.selectedOption?.value || null;
+    return this.selectedOption()?.value || null;
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.dropdownRef as ElementRef<HTMLElement>;
+    return this.dropdownRef() as ElementRef<HTMLElement>;
   }
 
   protected override get focusElement(): HTMLElement {
-    return this.inputRef.nativeElement;
+    return this.inputRef().nativeElement;
   }
 
   // Mirrors the template: there is nothing to open once the field is readonly or disabled.
-  get hasInFieldToggle(): boolean {
-    return !this.readonly() && !this.disabled();
-  }
+  readonly hasInFieldToggle = computed(() => !this.readonly() && !this.disabled());
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
@@ -175,17 +174,13 @@ export class DropdownFieldComponent
 
   public readonly optionRole: FieldOptionRole = 'option';
 
-  protected readonly options$ = new BehaviorSubject<IFormidableOption[]>([]);
+  protected readonly activeOptions = signal<IFormidableOption[]>([]);
   private readonly typeahead$ = new BehaviorSubject<string>('');
 
-  protected selectedOption?: IFormidableOption = undefined;
-
-  protected get activeOptions(): IFormidableOption[] {
-    return this.options$.value;
-  }
+  protected readonly selectedOption = signal<IFormidableOption | undefined>(undefined);
 
   protected override get selectedOptionValue(): string | null {
-    return this.selectedOption?.value ?? null;
+    return this.selectedOption()?.value ?? null;
   }
 
   public selectOption(option: IFormidableOption): void {
@@ -198,14 +193,14 @@ export class DropdownFieldComponent
     };
 
     // commit selection + update displayed label
-    this.selectedOption = newOption;
-    this.inputRef.nativeElement.value = this.selectedOption.label!; // update input value with selected option label
+    this.selectedOption.set(newOption);
+    this.inputRef().nativeElement.value = newOption.label!; // update input value with selected option label
 
     // emit value change
-    this.valueChangeSubject$.next(this.selectedOption.value);
-    this.valueChanged.emit(this.selectedOption.value);
-    this.isFieldFilled = this.selectedOption.value.length > 0;
-    this.commit(this.selectedOption.value); // notify ControlValueAccessor of the change
+    this.valueChangeSubject$.next(newOption.value);
+    this.valueChanged.emit(newOption.value);
+    this.isFieldFilled.set(newOption.value.length > 0);
+    this.commit(newOption.value); // notify ControlValueAccessor of the change
     this.touch();
 
     // simulate blur (field-state blur, not necessarily native blur)
@@ -218,23 +213,21 @@ export class DropdownFieldComponent
 
   private deselectOption(opts: { clearInput?: boolean } = {}): void {
     // only do work if there actually was a selection
-    if (!this.selectedOption) return;
+    if (!this.selectedOption()) return;
 
     this.setHighlightedIndex(-1);
-    this.selectedOption = undefined;
+    this.selectedOption.set(undefined);
     this._writtenValue = null;
 
     if (opts.clearInput) {
-      this.inputRef.nativeElement.value = '';
+      this.inputRef().nativeElement.value = '';
     }
 
     this.valueChangeSubject$.next(null);
     this.valueChanged.emit(null);
-    this.isFieldFilled = this.inputRef.nativeElement.value.length > 0;
+    this.isFieldFilled.set(this.inputRef().nativeElement.value.length > 0);
     this.commit(null);
     this.touch();
-
-    this.cdRef.markForCheck();
   }
 
   protected onOptionsChanged(): void {
@@ -247,18 +240,16 @@ export class DropdownFieldComponent
     this.updateOptions(allOptions);
 
     // keep highlight consistent if panel is open
-    if (this.isPanelOpen) {
+    if (this.isPanelOpen()) {
       this.reconcileHighlightAfterOptionsChanged();
       this.updatePanelPosition();
     }
-
-    this.cdRef.markForCheck();
   }
 
   private computeAllOptions(): IFormidableOption[] {
     const combined = combineFieldOptions(
       this.options(),
-      this.optionComponents?.map((source) => source.option()),
+      this.optionComponents().map((source) => source.option()),
       this.sortFn()
     );
 
@@ -266,16 +257,16 @@ export class DropdownFieldComponent
   }
 
   private updateOptions(allOptions: IFormidableOption[]): void {
-    this.options$.next(allOptions);
+    this.activeOptions.set(allOptions);
 
     // keep current value in sync with newly combined options
     this.writeValue(this._writtenValue);
   }
 
   private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {
-    if (!this.selectedOption) return;
+    if (!this.selectedOption()) return;
 
-    const stillExists = allOptions.some((o) => o.value === this.selectedOption!.value);
+    const stillExists = allOptions.some((o) => o.value === this.selectedOption()!.value);
     if (!stillExists) {
       // selection is no longer valid
       this.deselectOption({ clearInput: true });
@@ -286,23 +277,19 @@ export class DropdownFieldComponent
 
   // #region IFormidablePanelField
 
-  @ViewChild('panelRef') panelRef?: ElementRef<HTMLDivElement>;
+  readonly panelRef = viewChild<ElementRef<HTMLDivElement>>('panelRef');
 
   /** Whether the panel is currently open. Call `togglePanel` to open or close it from outside. */
-  get isPanelOpen(): boolean {
-    return this._isPanelOpen;
-  }
+  public readonly isPanelOpen = signal(false);
 
   /** Where the panel opens. The three anchored positions flip above the field when there is no room below. */
   public readonly panelPosition = input<FormidablePanelPosition>('full');
 
-  private _isPanelOpen = false;
-
   // Mousedown is used to prevent sending focusChanged events.
   protected toggleMouseDown(event: MouseEvent): void {
     event.preventDefault();
-    this.inputRef.nativeElement.focus(); // ensure input remains focused, so keyboard events work
-    this.togglePanel(!this.isPanelOpen);
+    this.inputRef().nativeElement.focus(); // ensure input remains focused, so keyboard events work
+    this.togglePanel(!this.isPanelOpen());
   }
 
   panelMouseDown(event: MouseEvent): void {
@@ -312,29 +299,27 @@ export class DropdownFieldComponent
 
   /** Opens or closes the panel. */
   public togglePanel(isOpen: boolean): void {
-    this._isPanelOpen = isOpen;
+    this.isPanelOpen.set(isOpen);
 
     // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
     // before change detection.
-    setTimeout(() => scrollIntoView(this.dropdownRef, this.panelRef, isOpen));
+    setTimeout(() => scrollIntoView(this.dropdownRef(), this.panelRef(), isOpen));
 
     if (isOpen) {
       this.highlightSelectedOption();
       // Synchronous on purpose: a closed panel is `visibility: hidden`, not `display: none`, so it is
       // already laid out and measurable. Deferring would flip it after paint, which is a visible jump.
-      updatePanelPosition(this.dropdownRef, this.panelRef);
+      updatePanelPosition(this.dropdownRef(), this.panelRef());
     } else {
       this.resetTypeahead();
       this.setHighlightedIndex(-1);
     }
-
-    this.cdRef.markForCheck();
   }
 
   // Deferred, unlike the call in `togglePanel`: the option list changed, so the panel's height is only
   // correct once change detection has rendered it.
   private updatePanelPosition(): void {
-    setTimeout(() => updatePanelPosition(this.dropdownRef, this.panelRef));
+    setTimeout(() => updatePanelPosition(this.dropdownRef(), this.panelRef()));
   }
 
   // #endregion
@@ -344,7 +329,7 @@ export class DropdownFieldComponent
       .pipe(
         debounceTime(200),
         distinctUntilChanged(),
-        filter(() => this.isFieldFocused),
+        filter(() => this.isFieldFocused()),
         takeUntil(this.destroy$)
       )
       .subscribe((term) => {
@@ -356,11 +341,11 @@ export class DropdownFieldComponent
   private highlightFirstMatchingOption(term: string): void {
     if (!term) return;
 
-    if (!this.isPanelOpen) {
+    if (!this.isPanelOpen()) {
       this.togglePanel(true);
     }
 
-    const matchIndex = this.options$.value.findIndex((opt) =>
+    const matchIndex = this.activeOptions().findIndex((opt) =>
       (opt.label || opt.value).toLowerCase().startsWith(term.toLowerCase())
     );
 
@@ -372,7 +357,7 @@ export class DropdownFieldComponent
       this._typedBuffer += event.key;
       this.typeahead$.next(this._typedBuffer);
 
-      if (!this.isPanelOpen) {
+      if (!this.isPanelOpen()) {
         this.togglePanel(true);
       }
     } else if (event.key === 'Backspace') {

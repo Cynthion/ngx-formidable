@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DOCUMENT, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DOCUMENT, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   AutocompleteFieldComponent,
@@ -91,10 +91,7 @@ import {
   ]
 })
 export class ExampleFormComponent implements OnInit {
-  constructor(
-    @Inject(DOCUMENT) private doc: Document,
-    private cdRef: ChangeDetectorRef
-  ) {}
+  private readonly doc = inject(DOCUMENT);
 
   ngOnInit(): void {
     this.restoreSchemes();
@@ -338,16 +335,13 @@ export class ExampleFormComponent implements OnInit {
     this.log('Set birthdate to today from its prefix.');
   }
 
-  protected isHobbyLoading = false;
+  protected readonly isHobbyLoading = signal(false);
 
   /** Stands in for an async lookup, so the suffix demonstrates a spinner that comes and goes. */
   private simulateHobbyLookup(): void {
-    this.isHobbyLoading = true;
+    this.isHobbyLoading.set(true);
 
-    setTimeout(() => {
-      this.isHobbyLoading = false;
-      this.cdRef.markForCheck();
-    }, 800);
+    setTimeout(() => this.isHobbyLoading.set(false), 800);
   }
 
   // #endregion
@@ -515,15 +509,11 @@ export class ExampleFormComponent implements OnInit {
     { key: 'always', label: 'Always' }
   ];
 
-  // Since all components are change-detection OnPush, we need to trigger a change detection cycle
-  protected renderFlip = true;
   private appliedKeys = new Set<string>(); // track what we’ve set on :root
 
   onToggle(key: ControlKey, checked: boolean): void {
     this.controlCenter[key] = checked;
-    this.renderFlip = !this.renderFlip;
     this.clearLogs();
-    // this.cdRef.markForCheck();
   }
 
   setLabelPosition(position: FieldLabelPosition): void {
@@ -547,7 +537,6 @@ export class ExampleFormComponent implements OnInit {
    */
   setUpdateOn(updateOn: UpdateOn): void {
     this.ngFormOptions = { updateOn };
-    this.renderFlip = !this.renderFlip;
     this.clearLogs();
   }
 
@@ -583,10 +572,9 @@ export class ExampleFormComponent implements OnInit {
       this.appliedKeys.add(k);
     }
 
-    // 3) Persist + nudge CD if needed
+    // 3) Persist
     localStorage.setItem('example.geometry', this.geometry);
     localStorage.setItem('example.color', this.color);
-    this.cdRef.markForCheck();
   }
 
   private restoreSchemes(): void {

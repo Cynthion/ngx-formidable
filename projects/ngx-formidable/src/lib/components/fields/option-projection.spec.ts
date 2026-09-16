@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { IFormidableOption } from '../../models/formidable.model';
@@ -52,7 +52,7 @@ import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.
   `
 })
 class WrappedOptionsHostComponent {
-  @ViewChild(RadioGroupFieldComponent, { static: true }) field!: RadioGroupFieldComponent;
+  readonly field = viewChild.required(RadioGroupFieldComponent);
 
   showConditional = true;
   loopedValues = ['looped-a', 'looped-b'];
@@ -76,7 +76,7 @@ class WrappedOptionsHostComponent {
   `
 })
 class LoopedCheckboxHostComponent {
-  @ViewChild(CheckboxGroupFieldComponent, { static: true }) field!: CheckboxGroupFieldComponent;
+  readonly field = viewChild.required(CheckboxGroupFieldComponent);
 
   loopedValues: string[] = ['a', 'b'];
   noOptionsText = 'Nothing here.';
@@ -96,7 +96,7 @@ class LoopedCheckboxHostComponent {
   `
 })
 class FilteredAutocompleteHostComponent {
-  @ViewChild(AutocompleteFieldComponent, { static: true }) field!: AutocompleteFieldComponent;
+  readonly field = viewChild.required(AutocompleteFieldComponent);
 
   options: IFormidableOption[] = [{ value: 'cat', label: 'Cat' }];
   defaultOption: IFormidableOption = { value: 'add-new', label: 'Add a new one…' };
@@ -118,7 +118,7 @@ class FilteredAutocompleteHostComponent {
   `
 })
 class ProjectedContentHostComponent {
-  @ViewChild(RadioGroupFieldComponent, { static: true }) field!: RadioGroupFieldComponent;
+  readonly field = viewChild.required(RadioGroupFieldComponent);
 }
 
 // An autocomplete, because its filter is what reads the label off the option — a group only displays it,
@@ -210,7 +210,7 @@ describe('option projection', () => {
       option.querySelector('div')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       await settle(fixture);
 
-      expect(host.field.value).toBe('a');
+      expect(host.field().value).toBe('a');
     });
 
     // The default `match` reads the option's own label, which for a projected option is the text taken
@@ -258,10 +258,10 @@ describe('option projection', () => {
       host.defaultOption = { value: 'chosen-default' };
       await settle(fixture);
 
-      host.field.selectOption(host.defaultOption);
+      host.field().selectOption(host.defaultOption);
       await settle(fixture);
 
-      expect(host.field.value).toBe('chosen-default');
+      expect(host.field().value).toBe('chosen-default');
     });
 
     it('stays out of the list in the fallback mode while other options exist', async () => {
@@ -319,7 +319,7 @@ describe('option projection', () => {
 
     it('does not deselect a chosen fallback default when the option list changes', fakeAsync(() => {
       type('zzz');
-      host.field.selectOption(host.defaultOption);
+      host.field().selectOption(host.defaultOption);
 
       // an options change runs the reconcile pass, which drops any selection it cannot find
       host.options = [{ value: 'dog', label: 'Dog' }];
@@ -327,13 +327,13 @@ describe('option projection', () => {
       tick(300);
       fixture.detectChanges();
 
-      expect(host.field.value).toBe('add-new');
+      expect(host.field().value).toBe('add-new');
 
       discardPeriodicTasks();
     }));
 
     it('displays an externally written default value', fakeAsync(() => {
-      host.field.writeValue('add-new');
+      host.field().writeValue('add-new');
       tick();
       fixture.detectChanges();
 

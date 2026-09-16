@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, HostBinding, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, HostBinding, inject, input, signal } from '@angular/core';
 import { AbstractControl, NgForm, NgModel, NgModelGroup } from '@angular/forms';
 import { NgxFormidableFormDirective } from '../../forms/form.directive';
 import {
@@ -25,7 +25,6 @@ import {
   standalone: true
 })
 export class FieldErrorsComponent {
-  private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly translateError = inject<FormidableErrorTranslatorFn>(FORMIDABLE_ERROR_TRANSLATOR);
   private readonly extractErrors = inject<FormidableErrorExtractorFn>(FORMIDABLE_ERROR_EXTRACTOR);
 
@@ -44,11 +43,18 @@ export class FieldErrorsComponent {
 
   private previousError?: string[];
 
+  // Angular's form state is not signal-backed — `AbstractControl.errors`, `touched`, `dirty` and
+  // `NgForm.submitted` are all plain — so nothing below can track it. `FieldErrorsDirective` knows when it
+  // moved and bumps this; everything derived recomputes off it, and the views that read them repaint.
+  private readonly revision = signal(0);
+
   get control(): AbstractControl | undefined {
     return this.ngModelGroup()?.control ?? this.ngModel()?.control;
   }
 
-  get errors(): string[] | undefined {
+  readonly errors = computed<string[] | undefined>(() => {
+    this.revision();
+
     // A pending control has no errors yet, so keep showing the last ones instead of flickering to none.
     if (this.control?.pending) {
       return this.previousError;
@@ -57,16 +63,19 @@ export class FieldErrorsComponent {
     this.previousError = this.extractErrors(this.control?.errors ?? null);
 
     return this.previousError;
-  }
+  });
 
   // This field's setting first, then the form's, then the default.
   private get reveal(): FormidableReveal {
     return this.revealOn() ?? this.formDirective?.revealOn() ?? 'touched';
   }
 
-  @HostBinding('class.is-invalid')
-  get invalid(): boolean {
-    if (!this.errors?.length) return false;
+  readonly invalid = computed(() => {
+    // Reads the revision itself, and not only `errors()`: whether a control is touched, dirty or submitted
+    // moves without its errors moving, and `errors()` is reference-equal across such a change.
+    this.revision();
+
+    if (!this.errors()?.length) return false;
 
     switch (this.reveal) {
       case 'always':
@@ -78,9 +87,15 @@ export class FieldErrorsComponent {
       default:
         return !!this.control?.touched;
     }
+  });
+
+  @HostBinding('class.is-invalid')
+  protected get isInvalid(): boolean {
+    return this.invalid();
   }
 
-  markForCheck(): void {
-    this.cdRef.markForCheck();
+  /** Re-reads the control. Called by `FieldErrorsDirective` whenever Angular's own form state has moved. */
+  refresh(): void {
+    this.revision.update((revision) => revision + 1);
   }
 }

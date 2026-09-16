@@ -4,7 +4,7 @@
   class="field"
   [class.is-readonly]="readonly()"
   [class.is-disabled]="disabled()"
-  [class.focused]="isFieldFocused"
+  [class.focused]="isFieldFocused()"
   [class.checked]="value"
   [tabindex]="readonly() || disabled() ? -1 : null"
   [attr.aria-checked]="!!value"

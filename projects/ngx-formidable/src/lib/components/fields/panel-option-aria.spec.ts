@@ -1,4 +1,4 @@
-import { Component, Type, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Type, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -58,7 +58,7 @@ class PanelHostComponent {
   template: `<formidable-date-field name="date" />`
 })
 class DateHostComponent {
-  @ViewChild(DateFieldComponent, { static: true }) date!: DateFieldComponent;
+  readonly date = viewChild.required(DateFieldComponent);
 }
 
 @Component({
@@ -286,7 +286,7 @@ describe('panel and option field ARIA', () => {
 
       expect(input.getAttribute('aria-expanded')).toBe('false');
 
-      host.date.togglePanel(true);
+      host.date().togglePanel(true);
       fixture.detectChanges();
       flush();
       discardPeriodicTasks();

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, viewChild } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -31,7 +31,7 @@ import { InputFieldComponent } from './input-field/input-field.component';
   `
 })
 class DisabledHostComponent {
-  @ViewChild(NgForm, { static: true }) ngForm!: NgForm;
+  readonly ngForm = viewChild.required(NgForm);
 
   value = '';
   disabled = false;
@@ -87,13 +87,13 @@ describe('field disabled state', () => {
   // The claim the `model` exists for: nothing binds the input here, so the only writer is Angular's
   // `setDisabledState`. With a plain `input()` the field could not take this at all.
   it('follows a control disabled through Angular’s own forms', fakeAsync(() => {
-    host.ngForm.control.get('name')!.disable();
+    host.ngForm().control.get('name')!.disable();
     settle();
 
     expect(input().hasAttribute('disabled')).toBe(true);
     expect(decorator().classList.contains('is-disabled')).toBe(true);
 
-    host.ngForm.control.get('name')!.enable();
+    host.ngForm().control.get('name')!.enable();
     settle();
 
     expect(input().hasAttribute('disabled')).toBe(false);
@@ -104,7 +104,7 @@ describe('field disabled state', () => {
   // does not hand the field back its own `[disabled]="false"` and undo the control. The rule the old
   // plain property followed, and the reason this is a `model` rather than a computed over both writers.
   it('does not let an unchanged binding undo the control', fakeAsync(() => {
-    host.ngForm.control.get('name')!.disable();
+    host.ngForm().control.get('name')!.disable();
     settle();
     settle();
 

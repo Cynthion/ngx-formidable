@@ -5,8 +5,9 @@ import { ExampleFormComponent } from './example-form.component';
 /**
  * The demo form is `OnPush`, like every other component in the repo. Almost all of its state moves through
  * template event handlers, which Angular marks dirty for free — so this pins the one path it does not:
- * `simulateHobbyLookup` flips a flag inside a `setTimeout`, where only its own `markForCheck()` repaints.
- * Without that call the spinner stays on screen forever, and nothing else would notice.
+ * `simulateHobbyLookup` flips a flag inside a `setTimeout`, with nothing around it to repaint. The flag is
+ * a signal, which is what marks the view; make it a plain field again and the spinner stays on screen
+ * forever, and nothing else would notice.
  */
 
 describe('example-form OnPush contract', () => {
@@ -59,6 +60,6 @@ describe('example-form OnPush contract', () => {
     tick(1000);
     fixture.detectChanges();
 
-    expect(root.querySelector('.adornment-spinner')).withContext('spinner cleared by markForCheck').toBeNull();
+    expect(root.querySelector('.adornment-spinner')).withContext('spinner cleared by the signal').toBeNull();
   }));
 });

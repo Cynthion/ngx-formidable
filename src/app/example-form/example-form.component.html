@@ -245,11 +245,7 @@
 </div>
 
 <!-- Form -->
-@if (renderFlip) {
-  <ng-container *ngTemplateOutlet="form"></ng-container>
-} @else {
-  <ng-container *ngTemplateOutlet="form"></ng-container>
-}
+<ng-container *ngTemplateOutlet="form"></ng-container>
 
 <!-- Debugging Output -->
 @if (viewModel$ | async; as vm) {
@@ -1242,7 +1238,7 @@
 <!-- A spinner is not interactive, so it stays click-through. It only exists while the lookup runs, and the
           slot falling back to its text is what shows the inset following the width back and forth. -->
 <ng-template #loadingAction>
-  @if (isHobbyLoading) {
+  @if (isHobbyLoading()) {
     <span class="adornment-spinner"></span>
   } @else {
     Suffix

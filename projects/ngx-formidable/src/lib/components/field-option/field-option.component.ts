@@ -12,7 +12,7 @@ import {
   OnInit,
   signal,
   TemplateRef,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {
   FieldOptionLayout,
@@ -50,7 +50,7 @@ export class FieldOptionComponent implements IFormidableOptionSource, OnInit, Af
   private parent = inject<IFormidableOptionField>(FORMIDABLE_OPTION_FIELD, { optional: true })!;
   readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  @ViewChild('contentTemplate', { static: true }) private contentTemplate!: TemplateRef<unknown>;
+  private readonly contentTemplate = viewChild.required<TemplateRef<unknown>>('contentTemplate');
 
   /** What reaches the model when this option is picked. */
   readonly value = input.required<string>();
@@ -87,7 +87,7 @@ export class FieldOptionComponent implements IFormidableOptionSource, OnInit, Af
   private readonly projectedLabel = signal<string | undefined>(undefined);
 
   get template(): TemplateRef<unknown> | undefined {
-    return this.hasContent() ? this.contentTemplate : undefined;
+    return this.hasContent() ? this.contentTemplate() : undefined;
   }
 
   readonly option = computed<IFormidableOption>(() => ({
@@ -150,7 +150,7 @@ export class FieldOptionComponent implements IFormidableOptionSource, OnInit, Af
   ngAfterContentInit(): void {
     // Angular has no API to check whether <ng-content> received content;
     // instantiating the template temporarily is the standard workaround.
-    const view = this.contentTemplate.createEmbeddedView({});
+    const view = this.contentTemplate().createEmbeddedView({});
     const hasContent = view.rootNodes.some((n: Node) => n.nodeType !== Node.TEXT_NODE || !!n.textContent?.trim());
 
     this.hasContent.set(hasContent);

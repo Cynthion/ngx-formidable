@@ -1,19 +1,17 @@
 import { CommonModule } from '@angular/common';
 import {
-  AfterContentInit,
   ChangeDetectionStrategy,
   Component,
-  ContentChildren,
+  contentChildren,
+  effect,
   ElementRef,
   forwardRef,
   input,
-  OnChanges,
-  QueryList,
-  SimpleChanges,
-  ViewChild
+  signal,
+  untracked,
+  viewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject, takeUntil } from 'rxjs';
 import { applyDefaultOption, combineFieldOptions } from '../../../helpers/option.helpers';
 import {
   FieldDecoratorLayout,
@@ -58,32 +56,29 @@ import { BaseFieldDirective } from '../base-field.directive';
     }
   ]
 })
-export class SelectFieldComponent
-  extends BaseFieldDirective<string | null>
-  implements IFormidableSelectField, OnChanges, AfterContentInit
-{
-  @ViewChild('selectRef', { static: true }) selectRef!: ElementRef<HTMLSelectElement>;
+export class SelectFieldComponent extends BaseFieldDirective<string | null> implements IFormidableSelectField {
+  readonly selectRef = viewChild.required<ElementRef<HTMLSelectElement>>('selectRef');
 
   protected keyboardCallback = null;
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
-  ngOnChanges(changes: SimpleChanges): void {
-    // react to changes of the option inputs
-    if (changes['options'] || changes['defaultOption'] || changes['defaultOptionMode'] || changes['sortFn']) {
-      queueMicrotask(() => this.onOptionsChanged());
-    }
-  }
+  constructor() {
+    super();
 
-  ngAfterContentInit(): void {
-    // The projected options (option.template) might not be available immediately after content initialization,
-    // so we use queueMicrotask to ensure they are processed after the current change detection cycle.
-    queueMicrotask(() => this.onOptionsChanged());
+    // `BaseOptionFieldDirective` has the same effect, including why the read is deferred to a microtask;
+    // this field stays on `BaseFieldDirective`, because a native `<select>` has no highlight and would
+    // only inherit dead state.
+    effect(() => {
+      this.options();
+      this.defaultOption();
+      this.defaultOptionMode();
+      this.sortFn();
+      this.optionComponents();
 
-    this.optionComponents?.changes
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
+      untracked(() => queueMicrotask(() => this.onOptionsChanged()));
+    });
   }
 
   protected doOnValueChange(): void {
@@ -100,9 +95,9 @@ export class SelectFieldComponent
     const match = this.computeAllOptions().find((opt) => opt.value === value);
 
     // write to wrapped select element
-    this.selectRef.nativeElement.value = match ? match.value : '';
+    this.selectRef().nativeElement.value = match ? match.value : '';
 
-    this.isFieldFilled = this.selectRef.nativeElement.value.length > 0;
+    this.isFieldFilled.set(this.selectRef().nativeElement.value.length > 0);
   }
 
   // #endregion
@@ -110,20 +105,18 @@ export class SelectFieldComponent
   // #region IFormidableField
 
   get value(): string | null {
-    return this.selectRef.nativeElement.value || null;
+    return this.selectRef().nativeElement.value || null;
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.selectRef as ElementRef<HTMLElement>;
+    return this.selectRef() as ElementRef<HTMLElement>;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
   // A native <select> always renders something in its value area, so a label can never rest there: with
   // nothing selected it shows its first option, and with no options at all it shows `noOptionsText`.
-  protected override get showsEmptyValueHint(): boolean {
-    return true;
-  }
+  protected override readonly showsEmptyValueHint = signal(true);
 
   // #endregion
 
@@ -144,10 +137,12 @@ export class SelectFieldComponent
   /** Orders the merged list. Applied after the merge, so bound and projected options interleave. */
   public readonly sortFn = input<((a: IFormidableOption, b: IFormidableOption) => number) | undefined>(undefined);
 
-  @ContentChildren(FORMIDABLE_OPTION, { descendants: true })
-  optionComponents?: QueryList<IFormidableOptionSource>;
+  /** The projected options. One may sit inside a wrapper element rather than directly in the field. */
+  public readonly optionComponents = contentChildren<IFormidableOptionSource>(FORMIDABLE_OPTION, {
+    descendants: true
+  });
 
-  protected readonly options$ = new BehaviorSubject<IFormidableOption[]>([]);
+  protected readonly activeOptions = signal<IFormidableOption[]>([]);
 
   public selectOption(_option: IFormidableOption): void {
     // Native <select> chooses options; not used.
@@ -158,14 +153,12 @@ export class SelectFieldComponent
 
     this.updateOptions(allOptions);
     this.reconcileSelectionAgainstOptions(allOptions);
-
-    this.cdRef.markForCheck();
   }
 
   private computeAllOptions(): IFormidableOption[] {
     const combined = combineFieldOptions(
       this.options(),
-      this.optionComponents?.map((source) => source.option()),
+      this.optionComponents().map((source) => source.option()),
       this.sortFn()
     );
 
@@ -173,21 +166,21 @@ export class SelectFieldComponent
   }
 
   private updateOptions(allOptions: IFormidableOption[]): void {
-    this.options$.next(allOptions);
+    this.activeOptions.set(allOptions);
 
     // keep current value consistent with updated options
-    this.writeValue(this.selectRef?.nativeElement?.value ?? '');
+    this.writeValue(this.selectRef()?.nativeElement?.value ?? '');
   }
 
   private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {
-    const current = this.selectRef.nativeElement.value;
+    const current = this.selectRef().nativeElement.value;
     if (!current) return;
 
     const stillExists = allOptions.some((o) => o.value === current);
     if (stillExists) return;
 
     // clear selection + notify like other fields
-    this.selectRef.nativeElement.value = '';
+    this.selectRef().nativeElement.value = '';
     this.onValueChange();
   }
 

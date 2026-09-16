@@ -11,12 +11,12 @@
   [attr.aria-describedby]="describedBy"
   [attr.aria-readonly]="readonly() || null"
   [attr.aria-disabled]="disabled() || null"
-  [attr.aria-activedescendant]="optionId((highlightedOptionIndex$ | async) ?? -1)"
+  [attr.aria-activedescendant]="optionId(highlightedOptionIndex())"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <!-- Options -->
   <!-- Options are re-created in order to use native <input> elements. -->
-  @for (option of options$ | async; track option.value; let i = $index) {
+  @for (option of activeOptions(); track option.value; let i = $index) {
     <input
       hidden
       type="checkbox"
@@ -34,7 +34,7 @@
       [readonly]="option.readonly || readonly()"
       [disabled]="option.disabled || disabled()"
       [selected]="isChecked(option.value)"
-      [highlighted]="i === (highlightedOptionIndex$ | async)">
+      [highlighted]="i === highlightedOptionIndex()">
       @if (option.template) {
         <ng-container [ngTemplateOutlet]="option.template"> </ng-container>
       } @else {

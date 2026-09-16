@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, signal, viewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableSliderField } from '../../../models/formidable.model';
 import { BaseFieldDirective } from '../base-field.directive';
@@ -40,15 +40,15 @@ interface SliderLabelItem {
   ]
 })
 export class SliderFieldComponent extends BaseFieldDirective<number | null> implements IFormidableSliderField {
-  @ViewChild('sliderRef', { static: true }) sliderRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('rangeRef', { static: true }) rangeRef!: ElementRef<HTMLInputElement>;
+  readonly sliderRef = viewChild.required<ElementRef<HTMLDivElement>>('sliderRef');
+  readonly rangeRef = viewChild.required<ElementRef<HTMLInputElement>>('rangeRef');
 
   protected keyboardCallback = null;
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = []; // arrows are natively supported
 
-  private _value: number | null = null;
+  private readonly _value = signal<number | null>(null);
 
   protected doOnValueChange(): void {
     // No additional actions needed
@@ -63,7 +63,7 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   protected doWriteValue(value: number | null): void {
     const normalized = this.normalizeValue(value);
 
-    this._value = normalized;
+    this._value.set(normalized);
     this.syncRangeInput();
     this.updateThumbTransform();
 
@@ -80,15 +80,15 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   // #region IFormidableField
 
   get value(): number | null {
-    return this._value;
+    return this._value();
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.sliderRef as ElementRef<HTMLElement>;
+    return this.sliderRef() as ElementRef<HTMLElement>;
   }
 
   protected override get focusElement(): HTMLElement {
-    return this.rangeRef.nativeElement;
+    return this.rangeRef().nativeElement;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'vertical';
@@ -140,9 +140,9 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   public selectValue(value: number): void {
     const normalized = this.normalizeValue(value);
 
-    if (normalized === this._value) return;
+    if (normalized === this._value()) return;
 
-    this._value = normalized;
+    this._value.set(normalized);
     this.syncRangeInput();
     this.updateThumbTransform();
     this.onValueChange();
@@ -308,14 +308,15 @@ export class SliderFieldComponent extends BaseFieldDirective<number | null> impl
   }
 
   private syncRangeInput(): void {
-    if (!this.rangeRef?.nativeElement) return;
+    const rangeRef = this.rangeRef();
+    if (!rangeRef?.nativeElement) return;
 
     const val = this.value ?? this.min();
-    this.rangeRef.nativeElement.value = String(val);
+    rangeRef.nativeElement.value = String(val);
   }
 
   private updateThumbTransform(): void {
-    const el = this.rangeRef?.nativeElement;
+    const el = this.rangeRef()?.nativeElement;
     if (!el) return;
 
     // Decide what value to use when null: min makes sense for a slider UI

@@ -328,10 +328,9 @@ describe('formidable-field-decorator layout', () => {
       expect(errors.getBoundingClientRect().height).toBeCloseTo(rem(1.2), 0);
     });
 
-    // The errors component is OnPush and its `ngModel` input never changes identity, so it only repaints
-    // when the directive pumps `markForCheck()`. Rendering it from the decorator's view rather than beside
-    // the field must leave both halves working: it still reads the field's control, and a pump still
-    // reaches it through its new ancestor chain.
+    // Angular's own form state is not signal-backed, so the component only re-reads the control when the
+    // directive pumps `refresh()`. Rendering it from the decorator's view rather than beside the field must
+    // leave both halves working: it still reads the field's control, and a pump still repaints it.
     it('shows the messages once the control is touched and invalid', () => {
       const errors = fixture.debugElement.query(By.directive(FieldErrorsComponent));
       const control = fixture.debugElement.query(By.css('formidable-input-field')).injector.get(NgModel).control;
@@ -341,7 +340,7 @@ describe('formidable-field-decorator layout', () => {
 
       control.markAsTouched();
       control.setErrors({ errors: ['Required.'] });
-      (errors.componentInstance as FieldErrorsComponent).markForCheck();
+      (errors.componentInstance as FieldErrorsComponent).refresh();
       fixture.detectChanges();
 
       const messages = Array.from(root.querySelectorAll('.error')).map((e) => e.textContent?.trim());

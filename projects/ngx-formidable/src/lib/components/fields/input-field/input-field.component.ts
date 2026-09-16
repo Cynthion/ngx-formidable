@@ -2,13 +2,14 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
+  effect,
   ElementRef,
   forwardRef,
   inject,
   input,
-  OnChanges,
-  SimpleChanges,
-  ViewChild
+  untracked,
+  viewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgxMaskConfig, NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
@@ -19,6 +20,7 @@ import {
   DEFAULT_SPECIAL_CHARACTERS,
   MaskConfigSubset
 } from '../../../helpers/mask.helpers';
+import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
@@ -55,11 +57,11 @@ import { BaseFieldDirective } from '../base-field.directive';
     NgxMaskPipe
   ]
 })
-export class InputFieldComponent extends BaseFieldDirective implements IFormidableInputField, AfterViewInit, OnChanges {
+export class InputFieldComponent extends BaseFieldDirective implements IFormidableInputField, AfterViewInit {
   private maskPipe = inject(NgxMaskPipe);
   private maskDefaults = inject<Partial<NgxMaskConfig>>(FORMIDABLE_MASK_DEFAULTS, { optional: true });
 
-  @ViewChild('inputRef', { static: false }) inputRef!: ElementRef<HTMLInputElement>;
+  readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
   protected keyboardCallback = null;
   protected externalClickCallback = null;
@@ -72,15 +74,23 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     this.warnIfMaskConflictsWithMinMax();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['mask'] || changes['maskConfig'] || changes['minLength'] || changes['maxLength']) {
-      this.warnIfMaskConflictsWithMinMax();
+  constructor() {
+    super();
 
-      if (changes['mask'] || changes['maskConfig']) {
-        // re-apply formatting if the mask changed
-        queueMicrotask(() => this.doWriteValue(this.value ?? ''));
-      }
-    }
+    onSignalChange(
+      () => [this.mask(), this.maskConfig(), this.minLength(), this.maxLength()],
+      () => this.warnIfMaskConflictsWithMinMax()
+    );
+
+    // Re-applies the formatting the new mask asks for. Separate, so a `minLength` change does not rewrite
+    // the value the user is in the middle of typing — and it runs on the first pass too:
+    // ngxMask initialises across a full task, so the value written before that has to be formatted again once it has.
+    effect(() => {
+      this.mask();
+      this.maskConfig();
+
+      untracked(() => queueMicrotask(() => this.doWriteValue(this.value ?? '')));
+    });
   }
 
   protected doOnValueChange(): void {
@@ -101,8 +111,8 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
       // task — a microtask would land before it and the value would be written unmasked.
       setTimeout(() => {
         const maskedValue = this.maskPipe.transform(newValue, this.mask()!, this.mergedMaskConfig);
-        this.inputRef.nativeElement.value = maskedValue;
-        setCaretPositionToEnd(this.inputRef.nativeElement);
+        this.inputRef().nativeElement.value = maskedValue;
+        setCaretPositionToEnd(this.inputRef().nativeElement);
 
         // notify the form control again (since usually done in base directive)
         if (newValue) {
@@ -110,8 +120,8 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
         }
       });
     } else {
-      this.inputRef.nativeElement.value = newValue;
-      setCaretPositionToEnd(this.inputRef.nativeElement);
+      this.inputRef().nativeElement.value = newValue;
+      setCaretPositionToEnd(this.inputRef().nativeElement);
     }
   }
 
@@ -120,7 +130,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   // #region IFormidableField
 
   get value(): string | null {
-    const inputValue = this.inputRef.nativeElement.value;
+    const inputValue = this.inputRef().nativeElement.value;
 
     if (this.mask()) {
       // remove mask characters if mask is applied
@@ -136,7 +146,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.inputRef as ElementRef<HTMLElement>;
+    return this.inputRef() as ElementRef<HTMLElement>;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
@@ -164,10 +174,10 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   /** Per-field ngx-mask overrides, layered over `FORMIDABLE_MASK_DEFAULTS` and the library's own defaults. */
   public readonly maskConfig = input<Partial<NgxMaskConfig> | undefined>(undefined);
 
-  protected override get showsEmptyValueHint(): boolean {
-    // Only a mask that renders its slots while empty occupies the value area.
-    return !!this.mask() && this.mergedMaskConfig.showMaskTyped;
-  }
+  // Only a mask that renders its slots while empty occupies the value area.
+  protected override readonly showsEmptyValueHint = computed(
+    () => !!this.mask() && this.mergedMaskConfig.showMaskTyped
+  );
 
   private readonly LOCAL_MASK_DEFAULTS: Required<MaskConfigSubset> = {
     validation: true,

@@ -6,11 +6,10 @@ import {
   forwardRef,
   input,
   linkedSignal,
-  OnChanges,
   OnDestroy,
   OnInit,
-  SimpleChanges,
-  ViewChild
+  signal,
+  viewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { format, isEqual } from 'date-fns';
@@ -26,6 +25,7 @@ import {
   validateUnicodeTimeTokenFormat
 } from '../../../helpers/format.helpers';
 import { renderEmptyMask } from '../../../helpers/input.helpers';
+import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
@@ -64,10 +64,10 @@ import { BaseFieldDirective } from '../base-field.directive';
 })
 export class TimeFieldComponent
   extends BaseFieldDirective<Date | null>
-  implements IFormidableTimeField, OnInit, OnChanges, OnDestroy
+  implements IFormidableTimeField, OnInit, OnDestroy
 {
-  @ViewChild('timeRef', { static: true }) timeRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
+  readonly timeRef = viewChild.required<ElementRef<HTMLDivElement>>('timeRef');
+  readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
@@ -90,10 +90,14 @@ export class TimeFieldComponent
     }
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['unicodeTokenFormat'] && !changes['unicodeTokenFormat'].firstChange) {
-      this.setTime(this.selectedTime); // re-render the current value in the new format
-    }
+  constructor() {
+    super();
+
+    // Re-renders the current value in the new format.
+    onSignalChange(
+      () => this.unicodeTokenFormat(),
+      () => this.setTime(this.selectedTime)
+    );
   }
 
   // Typing commits on blur — a half-typed time is not a time — so value changes are handled in the
@@ -105,7 +109,7 @@ export class TimeFieldComponent
       return;
     }
 
-    this.isFieldFilled = !!this.value;
+    this.isFieldFilled.set(!!this.value);
   }
 
   protected doOnValueChange(): void {
@@ -123,13 +127,13 @@ export class TimeFieldComponent
     }
 
     // try set time on blur
-    this.trySetTimeFromInput(this.inputRef.nativeElement.value);
+    this.trySetTimeFromInput(this.inputRef().nativeElement.value);
   }
 
   private handleKeydown(event: KeyboardEvent): void {
     switch (event.key) {
       case 'Enter':
-        this.trySetTimeFromInput(this.inputRef.nativeElement.value);
+        this.trySetTimeFromInput(this.inputRef().nativeElement.value);
         break;
       case 'ArrowUp':
         this.stepSegment(1);
@@ -146,7 +150,7 @@ export class TimeFieldComponent
   // The input text is what gets stepped, not `selectedTime`: it also carries what was typed but not yet
   // committed. An empty field is seeded with midnight, so arrows alone can fill it.
   private stepSegment(direction: 1 | -1): void {
-    const input = this.inputRef.nativeElement;
+    const input = this.inputRef().nativeElement;
     const segment = findSegmentAtCaret(this.tokenFormat(), input.selectionStart ?? 0);
     if (!segment) return;
 
@@ -173,11 +177,11 @@ export class TimeFieldComponent
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.timeRef as ElementRef<HTMLElement>;
+    return this.timeRef() as ElementRef<HTMLElement>;
   }
 
   protected override get focusElement(): HTMLElement {
-    return this.inputRef.nativeElement;
+    return this.inputRef().nativeElement;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
@@ -207,9 +211,7 @@ export class TimeFieldComponent
   };
 
   // An empty time field always shows its `emptyHint` in the value area, so a label can never rest there.
-  protected override get showsEmptyValueHint(): boolean {
-    return true;
-  }
+  protected override readonly showsEmptyValueHint = signal(true);
 
   // ngxMask's own empty display: the mask with every slot as its placeholder character.
   private get maskPlaceholder(): string {
@@ -224,14 +226,14 @@ export class TimeFieldComponent
 
   // ngxMask either empties the input outright or leaves the slots it renders for a focused empty field.
   private get isInputCleared(): boolean {
-    const value = this.inputRef.nativeElement.value;
+    const value = this.inputRef().nativeElement.value;
 
     return value === '' || value === this.maskPlaceholder;
   }
 
   // Shows the `emptyHint` at rest, but lets ngxMask own the text while focused.
   private renderEmpty(): void {
-    renderEmptyMask(this.inputRef.nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused);
+    renderEmptyMask(this.inputRef().nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused());
   }
 
   private selectedTime: Date | null = null;
@@ -247,7 +249,7 @@ export class TimeFieldComponent
 
     this.valueChangeSubject$.next(this.selectedTime);
     this.valueChanged.emit(this.selectedTime);
-    this.isFieldFilled = !!this.selectedTime;
+    this.isFieldFilled.set(!!this.selectedTime);
     this.commit(this.selectedTime); // notify ControlValueAccessor of the change
     this.touch();
   }
@@ -306,7 +308,8 @@ export class TimeFieldComponent
       }
 
       const formatted = format(this.selectedTime, this.tokenFormat());
-      if (this.inputRef.nativeElement.value !== formatted) this.inputRef.nativeElement.value = formatted;
+      const inputRef = this.inputRef();
+      if (inputRef.nativeElement.value !== formatted) inputRef.nativeElement.value = formatted;
     });
   }
 }

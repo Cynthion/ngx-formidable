@@ -3,14 +3,15 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  ContentChild,
+  contentChild,
   ElementRef,
   HostBinding,
   inject,
   NgZone,
   OnDestroy,
   output,
-  ViewChild,
+  signal,
+  viewChild,
   ViewContainerRef
 } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
@@ -25,8 +26,7 @@ import {
   FieldAdornmentAlignment,
   FieldDecoratorLayout,
   FieldValueAlignment,
-  FORMIDABLE_FIELD,
-  IFormidableField
+  FORMIDABLE_FIELD
 } from '../../models/formidable.model';
 import { FieldErrorsComponent } from '../field-errors/field-errors.component';
 
@@ -45,62 +45,60 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
   selector: 'formidable-field-decorator',
   templateUrl: './field-decorator.component.html',
   styleUrls: ['./field-decorator.component.scss'],
-  // Deliberately not `OnPush` — see `tech/decoration.md`.
-  // eslint-disable-next-line @angular-eslint/prefer-on-push-component-change-detection
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule]
 })
-// It mirrors a field's surface but does not implement `IFormidableField`, because it is signal-typed,
-// and these are plain getters reading a non-signal `@ContentChild`.
+// It mirrors a field's surface but does not implement `IFormidableField`, which is signal-typed while these
+// are plain getters. They are reactive all the same: every one bottoms out in a `contentChild()` query or a
+// signal on the field, and a signal read inside a getter is tracked by whichever view called it.
 export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true });
 
   // View children are used to access the prefix and suffix wrappers
-  @ViewChild('prefixWrapperRef') prefixWrapper?: ElementRef<HTMLDivElement>;
-  @ViewChild('suffixWrapperRef') suffixWrapper?: ElementRef<HTMLDivElement>;
+  readonly prefixWrapper = viewChild<ElementRef<HTMLDivElement>>('prefixWrapperRef');
+  readonly suffixWrapper = viewChild<ElementRef<HTMLDivElement>>('suffixWrapperRef');
 
   // Where `FieldErrorsDirective` renders its component, so the layout container holds only the field.
-  // `static: true` is what makes it readable whatever the hook order.
-  @ViewChild('errorsSlot', { read: ViewContainerRef, static: true }) errorsSlot?: ViewContainerRef;
+  readonly errorsSlot = viewChild('errorsSlot', { read: ViewContainerRef });
 
   // Content children are used to project the field, label, label adornment, prefix, suffix and hint
-  @ContentChild(FORMIDABLE_FIELD) projectedField?: IFormidableField;
-  @ContentChild(FieldHintDirective) projectedHint?: FieldHintDirective;
-  @ContentChild(FieldLabelDirective) projectedLabel?: FieldLabelDirective;
-  @ContentChild(FieldLabelAdornmentDirective) projectedLabelAdornment?: FieldLabelAdornmentDirective;
-  @ContentChild(FieldPrefixDirective) projectedPrefix?: FieldPrefixDirective;
-  @ContentChild(FieldSuffixDirective) projectedSuffix?: FieldSuffixDirective;
+  readonly projectedField = contentChild(FORMIDABLE_FIELD);
+  readonly projectedHint = contentChild(FieldHintDirective);
+  readonly projectedLabel = contentChild(FieldLabelDirective);
+  readonly projectedLabelAdornment = contentChild(FieldLabelAdornmentDirective);
+  readonly projectedPrefix = contentChild(FieldPrefixDirective);
+  readonly projectedSuffix = contentChild(FieldSuffixDirective);
 
   // Getters, not fields: a consumer adds and removes a projected decoration at runtime (`@if`, `*ngIf`),
   // and a value latched in `ngAfterContentInit` would leave its wrapper shown — or hidden — forever.
   protected get hasLabel(): boolean {
-    return !!this.projectedLabel;
+    return !!this.projectedLabel();
   }
 
   protected get hasLabelAdornment(): boolean {
-    return !!this.projectedLabelAdornment;
+    return !!this.projectedLabelAdornment();
   }
 
   protected get hasPrefix(): boolean {
-    return !!this.projectedPrefix;
+    return !!this.projectedPrefix();
   }
 
   protected get hasSuffix(): boolean {
-    return !!this.projectedSuffix;
+    return !!this.projectedSuffix();
   }
 
   protected get hasHint(): boolean {
-    return !!this.projectedHint;
+    return !!this.projectedHint();
   }
 
   // Read off the projected directives rather than host-bound by them: the wrappers these style are the
   // decorator's own elements, so it needs no global rule to reach them (a hint does).
   protected get prefixAlignment(): FieldAdornmentAlignment {
-    return this.projectedPrefix?.align() ?? 'center';
+    return this.projectedPrefix()?.align() ?? 'center';
   }
 
   protected get suffixAlignment(): FieldAdornmentAlignment {
-    return this.projectedSuffix?.align() ?? 'center';
+    return this.projectedSuffix()?.align() ?? 'center';
   }
 
   private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
@@ -110,17 +108,17 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   private focusChangeSubject$ = new Subject<boolean>();
   private destroy$ = new Subject<void>();
   private resizeObserver?: ResizeObserver;
-  private errors?: FieldErrorsComponent;
-  private isFocused = false;
+  private readonly errors = signal<FieldErrorsComponent | undefined>(undefined);
+  private readonly isFocused = signal(false);
 
   // Whether the label may transition yet. False until the field has settled on its first state, so the
   // initial resting-to-floating correction is not animated.
-  protected isLabelAnimated = false;
+  protected readonly isLabelAnimated = signal(false);
 
   // Called by `FieldErrorsDirective` with the errors component it renders into this decorator's slot, so
   // the invalid state it already computes can surface as a host class the stylesheets target.
   registerErrors(errors: FieldErrorsComponent): void {
-    this.errors = errors;
+    this.errors.set(errors);
   }
 
   ngAfterViewInit(): void {
@@ -148,15 +146,15 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   public readonly focusChanged = output<boolean>();
 
   get fieldId(): string {
-    return this.projectedField?.fieldId ?? '';
+    return this.projectedField()?.fieldId ?? '';
   }
 
   get name(): string {
-    return this.projectedField?.name() ?? '';
+    return this.projectedField()?.name() ?? '';
   }
 
   get placeholder(): string {
-    return this.projectedField?.placeholder() ?? '';
+    return this.projectedField()?.placeholder() ?? '';
   }
 
   // #region ARIA ids
@@ -187,32 +185,34 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   // #endregion
 
   get readonly(): boolean {
-    return this.projectedField?.readonly() ?? false;
+    return this.projectedField()?.readonly() ?? false;
   }
 
   get disabled(): boolean {
-    return this.projectedField?.disabled() ?? false;
+    return this.projectedField()?.disabled() ?? false;
   }
 
   /** Drives the label's required marker. Presentational only, and the form may switch it off for all fields. */
   get showRequiredMarker(): boolean {
-    return (this.formDirective?.showRequiredMarkers() ?? true) && (this.projectedField?.showRequiredMarker() ?? false);
+    return (
+      (this.formDirective?.showRequiredMarkers() ?? true) && (this.projectedField()?.showRequiredMarker() ?? false)
+    );
   }
 
   get value(): unknown {
-    return this.projectedField?.value ?? null;
+    return this.projectedField()?.value ?? null;
   }
 
   get canLabelRest(): boolean {
-    return this.projectedField?.canLabelRest ?? false;
+    return this.projectedField()?.canLabelRest() ?? false;
   }
 
   // How the label actually renders — the configured `position` resolved against the field's own state and
   // layout.
   get labelState(): FieldLabelState {
-    const position = this.projectedLabel?.position();
+    const position = this.projectedLabel()?.position();
 
-    if (!position || position === 'outside' || this.projectedField?.decoratorLayout !== 'horizontal') {
+    if (!position || position === 'outside' || this.projectedField()?.decoratorLayout !== 'horizontal') {
       return 'outside';
     }
     // Whether a `placeholder` blocks the label from resting is the position's call, not the field's:
@@ -227,7 +227,7 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   // Where the field's value sits, which a projected prefix/suffix aligns with. Fields that do not say
   // center their value, so the prefix centers on the field's box too.
   get valueAlignment(): FieldValueAlignment {
-    return this.projectedField?.valueAlignment ?? 'center';
+    return this.projectedField()?.valueAlignment ?? 'center';
   }
 
   // Whether the label sits over the value area, so the field has to keep its value clear of it.
@@ -265,13 +265,13 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
 
   @HostBinding('class.is-focused')
   get isFieldFocused(): boolean {
-    return this.isFocused;
+    return this.isFocused();
   }
 
   // Only ever true with a `formidableFieldErrors` field inside: nothing else computes validity.
   @HostBinding('class.is-invalid')
   get isInvalid(): boolean {
-    return this.errors?.invalid ?? false;
+    return this.errors()?.invalid() ?? false;
   }
 
   // The label stands in for the placeholder, so the field has to stop rendering its own.
@@ -285,7 +285,7 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   // it — which also spares a re-measure every time `readonly` / `disabled` add or remove the toggle.
   @HostBinding('class.has-in-field-toggle')
   get hasInFieldToggle(): boolean {
-    return !!this.projectedField?.hasInFieldToggle;
+    return !!this.projectedField()?.hasInFieldToggle?.();
   }
 
   // The decorator is a stacking context, so everything it renders is ordered inside it and none of it can
@@ -294,37 +294,39 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   // rises to is the panel's kind: a sheet spans the viewport and outranks an anchored panel.
   @HostBinding('class.has-open-panel')
   get hasOpenPanel(): boolean {
-    const position = openPanelPosition(this.projectedField);
+    const position = openPanelPosition(this.projectedField());
 
     return position !== null && position !== 'sheet';
   }
 
   @HostBinding('class.has-open-sheet')
   get hasOpenSheet(): boolean {
-    return openPanelPosition(this.projectedField) === 'sheet';
+    return openPanelPosition(this.projectedField()) === 'sheet';
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    if (!this.projectedField) {
+    const projectedField = this.projectedField();
+    if (!projectedField) {
       throw new Error('FieldDecoratorComponent: projectedField is not available yet.');
     }
-    return this.projectedField?.fieldRef;
+    return projectedField?.fieldRef;
   }
 
   get decoratorLayout(): FieldDecoratorLayout {
-    return this.projectedField?.decoratorLayout ?? 'horizontal';
+    return this.projectedField()?.decoratorLayout ?? 'horizontal';
   }
 
   // As a decorator, the wrapped field events are forwarded.
   private forwardEvents(): void {
-    if (this.projectedField) {
-      this.projectedField.focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
-        this.isFocused = focused;
+    const projectedField = this.projectedField();
+    if (projectedField) {
+      projectedField.focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
+        this.isFocused.set(focused);
         this.focusChangeSubject$.next(focused);
         this.focusChanged.emit(focused);
       });
 
-      this.projectedField.valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
+      projectedField.valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
         this.valueChangeSubject$.next(value);
         this.valueChanged.emit(value);
       });
@@ -336,7 +338,7 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   private allowLabelAnimation(): void {
     // A frame and not a microtask: every option field resolves its projected options in a `queueMicrotask`,
     // so only a frame is reliably after all of them.
-    requestAnimationFrame(() => (this.isLabelAnimated = true));
+    requestAnimationFrame(() => this.isLabelAnimated.set(true));
   }
 
   // Turns a projected prefix/suffix wrapper's measured width into the field's value inset, and keeps it in
@@ -344,7 +346,7 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   private observeInsets(): void {
     if (this.decoratorLayout !== 'horizontal') return;
 
-    const wrappers = [this.prefixWrapper?.nativeElement, this.suffixWrapper?.nativeElement].filter(
+    const wrappers = [this.prefixWrapper()?.nativeElement, this.suffixWrapper()?.nativeElement].filter(
       (wrapper): wrapper is HTMLDivElement => !!wrapper
     );
 
@@ -357,8 +359,8 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
 
   // Moves the value clear of a prefix/suffix — and an inside label with it, so the two stay aligned.
   private insetValue(): void {
-    this.setInset('prefix', this.prefixWrapper?.nativeElement.offsetWidth ?? 0);
-    this.setInset('suffix', this.suffixWrapper?.nativeElement.offsetWidth ?? 0);
+    this.setInset('prefix', this.prefixWrapper()?.nativeElement.offsetWidth ?? 0);
+    this.setInset('suffix', this.suffixWrapper()?.nativeElement.offsetWidth ?? 0);
   }
 
   // Removing the property, rather than writing a zero, is what restores the field's own padding.

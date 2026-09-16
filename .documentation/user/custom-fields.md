@@ -67,7 +67,7 @@ Call the protected `onValueChange()` whenever the user changes the value: it emi
 A counter: it holds a number rather than a string, steps with the arrow keys, and always renders something where the value goes. Those are the three things a plain text field does not have to deal with.
 
 ```ts
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, signal, viewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BaseFieldDirective, FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableField } from '@cynthion/ngx-formidable';
 
@@ -92,7 +92,7 @@ import { BaseFieldDirective, FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidable
 	]
 })
 export class ExampleCounterFieldComponent extends BaseFieldDirective<number> implements IFormidableField<number> {
-	@ViewChild('counterRef', { static: true }) counterRef!: ElementRef<HTMLDivElement>;
+	readonly counterRef = viewChild.required<ElementRef<HTMLDivElement>>('counterRef');
 
 	protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
 	protected externalClickCallback = null;
@@ -103,7 +103,7 @@ export class ExampleCounterFieldComponent extends BaseFieldDirective<number> imp
 	public readonly max = input(10);
 	public readonly step = input(1);
 
-	private _value = 0;
+	private readonly _value = signal(0);
 
 	protected doOnValueChange(): void {
 		// No additional actions needed
@@ -128,7 +128,7 @@ export class ExampleCounterFieldComponent extends BaseFieldDirective<number> imp
 	// #region ControlValueAccessor
 
 	protected doWriteValue(value: number): void {
-		this._value = this.clamp(typeof value === 'number' && !Number.isNaN(value) ? value : this.min());
+		this._value.set(this.clamp(typeof value === 'number' && !Number.isNaN(value) ? value : this.min()));
 	}
 
 	// #endregion
@@ -136,28 +136,26 @@ export class ExampleCounterFieldComponent extends BaseFieldDirective<number> imp
 	// #region IFormidableField
 
 	get value(): number {
-		return this._value;
+		return this._value();
 	}
 
 	get fieldRef(): ElementRef<HTMLElement> {
-		return this.counterRef as ElementRef<HTMLElement>;
+		return this.counterRef() as ElementRef<HTMLElement>;
 	}
 
 	// The counter always renders a number where the value goes, so a resting label would land on top of it.
-	protected override get showsEmptyValueHint(): boolean {
-		return true;
-	}
+	protected override readonly showsEmptyValueHint = signal(true);
 
 	decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
 	// #endregion
 
 	public increment(): void {
-		this.setValue(this._value + this.step());
+		this.setValue(this._value() + this.step());
 	}
 
 	public decrement(): void {
-		this.setValue(this._value - this.step());
+		this.setValue(this._value() - this.step());
 	}
 
 	protected onButtonPointerDown(event: PointerEvent): void {
@@ -169,7 +167,7 @@ export class ExampleCounterFieldComponent extends BaseFieldDirective<number> imp
 	private setValue(next: number): void {
 		if (this.readonly() || this.disabled()) return;
 
-		this._value = this.clamp(next);
+		this._value.set(this.clamp(next));
 		this.onValueChange(); // emits, and reports the value to the bound control
 	}
 
