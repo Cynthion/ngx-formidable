@@ -6,10 +6,10 @@ import {
   forwardRef,
   OnDestroy,
   OnInit,
-  ViewChild
+  signal,
+  viewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
 import { applyDefaultOption, combineFieldOptions, getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
 import {
   FieldDecoratorLayout,
@@ -34,7 +34,6 @@ import { BaseOptionFieldDirective } from '../base-option-field.directive';
   templateUrl: './checkbox-group-field.component.html',
   styleUrls: ['./checkbox-group-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [CommonModule, FieldOptionComponent],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
@@ -59,14 +58,14 @@ export class CheckboxGroupFieldComponent
   extends BaseOptionFieldDirective<string[]>
   implements IFormidableCheckboxGroupField, OnInit, OnDestroy
 {
-  @ViewChild('checkboxGroupRef', { static: true }) checkboxGroupRef!: ElementRef<HTMLDivElement>;
+  readonly checkboxGroupRef = viewChild.required<ElementRef<HTMLDivElement>>('checkboxGroupRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter'];
 
-  private _writtenValues: string[] = [];
+  private readonly _writtenValues = signal<string[]>([]);
 
   protected doOnValueChange(): void {
     // No additional actions needed
@@ -77,23 +76,23 @@ export class CheckboxGroupFieldComponent
   }
 
   private handleKeydown(event: KeyboardEvent): void {
-    const options = this.options$.value;
+    const options = this.activeOptions();
     const count = options.length;
 
     switch (event.key) {
       case 'ArrowDown':
         if (count > 0) {
-          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'down'));
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex(), options, 'down'));
         }
         break;
       case 'ArrowUp':
         if (count > 0) {
-          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'up'));
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex(), options, 'up'));
         }
         break;
       case 'Enter': {
-        const idx = this.highlightedOptionIndex$.value;
-        const option = this.options$.value[idx];
+        const idx = this.highlightedOptionIndex();
+        const option = this.activeOptions()[idx];
         if (option) this.selectOption(option);
         break;
       }
@@ -103,9 +102,8 @@ export class CheckboxGroupFieldComponent
   // #region ControlValueAccessor
 
   protected doWriteValue(value: string[]): void {
-    this._writtenValues = Array.isArray(value) ? value : [];
-    this.isFieldFilled = this._writtenValues.length > 0;
-    this.cdRef.markForCheck();
+    this._writtenValues.set(Array.isArray(value) ? value : []);
+    this.isFieldFilled.set(this._writtenValues().length > 0);
   }
 
   // #endregion
@@ -113,11 +111,11 @@ export class CheckboxGroupFieldComponent
   // #region IFormidableField
 
   get value(): string[] {
-    return this._writtenValues;
+    return this._writtenValues();
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.checkboxGroupRef as ElementRef<HTMLElement>;
+    return this.checkboxGroupRef() as ElementRef<HTMLElement>;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'vertical';
@@ -134,31 +132,25 @@ export class CheckboxGroupFieldComponent
 
   public readonly optionRole: FieldOptionRole = 'checkbox';
 
-  protected readonly options$ = new BehaviorSubject<IFormidableOption[]>([]);
-
-  protected get activeOptions(): IFormidableOption[] {
-    return this.options$.value;
-  }
+  protected readonly activeOptions = signal<IFormidableOption[]>([]);
 
   public selectOption(option: IFormidableOption): void {
     if (option.disabled) return;
 
-    const curr = this._writtenValues;
+    const curr = this._writtenValues();
     const exists = curr.includes(option.value);
 
     const next = exists ? curr.filter((v) => v !== option.value) : [...curr, option.value];
 
     // commit selection
-    this._writtenValues = next;
+    this._writtenValues.set(next);
 
     // emit value change
     this.valueChangeSubject$.next(next);
     this.valueChanged.emit(next);
-    this.isFieldFilled = next.length > 0;
+    this.isFieldFilled.set(next.length > 0);
     this.commit(next); // notify ControlValueAccessor of the change
     this.touch();
-
-    this.cdRef.markForCheck();
   }
 
   protected onOptionsChanged(): void {
@@ -168,47 +160,47 @@ export class CheckboxGroupFieldComponent
     // A changed options list is not the user, so the reconcile may correct the model but not touch.
     this.runSilently('correction', () => this.reconcileSelectionAgainstOptions(allOptions));
     this.reconcileHighlightAfterOptionsChanged();
-
-    this.cdRef.markForCheck();
   }
 
   private computeAllOptions(): IFormidableOption[] {
-    const combined = combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
+    const combined = combineFieldOptions(
+      this.options(),
+      this.optionComponents().map((source) => source.option()),
+      this.sortFn()
+    );
 
-    return applyDefaultOption(combined, this.defaultOption, this.defaultOptionMode);
+    return applyDefaultOption(combined, this.defaultOption(), this.defaultOptionMode());
   }
 
   private updateOptions(allOptions: IFormidableOption[]): void {
-    this.options$.next(allOptions);
+    this.activeOptions.set(allOptions);
 
     // keep current value in sync with newly combined options
-    this.writeValue(this._writtenValues);
+    this.writeValue(this._writtenValues());
   }
 
   private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {
-    if (!this._writtenValues.length) return;
+    if (!this._writtenValues().length) return;
 
     const allowed = new Set(allOptions.map((o) => o.value));
-    const filtered = this._writtenValues.filter((v) => allowed.has(v));
+    const filtered = this._writtenValues().filter((v) => allowed.has(v));
 
-    if (filtered.length === this._writtenValues.length) return; // no change
+    if (filtered.length === this._writtenValues().length) return; // no change
 
     // commit
-    this._writtenValues = filtered;
+    this._writtenValues.set(filtered);
 
     // emit like other fields when selection becomes invalid
     this.valueChangeSubject$.next(filtered);
     this.valueChanged.emit(filtered);
-    this.isFieldFilled = filtered.length > 0;
+    this.isFieldFilled.set(filtered.length > 0);
     this.commit(filtered);
     this.touch();
-
-    this.cdRef.markForCheck();
   }
 
   // #endregion
 
   protected isChecked(value: string): boolean {
-    return this._writtenValues.includes(value);
+    return this._writtenValues().includes(value);
   }
 }

@@ -1,7 +1,7 @@
 import { Directive, input } from '@angular/core';
 import { FORMIDABLE_VALIDATOR, IFormidableValidator } from '@cynthion/ngx-formidable';
-import { Observable, of } from 'rxjs';
-import { StaticSuite } from 'vest';
+import { from, map, Observable, of } from 'rxjs';
+import { Suite } from 'vest';
 
 /**
  * Validates a `formidableForm` with a Vest static suite.
@@ -24,10 +24,10 @@ import { StaticSuite } from 'vest';
 })
 export class NgxFormidableVestValidatorDirective<T extends Record<string, unknown>> implements IFormidableValidator<T> {
   /**
-   * A Vest `staticSuite` holding the rules for every target on this form. A whole-form rule is written
-   * against the `WHOLE_FORM` target.
+   * A Vest suite, from `create`, holding the rules for every target on this form. A whole-form rule is
+   * written against the `WHOLE_FORM` target.
    */
-  public readonly formSuite = input<StaticSuite<string, string, (model: T, field: string) => void> | null>(null);
+  public readonly formSuite = input<Suite<string, string, (model: T, field: string) => void> | null>(null);
 
   public validate(model: T, target: string): Observable<string[] | null> {
     const suite = this.formSuite();
@@ -36,11 +36,15 @@ export class NgxFormidableVestValidatorDirective<T extends Record<string, unknow
       return of(null);
     }
 
-    return new Observable<string[] | null>((observer) => {
-      suite(model, target).done((result) => {
-        observer.next(result.getErrors()[target] ?? null);
-        observer.complete();
-      });
-    });
+    // `runStatic` keeps each run independent of the last, as `staticSuite` used to. Its result is a
+    // thenable that settles once the suite's async tests do, which is what replaced Vest 5's `done()`.
+    return from(Promise.resolve(suite.runStatic(model, target))).pipe(
+      map((result) => {
+        const messages = result.getErrors(target);
+
+        // Vest reports a clean or unknown target as an empty array; the seam's contract is `null`.
+        return messages.length ? messages : null;
+      })
+    );
   }
 }

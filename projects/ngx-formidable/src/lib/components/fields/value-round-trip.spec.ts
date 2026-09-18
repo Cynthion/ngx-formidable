@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -15,8 +15,8 @@ import { TextareaFieldComponent } from './textarea-field/textarea-field.componen
  */
 
 @Component({
-  standalone: true,
   imports: [FormsModule, InputFieldComponent, TextareaFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-input-field

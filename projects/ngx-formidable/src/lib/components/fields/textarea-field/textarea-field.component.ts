@@ -1,16 +1,15 @@
-import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
+  effect,
   ElementRef,
   forwardRef,
-  Inject,
-  Input,
-  OnChanges,
-  Optional,
-  SimpleChanges,
-  ViewChild
+  inject,
+  input,
+  untracked,
+  viewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgxMaskConfig, NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
@@ -21,6 +20,7 @@ import {
   DEFAULT_SPECIAL_CHARACTERS,
   MaskConfigSubset
 } from '../../../helpers/mask.helpers';
+import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
   FieldValueAlignment,
@@ -42,8 +42,7 @@ import { BaseFieldDirective } from '../base-field.directive';
   templateUrl: './textarea-field.component.html',
   styleUrls: ['./textarea-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [CommonModule, NgxMaskDirective],
+  imports: [NgxMaskDirective],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -59,26 +58,18 @@ import { BaseFieldDirective } from '../base-field.directive';
     NgxMaskPipe
   ]
 })
-export class TextareaFieldComponent
-  extends BaseFieldDirective
-  implements IFormidableTextareaField, AfterViewInit, OnChanges
-{
-  // @ViewChild('textareaRef', { static: false }) textareaRef!: ElementRef<HTMLTextAreaElement>;
-  @ViewChild('maskedTextareaRef', { static: false }) maskedTextareaRef?: ElementRef<HTMLTextAreaElement>;
-  @ViewChild('plainTextareaRef', { static: false }) plainTextareaRef?: ElementRef<HTMLTextAreaElement>;
-  @ViewChild('lengthIndicatorRef') lengthIndicatorRef?: ElementRef<HTMLDivElement>;
+export class TextareaFieldComponent extends BaseFieldDirective implements IFormidableTextareaField, AfterViewInit {
+  private maskPipe = inject(NgxMaskPipe);
+  private maskDefaults = inject<Partial<NgxMaskConfig>>(FORMIDABLE_MASK_DEFAULTS, { optional: true });
+
+  readonly maskedTextareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('maskedTextareaRef');
+  readonly plainTextareaRef = viewChild<ElementRef<HTMLTextAreaElement>>('plainTextareaRef');
+  readonly lengthIndicatorRef = viewChild<ElementRef<HTMLDivElement>>('lengthIndicatorRef');
 
   protected keyboardCallback = null;
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
-
-  constructor(
-    private maskPipe: NgxMaskPipe,
-    @Optional() @Inject(FORMIDABLE_MASK_DEFAULTS) private maskDefaults?: Partial<NgxMaskConfig>
-  ) {
-    super();
-  }
 
   override ngAfterViewInit(): void {
     super.ngAfterViewInit();
@@ -87,19 +78,29 @@ export class TextareaFieldComponent
     this.warnIfMaskConflictsWithMinMax();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['mask'] || changes['maskConfig'] || changes['minLength'] || changes['maxLength']) {
-      this.warnIfMaskConflictsWithMinMax();
+  constructor() {
+    super();
 
-      if (changes['mask'] || changes['maskConfig']) {
-        // re-apply formatting if the mask changed
+    onSignalChange(
+      () => [this.mask(), this.maskConfig(), this.minLength(), this.maxLength()],
+      () => this.warnIfMaskConflictsWithMinMax()
+    );
+
+    // Re-applies the formatting the new mask asks for, and resizes to whatever it produced. Separate, so a
+    // `minLength` change does not rewrite the value the user is in the middle of typing:
+    // ngxMask initialises across a full task, so the value written before that has to be formatted, and measured, again once it has.
+    effect(() => {
+      this.mask();
+      this.maskConfig();
+
+      untracked(() =>
         queueMicrotask(() => {
           this.doWriteValue(this.value ?? '');
           this.adjustLayout();
           this.autoResize();
-        });
-      }
-    }
+        })
+      );
+    });
   }
 
   protected doOnValueChange(): void {
@@ -117,11 +118,11 @@ export class TextareaFieldComponent
     const el = this.textareaElement;
     if (!el) return;
 
-    if (this.mask) {
+    if (this.mask()) {
       // Waits for the ngxMask directive to initialize on the control, which it does across a full
       // task — a microtask would land before it and the value would be written unmasked.
       setTimeout(() => {
-        const maskedValue = this.maskPipe.transform(newValue, this.mask!, this.mergedMaskConfig);
+        const maskedValue = this.maskPipe.transform(newValue, this.mask()!, this.mergedMaskConfig);
         el.value = maskedValue;
         setCaretPositionToEnd(el);
 
@@ -145,9 +146,9 @@ export class TextareaFieldComponent
     if (!el) return null;
     const textareaValue = el.value;
 
-    if (this.mask) {
+    if (this.mask()) {
       // remove mask characters if mask is applied
-      const valueNoMaskTyped = this.maskPipe.transform(textareaValue, this.mask!, {
+      const valueNoMaskTyped = this.maskPipe.transform(textareaValue, this.mask()!, {
         ...this.mergedMaskConfig,
         showMaskTyped: false
       });
@@ -159,7 +160,7 @@ export class TextareaFieldComponent
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return (this.mask ? this.maskedTextareaRef! : this.plainTextareaRef!) as ElementRef<HTMLElement>;
+    return (this.mask() ? this.maskedTextareaRef()! : this.plainTextareaRef()!) as ElementRef<HTMLElement>;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
@@ -173,34 +174,34 @@ export class TextareaFieldComponent
   // #region IFormidableTextareaField
 
   /** The native autofill hint. Off by default, so a form does not leak values a consumer did not ask for. */
-  @Input() autocomplete: AutoFill = 'off';
+  public readonly autocomplete = input<AutoFill>('off');
 
   /** The native attribute. Reported to the browser and used to sanity-check a `mask`; it does not validate. */
-  @Input() minLength = -1;
+  public readonly minLength = input(-1);
 
   /** The native attribute, which does cap what can be typed. `-1` for no cap. */
-  @Input() maxLength = -1;
+  public readonly maxLength = input(-1);
 
   /** Grows the box with the content instead of scrolling it. */
-  @Input() enableAutosize = true;
+  public readonly enableAutosize = input(true);
 
   /** Shows the character count below the value, against `maxLength` when there is one. */
-  @Input() showLengthIndicator = false;
+  public readonly showLengthIndicator = input(false);
 
   // #endregion
 
   // #region IFormidableMaskField
 
   /** An ngx-mask pattern. Setting one changes what the model receives — see `dropSpecialCharacters`. */
-  @Input() mask?: string = undefined;
+  public readonly mask = input<string | undefined>(undefined);
 
   /** Per-field ngx-mask overrides, layered over `FORMIDABLE_MASK_DEFAULTS` and the library's own defaults. */
-  @Input() maskConfig?: Partial<NgxMaskConfig>;
+  public readonly maskConfig = input<Partial<NgxMaskConfig> | undefined>(undefined);
 
-  protected override get showsEmptyValueHint(): boolean {
-    // Only a mask that renders its slots while empty occupies the value area.
-    return !!this.mask && this.mergedMaskConfig.showMaskTyped;
-  }
+  // Only a mask that renders its slots while empty occupies the value area.
+  protected override readonly showsEmptyValueHint = computed(
+    () => !!this.mask() && this.mergedMaskConfig.showMaskTyped
+  );
 
   private readonly LOCAL_MASK_DEFAULTS: Required<MaskConfigSubset> = {
     validation: true,
@@ -222,46 +223,48 @@ export class TextareaFieldComponent
     return {
       ...this.LOCAL_MASK_DEFAULTS,
       ...(this.maskDefaults ?? {}),
-      ...(this.maskConfig ?? {})
+      ...(this.maskConfig() ?? {})
     } as Required<MaskConfigSubset>;
   }
 
   private warnIfMaskConflictsWithMinMax(): void {
-    if (!this.mask) return;
+    const mask = this.mask();
+    if (!mask) return;
 
     const { prefix, suffix } = this.mergedMaskConfig;
-    const { min, max, variable } = analyzeMaskDisplayLength(this.mask, { prefix, suffix });
+    const { min, max, variable } = analyzeMaskDisplayLength(mask, { prefix, suffix });
+    const name = this.name() || 'textarea';
 
     // Only emit hard errors when we have a deterministic range
     if (!variable) {
-      if (this.minLength > -1 && this.minLength > max) {
+      if (this.minLength() > -1 && this.minLength() > max) {
         console.error(
-          `[ngx-formidable] <${this.name || 'textarea'}>: minlength=${this.minLength} exceeds mask's max display length=${max} (mask="${this.mask}", prefix="${prefix ?? ''}", suffix="${suffix ?? ''}").`
+          `[ngx-formidable] <${name}>: minlength=${this.minLength()} exceeds mask's max display length=${max} (mask="${mask}", prefix="${prefix ?? ''}", suffix="${suffix ?? ''}").`
         );
       }
-      if (this.maxLength > -1 && this.maxLength < min) {
+      if (this.maxLength() > -1 && this.maxLength() < min) {
         console.error(
-          `[ngx-formidable] <${this.name || 'textarea'}>: maxlength=${this.maxLength} is below mask's min display length=${min} (mask="${this.mask}", prefix="${prefix ?? ''}", suffix="${suffix ?? ''}").`
+          `[ngx-formidable] <${name}>: maxlength=${this.maxLength()} is below mask's min display length=${min} (mask="${mask}", prefix="${prefix ?? ''}", suffix="${suffix ?? ''}").`
         );
       }
     } else {
       // Optional: gentle heads-up for variable masks
-      if (this.minLength > -1 || this.maxLength > -1) {
+      if (this.minLength() > -1 || this.maxLength() > -1) {
         console.warn(
-          `[ngx-formidable] <${this.name || 'textarea'}>: mask "${this.mask}" has variable length; exact comparison with minlength/maxlength is not deterministic.`
+          `[ngx-formidable] <${name}>: mask "${mask}" has variable length; exact comparison with minlength/maxlength is not deterministic.`
         );
       }
     }
   }
 
   private get textareaElement(): HTMLTextAreaElement | null {
-    return (this.mask ? this.maskedTextareaRef?.nativeElement : this.plainTextareaRef?.nativeElement) ?? null;
+    return (this.mask() ? this.maskedTextareaRef()?.nativeElement : this.plainTextareaRef()?.nativeElement) ?? null;
   }
 
   // #endregion
 
   private autoResize(): void {
-    if (!this.enableAutosize) return;
+    if (!this.enableAutosize()) return;
 
     const el = this.textareaElement;
     if (!el) return;
@@ -271,12 +274,13 @@ export class TextareaFieldComponent
   }
 
   private adjustLayout(): void {
-    // Reads resolved styles, so it has to wait for the suffix to render — a microtask runs before
-    // change detection.
+    // Reads resolved styles, so it has to wait for the suffix to render. Neither caller notifies the
+    // scheduler, so the timer is not queued behind a pass: `ngAfterViewInit` runs inside one, and the mask
+    // effect's microtask reads padding off DOM `doWriteValue` wrote directly. A timer is what clears both.
     setTimeout(() => {
       // adjust length indicator, so that it also aligns right even if a suffix is set
       const el = this.textareaElement;
-      const indicator = this.lengthIndicatorRef?.nativeElement;
+      const indicator = this.lengthIndicatorRef()?.nativeElement;
       if (!el || !indicator) return;
       const style = window.getComputedStyle(el);
       indicator.style.right = style.paddingRight;

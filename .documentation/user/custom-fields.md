@@ -18,7 +18,7 @@ Register the component as `FORMIDABLE_FIELD` and it immediately gains:
 | Required marker                              | `showRequiredMarker`, inherited from the base                              |
 | Focus and `autoFocus`                        | `focus()`, inherited from the base                                         |
 | Accessible names                             | `labelledBy`, `describedBy` and `isInvalid`, protected getters on the base |
-| Keyboard, outside-click and resize listeners | The base, registered outside the Angular zone                              |
+| Keyboard, outside-click and resize listeners | The base, through RxJS `fromEvent`                                         |
 
 ---
 
@@ -28,8 +28,8 @@ Extend `BaseFieldDirective<T>` — `T` is the field's value type — and registe
 
 ```ts
 providers: [
-  { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => MyFieldComponent), multi: true },
-  { provide: FORMIDABLE_FIELD, useExisting: MyFieldComponent }
+	{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => MyFieldComponent), multi: true },
+	{ provide: FORMIDABLE_FIELD, useExisting: MyFieldComponent }
 ];
 ```
 
@@ -62,120 +62,118 @@ Call the protected `onValueChange()` whenever the user changes the value: it emi
 
 ---
 
-## A Worked Example
+## A Working Example
 
 A counter: it holds a number rather than a string, steps with the arrow keys, and always renders something where the value goes. Those are the three things a plain text field does not have to deal with.
 
 ```ts
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, signal, viewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BaseFieldDirective, FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableField } from '@cynthion/ngx-formidable';
 
 @Component({
-  selector: 'example-counter-field',
-  templateUrl: './example-counter-field.component.html',
-  styleUrls: ['./example-counter-field.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  providers: [
-    // required for ControlValueAccessor to work with Angular forms
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => ExampleCounterFieldComponent),
-      multi: true
-    },
-    // required to provide this component as IFormidableField
-    {
-      provide: FORMIDABLE_FIELD,
-      useExisting: ExampleCounterFieldComponent
-    }
-  ]
+	selector: 'example-counter-field',
+	templateUrl: './example-counter-field.component.html',
+	styleUrls: ['./example-counter-field.component.scss'],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	providers: [
+		// required for ControlValueAccessor to work with Angular forms
+		{
+			provide: NG_VALUE_ACCESSOR,
+			useExisting: forwardRef(() => ExampleCounterFieldComponent),
+			multi: true
+		},
+		// required to provide this component as IFormidableField
+		{
+			provide: FORMIDABLE_FIELD,
+			useExisting: ExampleCounterFieldComponent
+		}
+	]
 })
 export class ExampleCounterFieldComponent extends BaseFieldDirective<number> implements IFormidableField<number> {
-  @ViewChild('counterRef', { static: true }) counterRef!: ElementRef<HTMLDivElement>;
+	readonly counterRef = viewChild.required<ElementRef<HTMLDivElement>>('counterRef');
 
-  protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
-  protected registeredKeys = ['ArrowUp', 'ArrowDown'];
+	protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
+	protected externalClickCallback = null;
+	protected windowResizeScrollCallback = null;
+	protected registeredKeys = ['ArrowUp', 'ArrowDown'];
 
-  @Input() min = 0;
-  @Input() max = 10;
-  @Input() step = 1;
+	public readonly min = input(0);
+	public readonly max = input(10);
+	public readonly step = input(1);
 
-  private _value = 0;
+	private readonly _value = signal(0);
 
-  protected doOnValueChange(): void {
-    // No additional actions needed
-  }
+	protected doOnValueChange(): void {
+		// No additional actions needed
+	}
 
-  protected doOnFocusChange(_isFocused: boolean): void {
-    // No additional actions needed
-  }
+	protected doOnFocusChange(_isFocused: boolean): void {
+		// No additional actions needed
+	}
 
-  // The base already filters the key stream on focus, readonly and disabled.
-  private handleKeydown(event: KeyboardEvent): void {
-    switch (event.key) {
-      case 'ArrowUp':
-        this.increment();
-        break;
-      case 'ArrowDown':
-        this.decrement();
-        break;
-    }
-  }
+	// The base already filters the key stream on focus, readonly and disabled.
+	private handleKeydown(event: KeyboardEvent): void {
+		switch (event.key) {
+			case 'ArrowUp':
+				this.increment();
+				break;
+			case 'ArrowDown':
+				this.decrement();
+				break;
+		}
+	}
 
-  // #region ControlValueAccessor
+	// #region ControlValueAccessor
 
-  protected doWriteValue(value: number): void {
-    this._value = this.clamp(typeof value === 'number' && !Number.isNaN(value) ? value : this.min);
-  }
+	protected doWriteValue(value: number): void {
+		this._value.set(this.clamp(typeof value === 'number' && !Number.isNaN(value) ? value : this.min()));
+	}
 
-  // #endregion
+	// #endregion
 
-  // #region IFormidableField
+	// #region IFormidableField
 
-  get value(): number {
-    return this._value;
-  }
+	get value(): number {
+		return this._value();
+	}
 
-  get fieldRef(): ElementRef<HTMLElement> {
-    return this.counterRef as ElementRef<HTMLElement>;
-  }
+	get fieldRef(): ElementRef<HTMLElement> {
+		return this.counterRef() as ElementRef<HTMLElement>;
+	}
 
-  // The counter always renders a number where the value goes, so a resting label would land on top of it.
-  protected override get showsEmptyValueHint(): boolean {
-    return true;
-  }
+	// The counter always renders a number where the value goes, so a resting label would land on top of it.
+	protected override readonly showsEmptyValueHint = signal(true);
 
-  decoratorLayout: FieldDecoratorLayout = 'horizontal';
+	decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
-  // #endregion
+	// #endregion
 
-  public increment(): void {
-    this.setValue(this._value + this.step);
-  }
+	public increment(): void {
+		this.setValue(this._value() + this.step());
+	}
 
-  public decrement(): void {
-    this.setValue(this._value - this.step);
-  }
+	public decrement(): void {
+		this.setValue(this._value() - this.step());
+	}
 
-  protected onButtonPointerDown(event: PointerEvent): void {
-    // Keeps the focus on the field rather than letting it land on the button.
-    event.preventDefault();
-    this.focus();
-  }
+	protected onButtonPointerDown(event: PointerEvent): void {
+		// Keeps the focus on the field rather than letting it land on the button.
+		event.preventDefault();
+		this.focus();
+	}
 
-  private setValue(next: number): void {
-    if (this.readonly || this.disabled) return;
+	private setValue(next: number): void {
+		if (this.readonly() || this.disabled()) return;
 
-    this._value = this.clamp(next);
-    this.onValueChange(); // emits, and reports the value to the bound control
-  }
+		this._value.set(this.clamp(next));
+		this.onValueChange(); // emits, and reports the value to the bound control
+	}
 
-  private clamp(value: number): number {
-    return Math.max(this.min, Math.min(this.max, value));
-  }
+	private clamp(value: number): number {
+		return Math.max(this.min(), Math.min(this.max(), value));
+	}
 }
 ```
 
@@ -183,46 +181,46 @@ The template carries the focus handlers and the accessibility attributes. `label
 
 ```html
 <div
-  #counterRef
-  role="spinbutton"
-  class="counter"
-  [tabindex]="disabled ? -1 : 0"
-  [class.is-readonly]="readonly"
-  [class.is-disabled]="disabled"
-  [attr.aria-valuenow]="value"
-  [attr.aria-valuemin]="min"
-  [attr.aria-valuemax]="max"
-  [attr.aria-labelledby]="labelledBy"
-  [attr.aria-describedby]="describedBy"
-  [attr.aria-required]="showRequiredMarker || null"
-  [attr.aria-invalid]="isInvalid || null"
-  [attr.aria-readonly]="readonly || null"
-  [attr.aria-disabled]="disabled || null"
-  (focus)="onFocusChange(true)"
-  (blur)="onFocusChange(false)">
-  <button
-    type="button"
-    tabindex="-1"
-    aria-hidden="true"
-    class="counter-button"
-    [disabled]="readonly || disabled || value <= min"
-    (pointerdown)="onButtonPointerDown($event)"
-    (click)="decrement()">
-    &minus;
-  </button>
+	#counterRef
+	role="spinbutton"
+	class="counter"
+	[tabindex]="disabled ? -1 : 0"
+	[class.is-readonly]="readonly"
+	[class.is-disabled]="disabled"
+	[attr.aria-valuenow]="value"
+	[attr.aria-valuemin]="min"
+	[attr.aria-valuemax]="max"
+	[attr.aria-labelledby]="labelledBy"
+	[attr.aria-describedby]="describedBy"
+	[attr.aria-required]="showRequiredMarker || null"
+	[attr.aria-invalid]="isInvalid || null"
+	[attr.aria-readonly]="readonly || null"
+	[attr.aria-disabled]="disabled || null"
+	(focus)="onFocusChange(true)"
+	(blur)="onFocusChange(false)">
+	<button
+		type="button"
+		tabindex="-1"
+		aria-hidden="true"
+		class="counter-button"
+		[disabled]="readonly || disabled || value <= min"
+		(pointerdown)="onButtonPointerDown($event)"
+		(click)="decrement()">
+		&minus;
+	</button>
 
-  <span class="counter-value">{{ value }}</span>
+	<span class="counter-value">{{ value }}</span>
 
-  <button
-    type="button"
-    tabindex="-1"
-    aria-hidden="true"
-    class="counter-button"
-    [disabled]="readonly || disabled || value >= max"
-    (pointerdown)="onButtonPointerDown($event)"
-    (click)="increment()">
-    +
-  </button>
+	<button
+		type="button"
+		tabindex="-1"
+		aria-hidden="true"
+		class="counter-button"
+		[disabled]="readonly || disabled || value >= max"
+		(pointerdown)="onButtonPointerDown($event)"
+		(click)="increment()">
+		+
+	</button>
 </div>
 ```
 
@@ -232,16 +230,16 @@ A custom field styles itself; the library's SCSS surface is closed. What is open
 
 ```scss
 .counter {
-  height: var(--formidable-field-height, 56px);
-  // The decorator publishes these two on the field's host when a prefix or a suffix is projected.
-  padding-right: var(--formidable-field-suffix-inset, var(--formidable-field-padding-x, 16px));
-  padding-left: var(--formidable-field-prefix-inset, var(--formidable-field-padding-x, 16px));
-  // Set by the decorator while a label sits inside the field, so the value clears it. Zero otherwise.
-  padding-top: var(--formidable-field-value-padding-top, 0);
-  color: var(--formidable-color-field-text, #1e293b);
-  background: var(--formidable-color-field-background, #f8fafc);
-  border: var(--formidable-field-border-thickness, 1px) solid var(--formidable-color-field-border, #94a3b8);
-  border-radius: var(--formidable-field-border-radius, var(--formidable-border-radius, 8px));
+	height: var(--formidable-field-height, 56px);
+	// The decorator publishes these two on the field's host when a prefix or a suffix is projected.
+	padding-right: var(--formidable-field-suffix-inset, var(--formidable-field-padding-x, 16px));
+	padding-left: var(--formidable-field-prefix-inset, var(--formidable-field-padding-x, 16px));
+	// Set by the decorator while a label sits inside the field, so the value clears it. Zero otherwise.
+	padding-top: var(--formidable-field-value-padding-top, 0);
+	color: var(--formidable-color-field-text, #1e293b);
+	background: var(--formidable-color-field-background, #f8fafc);
+	border: var(--formidable-field-border-thickness, 1px) solid var(--formidable-color-field-border, #94a3b8);
+	border-radius: var(--formidable-field-border-radius, var(--formidable-border-radius, 8px));
 }
 ```
 
@@ -253,15 +251,15 @@ Exactly like a built-in field:
 
 ```html
 <formidable-field-decorator>
-  <example-counter-field
-    formidableFieldErrors
-    name="pets"
-    [min]="0"
-    [max]="10"
-    [showRequiredMarker]="true"
-    [ngModel]="model.pets" />
-  <div formidableFieldLabel>Pets</div>
-  <div formidableFieldHint>Arrow keys step it</div>
+	<example-counter-field
+		formidableFieldErrors
+		name="pets"
+		[min]="0"
+		[max]="10"
+		[showRequiredMarker]="true"
+		[ngModel]="model.pets" />
+	<div formidableFieldLabel>Pets</div>
+	<div formidableFieldHint>Arrow keys step it</div>
 </formidable-field-decorator>
 ```
 
@@ -275,34 +273,42 @@ An option is a component too. Extend `FieldOptionComponent`, register `FORMIDABL
 
 ```ts
 @Component({
-  selector: 'example-fuzzy-option',
-  templateUrl: './example-fuzzy-option.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  providers: [
-    // required to provide this component as IFormidableOption
-    {
-      provide: FORMIDABLE_OPTION,
-      useExisting: forwardRef(() => ExampleFuzzyOptionComponent)
-    }
-  ]
+	selector: 'example-fuzzy-option',
+	templateUrl: './example-fuzzy-option.component.html',
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	providers: [
+		// required to provide this component as IFormidableOption
+		{
+			provide: FORMIDABLE_OPTION,
+			useExisting: forwardRef(() => ExampleFuzzyOptionComponent)
+		}
+	]
 })
 export class ExampleFuzzyOptionComponent extends FieldOptionComponent {
-  @Input() subtitle?: string;
-  @Input() highlightedEntries?: HighlightedEntries;
+	readonly subtitle = input<string | undefined>('sub');
+
+	readonly highlightedEntries = input<HighlightedEntries>({
+		labelEntries: [],
+		subtitleEntries: []
+	});
 }
 ```
 
 The projected content goes in an `ng-template`, which is what the parent field renders in the option's place:
 
 ```html
-<div (click)="select ? select() : null">
-  <ng-template #contentTemplate>
-    <p class="option-label">{{ label }}</p>
-    <p class="option-subtitle">{{ subtitle }}</p>
-  </ng-template>
+<div>
+	<ng-template #contentTemplate>
+		<p class="option-label">{{ label() }}</p>
+		<p class="option-subtitle">{{ subtitle() }}</p>
+	</ng-template>
 </div>
 ```
+
+Only the `ng-template` is rendered, in the option's place inside the field — the component's own host element never reaches the DOM, so nothing outside that template is drawn or clickable.
+
+What `FORMIDABLE_OPTION` provides is `IFormidableOptionSource`: one `option` computed holding the plain `IFormidableOption` the owning field reads off the component. `FieldOptionComponent` implements it, so extending it is all that is needed and a subclass's own inputs are for its template. Writing an option component from scratch means providing `option` yourself. Either way what a field receives is plain data — the same shape its `options` input takes.
 
 The option's ARIA role is not its own to choose — it comes from the parent field, so an option inside a listbox is an `option` and one inside a radio group is a `radio`. `layout` is a look, not a role.
 

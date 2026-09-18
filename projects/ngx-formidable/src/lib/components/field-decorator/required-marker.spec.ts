@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -27,8 +27,8 @@ import { FieldDecoratorComponent } from './field-decorator.component';
  */
 
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator [style.width.rem]="width">
       <formidable-input-field
@@ -54,8 +54,8 @@ class InputHostComponent {
 
 /** A group renders its label as a plain `div` instead of a `label`, so the marker has to reach both. */
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, RadioGroupFieldComponent, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field
@@ -73,8 +73,8 @@ class RadioGroupHostComponent {}
 
 /** The form-wide switch: one flag hides every marker on the form, whatever its fields asked for. */
 @Component({
-  standalone: true,
   imports: [FormsModule, NgxFormidableFormDirective, FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm

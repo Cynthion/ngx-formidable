@@ -1,24 +1,27 @@
 import {
   AfterViewInit,
-  ChangeDetectorRef,
+  computed,
   Directive,
   ElementRef,
-  EventEmitter,
   HostBinding,
   inject,
   Injector,
-  Input,
-  NgZone,
+  input,
+  model,
   OnDestroy,
   OnInit,
-  Output
+  output,
+  signal,
+  Signal
 } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NgControl } from '@angular/forms';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
-import { v4 as uuid } from 'uuid';
 import { openPanelPosition } from '../../helpers/position.helpers';
 import { FieldDecoratorLayout, IFormidableField } from '../../models/formidable.model';
 import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
+
+// Seeds every id the library mints.
+let nextFieldId = 0;
 
 /**
  * The base class a custom field extends. It supplies the value and focus channels, the `ControlValueAccessor`
@@ -47,18 +50,15 @@ export abstract class BaseFieldDirective<T = string | null>
    */
   protected abstract registeredKeys: string[];
 
-  protected id = uuid();
-  protected isFieldFocused = false;
-  protected isFieldFilled = false;
+  protected id = `formidable-field-${nextFieldId++}`;
+  protected readonly isFieldFocused = signal(false);
+  protected readonly isFieldFilled = signal(false);
   protected valueChangeSubject$ = new Subject<T>();
   protected focusChangeSubject$ = new Subject<boolean>();
-
-  protected readonly ngZone: NgZone = inject(NgZone);
 
   // Element injectors follow the declaring template, so a projected field really does see its decorator.
   // Optional: a field used on its own has no label, hint or errors to point at.
   private readonly decorator = inject(FieldDecoratorComponent, { optional: true });
-  protected readonly cdRef = inject(ChangeDetectorRef);
   private readonly injector = inject(Injector);
 
   private ngControl?: NgControl | null;
@@ -103,7 +103,7 @@ export abstract class BaseFieldDirective<T = string | null>
   ngAfterViewInit(): void {
     // Focusing inside the change detection pass flips `isFieldFocused`, which the decorator reads through
     // `canLabelRest` — an ExpressionChanged error. A microtask lands after the pass, with the refs resolved.
-    if (this.autoFocus) queueMicrotask(() => this.focus());
+    if (this.autoFocus()) queueMicrotask(() => this.focus());
   }
 
   ngOnDestroy(): void {
@@ -117,7 +117,7 @@ export abstract class BaseFieldDirective<T = string | null>
     if (value == this._valuePrevious) return;
     this._valuePrevious = value;
 
-    this.isFieldFilled = BaseFieldDirective.isFilled(value);
+    this.isFieldFilled.set(BaseFieldDirective.isFilled(value));
 
     this.valueChangeSubject$.next(value);
     this.valueChanged.emit(value);
@@ -127,9 +127,9 @@ export abstract class BaseFieldDirective<T = string | null>
   }
 
   protected onFocusChange(isFocused: boolean): void {
-    if (this.disabled) return;
+    if (this.disabled()) return;
 
-    this.isFieldFocused = isFocused;
+    this.isFieldFocused.set(isFocused);
 
     this.focusChangeSubject$.next(isFocused);
     this.focusChanged.emit(isFocused);
@@ -205,7 +205,7 @@ export abstract class BaseFieldDirective<T = string | null>
   }
 
   writeValue(value: T): void {
-    this.isFieldFilled = BaseFieldDirective.isFilled(value);
+    this.isFieldFilled.set(BaseFieldDirective.isFilled(value));
     // What the field now displays, so `onValueChange` compares against it and not against the last value a
     // user typed. Without this a written-in value cleared by a user reads as no change, and never reaches
     // the model.
@@ -224,7 +224,7 @@ export abstract class BaseFieldDirective<T = string | null>
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
+    this.disabled.set(isDisabled);
   }
 
   /**
@@ -238,25 +238,28 @@ export abstract class BaseFieldDirective<T = string | null>
   // #region IFormidableField
 
   /** The control's name, which is also the key it takes in the model and its validation target. */
-  @Input() name = '';
+  public readonly name = input('');
 
   /** Placeholder text. A field with one has nothing for an `inside` label to rest in, so that label floats. */
-  @Input() placeholder = '';
+  public readonly placeholder = input('');
 
   /** Blocks edits but stays focusable and keeps its focus ring, unlike `disabled`. */
-  @Input() readonly = false;
+  public readonly readonly = input(false);
 
-  /** Blocks edits and takes the field out of the tab order. Also set by Angular's own `disabled` handling. */
-  @Input() disabled = false;
+  /**
+   * Blocks edits and takes the field out of the tab order. A `model` and not an `input`, because Angular's
+   * own `setDisabledState` writes it as well — so `disabledChange` also reports a `control.disable()`.
+   */
+  public readonly disabled = model(false);
 
   /**
    * Suffixes the required marker to the label. Presentational only — nothing is inferred from a validator,
    * so this and the rules are the consumer's to keep in step. The form can switch all of them off at once.
    */
-  @Input() showRequiredMarker = false;
+  public readonly showRequiredMarker = input(false);
 
   /** Focuses the field once it has rendered. Does not open a panel. */
-  @Input() autoFocus = false;
+  public readonly autoFocus = input(false);
 
   /** For the decorator, which subscribes on the way in. `valueChanged` is the same signal for a consumer. */
   public valueChange$ = this.valueChangeSubject$.asObservable();
@@ -265,10 +268,10 @@ export abstract class BaseFieldDirective<T = string | null>
   public focusChange$ = this.focusChangeSubject$.asObservable();
 
   /** Emits the committed value on every change. Distinct-checked, so writing the same value twice is silent. */
-  @Output() public valueChanged = new EventEmitter<T>();
+  public readonly valueChanged = output<T>();
 
   /** Emits `true` on focus and `false` on blur — including a blur the field caused itself. */
-  @Output() public focusChanged = new EventEmitter<boolean>();
+  public readonly focusChanged = output<boolean>();
 
   get fieldId(): string {
     return this.id;
@@ -279,9 +282,8 @@ export abstract class BaseFieldDirective<T = string | null>
   // The decorator owns the label, the hint and the errors, so it is what mints the ids these point at.
 
   /** Binds `aria-labelledby` for a control a `<label for>` cannot reach: the groups, the toggle, the slider. */
-  // Read once per repaint of this `OnPush` field, so a label added or removed at runtime (an `@if` around
-  // it) only lands the next time the field is checked. Every other projected decoration is the decorator's
-  // own to render, which is why it is the decorator — and not the field — that is not `OnPush`.
+  // Reads the decorator's `contentChild()` query through its getter, so a label added or removed at
+  // runtime (an `@if` around it) marks this field on the pass that resolves the query.
   protected get labelledBy(): string | null {
     return this.decorator?.labelledById ?? null;
   }
@@ -302,13 +304,6 @@ export abstract class BaseFieldDirective<T = string | null>
     return `${this.fieldId}-panel`;
   }
 
-  /** Repaints the field. Called by the errors directive when validity changes, so `aria-invalid` follows it. */
-  // Validity lives in the errors component, whose own `markForCheck` marks its ancestors and never this
-  // sibling — so `FieldErrorsDirective` calls this as well, or `aria-invalid` would bind once and go stale.
-  public markForCheck(): void {
-    this.cdRef.markForCheck();
-  }
-
   // #endregion
 
   /** What the field currently holds, read straight off whatever it renders rather than cached. */
@@ -318,24 +313,23 @@ export abstract class BaseFieldDirective<T = string | null>
     return typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
   }
 
-  get canLabelRest(): boolean {
+  public readonly canLabelRest = computed(() => {
     // Readonly/disabled fields never rest — the label stays put instead of
     // dropping over the (often filled) value when the field gains focus.
-    if (this.disabled || this.readonly) return false;
+    if (this.disabled() || this.readonly()) return false;
     // Only what the field renders of its own accord counts here — its value, or mask slots. A
     // `placeholder` is the decorator's to weigh, because whether it blocks a resting label or is hidden
     // behind one depends on the label's position, which this field cannot see.
-    return !this.isFieldFocused && !this.isFieldFilled && !this.showsEmptyValueHint;
-  }
+    return !this.isFieldFocused() && !this.isFieldFilled() && !this.showsEmptyValueHint();
+  });
 
   /**
    * Whether the field renders something where the value goes even while it has no value (e.g. mask
    * slots), which a resting label would collide with. Overridden by the fields that do.
    */
-  // eslint-disable-next-line @typescript-eslint/class-literal-property-style
-  protected get showsEmptyValueHint(): boolean {
-    return false;
-  }
+  // A signal and not a getter, because `canLabelRest` is a `computed` over it: a computed caches, so a
+  // plain getter here would pin whatever it returned the first time the label state was resolved.
+  protected readonly showsEmptyValueHint: Signal<boolean> = signal(false);
 
   /** The field's outer element. The decorator measures it, and the global listeners are scoped to it. */
   abstract fieldRef: ElementRef<HTMLElement>;
@@ -353,14 +347,14 @@ export abstract class BaseFieldDirective<T = string | null>
 
   /** Focuses the field without opening its panel — no panel field opens on focus. */
   public focus(): void {
-    if (this.disabled) return;
+    if (this.disabled()) return;
 
     this.focusElement?.focus();
   }
 
   /** Keeps a readonly or disabled field from being edited by pointer, while leaving it focusable. */
   protected preventPointerDown(event: PointerEvent): void {
-    if (!this.readonly && !this.disabled) return;
+    if (!this.readonly() && !this.disabled()) return;
 
     event.preventDefault();
     // Waits for the browser's default pointerdown handling: `preventDefault` suppresses the native focus,
@@ -370,7 +364,7 @@ export abstract class BaseFieldDirective<T = string | null>
 
   /** Blocks the keys a native control would act on while readonly or disabled — a `select`, a range input. */
   protected preventKeydown(event: KeyboardEvent): void {
-    if (!this.readonly && !this.disabled) return;
+    if (!this.readonly() && !this.disabled()) return;
 
     const nativeSelectKeys = [
       'ArrowUp',
@@ -393,53 +387,47 @@ export abstract class BaseFieldDirective<T = string | null>
 
   // #endregion
 
+  // No `NgZone` anywhere: what these callbacks change is signals, and a signal write notifies the change
+  // detection scheduler from any callstack. See `tech/architecture.md` for what that costs a consumer who
+  // opts back into zone change detection.
   private registerGlobalListeners(): void {
-    if (this.keyboardCallback || this.externalClickCallback || this.windowResizeScrollCallback) {
-      this.ngZone.runOutsideAngular(() => {
-        if (this.keyboardCallback && this.registeredKeys.length > 0) {
-          fromEvent<KeyboardEvent>(this.fieldRef.nativeElement, 'keydown')
-            .pipe(
-              filter(() => this.isFieldFocused && !this.readonly && !this.disabled),
-              filter((event) => this.registeredKeys.includes(event.key)),
-              tap((event) => {
-                // immediately prevent default, before debounceTime
-                if (event.key !== 'Tab' && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')
-                  event.preventDefault();
-              }),
-              takeUntil(this.destroy$)
-            )
-            .subscribe((event: KeyboardEvent) =>
-              this.ngZone.run(() => {
-                this.keyboardCallback?.(event);
-              })
-            );
-        }
+    if (this.keyboardCallback && this.registeredKeys.length > 0) {
+      fromEvent<KeyboardEvent>(this.fieldRef.nativeElement, 'keydown')
+        .pipe(
+          filter(() => this.isFieldFocused() && !this.readonly() && !this.disabled()),
+          filter((event) => this.registeredKeys.includes(event.key)),
+          tap((event) => {
+            // immediately prevent default, before debounceTime
+            if (event.key !== 'Tab' && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') event.preventDefault();
+          }),
+          takeUntil(this.destroy$)
+        )
+        .subscribe((event: KeyboardEvent) => this.keyboardCallback?.(event));
+    }
 
-        if (this.externalClickCallback) {
-          fromEvent<MouseEvent>(document, 'click')
-            .pipe(
-              filter((event) => {
-                const path = event.composedPath?.() ?? [];
+    if (this.externalClickCallback) {
+      fromEvent<MouseEvent>(document, 'click')
+        .pipe(
+          filter((event) => {
+            const path = event.composedPath?.() ?? [];
 
-                // accept clicks that bubble through any part of the field (like panel)
-                const isInside = path.some((el) => el instanceof Node && this.fieldRef.nativeElement.contains(el));
+            // accept clicks that bubble through any part of the field (like panel)
+            const isInside = path.some((el) => el instanceof Node && this.fieldRef.nativeElement.contains(el));
 
-                return !isInside;
-              }),
-              takeUntil(this.destroy$)
-            )
-            .subscribe(() => this.ngZone.run(() => this.externalClickCallback?.()));
-        }
+            return !isInside;
+          }),
+          takeUntil(this.destroy$)
+        )
+        .subscribe(() => this.externalClickCallback?.());
+    }
 
-        if (this.windowResizeScrollCallback) {
-          const resize$ = fromEvent(window, 'resize');
-          const scroll$ = fromEvent(window, 'scroll');
+    if (this.windowResizeScrollCallback) {
+      const resize$ = fromEvent(window, 'resize');
+      const scroll$ = fromEvent(window, 'scroll');
 
-          merge(resize$, scroll$)
-            .pipe(debounceTime(50), takeUntil(this.destroy$))
-            .subscribe(() => this.ngZone.run(() => this.windowResizeScrollCallback?.()));
-        }
-      });
+      merge(resize$, scroll$)
+        .pipe(debounceTime(50), takeUntil(this.destroy$))
+        .subscribe(() => this.windowResizeScrollCallback?.());
     }
   }
 }

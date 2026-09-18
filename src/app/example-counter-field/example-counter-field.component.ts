@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, signal, viewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BaseFieldDirective, FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableField } from '@cynthion/ngx-formidable';
 
@@ -29,7 +29,7 @@ import { BaseFieldDirective, FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidable
   ]
 })
 export class ExampleCounterFieldComponent extends BaseFieldDirective<number> implements IFormidableField<number> {
-  @ViewChild('counterRef', { static: true }) counterRef!: ElementRef<HTMLDivElement>;
+  readonly counterRef = viewChild.required<ElementRef<HTMLDivElement>>('counterRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
@@ -37,15 +37,15 @@ export class ExampleCounterFieldComponent extends BaseFieldDirective<number> imp
   protected registeredKeys = ['ArrowUp', 'ArrowDown'];
 
   /** Lowest value the counter steps to. */
-  @Input() min = 0;
+  public readonly min = input(0);
 
   /** Highest value the counter steps to. */
-  @Input() max = 10;
+  public readonly max = input(10);
 
   /** How much one step moves the value. */
-  @Input() step = 1;
+  public readonly step = input(1);
 
-  private _value = 0;
+  private readonly _value = signal(0);
 
   protected doOnValueChange(): void {
     // No additional actions needed
@@ -70,7 +70,7 @@ export class ExampleCounterFieldComponent extends BaseFieldDirective<number> imp
   // #region ControlValueAccessor
 
   protected doWriteValue(value: number): void {
-    this._value = this.clamp(typeof value === 'number' && !Number.isNaN(value) ? value : this.min);
+    this._value.set(this.clamp(typeof value === 'number' && !Number.isNaN(value) ? value : this.min()));
   }
 
   // #endregion
@@ -78,17 +78,15 @@ export class ExampleCounterFieldComponent extends BaseFieldDirective<number> imp
   // #region IFormidableField
 
   get value(): number {
-    return this._value;
+    return this._value();
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.counterRef as ElementRef<HTMLElement>;
+    return this.counterRef() as ElementRef<HTMLElement>;
   }
 
   // The counter always renders a number where the value goes, so a resting label would land on top of it.
-  protected override get showsEmptyValueHint(): boolean {
-    return true;
-  }
+  protected override readonly showsEmptyValueHint = signal(true);
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
@@ -96,12 +94,12 @@ export class ExampleCounterFieldComponent extends BaseFieldDirective<number> imp
 
   /** Steps the value up by `step`, stopping at `max`. No-op while readonly or disabled. */
   public increment(): void {
-    this.setValue(this._value + this.step);
+    this.setValue(this._value() + this.step());
   }
 
   /** Steps the value down by `step`, stopping at `min`. No-op while readonly or disabled. */
   public decrement(): void {
-    this.setValue(this._value - this.step);
+    this.setValue(this._value() - this.step());
   }
 
   protected onButtonPointerDown(event: PointerEvent): void {
@@ -111,13 +109,13 @@ export class ExampleCounterFieldComponent extends BaseFieldDirective<number> imp
   }
 
   private setValue(next: number): void {
-    if (this.readonly || this.disabled) return;
+    if (this.readonly() || this.disabled()) return;
 
-    this._value = this.clamp(next);
+    this._value.set(this.clamp(next));
     this.onValueChange(); // emits, and reports the value to the bound control
   }
 
   private clamp(value: number): number {
-    return Math.max(this.min, Math.min(this.max, value));
+    return Math.max(this.min(), Math.min(this.max(), value));
   }
 }

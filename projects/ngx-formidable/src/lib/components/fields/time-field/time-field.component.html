@@ -1,9 +1,9 @@
 <div
   #timeRef
   class="field"
-  [class.is-readonly]="readonly"
-  [class.is-disabled]="disabled"
-  [class.focused]="isFieldFocused">
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
+  [class.focused]="isFieldFocused()">
   <div class="input-wrapper">
     <!-- Input Field -->
     <input
@@ -11,20 +11,20 @@
       type="text"
       autocomplete="off"
       class="wrapped-input"
-      [mask]="ngxMask"
+      [mask]="ngxMask()"
       [showMaskTyped]="ngxMaskConfig.showMaskTyped"
       [leadZeroDateTime]="ngxMaskConfig.leadZeroDateTime"
       [dropSpecialCharacters]="ngxMaskConfig.dropSpecialCharacters"
       [id]="fieldId"
-      [placeholder]="placeholder"
-      [attr.name]="name"
-      [attr.readonly]="readonly ? '' : null"
-      [attr.disabled]="disabled ? '' : null"
-      [attr.tabindex]="readonly || disabled ? -1 : null"
-      [attr.aria-required]="showRequiredMarker || null"
+      [placeholder]="placeholder()"
+      [attr.name]="name()"
+      [attr.readonly]="readonly() ? '' : null"
+      [attr.disabled]="disabled() ? '' : null"
+      [attr.tabindex]="readonly() || disabled() ? -1 : null"
+      [attr.aria-required]="showRequiredMarker() || null"
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
-      [attr.aria-readonly]="readonly || null"
+      [attr.aria-readonly]="readonly() || null"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />

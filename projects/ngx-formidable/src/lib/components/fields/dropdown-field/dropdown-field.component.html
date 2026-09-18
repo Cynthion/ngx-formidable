@@ -1,14 +1,14 @@
 <div
   #dropdownRef
   class="field"
-  [class.is-readonly]="readonly"
-  [class.is-disabled]="disabled"
-  [class.focused]="isFieldFocused">
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
+  [class.focused]="isFieldFocused()">
   <div
     class="input-wrapper"
-    (mousedown)="!readonly && !disabled ? toggleMouseDown($event) : null"
-    (pointerdown)="readonly || disabled ? preventPointerDown($event) : null"
-    (keydown)="readonly || disabled ? preventKeydown($event) : null">
+    (mousedown)="!readonly() && !disabled() ? toggleMouseDown($event) : null"
+    (pointerdown)="readonly() || disabled() ? preventPointerDown($event) : null"
+    (keydown)="readonly() || disabled() ? preventKeydown($event) : null">
     <!-- Input Field -->
     <input
       #inputRef
@@ -17,31 +17,31 @@
       role="combobox"
       class="wrapped-input"
       [id]="fieldId"
-      [placeholder]="placeholder"
-      [value]="selectedOption?.label"
-      [attr.name]="name"
+      [placeholder]="placeholder()"
+      [value]="selectedOption()?.label ?? null"
+      [attr.name]="name()"
       [attr.readonly]="true"
-      [attr.disabled]="disabled ? '' : null"
-      [attr.tabindex]="readonly || disabled ? -1 : null"
-      [attr.aria-required]="showRequiredMarker || null"
+      [attr.disabled]="disabled() ? '' : null"
+      [attr.tabindex]="readonly() || disabled() ? -1 : null"
+      [attr.aria-required]="showRequiredMarker() || null"
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
-      [attr.aria-readonly]="readonly || null"
-      [attr.aria-expanded]="isPanelOpen"
+      [attr.aria-readonly]="readonly() || null"
+      [attr.aria-expanded]="isPanelOpen()"
       [attr.aria-controls]="panelId"
-      [attr.aria-activedescendant]="optionId((highlightedOptionIndex$ | async) ?? -1)"
+      [attr.aria-activedescendant]="optionId(highlightedOptionIndex())"
       (keydown)="onTypeaheadKeydown($event)"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
 
     <!-- Toggle -->
-    @if (!readonly && !disabled) {
+    @if (!readonly() && !disabled()) {
       <span
         #toggleRef
         class="dropdown-toggle"
-        [class.open]="isPanelOpen"
-        [class.arrow-down]="!isPanelOpen"
-        [class.arrow-up]="isPanelOpen">
+        [class.open]="isPanelOpen()"
+        [class.arrow-down]="!isPanelOpen()"
+        [class.arrow-up]="isPanelOpen()">
       </span>
     }
   </div>
@@ -50,8 +50,8 @@
   <div
     #panelRef
     tabindex="-1"
-    class="panel panel-{{ panelPosition }}"
-    [class.open]="isPanelOpen"
+    class="panel panel-{{ panelPosition() }}"
+    [class.open]="isPanelOpen()"
     (mousedown)="panelMouseDown($event)">
     <!-- The role sits here rather than on the panel, so the options it owns are its direct children. -->
     <div
@@ -60,7 +60,7 @@
       [id]="panelId">
       <!-- Options -->
       <!-- Option components are re-created in order to control them. -->
-      @for (option of options$ | async; track option.value; let i = $index) {
+      @for (option of activeOptions(); track option.value; let i = $index) {
         <formidable-field-option
           #optionRef
           [attr.id]="optionId(i)"
@@ -69,16 +69,16 @@
           [readonly]="option.readonly || false"
           [disabled]="option.disabled || false"
           [selected]="option.value === value"
-          [highlighted]="i === (highlightedOptionIndex$ | async)">
-          <ng-container
-            *ngIf="option.template; else labelContent"
-            [ngTemplateOutlet]="option.template">
-          </ng-container>
-          <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
+          [highlighted]="i === highlightedOptionIndex()">
+          @if (option.template) {
+            <ng-container [ngTemplateOutlet]="option.template"> </ng-container>
+          } @else {
+            {{ option.label || option.value }}
+          }
         </formidable-field-option>
       } @empty {
         <!-- Plain text, not an option: a listbox must not offer its empty state as something to pick. -->
-        <div class="no-option">{{ noOptionsText }}</div>
+        <div class="no-option">{{ noOptionsText() }}</div>
       }
     </div>
   </div>

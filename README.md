@@ -16,7 +16,7 @@ Angular form fields you can actually theme, validated by whatever you already us
     <img src="https://img.shields.io/badge/demo-live-4f46e5" alt="Live demo">
   </a>
   <a href="https://angular.dev">
-    <img src="https://img.shields.io/badge/Angular-%5E18-dd0031" alt="Angular ^18">
+    <img src="https://img.shields.io/badge/Angular-%5E22-dd0031" alt="Angular ^22">
   </a>
   <a href="./LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License">
@@ -28,7 +28,7 @@ Angular form fields you can actually theme, validated by whatever you already us
 
 Eleven form fields, one decorator that puts labels, prefixes, hints and errors around them, and around two hundred CSS custom properties to make them look like your product instead of like a component library. It holds the model and renders the fields; the rules come from Vest, zod, Angular's own validators, or nothing at all.
 
-🌐 **[Live demo](https://cynthion.github.io/ngx-formidable/)** — every field, every label position, ten palettes and eleven field shapes, switchable in the page.
+🌐 **[Live Demo](https://cynthion.github.io/ngx-formidable/)** — every field, every label position, ten palettes and eleven field shapes, switchable in the page.
 📚 **[Documentation](./.documentation/README.md)** — guides for consumers, design notes for maintainers.
 
 ## Table of Contents
@@ -84,7 +84,7 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 • `debounceMs` on the form
 • `FORMIDABLE_ERROR_EXTRACTOR` reads any error shape
 • `FORMIDABLE_ERROR_TRANSLATOR` for i18n
-• Live `formValueChange$`, `validChange$`, `dirtyChange$`, `errorsChange$`
+• Live `formValueChange`, `validChange`, `dirtyChange`, `errorsChange`
 
 </td>
 </tr>
@@ -192,7 +192,7 @@ The package is published to GitHub Packages under the `@cynthion` scope, so npm 
 GitHub Packages authenticates every read, public package or not, so the token needs the `read:packages` scope. Then:
 
 ```bash
-npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday uuid
+npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday
 ```
 
 The library does not validate, so it brings no validation library. Add one only if you want it — `npm i vest` for the validator that ships in `@cynthion/ngx-formidable/vest`, or wire your own.
@@ -208,7 +208,7 @@ Two paths, registering the same providers.
 import { provideNgxFormidable } from '@cynthion/ngx-formidable';
 
 bootstrapApplication(AppComponent, {
-  providers: [...provideNgxFormidable()]
+	providers: [...provideNgxFormidable()]
 }).catch(console.error);
 ```
 
@@ -217,8 +217,8 @@ bootstrapApplication(AppComponent, {
 import { NgxFormidableModule } from '@cynthion/ngx-formidable';
 
 @NgModule({
-  imports: [BrowserModule, NgxFormidableModule.forRoot()],
-  bootstrap: [AppComponent]
+	imports: [BrowserModule, NgxFormidableModule.forRoot()],
+	bootstrap: [AppComponent]
 })
 export class AppModule {}
 ```
@@ -234,8 +234,8 @@ That is the whole default theme. Redeclare whatever you want to change in your o
 
 ```scss
 :root {
-  --formidable-color-field-border-focus: #0f766e; // rebrand from this one variable
-  --formidable-field-height: 50px;
+	--formidable-color-field-border-focus: #0f766e; // rebrand from this one variable
+	--formidable-field-height: 50px;
 }
 ```
 
@@ -245,8 +245,8 @@ Declare the model, the shape and the rules in one `*.form.ts` — this one valid
 
 ```ts
 export interface User {
-  name: string;
-  birthdate: Date;
+	name: string;
+	birthdate: Date;
 }
 
 export type UserFormModel = DeepPartial<User>;
@@ -255,13 +255,13 @@ export type UserFormShape = DeepRequired<UserFormModel>;
 /** Every key the model may carry, all required — a dev-mode typo check, not a validator. */
 export const userFormShape: UserFormShape = { name: '', birthdate: new Date() };
 
-export const userFormSuite = staticSuite((model: UserFormModel, field?: string) => {
-  mode(Modes.ALL);
-  if (field) only(field); // the form asks about one target at a time
+export const userFormSuite = create((model: UserFormModel, field?: string) => {
+	mode(Modes.ALL); // Vest 6 defaults to `EAGER`, which reports only a field's first failing message
+	if (field) only(field); // the form asks about one target at a time
 
-  test('name', 'Name is required.', () => {
-    enforce(model.name).isNotBlank();
-  });
+	test('name', 'Name is required.', () => {
+		enforce(model.name).isNotBlank();
+	});
 });
 ```
 
@@ -269,41 +269,41 @@ Then the template:
 
 ```html
 <form
-  formidableForm
-  [formValue]="formValue$ | async"
-  [formShape]="formShape"
-  [formSuite]="formSuite"
-  (formValueChange$)="formValue$.next($event)"
-  (validChange$)="isValid$.next($event)"
-  (ngSubmit)="onSubmit()">
-  <formidable-field-decorator>
-    <formidable-input-field
-      formidableFieldErrors
-      name="name"
-      [showRequiredMarker]="true"
-      [ngModel]="(formValue$ | async)?.name" />
-    <div formidableFieldLabel>Name</div>
-    <div formidableFieldHint>As it appears on your passport</div>
-  </formidable-field-decorator>
+	formidableForm
+	[formValue]="formValue$ | async"
+	[formShape]="formShape"
+	[formSuite]="formSuite"
+	(formValueChange)="formValue$.next($event)"
+	(validChange)="isValid$.next($event)"
+	(ngSubmit)="onSubmit()">
+	<formidable-field-decorator>
+		<formidable-input-field
+			formidableFieldErrors
+			name="name"
+			[showRequiredMarker]="true"
+			[ngModel]="(formValue$ | async)?.name" />
+		<div formidableFieldLabel>Name</div>
+		<div formidableFieldHint>As it appears on your passport</div>
+	</formidable-field-decorator>
 
-  <formidable-field-decorator>
-    <formidable-date-field
-      formidableFieldErrors
-      name="birthdate"
-      [unicodeTokenFormat]="'dd.MM.yyyy'"
-      [ngModel]="(formValue$ | async)?.birthdate" />
-    <div
-      formidableFieldLabel
-      [position]="'border'">
-      Birthdate
-    </div>
-  </formidable-field-decorator>
+	<formidable-field-decorator>
+		<formidable-date-field
+			formidableFieldErrors
+			name="birthdate"
+			[unicodeTokenFormat]="'dd.MM.yyyy'"
+			[ngModel]="(formValue$ | async)?.birthdate" />
+		<div
+			formidableFieldLabel
+			[position]="'border'">
+			Birthdate
+		</div>
+	</formidable-field-decorator>
 
-  <button type="submit">Submit</button>
+	<button type="submit">Submit</button>
 </form>
 ```
 
-Every rule runs asynchronously, so the form is still `PENDING` when `ngSubmit` fires — gate a submit on `validChange$` rather than reading `form.valid`.
+Every rule runs asynchronously, so the form is still `PENDING` when `ngSubmit` fires — gate a submit on `validChange` rather than reading `form.valid`.
 
 The whole walkthrough, with the component state and where each piece goes: [Getting Started](.documentation/user/getting-started.md).
 

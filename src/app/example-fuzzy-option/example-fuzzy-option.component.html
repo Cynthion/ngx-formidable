@@ -1,22 +1,22 @@
-<div (click)="select ? select() : null">
+<div>
   <ng-template #contentTemplate>
     <!-- Custom Template -->
     <p class="option-label">
-      @if (highlightedEntries?.labelEntries?.length) {
-        @for (entry of highlightedEntries?.labelEntries; track entry.text) {
+      @if (highlightedEntries().labelEntries.length) {
+        @for (entry of highlightedEntries().labelEntries; track entry.text) {
           <span [class.option-highlight]="entry.isHighlighted">{{ entry.text }}</span>
         }
       } @else {
-        {{ label }}
+        {{ label() }}
       }
     </p>
     <p class="option-subtitle">
-      @if (highlightedEntries?.subtitleEntries?.length) {
-        @for (entry of highlightedEntries?.subtitleEntries; track entry.text) {
+      @if (highlightedEntries().subtitleEntries.length) {
+        @for (entry of highlightedEntries().subtitleEntries; track entry.text) {
           <span [class.option-highlight]="entry.isHighlighted">{{ entry.text }}</span>
         }
       } @else {
-        {{ subtitle }}
+        {{ subtitle() }}
       }
     </p>
   </ng-template>

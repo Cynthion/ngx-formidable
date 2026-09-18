@@ -6,10 +6,10 @@ import {
   forwardRef,
   OnDestroy,
   OnInit,
-  ViewChild
+  signal,
+  viewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
 import { applyDefaultOption, combineFieldOptions, getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
 import {
   FieldDecoratorLayout,
@@ -34,7 +34,6 @@ import { BaseOptionFieldDirective } from '../base-option-field.directive';
   templateUrl: './radio-group-field.component.html',
   styleUrls: ['./radio-group-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [CommonModule, FieldOptionComponent],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
@@ -59,7 +58,7 @@ export class RadioGroupFieldComponent
   extends BaseOptionFieldDirective<string | null>
   implements IFormidableRadioGroupField, OnInit, OnDestroy
 {
-  @ViewChild('radioGroupRef', { static: true }) radioGroupRef!: ElementRef<HTMLDivElement>;
+  readonly radioGroupRef = viewChild.required<ElementRef<HTMLDivElement>>('radioGroupRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
@@ -77,23 +76,23 @@ export class RadioGroupFieldComponent
   }
 
   private handleKeydown(event: KeyboardEvent): void {
-    const options = this.options$.value;
+    const options = this.activeOptions();
     const count = options.length;
 
     switch (event.key) {
       case 'ArrowDown':
         if (count > 0) {
-          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'down'));
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex(), options, 'down'));
         }
         break;
       case 'ArrowUp':
         if (count > 0) {
-          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex$.value, options, 'up'));
+          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex(), options, 'up'));
         }
         break;
       case 'Enter': {
-        const idx = this.highlightedOptionIndex$.value;
-        const option = this.options$.value[idx];
+        const idx = this.highlightedOptionIndex();
+        const option = this.activeOptions()[idx];
         if (option) this.selectOption(option);
         break;
       }
@@ -106,9 +105,9 @@ export class RadioGroupFieldComponent
     this._writtenValue = value ?? null;
 
     const found = this.computeAllOptions().find((opt) => opt.value === value);
-    this.selectedOption = found ? { ...found } : undefined;
+    this.selectedOption.set(found ? { ...found } : undefined);
 
-    this.isFieldFilled = !!this.selectedOption?.value;
+    this.isFieldFilled.set(!!this.selectedOption()?.value);
   }
 
   // #endregion
@@ -116,11 +115,11 @@ export class RadioGroupFieldComponent
   // #region IFormidableField
 
   get value(): string | null {
-    return this.selectedOption?.value || null;
+    return this.selectedOption()?.value || null;
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.radioGroupRef as ElementRef<HTMLElement>;
+    return this.radioGroupRef() as ElementRef<HTMLElement>;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'vertical';
@@ -137,16 +136,12 @@ export class RadioGroupFieldComponent
 
   public readonly optionRole: FieldOptionRole = 'radio';
 
-  protected readonly options$ = new BehaviorSubject<IFormidableOption[]>([]);
+  protected readonly activeOptions = signal<IFormidableOption[]>([]);
 
-  private selectedOption?: IFormidableOption = undefined;
-
-  protected get activeOptions(): IFormidableOption[] {
-    return this.options$.value;
-  }
+  private readonly selectedOption = signal<IFormidableOption | undefined>(undefined);
 
   protected override get selectedOptionValue(): string | null {
-    return this.selectedOption?.value ?? null;
+    return this.selectedOption()?.value ?? null;
   }
 
   public selectOption(option: IFormidableOption): void {
@@ -159,39 +154,35 @@ export class RadioGroupFieldComponent
     };
 
     // commit selection
-    this.selectedOption = newOption;
+    this.selectedOption.set(newOption);
     this._writtenValue = newOption.value;
 
     // emit value change
-    const newValue = this.selectedOption.value;
+    const newValue = newOption.value;
     this.valueChangeSubject$.next(newValue);
     this.valueChanged.emit(newValue);
-    this.isFieldFilled = newValue.length > 0;
+    this.isFieldFilled.set(newValue.length > 0);
     this.commit(newValue); // notify ControlValueAccessor of the change
     this.touch();
 
     // immediately highlight the selected option
     this.highlightSelectedOption();
-
-    this.cdRef.markForCheck();
   }
 
   private deselectOption(): void {
     // only do work if there actually was a selection
-    if (!this.selectedOption) return;
+    if (!this.selectedOption()) return;
 
     this.setHighlightedIndex(-1);
-    this.selectedOption = undefined;
+    this.selectedOption.set(undefined);
 
     this._writtenValue = null;
-    this.isFieldFilled = false;
+    this.isFieldFilled.set(false);
 
     this.valueChangeSubject$.next(null);
     this.valueChanged.emit(null);
     this.commit(null);
     this.touch();
-
-    this.cdRef.markForCheck();
   }
 
   protected onOptionsChanged(): void {
@@ -203,27 +194,29 @@ export class RadioGroupFieldComponent
     this.runSilently('correction', () => this.reconcileSelectionAgainstOptions(allOptions));
     this.updateOptions(allOptions);
     this.reconcileHighlightAfterOptionsChanged();
-
-    this.cdRef.markForCheck();
   }
 
   private computeAllOptions(): IFormidableOption[] {
-    const combined = combineFieldOptions(this.options, this.optionComponents?.toArray(), this.sortFn);
+    const combined = combineFieldOptions(
+      this.options(),
+      this.optionComponents().map((source) => source.option()),
+      this.sortFn()
+    );
 
-    return applyDefaultOption(combined, this.defaultOption, this.defaultOptionMode);
+    return applyDefaultOption(combined, this.defaultOption(), this.defaultOptionMode());
   }
 
   private updateOptions(allOptions: IFormidableOption[]): void {
-    this.options$.next(allOptions);
+    this.activeOptions.set(allOptions);
 
     // keep current value in sync with newly combined options
     this.writeValue(this._writtenValue);
   }
 
   private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {
-    if (!this.selectedOption) return;
+    if (!this.selectedOption()) return;
 
-    const stillExists = allOptions.some((o) => o.value === this.selectedOption!.value);
+    const stillExists = allOptions.some((o) => o.value === this.selectedOption()!.value);
     if (!stillExists) {
       this.deselectOption();
     }

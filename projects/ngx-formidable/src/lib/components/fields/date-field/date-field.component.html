@@ -1,9 +1,9 @@
 <div
   #dateRef
   class="field"
-  [class.is-readonly]="readonly"
-  [class.is-disabled]="disabled"
-  [class.focused]="isFieldFocused">
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
+  [class.focused]="isFieldFocused()">
   <div class="input-wrapper">
     <!-- Input Field -->
     <input
@@ -13,34 +13,34 @@
       role="combobox"
       class="wrapped-input"
       aria-haspopup="dialog"
-      [mask]="ngxMask"
+      [mask]="ngxMask()"
       [showMaskTyped]="ngxMaskConfig.showMaskTyped"
       [leadZeroDateTime]="ngxMaskConfig.leadZeroDateTime"
       [dropSpecialCharacters]="ngxMaskConfig.dropSpecialCharacters"
       [id]="fieldId"
-      [placeholder]="placeholder"
-      [attr.name]="name"
-      [attr.readonly]="readonly ? '' : null"
-      [attr.disabled]="disabled ? '' : null"
-      [attr.tabindex]="readonly || disabled ? -1 : null"
-      [attr.aria-required]="showRequiredMarker || null"
+      [placeholder]="placeholder()"
+      [attr.name]="name()"
+      [attr.readonly]="readonly() ? '' : null"
+      [attr.disabled]="disabled() ? '' : null"
+      [attr.tabindex]="readonly() || disabled() ? -1 : null"
+      [attr.aria-required]="showRequiredMarker() || null"
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
-      [attr.aria-readonly]="readonly || null"
-      [attr.aria-expanded]="isPanelOpen"
+      [attr.aria-readonly]="readonly() || null"
+      [attr.aria-expanded]="isPanelOpen()"
       [attr.aria-controls]="panelId"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
 
     <!-- Toggle -->
-    @if (!readonly && !disabled) {
+    @if (!readonly() && !disabled()) {
       <span
         #toggleRef
         class="toggle"
-        [class.open]="isPanelOpen"
-        [class.arrow-down]="!hasToggleIcon && !isPanelOpen"
-        [class.arrow-up]="!hasToggleIcon && isPanelOpen"
+        [class.open]="isPanelOpen()"
+        [class.arrow-down]="!hasToggleIcon() && !isPanelOpen()"
+        [class.arrow-up]="!hasToggleIcon() && isPanelOpen()"
         (mousedown)="toggleMouseDown($event)">
         <ng-content select="[formidableFieldToggleIcon]" />
       </span>
@@ -51,8 +51,8 @@
   <div
     #panelRef
     tabindex="-1"
-    class="panel panel-{{ panelPosition }}"
-    [class.open]="isPanelOpen"
+    class="panel panel-{{ panelPosition() }}"
+    [class.open]="isPanelOpen()"
     (mousedown)="panelMouseDown($event)">
     <!-- A calendar is not a list, so this is a dialog. It is named from the same label as the field, and
          stays unnamed without one — the same rule `labelledBy` follows everywhere else. -->

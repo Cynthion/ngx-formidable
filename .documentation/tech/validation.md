@@ -38,7 +38,7 @@ flowchart TB
 
 Nothing in L1 or L2a is coupled to a validator because both rest on things Angular already guarantees:
 
-- **`AbstractControl.errors`** — every validator writes here. `FieldErrorsComponent` reads it and nothing else, through `FORMIDABLE_ERROR_EXTRACTOR`; `getAllFormErrors` runs every entry through the same extractor, so `errorsChange$` is one homogeneous `FormidableFormErrors` map however many validators wrote into it.
+- **`AbstractControl.errors`** — every validator writes here. `FieldErrorsComponent` reads it and nothing else, through `FORMIDABLE_ERROR_EXTRACTOR`; `getAllFormErrors` runs every entry through the same extractor, so `errorsChange` is one homogeneous `FormidableFormErrors` map however many validators wrote into it.
 - **`.is-invalid`** — one class on `FieldDecoratorComponent`'s host, computed from the messages and the reveal setting that gates them. The whole SCSS state layer hangs off it, and it means nothing about who decided the field was invalid.
 
 `FORMIDABLE_ERROR_EXTRACTOR` is what makes `AbstractControl.errors` genuinely universal. The harness writes `{ error, errors }`; Angular's validators write `{ required: true }`; a schema library writes something else. The extractor's default handles the first two and an override handles the third, so the same UI serves all of them.
@@ -55,13 +55,13 @@ One naming trap worth knowing: `IFormidableValidator.validate(model, target)` an
 4. **Run the rules.** ← the only validator-specific step
 5. Map the result into `ValidationErrors`.
 
-So the seam is a single method that takes `(model, target)` and returns messages. A validator is the smallest thing that can exist — the Vest one is about thirty lines, all of it the `suite(model, target).done(…)` call.
+So the seam is a single method that takes `(model, target)` and returns messages. A validator is the smallest thing that can exist — the Vest one is about thirty lines, all of it the `suite.runStatic(model, target)` call and the `getErrors(target)` read off its result.
 
 Putting the seam any lower would force each adapter to re-implement path computation and debouncing. Putting it any higher would drag the validator's own types into `form.directive.ts`.
 
 ## The Model A Rule Sees
 
-The form's **live control values lead**, and `formValue` fills in only what has no control of its own. It cannot be the other way round: Angular calls `_runAsyncValidator` before it emits the `ValueChangeEvent` that `formValueChange$` turns into the next `formValue`, so the bound model is one change behind at the moment a rule runs.
+The form's **live control values lead**, and `formValue` fills in only what has no control of its own. It cannot be the other way round: Angular calls `_runAsyncValidator` before it emits the `ValueChangeEvent` that `formValueChange` turns into the next `formValue`, so the bound model is one change behind at the moment a rule runs.
 
 That is also why `formValue` is optional at every moment, including the first. A form whose model arrives through `| async`, or never binds one at all, validates against its control values alone.
 
@@ -106,7 +106,7 @@ Angular raises its pending dirty flag on every change a value accessor reports a
 
 ### Reveal Resolution And Repaint
 
-`FieldErrorsComponent` resolves its own field's `revealOn` first, then the form's, then `touched`. `FieldErrorsDirective` pushes the field's value and drives the repaint, because the `OnPush` component is not reactive to either of the other two gates: `NgForm.submitted` reads through `untracked`, and the form's `revealOn` is a signal on a directive the component does not own. Both join the repaint stream alongside the control's own events.
+`FieldErrorsComponent` resolves its own field's `revealOn` first, then the form's, then `touched`. `FieldErrorsDirective` pushes the field's value and drives the repaint, because none of the state the component reads is signal-backed: `AbstractControl.errors`, `touched` and `dirty` are plain properties, `NgForm.submitted` reads through `untracked`, and the form's `revealOn` is a signal on a directive the component does not own. All three join one stream, and each emission calls `refresh()` — which bumps the revision the component's `errors` and `invalid` computeds read. See `tech/decoration.md` for what that one signal then reaches.
 
 ### Debounce
 

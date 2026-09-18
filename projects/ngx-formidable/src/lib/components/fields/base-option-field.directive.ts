@@ -1,20 +1,11 @@
-import {
-  AfterContentInit,
-  ContentChildren,
-  Directive,
-  Input,
-  OnChanges,
-  QueryList,
-  SimpleChanges,
-  ViewChildren
-} from '@angular/core';
-import { BehaviorSubject, takeUntil } from 'rxjs';
+import { contentChildren, Directive, effect, input, signal, Signal, untracked, viewChildren } from '@angular/core';
 import { getNextAvailableOptionIndex } from '../../helpers/option.helpers';
 import { scrollHighlightedOptionIntoView } from '../../helpers/position.helpers';
 import {
   FieldDefaultOptionMode,
   FORMIDABLE_OPTION,
   IFormidableOption,
+  IFormidableOptionSource,
   NO_OPTIONS_TEXT
 } from '../../models/formidable.model';
 import { FieldOptionComponent } from '../field-option/field-option.component';
@@ -28,59 +19,64 @@ import { BaseFieldDirective } from './base-field.directive';
  * Options come from the `options` input, from projected `<formidable-field-option>` children, or from both.
  */
 @Directive()
-export abstract class BaseOptionFieldDirective<T = string | null>
-  extends BaseFieldDirective<T>
-  implements OnChanges, AfterContentInit
-{
+export abstract class BaseOptionFieldDirective<T = string | null> extends BaseFieldDirective<T> {
   /** Options bound as data. Merged with any projected `<formidable-field-option>` children, not replaced. */
-  @Input() options?: IFormidableOption[] = [];
+  public readonly options = input<IFormidableOption[] | undefined>([]);
 
   /** An option pinned to the top of the list, never sorted and never filtered. See `defaultOptionMode`. */
-  @Input() defaultOption?: IFormidableOption;
+  public readonly defaultOption = input<IFormidableOption | undefined>(undefined);
 
   /** Whether the `defaultOption` always renders, or only when there would otherwise be no options. */
-  @Input() defaultOptionMode: FieldDefaultOptionMode = 'always';
+  public readonly defaultOptionMode = input<FieldDefaultOptionMode>('always');
 
   /** What renders in place of an empty list. Plain text, not an option — there is nothing there to pick. */
-  @Input() noOptionsText: string = NO_OPTIONS_TEXT;
+  public readonly noOptionsText = input<string>(NO_OPTIONS_TEXT);
 
   /** Orders the merged list. Applied after the merge, so bound and projected options interleave. */
-  @Input() sortFn?: (a: IFormidableOption, b: IFormidableOption) => number;
+  public readonly sortFn = input<((a: IFormidableOption, b: IFormidableOption) => number) | undefined>(undefined);
 
   /** The projected options. One may sit inside a wrapper element rather than directly in the field. */
-  @ContentChildren(FORMIDABLE_OPTION, { descendants: true })
-  optionComponents?: QueryList<IFormidableOption>;
+  public readonly optionComponents = contentChildren<IFormidableOptionSource>(FORMIDABLE_OPTION, {
+    descendants: true
+  });
 
-  @ViewChildren('optionRef') protected optionRefs?: QueryList<FieldOptionComponent>;
+  protected readonly optionRefs = viewChildren<FieldOptionComponent>('optionRef');
 
-  protected readonly highlightedOptionIndex$ = new BehaviorSubject<number>(-1);
+  protected readonly highlightedOptionIndex = signal(-1);
 
   // The highlighted option's value, so a reconcile can follow it across a changed list.
   protected highlightedOptionValue: string | null = null;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    // react to changes of @Input properties
-    if (changes['options'] || changes['sortFn'] || changes['defaultOption'] || changes['defaultOptionMode']) {
-      queueMicrotask(() => this.onOptionsChanged());
-    }
+  constructor() {
+    super();
+
+    // One source of truth for "the option list moved".
+    //
+    // The `queueMicrotask` stays, and is the one thing signals do not remove. A projected option resolves
+    // its content — and therefore its label — in its own `ngAfterContentInit`, and an option inside an
+    // `@for` has not had its `required` inputs applied while this effect runs. Reading either now gives a
+    // wrong label or throws NG0950; a microtask lands after both.
+    effect(() => {
+      this.optionSources();
+      untracked(() => queueMicrotask(() => this.onOptionsChanged()));
+    });
   }
 
-  ngAfterContentInit(): void {
-    // The projected options (option.template) might not be available immediately after content initialization,
-    // so we use queueMicrotask to ensure they are processed after the current change detection cycle.
-    queueMicrotask(() => this.onOptionsChanged());
-
-    // react to the changes of projected options
-    this.optionComponents?.changes
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => queueMicrotask(() => this.onOptionsChanged()));
+  // What the effect above watches. Not the merged list itself: each field merges differently, and the
+  // reconcile needs to run for a changed `sortFn` as much as for a changed option.
+  //
+  // The projected children are watched by the query's own identity and never by reading `option()` off
+  // them, because that reads a `required` input: the effect's first run can land before the bindings on an
+  // option inside an `@for` have been applied, and the read would throw NG0950 rather than wait.
+  private optionSources(): unknown[] {
+    return [this.options(), this.defaultOption(), this.defaultOptionMode(), this.sortFn(), this.optionComponents()];
   }
 
   // Recombines the options and re-reconciles selection and highlight against them.
   protected abstract onOptionsChanged(): void;
 
   // The options the highlight walks — the rendered list, which `autocomplete-field` filters.
-  protected abstract get activeOptions(): IFormidableOption[];
+  protected abstract readonly activeOptions: Signal<IFormidableOption[]>;
 
   // The value the selection claims the highlight for. `null` for a multi-select field, which has no single
   // selection to claim it.
@@ -99,7 +95,7 @@ export abstract class BaseOptionFieldDirective<T = string | null>
   }
 
   protected reconcileHighlightAfterOptionsChanged(): void {
-    const options = this.activeOptions;
+    const options = this.activeOptions();
     const count = options.length;
 
     // empty list
@@ -125,7 +121,7 @@ export abstract class BaseOptionFieldDirective<T = string | null>
     }
 
     // clamp previous index into new bounds
-    let nextIndex = this.highlightedOptionIndex$.value;
+    let nextIndex = this.highlightedOptionIndex();
     if (nextIndex < 0) nextIndex = 0;
     if (nextIndex >= count) nextIndex = count - 1;
 
@@ -139,22 +135,23 @@ export abstract class BaseOptionFieldDirective<T = string | null>
   }
 
   protected setHighlightedIndex(index: number): void {
-    this.highlightedOptionIndex$.next(index);
+    this.highlightedOptionIndex.set(index);
 
-    const option = index >= 0 ? this.activeOptions[index] : undefined;
+    const option = index >= 0 ? this.activeOptions()[index] : undefined;
     this.highlightedOptionValue = option?.value ?? null;
 
-    if (!this.isFieldFocused) return;
+    if (!this.isFieldFocused()) return;
     if (index < 0) return;
 
     // `optionRefs` is only repopulated once the new highlight has rendered, so a microtask would
-    // resolve the wrong element.
-    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs));
+    // resolve the wrong element. A timer lands after the render even zonelessly: the `set` above notifies
+    // the scheduler, which queues its own timer from inside that call, so ours is behind it in the queue.
+    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs()));
   }
 
   private get selectedOptionIndex(): number {
     const value = this.selectedOptionValue;
 
-    return value === null ? -1 : this.activeOptions.findIndex((o) => o.value === value);
+    return value === null ? -1 : this.activeOptions().findIndex((o) => o.value === value);
   }
 }

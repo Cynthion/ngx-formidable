@@ -4,15 +4,15 @@
 
 ```html
 <formidable-field-decorator>
-  <formidable-input-field
-    formidableFieldErrors
-    name="amount"
-    ngModel />
-  <div formidableFieldLabel>Amount</div>
-  <div formidableFieldLabelAdornment>?</div>
-  <div formidableFieldPrefix>CHF</div>
-  <div formidableFieldSuffix>.00</div>
-  <div formidableFieldHint>Excluding VAT</div>
+	<formidable-input-field
+		formidableFieldErrors
+		name="amount"
+		ngModel />
+	<div formidableFieldLabel>Amount</div>
+	<div formidableFieldLabelAdornment>?</div>
+	<div formidableFieldPrefix>CHF</div>
+	<div formidableFieldSuffix>.00</div>
+	<div formidableFieldHint>Excluding VAT</div>
 </formidable-field-decorator>
 ```
 
@@ -87,9 +87,9 @@ The `vertical` layout stacks its options inside the field's box, which leaves a 
 
 ```html
 <div
-  formidableFieldLabel
-  [position]="'border'">
-  Amount
+	formidableFieldLabel
+	[position]="'border'">
+	Amount
 </div>
 ```
 
@@ -107,7 +107,7 @@ An adornment decorates the label, so it lives and dies with the label's row: eve
 ```html
 <div formidableFieldLabel>Password</div>
 <div formidableFieldLabelAdornment>
-  <my-tooltip text="At least twelve characters."></my-tooltip>
+	<my-tooltip text="At least twelve characters."></my-tooltip>
 </div>
 ```
 
@@ -117,11 +117,11 @@ An adornment decorates the label, so it lives and dies with the label's row: eve
 
 ```html
 <formidable-field-decorator>
-  <formidable-input-field
-    name="firstName"
-    [showRequiredMarker]="true"
-    ngModel />
-  <div formidableFieldLabel>First Name</div>
+	<formidable-input-field
+		name="firstName"
+		[showRequiredMarker]="true"
+		ngModel />
+	<div formidableFieldLabel>First Name</div>
 </formidable-field-decorator>
 ```
 
@@ -149,9 +149,9 @@ Each slot picks what it follows vertically:
 
 ```html
 <div
-  formidableFieldPrefix
-  [align]="'value'">
-  CHF
+	formidableFieldPrefix
+	[align]="'value'">
+	CHF
 </div>
 ```
 
@@ -172,13 +172,13 @@ The decorator re-measures its slots whenever their width changes, so an action t
 
 ```html
 <div formidableFieldSuffix>
-  <button
-    *ngIf="model.firstName"
-    type="button"
-    (mousedown)="$event.preventDefault()"
-    (click)="model.firstName = ''">
-    &times;
-  </button>
+	<button
+		*ngIf="model.firstName"
+		type="button"
+		(mousedown)="$event.preventDefault()"
+		(click)="model.firstName = ''">
+		&times;
+	</button>
 </div>
 ```
 
@@ -186,13 +186,13 @@ The decorator re-measures its slots whenever their width changes, so an action t
 
 ```html
 <div formidableFieldSuffix>
-  <button
-    type="button"
-    [disabled]="!model.iban"
-    (mousedown)="$event.preventDefault()"
-    (click)="clipboard.writeText(model.iban)">
-    Copy
-  </button>
+	<button
+		type="button"
+		[disabled]="!model.iban"
+		(mousedown)="$event.preventDefault()"
+		(click)="clipboard.writeText(model.iban)">
+		Copy
+	</button>
 </div>
 ```
 
@@ -200,7 +200,7 @@ The decorator re-measures its slots whenever their width changes, so an action t
 
 ```html
 <div formidableFieldSuffix>
-  <span [class.invalid]="errors['email']">{{ errors['email'] ? '✗' : '✓' }}</span>
+	<span [class.invalid]="errors['email']">{{ errors['email'] ? '✗' : '✓' }}</span>
 </div>
 ```
 
@@ -208,9 +208,9 @@ The decorator re-measures its slots whenever their width changes, so an action t
 
 ```html
 <div formidableFieldSuffix>
-  <span
-    *ngIf="isLookingUp"
-    class="spinner"></span>
+	<span
+		*ngIf="isLookingUp"
+		class="spinner"></span>
 </div>
 ```
 
@@ -222,17 +222,17 @@ A hint is always-visible support text on a row below the field and above the err
 
 ```html
 <formidable-field-decorator>
-  <formidable-input-field
-    formidableFieldErrors
-    name="firstName"
-    [maxLength]="150"
-    [ngModel]="value.firstName" />
-  <div formidableFieldHint>Your legal first name</div>
-  <div
-    formidableFieldHint
-    align="end">
-    {{ value.firstName?.length ?? 0 }} / 150
-  </div>
+	<formidable-input-field
+		formidableFieldErrors
+		name="firstName"
+		[maxLength]="150"
+		[ngModel]="value.firstName" />
+	<div formidableFieldHint>Your legal first name</div>
+	<div
+		formidableFieldHint
+		align="end">
+		{{ value.firstName?.length ?? 0 }} / 150
+	</div>
 </formidable-field-decorator>
 ```
 

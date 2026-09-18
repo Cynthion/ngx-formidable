@@ -1,15 +1,15 @@
-import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   forwardRef,
-  Input,
-  OnChanges,
+  input,
+  linkedSignal,
   OnDestroy,
   OnInit,
-  SimpleChanges,
-  ViewChild
+  signal,
+  viewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { format, isEqual } from 'date-fns';
@@ -25,6 +25,7 @@ import {
   validateUnicodeTimeTokenFormat
 } from '../../../helpers/format.helpers';
 import { renderEmptyMask } from '../../../helpers/input.helpers';
+import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
@@ -46,8 +47,7 @@ import { BaseFieldDirective } from '../base-field.directive';
   templateUrl: './time-field.component.html',
   styleUrls: ['./time-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [CommonModule, NgxMaskDirective],
+  imports: [NgxMaskDirective],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
@@ -64,10 +64,10 @@ import { BaseFieldDirective } from '../base-field.directive';
 })
 export class TimeFieldComponent
   extends BaseFieldDirective<Date | null>
-  implements IFormidableTimeField, OnInit, OnChanges, OnDestroy
+  implements IFormidableTimeField, OnInit, OnDestroy
 {
-  @ViewChild('timeRef', { static: true }) timeRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('inputRef', { static: true }) inputRef!: ElementRef<HTMLInputElement>;
+  readonly timeRef = viewChild.required<ElementRef<HTMLDivElement>>('timeRef');
+  readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
@@ -80,24 +80,24 @@ export class TimeFieldComponent
   override ngOnInit(): void {
     super.ngOnInit();
 
-    if (!validateUnicodeTimeTokenFormat(this.unicodeTokenFormat)) {
+    if (!validateUnicodeTimeTokenFormat(this.unicodeTokenFormat())) {
       console.warn(
-        `[ngx-formidable] Invalid unicodeTokenFormat: "${this.unicodeTokenFormat}". ` +
+        `[ngx-formidable] Invalid unicodeTokenFormat: "${this.unicodeTokenFormat()}". ` +
           `Falling back to default "${this.defaultUnicodeTokenFormat}". Supported tokens: ${UNICODE_TIME_TOKENS.join(', ')}.`
       );
 
-      this.unicodeTokenFormat = this.defaultUnicodeTokenFormat;
+      this.tokenFormat.set(this.defaultUnicodeTokenFormat);
     }
-
-    // must run before the first binding pass, so the input carries the correct mask
-    this.updateMask();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['unicodeTokenFormat'] && !changes['unicodeTokenFormat'].firstChange) {
-      this.updateMask();
-      this.setTime(this.selectedTime); // re-render the current value in the new format
-    }
+  constructor() {
+    super();
+
+    // Re-renders the current value in the new format.
+    onSignalChange(
+      () => this.unicodeTokenFormat(),
+      () => this.setTime(this.selectedTime)
+    );
   }
 
   // Typing commits on blur — a half-typed time is not a time — so value changes are handled in the
@@ -109,7 +109,7 @@ export class TimeFieldComponent
       return;
     }
 
-    this.isFieldFilled = !!this.value;
+    this.isFieldFilled.set(!!this.value);
   }
 
   protected doOnValueChange(): void {
@@ -118,7 +118,7 @@ export class TimeFieldComponent
 
   protected doOnFocusChange(isFocused: boolean): void {
     // A readonly field has nothing to type into: it neither hands its display to ngxMask nor commits on blur.
-    if (this.readonly) return;
+    if (this.readonly()) return;
 
     // hand the empty display over to ngxMask while focused (see renderEmpty)
     if (isFocused) {
@@ -127,13 +127,13 @@ export class TimeFieldComponent
     }
 
     // try set time on blur
-    this.trySetTimeFromInput(this.inputRef.nativeElement.value);
+    this.trySetTimeFromInput(this.inputRef().nativeElement.value);
   }
 
   private handleKeydown(event: KeyboardEvent): void {
     switch (event.key) {
       case 'Enter':
-        this.trySetTimeFromInput(this.inputRef.nativeElement.value);
+        this.trySetTimeFromInput(this.inputRef().nativeElement.value);
         break;
       case 'ArrowUp':
         this.stepSegment(1);
@@ -150,11 +150,11 @@ export class TimeFieldComponent
   // The input text is what gets stepped, not `selectedTime`: it also carries what was typed but not yet
   // committed. An empty field is seeded with midnight, so arrows alone can fill it.
   private stepSegment(direction: 1 | -1): void {
-    const input = this.inputRef.nativeElement;
-    const segment = findSegmentAtCaret(this.unicodeTokenFormat, input.selectionStart ?? 0);
+    const input = this.inputRef().nativeElement;
+    const segment = findSegmentAtCaret(this.tokenFormat(), input.selectionStart ?? 0);
     if (!segment) return;
 
-    const base = this.onParse(input.value, this.unicodeTokenFormat) ?? this.selectedTime ?? new Date(1970, 0, 1);
+    const base = this.onParse(input.value, this.tokenFormat()) ?? this.selectedTime ?? new Date(1970, 0, 1);
 
     this.setTime(normalizeDatePart(stepDateTimeUnit(base, segment.unit, direction)));
 
@@ -177,11 +177,11 @@ export class TimeFieldComponent
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.timeRef as ElementRef<HTMLElement>;
+    return this.timeRef() as ElementRef<HTMLElement>;
   }
 
   protected override get focusElement(): HTMLElement {
-    return this.inputRef.nativeElement;
+    return this.inputRef().nativeElement;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
@@ -194,11 +194,15 @@ export class TimeFieldComponent
    * A Unicode time format (`H`, `h`, `m`, `s`, `a` tokens). Decides the mask, the display, and which segment
    * the arrow keys step. An unrecognized format warns and falls back to the default.
    */
-  @Input() unicodeTokenFormat = this.defaultUnicodeTokenFormat;
+  public readonly unicodeTokenFormat = input(this.defaultUnicodeTokenFormat);
   /** What an empty, unfocused field shows: underscores (default, "__ : __") or the `unicodeTokenFormat` ("HH : mm"). */
-  @Input() emptyHint: FormidableEmptyHint = 'underscores';
+  public readonly emptyHint = input<FormidableEmptyHint>('underscores');
 
-  protected ngxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.maskChar);
+  // The format actually in force. A `linkedSignal` and not a `computed`, because the fallback also warns —
+  // which a computed must not do — so `ngOnInit` writes it once for an unrecognized format.
+  protected readonly tokenFormat = linkedSignal(() => this.unicodeTokenFormat());
+
+  protected readonly ngxMask = computed(() => formatToTimeTokenMask(this.tokenFormat(), this.maskChar));
 
   protected ngxMaskConfig: Pick<NgxMaskConfig, 'showMaskTyped' | 'leadZeroDateTime' | 'dropSpecialCharacters'> = {
     showMaskTyped: true,
@@ -207,31 +211,29 @@ export class TimeFieldComponent
   };
 
   // An empty time field always shows its `emptyHint` in the value area, so a label can never rest there.
-  protected override get showsEmptyValueHint(): boolean {
-    return true;
-  }
+  protected override readonly showsEmptyValueHint = signal(true);
 
   // ngxMask's own empty display: the mask with every slot as its placeholder character.
   private get maskPlaceholder(): string {
-    return this.ngxMask.replace(/\w/g, '_');
+    return this.ngxMask().replace(/\w/g, '_');
   }
 
   // The resting display of an empty field for the current `emptyHint`: the format string, or
   // `maskPlaceholder`.
   private get emptyDisplay(): string {
-    return this.emptyHint === 'format' ? (this.unicodeTokenFormat ?? '') : this.maskPlaceholder;
+    return this.emptyHint() === 'format' ? this.tokenFormat() : this.maskPlaceholder;
   }
 
   // ngxMask either empties the input outright or leaves the slots it renders for a focused empty field.
   private get isInputCleared(): boolean {
-    const value = this.inputRef.nativeElement.value;
+    const value = this.inputRef().nativeElement.value;
 
     return value === '' || value === this.maskPlaceholder;
   }
 
   // Shows the `emptyHint` at rest, but lets ngxMask own the text while focused.
   private renderEmpty(): void {
-    renderEmptyMask(this.inputRef.nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused);
+    renderEmptyMask(this.inputRef().nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused());
   }
 
   private selectedTime: Date | null = null;
@@ -247,7 +249,7 @@ export class TimeFieldComponent
 
     this.valueChangeSubject$.next(this.selectedTime);
     this.valueChanged.emit(this.selectedTime);
-    this.isFieldFilled = !!this.selectedTime;
+    this.isFieldFilled.set(!!this.selectedTime);
     this.commit(this.selectedTime); // notify ControlValueAccessor of the change
     this.touch();
   }
@@ -262,10 +264,6 @@ export class TimeFieldComponent
   }
 
   // #endregion
-
-  private updateMask(): void {
-    this.ngxMask = formatToTimeTokenMask(this.unicodeTokenFormat!, this.maskChar);
-  }
 
   private trySetTimeFromInput(value: Date | null | string): void {
     if (value === null || value === undefined || value === '') {
@@ -285,7 +283,7 @@ export class TimeFieldComponent
         return;
       }
 
-      const parsedDate = this.onParse(trimmed, this.unicodeTokenFormat || this.defaultUnicodeTokenFormat);
+      const parsedDate = this.onParse(trimmed, this.tokenFormat());
 
       if (parsedDate) {
         this.setTime(parsedDate);
@@ -309,8 +307,9 @@ export class TimeFieldComponent
         return;
       }
 
-      const formatted = format(this.selectedTime, this.unicodeTokenFormat || this.defaultUnicodeTokenFormat);
-      if (this.inputRef.nativeElement.value !== formatted) this.inputRef.nativeElement.value = formatted;
+      const formatted = format(this.selectedTime, this.tokenFormat());
+      const inputRef = this.inputRef();
+      if (inputRef.nativeElement.value !== formatted) inputRef.nativeElement.value = formatted;
     });
   }
 }

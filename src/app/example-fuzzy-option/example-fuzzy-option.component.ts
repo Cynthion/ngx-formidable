@@ -1,5 +1,4 @@
-import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, forwardRef, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, forwardRef, input } from '@angular/core';
 import { FieldOptionComponent, FORMIDABLE_OPTION } from '@cynthion/ngx-formidable';
 import { HighlightedEntries } from '../example-form/example-form.model';
 
@@ -8,8 +7,7 @@ import { HighlightedEntries } from '../example-form/example-form.model';
   templateUrl: './example-fuzzy-option.component.html',
   styleUrls: ['./example-fuzzy-option.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [CommonModule],
+  imports: [],
   providers: [
     {
       // required to provide this component as IFormidableOption
@@ -19,10 +17,10 @@ import { HighlightedEntries } from '../example-form/example-form.model';
   ]
 })
 export class ExampleFuzzyOptionComponent extends FieldOptionComponent {
-  @Input() subtitle?: string = 'sub';
+  readonly subtitle = input<string | undefined>('sub');
 
-  @Input() highlightedEntries?: HighlightedEntries = {
+  readonly highlightedEntries = input<HighlightedEntries>({
     labelEntries: [],
     subtitleEntries: []
-  };
+  });
 }

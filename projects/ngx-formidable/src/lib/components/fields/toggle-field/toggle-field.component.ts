@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, signal, viewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import {
   FieldDecoratorLayout,
@@ -20,7 +20,6 @@ import { BaseFieldDirective } from '../base-field.directive';
   templateUrl: './toggle-field.component.html',
   styleUrls: ['./toggle-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [CommonModule],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
@@ -37,14 +36,14 @@ import { BaseFieldDirective } from '../base-field.directive';
   ]
 })
 export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> implements IFormidableToggleField {
-  @ViewChild('toggleRef', { static: true }) toggleRef!: ElementRef<HTMLDivElement>;
+  readonly toggleRef = viewChild.required<ElementRef<HTMLDivElement>>('toggleRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys = [' ', 'Space', 'Enter'];
 
-  private _value: boolean | null = null;
+  private readonly _value = signal<boolean | null>(null);
 
   protected doOnValueChange(): void {
     // No additional actions needed
@@ -67,7 +66,7 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
   // #region ControlValueAccessor
 
   protected doWriteValue(value: boolean): void {
-    this._value = !!value;
+    this._value.set(!!value);
   }
 
   // #endregion
@@ -75,11 +74,11 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
   // #region IFormidableField
 
   get value(): boolean | null {
-    return this._value;
+    return this._value();
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.toggleRef as ElementRef<HTMLElement>;
+    return this.toggleRef() as ElementRef<HTMLElement>;
   }
 
   decoratorLayout: FieldDecoratorLayout = 'inline';
@@ -89,19 +88,19 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
   // #region IFormidableToggleField
 
   /** Which side of the switch `onLabel` / `offLabel` sits on. Unrelated to a projected label's position. */
-  @Input() labelPosition?: FormidableToggleFieldLabelPosition = 'before';
+  public readonly labelPosition = input<FormidableToggleFieldLabelPosition | undefined>('before');
 
   /** Text shown beside the switch while on. The field's own, not a projected label. */
-  @Input() onLabel?: string;
+  public readonly onLabel = input<string | undefined>(undefined);
 
   /** Text shown beside the switch while off. Leave unset to show `onLabel` in both states. */
-  @Input() offLabel?: string;
+  public readonly offLabel = input<string | undefined>(undefined);
 
   /** Flips the value, as clicking the switch or pressing Space or Enter does. No-op while readonly. */
   public toggle(): void {
-    if (this.readonly || this.disabled) return;
+    if (this.readonly() || this.disabled()) return;
 
-    this._value = !this._value;
+    this._value.set(!this._value());
     this.onValueChange();
   }
 
@@ -111,8 +110,8 @@ export class ToggleFieldComponent extends BaseFieldDirective<boolean | null> imp
   }
 
   get internalLabel(): string | undefined {
-    if (this.value && this.onLabel != null) return this.onLabel;
-    if (!this.value && this.offLabel != null) return this.offLabel;
+    if (this.value && this.onLabel() != null) return this.onLabel();
+    if (!this.value && this.offLabel() != null) return this.offLabel();
     return undefined;
   }
 

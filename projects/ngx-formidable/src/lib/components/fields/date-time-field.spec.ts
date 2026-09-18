@@ -69,8 +69,8 @@ function setup<T extends MaskedField>(
 ): { fixture: ComponentFixture<T>; input: HTMLInputElement } {
   const fixture = TestBed.createComponent(component);
 
-  fixture.componentInstance.unicodeTokenFormat = unicodeTokenFormat;
-  fixture.componentInstance.emptyHint = emptyHint;
+  fixture.componentRef.setInput('unicodeTokenFormat', unicodeTokenFormat);
+  fixture.componentRef.setInput('emptyHint', emptyHint);
 
   fixture.detectChanges(); // ngOnInit + ngAfterViewInit (recomputes the mask)
   fixture.detectChanges(); // propagate the recomputed mask to ngxMask
@@ -464,7 +464,7 @@ describe('masked date/time field', () => {
       arrow(input, 'ArrowDown');
       tick();
 
-      expect(fixture.componentInstance.isPanelOpen).toBe(false);
+      expect(fixture.componentInstance.isPanelOpen()).toBe(false);
       expect(input.value).toBe('11 . 05 . 2024');
     }));
 
@@ -473,12 +473,12 @@ describe('masked date/time field', () => {
 
       arrow(input, 'ArrowDown', true);
       tick();
-      expect(fixture.componentInstance.isPanelOpen).toBe(true);
+      expect(fixture.componentInstance.isPanelOpen()).toBe(true);
       expect(input.value).toBe('12 . 05 . 2024'); // an Alt+Arrow never touches the value
 
       arrow(input, 'ArrowUp', true);
       tick();
-      expect(fixture.componentInstance.isPanelOpen).toBe(false);
+      expect(fixture.componentInstance.isPanelOpen()).toBe(false);
     }));
 
     it('still moves the calendar by a week while the panel is open, committing only on Enter', fakeAsync(() => {
@@ -497,7 +497,7 @@ describe('masked date/time field', () => {
       tick();
 
       expect(fixture.componentInstance.value).toEqual(new Date(2024, 4, 19));
-      expect(fixture.componentInstance.isPanelOpen).toBe(false);
+      expect(fixture.componentInstance.isPanelOpen()).toBe(false);
     }));
 
     it('seeds an empty date field before stepping it', fakeAsync(() => {

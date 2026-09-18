@@ -5,7 +5,7 @@ import {
   EnvironmentInjector,
   inject,
   Injector,
-  Input,
+  input,
   OnDestroy,
   Optional,
   ViewContainerRef
@@ -38,7 +38,7 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   /** When this field's messages appear, overriding whatever the form set. */
-  @Input() revealOn?: FormidableReveal;
+  public readonly revealOn = input<FormidableReveal | undefined>(undefined);
 
   // Element injectors follow the declaring template, so a projected field really does see its decorator.
   private readonly decorator = inject(FieldDecoratorComponent, { optional: true });
@@ -61,21 +61,21 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
   public ngAfterViewInit(): void {
     // The injector stays this directive's either way, so the component resolves the same error translator
     // wherever it is rendered — only the DOM anchor differs.
-    this.fieldErrorsComponentRef = (this.decorator?.errorsSlot ?? this.viewContainerRef).createComponent(
+    this.fieldErrorsComponentRef = (this.decorator?.errorsSlot() ?? this.viewContainerRef).createComponent(
       FieldErrorsComponent,
       { injector: this.injector, environmentInjector: this.environmentInjector }
     );
 
-    this.fieldErrorsComponentRef.instance.ngModel = this.ngModel ?? undefined;
-    this.fieldErrorsComponentRef.instance.ngModelGroup = this.ngModelGroup ?? undefined;
-    this.fieldErrorsComponentRef.instance.revealOn = this.revealOn;
+    this.fieldErrorsComponentRef.setInput('ngModel', this.ngModel ?? undefined);
+    this.fieldErrorsComponentRef.setInput('ngModelGroup', this.ngModelGroup ?? undefined);
+    this.fieldErrorsComponentRef.setInput('revealOn', this.revealOn());
 
     // The decorator owns the label and is the ancestor every field's stylesheet reaches with
     // `:host-context(.is-invalid)`, so it is where the flag has to surface.
     this.decorator?.registerErrors(this.fieldErrorsComponentRef.instance);
 
-    // When the form is idle, listen to all events of the ngModel or ngModelgroup
-    // and mark the component and its ancestors as dirty. (Allows use of OnPush.)
+    // When the form is idle, listen to all events of the ngModel or ngModelGroup — Angular's form state is
+    // not signal-backed, so this stream is the only thing that knows it moved.
     // Deferred: an `ngModelGroup` registers its control a microtask after this hook, so resolving it here
     // and now would leave a group's errors component with nothing to repaint on.
     const events$ = defer(() => (this.ngModelGroup?.control ?? this.ngModel?.control)?.events ?? of(null));
@@ -88,8 +88,8 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
       ? this.formDirective.idle$.pipe(switchMap(() => events$.pipe(startWith(null))))
       : events$;
 
-    // `NgForm.submitted` is untracked, and the form's `revealOn` is a signal this OnPush component does not
-    // own, so neither repaints on its own. Both gate the messages, so both have to.
+    // `NgForm.submitted` is untracked, and the form's `revealOn` is a signal the errors component does not
+    // own, so neither reaches it on its own. Both gate the messages, so both have to.
     const repaints: Observable<unknown>[] = [
       controlEvents$,
       this.ngForm?.ngSubmit ?? EMPTY,
@@ -98,11 +98,8 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
 
     merge(...repaints)
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.fieldErrorsComponentRef?.instance.markForCheck();
-        // The field is a sibling of the errors component, so nothing above marks it. Without this its
-        // `aria-invalid` would keep whatever it bound on the first pass.
-        this.decorator?.projectedField?.markForCheck?.();
-      });
+      // The field needs no pump of its own: its `aria-invalid` reads the decorator's `isInvalid`, which
+      // reads this component's `invalid` signal, and a signal read is tracked across that sibling boundary.
+      .subscribe(() => this.fieldErrorsComponentRef?.instance.refresh());
   }
 }

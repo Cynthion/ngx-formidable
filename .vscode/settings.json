@@ -12,25 +12,12 @@
 
   "files.trimTrailingWhitespace": true,
 
-  "task.allowAutomaticTasks": "off",
-
   /* LANGUAGES */
   "[markdown]": {
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
     "editor.wordWrap": "off"
   },
-  // "[html]": {
-  //   // format HTML with Prettier first, then with the built-in formatter
-  //   "editor.defaultFormatter": "Jota0222.multi-formatter",
-  //   "multiFormatter.formatterList": ["esbenp.prettier-vscode", "vscode.html-language-features"],
-  // },
-  // "html.format.wrapAttributes": "force-aligned",
-  // "html.format.preserveNewLines": true,
-  // "html.format.wrapLineLength": 160 /* also change in .editorconfig */,
-  // "html.autoClosingTags": true,
-  // "html.format.contentUnformatted": "pre,code,textarea",
-
   "js/ts.preferences.quoteStyle": "single",
   "js/ts.preferences.importModuleSpecifier": "relative",
   "js/ts.preferences.autoImportFileExcludePatterns": ["@ionic/angular/common", "@ionic/angular"], // https://ionicframework.com/docs/angular/build-options#standalone-based-applications

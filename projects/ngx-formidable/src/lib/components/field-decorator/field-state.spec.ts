@@ -1,12 +1,12 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
 import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
 import { NgxFormidableFieldValidateDirective } from '../../forms/field-validate.directive';
 import { NgxFormidableFormDirective } from '../../forms/form.directive';
+import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
 import { InputFieldComponent } from '../fields/input-field/input-field.component';
 import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
 import { FieldDecoratorComponent } from './field-decorator.component';
@@ -37,8 +37,8 @@ function token(name: string): string {
 }
 
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field
@@ -59,8 +59,8 @@ class InputHostComponent {
 }
 
 @Component({
-  standalone: true,
   imports: [FieldDecoratorComponent, RadioGroupFieldComponent, FieldLabelDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field name="field" />
@@ -76,7 +76,6 @@ interface NameModel {
 
 /** A real form, so the flag is proven to travel from a validator all the way to the host class. */
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     NgxFormidableFormDirective,
@@ -87,13 +86,14 @@ interface NameModel {
     FieldErrorsDirective,
     FieldLabelDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
       [formValue]="formValue"
       [formShape]="shape"
       [stubValidator]="required"
-      (formValueChange$)="formValue = $event">
+      (formValueChange)="formValue = $event">
       <formidable-field-decorator>
         <formidable-input-field
           formidableFieldErrors

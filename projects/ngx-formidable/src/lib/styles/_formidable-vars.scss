@@ -122,7 +122,8 @@
             --formidable-label-floating-height,
             #{tokens.$formidable-label-floating-height}
           ) - var(--formidable-field-value-height, #{tokens.$formidable-field-value-height})
-      ) / 2
+      ) /
+      2
   );
 
   // Where the value's line-box starts, measured from the field's inner top — with the label inside, so
@@ -140,7 +141,8 @@
             --formidable-field-value-height,
             #{tokens.$formidable-field-value-height}
           )
-      ) / 2
+      ) /
+      2
   );
 
   // A label that renders over the field is positioned inside the field's own container, whose top edge is
@@ -162,10 +164,8 @@
   // Border: the label's line-box is centered on the field's top border, so it straddles it. Negative,
   // because the label is taller than the border it is centered on.
   --formidable-label-border-offset: calc(
-    var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) / 2 - var(
-        --formidable-label-floating-height,
-        #{tokens.$formidable-label-floating-height}
-      ) / 2
+    var(--formidable-field-border-thickness, #{tokens.$formidable-field-border-thickness}) /
+      2 - var(--formidable-label-floating-height, #{tokens.$formidable-label-floating-height}) / 2
   );
 
   // How far a `border` label's border-hiding band reaches either side of its text, and how far it

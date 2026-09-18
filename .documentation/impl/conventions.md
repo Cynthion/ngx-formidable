@@ -24,8 +24,9 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 ## Components And Directives
 
-- **Standalone**: every component and directive is `standalone: true`. Consumers import them directly or via `NgxFormidableModule`.
-- **Change Detection**: every component uses `ChangeDetectionStrategy.OnPush`.
+- **Standalone**: every component and directive is standalone
+- **Change Detection**: every component uses `ChangeDetectionStrategy.OnPush`, with no exception and no `prefer-on-push-component-change-detection` waiver. Nothing calls `markForCheck()`: state a template reads is a signal, and the read is what marks the view`.
+- **Zoneless**: the library holds no `NgZone` and the demo runs on Angular's default zoneless change detection. State a template **or a host binding** reads must therefore be a signal — a template listener or an output emission marks the whole ancestor chain, while a signal write marks only the views that read it, and a plain field written from a callback Angular does not own marks nothing at all.
 - **Selectors**: components are elements, kebab-case, `formidable-` prefix (`formidable-input-field`). Field-decoration directives are attributes, camelCase, `formidable` prefix (`[formidableFieldLabel]`, `form[formidableForm]`). Two directives intentionally hijack Angular's own selectors — `NgxFormidableFieldValidateDirective` on `[ngModel]` and `NgxFormidableGroupValidateDirective` on `[ngModelGroup]` — so they attach to every model-bound control (they no-op outside a formidable form).
 - **File Naming**: components are folders with external `*.component.ts` / `.html` / `.scss` (never inline templates or styles). Directives are single `*.directive.ts` files. The shared bases are `base-field.directive.ts` and `base-option-field.directive.ts`. Filenames drop the `NgxFormidable` prefix (`field-validate.directive.ts`, not `ngx-formidable-field-validate.directive.ts`) — consumers import from the package root, so the prefix would only add path noise.
 - **Folder Placement**: `directives/` holds only the `formidableField*` attribute directives that decorate a field; the form-level directives and their helpers live in `forms/`. Test-only code goes in a `testing/` folder and stays unreachable from `public-api.ts`, which is what keeps ng-packagr from compiling it.
@@ -34,14 +35,19 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 ## Field Contract
 
 - Field components extend `BaseFieldDirective<T>` and register two providers: `NG_VALUE_ACCESSOR` (via `forwardRef`, `multi: true`) and `FORMIDABLE_FIELD` (`useExisting`) — this is what makes them work with `ngModel` and be discovered by `FieldDecoratorComponent`.
-- Option-based fields additionally collect options with `@ContentChildren(FORMIDABLE_OPTION, { descendants: true })` and provide `FORMIDABLE_OPTION_FIELD`. `descendants` is what lets an option sit inside a wrapper element; a shallow query already reaches into `@for` / `*ngIf` / `<ng-template>`. The four that walk their list with a highlight take the query — and the option inputs, the option lifecycle and the highlight itself — from `BaseOptionFieldDirective` instead of declaring it; only `select-field` still declares its own, because a native `<select>` has no highlight.
+- Option-based fields additionally collect options with `contentChildren(FORMIDABLE_OPTION, { descendants: true })` and provide `FORMIDABLE_OPTION_FIELD`. `descendants` is what lets an option sit inside a wrapper element; a shallow query already reaches into `@for` / `*ngIf` / `<ng-template>`. The four that walk their list with a highlight take the query — and the option inputs, the option lifecycle and the highlight itself — from `BaseOptionFieldDirective` instead of declaring it; only `select-field` still declares its own, because a native `<select>` has no highlight.
 - `BaseFieldDirective` is the extension point for custom fields; `example-counter-field` in the demo is the reference implementation, quoted as the worked example in `user/custom-fields.md`. The full contract is documented in `user/components.md`.
 
 ## Inputs, Outputs And Observables
 
-- **Inputs**: components and fields use classic `@Input()`; the newer signal `input()` API is used only in the form-level directives that have inputs at all (`NgxFormidableFormDirective`, `NgxFormidableWholeFormValidateDirective`, and `NgxFormidableVestValidatorDirective` in the `vest` entry point). `NgxFormidableFieldValidateDirective` and `NgxFormidableGroupValidateDirective` declare none.
-- **Outputs**: a mix of `@Output() EventEmitter` and RxJS observable outputs.
-- **Observable Naming**: append `$` (`valueChange$`, `formValueChange$`). Enforced by the `rxjs-x/finnish` ESLint rule (exempts `EventEmitter` and Angular lifecycle hooks like `canActivate`/`validate`).
+- **Inputs**: signal `input()` throughout, with no aliases
+- **Two Writers**: where an input has a second writer, the input keeps the public name and the effective value is a `linkedSignal` beside it under its own name. Nothing ever writes to an input.
+- **Outputs**: signal `output()`; a form-level output over an existing observable uses `outputFromObservable()`
+- **Observable Naming**: append `$` (`valueChange$`, `formValueChange$`)
+- **Setting An Input From Code**: `componentRef.setInput(name, value)`
+- **Queries**: signal `viewChild()` / `viewChildren()` / `contentChild()` / `contentChildren()` throughout. There is no `static` flag and none is needed — the result is materialized on read, so it is available from `ngOnInit` onward
+- **Reacting To An Input**: no `ngOnChanges`. An `effect()` where the work must also run on the first pass, `onSignalChange()` from `helpers/utility.helpers.ts` where it must not — the equivalent of the `!change.firstChange` guard
+- **State A Template Reads**: a `signal` or a `computed`, never a plain field. That is what marks the view, and it is the only thing that does
 
 ## Immutable Programming
 
@@ -72,11 +78,14 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 ## TypeScript
 
-- Strict everything: `strict`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noPropertyAccessFromIndexSignature`, `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`. Angular compiler runs `strictTemplates`, `strictInjectionParameters`, `strictInputAccessModifiers`.
+- Strict everything: `strict`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noPropertyAccessFromIndexSignature`, `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`. Angular compiler runs `strictTemplates`, `strictInjectionParameters`, `strictInputAccessModifiers`, `strictStandalone`.
+- `module` is `preserve`, which implies `moduleResolution: bundler` and forces `esModuleInterop`, so neither is declared. `useDefineForClassFields` is left at its `ES2022` default of `true`; the extended diagnostics Angular 22 promoted to errors are **not** suppressed, so `nullishCoalescingNotNullable` and `optionalChainNotNullable` both fail the build.
+- **Version ceilings**: TypeScript is capped by `@angular/compiler-cli` and `ng-packagr`, which both peer `>=6.0 <6.1` — so TypeScript 7 is unavailable while Angular 22 is the floor. `jasmine-core` is capped at 6: Jasmine 7 makes `describe`/`it` read-only on the global, which breaks `zone.js`'s `patchJasmine` and with it every `fakeAsync` spec.
 
 ## Tooling
 
-- **ESLint**: flat config (`typescript-eslint` + `angular-eslint` + `eslint-plugin-rxjs-x`), type-aware. Specs are not linted. Custom: `@typescript-eslint/no-unused-vars` with `^_` ignore; `rxjs-x/finnish`.
+- **ESLint**: flat config (`typescript-eslint` + `angular-eslint` + `eslint-plugin-rxjs-x`), type-aware. Specs are not linted. Custom: `@typescript-eslint/no-unused-vars` with `^_` ignore; `rxjs-x/finnish`. `eslint-plugin-rxjs-x` is ESM-only, so the config takes its `.default` — a bare `require` yields the module namespace and the plugin's rules are then invisible.
+- **Stylelint**: `stylelint-config-standard-scss` only
 - **Prettier**: single quotes, no trailing commas, `bracketSameLine`, one attribute per line; HTML attribute order via `prettier-plugin-organize-attributes`.
 - **Stylelint**: `stylelint-config-standard-scss` + `stylelint-config-prettier-scss`; modern color-function notation, long hex.
 

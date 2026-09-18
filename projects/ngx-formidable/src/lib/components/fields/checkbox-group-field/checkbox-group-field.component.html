@@ -2,28 +2,28 @@
   #checkboxGroupRef
   role="group"
   class="field"
-  [class.is-readonly]="readonly"
-  [class.is-disabled]="disabled"
-  [tabindex]="readonly || disabled ? -1 : null"
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
+  [tabindex]="readonly() || disabled() ? -1 : null"
   [attr.aria-labelledby]="labelledBy"
-  [attr.aria-required]="showRequiredMarker || null"
+  [attr.aria-required]="showRequiredMarker() || null"
   [attr.aria-invalid]="isInvalid || null"
   [attr.aria-describedby]="describedBy"
-  [attr.aria-readonly]="readonly || null"
-  [attr.aria-disabled]="disabled || null"
-  [attr.aria-activedescendant]="optionId((highlightedOptionIndex$ | async) ?? -1)"
+  [attr.aria-readonly]="readonly() || null"
+  [attr.aria-disabled]="disabled() || null"
+  [attr.aria-activedescendant]="optionId(highlightedOptionIndex())"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <!-- Options -->
   <!-- Options are re-created in order to use native <input> elements. -->
-  @for (option of options$ | async; track option.value; let i = $index) {
+  @for (option of activeOptions(); track option.value; let i = $index) {
     <input
       hidden
       type="checkbox"
       [tabindex]="-1"
-      [attr.name]="name"
-      [attr.readonly]="option.readonly || readonly ? '' : null"
-      [attr.disabled]="option.disabled || disabled ? '' : null"
+      [attr.name]="name()"
+      [attr.readonly]="option.readonly || readonly() ? '' : null"
+      [attr.disabled]="option.disabled || disabled() ? '' : null"
       [checked]="isChecked(option.value)" />
     <formidable-field-option
       #optionRef
@@ -31,17 +31,17 @@
       [layout]="'checkbox-group'"
       [value]="option.value"
       [label]="option.label"
-      [readonly]="option.readonly || readonly"
-      [disabled]="option.disabled || disabled"
+      [readonly]="option.readonly || readonly()"
+      [disabled]="option.disabled || disabled()"
       [selected]="isChecked(option.value)"
-      [highlighted]="i === (highlightedOptionIndex$ | async)">
-      <ng-container
-        *ngIf="option.template; else labelContent"
-        [ngTemplateOutlet]="option.template">
-      </ng-container>
-      <ng-template #labelContent>{{ option.label || option.value }}</ng-template>
+      [highlighted]="i === highlightedOptionIndex()">
+      @if (option.template) {
+        <ng-container [ngTemplateOutlet]="option.template"> </ng-container>
+      } @else {
+        {{ option.label || option.value }}
+      }
     </formidable-field-option>
   } @empty {
-    <div class="no-option">{{ noOptionsText }}</div>
+    <div class="no-option">{{ noOptionsText() }}</div>
   }
 </div>

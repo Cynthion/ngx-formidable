@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
@@ -20,7 +20,6 @@ import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
  */
 
 @Component({
-  standalone: true,
   imports: [
     FormsModule,
     InputFieldComponent,
@@ -32,6 +31,7 @@ import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
   ],
   // Inside a `<form>`, like real usage: a standalone `ngModel` writes its value synchronously, before
   // the fields whose control sits in an `@if` branch have resolved their view refs.
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-input-field
@@ -66,12 +66,12 @@ import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
   `
 })
 class FocusHostComponent {
-  @ViewChild(InputFieldComponent, { static: true }) input!: InputFieldComponent;
-  @ViewChild(DropdownFieldComponent, { static: true }) dropdown!: DropdownFieldComponent;
-  @ViewChild(AutocompleteFieldComponent, { static: true }) autocomplete!: AutocompleteFieldComponent;
-  @ViewChild(DateFieldComponent, { static: true }) date!: DateFieldComponent;
-  @ViewChild(SliderFieldComponent, { static: true }) slider!: SliderFieldComponent;
-  @ViewChild(ToggleFieldComponent, { static: true }) toggle!: ToggleFieldComponent;
+  readonly input = viewChild.required(InputFieldComponent);
+  readonly dropdown = viewChild.required(DropdownFieldComponent);
+  readonly autocomplete = viewChild.required(AutocompleteFieldComponent);
+  readonly date = viewChild.required(DateFieldComponent);
+  readonly slider = viewChild.required(SliderFieldComponent);
+  readonly toggle = viewChild.required(ToggleFieldComponent);
 
   focused: string | null = null;
   toggleDisabled = false;
@@ -147,7 +147,7 @@ describe('field focus', () => {
     it(`does not open the ${field} panel`, fakeAsync(() => {
       build(field);
 
-      expect(host[field].isPanelOpen).toBeFalse();
+      expect(host[field]().isPanelOpen()).toBeFalse();
     }));
   }
 
@@ -179,7 +179,7 @@ describe('field focus', () => {
   it('focus() is callable on the field itself', fakeAsync(() => {
     build(null);
 
-    (host.dropdown as BaseFieldDirective).focus();
+    (host.dropdown() as BaseFieldDirective).focus();
 
     expect(document.activeElement).toBe(expectedElement(fixture, 'dropdown'));
   }));
@@ -192,12 +192,12 @@ describe('field focus', () => {
   it('keeps focus on the date input while its panel opens', fakeAsync(() => {
     build('date');
 
-    host.date.isPanelOpen = true;
+    host.date().togglePanel(true);
     fixture.detectChanges();
     tick();
     discardPeriodicTasks();
 
-    expect(host.date.isPanelOpen).toBeTrue();
+    expect(host.date().isPanelOpen()).toBeTrue();
     expect(document.activeElement).toBe(expectedElement(fixture, 'date'));
   }));
 });

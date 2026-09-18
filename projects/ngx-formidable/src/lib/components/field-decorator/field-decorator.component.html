@@ -84,24 +84,24 @@
     <div
       ngClass="label-wrapper label-{{ labelState }}"
       [class.hidden]="!hasLabel"
-      [class.label-animated]="isLabelAnimated"
+      [class.label-animated]="isLabelAnimated()"
       [id]="labelId">
-      <ng-container [ngTemplateOutlet]="projectedLabel" />
+      <ng-container [ngTemplateOutlet]="labelContent" />
       <ng-container [ngTemplateOutlet]="requiredMarker" />
     </div>
   } @else {
     <label
       ngClass="label-wrapper label-{{ labelState }}"
       [class.hidden]="!hasLabel"
-      [class.label-animated]="isLabelAnimated"
+      [class.label-animated]="isLabelAnimated()"
       [attr.for]="fieldId"
       [id]="labelId">
-      <ng-container [ngTemplateOutlet]="projectedLabel" />
+      <ng-container [ngTemplateOutlet]="labelContent" />
       <ng-container [ngTemplateOutlet]="requiredMarker" />
     </label>
   }
 
-  <ng-template #projectedLabel>
+  <ng-template #labelContent>
     <ng-content select="[formidableFieldLabel]" />
   </ng-template>
 

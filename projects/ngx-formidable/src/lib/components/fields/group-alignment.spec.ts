@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
 import { FieldOptionComponent } from '../field-option/field-option.component';
@@ -26,8 +26,8 @@ import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.
  */
 
 @Component({
-  standalone: true,
   imports: [InputFieldComponent, RadioGroupFieldComponent, CheckboxGroupFieldComponent, FieldOptionComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-input-field name="text" />
 

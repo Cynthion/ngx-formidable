@@ -1,4 +1,4 @@
-import { Directive, ElementRef } from '@angular/core';
+import { Directive, ElementRef, inject } from '@angular/core';
 
 /**
  * Marks a projected element as decorating the label — a help icon, a badge. It shares the label's row and
@@ -6,5 +6,5 @@ import { Directive, ElementRef } from '@angular/core';
  */
 @Directive({ selector: '[formidableFieldLabelAdornment]', standalone: true })
 export class FieldLabelAdornmentDirective {
-  constructor(public elementRef: ElementRef) {}
+  elementRef = inject(ElementRef);
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
 import { FieldLabelDirective } from '../../directives/field-label.directive';
@@ -79,7 +79,6 @@ function underline(element: HTMLElement): number {
 }
 
 @Component({
-  standalone: true,
   imports: [
     FieldDecoratorComponent,
     InputFieldComponent,
@@ -88,6 +87,7 @@ function underline(element: HTMLElement): number {
     RadioGroupFieldComponent,
     FieldLabelDirective
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field

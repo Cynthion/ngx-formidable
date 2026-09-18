@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
 import { FORMIDABLE_VALIDATOR } from '../models/validation.model';
@@ -21,8 +21,8 @@ interface Model extends Record<string, unknown> {
 }
 
 @Component({
-  standalone: true,
   imports: [FormsModule, NgxFormidableFormDirective, NgxFormidableFieldValidateDirective, StubValidatorDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -43,8 +43,8 @@ class RunHostComponent {
 
 /** The form asks for `blur`, this one field asks for `change`. The field wins — that is Angular's rule. */
 @Component({
-  standalone: true,
   imports: [FormsModule, NgxFormidableFormDirective, NgxFormidableFieldValidateDirective, StubValidatorDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
