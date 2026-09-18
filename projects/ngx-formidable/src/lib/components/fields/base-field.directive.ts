@@ -8,7 +8,6 @@ import {
   Injector,
   input,
   model,
-  NgZone,
   OnDestroy,
   OnInit,
   output,
@@ -56,8 +55,6 @@ export abstract class BaseFieldDirective<T = string | null>
   protected readonly isFieldFilled = signal(false);
   protected valueChangeSubject$ = new Subject<T>();
   protected focusChangeSubject$ = new Subject<boolean>();
-
-  protected readonly ngZone: NgZone = inject(NgZone);
 
   // Element injectors follow the declaring template, so a projected field really does see its decorator.
   // Optional: a field used on its own has no label, hint or errors to point at.
@@ -390,53 +387,47 @@ export abstract class BaseFieldDirective<T = string | null>
 
   // #endregion
 
+  // No `NgZone` anywhere: what these callbacks change is signals, and a signal write notifies the change
+  // detection scheduler from any callstack. See `tech/architecture.md` for what that costs a consumer who
+  // opts back into zone change detection.
   private registerGlobalListeners(): void {
-    if (this.keyboardCallback || this.externalClickCallback || this.windowResizeScrollCallback) {
-      this.ngZone.runOutsideAngular(() => {
-        if (this.keyboardCallback && this.registeredKeys.length > 0) {
-          fromEvent<KeyboardEvent>(this.fieldRef.nativeElement, 'keydown')
-            .pipe(
-              filter(() => this.isFieldFocused() && !this.readonly() && !this.disabled()),
-              filter((event) => this.registeredKeys.includes(event.key)),
-              tap((event) => {
-                // immediately prevent default, before debounceTime
-                if (event.key !== 'Tab' && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')
-                  event.preventDefault();
-              }),
-              takeUntil(this.destroy$)
-            )
-            .subscribe((event: KeyboardEvent) =>
-              this.ngZone.run(() => {
-                this.keyboardCallback?.(event);
-              })
-            );
-        }
+    if (this.keyboardCallback && this.registeredKeys.length > 0) {
+      fromEvent<KeyboardEvent>(this.fieldRef.nativeElement, 'keydown')
+        .pipe(
+          filter(() => this.isFieldFocused() && !this.readonly() && !this.disabled()),
+          filter((event) => this.registeredKeys.includes(event.key)),
+          tap((event) => {
+            // immediately prevent default, before debounceTime
+            if (event.key !== 'Tab' && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') event.preventDefault();
+          }),
+          takeUntil(this.destroy$)
+        )
+        .subscribe((event: KeyboardEvent) => this.keyboardCallback?.(event));
+    }
 
-        if (this.externalClickCallback) {
-          fromEvent<MouseEvent>(document, 'click')
-            .pipe(
-              filter((event) => {
-                const path = event.composedPath?.() ?? [];
+    if (this.externalClickCallback) {
+      fromEvent<MouseEvent>(document, 'click')
+        .pipe(
+          filter((event) => {
+            const path = event.composedPath?.() ?? [];
 
-                // accept clicks that bubble through any part of the field (like panel)
-                const isInside = path.some((el) => el instanceof Node && this.fieldRef.nativeElement.contains(el));
+            // accept clicks that bubble through any part of the field (like panel)
+            const isInside = path.some((el) => el instanceof Node && this.fieldRef.nativeElement.contains(el));
 
-                return !isInside;
-              }),
-              takeUntil(this.destroy$)
-            )
-            .subscribe(() => this.ngZone.run(() => this.externalClickCallback?.()));
-        }
+            return !isInside;
+          }),
+          takeUntil(this.destroy$)
+        )
+        .subscribe(() => this.externalClickCallback?.());
+    }
 
-        if (this.windowResizeScrollCallback) {
-          const resize$ = fromEvent(window, 'resize');
-          const scroll$ = fromEvent(window, 'scroll');
+    if (this.windowResizeScrollCallback) {
+      const resize$ = fromEvent(window, 'resize');
+      const scroll$ = fromEvent(window, 'scroll');
 
-          merge(resize$, scroll$)
-            .pipe(debounceTime(50), takeUntil(this.destroy$))
-            .subscribe(() => this.ngZone.run(() => this.windowResizeScrollCallback?.()));
-        }
-      });
+      merge(resize$, scroll$)
+        .pipe(debounceTime(50), takeUntil(this.destroy$))
+        .subscribe(() => this.windowResizeScrollCallback?.());
     }
   }
 }

@@ -302,7 +302,8 @@ export class DropdownFieldComponent
     this.isPanelOpen.set(isOpen);
 
     // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
-    // before change detection.
+    // before change detection. A timer lands after it even zonelessly: the `set` above notifies the
+    // scheduler, which queues its own timer from inside that call, so ours is behind it in the queue.
     setTimeout(() => scrollIntoView(this.dropdownRef(), this.panelRef(), isOpen));
 
     if (isOpen) {
@@ -317,7 +318,7 @@ export class DropdownFieldComponent
   }
 
   // Deferred, unlike the call in `togglePanel`: the option list changed, so the panel's height is only
-  // correct once change detection has rendered it.
+  // correct once change detection has rendered it. Queued behind the scheduler's own timer, as above.
   private updatePanelPosition(): void {
     setTimeout(() => updatePanelPosition(this.dropdownRef(), this.panelRef()));
   }

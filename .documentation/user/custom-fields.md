@@ -18,7 +18,7 @@ Register the component as `FORMIDABLE_FIELD` and it immediately gains:
 | Required marker                              | `showRequiredMarker`, inherited from the base                              |
 | Focus and `autoFocus`                        | `focus()`, inherited from the base                                         |
 | Accessible names                             | `labelledBy`, `describedBy` and `isInvalid`, protected getters on the base |
-| Keyboard, outside-click and resize listeners | The base, registered outside the Angular zone                              |
+| Keyboard, outside-click and resize listeners | The base, through RxJS `fromEvent`                                         |
 
 ---
 

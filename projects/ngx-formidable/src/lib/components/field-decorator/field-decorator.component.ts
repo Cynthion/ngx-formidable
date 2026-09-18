@@ -7,7 +7,6 @@ import {
   ElementRef,
   HostBinding,
   inject,
-  NgZone,
   OnDestroy,
   output,
   signal,
@@ -102,7 +101,6 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   }
 
   private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
-  private readonly ngZone: NgZone = inject(NgZone);
 
   private valueChangeSubject$ = new Subject<unknown>();
   private focusChangeSubject$ = new Subject<boolean>();
@@ -351,10 +349,8 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
     );
 
     // Writes custom properties only, so it never needs a change-detection pass of its own.
-    this.ngZone.runOutsideAngular(() => {
-      this.resizeObserver = new ResizeObserver(() => this.insetValue());
-      wrappers.forEach((wrapper) => this.resizeObserver?.observe(wrapper));
-    });
+    this.resizeObserver = new ResizeObserver(() => this.insetValue());
+    wrappers.forEach((wrapper) => this.resizeObserver?.observe(wrapper));
   }
 
   // Moves the value clear of a prefix/suffix — and an inside label with it, so the two stay aligned.

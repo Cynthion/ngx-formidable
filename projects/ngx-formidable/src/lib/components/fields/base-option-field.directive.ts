@@ -144,7 +144,8 @@ export abstract class BaseOptionFieldDirective<T = string | null> extends BaseFi
     if (index < 0) return;
 
     // `optionRefs` is only repopulated once the new highlight has rendered, so a microtask would
-    // resolve the wrong element.
+    // resolve the wrong element. A timer lands after the render even zonelessly: the `set` above notifies
+    // the scheduler, which queues its own timer from inside that call, so ours is behind it in the queue.
     setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs()));
   }
 

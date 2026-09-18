@@ -140,7 +140,7 @@ The measurement is the wrapper, not the content. Each wrapper shrink-wraps what 
 | Step    | Detail                                                                                        |
 | :------ | :-------------------------------------------------------------------------------------------- |
 | Observe | A `ResizeObserver` on both wrappers, `horizontal` layout only                                 |
-| Run     | Outside the zone: it writes custom properties only, so it needs no change-detection pass      |
+| Run     | Writes custom properties only, so it needs no change-detection pass of its own                |
 | Write   | `--formidable-field-prefix-inset` and `--formidable-field-suffix-inset` on the decorator host |
 | Clear   | `removeProperty` at zero width, not a `0px` write                                             |
 

@@ -6,7 +6,8 @@ import {
   inject,
   input,
   OnDestroy,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 import { ExampleIconComponent } from '../example-icon/example-icon.component';
 
@@ -25,7 +26,9 @@ export class ExampleTooltipComponent implements OnInit, OnDestroy {
   readonly placement = input<Placement>('right');
   readonly trigger = input<TriggerMode>('click');
 
-  open = false;
+  // A signal, not a plain field: the document listeners below close the panel from a callstack Angular does
+  // not own, and a signal write is what notifies change detection there.
+  readonly open = signal(false);
   readonly icon = input(`
     <svg width="24" height="24" viewBox="0 0 24 24">
       <path d="M23 12C23 18.0751 18.0751 23 12 23C5.92487 23 1 18.0751 1 12C1 5.92487 5.92487 1 12 1C18.0751 1 23 5.92487 23 12ZM3.00683 12C3.00683 16.9668 7.03321 20.9932 12 20.9932C16.9668 20.9932 20.9932 16.9668 20.9932 12C20.9932 7.03321 16.9668 3.00683 12 3.00683C7.03321 3.00683 3.00683 7.03321 3.00683 12Z"></path>
@@ -38,7 +41,7 @@ export class ExampleTooltipComponent implements OnInit, OnDestroy {
   private readonly doc = inject(DOCUMENT);
 
   private onDocClick = (e: MouseEvent) => {
-    if (!this.open) return;
+    if (!this.open()) return;
     const target = e.target as Node;
     if (!this.host.nativeElement.contains(target)) this.close();
   };
@@ -60,13 +63,13 @@ export class ExampleTooltipComponent implements OnInit, OnDestroy {
 
   toggle(): void {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    this.open ? this.close() : this.openPanel();
+    this.open() ? this.close() : this.openPanel();
   }
   openPanel(): void {
-    this.open = true;
+    this.open.set(true);
   }
   close(): void {
-    this.open = false;
+    this.open.set(false);
   }
 
   // Hover triggers

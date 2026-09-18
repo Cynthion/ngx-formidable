@@ -16,6 +16,10 @@ Prioritize testing **logic** over Angular rendering: fast, reliable tests that c
 
 Not the newer `@angular/build:unit-test`: it is still experimental, its own `migrate-karma-to-vitest` migration skips library projects outright, and it takes no `polyfills`, `styles` or `stylePreprocessorOptions` of its own — it reads them from a `buildTarget`, which a library built by ng-packagr does not have. The library's specs need all three: `zone.js/testing` for `fakeAsync`, and `test-styles.scss` for the geometry specs that measure computed CSS.
 
+**Both test targets run under zone change detection, and the app does not.** `@angular/build:karma` writes the test environment module itself, and it puts `provideZoneChangeDetection()` in it whenever `zone.js` is one of the target's `polyfills`. Removing that entry does not buy zoneless specs, because `zone.js/testing` carries no copy of zone.js and `fakeAsync` needs one. A spec that must run the way the app does provides `provideZonelessChangeDetection()` in its own `TestBed`, which overrides the environment's; `zoneless.spec.ts` is the one that does, and its header says why the NG0914 warning it logs is expected.
+
+Two things behave differently in a zoneless `TestBed`, and both mislead if they are not known. `fixture.detectChanges()` refreshes only what something marked, so a host holding plain fields is skipped where it would have been checked under zones — a spec host that mutates its own state needs signals. And a spec proving that a repaint arrives on its own must not call `detectChanges()` after the act at all, since it ticks the whole application and would pass either way.
+
 The library's `test` target sets `include` explicitly, as `['**/*.spec.ts', '../vest/**/*.spec.ts']`. The builder resolves those globs against `sourceRoot` and not, as its schema says, the project root — so the default glob covers `src/` only and the `vest/` entry point's spec is silently skipped. It was skipped for a long time; the second glob is what runs it.
 
 ---
@@ -57,8 +61,8 @@ Behavior that carries real risk, tested through a minimal host — not the frame
 
 ## Running Tests
 
-- Library: `ng test ngx-formidable`.
-- Demo: `npm test` (defaults to the demo project).
+- Library: `ng test ngx-formidable`, which `npm test` also resolves to.
+- Demo: `ng test ngx-formidable-demo`, which has to be named.
 
 Prove work by pasting command output — do not claim success. When a change is logic-bearing, add the helper spec in the same commit.
 

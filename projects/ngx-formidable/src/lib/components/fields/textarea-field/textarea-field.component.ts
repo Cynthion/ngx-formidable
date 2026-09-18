@@ -274,8 +274,9 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
   }
 
   private adjustLayout(): void {
-    // Reads resolved styles, so it has to wait for the suffix to render — a microtask runs before
-    // change detection.
+    // Reads resolved styles, so it has to wait for the suffix to render. Neither caller notifies the
+    // scheduler, so the timer is not queued behind a pass: `ngAfterViewInit` runs inside one, and the mask
+    // effect's microtask reads padding off DOM `doWriteValue` wrote directly. A timer is what clears both.
     setTimeout(() => {
       // adjust length indicator, so that it also aligns right even if a suffix is set
       const el = this.textareaElement;
