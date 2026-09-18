@@ -1,0 +1,85 @@
+name: Dependency Check
+
+on:
+  schedule:
+    - cron: '0 6 1 * *' # 06:00 UTC on the first of the month
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: dependency-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      # Both commands are read-only reports and exit non-zero when they have something to say.
+      - name: Collect Outdated Packages
+        id: collect
+        run: |
+          npm outdated > outdated.txt || true
+          npx ng update > ng-update.txt || true
+
+          if [ ! -s outdated.txt ]; then
+            echo 'Every dependency is current.'
+            echo 'stale=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo 'stale=true' >> "$GITHUB_OUTPUT"
+
+          {
+            echo 'Monthly check. This is a report, not an instruction — confirm locally before changing anything.'
+            echo
+            echo '## Angular'
+            echo
+            echo '```'
+            cat ng-update.txt
+            echo '```'
+            echo
+            echo 'Angular moves with `ng update`, one major at a time and never a hand-edited version — the migrations are the point.'
+            echo
+            echo '## Everything Else'
+            echo
+            echo '```'
+            cat outdated.txt
+            echo '```'
+            echo
+            echo 'Two ceilings are deliberate and stay where they are: `typescript` is peered `>=6.0 <6.1` by `@angular/compiler-cli` and `ng-packagr`, and `jasmine-core` stays at 6 because Jasmine 7 makes `describe` and `it` read-only on the global and breaks every `fakeAsync` spec. See `.documentation/impl/conventions.md`.'
+            echo
+            echo 'Close this issue once the work is done or deliberately skipped — the next run opens a new one only after this one is closed.'
+          } > body.md
+
+      # One open issue at a time: a new issue is what sends the mail, an edit to an old one is not.
+      - name: Open Reminder Issue
+        if: steps.collect.outputs.stale == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create dependencies --color 0366d6 --description 'Dependency and toolchain updates' || true
+
+          if [ -n "$(gh issue list --label dependencies --state open --limit 1 --json number --jq '.[0].number')" ]; then
+            echo 'An open dependency issue is already waiting; not opening a second.'
+            exit 0
+          fi
+
+          gh issue create \
+            --title "Dependency update check — $(date -u '+%Y-%m')" \
+            --label dependencies \
+            --body-file body.md

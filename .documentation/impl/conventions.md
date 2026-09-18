@@ -92,6 +92,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 ## Development Workflow
 
 - **Branches**: `main` is production — push triggers the GitHub Pages deploy of the demo. `feature/*` for work in progress.
+- **Checks**: every push to `main` and every pull request runs the Formatting, Tests and Build items below in CI. See `tech/architecture.md`.
 - **Publishing**: `build:lib` then `publish:lib` to GitHub Packages; `@cynthion` scope needs `~/.npmrc` auth. See `tech/architecture.md`.
 - **Roadmap**: `impl/implementation.md` is the source of truth for outstanding work — check it before starting. `impl/backlog.md` is the intake buffer for ideas that have not been triaged into a phase yet.
 

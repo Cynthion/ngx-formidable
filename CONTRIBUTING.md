@@ -33,7 +33,7 @@ There is no standalone typecheck script — `build:lib` is it.
 4. **Exercise it in the demo.** `example-form` is the showcase and the only visual test surface; a new field component is wired into it so it renders and can be tried.
 5. **Add tests** per `.documentation/impl/testing.md` — helpers first, colocated with the code they pin down.
 6. **Update the docs.** A public API change belongs in `.documentation/user/components.md`; a change to public usage belongs in the matching `.documentation/user/*.md`; a design decision belongs in the matching `.documentation/tech/*.md`. The root `README.md` changes only when public usage does.
-7. **Run every check** in the Scripts table above and make them pass.
+7. **Run every check** in the Scripts table above and make them pass. CI runs the same ones on your pull request.
 8. **Open a pull request** describing what changed and why.
 
 ## Documentation

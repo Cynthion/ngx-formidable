@@ -12,7 +12,7 @@ ngx-formidable/
 ├── src/                       # the demo app
 ├── dist/                      # build output
 ├── .documentation/            # docs: user/ for consumers, tech/ for maintainers, impl/ for repo work
-└── .github/workflows/         # deploy.yml — GitHub Pages deploy of the demo
+└── .github/workflows/         # checks, the GitHub Pages deploy of the demo, the dependency check
 ```
 
 Two Angular projects are declared:
@@ -71,6 +71,20 @@ ng-packagr config:
 
 - `ng-package.json` sets the entry file to `public-api.ts`, outputs to `dist/ngx-formidable`, and ships the library SCSS as assets under `dist/ngx-formidable/styles/`.
 - `vest/ng-package.json` declares the secondary entry point; ng-packagr builds it after the primary and it imports the primary by package name (see `tech/validation.md`). The package is published as `@cynthion/ngx-formidable` to GitHub Packages (`publishConfig.registry`).
+
+## Continuous Integration
+
+Three workflows in `.github/workflows/`. All three take the Node version from `.nvmrc` and install with `npm ci`, so a run resolves exactly the committed lockfile.
+
+| Workflow               | Trigger                              | Does                                                                             |
+| :--------------------- | :----------------------------------- | :------------------------------------------------------------------------------- |
+| `ci.yml`               | Push to `main`, pull request, manual | `prettier:check`, `lint`, `style-lint`, `build:lib`, both test projects, `build` |
+| `deploy.yml`           | Push to `main`, manual               | Builds the demo and deploys `dist/ngx-formidable-demo/browser` to GitHub Pages   |
+| `dependency-check.yml` | Monthly, manual                      | Reports `npm outdated` and `ng update` into a GitHub issue                       |
+
+- **Checks Mirror The Scripts**: `ci.yml` runs the same scripts a contributor runs locally, in the order of the Definition of Done in `impl/conventions.md`. `build:lib` is in it because it is also the type and template check — there is no standalone typecheck script.
+- **Tests**: the two projects are separate steps, because `ng test` takes one project at a time. Both run in `ChromeHeadless` with `--watch=false`.
+- **Dependency Check**: the reports are read-only and the issue is the notification, so it opens one only when something is behind and only when no open `dependencies` issue is already waiting. Editing an open issue would not notify, which is why the check never does.
 
 ## Consumer Setup
 
