@@ -150,14 +150,14 @@ $formidable-field-support-min-height: $formidable-field-validation-error-line-he
 
 // #region Colors
 
-// The default theme is neutral chrome plus a single accent — the palette a library should ship, because
-// it reads as deliberate without competing with the consumer's brand. Rebranding it is one variable:
+// The default theme is neutral surfaces and text plus a single accent — the palette a library should ship,
+// because it reads as deliberate without competing with the consumer's brand. Rebranding it is one variable:
 // `--formidable-color-field-border-focus`. The alternatives live in `user/studio.md`.
 // Neutral                     Accent                      Signal
 //  50: #f8fafc  field fill     200: #c7d2fe  selection     error: #dc2626
-// 400: #94a3b8  field border   600: #4f46e5  focus
-// 500: #5a6b82  placeholder    700: #4338ca  floating label
-// 800: #1e293b  field text
+// 500: #5a6b82  placeholder    400: #818cf8  field border
+// 800: #1e293b  field text     600: #4f46e5  focus
+//                              700: #4338ca  floating label
 
 $formidable-color-validation-error: #dc2626;
 
@@ -175,10 +175,14 @@ $formidable-color-field-text-disabled: rgb($formidable-color-field-text, 50%);
 $formidable-color-field-placeholder: #5a6b82; // 500
 $formidable-color-field-selection: #c7d2fe; // accent 200
 
-// A colour of its own, not the text's. Chrome and content are separate concerns: a neutral default wants
-// a light border under dark text, and tying the two forces every field into a heavy outline the consumer
-// never asked for.
-$formidable-color-field-border: #94a3b8; // 400
+// A colour of its own, not the text's. Chrome and content are separate concerns: tying the two forces
+// every field into a heavy outline the consumer never asked for.
+// A tint of the accent rather than a neutral grey, because this one variable is also the toggle thumb, the
+// slider's thumb and track fill and the option markers — the parts that have to read as *on*. At a neutral
+// 400 they landed on the same grey as their own disabled colour, which is the field text at 50% alpha, and
+// an enabled control that looks disabled is worse than a border that is not perfectly neutral. It is also
+// the higher contrast of the two against the field fill: 2.9:1 here against 2.5:1 for a neutral 400.
+$formidable-color-field-border: #818cf8; // accent 400
 $formidable-color-field-border-hovered: $formidable-color-field-border;
 $formidable-color-field-border-focus: #4f46e5; // accent 600
 $formidable-color-field-border-invalid: $formidable-color-validation-error;
@@ -268,8 +272,11 @@ $formidable-color-slider-thumb-label: $formidable-color-field-label;
 $formidable-color-slider-thumb-label-background: $formidable-color-field-background;
 $formidable-color-slider-thumb-label-border: $formidable-color-field-border;
 $formidable-color-slider-thumb-border: $formidable-color-field-border;
-$formidable-color-slider-thumb-readonly: $formidable-color-field-text;
-$formidable-color-slider-thumb-disabled: $formidable-color-field-text;
+
+// The faded text, not the text: at full strength the disabled thumb was the darkest thing on the field and
+// outshone the enabled one, which is the toggle's thumb the other way round.
+$formidable-color-slider-thumb-readonly: $formidable-color-field-text-readonly;
+$formidable-color-slider-thumb-disabled: $formidable-color-field-text-disabled;
 $formidable-color-slider-track-readonly: $formidable-color-field-background-readonly;
 $formidable-color-slider-track-disabled: $formidable-color-field-background-disabled;
 $formidable-color-slider-track-filled-readonly: $formidable-color-field-text-readonly;

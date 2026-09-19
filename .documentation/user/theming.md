@@ -4,12 +4,12 @@ Every visual property of every field is a CSS custom property you can override. 
 
 ## The Default Theme
 
-The library ships neutral chrome plus a single accent — deliberate enough to use unthemed, quiet enough not to compete with your brand. Import the stylesheet and you get this; there is no theme to select and nothing to initialise.
+The library ships neutral surfaces and text plus a single accent — deliberate enough to use unthemed, quiet enough not to compete with your brand. Import the stylesheet and you get this; there is no theme to select and nothing to initialise.
 
 | Role           | Variable                                  |   Value   | Scale       |
 | :------------- | :---------------------------------------- | :-------: | :---------- |
 | Field fill     | `--formidable-color-field-background`     | `#f8fafc` | neutral 50  |
-| Field border   | `--formidable-color-field-border`         | `#94a3b8` | neutral 400 |
+| Field border   | `--formidable-color-field-border`         | `#818cf8` | accent 400  |
 | Placeholder    | `--formidable-color-field-placeholder`    | `#5a6b82` | neutral 500 |
 | Field text     | `--formidable-color-field-text`           | `#1e293b` | neutral 800 |
 | Selection      | `--formidable-color-field-selection`      | `#c7d2fe` | accent 200  |
@@ -60,7 +60,7 @@ Set these and the rest of the library follows. Do not set the derived variables 
 ```scss
 :root {
   --formidable-color-field-background: #f8fafc; // the fill; also the panels and the groups
-  --formidable-color-field-border: #94a3b8; // also the underline, toggle thumb, slider, option markers
+  --formidable-color-field-border: #818cf8; // also the underline, toggle thumb, slider, option markers
   --formidable-color-field-placeholder: #5a6b82; // also the hints, length indicator, resting label
   --formidable-color-field-text: #1e293b; // also the group text and the readonly/disabled fades
   --formidable-color-field-selection: #c7d2fe; // also the hover fill and the slider's tick marks

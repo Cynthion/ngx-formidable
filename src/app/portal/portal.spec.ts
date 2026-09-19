@@ -84,6 +84,37 @@ describe('portal', () => {
     expect(thumbnails[0]?.querySelector('formidable-input-field')).toBeTruthy();
   }));
 
+  /**
+   * The variables `USE_SITE_VARS` names are declared nowhere, so nothing masks them by inheritance and the
+   * `:root` theme reaches straight into every thumbnail. Applying a preset that sets one used to repaint
+   * the other eleven with it.
+   */
+  it('keeps every preset thumbnail on its own theme when another preset is applied', fakeAsync(() => {
+    settle();
+
+    const radius = (index: number): string => {
+      const thumbnail = root.querySelectorAll('.portal-theme-scope')[index] as HTMLElement;
+      const field = thumbnail.querySelector('formidable-input-field .field') as HTMLElement;
+
+      return getComputedStyle(field).borderStartStartRadius;
+    };
+
+    // `outlined`, which says nothing about its corners, next to `tab`, which rounds the top two to 18px.
+    const outlined = THEME_PRESETS.findIndex((preset) => preset.geometry === 'outlined');
+    const tab = THEME_PRESETS.findIndex((preset) => preset.geometry === 'tab');
+
+    theme.applyPreset(THEME_PRESETS.find((preset) => preset.geometry === 'pill')!);
+    settle();
+    const before = radius(outlined);
+
+    theme.applyPreset(THEME_PRESETS[tab]!);
+    settle();
+
+    expect(radius(tab)).toBe('18px');
+    expect(radius(outlined)).toBe(before);
+    expect(radius(outlined)).not.toBe('18px');
+  }));
+
   it('writes the theme to `:root`, where the derived variables are declared', fakeAsync(() => {
     settle();
 

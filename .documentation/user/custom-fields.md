@@ -238,7 +238,7 @@ A custom field styles itself; the library's SCSS surface is closed. What is open
   padding-top: var(--formidable-field-value-padding-top, 0);
   color: var(--formidable-color-field-text, #1e293b);
   background: var(--formidable-color-field-background, #f8fafc);
-  border: var(--formidable-field-border-thickness, 1px) solid var(--formidable-color-field-border, #94a3b8);
+  border: var(--formidable-field-border-thickness, 1px) solid var(--formidable-color-field-border, #818cf8);
   border-radius: var(--formidable-field-border-radius, var(--formidable-border-radius, 8px));
 }
 ```

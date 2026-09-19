@@ -456,11 +456,11 @@
     #{tokens.$formidable-color-slider-thumb-border}
   );
   --formidable-color-slider-thumb-readonly: var(
-    --formidable-color-field-text,
+    --formidable-color-field-text-readonly,
     #{tokens.$formidable-color-slider-thumb-readonly}
   );
   --formidable-color-slider-thumb-disabled: var(
-    --formidable-color-field-text,
+    --formidable-color-field-text-disabled,
     #{tokens.$formidable-color-slider-thumb-disabled}
   );
   --formidable-color-slider-track-readonly: var(

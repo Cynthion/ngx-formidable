@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FieldDecoratorComponent, FieldLabelDirective, InputFieldComponent } from '@cynthion/ngx-formidable';
 import { ThemeScopeDirective } from '../../chrome/theme-scope.directive';
 import { FONT_OPTIONS, THEME_PRESETS, ThemePreset } from '../../model/presets';
@@ -8,7 +8,8 @@ import {
   ColorKey,
   GEOMETRY_SCHEME_META,
   GEOMETRY_SCHEMES,
-  GeometryKey
+  GeometryKey,
+  USE_SITE_VARS
 } from '../../model/schemes';
 import { ThemeStore } from '../../state/theme.store';
 
@@ -35,12 +36,20 @@ export class PresetGalleryComponent {
 
   protected readonly axesOpen = signal(false);
 
-  protected readonly thumbnails = computed(() =>
-    this.presets.map((preset) => ({
-      preset,
-      vars: { ...GEOMETRY_SCHEMES[preset.geometry], ...COLOR_SCHEMES[preset.color] }
-    }))
-  );
+  /**
+   * A thumbnail states its theme in full, including the variables it does *not* want. The ones the library
+   * declares nowhere are inherited from the `:root` theme the user is editing, so a thumbnail that stays
+   * silent about them repaints whenever another preset is applied. `initial` is the guaranteed-invalid
+   * value: the use site falls back to what it would have used had nobody set the variable at all.
+   */
+  protected readonly thumbnails = this.presets.map((preset) => ({
+    preset,
+    vars: {
+      ...Object.fromEntries(USE_SITE_VARS.map((name) => [name, 'initial'])),
+      ...GEOMETRY_SCHEMES[preset.geometry],
+      ...COLOR_SCHEMES[preset.color]
+    }
+  }));
 
   protected apply(preset: ThemePreset): void {
     this.theme.applyPreset(preset);

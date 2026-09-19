@@ -214,7 +214,7 @@ export const COLOR_SCHEMES: Readonly<Record<ColorKey, ThemeVars>> = {
     '--formidable-color-field-text': '#1e293b',
     '--formidable-color-field-placeholder': '#5a6b82',
     '--formidable-color-field-selection': '#c7d2fe',
-    '--formidable-color-field-border': '#94a3b8',
+    '--formidable-color-field-border': '#818cf8',
     '--formidable-color-field-border-focus': '#4f46e5',
     '--formidable-color-field-background': '#f8fafc',
     '--formidable-color-field-label-floating': '#4338ca'
@@ -325,6 +325,21 @@ export const DARK_FILL_COMPANIONS: readonly string[] = [
   '--formidable-color-field-background-disabled',
   '--formidable-color-field-option-background-selected',
   '--formidable-color-field-option-background-highlighted'
+];
+
+/**
+ * The variables the library declares nowhere: each is read at its use site with a fallback, so no `:root`
+ * block and no re-emitted default block mentions them. Nothing masks them by inheritance, which is why a
+ * subtree carrying a theme of its own has to clear the ones its own schemes do not set — otherwise the
+ * `:root` theme leaks straight through into it.
+ */
+export const USE_SITE_VARS: readonly string[] = [
+  '--formidable-field-border-start-start-radius',
+  '--formidable-field-border-start-end-radius',
+  '--formidable-field-border-end-end-radius',
+  '--formidable-field-border-end-start-radius',
+  '--formidable-panel-border-thickness',
+  '--formidable-toggle-field-track-border-thickness'
 ];
 
 /** The five lengths a `0px` field border also erases, named by the borderless notice. */
