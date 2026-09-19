@@ -52,7 +52,7 @@ import { provideNgxFormidable } from '@cynthion/ngx-formidable';
 import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, {
-	providers: [...provideNgxFormidable()]
+  providers: [...provideNgxFormidable()]
 }).catch(console.error);
 ```
 
@@ -66,8 +66,8 @@ import { NgxFormidableModule } from '@cynthion/ngx-formidable';
 import { AppComponent } from './app.component';
 
 @NgModule({
-	imports: [BrowserModule, NgxFormidableModule.forRoot()],
-	bootstrap: [AppComponent]
+  imports: [BrowserModule, NgxFormidableModule.forRoot()],
+  bootstrap: [AppComponent]
 })
 export class AppModule {}
 ```
@@ -103,9 +103,9 @@ import { DeepPartial, DeepRequired } from '@cynthion/ngx-formidable';
 import { create, enforce, Modes, mode, only, Suite, test } from 'vest';
 
 export interface User {
-	name: string;
-	hobby: 'reading' | 'gaming' | 'swimming';
-	birthdate: Date;
+  name: string;
+  hobby: 'reading' | 'gaming' | 'swimming';
+  birthdate: Date;
 }
 
 export type UserFormModel = DeepPartial<User>;
@@ -113,25 +113,25 @@ export type UserFormShape = DeepRequired<UserFormModel>;
 
 /** Initial values. Every key the form edits, `undefined` where it starts empty. */
 export const initialUserFormModel: UserFormModel = {
-	name: undefined,
-	hobby: undefined,
-	birthdate: undefined
+  name: undefined,
+  hobby: undefined,
+  birthdate: undefined
 };
 
 /** Every key the model may carry, all required — a dev-mode typo check, not a validator. */
 export const userFormShape: UserFormShape = {
-	name: '',
-	hobby: 'reading',
-	birthdate: new Date()
+  name: '',
+  hobby: 'reading',
+  birthdate: new Date()
 };
 
 export const userFormSuite: Suite<string, string, (model: UserFormModel, field?: string) => void> = create((model: UserFormModel, field?: string) => {
-	mode(Modes.ALL); // Vest 6 defaults to `EAGER`, which reports only a field's first failing message
-	if (field) only(field); // the form asks about one target at a time
+  mode(Modes.ALL); // Vest 6 defaults to `EAGER`, which reports only a field's first failing message
+  if (field) only(field); // the form asks about one target at a time
 
-	test('name', 'Name is required.', () => {
-		enforce(model.name).isNotBlank();
-	});
+  test('name', 'Name is required.', () => {
+    enforce(model.name).isNotBlank();
+  });
 });
 ```
 
@@ -139,48 +139,48 @@ export const userFormSuite: Suite<string, string, (model: UserFormModel, field?:
 
 ```html
 <form
-	formidableForm
-	[formValue]="formValue$ | async"
-	[formShape]="formShape"
-	[formSuite]="formSuite"
-	(formValueChange)="formValue$.next($event)"
-	(validChange)="isValid$.next($event)"
-	(errorsChange)="errors$.next($event)"
-	(ngSubmit)="onSubmit()">
-	<formidable-field-decorator>
-		<formidable-input-field
-			formidableFieldErrors
-			name="name"
-			[showRequiredMarker]="true"
-			[ngModel]="(formValue$ | async)?.name" />
-		<div formidableFieldLabel>Name</div>
-		<div formidableFieldHint>As it appears on your passport</div>
-	</formidable-field-decorator>
+  formidableForm
+  [formValue]="formValue$ | async"
+  [formShape]="formShape"
+  [formSuite]="formSuite"
+  (formValueChange)="formValue$.next($event)"
+  (validChange)="isValid$.next($event)"
+  (errorsChange)="errors$.next($event)"
+  (ngSubmit)="onSubmit()">
+  <formidable-field-decorator>
+    <formidable-input-field
+      formidableFieldErrors
+      name="name"
+      [showRequiredMarker]="true"
+      [ngModel]="(formValue$ | async)?.name" />
+    <div formidableFieldLabel>Name</div>
+    <div formidableFieldHint>As it appears on your passport</div>
+  </formidable-field-decorator>
 
-	<formidable-field-decorator>
-		<formidable-dropdown-field
-			formidableFieldErrors
-			name="hobby"
-			[options]="hobbyOptions"
-			[ngModel]="(formValue$ | async)?.hobby" />
-		<div
-			formidableFieldLabel
-			[position]="'inside'">
-			Hobby
-		</div>
-	</formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-dropdown-field
+      formidableFieldErrors
+      name="hobby"
+      [options]="hobbyOptions"
+      [ngModel]="(formValue$ | async)?.hobby" />
+    <div
+      formidableFieldLabel
+      [position]="'inside'">
+      Hobby
+    </div>
+  </formidable-field-decorator>
 
-	<formidable-field-decorator>
-		<formidable-date-field
-			formidableFieldErrors
-			name="birthdate"
-			[maxDate]="today"
-			[unicodeTokenFormat]="'dd.MM.yyyy'"
-			[ngModel]="(formValue$ | async)?.birthdate" />
-		<div formidableFieldLabel>Birthdate</div>
-	</formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-date-field
+      formidableFieldErrors
+      name="birthdate"
+      [maxDate]="today"
+      [unicodeTokenFormat]="'dd.MM.yyyy'"
+      [ngModel]="(formValue$ | async)?.birthdate" />
+    <div formidableFieldLabel>Birthdate</div>
+  </formidable-field-decorator>
 
-	<button type="submit">Submit</button>
+  <button type="submit">Submit</button>
 </form>
 ```
 

@@ -1,0 +1,36 @@
+<h3 class="heading">
+  <button
+    type="button"
+    class="trigger"
+    [id]="headingId()"
+    [attr.aria-expanded]="open()"
+    (click)="toggled.emit()">
+    <span
+      class="chevron"
+      aria-hidden="true">
+      {{ open() ? '▾' : '▸' }}
+    </span>
+    @if (step() !== null) {
+      <span class="step">{{ step() }}</span>
+    }
+    <span class="title">{{ heading() }}</span>
+    @if (startHere()) {
+      <span class="start-here">Start here</span>
+    }
+    @if (hint()) {
+      <span class="hint">{{ hint() }}</span>
+    }
+  </button>
+</h3>
+
+@if (open()) {
+  <div
+    role="region"
+    class="body"
+    [attr.aria-labelledby]="headingId()">
+    @if (lede()) {
+      <p class="lede">{{ lede() }}</p>
+    }
+    <ng-content />
+  </div>
+}

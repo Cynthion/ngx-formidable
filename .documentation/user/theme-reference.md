@@ -1,6 +1,6 @@
 # Theme Reference
 
-Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these you actually need, is in `user/theming.md`; complete schemes to copy are in `user/theme-options.md`.
+Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these you actually need, is in `user/theming.md`; complete schemes to start from are in the Studio.
 
 ---
 
@@ -292,7 +292,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 
 ```scss
 .app-header {
-	z-index: calc(var(--formidable-sheet-z-index, 1000) + 1);
+  z-index: calc(var(--formidable-sheet-z-index, 1000) + 1);
 }
 ```
 
@@ -342,9 +342,9 @@ Every corner of a field falls back to `--formidable-field-border-radius`, and ea
 
 ```scss
 :root {
-	--formidable-field-border-radius: 0.5rem;
-	--formidable-field-border-end-start-radius: 0; /* top-rounded only */
-	--formidable-field-border-end-end-radius: 0;
+  --formidable-field-border-radius: 0.5rem;
+  --formidable-field-border-end-start-radius: 0; /* top-rounded only */
+  --formidable-field-border-end-end-radius: 0;
 }
 ```
 
@@ -360,10 +360,10 @@ A field can carry an extra line inside its bottom edge, thickening on focus and 
 
 ```scss
 :root {
-	--formidable-field-border-thickness: 0px;
-	--formidable-field-underline-thickness: 1px;
-	--formidable-field-underline-thickness-focus: 2px;
-	--formidable-field-underline-thickness-invalid: 2px;
+  --formidable-field-border-thickness: 0px;
+  --formidable-field-underline-thickness: 1px;
+  --formidable-field-underline-thickness-focus: 2px;
+  --formidable-field-underline-thickness-invalid: 2px;
 }
 ```
 
@@ -379,6 +379,6 @@ The date field's calendar is rendered by Pikaday, which brings its own class nam
 
 ```scss
 .pika-lendar {
-	background-color: #8a2b75ff;
+  background-color: #8a2b75ff;
 }
 ```

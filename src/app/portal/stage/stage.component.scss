@@ -1,0 +1,122 @@
+:host {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+  background: var(--portal-surface);
+}
+
+.stage-head {
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.stage-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  background: var(--portal-surface);
+  color: var(--portal-text);
+  font-size: 12px;
+}
+
+.stage-label {
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.stage-hint {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--portal-text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// Quiet by design: these annotate the preview, they are not part of building a theme.
+.stage-tools {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.tool {
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  color: var(--portal-text-muted);
+  font-family: var(--portal-font);
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--portal-border);
+    color: var(--portal-text);
+  }
+
+  &.is-on {
+    border-color: var(--portal-accent);
+    background: var(--portal-accent-soft);
+    color: var(--portal-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: 1px;
+  }
+}
+
+// Wraps, because an explanation that is cut off explains nothing.
+.stage-status {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 5px 16px;
+  border-top: 1px solid var(--portal-border);
+  background: var(--portal-accent-soft);
+  color: var(--portal-text);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.status-name {
+  flex: none;
+  color: var(--portal-accent);
+  font-weight: 650;
+}
+
+.stage-scroll {
+  min-height: 0;
+  padding: 24px;
+  overflow: auto;
+}
+
+.page-surface {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 32px;
+  border: 1px solid var(--portal-border);
+  border-radius: 14px;
+  background: var(--portal-page-background);
+  color: var(--portal-page-text);
+  box-shadow: var(--portal-shadow);
+}
+
+@media (width <= 900px) {
+  .stage-scroll {
+    padding: 12px;
+  }
+
+  .page-surface {
+    padding: 18px;
+  }
+
+  .stage-hint {
+    display: none;
+  }
+}

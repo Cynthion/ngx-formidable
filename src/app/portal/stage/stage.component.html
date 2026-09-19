@@ -1,0 +1,54 @@
+<!-- One element, whatever is inside it: the host's grid rows are fixed, so an optional child of the host
+     would shift every row below it. -->
+<div class="stage-head portal-chrome">
+  <div class="stage-bar">
+    <span class="stage-label">Preview</span>
+    <span class="stage-hint">Everything you change on the left lands here</span>
+
+    <div class="stage-tools">
+      <button
+        type="button"
+        title="Label each field with what it differs from its neighbour in"
+        class="tool"
+        [class.is-on]="layout.showCaptions()"
+        [attr.aria-pressed]="layout.showCaptions()"
+        (click)="toggleCaptions()">
+        Captions
+      </button>
+      <button
+        type="button"
+        title="State the accessibility data the library produced, beside each field"
+        class="tool"
+        [class.is-on]="layout.showAccessibility()"
+        [attr.aria-pressed]="layout.showAccessibility()"
+        (click)="toggleAccessibility()">
+        Accessibility
+      </button>
+    </div>
+  </div>
+
+  <!-- One line per annotation that is actually on, rather than one sentence that grows until it is cut off. -->
+  @if (layout.showCaptions()) {
+    <p class="stage-status">
+      <span class="status-name">Captions</span>
+      The chip under each field names what it differs from its neighbour in. Click one to edit that field.
+    </p>
+  }
+  @if (layout.showAccessibility()) {
+    <p class="stage-status">
+      <span class="status-name">Accessibility</span>
+      Read off the rendered DOM — nothing here is simulated. Verify with a real screen reader.
+    </p>
+  }
+</div>
+
+<div class="stage-scroll">
+  <!-- The page surface: an explicit edge, so a dark theme has the object it needs. -->
+  <div class="page-surface">
+    <portal-preview-form
+      [showCaptions]="layout.showCaptions()"
+      [showAccessibility]="layout.showAccessibility()" />
+  </div>
+</div>
+
+<portal-model-drawer />

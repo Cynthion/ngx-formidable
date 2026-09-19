@@ -12,11 +12,11 @@
   [attr.aria-readonly]="readonly() || null"
   (pointerdown)="readonly() || disabled() ? preventPointerDown($event) : null"
   (keydown)="readonly() || disabled() ? preventKeydown($event) : null"
-  (change)="onValueChange()"
+  (change)="onSelectChanged()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <!-- Placeholder -->
-  @if (placeholder() && !value) {
+  @if (placeholder() && !selectedValue()) {
     <option
       value=""
       disabled
@@ -31,7 +31,7 @@
     <option
       [value]="option.value"
       [disabled]="option.disabled || false"
-      [selected]="option.value === value">
+      [selected]="option.value === selectedValue()">
       {{ option.label || option.value }}
     </option>
   } @empty {

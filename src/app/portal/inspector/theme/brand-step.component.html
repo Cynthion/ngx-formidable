@@ -1,0 +1,33 @@
+<div class="pc-field">
+  <label
+    for="brand-colour"
+    class="pc-label">
+    <span class="pc-label-name">color-field-border-focus</span>
+  </label>
+  <span class="pc-color">
+    <input
+      type="color"
+      id="brand-colour"
+      class="pc-color-well"
+      [value]="brandHex()"
+      (input)="setBrand($any($event.target).value)" />
+    <input
+      type="text"
+      spellcheck="false"
+      class="pc-input"
+      [value]="theme.valueOf('--formidable-color-field-border-focus')"
+      (change)="setBrand($any($event.target).value)" />
+  </span>
+  <p class="pc-help">
+    Carries the focus border, the focused label, the focused underline and both focus rings. Stop here and the rest of the shipped theme stays neutral behind
+    it.
+  </p>
+</div>
+
+<label class="pc-check">
+  <input
+    type="checkbox"
+    [checked]="accentsRestingLabels()"
+    (change)="setAccentsRestingLabels($any($event.target).checked)" />
+  Accent The Labels Too
+</label>

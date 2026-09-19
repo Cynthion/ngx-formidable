@@ -1,0 +1,735 @@
+@if (field(); as f) {
+  @let caps = capabilities()!;
+
+  <p class="layout-note">
+    A <strong>{{ caps.layout }}</strong> layout. That is the field's own choice, not a setting — it decides which of the controls below apply.
+  </p>
+
+  <h3 class="group-title">Identity</h3>
+  <div class="pc-row">
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-label-' + f.id">
+        <span class="pc-label-name">Label</span>
+      </label>
+      <input
+        type="text"
+        class="pc-input"
+        [id]="'fe-label-' + f.id"
+        [value]="f.label"
+        (change)="set('label', $any($event.target).value)" />
+    </div>
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-name-' + f.id">
+        <span class="pc-label-name">Name</span>
+      </label>
+      <input
+        type="text"
+        spellcheck="false"
+        class="pc-input pc-code"
+        [id]="'fe-name-' + f.id"
+        [value]="f.name"
+        (change)="set('name', $any($event.target).value)" />
+    </div>
+  </div>
+
+  @if (caps.placeholder) {
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-placeholder-' + f.id">
+        <span class="pc-label-name">Placeholder</span>
+      </label>
+      <input
+        type="text"
+        class="pc-input"
+        [id]="'fe-placeholder-' + f.id"
+        [value]="f.placeholder"
+        (change)="set('placeholder', $any($event.target).value)" />
+    </div>
+  }
+
+  <div class="pc-field">
+    <label
+      class="pc-label"
+      [for]="'fe-caption-' + f.id">
+      <span class="pc-label-name">Caption Chip</span>
+    </label>
+    <input
+      type="text"
+      class="pc-input"
+      [id]="'fe-caption-' + f.id"
+      [value]="f.caption"
+      (change)="set('caption', $any($event.target).value)" />
+  </div>
+
+  <h3 class="group-title">State</h3>
+  <div class="pc-checks">
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="f.state.readonly"
+        (change)="setState('readonly', $any($event.target).checked)" />
+      Readonly
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="f.state.disabled"
+        (change)="setState('disabled', $any($event.target).checked)" />
+      Disabled
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="f.state.autoFocus"
+        (change)="setState('autoFocus', $any($event.target).checked)" />
+      Auto Focus
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="f.span === 2"
+        (change)="set('span', $any($event.target).checked ? 2 : 1)" />
+      Full Width
+    </label>
+  </div>
+
+  <h3 class="group-title">Decoration</h3>
+  <div class="pc-checks">
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="f.decoration.showLabel"
+        (change)="setDecoration('showLabel', $any($event.target).checked)" />
+      Show Label
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="f.decoration.showRequiredMarker"
+        (change)="setDecoration('showRequiredMarker', $any($event.target).checked)" />
+      Required Marker
+    </label>
+  </div>
+
+  <div class="pc-field">
+    <label
+      class="pc-label"
+      [for]="'fe-label-position-' + f.id">
+      <span class="pc-label-name">Label Position</span>
+    </label>
+    <select
+      class="pc-select"
+      [id]="'fe-label-position-' + f.id"
+      [disabled]="!labelPositionApplies()"
+      [value]="f.decoration.labelPosition"
+      (change)="setDecoration('labelPosition', $any($event.target).value)">
+      <option value="outside">Outside</option>
+      <option value="inside">Inside</option>
+      <option value="inside-placeholder">Inside, As Placeholder</option>
+      <option value="inside-floating">Inside, Floating Only</option>
+      <option value="border">Border</option>
+      <option value="border-prefix">Border, At The Prefix</option>
+    </select>
+    @if (!labelPositionApplies()) {
+      <p class="pc-help">A {{ caps.layout }} layout has no room over the field, so this field always labels outside.</p>
+    }
+  </div>
+
+  <div class="pc-row">
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-adornment-' + f.id">
+        <span class="pc-label-name">Label Adornment</span>
+      </label>
+      <select
+        class="pc-select"
+        [id]="'fe-adornment-' + f.id"
+        [value]="f.decoration.labelAdornment"
+        (change)="setDecoration('labelAdornment', $any($event.target).value)">
+        @for (slot of slots; track slot[0]) {
+          <option [value]="slot[0]">{{ slot[1] }}</option>
+        }
+      </select>
+    </div>
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-hint-align-' + f.id">
+        <span class="pc-label-name">Hint Align</span>
+      </label>
+      <select
+        class="pc-select"
+        [id]="'fe-hint-align-' + f.id"
+        [value]="f.decoration.hintAlign"
+        (change)="setDecoration('hintAlign', $any($event.target).value)">
+        <option value="start">Start</option>
+        <option value="center">Centre</option>
+        <option value="end">End</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="pc-field">
+    <label
+      class="pc-label"
+      [for]="'fe-hint-' + f.id">
+      <span class="pc-label-name">Hint</span>
+    </label>
+    <input
+      type="text"
+      class="pc-input"
+      [id]="'fe-hint-' + f.id"
+      [value]="f.decoration.hint"
+      (change)="setDecoration('hint', $any($event.target).value)" />
+  </div>
+
+  @if (caps.adornments) {
+    <div class="pc-row">
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-prefix-' + f.id">
+          <span class="pc-label-name">Prefix</span>
+        </label>
+        <select
+          class="pc-select"
+          [id]="'fe-prefix-' + f.id"
+          [value]="f.decoration.prefix"
+          (change)="setDecoration('prefix', $any($event.target).value)">
+          @for (slot of slots; track slot[0]) {
+            <option [value]="slot[0]">{{ slot[1] }}</option>
+          }
+        </select>
+      </div>
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-suffix-' + f.id">
+          <span class="pc-label-name">Suffix</span>
+        </label>
+        <select
+          class="pc-select"
+          [id]="'fe-suffix-' + f.id"
+          [value]="f.decoration.suffix"
+          (change)="setDecoration('suffix', $any($event.target).value)">
+          @for (slot of slots; track slot[0]) {
+            <option [value]="slot[0]">{{ slot[1] }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <div class="pc-row">
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-prefix-align-' + f.id">
+          <span class="pc-label-name">Prefix Follows</span>
+        </label>
+        <select
+          class="pc-select"
+          [id]="'fe-prefix-align-' + f.id"
+          [value]="f.decoration.prefixAlign"
+          (change)="setDecoration('prefixAlign', $any($event.target).value)">
+          <option value="center">Centre Of The Box</option>
+          <option value="value">The Value</option>
+        </select>
+      </div>
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-suffix-align-' + f.id">
+          <span class="pc-label-name">Suffix Follows</span>
+        </label>
+        <select
+          class="pc-select"
+          [id]="'fe-suffix-align-' + f.id"
+          [value]="f.decoration.suffixAlign"
+          (change)="setDecoration('suffixAlign', $any($event.target).value)">
+          <option value="center">Centre Of The Box</option>
+          <option value="value">The Value</option>
+        </select>
+      </div>
+    </div>
+    <p class="pc-help">
+      Adornments also need the form-level switch. A vertical layout renders none at all, and following the value is a no-op wherever nothing displaces it.
+    </p>
+  } @else {
+    <p class="pc-help">A {{ caps.layout }} layout leaves a prefix nothing to sit beside and no value to inset, so the slots are not rendered.</p>
+  }
+
+  <h3 class="group-title">Behaviour</h3>
+
+  @if (caps.mask) {
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-mask-' + f.id">
+        <span class="pc-label-name">Mask</span>
+      </label>
+      <input
+        type="text"
+        spellcheck="false"
+        placeholder="AAA-0000"
+        class="pc-input pc-code"
+        [id]="'fe-mask-' + f.id"
+        [value]="f.mask ?? ''"
+        (change)="set('mask', $any($event.target).value || undefined)" />
+    </div>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="f.showMaskTyped ?? false"
+        (change)="set('showMaskTyped', $any($event.target).checked)" />
+      Show The Mask While Typing
+    </label>
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-autocomplete-' + f.id">
+        <span class="pc-label-name">Autofill Hint</span>
+      </label>
+      <input
+        type="text"
+        spellcheck="false"
+        placeholder="off"
+        class="pc-input pc-code"
+        [id]="'fe-autocomplete-' + f.id"
+        [value]="f.autocompleteHint ?? ''"
+        (change)="set('autocompleteHint', $any($event.target).value || undefined)" />
+      <p class="pc-help">The native attribute. Off by default, so a form leaks no value you did not ask for.</p>
+    </div>
+  }
+
+  @if (caps.textLength) {
+    <div class="pc-row">
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-min-length-' + f.id">
+          <span class="pc-label-name">Min Length</span>
+        </label>
+        <input
+          type="number"
+          class="pc-input"
+          [id]="'fe-min-length-' + f.id"
+          [value]="f.minLength ?? -1"
+          (change)="setNumber('minLength', $any($event.target).value)" />
+      </div>
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-max-length-' + f.id">
+          <span class="pc-label-name">Max Length</span>
+        </label>
+        <input
+          type="number"
+          class="pc-input"
+          [id]="'fe-max-length-' + f.id"
+          [value]="f.maxLength ?? -1"
+          (change)="setNumber('maxLength', $any($event.target).value)" />
+      </div>
+    </div>
+  }
+
+  @if (f.kind === 'textarea') {
+    <div class="pc-checks">
+      <label class="pc-check">
+        <input
+          type="checkbox"
+          [checked]="f.enableAutosize ?? true"
+          (change)="set('enableAutosize', $any($event.target).checked)" />
+        Autosize
+      </label>
+      <label class="pc-check">
+        <input
+          type="checkbox"
+          [checked]="f.showLengthIndicator ?? false"
+          (change)="set('showLengthIndicator', $any($event.target).checked)" />
+        Length Indicator
+      </label>
+    </div>
+  }
+
+  @if (caps.panel) {
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-panel-' + f.id">
+        <span class="pc-label-name">Panel Position</span>
+      </label>
+      <select
+        class="pc-select"
+        [id]="'fe-panel-' + f.id"
+        [value]="f.panelPosition ?? store.options().panelPosition"
+        (change)="set('panelPosition', $any($event.target).value)">
+        <option value="left">Left</option>
+        <option value="right">Right</option>
+        <option value="full">Full Width</option>
+        <option value="sheet">Bottom Sheet</option>
+      </select>
+      <p class="pc-help">The first three are anchored and flip above the field when there is no room. A sheet is pinned to the viewport and never moves.</p>
+    </div>
+  }
+
+  @if (caps.locale) {
+    <div class="pc-row">
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-locale-' + f.id">
+          <span class="pc-label-name">Locale</span>
+        </label>
+        <select
+          class="pc-select"
+          [id]="'fe-locale-' + f.id"
+          [value]="f.locale ?? store.options().locale"
+          (change)="setLocale($any($event.target).value)">
+          @for (locale of locales; track locale.id) {
+            <option [value]="locale.id">{{ locale.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-format-' + f.id">
+          <span class="pc-label-name">Token Format</span>
+        </label>
+        <input
+          type="text"
+          spellcheck="false"
+          class="pc-input pc-code"
+          [id]="'fe-format-' + f.id"
+          [value]="f.unicodeTokenFormat ?? ''"
+          (change)="set('unicodeTokenFormat', $any($event.target).value)" />
+      </div>
+    </div>
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-empty-hint-' + f.id">
+        <span class="pc-label-name">Empty Hint</span>
+      </label>
+      <select
+        class="pc-select"
+        [id]="'fe-empty-hint-' + f.id"
+        [value]="f.emptyHint ?? 'underscores'"
+        (change)="set('emptyHint', $any($event.target).value)">
+        <option value="underscores">Underscores</option>
+        <option value="format">The Token Format</option>
+      </select>
+      <p class="pc-help">A focused empty field always shows underscores, whatever this says.</p>
+    </div>
+  }
+
+  @if (f.kind === 'toggle') {
+    <div class="pc-row">
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-on-label-' + f.id">
+          <span class="pc-label-name">On Label</span>
+        </label>
+        <input
+          type="text"
+          class="pc-input"
+          [id]="'fe-on-label-' + f.id"
+          [value]="f.onLabel ?? ''"
+          (change)="set('onLabel', $any($event.target).value)" />
+      </div>
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-off-label-' + f.id">
+          <span class="pc-label-name">Off Label</span>
+        </label>
+        <input
+          type="text"
+          class="pc-input"
+          [id]="'fe-off-label-' + f.id"
+          [value]="f.offLabel ?? ''"
+          (change)="set('offLabel', $any($event.target).value)" />
+      </div>
+    </div>
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-toggle-position-' + f.id">
+        <span class="pc-label-name">Switch Side</span>
+      </label>
+      <select
+        class="pc-select"
+        [id]="'fe-toggle-position-' + f.id"
+        [value]="f.toggleLabelPosition ?? 'before'"
+        (change)="set('toggleLabelPosition', $any($event.target).value)">
+        <option value="before">Label Before The Switch</option>
+        <option value="after">Label After The Switch</option>
+      </select>
+    </div>
+  }
+
+  @if (caps.range) {
+    <div class="pc-row">
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-min-' + f.id">
+          <span class="pc-label-name">Min</span>
+        </label>
+        <input
+          type="number"
+          class="pc-input"
+          [id]="'fe-min-' + f.id"
+          [value]="f.min ?? 0"
+          (change)="setNumber('min', $any($event.target).value)" />
+      </div>
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-max-' + f.id">
+          <span class="pc-label-name">Max</span>
+        </label>
+        <input
+          type="number"
+          class="pc-input"
+          [id]="'fe-max-' + f.id"
+          [value]="f.max ?? 100"
+          (change)="setNumber('max', $any($event.target).value)" />
+      </div>
+    </div>
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-step-' + f.id">
+        <span class="pc-label-name">Step</span>
+      </label>
+      <input
+        type="number"
+        class="pc-input"
+        [id]="'fe-step-' + f.id"
+        [value]="f.step ?? 1"
+        (change)="setNumber('step', $any($event.target).value)" />
+    </div>
+  }
+
+  @if (f.kind === 'slider') {
+    <div class="pc-checks">
+      <label class="pc-check">
+        <input
+          type="checkbox"
+          [checked]="f.showThumbLabel ?? true"
+          (change)="set('showThumbLabel', $any($event.target).checked)" />
+        Thumb Label
+      </label>
+      <label class="pc-check">
+        <input
+          type="checkbox"
+          [checked]="f.showTickMarks ?? false"
+          (change)="set('showTickMarks', $any($event.target).checked)" />
+        Tick Marks
+      </label>
+      <label class="pc-check">
+        <input
+          type="checkbox"
+          [checked]="f.showTickLabels ?? false"
+          (change)="set('showTickLabels', $any($event.target).checked)" />
+        Tick Labels
+      </label>
+      <label class="pc-check">
+        <input
+          type="checkbox"
+          [checked]="f.showMinMaxLabels ?? false"
+          (change)="set('showMinMaxLabels', $any($event.target).checked)" />
+        Min/Max Labels
+      </label>
+    </div>
+
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'fe-tick-interval-' + f.id">
+        <span class="pc-label-name">Tick Interval</span>
+      </label>
+      <input
+        type="number"
+        placeholder="step"
+        class="pc-input"
+        [id]="'fe-tick-interval-' + f.id"
+        [value]="f.tickInterval ?? ''"
+        (change)="setNumber('tickInterval', $any($event.target).value)" />
+      <p class="pc-help">Only relevant with tick marks on. Left empty, the step is used.</p>
+    </div>
+
+    <div class="pc-row">
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-min-label-' + f.id">
+          <span class="pc-label-name">Min Label</span>
+        </label>
+        <input
+          type="text"
+          class="pc-input"
+          [id]="'fe-min-label-' + f.id"
+          [value]="f.minLabel ?? ''"
+          (change)="set('minLabel', $any($event.target).value)" />
+      </div>
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-max-label-' + f.id">
+          <span class="pc-label-name">Max Label</span>
+        </label>
+        <input
+          type="text"
+          class="pc-input"
+          [id]="'fe-max-label-' + f.id"
+          [value]="f.maxLabel ?? ''"
+          (change)="set('maxLabel', $any($event.target).value)" />
+      </div>
+    </div>
+
+    <div class="pc-row">
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-thumb-format-' + f.id">
+          <span class="pc-label-name">Thumb Format</span>
+        </label>
+        <select
+          class="pc-select"
+          [id]="'fe-thumb-format-' + f.id"
+          [value]="f.thumbLabelFormat ?? 'none'"
+          (change)="set('thumbLabelFormat', $any($event.target).value)">
+          @for (entry of formatters; track entry[0]) {
+            <option [value]="entry[0]">{{ entry[1] }}</option>
+          }
+        </select>
+      </div>
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-tick-format-' + f.id">
+          <span class="pc-label-name">Tick Format</span>
+        </label>
+        <select
+          class="pc-select"
+          [id]="'fe-tick-format-' + f.id"
+          [value]="f.tickLabelFormat ?? 'none'"
+          (change)="set('tickLabelFormat', $any($event.target).value)">
+          @for (entry of formatters; track entry[0]) {
+            <option [value]="entry[0]">{{ entry[1] }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <p class="pc-help">
+      The two transform inputs take a function. Named formatters stand in for a code editor, because their purpose here is to show what the input is for.
+    </p>
+  }
+
+  @if (caps.options) {
+    <h3 class="group-title">Options</h3>
+
+    <div class="pc-row">
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-default-mode-' + f.id">
+          <span class="pc-label-name">Default Option</span>
+        </label>
+        <select
+          class="pc-select"
+          [id]="'fe-default-mode-' + f.id"
+          [value]="f.defaultOptionMode ?? 'always'"
+          (change)="set('defaultOptionMode', $any($event.target).value)">
+          <option value="always">Always, Pinned First</option>
+          <option value="fallback">Only When The List Is Empty</option>
+        </select>
+      </div>
+      <div class="pc-field">
+        <label
+          class="pc-label"
+          [for]="'fe-no-options-' + f.id">
+          <span class="pc-label-name">Empty Text</span>
+        </label>
+        <input
+          type="text"
+          class="pc-input"
+          [id]="'fe-no-options-' + f.id"
+          [value]="f.noOptionsText ?? ''"
+          (change)="set('noOptionsText', $any($event.target).value || undefined)" />
+      </div>
+    </div>
+
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="f.sortAlphabetically ?? false"
+        (change)="set('sortAlphabetically', $any($event.target).checked)" />
+      Sort Alphabetically
+    </label>
+
+    <ul class="options">
+      @for (option of f.options ?? []; track option.value; let i = $index) {
+        <li class="option">
+          <input
+            type="text"
+            class="pc-input"
+            [attr.aria-label]="'Option Label'"
+            [value]="option.label"
+            (change)="setOption(i, { label: $any($event.target).value })" />
+          <input
+            type="text"
+            spellcheck="false"
+            class="pc-input pc-code"
+            [attr.aria-label]="'Option Value'"
+            [value]="option.value"
+            (change)="setOption(i, { value: $any($event.target).value })" />
+          <label
+            title="Readonly"
+            class="pc-check">
+            <input
+              type="checkbox"
+              [checked]="option.readonly ?? false"
+              (change)="setOption(i, { readonly: $any($event.target).checked })" />
+            R
+          </label>
+          <label
+            title="Disabled"
+            class="pc-check">
+            <input
+              type="checkbox"
+              [checked]="option.disabled ?? false"
+              (change)="setOption(i, { disabled: $any($event.target).checked })" />
+            D
+          </label>
+          <button
+            type="button"
+            title="Remove"
+            class="pc-button is-quiet"
+            (click)="removeOption(i)">
+            ×
+          </button>
+        </li>
+      }
+    </ul>
+
+    <div class="pc-buttons">
+      <button
+        type="button"
+        class="pc-button"
+        (click)="addOption()">
+        Add An Option
+      </button>
+    </div>
+  }
+} @else {
+  <p class="pc-empty">Pick a field above, or click one in the preview.</p>
+}

@@ -54,18 +54,36 @@ See `tech/validation.md` and `user/validation.md`.
 
 ## Demo App
 
-The demo (`src/`) is a standalone-bootstrapped app that showcases every field and serves as the dev playground; `example-form` is the main showcase and `example-counter-field` demonstrates building a custom field on `BaseFieldDirective`. It is deployed to GitHub Pages by `deploy.yml` on push to `main` (builds and publishes `dist/ngx-formidable-demo`). The demo consumes the library, not the other way round.
+The demo (`src/`) is a standalone-bootstrapped app holding the portal, which showcases every field and serves as the dev playground. It is deployed to GitHub Pages by `deploy.yml` on push to `main` (builds and publishes `dist/ngx-formidable-demo`). The demo consumes the library, not the other way round.
+
+The portal lives in `src/app/portal/` and is routed with hash location, because GitHub Pages serves no SPA fallback. Its design is `impl/portal.md`.
+
+| Path                  | Holds                                                                           |
+| :-------------------- | :------------------------------------------------------------------------------ |
+| `portal/model/`       | The field specifications, the capability table, the token manifest, the schemes |
+| `portal/state/`       | The three signal stores: form definition, model, theme                          |
+| `portal/stage/`       | The preview form, the model drawer and the accessibility readout                |
+| `portal/inspector/`   | The theme editor, the field editor and the structure editor                     |
+| `portal/export/`      | Theme export and import, and the markup serializer and parser                   |
+| `src/styles/portal/`  | The portal's own appearance, the chrome insulation and the shared controls      |
+| `src/app/example-*`   | The custom field, option, icon and tooltip the portal projects                  |
+| `src/app/validation/` | The hand-written model and Vest suite the validation integration spec drives    |
+
+**Mirrored Documentation**: the `Docs` route imports `.documentation/user/*.md` as text — `angular.json` maps `.md` to esbuild's `text` loader for the application and the test target — and renders it with `marked`. The markdown is the single source: there is no second copy to drift, and the deploy stays static because nothing is fetched. `docs:check` still guards the token manifest, whose descriptions the **inspector** reads for inline help.
+
+**Chrome Insulation**: the portal's own controls read `--formidable-*`, and the user's theme is written to `:root`, so the chrome would follow it. It cannot be insulated by scoping alone — most of the library's variables are derived and declared once, in that `:root` block, so an override further down the tree leaves the derived ones frozen. The chrome therefore re-emits the whole default block under `.portal-chrome`, where derivation recomputes against its own bases. That is what the `formidable-vars` mixin in `_formidable-vars.scss` exists for; it is not forwarded from `_ngx-formidable.scss`, so the closed SCSS surface is unchanged.
 
 ## Build And Publish
 
-| Script         | Purpose                                                       |
-| :------------- | :------------------------------------------------------------ |
-| `start`        | Serve the demo app                                            |
-| `build`        | Build the demo app                                            |
-| `build:lib`    | Build the library with ng-packagr into `dist/ngx-formidable`  |
-| `prebuild:lib` | Copy `README.md` + `LICENSE` into the library before building |
-| `publish:lib`  | Publish the built library                                     |
-| `test`         | Run tests (see `impl/testing.md`)                             |
+| Script         | Purpose                                                                 |
+| :------------- | :---------------------------------------------------------------------- |
+| `start`        | Serve the demo app                                                      |
+| `build`        | Build the demo app                                                      |
+| `build:lib`    | Build the library with ng-packagr into `dist/ngx-formidable`            |
+| `docs:check`   | Hold the portal's token manifest in step with `user/theme-reference.md` |
+| `prebuild:lib` | Copy `README.md` + `LICENSE` into the library before building           |
+| `publish:lib`  | Publish the built library                                               |
+| `test`         | Run tests (see `impl/testing.md`)                                       |
 
 ng-packagr config:
 

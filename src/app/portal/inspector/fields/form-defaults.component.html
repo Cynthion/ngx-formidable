@@ -1,0 +1,234 @@
+@let options = store.options();
+
+@if (section() === 'decoration') {
+  <div class="pc-field">
+    <label
+      for="fd-label-position"
+      class="pc-label">
+      <span class="pc-label-name">Label Position</span>
+    </label>
+    <select
+      id="fd-label-position"
+      class="pc-select"
+      [value]="options.labelPosition"
+      (change)="set('labelPosition', $any($event.target).value)">
+      @for (entry of labelPositions; track entry[0]) {
+        <option [value]="entry[0]">{{ entry[1] }}</option>
+      }
+    </select>
+    <p class="pc-help">Honoured only by the horizontal layout. A group, a toggle and a slider always label outside.</p>
+  </div>
+
+  <div class="pc-checks">
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="options.showLabels"
+        (change)="set('showLabels', $any($event.target).checked)" />
+      Labels
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="options.showRequiredMarkers"
+        (change)="set('showRequiredMarkers', $any($event.target).checked)" />
+      Required Markers
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="options.showHints"
+        (change)="set('showHints', $any($event.target).checked)" />
+      Hints
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="options.showAdornments"
+        (change)="set('showAdornments', $any($event.target).checked)" />
+      Adornments
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="options.readonly"
+        (change)="set('readonly', $any($event.target).checked)" />
+      All Readonly
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="options.disabled"
+        (change)="set('disabled', $any($event.target).checked)" />
+      All Disabled
+    </label>
+  </div>
+
+  <div class="pc-row">
+    <div class="pc-field">
+      <label
+        for="fd-adornment-align"
+        class="pc-label">
+        <span class="pc-label-name">Adornment Align</span>
+      </label>
+      <select
+        id="fd-adornment-align"
+        class="pc-select"
+        [value]="options.adornmentAlignment"
+        (change)="set('adornmentAlignment', $any($event.target).value)">
+        <option value="center">Centre Of The Box</option>
+        <option value="value">The Value</option>
+      </select>
+    </div>
+
+    <div class="pc-field">
+      <label
+        for="fd-panel"
+        class="pc-label">
+        <span class="pc-label-name">Panel Position</span>
+      </label>
+      <select
+        id="fd-panel"
+        class="pc-select"
+        [value]="options.panelPosition"
+        (change)="set('panelPosition', $any($event.target).value)">
+        @for (entry of panelPositions; track entry[0]) {
+          <option [value]="entry[0]">{{ entry[1] }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="pc-row">
+    <div class="pc-field">
+      <label
+        for="fd-prefix"
+        class="pc-label">
+        <span class="pc-label-name">Prefix, Every Field</span>
+      </label>
+      <select
+        id="fd-prefix"
+        class="pc-select"
+        (change)="setSlotOnAllFields('prefix', $any($event.target).value)">
+        @for (slot of slots; track slot[0]) {
+          <option [value]="slot[0]">{{ slot[1] }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="pc-field">
+      <label
+        for="fd-suffix"
+        class="pc-label">
+        <span class="pc-label-name">Suffix, Every Field</span>
+      </label>
+      <select
+        id="fd-suffix"
+        class="pc-select"
+        (change)="setSlotOnAllFields('suffix', $any($event.target).value)">
+        @for (slot of slots; track slot[0]) {
+          <option [value]="slot[0]">{{ slot[1] }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="pc-field">
+    <label
+      for="fd-label-adornment"
+      class="pc-label">
+      <span class="pc-label-name">Label Adornment, Every Field</span>
+    </label>
+    <select
+      id="fd-label-adornment"
+      class="pc-select"
+      (change)="setSlotOnAllFields('labelAdornment', $any($event.target).value)">
+      @for (slot of slots; track slot[0]) {
+        <option [value]="slot[0]">{{ slot[1] }}</option>
+      }
+    </select>
+    <p class="pc-help">
+      Adornments are content projection, so these set every field at once rather than layering a second default under each one. A field keeps whatever it is set
+      to afterwards.
+    </p>
+  </div>
+
+  <div class="pc-field">
+    <label
+      for="fd-locale"
+      class="pc-label">
+      <span class="pc-label-name">Locale</span>
+    </label>
+    <select
+      id="fd-locale"
+      class="pc-select"
+      [value]="options.locale"
+      (change)="setLocale($any($event.target).value)">
+      @for (locale of locales; track locale.id) {
+        <option [value]="locale.id">{{ locale.label }}</option>
+      }
+    </select>
+    <p class="pc-help">One control: the calendar's translations, its first day and the token format move together, on every date and time field.</p>
+  </div>
+} @else {
+  <div class="pc-field">
+    <label
+      for="fd-validator"
+      class="pc-label">
+      <span class="pc-label-name">Validator</span>
+    </label>
+    <select
+      id="fd-validator"
+      class="pc-select"
+      [value]="options.validator"
+      (change)="set('validator', $any($event.target).value)">
+      @for (entry of validators; track entry[0]) {
+        <option [value]="entry[0]">{{ entry[1] }}</option>
+      }
+    </select>
+    <p class="pc-help">
+      The form directive owns the model, the targets and the debounce, and delegates the rules. With none provided, the form is still observable and nothing
+      validates.
+    </p>
+  </div>
+
+  <div class="pc-row">
+    <div class="pc-field">
+      <label
+        for="fd-update-on"
+        class="pc-label">
+        <span class="pc-label-name">Run On</span>
+      </label>
+      <select
+        id="fd-update-on"
+        class="pc-select"
+        [value]="options.updateOn"
+        (change)="set('updateOn', $any($event.target).value)">
+        @for (entry of updateOns; track entry[0]) {
+          <option [value]="entry[0]">{{ entry[1] }}</option>
+        }
+      </select>
+      <p class="pc-help">When the validator runs. Angular's own axis.</p>
+    </div>
+
+    <div class="pc-field">
+      <label
+        for="fd-reveal-on"
+        class="pc-label">
+        <span class="pc-label-name">Reveal On</span>
+      </label>
+      <select
+        id="fd-reveal-on"
+        class="pc-select"
+        [value]="options.revealOn"
+        (change)="set('revealOn', $any($event.target).value)">
+        @for (entry of reveals; track entry[0]) {
+          <option [value]="entry[0]">{{ entry[1] }}</option>
+        }
+      </select>
+      <p class="pc-help">When the messages appear. The library's axis.</p>
+    </div>
+  </div>
+
+  <p class="pc-help">Changing the run axis rebuilds the form, because `NgForm` reads its options once.</p>
+}

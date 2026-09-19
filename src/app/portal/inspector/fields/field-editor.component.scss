@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+.layout-note {
+  margin: 0 0 10px;
+  color: var(--portal-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.group-title {
+  margin: 14px 0 8px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--portal-border);
+  color: var(--portal-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &:first-of-type {
+    margin-top: 4px;
+  }
+}
+
+.options {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto auto auto;
+  gap: 4px;
+  align-items: center;
+}

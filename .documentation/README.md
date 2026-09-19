@@ -20,7 +20,6 @@ For consumers of the library. A **guide** teaches a topic; a **reference** lists
 | `user/custom-fields.md`   |   Guide   | Building a field, an option or a validator of your own         |
 | `user/components.md`      | Reference | Catalogue of every public component, directive, token and type |
 | `user/theme-reference.md` | Reference | Every overridable `--formidable-*` custom property             |
-| `user/theme-options.md`   | Reference | Colour and geometry schemes to start from                      |
 
 ---
 
@@ -48,4 +47,5 @@ For whoever works the repo.
 | `impl/conventions.md`    | Coding conventions, Definition of Done                   |
 | `impl/documentation.md`  | Documentation style and authoring guide                  |
 | `impl/implementation.md` | Phased roadmap, the source of truth for outstanding work |
+| `impl/portal.md`         | Portal design: structure, theming, state, phases         |
 | `impl/testing.md`        | Testing strategy, helpers first                          |

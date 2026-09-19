@@ -1,0 +1,139 @@
+:host {
+  display: block;
+}
+
+// Step 1 — the three ways in. A card each rather than three buttons in a row: each needs a sentence saying
+// what it costs, and a visitor about to throw away 24 fields should read it before clicking.
+.starts {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.start {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface-sunken);
+  color: inherit;
+  font-family: var(--portal-font);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--portal-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: 1px;
+  }
+}
+
+.start-name {
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.start-note {
+  color: var(--portal-text-muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+// Step 2 — one block per form section, inside the single accordion.
+.group + .group {
+  margin-top: 12px;
+}
+
+.group-title {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 4px;
+  color: var(--portal-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.group-count {
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--portal-surface-sunken);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.rows {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  gap: 2px;
+  align-items: center;
+  border-radius: var(--portal-radius-sm);
+
+  &.is-selected {
+    background: var(--portal-accent-soft);
+  }
+}
+
+.row-name {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-family: var(--portal-font);
+  text-align: left;
+  cursor: pointer;
+}
+
+.row-label {
+  overflow: hidden;
+  font-size: 12px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.row-kind {
+  color: var(--portal-text-muted);
+  font-size: 10px;
+}
+
+// Step 3.
+.add-title {
+  margin: 0 0 6px;
+  color: var(--portal-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  & + * + & {
+    margin-top: 14px;
+  }
+}
+
+.add-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 5px;
+
+  &.is-section {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}

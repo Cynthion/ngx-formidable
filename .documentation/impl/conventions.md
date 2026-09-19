@@ -84,10 +84,11 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 ## Tooling
 
-- **ESLint**: flat config (`typescript-eslint` + `angular-eslint` + `eslint-plugin-rxjs-x`), type-aware. Specs are not linted. Custom: `@typescript-eslint/no-unused-vars` with `^_` ignore; `rxjs-x/finnish`. `eslint-plugin-rxjs-x` is ESM-only, so the config takes its `.default` — a bare `require` yields the module namespace and the plugin's rules are then invisible.
-- **Stylelint**: `stylelint-config-standard-scss` only
+- **ESLint**: flat config (`typescript-eslint` + `angular-eslint` + `eslint-plugin-rxjs-x`), type-aware over `projects/ngx-formidable/src`, `projects/ngx-formidable/vest` and `src`. Specs are not linted, but a module only a spec imports still has to belong to a project, which is why `tsconfig.spec.json` is one of the parser's projects. Custom: `@typescript-eslint/no-unused-vars` with `^_` ignore; `rxjs-x/finnish`. `eslint-plugin-rxjs-x` is ESM-only, so the config takes its `.default` — a bare `require` yields the module namespace and the plugin's rules are then invisible.
+- **Selector Prefixes**: enforced per path — `formidable` under `projects/ngx-formidable/src/lib`, `portal` under `src/app/portal`. The two directives that deliberately hijack Angular's own selectors (`[ngModel]`, `[ngModelGroup]`) and the test-only stub carry an inline waiver naming the reason.
+- **Stylelint**: `stylelint-config-standard-scss` only, over `projects/ngx-formidable/src` and `src`
+- **Docs Gate**: `docs:check` asserts that every token description in the portal's manifest still matches `user/theme-reference.md`, which owns them. It runs in CI beside the linters.
 - **Prettier**: single quotes, no trailing commas, `bracketSameLine`, one attribute per line; HTML attribute order via `prettier-plugin-organize-attributes`.
-- **Stylelint**: `stylelint-config-standard-scss` + `stylelint-config-prettier-scss`; modern color-function notation, long hex.
 
 ## Development Workflow
 
@@ -102,7 +103,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 - **Formatting**: `prettier:check`, `lint` and `style-lint` pass.
 - **Component Docs**: any component/directive API change is reflected in `user/components.md`.
 - **User And Tech Docs**: a change to public usage updates the matching `user/*.md`; a change to a design decision or an internal boundary updates the matching `tech/*.md`. Neither restates the other — see `impl/documentation.md`.
-- **Demo**: new or changed fields and features are exercised in the demo app (`example-form`); a new field component is wired into it so it renders and can be tried. The demo is the showcase and the only visual-test surface — see `tech/architecture.md`.
+- **Demo**: new or changed fields and features are exercised in the portal's preview form (`src/app/portal/model/preview-form.definition.ts`); a new field component gets a `PortalFieldKind`, a capability row and a specification there, so it renders and can be tried. The portal is the showcase and the only visual-test surface — see `tech/architecture.md`.
 - **Documentation**: new behavior documented per `impl/documentation.md`; the user-facing `README.md` updated when public usage changes.
 - **Doc Comments**: a new or changed public symbol carries a doc comment per **Code Comments** above.
 - **Tests**: implemented per `impl/testing.md` (helpers-first).

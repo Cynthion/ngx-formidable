@@ -1,0 +1,81 @@
+// A column, so the caption sits at the bottom of the grid row whatever height the field above it takes —
+// a hint row on one field of a pair would otherwise stagger the two captions.
+:host {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  position: relative;
+}
+
+.caption-row {
+  display: flex;
+  margin-top: auto;
+  padding-top: 2px;
+}
+
+// A caption chip is a control: it names exactly what this field differs from its neighbour in, and it is
+// also the way to change it. It sits on the user's page surface, so it takes that surface's colours rather
+// than the portal's own — the chrome's palette would read as foreign on a theme the user chose.
+.caption {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 2px 9px;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-family: var(--portal-font);
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentcolor;
+    outline-offset: 1px;
+    opacity: 1;
+  }
+}
+
+.caption-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// Says the chip goes somewhere, which a pill on its own does not.
+.caption-glyph {
+  flex: none;
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+:host(.is-selected) .caption {
+  border-color: var(--formidable-color-field-border-focus);
+  color: var(--formidable-color-field-border-focus);
+  opacity: 1;
+}
+
+.adornment {
+  display: inline-flex;
+  align-items: center;
+
+  button {
+    padding: 2px 8px;
+    border: 1px solid currentcolor;
+    border-radius: var(--portal-radius-sm);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+  }
+}

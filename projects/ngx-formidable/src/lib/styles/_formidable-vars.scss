@@ -2,7 +2,11 @@
 
 // This file defines the exposed CSS variables (run-time), which keep track of relationships/calculations between each other.
 
-:root {
+// The block is a mixin so a subtree that must not inherit a consumer's `:root` overrides can re-emit the
+// defaults under its own selector, where the derived values recompute against them. Most variables here are
+// derived and are declared once, so scoping an override to a subtree otherwise only half-applies. The mixin
+// is not forwarded from `_ngx-formidable.scss`, so the closed SCSS surface is unchanged.
+@mixin formidable-vars {
   // #region Font Sizes & Line Heights
 
   --formidable-field-font-size: #{tokens.$formidable-field-font-size};
@@ -687,4 +691,8 @@
   --formidable-option-prefix-border-thickness: #{tokens.$formidable-option-prefix-border-thickness};
 
   // #endregion
+}
+
+:root {
+  @include formidable-vars;
 }

@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.tools {
+  display: grid;
+  gap: 6px;
+  padding: 0 16px 12px;
+}
+
+.written {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    gap: 1px;
+  }
+}
+
+.set-by {
+  color: var(--portal-text-muted);
+  font-size: 11px;
+}

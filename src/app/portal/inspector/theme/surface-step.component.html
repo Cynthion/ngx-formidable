@@ -1,0 +1,67 @@
+<div class="pc-row">
+  <div class="pc-field">
+    <label
+      for="page-background"
+      class="pc-label">
+      <span class="pc-label-name">background</span>
+    </label>
+    <span class="pc-color">
+      <input
+        type="color"
+        id="page-background"
+        class="pc-color-well"
+        [value]="backgroundHex()"
+        (input)="setBackground($any($event.target).value)" />
+      <input
+        type="text"
+        spellcheck="false"
+        class="pc-input"
+        [value]="theme.page().background"
+        (change)="setBackground($any($event.target).value)" />
+    </span>
+  </div>
+
+  <div class="pc-field">
+    <label
+      for="page-text"
+      class="pc-label">
+      <span class="pc-label-name">color</span>
+    </label>
+    <span class="pc-color">
+      <input
+        type="color"
+        id="page-text"
+        class="pc-color-well"
+        [value]="textHex()"
+        (input)="setText($any($event.target).value)" />
+      <input
+        type="text"
+        spellcheck="false"
+        class="pc-input"
+        [value]="theme.page().text"
+        (change)="setText($any($event.target).value)" />
+    </span>
+  </div>
+</div>
+
+@if (pageContrast(); as check) {
+  <span
+    class="page-contrast"
+    [class.fails]="!check.passes">
+    Page text on page fill: {{ check.ratio }} / 4.5
+  </span>
+}
+
+<div class="pc-buttons">
+  <button
+    type="button"
+    class="pc-button"
+    (click)="matchTheFieldFill()">
+    Match The Field Fill
+  </button>
+</div>
+
+<p class="pc-help">
+  The library styles fields, never the surface they sit on. A dark theme needs a dark page, and no
+  <code class="pc-code">--formidable-*</code> variable can supply one. Exported as its own commented block.
+</p>

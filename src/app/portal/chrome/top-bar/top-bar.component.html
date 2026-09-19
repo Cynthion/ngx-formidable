@@ -1,0 +1,69 @@
+<div class="brand">
+  <span class="brand-text">
+    <span class="name">ngx-formidable</span>
+    <span class="tagline">Angular form fields you can actually theme, configure and customize.</span>
+  </span>
+</div>
+
+<nav
+  class="tabs"
+  aria-label="Portal">
+  @for (entry of routes; track entry.path) {
+    <a
+      routerLinkActive="active"
+      class="tab"
+      [routerLink]="entry.path"
+      [routerLinkActiveOptions]="{ exact: entry.exact }"
+      [title]="entry.title">
+      {{ entry.label }}
+    </a>
+  }
+</nav>
+
+<div class="actions">
+  <a
+    target="_blank"
+    rel="noreferrer noopener"
+    class="link"
+    [href]="repositoryUrl">
+    <example-icon
+      class="github"
+      [svg]="githubSvg"
+      [size]="15" />
+    GitHub
+  </a>
+
+  <button
+    type="button"
+    class="icon-button"
+    [attr.aria-label]="'Portal appearance: ' + labelFor(theme.appearance())"
+    [title]="'Portal appearance: ' + labelFor(theme.appearance())"
+    (click)="cycleAppearance()">
+    {{ glyphFor(theme.appearance()) }}
+  </button>
+
+  <div class="copy-group">
+    <button
+      type="button"
+      class="copy-button"
+      [class.copied]="justCopied()"
+      [title]="'Copy ' + theme.changeCount() + ' variables as a :root block'"
+      (click)="copyTheme()">
+      {{ justCopied() ? 'Copied' : 'Copy Theme' }}
+      <span class="count">{{ theme.changeCount() }}</span>
+    </button>
+    <button
+      type="button"
+      title="Import &amp; Export: the theme CSS and the form's template, out of the Studio and back in"
+      class="export-button"
+      [attr.aria-label]="'Open Import and Export: ' + theme.changeCount() + ' theme variables and a template of ' + fields().length + ' fields'"
+      (click)="showExport()">
+      Export
+      <span
+        class="export-glyph"
+        aria-hidden="true">
+        ↗
+      </span>
+    </button>
+  </div>
+</div>

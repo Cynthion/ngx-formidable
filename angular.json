@@ -24,7 +24,6 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              "src/assets",
               {
                 "glob": "**/*",
                 "input": "public"
@@ -36,7 +35,10 @@
             },
             "scripts": [],
             "allowedCommonJsDependencies": ["pikaday"],
-            "browser": "src/main.ts"
+            "browser": "src/main.ts",
+            "loader": {
+              ".md": "text"
+            }
           },
           "configurations": {
             "production": {
@@ -80,6 +82,7 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
+            "karmaConfig": "karma.conf.cjs",
             "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
@@ -93,6 +96,9 @@
             "scripts": [],
             "stylePreprocessorOptions": {
               "includePaths": ["projects/ngx-formidable/src/lib/styles"]
+            },
+            "loader": {
+              ".md": "text"
             }
           }
         }

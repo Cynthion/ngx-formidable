@@ -1,0 +1,56 @@
+:host {
+  display: block;
+}
+
+.families {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.family {
+  display: grid;
+  gap: 1px;
+  padding: 7px 10px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface-raised);
+  color: var(--portal-text);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--portal-border-strong);
+  }
+
+  &.is-active {
+    border-color: var(--portal-accent);
+    box-shadow: 0 0 0 1px var(--portal-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: 1px;
+  }
+}
+
+.family-name {
+  color: var(--portal-text-muted);
+  font-family: var(--portal-font);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.family-sample {
+  font-size: 14px;
+}
+
+.type {
+  summary {
+    padding: 4px 0;
+    color: var(--portal-text-muted);
+    font-size: 12px;
+    cursor: pointer;
+  }
+}

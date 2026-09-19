@@ -1,0 +1,62 @@
+:host {
+  display: block;
+}
+
+.markup {
+  max-height: 44dvh;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface-sunken);
+  font-family: var(--portal-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow: auto;
+}
+
+.import {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--portal-border);
+}
+
+.import-title {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.report {
+  margin-top: 10px;
+  font-size: 11px;
+}
+
+.applied {
+  margin: 0 0 4px;
+  color: var(--portal-ok);
+}
+
+.notes-head {
+  margin: 0 0 3px;
+  color: var(--portal-text-muted);
+}
+
+.notes {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    gap: 1px;
+  }
+}
+
+.reason {
+  color: var(--portal-warn);
+}

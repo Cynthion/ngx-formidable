@@ -1,0 +1,42 @@
+<div class="families">
+  @for (font of fonts; track font.key) {
+    <button
+      type="button"
+      class="family"
+      [class.is-active]="activeKey() === font.key"
+      [style.font-family]="font.stack"
+      (click)="setFamily(font.stack)">
+      <span class="family-name">{{ font.label }}</span>
+      <span class="family-sample">Temporal Transit Visa 0123</span>
+    </button>
+  }
+</div>
+
+<div class="pc-field">
+  <label
+    for="font-stack"
+    class="pc-label">
+    <span class="pc-label-name">font-family</span>
+  </label>
+  <input
+    type="text"
+    spellcheck="false"
+    id="font-stack"
+    class="pc-input pc-code"
+    [value]="theme.fontFamily()"
+    (change)="setFamily($any($event.target).value)" />
+  <p class="pc-help">
+    The library exposes no family token: every field takes the page's family through
+    <code class="pc-code">font: inherit</code>. This is written to <code class="pc-code">:root</code> beside the variables and exported as an ordinary
+    declaration.
+  </p>
+</div>
+
+<details class="type">
+  <summary>Size, Weight And Line Height</summary>
+  @for (token of typeTokens(); track token.name) {
+    <portal-token-control
+      [token]="token"
+      [compact]="true" />
+  }
+</details>

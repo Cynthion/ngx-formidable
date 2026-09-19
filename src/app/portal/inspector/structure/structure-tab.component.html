@@ -1,0 +1,150 @@
+<portal-accordion
+  heading="Start"
+  lede="A form is sections, and each section holds fields. Begin from nothing, from the sample you landed on, or from markup you already have."
+  [step]="1"
+  [hint]="startHint()"
+  [startHere]="!fieldCount()"
+  [open]="openSection() === 'start'"
+  (toggled)="toggle('start')">
+  <div class="starts">
+    <button
+      type="button"
+      class="start"
+      (click)="startBlank()">
+      <span class="start-name">Blank Form</span>
+      <span class="start-note">One empty section. Add the fields you need, one at a time.</span>
+    </button>
+    <button
+      type="button"
+      class="start"
+      (click)="startSample()">
+      <span class="start-name">The Sample</span>
+      <span class="start-note">Back to the {{ sampleFieldCount }} fields you landed on — every field the library ships.</span>
+    </button>
+    <button
+      type="button"
+      class="start"
+      (click)="startImport()">
+      <span class="start-name">Paste Markup</span>
+      <span class="start-note">A form you already wrote, read back in. Opens Import &amp; Export.</span>
+    </button>
+  </div>
+
+  @if (fieldCount()) {
+    <p class="pc-help">Either of the first two replaces the {{ fieldCount() }} fields on the stage. Your theme is untouched.</p>
+  }
+</portal-accordion>
+
+<portal-accordion
+  heading="Sections And Fields"
+  lede="What the form is now. Reorder a field with the arrows, remove it with the cross, or pick one to open it on the Fields tab."
+  [step]="2"
+  [hint]="listHint()"
+  [open]="openSection() === 'list'"
+  (toggled)="toggle('list')">
+  @for (entry of store.sectionsWithFields(); track entry.section.id) {
+    <div class="group">
+      <p class="group-title">
+        {{ entry.section.title }}
+        <span class="group-count">{{ entry.fields.length }}</span>
+      </p>
+
+      <ul class="rows">
+        @for (field of entry.fields; track field.id; let first = $first; let last = $last) {
+          <li
+            class="row"
+            [class.is-selected]="store.selectedFieldId() === field.id">
+            <button
+              type="button"
+              title="Edit This Field"
+              class="row-name"
+              (click)="edit(field.id)">
+              <span class="row-label">{{ field.label }}</span>
+              <span class="row-kind">{{ kindLabels[field.kind] }}</span>
+            </button>
+            <button
+              type="button"
+              title="Move Up"
+              class="pc-button is-quiet"
+              [disabled]="first"
+              (click)="store.moveField(field.id, -1)">
+              ↑
+            </button>
+            <button
+              type="button"
+              title="Move Down"
+              class="pc-button is-quiet"
+              [disabled]="last"
+              (click)="store.moveField(field.id, 1)">
+              ↓
+            </button>
+            <button
+              type="button"
+              title="Remove This Field"
+              class="pc-button is-quiet"
+              (click)="store.removeField(field.id)">
+              ×
+            </button>
+          </li>
+        } @empty {
+          <li class="pc-empty">No fields yet. Add one in step 3.</li>
+        }
+      </ul>
+    </div>
+  }
+</portal-accordion>
+
+<portal-accordion
+  heading="Add"
+  lede="A new field takes the defaults for its type; open it on the Fields tab to say what it is. A new section appears at the bottom of the form."
+  [step]="3"
+  [hint]="addHint"
+  [startHere]="!fieldCount()"
+  [open]="openSection() === 'add'"
+  (toggled)="toggle('add')">
+  <h4 class="add-title">Add A Field</h4>
+  <div class="add-row">
+    <select
+      class="pc-select"
+      aria-label="Field Type To Add"
+      [value]="newKind()"
+      (change)="newKind.set($any($event.target).value)">
+      @for (kind of kinds; track kind) {
+        <option [value]="kind">{{ kindLabels[kind] }}</option>
+      }
+    </select>
+    <select
+      class="pc-select"
+      aria-label="Section To Add To"
+      [value]="newSection()"
+      (change)="newSection.set($any($event.target).value)">
+      @for (section of store.sections(); track section.id) {
+        <option [value]="section.id">{{ section.title }}</option>
+      }
+    </select>
+    <button
+      type="button"
+      class="pc-button is-primary"
+      (click)="add()">
+      Add
+    </button>
+  </div>
+
+  <h4 class="add-title">Add A Section</h4>
+  <div class="add-row is-section">
+    <input
+      type="text"
+      placeholder="Section title"
+      class="pc-input"
+      aria-label="New Section Title"
+      [value]="newSectionTitle()"
+      (input)="newSectionTitle.set($any($event.target).value)" />
+    <button
+      type="button"
+      class="pc-button"
+      [disabled]="!newSectionTitle().trim()"
+      (click)="addSection()">
+      Add
+    </button>
+  </div>
+</portal-accordion>

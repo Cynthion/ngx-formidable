@@ -1,0 +1,48 @@
+<div class="picker">
+  <label
+    for="ft-select"
+    class="pc-label">
+    <span class="pc-label-name">Selected Field</span>
+  </label>
+  <select
+    id="ft-select"
+    class="pc-select"
+    [value]="store.selectedFieldId() ?? ''"
+    (change)="store.select($any($event.target).value)">
+    @for (entry of store.sectionsWithFields(); track entry.section.id) {
+      <optgroup [label]="entry.section.title">
+        @for (field of entry.fields; track field.id) {
+          <option [value]="field.id">{{ field.label }} — {{ kindLabels[field.kind] }}</option>
+        }
+      </optgroup>
+    }
+  </select>
+  <p class="pc-help">Two scopes below: the first two change every field at once, the last only this one. Clicking a field in the preview selects it here.</p>
+</div>
+
+<portal-accordion
+  heading="Every Field: Decoration"
+  lede="Labels, adornments, hints and state, set once for the whole form."
+  [hint]="fieldCount() + ' fields'"
+  [open]="openSection() === 'every'"
+  (toggled)="toggle('every')">
+  <portal-form-defaults section="decoration" />
+</portal-accordion>
+
+<portal-accordion
+  heading="Every Field: Validation"
+  hint="The whole form"
+  lede="Which validator runs, when it runs, and when its messages appear. Run and reveal are two axes, not one setting."
+  [open]="openSection() === 'validation'"
+  (toggled)="toggle('validation')">
+  <portal-form-defaults section="validation" />
+</portal-accordion>
+
+<portal-accordion
+  lede="Only this one field. A control is offered only where this kind of field honours it."
+  [heading]="'This Field Only: ' + selectedLabel()"
+  [hint]="selectedKind()"
+  [open]="openSection() === 'this'"
+  (toggled)="toggle('this')">
+  <portal-field-editor />
+</portal-accordion>

@@ -1,0 +1,74 @@
+@let opts = options();
+
+<!-- `NgForm` reads its options once, so a new `updateOn` only reaches the controls when the form is rebuilt. -->
+@for (key of [formKey()]; track key) {
+  <form
+    formidableForm
+    formidableValidateWholeForm
+    class="preview-form"
+    [formValue]="valueStore.model()"
+    [formShape]="valueStore.shape()"
+    [formSuite]="suite()"
+    [dependentFields]="dependentFields"
+    [revealOn]="opts.revealOn"
+    [showRequiredMarkers]="opts.showRequiredMarkers"
+    [ngFormOptions]="ngFormOptions()"
+    (formValueChange)="onModelChange($event)"
+    (errorsChange)="onErrors($event)"
+    (validChange)="valueStore.valid.set($event)"
+    (dirtyChange)="valueStore.dirty.set($event)"
+    (ngSubmit)="onSubmit()">
+    <header class="form-header">
+      <h1>{{ heading() }}</h1>
+      @if (intro(); as text) {
+        <p>{{ text }}</p>
+      }
+    </header>
+
+    @if (valueStore.wholeFormMessages().length) {
+      <div
+        role="alert"
+        class="whole-form-errors">
+        @for (message of valueStore.wholeFormMessages(); track message) {
+          <p>{{ message }}</p>
+        }
+      </div>
+    }
+
+    @for (entry of sections(); track entry.section.id) {
+      <section class="form-section">
+        <h2>{{ entry.section.title }}</h2>
+        <div class="field-grid">
+          @for (field of entry.fields; track field.id) {
+            <portal-preview-field
+              [spec]="field"
+              [formOptions]="opts"
+              [value]="valueFor(field.name)"
+              [selected]="definitionStore.selectedFieldId() === field.id"
+              [showCaptions]="showCaptions()"
+              [showAccessibility]="showAccessibility()"
+              (focused)="onFieldFocused($event)"
+              (captionActivated)="openInInspector($event)" />
+          }
+        </div>
+      </section>
+    }
+
+    <footer class="form-footer">
+      <button
+        type="submit"
+        class="submit">
+        {{ submit().label }}
+      </button>
+      <span class="footer-note">
+        @if (valueStore.submitted() && valueStore.valid()) {
+          {{ submit().accepted }}
+        } @else if (valueStore.submitted()) {
+          {{ submit().rejected }}
+        } @else {
+          Nothing leaves this page.
+        }
+      </span>
+    </footer>
+  </form>
+}

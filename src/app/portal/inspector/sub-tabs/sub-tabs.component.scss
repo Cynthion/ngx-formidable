@@ -1,0 +1,45 @@
+:host {
+  display: block;
+}
+
+.sub-tabs {
+  display: flex;
+  gap: 3px;
+  padding: 10px 16px 0;
+}
+
+.sub-tab {
+  flex: 1;
+  padding: 5px 8px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface);
+  color: var(--portal-text-muted);
+  font-family: var(--portal-font);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--portal-text);
+  }
+
+  &.active {
+    border-color: var(--portal-accent);
+    background: var(--portal-accent-soft);
+    color: var(--portal-accent);
+    font-weight: 650;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: 1px;
+  }
+}
+
+.strapline {
+  margin: 8px 16px 10px;
+  color: var(--portal-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}

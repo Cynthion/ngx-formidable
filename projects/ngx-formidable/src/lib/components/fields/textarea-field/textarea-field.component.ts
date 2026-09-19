@@ -89,18 +89,35 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
     // Re-applies the formatting the new mask asks for, and resizes to whatever it produced. Separate, so a
     // `minLength` change does not rewrite the value the user is in the middle of typing:
     // ngxMask initialises across a full task, so the value written before that has to be formatted, and measured, again once it has.
+    let isFirstPass = true;
+
     effect(() => {
       this.mask();
       this.maskConfig();
 
+      const firstPass = isFirstPass;
+      isFirstPass = false;
+
       untracked(() =>
         queueMicrotask(() => {
-          this.doWriteValue(this.value ?? '');
+          this.doWriteValue(this.valueToReapply(firstPass));
           this.adjustLayout();
           this.autoResize();
         })
       );
     });
+  }
+
+  /**
+   * What the mask effect re-formats. On the first pass the element is not the source: ngxMask has not
+   * initialised, so a value written before this point is still sitting in `lastWrittenValue` while the
+   * element reads back empty — re-formatting the element would then erase it. Afterwards the element is
+   * authoritative, so a mask changed while the user is typing re-formats what they typed.
+   */
+  private valueToReapply(isFirstPass: boolean): string {
+    if (isFirstPass && this.lastWrittenValue) return this.lastWrittenValue;
+
+    return this.value ?? '';
   }
 
   protected doOnValueChange(): void {
@@ -113,10 +130,15 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
 
   // #region ControlValueAccessor
 
+  /** The last value the form wrote in, which the mask effect needs while the element cannot yet hold it. */
+  private lastWrittenValue = '';
+
   protected doWriteValue(value: string): void {
     const newValue = value ?? '';
     const el = this.textareaElement;
     if (!el) return;
+
+    this.lastWrittenValue = newValue;
 
     if (this.mask()) {
       // Waits for the ngxMask directive to initialize on the control, which it does across a full

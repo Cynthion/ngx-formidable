@@ -1,0 +1,368 @@
+@let field = spec();
+@let decoration = field.decoration;
+
+<formidable-field-decorator>
+  @switch (field.kind) {
+    @case ('input') {
+      <formidable-input-field
+        formidableFieldErrors
+        [name]="field.name"
+        [placeholder]="field.placeholder"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [mask]="field.mask"
+        [maskConfig]="field.showMaskTyped ? { showMaskTyped: true } : undefined"
+        [minLength]="field.minLength ?? -1"
+        [maxLength]="field.maxLength ?? -1"
+        [autocomplete]="field.autocompleteHint ?? 'off'"
+        [required]="requiredInAngularMode()"
+        [minlength]="minLengthInAngularMode()"
+        [ngModel]="value()"
+        (focusChanged)="onFocus($event)" />
+    }
+    @case ('textarea') {
+      <formidable-textarea-field
+        formidableFieldErrors
+        [name]="field.name"
+        [placeholder]="field.placeholder"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [enableAutosize]="field.enableAutosize ?? true"
+        [showLengthIndicator]="field.showLengthIndicator ?? false"
+        [minLength]="field.minLength ?? -1"
+        [maxLength]="field.maxLength ?? -1"
+        [autocomplete]="field.autocompleteHint ?? 'off'"
+        [required]="requiredInAngularMode()"
+        [ngModel]="value()"
+        (focusChanged)="onFocus($event)" />
+    }
+    @case ('select') {
+      <formidable-select-field
+        formidableFieldErrors
+        [name]="field.name"
+        [placeholder]="field.placeholder"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [defaultOption]="defaultOption()"
+        [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
+        [noOptionsText]="field.noOptionsText ?? 'No options available.'"
+        [sortFn]="sortFn()"
+        [required]="requiredInAngularMode()"
+        [ngModel]="value()"
+        (focusChanged)="onFocus($event)">
+        @for (option of options(); track option.value) {
+          <formidable-field-option
+            [value]="option.value"
+            [label]="option.label"
+            [readonly]="option.readonly ?? false"
+            [disabled]="option.disabled ?? false" />
+        }
+      </formidable-select-field>
+    }
+    @case ('dropdown') {
+      <formidable-dropdown-field
+        formidableFieldErrors
+        [name]="field.name"
+        [placeholder]="field.placeholder"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [defaultOption]="defaultOption()"
+        [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
+        [noOptionsText]="field.noOptionsText ?? 'No options available.'"
+        [sortFn]="sortFn()"
+        [panelPosition]="panelPosition()"
+        [required]="requiredInAngularMode()"
+        [ngModel]="value()"
+        (focusChanged)="onFocus($event)">
+        @for (option of options(); track option.value) {
+          <formidable-field-option
+            [value]="option.value"
+            [label]="option.label"
+            [readonly]="option.readonly ?? false"
+            [disabled]="option.disabled ?? false" />
+        }
+      </formidable-dropdown-field>
+    }
+    @case ('autocomplete') {
+      <formidable-autocomplete-field
+        formidableFieldErrors
+        [name]="field.name"
+        [placeholder]="field.placeholder"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [defaultOption]="defaultOption()"
+        [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
+        [noOptionsText]="field.noOptionsText ?? 'No options available.'"
+        [sortFn]="sortFn()"
+        [panelPosition]="panelPosition()"
+        [required]="requiredInAngularMode()"
+        [ngModel]="value()"
+        (filterChanged)="filterText.set($event)"
+        (focusChanged)="onFocus($event)">
+        <!-- A custom option component: the field reads the plain option it provides and renders its template. -->
+        @for (match of fuzzyMatches(); track match.option.value) {
+          <example-fuzzy-option
+            [value]="match.option.value"
+            [label]="match.option.label"
+            [subtitle]="match.option.subtitle"
+            [highlightedEntries]="match.highlights"
+            [readonly]="match.option.readonly ?? false"
+            [disabled]="match.option.disabled ?? false" />
+        }
+      </formidable-autocomplete-field>
+    }
+    @case ('date') {
+      <formidable-date-field
+        formidableFieldErrors
+        [name]="field.name"
+        [placeholder]="field.placeholder"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [unicodeTokenFormat]="field.unicodeTokenFormat ?? 'yyyy-MM-dd'"
+        [emptyHint]="field.emptyHint ?? 'underscores'"
+        [panelPosition]="panelPosition()"
+        [i18n]="locale().i18n"
+        [firstDay]="locale().firstDay"
+        [required]="requiredInAngularMode()"
+        [ngModel]="value()"
+        (focusChanged)="onFocus($event)">
+        <!-- The library ships no SVG, so everything about the projected icon is the page's: size and colour. -->
+        @if (capabilities().toggleIcon) {
+          <example-icon
+            formidableFieldToggleIcon
+            class="toggle-icon"
+            [svg]="calendarSvg"
+            [size]="20" />
+        }
+      </formidable-date-field>
+    }
+    @case ('time') {
+      <formidable-time-field
+        formidableFieldErrors
+        [name]="field.name"
+        [placeholder]="field.placeholder"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [unicodeTokenFormat]="field.unicodeTokenFormat ?? 'HH:mm'"
+        [emptyHint]="field.emptyHint ?? 'underscores'"
+        [required]="requiredInAngularMode()"
+        [ngModel]="value()"
+        (focusChanged)="onFocus($event)" />
+    }
+    @case ('toggle') {
+      <formidable-toggle-field
+        formidableFieldErrors
+        [name]="field.name"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [labelPosition]="field.toggleLabelPosition ?? 'before'"
+        [onLabel]="field.onLabel"
+        [offLabel]="field.offLabel"
+        [ngModel]="value()"
+        (focusChanged)="onFocus($event)" />
+    }
+    @case ('slider') {
+      <formidable-slider-field
+        formidableFieldErrors
+        [name]="field.name"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [min]="field.min ?? 0"
+        [max]="field.max ?? 100"
+        [step]="field.step ?? 1"
+        [minLabel]="field.minLabel"
+        [maxLabel]="field.maxLabel"
+        [showThumbLabel]="field.showThumbLabel ?? true"
+        [showTickMarks]="field.showTickMarks ?? false"
+        [showMinMaxLabels]="field.showMinMaxLabels ?? false"
+        [showTickLabels]="field.showTickLabels ?? false"
+        [tickInterval]="field.tickInterval"
+        [transformValueToThumbLabel]="thumbLabelFn()"
+        [transformTickToTickLabel]="tickLabelFn()"
+        [ngModel]="value()"
+        (focusChanged)="onFocus($event)" />
+    }
+    @case ('radio-group') {
+      <formidable-radio-group-field
+        formidableFieldErrors
+        [name]="field.name"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [defaultOption]="defaultOption()"
+        [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
+        [noOptionsText]="field.noOptionsText ?? 'No options available.'"
+        [sortFn]="sortFn()"
+        [required]="requiredInAngularMode()"
+        [ngModel]="value()"
+        (focusChanged)="onFocus($event)">
+        @for (option of options(); track option.value) {
+          <formidable-field-option
+            layout="radio-group"
+            [value]="option.value"
+            [label]="option.label"
+            [readonly]="option.readonly ?? false"
+            [disabled]="option.disabled ?? false" />
+        }
+      </formidable-radio-group-field>
+    }
+    @case ('checkbox-group') {
+      <formidable-checkbox-group-field
+        formidableFieldErrors
+        [name]="field.name"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [defaultOption]="defaultOption()"
+        [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
+        [noOptionsText]="field.noOptionsText ?? 'No options available.'"
+        [sortFn]="sortFn()"
+        [required]="requiredInAngularMode()"
+        [ngModel]="value()"
+        (focusChanged)="onFocus($event)">
+        @for (option of options(); track option.value) {
+          <formidable-field-option
+            layout="checkbox-group"
+            [value]="option.value"
+            [label]="option.label"
+            [readonly]="option.readonly ?? false"
+            [disabled]="option.disabled ?? false" />
+        }
+      </formidable-checkbox-group-field>
+    }
+    @case ('counter') {
+      <example-counter-field
+        formidableFieldErrors
+        [name]="field.name"
+        [readonly]="isReadonly()"
+        [disabled]="isDisabled()"
+        [autoFocus]="field.state.autoFocus"
+        [showRequiredMarker]="decoration.showRequiredMarker"
+        [min]="field.min ?? 0"
+        [max]="field.max ?? 10"
+        [step]="field.step ?? 1"
+        [ngModel]="value()"
+        (focusChanged)="onFocus($event)" />
+    }
+  }
+
+  @if (showLabel()) {
+    <div
+      formidableFieldLabel
+      [position]="labelPosition()">
+      {{ field.label }}
+    </div>
+  }
+
+  @if (decoration.labelAdornment !== 'none') {
+    <div formidableFieldLabelAdornment>
+      <span class="adornment">
+        @switch (decoration.labelAdornment) {
+          @case ('icon') {
+            <example-tooltip
+              placement="right"
+              trigger="hover"
+              [text]="field.caption || field.label" />
+          }
+          @case ('button') {
+            <button type="button">Help</button>
+          }
+          @default {
+            Info
+          }
+        }
+      </span>
+    </div>
+  }
+
+  @if (showAdornments() && decoration.prefix !== 'none') {
+    <div
+      formidableFieldPrefix
+      [align]="decoration.prefixAlign">
+      @switch (decoration.prefix) {
+        @case ('icon') {
+          <example-icon
+            [svg]="markerSvg"
+            [size]="16" />
+        }
+        @case ('button') {
+          <button type="button">Set</button>
+        }
+        @default {
+          Prefix
+        }
+      }
+    </div>
+  }
+
+  @if (showAdornments() && decoration.suffix !== 'none') {
+    <div
+      formidableFieldSuffix
+      [align]="decoration.suffixAlign">
+      @switch (decoration.suffix) {
+        @case ('icon') {
+          <example-icon
+            [svg]="sparkSvg"
+            [size]="16" />
+        }
+        @case ('button') {
+          <button type="button">Clear</button>
+        }
+        @default {
+          Suffix
+        }
+      }
+    </div>
+  }
+
+  @if (showHint()) {
+    <div
+      formidableFieldHint
+      [align]="decoration.hintAlign">
+      {{ decoration.hint }}
+    </div>
+  }
+</formidable-field-decorator>
+
+@if (showCaptions()) {
+  <div class="caption-row">
+    <button
+      type="button"
+      class="caption"
+      [title]="'Edit ' + field.label + ' on the Fields tab'"
+      (click)="onCaption()">
+      <span class="caption-text">{{ field.caption || field.kind }}</span>
+      <span
+        class="caption-glyph"
+        aria-hidden="true">
+        ↗
+      </span>
+    </button>
+  </div>
+}
+
+@if (showAccessibility()) {
+  <portal-accessibility-readout
+    [root]="host"
+    [revision]="revision()" />
+}

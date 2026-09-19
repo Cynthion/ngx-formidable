@@ -1,0 +1,40 @@
+@for (token of seeds(); track token.name) {
+  <portal-token-control
+    [token]="token"
+    [compact]="true"
+    (baseRequested)="baseRequested.emit($event)" />
+}
+
+<portal-contrast-badges />
+
+@if (theme.needsDarkFillCompanions() && !companionsPinned()) {
+  <div class="pc-notice">
+    <span class="pc-notice-title">A dark fill needs four values the seeds cannot derive</span>
+    The readonly and disabled fills are mixed toward <code class="pc-code">transparent</code>, which lightens a dark field instead of dimming it; the selected
+    and highlighted option fills default to black at low alpha and vanish on a dark panel.
+    <div class="pc-buttons">
+      <button
+        type="button"
+        class="pc-button"
+        (click)="applyDarkCompanions()">
+        Set The Four
+      </button>
+    </div>
+  </div>
+}
+
+@if (companionsPinned()) {
+  <details class="companions">
+    <summary>The Four A Dark Fill Needs</summary>
+    @for (token of companions(); track token.name) {
+      <portal-token-control
+        [token]="token"
+        [compact]="true" />
+    }
+  </details>
+}
+
+<p class="pc-help">
+  Do not set the <code class="pc-code">-hovered</code>, <code class="pc-code">-focus</code>, <code class="pc-code">-readonly</code> and
+  <code class="pc-code">-disabled</code> variants — they exist so you do not have to.
+</p>

@@ -1,0 +1,125 @@
+// The rendered document. Global rather than in the docs component: `[innerHTML]` content carries none of
+// Angular's encapsulation attributes, so a component stylesheet cannot reach a single element of it.
+// Everything below styles what `marked` emits rather than anything the portal wrote.
+.doc-body {
+  display: block;
+  max-width: 900px;
+  font-size: 13px;
+  line-height: 1.65;
+
+  h2 {
+    margin: 28px 0 10px;
+    font-size: 17px;
+    font-weight: 650;
+    scroll-margin-top: 12px;
+  }
+
+  h3 {
+    margin: 20px 0 8px;
+    font-size: 14px;
+    font-weight: 650;
+  }
+
+  h4 {
+    margin: 16px 0 6px;
+    color: var(--portal-text-muted);
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  p {
+    margin: 0 0 10px;
+  }
+
+  ul,
+  ol {
+    margin: 0 0 10px;
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+
+  a {
+    color: var(--portal-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    // A file reference the document wrote in backticks: still monospace, but plainly a link.
+    code {
+      background: var(--portal-accent-soft);
+      color: inherit;
+    }
+  }
+
+  code {
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: var(--portal-surface-sunken);
+    font-family: var(--portal-mono);
+    font-size: 11.5px;
+    overflow-wrap: anywhere;
+  }
+
+  pre {
+    margin: 0 0 12px;
+    padding: 10px 12px;
+    border: 1px solid var(--portal-border);
+    border-radius: var(--portal-radius-sm);
+    background: var(--portal-surface-sunken);
+    overflow-x: auto;
+
+    code {
+      padding: 0;
+      background: none;
+      font-size: 11.5px;
+      line-height: 1.55;
+      overflow-wrap: normal;
+    }
+  }
+
+  blockquote {
+    margin: 0 0 12px;
+    padding: 2px 0 2px 12px;
+    border-left: 3px solid var(--portal-accent);
+    color: var(--portal-text-muted);
+  }
+
+  hr {
+    margin: 22px 0;
+    border: 0;
+    border-top: 1px solid var(--portal-border);
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    margin: 0 0 14px;
+    border-collapse: collapse;
+    font-size: 12px;
+    overflow-x: auto;
+  }
+
+  th,
+  td {
+    padding: 5px 9px;
+    border: 1px solid var(--portal-border);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background: var(--portal-surface-sunken);
+    color: var(--portal-text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  strong {
+    font-weight: 650;
+  }
+}

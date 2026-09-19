@@ -1,0 +1,82 @@
+@use 'formidable-vars' as vars;
+
+// The portal's own controls are built from the library's components, so they read `--formidable-*` and a
+// `:root` theme reaches them. The cascade cannot insulate them by scoping alone: most of the library's
+// variables are derived and are declared once, in the `:root` block, so an override further down the tree
+// leaves the derived ones frozen at the value computed for `:root`.
+// The chrome therefore re-emits the whole default block under its own selector, where derivation recomputes
+// correctly, and then points the seeds at its own appearance. Order inside the block does not matter: a
+// `var()` resolves against the computed value of the property on this element, not the declaration above it.
+.portal-chrome {
+  @include vars.formidable-vars;
+
+  font-family: var(--portal-font);
+
+  --formidable-color-field-background: var(--portal-surface-raised);
+  --formidable-color-field-border: var(--portal-border-strong);
+  --formidable-color-field-text: var(--portal-text);
+  --formidable-color-field-placeholder: var(--portal-text-muted);
+  --formidable-color-field-selection: var(--portal-accent-soft);
+  --formidable-color-field-border-focus: var(--portal-accent);
+  --formidable-color-field-label-floating: var(--portal-accent);
+  --formidable-color-validation-error: var(--portal-danger);
+  --formidable-color-field-background-readonly: var(--portal-surface);
+  --formidable-color-field-background-disabled: var(--portal-surface);
+  --formidable-color-field-option-background-selected: var(--portal-accent-soft);
+  --formidable-color-field-option-background-highlighted: var(--portal-surface-sunken);
+
+  --formidable-field-height: 36px;
+  --formidable-field-border-thickness: 1px;
+  --formidable-border-radius: 6px;
+  --formidable-field-padding-x: 10px;
+  --formidable-field-font-size: 13px;
+  --formidable-label-font-size: 12px;
+  --formidable-label-floating-font-size: 10px;
+  --formidable-field-before-margin-bottom: 0;
+  --formidable-field-support-min-height: 0;
+  --formidable-field-toggle-size: 24px;
+  --formidable-option-prefix-dimension-outer: 15px;
+  --formidable-option-prefix-dimension-inner: 6px;
+  --formidable-option-prefix-gap: 8px;
+  --formidable-option-prefix-inset: 8px;
+  --formidable-toggle-field-width: 34px;
+  --formidable-toggle-field-height: 19px;
+  --formidable-toggle-field-thumb-size: 11px;
+  --formidable-field-group-option-padding: 2px 0;
+  --formidable-panel-max-height: 40dvh;
+}
+
+// A subtree painted by a theme of its own — the preset thumbnails, each a live miniature of a real field.
+// Same mechanism as the chrome: re-emit the block so the derived values recompute against whatever bases the
+// element carries, then set that theme's own variables on the element inline.
+.portal-theme-scope {
+  @include vars.formidable-vars;
+}
+
+// The defaults probe. It re-emits the same block with none of the chrome's own overrides, so reading a
+// variable off it gives the library's token default — which is why no default is stored in the manifest.
+.portal-token-defaults {
+  @include vars.formidable-vars;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+// Resolves an arbitrary colour expression — a keyword, a `var()`, a `color-mix()` — to what the page paints.
+// It sits outside the chrome, so it reads the user's theme rather than the portal's own.
+.portal-color-probe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}

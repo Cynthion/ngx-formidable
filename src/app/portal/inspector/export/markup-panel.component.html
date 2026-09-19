@@ -1,0 +1,53 @@
+<pre class="markup">{{ markup() }}</pre>
+
+<div class="pc-buttons">
+  <button
+    type="button"
+    class="pc-button is-primary"
+    (click)="copy()">
+    {{ justCopied() ? 'Copied' : 'Copy The Template' }}
+  </button>
+</div>
+
+<div class="import">
+  <h4 class="import-title">Import A Form</h4>
+  <p class="pc-help">
+    Paste a whole form. It replaces the one on the stage, sections included — those come from the comments above each run of fields. A static, attribute-only
+    subset: bindings to expressions and control flow are listed rather than silently dropped.
+  </p>
+
+  <textarea
+    rows="4"
+    spellcheck="false"
+    placeholder="<form formidableForm> … </form>"
+    class="pc-textarea"
+    [value]="importText()"
+    (input)="importText.set($any($event.target).value)"></textarea>
+
+  <div class="pc-buttons">
+    <button
+      type="button"
+      class="pc-button"
+      [disabled]="!importText().trim()"
+      (click)="runImport()">
+      Replace The Form
+    </button>
+  </div>
+
+  @if (importResult(); as result) {
+    <div class="report">
+      <p class="applied">Read {{ result.fields.length }} fields in {{ result.sections.length }} sections.</p>
+      @if (result.notes.length) {
+        <p class="notes-head">Ignored:</p>
+        <ul class="notes">
+          @for (note of result.notes; track $index) {
+            <li>
+              <code class="pc-code">{{ note.text }}</code>
+              <span class="reason">{{ noteLabels[note.reason] }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</div>

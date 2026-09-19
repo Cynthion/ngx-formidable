@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px dashed var(--portal-accent);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-accent-soft);
+  color: var(--portal-text);
+  font-family: var(--portal-mono);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.facts {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.fact {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 8px;
+}
+
+dt {
+  color: var(--portal-text-muted);
+  white-space: nowrap;
+}
+
+dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

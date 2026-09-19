@@ -28,19 +28,19 @@ Every field has a `focus()` method. `autoFocus` calls it once the view is ready,
 ```html
 <!-- focused on load -->
 <formidable-input-field
-	name="firstName"
-	[autoFocus]="true"
-	ngModel />
+  name="firstName"
+  [autoFocus]="true"
+  ngModel />
 
 <!-- or from anywhere that can reach the field -->
 <formidable-dropdown-field
-	#nationality
-	name="nationality"
-	ngModel />
+  #nationality
+  name="nationality"
+  ngModel />
 <button
-	type="button"
-	(click)="nationality.focus()">
-	Jump to Nationality
+  type="button"
+  (click)="nationality.focus()">
+  Jump to Nationality
 </button>
 ```
 
@@ -54,11 +54,11 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 ```html
 <formidable-dropdown-field
-	name="hobby"
-	[options]="hobbyOptions"
-	[defaultOption]="{ value: '', label: 'None' }">
-	<!-- projected options may sit anywhere inside the field, including in a @for or a wrapper element -->
-	<formidable-field-option [value]="'gardening'">Gardening</formidable-field-option>
+  name="hobby"
+  [options]="hobbyOptions"
+  [defaultOption]="{ value: '', label: 'None' }">
+  <!-- projected options may sit anywhere inside the field, including in a @for or a wrapper element -->
+  <formidable-field-option [value]="'gardening'">Gardening</formidable-field-option>
 </formidable-dropdown-field>
 ```
 
@@ -93,8 +93,8 @@ The three anchored values flip above the field when there is no room below, and 
 
 ```html
 <formidable-date-field
-	name="birthdate"
-	[panelPosition]="'sheet'" />
+  name="birthdate"
+  [panelPosition]="'sheet'" />
 ```
 
 Two things to know before reaching for a sheet:
@@ -157,9 +157,9 @@ The date field passes a set of options straight through to Pikaday — `minDate`
 
 ```html
 <formidable-date-field
-	name="birthdate"
-	ngModel>
-	<span formidableFieldToggleIcon>📅</span>
+  name="birthdate"
+  ngModel>
+  <span formidableFieldToggleIcon>📅</span>
 </formidable-date-field>
 ```
 
@@ -175,10 +175,10 @@ The toggle centres what is projected; its size, colour and hover feedback are yo
 
 ```html
 <formidable-input-field
-	name="price"
-	[mask]="'000.00'"
-	[maskConfig]="{ prefix: 'CHF ', decimalMarker: ',' }"
-	ngModel />
+  name="price"
+  [mask]="'000.00'"
+  [maskConfig]="{ prefix: 'CHF ', decimalMarker: ',' }"
+  ngModel />
 ```
 
 Set `mask` when you want masking; `maskConfig` is optional on top of it.
@@ -187,11 +187,11 @@ Set `mask` when you want masking; `maskConfig` is optional on top of it.
 
 ```ts
 bootstrapApplication(AppComponent, {
-	providers: [
-		...provideNgxFormidable({
-			globalMaskConfig: { validation: true, dropSpecialCharacters: true }
-		})
-	]
+  providers: [
+    ...provideNgxFormidable({
+      globalMaskConfig: { validation: true, dropSpecialCharacters: true }
+    })
+  ]
 });
 ```
 

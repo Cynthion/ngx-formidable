@@ -8,6 +8,8 @@ import { FORMIDABLE_VALIDATOR, IFormidableValidator } from '../../models/validat
  * at that path is blank.
  */
 @Directive({
+  // Test-only, unreachable from `public-api.ts`, so it carries no public prefix.
+  // eslint-disable-next-line @angular-eslint/directive-selector
   selector: 'form[stubValidator]',
   standalone: true,
   providers: [

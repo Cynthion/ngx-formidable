@@ -1,0 +1,45 @@
+<div class="tools">
+  <input
+    type="search"
+    placeholder="Filter by name or description"
+    class="pc-input"
+    [value]="query()"
+    (input)="query.set($any($event.target).value)" />
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="theme.showOnlyChanged()"
+      (change)="theme.showOnlyChanged.set($any($event.target).checked)" />
+    Only What I Changed — {{ theme.changeCount() }}
+  </label>
+</div>
+
+@for (group of groups(); track group.slug) {
+  <portal-accordion
+    [heading]="group.name"
+    [hint]="hintFor(group)"
+    [open]="openGroup() === group.name"
+    (toggled)="toggle(group.name)">
+    @for (token of group.tokens; track token.name) {
+      <portal-token-control [token]="token" />
+    }
+  </portal-accordion>
+} @empty {
+  <p class="pc-empty">Nothing matches.</p>
+}
+
+<portal-accordion
+  heading="Variables The Library Sets Itself"
+  lede="Written at runtime as a field measures its own content. They appear in the browser's inspector, but overriding one does nothing — the component writes the value again on the next render."
+  [hint]="writtenTokens.length + ''"
+  [open]="writtenOpen()"
+  (toggled)="writtenOpen.set(!writtenOpen())">
+  <ul class="written">
+    @for (token of writtenTokens; track token.name) {
+      <li>
+        <code class="pc-code">{{ token.name }}</code>
+        <span class="set-by">{{ token.setBy }}</span>
+      </li>
+    }
+  </ul>
+</portal-accordion>

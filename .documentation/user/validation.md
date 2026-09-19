@@ -33,6 +33,14 @@ A target is what your validator receives as its second argument, and what `error
 | `@cynthion/ngx-formidable/vest` | An import — the Vest validator ships with the library      | Vest suites                                |
 | Nothing                         | Nothing                                                    | Display-only or externally validated forms |
 
+**A Field Inside Your Own Component**: `ngModel` injects its `ControlContainer` with `@Host()`, which stops at a component boundary. Wrap a field in a component of your own and its control registers as **standalone** — outside your `<form>`, invisible to the model and to every rule. Angular logs `NG01354` and names the fix; add it to the wrapping component:
+
+```ts
+viewProviders: [{ provide: ControlContainer, useExisting: NgForm }];
+```
+
+This applies to any wrapper, including one that renders fields from a configuration.
+
 ---
 
 ## Angular's Built-In Validators
@@ -41,13 +49,13 @@ Nothing to wire. Put the validator on the field and the error renders.
 
 ```html
 <formidable-field-decorator>
-	<formidable-input-field
-		formidableFieldErrors
-		name="name"
-		[required]="true"
-		[minlength]="3"
-		[(ngModel)]="name" />
-	<div formidableFieldLabel>Name</div>
+  <formidable-input-field
+    formidableFieldErrors
+    name="name"
+    [required]="true"
+    [minlength]="3"
+    [(ngModel)]="name" />
+  <div formidableFieldLabel>Name</div>
 </formidable-field-decorator>
 ```
 
@@ -94,17 +102,17 @@ Angular owns this one, so there is no library input for it. `ngFormOptions` on t
 
 ```html
 <form
-	formidableForm
-	[ngFormOptions]="{ updateOn: 'blur' }">
-	<formidable-input-field
-		name="firstName"
-		[ngModel]="model.firstName" />
+  formidableForm
+  [ngFormOptions]="{ updateOn: 'blur' }">
+  <formidable-input-field
+    name="firstName"
+    [ngModel]="model.firstName" />
 
-	<!-- this one field validates on every keystroke anyway -->
-	<formidable-input-field
-		name="lastName"
-		[ngModel]="model.lastName"
-		[ngModelOptions]="{ updateOn: 'change' }" />
+  <!-- this one field validates on every keystroke anyway -->
+  <formidable-input-field
+    name="lastName"
+    [ngModel]="model.lastName"
+    [ngModelOptions]="{ updateOn: 'change' }" />
 </form>
 ```
 
@@ -129,19 +137,19 @@ A field takes it on `formidableFieldErrors`, which is the directive that renders
 
 ```html
 <form
-	formidableForm
-	revealOn="submitted">
-	<formidable-input-field
-		formidableFieldErrors
-		name="firstName"
-		[ngModel]="model.firstName" />
+  formidableForm
+  revealOn="submitted">
+  <formidable-input-field
+    formidableFieldErrors
+    name="firstName"
+    [ngModel]="model.firstName" />
 
-	<!-- this one reports as soon as it is edited -->
-	<formidable-input-field
-		formidableFieldErrors
-		name="lastName"
-		revealOn="dirty"
-		[ngModel]="model.lastName" />
+  <!-- this one reports as soon as it is edited -->
+  <formidable-input-field
+    formidableFieldErrors
+    name="lastName"
+    revealOn="dirty"
+    [ngModel]="model.lastName" />
 </form>
 ```
 
@@ -186,8 +194,8 @@ Everything else goes through one interface. `NgxFormidableFormDirective` owns th
 
 ```ts
 export interface IFormidableValidator<T = Record<string, unknown>> {
-	/** Runs the rules for one target against the whole model. `null` means valid. */
-	validate(model: T, target: string): Observable<string[] | null>;
+  /** Runs the rules for one target against the whole model. `null` means valid. */
+  validate(model: T, target: string): Observable<string[] | null>;
 }
 ```
 
@@ -197,16 +205,16 @@ A directive on the form is the idiomatic way to supply one, because it can take 
 
 ```ts
 @Directive({
-	selector: 'form[mySchema]',
-	standalone: true,
-	providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: MySchemaValidatorDirective }]
+  selector: 'form[mySchema]',
+  standalone: true,
+  providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: MySchemaValidatorDirective }]
 })
 export class MySchemaValidatorDirective<T extends Record<string, unknown>> implements IFormidableValidator<T> {
-	public readonly mySchema = input.required<MySchema<T>>();
+  public readonly mySchema = input.required<MySchema<T>>();
 
-	public validate(model: T, target: string): Observable<string[] | null> {
-		return of(this.mySchema().messagesFor(model, target) ?? null);
-	}
+  public validate(model: T, target: string): Observable<string[] | null> {
+    return of(this.mySchema().messagesFor(model, target) ?? null);
+  }
 }
 ```
 
@@ -234,18 +242,18 @@ import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/ve
 
 ```html
 <form
-	formidableForm
-	formidableValidateWholeForm
-	[formValue]="formValue$ | async"
-	[formShape]="formShape"
-	[formSuite]="formSuite"
-	[debounceMs]="0"
-	(formValueChange)="formValue$.next($event)"
-	(validChange)="isValid$.next($event)"
-	(dirtyChange)="isDirty$.next($event)"
-	(errorsChange)="errors$.next($event)"
-	(ngSubmit)="onSubmit()">
-	<!-- fields -->
+  formidableForm
+  formidableValidateWholeForm
+  [formValue]="formValue$ | async"
+  [formShape]="formShape"
+  [formSuite]="formSuite"
+  [debounceMs]="0"
+  (formValueChange)="formValue$.next($event)"
+  (validChange)="isValid$.next($event)"
+  (dirtyChange)="isDirty$.next($event)"
+  (errorsChange)="errors$.next($event)"
+  (ngSubmit)="onSubmit()">
+  <!-- fields -->
 </form>
 ```
 
@@ -255,13 +263,13 @@ One `*.form.ts` per form holds everything about it — model, shape, field names
 
 ```ts
 export interface AppointmentPage {
-	chosenDate: Date | null;
-	details: string;
+  chosenDate: Date | null;
+  details: string;
 }
 
 export const APPOINTMENT_PAGE_FORM_FIELD_NAMES = {
-	chosenDate: 'chosenDate',
-	details: 'details'
+  chosenDate: 'chosenDate',
+  details: 'details'
 } as const;
 
 export type AppointmentPageFormModel = DeepPartial<AppointmentPage>;
@@ -269,20 +277,20 @@ export type AppointmentPageFormShape = DeepRequired<AppointmentPageFormModel>;
 
 /** Every key the model can carry, so a typo in a target or a model key fails the build. */
 export const appointmentPageFormShape: AppointmentPageFormShape = {
-	chosenDate: new Date(),
-	details: ''
+  chosenDate: new Date(),
+  details: ''
 };
 
 export const appointmentPageFormSuite: Suite<string, string, (model: AppointmentPageFormModel, field?: string) => void> = create((model: AppointmentPageFormModel, field?: string) => {
-	mode(Modes.ALL); // set it explicitly: Vest 6 defaults to Modes.EAGER, only the first failure per target
+  mode(Modes.ALL); // set it explicitly: Vest 6 defaults to Modes.EAGER, only the first failure per target
 
-	if (field) {
-		only(field); // one target is validated at a time — without this the suite runs every rule
-	}
+  if (field) {
+    only(field); // one target is validated at a time — without this the suite runs every rule
+  }
 
-	test(APPOINTMENT_PAGE_FORM_FIELD_NAMES.details, 'view.appointment.form.details.required', () => {
-		enforce(model[APPOINTMENT_PAGE_FORM_FIELD_NAMES.details]).isNotBlank();
-	});
+  test(APPOINTMENT_PAGE_FORM_FIELD_NAMES.details, 'view.appointment.form.details.required', () => {
+    enforce(model[APPOINTMENT_PAGE_FORM_FIELD_NAMES.details]).isNotBlank();
+  });
 });
 ```
 
@@ -320,30 +328,30 @@ Not shipped. But it is the same shape, and the library is built so this is all i
 
 ```ts
 @Directive({
-	selector: 'form[formSchema]',
-	standalone: true,
-	providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: ZodValidatorDirective }]
+  selector: 'form[formSchema]',
+  standalone: true,
+  providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: ZodValidatorDirective }]
 })
 export class ZodValidatorDirective<T extends Record<string, unknown>> implements IFormidableValidator<T> {
-	public readonly formSchema = input<ZodType<T> | null>(null);
+  public readonly formSchema = input<ZodType<T> | null>(null);
 
-	public validate(model: T, target: string): Observable<string[] | null> {
-		const schema = this.formSchema();
+  public validate(model: T, target: string): Observable<string[] | null> {
+    const schema = this.formSchema();
 
-		if (!schema) {
-			return of(null);
-		}
+    if (!schema) {
+      return of(null);
+    }
 
-		const result = schema.safeParse(model);
+    const result = schema.safeParse(model);
 
-		if (result.success) {
-			return of(null);
-		}
+    if (result.success) {
+      return of(null);
+    }
 
-		const messages = result.error.issues.filter((issue) => issue.path.join('.') === target).map((issue) => issue.message);
+    const messages = result.error.issues.filter((issue) => issue.path.join('.') === target).map((issue) => issue.message);
 
-		return of(messages.length ? messages : null);
-	}
+    return of(messages.length ? messages : null);
+  }
 }
 ```
 

@@ -26,7 +26,7 @@ The library ships neutral chrome plus a single accent — deliberate enough to u
 
 Everything else in this document derives from those twelve. **To rebrand, set `--formidable-color-field-border-focus`** — it carries the focus border, the focused label, the focused underline and both focus rings. Add `--formidable-color-field-label-floating` if you want the accent on resting labels too.
 
-Alternative colour and geometry schemes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one — are catalogued in `user/theme-options.md` and selectable in the demo.
+Alternative colour and geometry schemes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one — are selectable in the Studio, which pairs them into named presets.
 
 ---
 
@@ -59,14 +59,14 @@ Set these and the rest of the library follows. Do not set the derived variables 
 
 ```scss
 :root {
-	--formidable-color-field-background: #f8fafc; // the fill; also the panels and the groups
-	--formidable-color-field-border: #94a3b8; // also the underline, toggle thumb, slider, option markers
-	--formidable-color-field-placeholder: #5a6b82; // also the hints, length indicator, resting label
-	--formidable-color-field-text: #1e293b; // also the group text and the readonly/disabled fades
-	--formidable-color-field-selection: #c7d2fe; // also the hover fill and the slider's tick marks
-	--formidable-color-field-border-focus: #4f46e5; // also the focused label, underline and both rings
-	--formidable-color-field-label-floating: #4338ca; // also the calendar's weekday labels
-	--formidable-color-validation-error: #dc2626; // also the invalid border, label, underline and ring
+  --formidable-color-field-background: #f8fafc; // the fill; also the panels and the groups
+  --formidable-color-field-border: #94a3b8; // also the underline, toggle thumb, slider, option markers
+  --formidable-color-field-placeholder: #5a6b82; // also the hints, length indicator, resting label
+  --formidable-color-field-text: #1e293b; // also the group text and the readonly/disabled fades
+  --formidable-color-field-selection: #c7d2fe; // also the hover fill and the slider's tick marks
+  --formidable-color-field-border-focus: #4f46e5; // also the focused label, underline and both rings
+  --formidable-color-field-label-floating: #4338ca; // also the calendar's weekday labels
+  --formidable-color-validation-error: #dc2626; // also the invalid border, label, underline and ring
 }
 ```
 
@@ -78,8 +78,8 @@ Set these and the rest of the library follows. Do not set the derived variables 
 
 ```scss
 :root {
-	--formidable-color-field-border-focus: #0f766e;
-	--formidable-color-field-label-floating: #115e59; // optional: accent the labels too
+  --formidable-color-field-border-focus: #0f766e;
+  --formidable-color-field-label-floating: #115e59; // optional: accent the labels too
 }
 ```
 
@@ -87,19 +87,19 @@ Set these and the rest of the library follows. Do not set the derived variables 
 
 ```scss
 :root {
-	--formidable-field-border-thickness: 0px;
-	--formidable-field-border-radius: 0px;
-	--formidable-field-border-start-start-radius: 8px;
-	--formidable-field-border-start-end-radius: 8px;
-	--formidable-field-underline-thickness: 1px;
-	--formidable-field-underline-thickness-focus: 2px;
-	--formidable-field-underline-thickness-invalid: 2px;
-	// Required — see Borderless Themes below
-	--formidable-field-group-border-thickness: 1px;
-	--formidable-field-focus-ring-width: 1px;
-	--formidable-panel-border-thickness: 1px;
-	--formidable-toggle-field-track-border-thickness: 1px;
-	--formidable-slider-track-border-thickness: 1px;
+  --formidable-field-border-thickness: 0px;
+  --formidable-field-border-radius: 0px;
+  --formidable-field-border-start-start-radius: 8px;
+  --formidable-field-border-start-end-radius: 8px;
+  --formidable-field-underline-thickness: 1px;
+  --formidable-field-underline-thickness-focus: 2px;
+  --formidable-field-underline-thickness-invalid: 2px;
+  // Required — see Borderless Themes below
+  --formidable-field-group-border-thickness: 1px;
+  --formidable-field-focus-ring-width: 1px;
+  --formidable-panel-border-thickness: 1px;
+  --formidable-toggle-field-track-border-thickness: 1px;
+  --formidable-slider-track-border-thickness: 1px;
 }
 ```
 
@@ -107,10 +107,10 @@ Set these and the rest of the library follows. Do not set the derived variables 
 
 ```scss
 :root {
-	--formidable-field-height: 52px;
-	--formidable-field-border-radius: 26px; // half the height
-	--formidable-border-radius: 16px; // the panels, toggle and slider
-	--formidable-field-padding-x: 24px; // keep the text off the curve
+  --formidable-field-height: 52px;
+  --formidable-field-border-radius: 26px; // half the height
+  --formidable-border-radius: 16px; // the panels, toggle and slider
+  --formidable-field-padding-x: 24px; // keep the text off the curve
 }
 ```
 
@@ -118,11 +118,11 @@ Set these and the rest of the library follows. Do not set the derived variables 
 
 ```scss
 :root {
-	--formidable-field-height: 44px; // do not go below this — see Sizing below
-	--formidable-field-padding-x: 12px;
-	--formidable-field-font-size: 14px;
-	--formidable-label-floating-font-size: 11px;
-	--formidable-border-radius: 4px;
+  --formidable-field-height: 44px; // do not go below this — see Sizing below
+  --formidable-field-padding-x: 12px;
+  --formidable-field-font-size: 14px;
+  --formidable-label-floating-font-size: 11px;
+  --formidable-border-radius: 4px;
 }
 ```
 
@@ -136,7 +136,7 @@ Set these and the rest of the library follows. Do not set the derived variables 
 
 ### 5. Start From A Scheme Instead
 
-Ten palettes and eleven field shapes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed — are written out variable by variable in `user/theme-options.md`, and every combination is selectable in the demo. Copying one and adjusting it is usually faster than starting from this page.
+Ten palettes and eleven field shapes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed — are selectable in the Studio, on two independent axes and as named presets pairing the two. Picking one and adjusting it is usually faster than starting from this page, and the Studio copies the result out as the `:root` block to paste.
 
 ---
 

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, forwardRef, input } from '@angular/core';
 import { FieldOptionComponent, FORMIDABLE_OPTION } from '@cynthion/ngx-formidable';
-import { HighlightedEntries } from '../example-form/example-form.model';
+import { HighlightedEntries } from './example-fuzzy-option.model';
 
 @Component({
   selector: 'example-fuzzy-option',

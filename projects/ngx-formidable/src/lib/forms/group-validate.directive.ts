@@ -13,6 +13,8 @@ import { getGroupTarget } from './form.helpers';
  * uses `WHOLE_FORM` instead; see `NgxFormidableWholeFormValidateDirective`.
  */
 @Directive({
+  // Deliberately hijacks Angular's own selector so it attaches to every model-bound group.
+  // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[ngModelGroup]',
   standalone: true,
   providers: [

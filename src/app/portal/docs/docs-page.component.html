@@ -1,0 +1,53 @@
+<portal-top-bar />
+
+<div class="docs">
+  <aside class="nav">
+    <p class="nav-head">Guides</p>
+    @for (entry of guides(); track entry.slug) {
+      <a
+        class="nav-link"
+        [class.active]="page().slug === entry.slug"
+        [routerLink]="['/docs', entry.slug]"
+        [title]="entry.purpose">
+        {{ entry.title }}
+      </a>
+    }
+
+    <p class="nav-head">References</p>
+    @for (entry of references(); track entry.slug) {
+      <a
+        class="nav-link"
+        [class.active]="page().slug === entry.slug"
+        [routerLink]="['/docs', entry.slug]"
+        [title]="entry.purpose">
+        {{ entry.title }}
+      </a>
+    }
+  </aside>
+
+  <main class="content">
+    <header class="doc-head">
+      <p class="doc-kind">{{ page().kind }}</p>
+      <h1 class="doc-title">{{ page().title }}</h1>
+      <p class="doc-purpose">{{ page().purpose }}</p>
+    </header>
+
+    <article
+      class="doc-body"
+      [innerHTML]="body()"></article>
+  </main>
+
+  <aside class="contents">
+    @if (headings().length) {
+      <p class="nav-head">On This Page</p>
+      @for (heading of headings(); track heading.id) {
+        <button
+          type="button"
+          class="contents-link"
+          (click)="scrollTo(heading.id)">
+          {{ heading.text }}
+        </button>
+      }
+    }
+  </aside>
+</div>

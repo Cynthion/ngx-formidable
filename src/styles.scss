@@ -1,25 +1,20 @@
 @use 'styles/styles';
 
 // use the formidable styles
-// angular.json stylePreprocessorOptions: "projects/formidable/src/lib/styles"
-// resolves to: 'projects/formidable/src/lib/styles/_formidable.scss'
+// angular.json stylePreprocessorOptions: "projects/ngx-formidable/src/lib/styles"
+// resolves to: 'projects/ngx-formidable/src/lib/styles/_ngx-formidable.scss'
 @use 'ngx-formidable';
 
-// Formidable Lib Overrides
-:root {
-  // --formidable-field-height: 50px;
-  // --formidable-color-field-text: purple;
-}
-
-// Demo-only, not a library token: a dark colour scheme needs a dark host page, and no `--formidable-*`
-// variable can supply one — the library styles fields, never the surface they sit on. Only the
-// `midnight` scheme sets these; every other scheme leaves the fallbacks in place.
+html,
 body {
-  background: var(--example-page-background, #ffffff);
-  color: var(--example-page-text, inherit);
+  height: 100%;
 }
 
-// Pikaday Overrides
-// .pika-lendar {
-//   background-color: yellow;
-// }
+body {
+  margin: 0;
+  background: var(--portal-bg);
+  color: var(--portal-text);
+}
+
+// The portal writes `font-family` to `:root` beside the tokens, because the library exposes no family token:
+// every field takes the host page's family through `font: inherit`. The chrome pins its own in `_chrome.scss`.
