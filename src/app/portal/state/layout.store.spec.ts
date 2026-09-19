@@ -62,14 +62,14 @@ describe('layout store', () => {
   it('persists what the user dragged', () => {
     store.setInspectorWidth(640);
     store.setDrawerHeight(320);
-    store.showCaptions.set(false);
+    store.showFieldTypes.set(false);
     TestBed.tick();
 
     const stored = JSON.parse(localStorage.getItem('portal.layout') ?? '{}');
 
     expect(stored.inspectorWidth).toBe(640);
     expect(stored.drawerHeight).toBe(320);
-    expect(stored.showCaptions).toBe(false);
+    expect(stored.showFieldTypes).toBe(false);
   });
 
   it('survives a stored value that is no longer usable', () => {

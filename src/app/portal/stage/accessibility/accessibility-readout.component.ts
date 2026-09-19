@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DOCUMENT, effect, inject, input, signal } from '@angular/core';
 
-export interface AccessibilityFact {
+interface AccessibilityFact {
   readonly label: string;
   readonly value: string;
 }

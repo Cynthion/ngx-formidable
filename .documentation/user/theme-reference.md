@@ -1,6 +1,6 @@
 # Theme Reference
 
-Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these you actually need, is in `user/theming.md`; complete schemes to start from are in the Studio.
+Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these you actually need, is in `user/theming.md`; complete schemes to start from are in the Studio, which `user/studio.md` covers.
 
 ---
 

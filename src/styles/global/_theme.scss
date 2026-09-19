@@ -1,7 +1,6 @@
-@use '../mixins/typography' as typo;
-
 html {
-  @include typo.font-base;
-
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 1.6;
   letter-spacing: 0;
 }

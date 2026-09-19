@@ -1,24 +1,18 @@
 import { marked } from 'marked';
+import { slugify } from '../helpers/slug.helpers';
 
 /** Where the maintainer-facing buckets live, since the portal only mirrors `user/`. */
 const REPOSITORY_DOCS = 'https://github.com/Cynthion/ngx-formidable/blob/main/.documentation';
 
 /** One heading the in-page contents lists. */
-export interface DocHeading {
+interface DocHeading {
   readonly id: string;
   readonly text: string;
 }
 
-export interface RenderedDoc {
+interface RenderedDoc {
   readonly html: string;
   readonly headings: readonly DocHeading[];
-}
-
-export function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
 }
 
 /**

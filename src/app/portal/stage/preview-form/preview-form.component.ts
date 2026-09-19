@@ -38,8 +38,8 @@ export class PreviewFormComponent {
   protected readonly inspectorStore = inject(InspectorStore);
 
   public readonly showAccessibility = input(false);
-  /** The caption chips are the portal's annotation of the form, not part of it. */
-  public readonly showCaptions = input(true);
+  /** The chips are the portal's annotation of the form, not part of it. */
+  public readonly showFieldTypes = input(true);
 
   protected readonly options = computed(() => this.definitionStore.options());
   protected readonly sections = computed(() => this.definitionStore.sectionsWithFields());
@@ -95,7 +95,7 @@ export class PreviewFormComponent {
     if (showingFields) this.definitionStore.select(id);
   }
 
-  /** A caption chip is a control: it opens the inspector at the field it names. */
+  /** A chip is a control: it opens the editor panel at the field it names. */
   protected openInInspector(id: string): void {
     this.definitionStore.select(id);
     this.inspectorStore.openFields();

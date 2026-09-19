@@ -1,4 +1,6 @@
 import {
+  DEFAULT_DECORATION,
+  DEFAULT_STATE,
   PortalFieldDecoration,
   PortalFieldSpec,
   PortalFieldState,
@@ -15,24 +17,15 @@ import {
  * contrived pairing shows on — two dates in two formats and two locales is the premise rather than a demo
  * artifact. It also gives every option field a real reason for a `disabled` and a `readonly` entry.
  *
- * Every field type appears at least twice with deliberately different configuration, and the pair sits
- * adjacent in the same row so the difference is visible without scrolling. The `caption` is what names it.
+ * Every field type appears at least twice with deliberately different configuration, adjacent in the same
+ * row so the difference is visible without scrolling. Nothing here names that difference in prose: the chip
+ * under each field states its kind, and its tooltip is derived from the specification — so two fields
+ * reading `Date` and rendering different formats show the pairing rather than claim it, and neither can
+ * disagree with the field once it has been edited.
  */
 
-const DECORATION: PortalFieldDecoration = {
-  showLabel: true,
-  labelPosition: 'inside',
-  showRequiredMarker: false,
-  labelAdornment: 'none',
-  prefix: 'none',
-  prefixAlign: 'center',
-  suffix: 'none',
-  suffixAlign: 'center',
-  hint: '',
-  hintAlign: 'start'
-};
-
-const STATE: PortalFieldState = { readonly: false, disabled: false, autoFocus: false };
+const DECORATION: PortalFieldDecoration = DEFAULT_DECORATION;
+const STATE: PortalFieldState = DEFAULT_STATE;
 
 function field(
   spec: Partial<PortalFieldSpec> & Pick<PortalFieldSpec, 'id' | 'kind' | 'sectionId' | 'label'>
@@ -40,7 +33,6 @@ function field(
   return {
     name: spec.id,
     placeholder: '',
-    caption: '',
     span: 1,
     decoration: DECORATION,
     state: STATE,
@@ -49,7 +41,7 @@ function field(
 }
 
 // An era closed for maintenance is disabled, an era open to observers only is readonly. The state has a
-// reason a visitor understands without a caption, which is what makes the sample honest rather than
+// reason a visitor understands without being told, which is what makes the sample honest rather than
 // decorative.
 const ERAS: readonly PortalOptionSpec[] = [
   { value: 'cretaceous', label: 'Late Cretaceous' },
@@ -120,7 +112,7 @@ const WAIVERS: readonly PortalOptionSpec[] = [
   { value: 'duplicate', label: 'Duplicate-self indemnity', disabled: true }
 ];
 
-export const PREVIEW_SECTIONS: readonly PortalSectionSpec[] = [
+const PREVIEW_SECTIONS: readonly PortalSectionSpec[] = [
   { id: 'traveller', title: 'The Traveller' },
   { id: 'journey', title: 'The Journey' },
   { id: 'rules', title: 'The Rules' },
@@ -135,7 +127,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'traveller',
     label: 'Name',
     placeholder: 'As it appears in your own century',
-    caption: 'Plain text',
     decoration: { ...DECORATION, showRequiredMarker: true, hint: 'Your name in your era of origin.' }
   }),
   field({
@@ -143,7 +134,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'input',
     sectionId: 'traveller',
     label: 'Temporal identifier',
-    caption: 'Masked AAA-0000',
     mask: 'AAA-0000',
     showMaskTyped: true,
     decoration: { ...DECORATION, showRequiredMarker: true }
@@ -154,7 +144,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'traveller',
     label: 'Origin era',
     placeholder: 'Select…',
-    caption: 'Pinned default option',
     options: ERAS,
     defaultOption: { value: 'unknown', label: 'Not recorded' },
     defaultOptionMode: 'always'
@@ -165,7 +154,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'traveller',
     label: 'Origin sector',
     placeholder: 'Select…',
-    caption: 'Sorted, fallback default',
     options: SECTORS,
     defaultOption: { value: 'none', label: 'No sector on file' },
     defaultOptionMode: 'fallback',
@@ -180,7 +168,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'journey',
     label: 'Destination era',
     placeholder: 'Where to?',
-    caption: 'Panel anchored right',
     options: ERAS,
     panelPosition: 'right'
   }),
@@ -190,7 +177,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'journey',
     label: 'Destination city',
     placeholder: 'Where exactly?',
-    caption: 'Panel as a bottom sheet',
     options: CITIES,
     panelPosition: 'sheet'
   }),
@@ -199,7 +185,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'date',
     sectionId: 'journey',
     label: 'Arrival date',
-    caption: 'en-GB · dd.MM.yyyy',
     unicodeTokenFormat: 'dd . MM . yyyy',
     emptyHint: 'format',
     locale: 'en-GB',
@@ -210,7 +195,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'date',
     sectionId: 'journey',
     label: 'Return date',
-    caption: 'ja-JP · yyyy/MM/dd',
     unicodeTokenFormat: 'yyyy / MM / dd',
     emptyHint: 'underscores',
     locale: 'ja-JP',
@@ -221,7 +205,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'time',
     sectionId: 'journey',
     label: 'Arrival time',
-    caption: '24-hour · HH:mm',
     unicodeTokenFormat: 'HH:mm'
   }),
   field({
@@ -229,7 +212,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'time',
     sectionId: 'journey',
     label: 'Departure time',
-    caption: '12-hour · hh:mm a',
     unicodeTokenFormat: 'hh:mm a',
     emptyHint: 'format'
   }),
@@ -238,7 +220,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'counter',
     sectionId: 'journey',
     label: 'Companions',
-    caption: 'Custom field, editable',
     min: 0,
     max: 8,
     step: 1
@@ -248,7 +229,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'counter',
     sectionId: 'journey',
     label: 'Sealed luggage units',
-    caption: 'Custom field, readonly',
     min: 0,
     max: 4,
     step: 1,
@@ -262,7 +242,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'radio-group',
     sectionId: 'rules',
     label: 'Purpose of visit',
-    caption: 'Options with a pinned default',
     options: PURPOSES,
     defaultOption: { value: 'undeclared', label: 'Undeclared' },
     defaultOptionMode: 'always'
@@ -272,7 +251,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'radio-group',
     sectionId: 'rules',
     label: 'Clearance level',
-    caption: 'Whole group disabled',
     options: CLEARANCES,
     state: { ...STATE, disabled: true }
   }),
@@ -281,7 +259,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'checkbox-group',
     sectionId: 'rules',
     label: 'Declarations',
-    caption: 'Multi-select, sorted',
     options: DECLARATIONS,
     sortAlphabetically: true
   }),
@@ -290,7 +267,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'checkbox-group',
     sectionId: 'rules',
     label: 'Waivers signed',
-    caption: 'Whole group readonly',
     options: WAIVERS,
     state: { ...STATE, readonly: true }
   }),
@@ -299,7 +275,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'slider',
     sectionId: 'rules',
     label: 'Paradox tolerance',
-    caption: 'Ticks and tick labels',
     min: 0,
     max: 100,
     step: 10,
@@ -317,7 +292,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'slider',
     sectionId: 'rules',
     label: 'Entropy insurance',
-    caption: 'Thumb label only',
     min: 0,
     max: 5000,
     step: 250,
@@ -333,7 +307,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'rules',
     label: 'Anchor point',
     placeholder: 'Type to filter…',
-    caption: 'Filtered, panel full width',
     options: ANCHORS,
     panelPosition: 'full'
   }),
@@ -343,7 +316,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'rules',
     label: 'Backup anchor',
     placeholder: 'Type to filter…',
-    caption: 'Fallback default, sheet',
     options: ANCHORS,
     defaultOption: { value: 'add', label: 'Request a new anchor…' },
     defaultOptionMode: 'fallback',
@@ -357,7 +329,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'toggle',
     sectionId: 'small-print',
     label: 'Have you met yourself',
-    caption: 'Switch before the text',
     toggleLabelPosition: 'before',
     onLabel: 'Yes, once',
     offLabel: 'Not yet'
@@ -367,7 +338,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'toggle',
     sectionId: 'small-print',
     label: 'Paradox liability accepted',
-    caption: 'Switch after, disabled',
     toggleLabelPosition: 'after',
     onLabel: 'Accepted',
     offLabel: 'Pending review',
@@ -379,7 +349,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'small-print',
     label: 'Notes to your past self',
     placeholder: 'Nothing actionable, please',
-    caption: 'Autosize with a counter',
     maxLength: 280,
     enableAutosize: true,
     showLengthIndicator: true,
@@ -391,14 +360,13 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'small-print',
     label: 'Undertaking',
     placeholder: 'I undertake to return the way I came',
-    caption: 'Fixed height, no counter',
     enableAutosize: false,
     showLengthIndicator: false
   })
   // #endregion
 ];
 
-export const PREVIEW_FORM_OPTIONS: PortalFormOptions = {
+const PREVIEW_FORM_OPTIONS: PortalFormOptions = {
   labelPosition: 'inside',
   showLabels: true,
   showRequiredMarkers: true,

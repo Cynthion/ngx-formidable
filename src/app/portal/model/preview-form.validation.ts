@@ -2,7 +2,7 @@ import { WHOLE_FORM } from '@cynthion/ngx-formidable';
 import { create, enforce, mode, Modes, omitWhen, only, Suite, test } from 'vest';
 
 /** The preview form's model. Keys are field ids, so the shape is derived from the definition, never declared. */
-export type PreviewModel = Record<string, unknown>;
+type PreviewModel = Record<string, unknown>;
 
 function text(value: unknown): string {
   return typeof value === 'string' ? value : '';

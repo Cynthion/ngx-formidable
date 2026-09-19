@@ -4,11 +4,12 @@ import decoration from '../../../../.documentation/user/decoration.md';
 import fields from '../../../../.documentation/user/fields.md';
 import gettingStarted from '../../../../.documentation/user/getting-started.md';
 import themeReference from '../../../../.documentation/user/theme-reference.md';
+import studio from '../../../../.documentation/user/studio.md';
 import theming from '../../../../.documentation/user/theming.md';
 import validation from '../../../../.documentation/user/validation.md';
 
 /** One document, as it is written in `.documentation/user/`. */
-export interface DocPage {
+interface DocPage {
   /** The route parameter, and the file's own name without its extension. */
   readonly slug: string;
   readonly title: string;
@@ -61,6 +62,13 @@ export const DOC_PAGES: readonly DocPage[] = [
     kind: 'Guide',
     purpose: 'The default theme, how theming works, and how to find your own',
     markdown: theming
+  },
+  {
+    slug: 'studio',
+    title: 'Studio',
+    kind: 'Guide',
+    purpose: 'The Studio: build a theme and a form, and take both away',
+    markdown: studio
   },
   {
     slug: 'custom-fields',

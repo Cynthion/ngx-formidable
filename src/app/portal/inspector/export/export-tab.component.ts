@@ -1,40 +1,45 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { AccordionComponent } from '../../chrome/accordion/accordion.component';
-import { FormDefinitionStore } from '../../state/form-definition.store';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ExportSection, InspectorStore } from '../../state/inspector.store';
-import { ThemeStore } from '../../state/theme.store';
+import { SubTab, SubTabsComponent } from '../sub-tabs/sub-tabs.component';
 import { MarkupPanelComponent } from './markup-panel.component';
 import { ThemePanelComponent } from './theme-panel.component';
+
+/** The two things there are to take away, in the order the top bar offers them. */
+const SUB_TABS: readonly SubTab[] = [
+  { id: 'theme', label: 'Theme' },
+  { id: 'markup', label: 'Markup' }
+];
+
+// Short, because each half's two accordions carry the explanation of what goes out and what comes back in.
+const STRAPLINES: Readonly<Record<ExportSection, string>> = {
+  theme: 'The CSS your theme is, out and back in.',
+  markup: 'The template your form is, out and back in.'
+};
 
 /**
  * What you leave with, and the way back in.
  *
- * One scroll rather than a third level of tabs: the two things a visitor takes away — the `:root` block and
- * the template — are read once at the end, not worked in, so a pair of accordions is enough to keep them
- * apart. Each carries its own import, because the way back in belongs beside the way out.
+ * Two halves rather than two accordions, so the area is navigated the way its siblings are: the sub-tab
+ * strip is the same control in the same place on all three, and each half is a whole panel rather than a
+ * body that has to be opened before it can be read.
  *
- * Which of the two is open lives in the inspector store rather than here: the top bar opens the theme half
- * and Structure's third way to start opens the markup half, and neither is in a position to reach into this
- * component.
+ * Which half is showing lives in the inspector store rather than here: each of the top bar's two export
+ * controls opens the one it belongs to, Structure's third way to start opens the markup half, and none of
+ * them is in a position to reach into this component.
  */
 @Component({
   selector: 'portal-export-tab',
   templateUrl: './export-tab.component.html',
   styleUrl: './export-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AccordionComponent, ThemePanelComponent, MarkupPanelComponent]
+  imports: [SubTabsComponent, ThemePanelComponent, MarkupPanelComponent]
 })
 export class ExportTabComponent {
-  private readonly theme = inject(ThemeStore);
-  private readonly definition = inject(FormDefinitionStore);
-  private readonly inspector = inject(InspectorStore);
+  protected readonly inspector = inject(InspectorStore);
+  protected readonly subTabs = SUB_TABS;
+  protected readonly straplines = STRAPLINES;
 
-  protected readonly openSection = this.inspector.exportSection;
-
-  protected readonly variableCount = computed(() => this.theme.changeCount());
-  protected readonly fieldCount = computed(() => this.definition.fields().length);
-
-  protected toggle(section: ExportSection): void {
-    this.openSection.update((current) => (current === section ? null : section));
+  protected select(id: string): void {
+    this.inspector.exportSection.set(id as ExportSection);
   }
 }

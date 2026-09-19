@@ -9,7 +9,7 @@ import { PortalFieldKind } from './field-spec.model';
  * The table exists so a page whose claim is that everything is configurable never offers a control that
  * silently does nothing.
  */
-export interface PortalFieldCapabilities {
+interface PortalFieldCapabilities {
   readonly layout: FieldDecoratorLayout;
   /** Whether a label position other than `outside` is honoured. */
   readonly labelPositions: boolean;

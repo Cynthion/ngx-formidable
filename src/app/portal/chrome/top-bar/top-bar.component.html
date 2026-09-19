@@ -42,23 +42,48 @@
     {{ glyphFor(theme.appearance()) }}
   </button>
 
+  <!-- One group per thing there is to take away: the copy does it outright, the control beside it opens the
+       half of Import & Export that holds the same block, its options and the way back in. -->
   <div class="copy-group">
     <button
       type="button"
       class="copy-button"
-      [class.copied]="justCopied()"
+      [class.copied]="copiedTheme()"
       [title]="'Copy ' + theme.changeCount() + ' variables as a :root block'"
       (click)="copyTheme()">
-      {{ justCopied() ? 'Copied' : 'Copy Theme' }}
+      {{ copiedTheme() ? 'Copied' : 'Copy Theme' }}
       <span class="count">{{ theme.changeCount() }}</span>
     </button>
     <button
       type="button"
-      title="Import &amp; Export: the theme CSS and the form's template, out of the Studio and back in"
+      title="Open Import &amp; Export at the theme CSS"
       class="export-button"
-      [attr.aria-label]="'Open Import and Export: ' + theme.changeCount() + ' theme variables and a template of ' + fields().length + ' fields'"
-      (click)="showExport()">
-      Export
+      aria-label="Open Import and Export at the theme CSS"
+      (click)="showExport('theme')">
+      <span
+        class="export-glyph"
+        aria-hidden="true">
+        ↗
+      </span>
+    </button>
+  </div>
+
+  <div class="copy-group">
+    <button
+      type="button"
+      class="copy-button"
+      [class.copied]="copiedMarkup()"
+      [title]="'Copy the Angular template for ' + fields().length + ' fields'"
+      (click)="copyMarkup()">
+      {{ copiedMarkup() ? 'Copied' : 'Copy Markup' }}
+      <span class="count">{{ fields().length }}</span>
+    </button>
+    <button
+      type="button"
+      title="Open Import &amp; Export at the markup"
+      class="export-button"
+      aria-label="Open Import and Export at the markup"
+      (click)="showExport('markup')">
       <span
         class="export-glyph"
         aria-hidden="true">

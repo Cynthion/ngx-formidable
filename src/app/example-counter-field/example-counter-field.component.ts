@@ -13,7 +13,6 @@ import { BaseFieldDirective, FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidable
   templateUrl: './example-counter-field.component.html',
   styleUrls: ['./example-counter-field.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {

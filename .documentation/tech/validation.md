@@ -147,7 +147,7 @@ A `/zod` entry point would be the same three files as `/vest`:
 | `zod/src/public-api.ts`                  | one re-export                                     |
 | `zod/src/lib/zod-validator.directive.ts` | the adapter, importing `@cynthion/ngx-formidable` |
 
-Plus `zod` in `peerDependencies` marked optional, and a `tsconfig.json` path alias for the demo. Note that a secondary entry point must import the primary by its **package name**, not the dev alias — importing `ngx-formidable` puts the primary's sources under the secondary's `rootDir` and the build fails.
+Plus `zod` in `peerDependencies` marked optional, and a `tsconfig.json` path alias for the portal. Note that a secondary entry point must import the primary by its **package name**, not the dev alias — importing `ngx-formidable` puts the primary's sources under the secondary's `rootDir` and the build fails.
 
 ## Whole-Form Rules
 

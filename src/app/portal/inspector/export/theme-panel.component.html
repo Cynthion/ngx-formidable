@@ -1,60 +1,66 @@
-<div class="options">
-  <label class="pc-check">
-    <input
-      type="radio"
-      name="export-format"
-      [checked]="theme.exportOptions().format === 'css'"
-      (change)="setFormat('css')" />
-    CSS
-  </label>
-  <label class="pc-check">
-    <input
-      type="radio"
-      name="export-format"
-      [checked]="theme.exportOptions().format === 'scss'"
-      (change)="setFormat('scss')" />
-    SCSS
-  </label>
-  <label class="pc-check">
-    <input
-      type="checkbox"
-      [checked]="theme.exportOptions().includePageSurface"
-      (change)="setIncludePageSurface($any($event.target).checked)" />
-    Page Surface
-  </label>
-  <label class="pc-check">
-    <input
-      type="checkbox"
-      [checked]="theme.exportOptions().includeComments"
-      (change)="setIncludeComments($any($event.target).checked)" />
-    Comments
-  </label>
-</div>
+<portal-accordion
+  heading="Export"
+  lede="The block to paste into your own :root. Declarations that only restate a library default are left out, so what you take away is your theme rather than the library's."
+  [hint]="theme.changeCount() + ' Variables'"
+  [open]="isOpen('export')"
+  (toggled)="toggle('export')">
+  <div class="options">
+    <label class="pc-check">
+      <input
+        type="radio"
+        name="export-format"
+        [checked]="theme.exportOptions().format === 'css'"
+        (change)="setFormat('css')" />
+      CSS
+    </label>
+    <label class="pc-check">
+      <input
+        type="radio"
+        name="export-format"
+        [checked]="theme.exportOptions().format === 'scss'"
+        (change)="setFormat('scss')" />
+      SCSS
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="theme.exportOptions().includeComments"
+        (change)="setIncludeComments($any($event.target).checked)" />
+      Comments
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="theme.exportOptions().includePageSurface"
+        (change)="setIncludePageSurface($any($event.target).checked)" />
+      Page Surface
+    </label>
+  </div>
 
-<pre class="preview">{{ theme.exportText() }}</pre>
+  <pre class="preview">{{ theme.exportText() }}</pre>
 
-<div class="pc-buttons">
-  <button
-    type="button"
-    class="pc-button is-primary"
-    (click)="copy()">
-    {{ justCopied() ? 'Copied' : 'Copy ' + theme.changeCount() + ' Variables' }}
-  </button>
-  <button
-    type="button"
-    class="pc-button is-quiet"
-    (click)="theme.reset()">
-    Reset The Theme
-  </button>
-</div>
+  <div class="pc-buttons">
+    <button
+      type="button"
+      class="pc-button is-primary"
+      (click)="copy()">
+      {{ justCopied() ? 'Copied' : 'Copy Theme' }}
+    </button>
+    <button
+      type="button"
+      class="pc-button is-quiet"
+      (click)="theme.reset()">
+      Reset Theme
+    </button>
+  </div>
+</portal-accordion>
 
-<div class="import">
-  <h4 class="import-title">Import A Theme</h4>
-  <p class="pc-help">
-    Paste a block back in. Anything outside the manifest is listed rather than applied — a variable the library does not declare would produce a control that
-    appears to do nothing.
-  </p>
-
+<portal-accordion
+  heading="Import"
+  lede="A block you saved earlier, read back in. Anything outside the manifest is listed rather than applied — a variable the library does not declare would produce a control that appears to do nothing."
+  hint="Paste A Block"
+  [open]="isOpen('import')"
+  (toggled)="toggle('import')">
   <textarea
     rows="4"
     spellcheck="false"
@@ -66,7 +72,7 @@
   <div class="pc-buttons">
     <button
       type="button"
-      class="pc-button"
+      class="pc-button is-primary"
       [disabled]="!importText().trim()"
       (click)="runImport()">
       Apply
@@ -89,4 +95,4 @@
       }
     </div>
   }
-</div>
+</portal-accordion>

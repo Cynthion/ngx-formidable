@@ -10,7 +10,7 @@ import { THEME_TOKENS_BY_NAME } from '../model/token-manifest';
 export type PortalAppearance = 'system' | 'light' | 'dark';
 
 /** One contrast obligation, as the badges state it. */
-export interface ContrastCheck {
+interface ContrastCheck {
   readonly token: string;
   readonly label: string;
   readonly required: number;

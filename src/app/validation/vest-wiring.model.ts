@@ -1,4 +1,4 @@
-import { DeepPartial, DeepRequired, WHOLE_FORM } from '@cynthion/ngx-formidable';
+import { DeepPartial, WHOLE_FORM } from '@cynthion/ngx-formidable';
 import { create, enforce, mode, Modes, omitWhen, only, Suite, test } from 'vest';
 
 /**
@@ -15,12 +15,12 @@ export interface Password {
   confirmPassword?: string;
 }
 
-export type UserGender = 'male' | 'female' | 'unspecified';
-export type UserNationality = 'ch' | 'de' | 'fr' | 'jp' | 'other';
-export type UserReligion =
+type UserGender = 'male' | 'female' | 'unspecified';
+type UserNationality = 'ch' | 'de' | 'fr' | 'jp' | 'other';
+type UserReligion =
   'christian' | 'islam' | 'hindu' | 'buddhism' | 'buddhist' | 'agnostic' | 'atheist' | 'custom' | 'none';
 
-export interface User {
+interface User {
   firstName: string;
   middleName: string;
   lastName: string;
@@ -43,29 +43,6 @@ export type VestWiringModel = DeepPartial<User>;
 // #endregion
 
 // #region FormModel Validation
-
-export type VestWiringShape = DeepRequired<VestWiringModel>;
-
-export const vestWiringShape: VestWiringShape = {
-  firstName: '',
-  middleName: '',
-  lastName: '',
-  gender: 'male',
-  nationality: 'ch',
-  hobby: '',
-  animal: '',
-  birthdate: new Date(),
-  time: new Date(0, 0, 0, 0, 0, 0, 0),
-  religion: 'hindu',
-  allergies: [],
-  isSingle: false,
-  age: 0,
-  passwords: {
-    password: '',
-    confirmPassword: ''
-  },
-  pets: 0
-};
 
 export const vestWiringSuite: Suite<string, string, (model: VestWiringModel, field?: string) => void> = create(
   (model: VestWiringModel, field?: string) => {

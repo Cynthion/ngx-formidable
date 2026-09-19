@@ -1,26 +1,23 @@
 # Portal
 
-Design of the portal: the interactive page a developer uses to build a theme for their own brand, which
-replaces the demo's example form as the GitHub Pages deploy. The phase table and its ordering live in
-`impl/implementation.md`; this document is the design those phases are built and reviewed against.
+Design of the portal: the interactive page a developer uses to build a theme for their own brand, and what
+the GitHub Pages deploy serves. This document is the design the portal is reviewed against; `user/studio.md`
+is the consumer-facing guide to the page itself and does not restate anything here.
 
-For the theming model itself see `user/theming.md` and `user/theme-reference.md`. For coding conventions and
-the Definition of Done see `impl/conventions.md`.
+For the theming model see `user/theming.md` and `user/theme-reference.md`. For coding conventions and the
+Definition of Done see `impl/conventions.md`.
 
 ## Scope
 
 **The Bar**: a developer lands knowing nothing about the library and leaves with a theme in their clipboard,
 having read no instructions. Every decision in this document is judged against that sentence.
 
-| Concern        | Portal                                                           |
-| :------------- | :--------------------------------------------------------------- |
-| **Location**   | `src/app/portal/`, inside the existing demo application          |
-| **Replaces**   | `src/app/example-form/`, at the cutover phase                    |
-| **Deploy**     | The existing Pages workflow, with no change to the workflow file |
-| **Supersedes** | `user/theme-options.md`, retired at cutover                      |
+| Concern      | Portal                                                                  |
+| :----------- | :---------------------------------------------------------------------- |
+| **Location** | `src/app/portal/`, the whole of the `ngx-formidable-portal` application |
+| **Deploy**   | The existing Pages workflow, with no change to the workflow file        |
 
-A separate Angular project is not used. The cutover phase reduces to deleting one directory and changing one
-component reference, rather than a whole-tree move and import rewrite in the final session.
+A separate Angular project is not used: the portal is what the application in `src/` is.
 
 ---
 
@@ -37,15 +34,15 @@ Three regions. The preview form is never hidden, because the form repainting is 
 ```txt
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ ◇ ngx-formidable      [ Studio │ Docs ]  ⌘GitHub ◐ [Copy 16│Export ↗]    │
-│   what the Studio does, in one line                                      │
+│   Angular form fields you can actually theme, configure and customize.   │
 ├───────────────────────────────────────────┬──────────────────────────────┤
-│ PREVIEW  live  Captions  Accessibility    │ INSPECTOR                 ›  │
-│ ┌─ your page ───────────────────────────┐ │ Theme │ Form │ Import&Export │
+│ PREVIEW  Field Types  Accessibility       │ Theme │ Form │ Import&Exp  › │
+│ ┌─ your page ───────────────────────────┐ │                              │
 │ │  Section heading                      │ │ ┌ Design │ Variables ┐       │
 │ │  ┌──────────────┐ ┌──────────────┐    │ │ │ Pick a look, then work…   │
 │ │  │ field        │ │ field        │    │ │ │ ▾ Presets Start here   12 │
 │ │  └──────────────┘ └──────────────┘    │ │ │   [ Randomize ] + why     │
-│ │   (caption ↗)      (caption ↗)        │ │ │   [thumbnails…]           │
+│ │   (Input ↗)        (Input ↗)          │ │ │   [thumbnails…]           │
 │ │  ┌──────────────┐ ┌──────────────┐    │ │ │ ▸ 1 Brand Colour    1 var │
 │ │  │ field        │ │ field        │    │ │ │ ▸ 2 Repaint       8 seeds │
 │ │  └──────────────┘ └──────────────┘    │ │ │ ▸ 3 Reshape     4 lengths │
@@ -55,6 +52,10 @@ Three regions. The preview form is never hidden, because the form repainting is 
 │   By Section │ Errors │ Raw               │                              │
 └───────────────────────────────────────────┴──────────────────────────────┘
 ```
+
+**No Title Row**: the tab strip is the inspector's header. A row above it could only add the word
+"Inspector", which names a panel that edits rather than inspects and which the three tabs say better, and it
+costs a row of the height the narrow-viewport sheet is already short of.
 
 **Stage Surface**: the form sits on an explicit page surface with a visible edge. That surface is the object a
 dark theme needs, because the library styles fields and never the page behind them.
@@ -87,14 +88,16 @@ drawer's, bar included, so the divider tracks the pointer rather than lagging it
 
 Routes are introduced with hash location.
 
-| Route                   | Tab       | Holds                                              |
-| :---------------------- | :-------- | :------------------------------------------------- |
-| `/`                     | `Studio`  | The stage and the inspector                        |
-| `/docs`, `/docs/:topic` | `Docs`    | The documentation page, lazily loaded              |
-| `/preview`              | `Preview` | The form alone, without the stage or the inspector |
+| Route                   | Tab      | Holds                                 |
+| :---------------------- | :------- | :------------------------------------ |
+| `/`                     | `Studio` | The stage and the inspector           |
+| `/docs`, `/docs/:topic` | `Docs`   | The documentation page, lazily loaded |
 
-The top bar is on every one of them and its three tabs are the only navigation there is, so no route carries
-a back control of its own.
+The top bar is on both of them and its two tabs are the only navigation there is, so no route carries a back
+control of its own.
+
+**No Preview Route**: turning the `Field Types` switch off leaves the stage showing the form exactly as a
+consumer's page would, which is what a third route would have duplicated.
 
 **Hash Location**: GitHub Pages serves no SPA fallback, so a path-routed deep link requires an `index.html`
 copy published as `404.html` and is then served with an HTTP 404 status. Hash location needs neither, and the
@@ -110,13 +113,16 @@ would hide either the preview or the editor. There are three, in the order the w
 | **Import & Export** | One scroll, two blocks | What you take away and paste back: the `:root` block and the template |
 
 `Form` is `Structure` first: which fields exist has to be settled before what one of them is is worth
-saying. `Import & Export` is one scroll rather than a third level of tabs: its two blocks are read once at
-the end, not worked in, so a pair of accordions keeps them apart at no navigational cost. Each carries its
-own import, because the way back in belongs beside the way out — which is what the tab is named for. Which
-of the two is open is held in the inspector store, not the component: the top bar opens the theme half and
-`Structure`'s third way to start opens the markup half. Inside every area the sections are accordions with one
-open at a time, so the run of collapsed headers is the panel's table of contents rather than a scroll the
-user has to survey.
+saying. All three areas carry the same second level, so the strip is learned once rather than per tab, and
+`Import & Export`'s two halves are the two things there are to take away. Each half is then the same pair of
+accordions — `Export` and `Import` — because both are round trips and the way back in belongs beside the way
+out, which is what the tab is named for. A reader who has learned one half has learned the other.
+
+Which half is showing and which of its two accordions is open are both held in the inspector store rather
+than in the components: each of the top bar's export controls opens the half it belongs to, and `Structure`'s
+third way to start opens the markup half **at its import**, which a panel's own state could not be reached to
+say. Inside every area the sections are accordions with one open at a time, so the run of collapsed headers is
+the panel's table of contents rather than a scroll the user has to survey.
 
 **Anchor Targets**: per-token deep links use a route parameter and scroll programmatically. A fragment on top
 of a hash route is ambiguous.
@@ -153,7 +159,7 @@ theme reaches them. The cascade cannot insulate them, for the reason above.
 **The chrome re-emits the full default variable block under its own selector**, where derivation recomputes
 correctly against the chrome's own base values. This requires one library change: the `:root` block in
 `_formidable-vars.scss` becomes a mixin, with `:root` including it. The emitted CSS is unchanged, and the
-mixin is not forwarded, so the closed SCSS surface described in `impl/conventions.md` still holds. The demo
+mixin is not forwarded, so the closed SCSS surface described in `impl/conventions.md` still holds. The portal
 already reaches library styles by path through the `stylePreprocessorOptions.includePaths` entry in
 `angular.json`.
 
@@ -194,7 +200,7 @@ export preview.
 - **Units**: length editors always emit a unit, so a unitless zero cannot be produced.
 - **Gradients**: colour wells accept colours only, because the fill feeds `color-mix()`.
 - **Borderless Geometry**: setting the field border thickness to zero raises a notice naming the five lengths
-  it also erases, with a control that restores them. `user/theme-options.md` lists the five.
+  it also erases, with a control that restores them. `user/theming.md` names the five.
 - **Dark Fills**: a dark fill raises a notice offering to set the four values the seeds cannot derive.
 
 **Contrast Badges**: the seeds that carry a documented contrast obligation show a live ratio against the
@@ -233,7 +239,7 @@ colour whose name carries no colour prefix all defeat inference from the value.
 
 **Drift Gate**: a spec walks `document.styleSheets`, collects the declared `--formidable-*` properties and
 asserts that the manifest and the stylesheet agree in both directions, and that no library-written variable is
-exposed. It runs in the demo project, which already loads the library stylesheet and already runs in CI.
+exposed. It runs in the portal project, which already loads the library stylesheet and already runs in CI.
 
 ### Colour Schemes
 
@@ -250,7 +256,7 @@ and is exported as a separately commented block. The portal's own appearance fol
 preference by default.
 
 A dark fill needs four values beyond the seeds, because the readonly and disabled fills are mixed toward
-`transparent` and the option fills default to black at low alpha. `user/theme-options.md` records them.
+`transparent` and the option fills default to black at low alpha. `user/theming.md` records them.
 
 ### Fonts
 
@@ -261,10 +267,11 @@ and exports it as an ordinary declaration together with its `@font-face`.
 Adding a family token to the library is a public API change with its own Definition-of-Done obligations, and
 is filed in `impl/backlog.md` rather than absorbed into this phase.
 
-**Fonts Are Bundled**, self-hosted, in a compressed web format, as a small curated set covering the common
-archetypes plus a free-text entry. The deploy is static and must work offline and behind a proxy, and a
-fetched family adds a third-party origin and a flash of unstyled text that undoes the instant repaint the
-presets exist to demonstrate. Families load on demand, so they are assets rather than initial bundle.
+**Fonts Are Local**, as stacks over faces the platform already has, covering the common archetypes plus a
+free-text entry. The deploy is static and must work offline and behind a proxy, and a fetched family adds a
+third-party origin and a flash of unstyled text that undoes the instant repaint the presets exist to
+demonstrate — which stacks satisfy without shipping a byte. They render differently per platform, and a
+display face has no reliable stand-in; bundling licensed `woff2` files is filed in `impl/backlog.md`.
 
 ---
 
@@ -272,7 +279,7 @@ presets exist to demonstrate. Families load on demand, so they are assets rather
 
 **The Context Is A Time Traveller's Visa Application.** It is chosen for the date field, which is the
 library's most configurable component and the one a contrived pairing shows on: two dates in two formats and
-two locales is the premise rather than a demo artifact. It also gives every option field a real reason for a
+two locales is the premise rather than a contrivance. It also gives every option field a real reason for a
 `disabled` and a `readonly` entry, and it carries a submit destination — an issued visa — so the form is
 visibly a form.
 
@@ -302,16 +309,26 @@ observers only is `readonly`. The state has a reason a visitor understands witho
 makes the sample honest rather than decorative.
 
 **Several Fields Per Type**: the table above is the core set, not the final field list. Each type appears at
-least twice with deliberately different configuration, and the pair sits adjacent in the same row so the
-difference is visible without scrolling. A caption strip beneath each pair names exactly what differs. The two
-dates are the pair the context exists for.
+least twice with deliberately different configuration, adjacent in the same row so the difference is visible
+without scrolling. The two dates are the pair the context exists for. Nothing states the difference in prose:
+the two chips read the same kind and the two fields render differently, which shows the pairing instead of
+claiming it — and survives a reorder, a removal and the one-column collapse, none of which a written caption
+does.
 
-**Caption Chips Are Controls**: each chip opens the field it names on the `Fields` tab, and carries a `↗` to
-say so. The preview explains itself, and every explanation is also the way to change it — which is what
-replaces the instructions the page is required not to need. A chip is the portal's annotation rather than
-part of the form, so a `Captions` switch on the stage bar turns the run of them off, and `/preview` never
-renders them at all. Each sits at the bottom of its grid row, so a pair stays aligned when one field carries
-a hint and the other does not.
+**Chips Are Controls, And Are Derived**: each chip names the component its field is, opens that field on the
+`Fields` tab, and carries a `↗` to say so. The preview explains itself, and every explanation is also the way
+to change it — which is what replaces the instructions the page is required not to need.
+
+Both halves of a chip come from the specification rather than from prose written beside it: the text is the
+kind's display name, and the tooltip is what the field is set to, read through the same `ALL_FIELD_ATTRIBUTES`
+table the markup serializer emits from. A written description cannot hold — editing the field on the `Fields`
+tab leaves it stating the old value, and a field added in the structure editor has none at all — so the page
+would be contradicting itself at exactly the moment the user starts working.
+
+A chip is the portal's annotation rather than part of the form, so the `Field Types` switch on the stage bar
+turns the run of them off, which is what leaves the stage showing the form as a consumer's page would. Each
+sits at the bottom of its grid row, so a pair stays aligned when one field carries a hint and the other does
+not.
 
 **Option Fields** always carry a sample option that is `disabled` and one that is `readonly`, so their theming
 is demonstrable.
@@ -458,12 +475,10 @@ of their own.
 | **Budgets**        | The initial budget is raised. The per-component style budget is kept, so each inspector panel is its own component                                            |
 | **Lint**           | The lint and style-lint scripts are extended to the application sources                                                                                       |
 | **Selector Rules** | The component and directive selector-prefix rules are scoped to a path that does not exist and have never run. The glob is corrected and a portal block added |
-| **Example Form**   | Frozen until cutover. Its change-detection spec selects by DOM position and runs in CI                                                                        |
-| **Cutover**        | The example form's model is relocated, because the validation integration spec imports it                                                                     |
 
-**Definition Of Done Sites** naming the example form as the showcase and the only visual-test surface:
-`impl/conventions.md`, `impl/testing.md`, `tech/architecture.md`, the root `CONTRIBUTING.md` and the `verify`
-skill. All are updated at cutover.
+**Definition Of Done Sites** naming the portal's preview form as the showcase and the only visual-test
+surface: `impl/conventions.md`, `impl/testing.md`, `tech/architecture.md`, the root `CONTRIBUTING.md` and the
+`verify` skill.
 
 ---
 

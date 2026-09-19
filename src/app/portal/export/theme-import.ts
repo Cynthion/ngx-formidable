@@ -1,10 +1,10 @@
 import { PageSurface } from '../model/presets';
 import { LIBRARY_WRITTEN_TOKENS, THEME_TOKENS_BY_NAME } from '../model/token-manifest';
 
-export type ImportSkipReason =
+type ImportSkipReason =
   'not-a-formidable-variable' | 'not-in-the-manifest' | 'written-by-the-library' | 'unrecognised-declaration';
 
-export interface ImportSkip {
+interface ImportSkip {
   readonly text: string;
   readonly reason: ImportSkipReason;
 }

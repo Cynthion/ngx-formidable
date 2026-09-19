@@ -10,11 +10,13 @@
   border-bottom: 1px solid var(--portal-border);
 }
 
+// One height with the editor panel's tab strip beside it, so the two column headers line up.
 .stage-bar {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 6px 16px;
+  height: var(--portal-section-header-height);
+  padding: 0 16px;
   background: var(--portal-surface);
   color: var(--portal-text);
   font-size: 12px;
@@ -116,7 +118,18 @@
     padding: 18px;
   }
 
+  // Kept, on a row of its own: it is the only line that says what the page is for, and a narrow viewport
+  // is where that is needed most. Two rows, so the height is the content's rather than the header's.
+  .stage-bar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 6px 16px;
+  }
+
   .stage-hint {
-    display: none;
+    flex-basis: 100%;
+    order: 1;
+    overflow: visible;
+    white-space: normal;
   }
 }

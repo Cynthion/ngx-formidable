@@ -1,7 +1,7 @@
 import { Directive, ElementRef, inject, input, output, signal } from '@angular/core';
 
 /** Which edge the handle sits on, and so which pointer coordinate a drag reports. */
-export type ResizeAxis = 'x' | 'y';
+type ResizeAxis = 'x' | 'y';
 
 /**
  * A draggable divider. It reports the pointer's position while a drag is in progress and leaves the
@@ -13,7 +13,6 @@ export type ResizeAxis = 'x' | 'y';
  */
 @Directive({
   selector: '[portalResizeHandle]',
-  standalone: true,
   host: {
     'class': 'portal-resize-handle',
     'role': 'separator',

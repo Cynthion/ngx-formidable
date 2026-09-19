@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { slugify } from '../../helpers/slug.helpers';
 
 /**
  * One collapsible section of an inspector panel.
@@ -28,10 +29,5 @@ export class AccordionComponent {
 
   public readonly toggled = output<void>();
 
-  protected readonly headingId = computed(
-    () =>
-      `acc-${this.heading()
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')}`
-  );
+  protected readonly headingId = computed(() => `acc-${slugify(this.heading())}`);
 }

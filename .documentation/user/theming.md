@@ -26,7 +26,7 @@ The library ships neutral chrome plus a single accent — deliberate enough to u
 
 Everything else in this document derives from those twelve. **To rebrand, set `--formidable-color-field-border-focus`** — it carries the focus border, the focused label, the focused underline and both focus rings. Add `--formidable-color-field-label-floating` if you want the accent on resting labels too.
 
-Alternative colour and geometry schemes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one — are selectable in the Studio, which pairs them into named presets.
+Alternative colour and geometry schemes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one — are selectable in the Studio, which pairs them into named presets — see `user/studio.md`.
 
 ---
 
@@ -136,7 +136,7 @@ Set these and the rest of the library follows. Do not set the derived variables 
 
 ### 5. Start From A Scheme Instead
 
-Ten palettes and eleven field shapes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed — are selectable in the Studio, on two independent axes and as named presets pairing the two. Picking one and adjusting it is usually faster than starting from this page, and the Studio copies the result out as the `:root` block to paste.
+Ten palettes and eleven field shapes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed — are selectable in the Studio, on two independent axes and as named presets pairing the two. Picking one and adjusting it is usually faster than starting from this page, and the Studio copies the result out as the `:root` block to paste. `user/studio.md` is the guide to it.
 
 ---
 

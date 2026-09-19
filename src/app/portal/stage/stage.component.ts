@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { FormValueStore } from '../state/form-value.store';
 import { LayoutStore } from '../state/layout.store';
 import { ModelDrawerComponent } from './model-drawer/model-drawer.component';
 import { PreviewFormComponent } from './preview-form/preview-form.component';
@@ -18,11 +17,10 @@ import { PreviewFormComponent } from './preview-form/preview-form.component';
   imports: [PreviewFormComponent, ModelDrawerComponent]
 })
 export class StageComponent {
-  protected readonly valueStore = inject(FormValueStore);
   protected readonly layout = inject(LayoutStore);
 
-  protected toggleCaptions(): void {
-    this.layout.showCaptions.update((on) => !on);
+  protected toggleFieldTypes(): void {
+    this.layout.showFieldTypes.update((on) => !on);
   }
 
   /** Shown, never simulated: the overlay states what the library actually produced. */

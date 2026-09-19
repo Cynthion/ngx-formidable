@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ngx-formidable-demo": {
+    "ngx-formidable-portal": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -18,7 +18,7 @@
           "builder": "@angular/build:application",
           "options": {
             "outputPath": {
-              "base": "dist/ngx-formidable-demo"
+              "base": "dist/ngx-formidable-portal"
             },
             "index": "src/index.html",
             "tsConfig": "tsconfig.app.json",
@@ -68,10 +68,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "ngx-formidable-demo:build:production"
+              "buildTarget": "ngx-formidable-portal:build:production"
             },
             "development": {
-              "buildTarget": "ngx-formidable-demo:build:development"
+              "buildTarget": "ngx-formidable-portal:build:development"
             }
           },
           "defaultConfiguration": "development"

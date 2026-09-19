@@ -3,17 +3,19 @@
 <div class="stage-head portal-chrome">
   <div class="stage-bar">
     <span class="stage-label">Preview</span>
-    <span class="stage-hint">Everything you change on the left lands here</span>
+    <!-- No side is named: the editor panel is beside this column at full width and under it below the
+         breakpoint, so a direction would be wrong half the time. -->
+    <span class="stage-hint">Configure and customize the form. Copy theme and markup when it looks right.</span>
 
     <div class="stage-tools">
       <button
         type="button"
-        title="Label each field with what it differs from its neighbour in"
+        title="Name the component under each field"
         class="tool"
-        [class.is-on]="layout.showCaptions()"
-        [attr.aria-pressed]="layout.showCaptions()"
-        (click)="toggleCaptions()">
-        Captions
+        [class.is-on]="layout.showFieldTypes()"
+        [attr.aria-pressed]="layout.showFieldTypes()"
+        (click)="toggleFieldTypes()">
+        Field Types
       </button>
       <button
         type="button"
@@ -27,11 +29,12 @@
     </div>
   </div>
 
-  <!-- One line per annotation that is actually on, rather than one sentence that grows until it is cut off. -->
-  @if (layout.showCaptions()) {
+  <!-- One line per annotation that is actually on, rather than one sentence that grows until it is cut off.
+       The chip names its own component, so the only thing left to say is that it is a control. -->
+  @if (layout.showFieldTypes()) {
     <p class="stage-status">
-      <span class="status-name">Captions</span>
-      The chip under each field names what it differs from its neighbour in. Click one to edit that field.
+      <span class="status-name">Field Types</span>
+      Click one to edit that field.
     </p>
   }
   @if (layout.showAccessibility()) {
@@ -46,7 +49,7 @@
   <!-- The page surface: an explicit edge, so a dark theme has the object it needs. -->
   <div class="page-surface">
     <portal-preview-form
-      [showCaptions]="layout.showCaptions()"
+      [showFieldTypes]="layout.showFieldTypes()"
       [showAccessibility]="layout.showAccessibility()" />
   </div>
 </div>

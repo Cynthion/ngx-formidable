@@ -28,13 +28,13 @@ Angular form fields you can actually theme, configure and customize. Validated b
 
 Eleven form fields, one decorator that puts labels, prefixes, hints and errors around them, and around two hundred CSS custom properties to make them look like your product instead of like a component library. It holds the model and renders the fields; the rules come from Vest, zod, Angular's own validators, or nothing at all.
 
-**[Studio](https://cynthion.github.io/ngx-formidable/)** — a live form of every field. Theme it to your brand, configure the fields, and take away the CSS and the Angular template.
-**[Docs](https://cynthion.github.io/ngx-formidable/#/docs)** — the guides and references below, rendered in the browser from the same files. [`.documentation/`](./.documentation/README.md) holds them, plus the design notes for maintainers.
+- **[Studio](https://cynthion.github.io/ngx-formidable/)** — a live form of every field. Theme it to your brand, configure the fields, and take away the CSS and the Angular template.
+- **[Docs](https://cynthion.github.io/ngx-formidable/#/docs)** — the guides and references below, rendered in the browser from the same files. [`.documentation/`](./.documentation/README.md) holds them, plus the design notes for maintainers.
 
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
-- [Features](#features) - [🧩 Eleven Fields](#-eleven-fields) - [🎀 One Decorator](#-one-decorator) - [✅ Bring Your Own Validator](#-bring-your-own-validator) - [🎨 Themeable To The Corner](#-themeable-to-the-corner) - [⌨️ Keyboard And Screen Readers](#️-keyboard-and-screen-readers) - [🛡️ Masking And Panels](#️-masking-and-panels) - [🧠 Typed Model And Shape](#-typed-model-and-shape) - [🛠️ Extensible](#️-extensible) - [🚀 Zero Boilerplate](#-zero-boilerplate)
+- [Features](#features)
 - [When To Pick This Over Angular Material](#when-to-pick-this-over-angular-material)
 - [Installation](#installation)
 - [Setup](#setup)
@@ -345,6 +345,7 @@ Guides teach a topic; references list what it accepts.
 | [Decoration](.documentation/user/decoration.md)           | Labels, adornments, prefixes, suffixes, hints, required marker |
 | [Validation](.documentation/user/validation.md)           | Targets, timing, Vest, zod, Angular's validators, messages     |
 | [Theming](.documentation/user/theming.md)                 | The default theme, what to override, worked examples           |
+| [Studio](.documentation/user/studio.md)                   | Building a theme and a form in the browser, and exporting both |
 | [Custom Fields](.documentation/user/custom-fields.md)     | Building a field, an option or a validator of your own         |
 
 | Reference                                                 | Lists                                                 |

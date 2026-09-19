@@ -23,7 +23,7 @@ Model-invoked (also `/verify`). This is NOT auto-guaranteed — a hook could for
 - A new or renamed `--formidable-*` variable is added to `src/app/portal/model/token-manifest.ts` as well as `user/theme-reference.md`, with the **same description text**; `token-manifest.spec.ts` gates the names and `docs:check` gates the text.
 - New behavior is documented per `impl/documentation.md`; the root `README.md` is updated when public usage changes.
 - Logic changes ship with a helper spec and pass `ng test ngx-formidable` (see `impl/testing.md`).
-- Changes under `src/` pass `ng test ngx-formidable-demo`, which has to be named.
+- Changes under `src/` pass `ng test ngx-formidable-portal`, which has to be named.
 
 ## Rules
 

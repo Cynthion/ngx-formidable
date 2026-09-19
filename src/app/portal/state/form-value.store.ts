@@ -33,7 +33,7 @@ function isFilled(value: unknown): boolean {
 }
 
 /** One field's row in the model drawer. */
-export interface ModelEntry {
+interface ModelEntry {
   readonly spec: PortalFieldSpec;
   readonly value: unknown;
   readonly display: string;
@@ -94,10 +94,6 @@ export class FormValueStore {
 
   public setModel(model: PortalModel): void {
     this.model.set(model);
-  }
-
-  public patch(name: string, value: unknown): void {
-    this.model.update((model) => ({ ...model, [name]: value }));
   }
 
   public reset(): void {

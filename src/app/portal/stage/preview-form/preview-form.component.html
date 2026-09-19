@@ -45,10 +45,10 @@
               [formOptions]="opts"
               [value]="valueFor(field.name)"
               [selected]="definitionStore.selectedFieldId() === field.id"
-              [showCaptions]="showCaptions()"
+              [showFieldTypes]="showFieldTypes()"
               [showAccessibility]="showAccessibility()"
               (focused)="onFieldFocused($event)"
-              (captionActivated)="openInInspector($event)" />
+              (chipActivated)="openInInspector($event)" />
           }
         </div>
       </section>

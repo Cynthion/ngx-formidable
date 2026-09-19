@@ -27,8 +27,31 @@ export type PortalFieldKind =
 /** What an adornment slot holds. Adornments are content projection, so a slot picks a kind of content. */
 export type PortalSlotContent = 'none' | 'icon' | 'text' | 'button';
 
+/**
+ * Display names for the label positions, and the portal's only list of them.
+ *
+ * A `Record` over the library's own union rather than an array, so adding a position to the library fails
+ * the build here instead of silently going missing from the two editors and the markup import.
+ */
+export const LABEL_POSITION_LABELS: Readonly<Record<FieldLabelPosition, string>> = {
+  'outside': 'Outside',
+  'inside': 'Inside',
+  'inside-placeholder': 'Inside, As Placeholder',
+  'inside-floating': 'Inside, Floating Only',
+  'border': 'Border',
+  'border-prefix': 'Border, At The Prefix'
+};
+
+/** Display names for the adornment slots, exhaustive over `PortalSlotContent` for the same reason. */
+export const SLOT_LABELS: Readonly<Record<PortalSlotContent, string>> = {
+  none: 'None',
+  icon: 'Icon',
+  text: 'Text',
+  button: 'Button'
+};
+
 /** The named formatters offered in place of a code editor for the slider's function-typed inputs. */
-export type PortalFormatterId = 'none' | 'percent' | 'years' | 'currency' | 'ordinal';
+type PortalFormatterId = 'none' | 'percent' | 'years' | 'currency' | 'ordinal';
 
 /** The locales the date pair switches between, each moving translations, first day and token format at once. */
 export type PortalLocaleId = 'en-GB' | 'en-US' | 'de-CH' | 'fr-FR' | 'ja-JP';
@@ -65,6 +88,28 @@ export interface PortalFieldState {
 }
 
 /**
+ * What a field decorates itself with before anything says otherwise.
+ *
+ * One copy, because the preview form's own fields and the fields the markup import builds are the same kind
+ * of object — two copies drift, and the drift is invisible until an import renders differently from the
+ * sample it was exported from.
+ */
+export const DEFAULT_DECORATION: PortalFieldDecoration = {
+  showLabel: true,
+  labelPosition: 'inside',
+  showRequiredMarker: false,
+  labelAdornment: 'none',
+  prefix: 'none',
+  prefixAlign: 'center',
+  suffix: 'none',
+  suffixAlign: 'center',
+  hint: '',
+  hintAlign: 'start'
+};
+
+export const DEFAULT_STATE: PortalFieldState = { readonly: false, disabled: false, autoFocus: false };
+
+/**
  * One field in the preview form. Flat and fully typed rather than a per-kind union: the renderer binds every
  * input it may need in one template, and `strictTemplates` refuses a bag of `unknown`.
  *
@@ -79,8 +124,6 @@ export interface PortalFieldSpec {
   readonly name: string;
   readonly label: string;
   readonly placeholder: string;
-  /** What this field differs from its pair in. Rendered as the caption chip under the row. */
-  readonly caption: string;
   /** How many grid columns the field takes. */
   readonly span: 1 | 2;
   readonly decoration: PortalFieldDecoration;
@@ -138,7 +181,7 @@ export interface PortalSectionSpec {
 }
 
 /** Which validator the form is wired to, and so what the errors under each field come from. */
-export type PortalValidatorKind = 'vest' | 'angular' | 'none';
+type PortalValidatorKind = 'vest' | 'angular' | 'none';
 
 /** The form-level options, which every field takes unless it states its own. */
 export interface PortalFormOptions {

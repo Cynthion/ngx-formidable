@@ -1,5 +1,5 @@
 /** One run of text in a fuzzy match, flagged with whether the filter matched it. */
-export interface HighlightEntry {
+interface HighlightEntry {
   text: string;
   isHighlighted: boolean;
 }

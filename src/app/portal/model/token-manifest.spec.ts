@@ -1,4 +1,4 @@
-import { LIBRARY_WRITTEN_TOKENS, THEME_TOKENS, THEME_TOKENS_BY_NAME } from './token-manifest';
+import { LIBRARY_WRITTEN_TOKENS, THEME_TOKEN_GROUPS, THEME_TOKENS, THEME_TOKENS_BY_NAME } from './token-manifest';
 
 /**
  * The drift gate. It walks the stylesheets the demo actually loads, collects the `--formidable-*` properties
@@ -88,5 +88,15 @@ describe('token manifest', () => {
 
   it('names each variable once', () => {
     expect(THEME_TOKENS_BY_NAME.size).toBe(THEME_TOKENS.length);
+  });
+
+  // The list carries the display order, so it is written out rather than derived — which leaves it free to
+  // disagree with the `group` the tokens themselves state. This is what stops that.
+  it('groups the variables under exactly the groups it lists', () => {
+    const listed = new Set(THEME_TOKEN_GROUPS);
+    const used = new Set(THEME_TOKENS.map((token) => token.group));
+
+    expect([...used].filter((group) => !listed.has(group))).toEqual([]);
+    expect([...listed].filter((group) => !used.has(group))).toEqual([]);
   });
 });

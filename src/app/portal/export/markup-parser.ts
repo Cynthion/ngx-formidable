@@ -1,15 +1,19 @@
 import { FieldLabelPosition } from '@cynthion/ngx-formidable';
 import { FIELD_CAPABILITIES, FIELD_KIND_BY_SELECTOR } from '../model/field-capabilities';
 import {
+  DEFAULT_DECORATION,
+  DEFAULT_STATE,
+  LABEL_POSITION_LABELS,
   PortalFieldDecoration,
   PortalFieldSpec,
   PortalFieldState,
   PortalOptionSpec,
   PortalSectionSpec
 } from '../model/field-spec.model';
+import { slugify } from '../helpers/slug.helpers';
 import { ATTRIBUTES_BY_LOWER_NAME, unquote } from './markup-attributes';
 
-export interface MarkupParseNote {
+interface MarkupParseNote {
   readonly text: string;
   readonly reason: 'unknown-element' | 'unknown-attribute' | 'dynamic-binding' | 'control-flow';
 }
@@ -20,29 +24,13 @@ export interface MarkupParseResult {
   readonly notes: readonly MarkupParseNote[];
 }
 
-const DECORATION: PortalFieldDecoration = {
-  showLabel: false,
-  labelPosition: 'inside',
-  showRequiredMarker: false,
-  labelAdornment: 'none',
-  prefix: 'none',
-  prefixAlign: 'center',
-  suffix: 'none',
-  suffixAlign: 'center',
-  hint: '',
-  hintAlign: 'start'
-};
+// An imported field shows no label until a `formidableFieldLabel` is found for it, which is the one place
+// the import differs from the defaults every other field starts at.
+const DECORATION: PortalFieldDecoration = { ...DEFAULT_DECORATION, showLabel: false };
 
-const STATE: PortalFieldState = { readonly: false, disabled: false, autoFocus: false };
+const STATE: PortalFieldState = DEFAULT_STATE;
 
-const LABEL_POSITIONS: readonly FieldLabelPosition[] = [
-  'outside',
-  'inside',
-  'inside-placeholder',
-  'inside-floating',
-  'border',
-  'border-prefix'
-];
+const LABEL_POSITIONS = Object.keys(LABEL_POSITION_LABELS) as readonly FieldLabelPosition[];
 
 /** Attributes the serializer emits that carry no configuration of their own. */
 const STRUCTURAL = new Set(['formidablefielderrors', '[ngmodel]', '#field']);
@@ -50,12 +38,7 @@ const STRUCTURAL = new Set(['formidablefielderrors', '[ngmodel]', '#field']);
 const FALLBACK_SECTION: PortalSectionSpec = { id: 'imported', title: 'Imported' };
 
 function slugOf(title: string): string {
-  return (
-    title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '') || 'imported'
-  );
+  return slugify(title) || 'imported';
 }
 
 /**
@@ -149,7 +132,6 @@ function parseDecorator(
     name: `imported${index + 1}`,
     label: '',
     placeholder: '',
-    caption: 'Imported',
     span: 1,
     decoration: DECORATION,
     state: STATE

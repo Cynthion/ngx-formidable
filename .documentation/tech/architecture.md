@@ -1,6 +1,6 @@
 # Architecture
 
-Structure of the `ngx-formidable` repository: a publishable Angular library and a demo app.
+Structure of the `ngx-formidable` repository: a publishable Angular library and the portal that showcases it.
 
 For coding conventions see `impl/conventions.md`; for the component/directive catalogue see `user/components.md`.
 
@@ -9,16 +9,16 @@ For coding conventions see `impl/conventions.md`; for the component/directive ca
 ```txt
 ngx-formidable/
 ├── projects/ngx-formidable/   # the publishable library → @cynthion/ngx-formidable
-├── src/                       # the demo app
+├── src/                       # the portal
 ├── dist/                      # build output
 ├── .documentation/            # docs: user/ for consumers, tech/ for maintainers, impl/ for repo work
-└── .github/workflows/         # checks, the GitHub Pages deploy of the demo, the dependency check
+└── .github/workflows/         # checks, the GitHub Pages deploy of the portal, the dependency check
 ```
 
 Two Angular projects are declared:
 
 - `ngx-formidable` library
-- `ngx-formidable-demo` application
+- `ngx-formidable-portal` application
 
 ## Library
 
@@ -52,9 +52,9 @@ projects/ngx-formidable/
 
 See `tech/validation.md` and `user/validation.md`.
 
-## Demo App
+## Portal
 
-The demo (`src/`) is a standalone-bootstrapped app holding the portal, which showcases every field and serves as the dev playground. It is deployed to GitHub Pages by `deploy.yml` on push to `main` (builds and publishes `dist/ngx-formidable-demo`). The demo consumes the library, not the other way round.
+The portal (`src/`) is a standalone-bootstrapped application that showcases every field and serves as the dev playground. Its `/` route is the Studio and its `/docs` route mirrors `user/*.md`; `impl/portal.md` is its design and `user/studio.md` the consumer's guide to it. It is deployed to GitHub Pages by `deploy.yml` on push to `main` (builds and publishes `dist/ngx-formidable-portal`). The portal consumes the library, not the other way round.
 
 The portal lives in `src/app/portal/` and is routed with hash location, because GitHub Pages serves no SPA fallback. Its design is `impl/portal.md`.
 
@@ -77,8 +77,8 @@ The portal lives in `src/app/portal/` and is routed with hash location, because 
 
 | Script         | Purpose                                                                 |
 | :------------- | :---------------------------------------------------------------------- |
-| `start`        | Serve the demo app                                                      |
-| `build`        | Build the demo app                                                      |
+| `start`        | Serve the portal                                                        |
+| `build`        | Build the portal                                                        |
 | `build:lib`    | Build the library with ng-packagr into `dist/ngx-formidable`            |
 | `docs:check`   | Hold the portal's token manifest in step with `user/theme-reference.md` |
 | `prebuild:lib` | Copy `README.md` + `LICENSE` into the library before building           |
@@ -94,11 +94,11 @@ ng-packagr config:
 
 Three workflows in `.github/workflows/`. All three take the Node version from `.nvmrc` and install with `npm ci`, so a run resolves exactly the committed lockfile.
 
-| Workflow               | Trigger                              | Does                                                                             |
-| :--------------------- | :----------------------------------- | :------------------------------------------------------------------------------- |
-| `ci.yml`               | Push to `main`, pull request, manual | `prettier:check`, `lint`, `style-lint`, `build:lib`, both test projects, `build` |
-| `deploy.yml`           | Push to `main`, manual               | Builds the demo and deploys `dist/ngx-formidable-demo/browser` to GitHub Pages   |
-| `dependency-check.yml` | Monthly, manual                      | Reports `npm outdated` and `ng update` into a GitHub issue                       |
+| Workflow               | Trigger                              | Does                                                                               |
+| :--------------------- | :----------------------------------- | :--------------------------------------------------------------------------------- |
+| `ci.yml`               | Push to `main`, pull request, manual | `prettier:check`, `lint`, `style-lint`, `build:lib`, both test projects, `build`   |
+| `deploy.yml`           | Push to `main`, manual               | Builds the portal and deploys `dist/ngx-formidable-portal/browser` to GitHub Pages |
+| `dependency-check.yml` | Monthly, manual                      | Reports `npm outdated` and `ng update` into a GitHub issue                         |
 
 - **Checks Mirror The Scripts**: `ci.yml` runs the same scripts a contributor runs locally, in the order of the Definition of Done in `impl/conventions.md`. `build:lib` is in it because it is also the type and template check — there is no standalone typecheck script.
 - **Tests**: the two projects are separate steps, because `ng test` takes one project at a time. Both run in `ChromeHeadless` with `--watch=false`.
@@ -118,5 +118,5 @@ Two wiring paths, `provideNgxFormidable()` and `NgxFormidableModule.forRoot()`, 
 | `projects/ngx-formidable/src/lib/forms/`             | The form-level directives and the `FORMIDABLE_VALIDATOR` boundary       |
 | `projects/ngx-formidable/src/lib/styles/`            | SCSS tokens, `:root` CSS-variable block, field mixins                   |
 | `projects/ngx-formidable/vest/`                      | The Vest adapter, `@cynthion/ngx-formidable/vest`                       |
-| `src/app/`                                           | Demo app                                                                |
+| `src/app/`                                           | The portal                                                              |
 | `dist/ngx-formidable/`                               | ng-packagr output                                                       |

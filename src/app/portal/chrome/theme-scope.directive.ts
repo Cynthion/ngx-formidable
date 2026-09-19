@@ -9,7 +9,6 @@ import { Directive, effect, ElementRef, inject, input } from '@angular/core';
  */
 @Directive({
   selector: '[portalThemeScope]',
-  standalone: true,
   host: { class: 'portal-theme-scope' }
 })
 export class ThemeScopeDirective {

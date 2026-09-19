@@ -11,7 +11,7 @@ export interface ThemeExportOptions {
   readonly includeComments: boolean;
 }
 
-export interface ThemeExportInput {
+interface ThemeExportInput {
   readonly vars: Readonly<Record<string, string>>;
   /** Emitted as an ordinary declaration: the library exposes no font-family token. */
   readonly fontFamily: string | null;
@@ -20,8 +20,8 @@ export interface ThemeExportInput {
 
 export const DEFAULT_EXPORT_OPTIONS: ThemeExportOptions = {
   format: 'css',
-  includePageSurface: true,
-  includeComments: true
+  includeComments: true,
+  includePageSurface: false
 };
 
 const MANIFEST_ORDER: ReadonlyMap<string, number> = new Map(THEME_TOKENS.map((token, index) => [token.name, index]));

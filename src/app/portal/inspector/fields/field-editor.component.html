@@ -52,20 +52,6 @@
     </div>
   }
 
-  <div class="pc-field">
-    <label
-      class="pc-label"
-      [for]="'fe-caption-' + f.id">
-      <span class="pc-label-name">Caption Chip</span>
-    </label>
-    <input
-      type="text"
-      class="pc-input"
-      [id]="'fe-caption-' + f.id"
-      [value]="f.caption"
-      (change)="set('caption', $any($event.target).value)" />
-  </div>
-
   <h3 class="group-title">State</h3>
   <div class="pc-checks">
     <label class="pc-check">
@@ -128,12 +114,9 @@
       [disabled]="!labelPositionApplies()"
       [value]="f.decoration.labelPosition"
       (change)="setDecoration('labelPosition', $any($event.target).value)">
-      <option value="outside">Outside</option>
-      <option value="inside">Inside</option>
-      <option value="inside-placeholder">Inside, As Placeholder</option>
-      <option value="inside-floating">Inside, Floating Only</option>
-      <option value="border">Border</option>
-      <option value="border-prefix">Border, At The Prefix</option>
+      @for (entry of labelPositions; track entry[0]) {
+        <option [value]="entry[0]">{{ entry[1] }}</option>
+      }
     </select>
     @if (!labelPositionApplies()) {
       <p class="pc-help">A {{ caps.layout }} layout has no room over the field, so this field always labels outside.</p>

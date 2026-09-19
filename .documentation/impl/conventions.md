@@ -17,6 +17,8 @@ One name per concept, in code and in docs. Check a new name against this table b
 | The strings a field displays                  | **messages**   | "errors" when the displayed text is meant                      |
 | When the validator runs                       | **run**        | "trigger", "mode", "strategy"                                  |
 | When the messages appear                      | **reveal**     | "show", "display", "mode", "strategy"                          |
+| The application in `src/`                     | **portal**     | "demo", "demo app", "showcase" as a noun for it                |
+| The portal's `/` route                        | **Studio**     | "the portal" when the page a visitor themes on is meant        |
 
 A rule has exactly one target, and its name follows it: a **field rule**, a **group rule** or a **whole-form rule**. "Cross-field" describes what a rule _reads_, never what it reports on — a group rule reading two fields is cross-field, and so is a whole-form rule. Full reference: `user/validation.md`.
 
@@ -26,7 +28,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 - **Standalone**: every component and directive is standalone
 - **Change Detection**: every component uses `ChangeDetectionStrategy.OnPush`, with no exception and no `prefer-on-push-component-change-detection` waiver. Nothing calls `markForCheck()`: state a template reads is a signal, and the read is what marks the view`.
-- **Zoneless**: the library holds no `NgZone` and the demo runs on Angular's default zoneless change detection. State a template **or a host binding** reads must therefore be a signal — a template listener or an output emission marks the whole ancestor chain, while a signal write marks only the views that read it, and a plain field written from a callback Angular does not own marks nothing at all.
+- **Zoneless**: the library holds no `NgZone` and the portal runs on Angular's default zoneless change detection. State a template **or a host binding** reads must therefore be a signal — a template listener or an output emission marks the whole ancestor chain, while a signal write marks only the views that read it, and a plain field written from a callback Angular does not own marks nothing at all.
 - **Selectors**: components are elements, kebab-case, `formidable-` prefix (`formidable-input-field`). Field-decoration directives are attributes, camelCase, `formidable` prefix (`[formidableFieldLabel]`, `form[formidableForm]`). Two directives intentionally hijack Angular's own selectors — `NgxFormidableFieldValidateDirective` on `[ngModel]` and `NgxFormidableGroupValidateDirective` on `[ngModelGroup]` — so they attach to every model-bound control (they no-op outside a formidable form).
 - **File Naming**: components are folders with external `*.component.ts` / `.html` / `.scss` (never inline templates or styles). Directives are single `*.directive.ts` files. The shared bases are `base-field.directive.ts` and `base-option-field.directive.ts`. Filenames drop the `NgxFormidable` prefix (`field-validate.directive.ts`, not `ngx-formidable-field-validate.directive.ts`) — consumers import from the package root, so the prefix would only add path noise.
 - **Folder Placement**: `directives/` holds only the `formidableField*` attribute directives that decorate a field; the form-level directives and their helpers live in `forms/`. Test-only code goes in a `testing/` folder and stays unreachable from `public-api.ts`, which is what keeps ng-packagr from compiling it.
@@ -36,7 +38,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 - Field components extend `BaseFieldDirective<T>` and register two providers: `NG_VALUE_ACCESSOR` (via `forwardRef`, `multi: true`) and `FORMIDABLE_FIELD` (`useExisting`) — this is what makes them work with `ngModel` and be discovered by `FieldDecoratorComponent`.
 - Option-based fields additionally collect options with `contentChildren(FORMIDABLE_OPTION, { descendants: true })` and provide `FORMIDABLE_OPTION_FIELD`. `descendants` is what lets an option sit inside a wrapper element; a shallow query already reaches into `@for` / `*ngIf` / `<ng-template>`. The four that walk their list with a highlight take the query — and the option inputs, the option lifecycle and the highlight itself — from `BaseOptionFieldDirective` instead of declaring it; only `select-field` still declares its own, because a native `<select>` has no highlight.
-- `BaseFieldDirective` is the extension point for custom fields; `example-counter-field` in the demo is the reference implementation, quoted as the worked example in `user/custom-fields.md`. The full contract is documented in `user/components.md`.
+- `BaseFieldDirective` is the extension point for custom fields; `example-counter-field` in the portal is the reference implementation, quoted as the worked example in `user/custom-fields.md`. The full contract is documented in `user/components.md`.
 
 ## Inputs, Outputs And Observables
 
@@ -74,7 +76,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 - **Field Styling**: all field CSS lives in `mixins/_forms.scss` (with `_css-icons.scss`, `_utils.scss`).
 - **Global Rules**: `_globals.scss` and `_pikaday.scss` hold the rules that cannot be scoped to a component — those that must reach consumer-projected content or third-party DOM, which view encapsulation puts out of a component stylesheet's reach.
 - **Closed SCSS Surface**: `_ngx-formidable.scss` only ever `@use`s its parts, never `@forward`s them — the public entry point ships CSS, not an API, so no internal mixin or function reaches a consumer's namespace. Component stylesheets take the internal surface from `variables.scss` by relative path instead.
-- **Consuming Styles**: the demo imports `@use 'ngx-formidable'` (resolved via the `angular.json` `includePaths`); an external consumer imports `@use '@cynthion/ngx-formidable/styles/ngx-formidable'` (resolved from the published package). The full overridable-variable list lives in `user/theme-reference.md`.
+- **Consuming Styles**: the portal imports `@use 'ngx-formidable'` (resolved via the `angular.json` `includePaths`); an external consumer imports `@use '@cynthion/ngx-formidable/styles/ngx-formidable'` (resolved from the published package). The full overridable-variable list lives in `user/theme-reference.md`.
 
 ## TypeScript
 
@@ -92,7 +94,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 ## Development Workflow
 
-- **Branches**: `main` is production — push triggers the GitHub Pages deploy of the demo. `feature/*` for work in progress.
+- **Branches**: `main` is production — push triggers the GitHub Pages deploy of the portal. `feature/*` for work in progress.
 - **Checks**: every push to `main` and every pull request runs the Formatting, Tests and Build items below in CI. See `tech/architecture.md`.
 - **Publishing**: `build:lib` then `publish:lib` to GitHub Packages; `@cynthion` scope needs `~/.npmrc` auth. See `tech/architecture.md`.
 - **Roadmap**: `impl/implementation.md` is the source of truth for outstanding work — check it before starting. `impl/backlog.md` is the intake buffer for ideas that have not been triaged into a phase yet.
@@ -103,7 +105,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 - **Formatting**: `prettier:check`, `lint` and `style-lint` pass.
 - **Component Docs**: any component/directive API change is reflected in `user/components.md`.
 - **User And Tech Docs**: a change to public usage updates the matching `user/*.md`; a change to a design decision or an internal boundary updates the matching `tech/*.md`. Neither restates the other — see `impl/documentation.md`.
-- **Demo**: new or changed fields and features are exercised in the portal's preview form (`src/app/portal/model/preview-form.definition.ts`); a new field component gets a `PortalFieldKind`, a capability row and a specification there, so it renders and can be tried. The portal is the showcase and the only visual-test surface — see `tech/architecture.md`.
+- **Portal**: new or changed fields and features are exercised in the portal's preview form (`src/app/portal/model/preview-form.definition.ts`); a new field component gets a `PortalFieldKind`, a capability row and a specification there, so it renders and can be tried. The portal is the showcase and the only visual-test surface — see `tech/architecture.md`.
 - **Documentation**: new behavior documented per `impl/documentation.md`; the user-facing `README.md` updated when public usage changes.
 - **Doc Comments**: a new or changed public symbol carries a doc comment per **Code Comments** above.
 - **Tests**: implemented per `impl/testing.md` (helpers-first).

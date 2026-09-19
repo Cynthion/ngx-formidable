@@ -1,21 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import {
+  LABEL_POSITION_LABELS,
   PortalFieldDecoration,
   PortalFormOptions,
   PortalLocaleId,
-  PortalSlotContent
+  PortalSlotContent,
+  SLOT_LABELS
 } from '../../model/field-spec.model';
 import { PORTAL_LOCALES } from '../../model/locales';
 import { FormDefinitionStore } from '../../state/form-definition.store';
-
-const LABEL_POSITIONS = [
-  ['outside', 'Outside'],
-  ['inside', 'Inside'],
-  ['inside-placeholder', 'Inside, as placeholder'],
-  ['inside-floating', 'Inside, floating only'],
-  ['border', 'Border'],
-  ['border-prefix', 'Border, at the prefix']
-] as const;
 
 const PANEL_POSITIONS = [
   ['left', 'Left'],
@@ -35,13 +28,6 @@ const UPDATE_ON = [
   ['change', 'Change'],
   ['blur', 'Blur'],
   ['submit', 'Submit']
-] as const;
-
-const SLOTS = [
-  ['none', 'None'],
-  ['icon', 'Icon'],
-  ['text', 'Text'],
-  ['button', 'Button']
 ] as const;
 
 const VALIDATORS = [
@@ -68,12 +54,12 @@ export class FormDefaultsComponent {
   /** Which half to render. The two are separate accordions, but one component owns both. */
   public readonly section = input.required<'decoration' | 'validation'>();
 
-  protected readonly labelPositions = LABEL_POSITIONS;
+  protected readonly labelPositions = Object.entries(LABEL_POSITION_LABELS);
   protected readonly panelPositions = PANEL_POSITIONS;
   protected readonly reveals = REVEAL;
   protected readonly updateOns = UPDATE_ON;
   protected readonly validators = VALIDATORS;
-  protected readonly slots = SLOTS;
+  protected readonly slots = Object.entries(SLOT_LABELS);
   protected readonly locales = PORTAL_LOCALES;
 
   protected set<K extends keyof PortalFormOptions>(key: K, value: PortalFormOptions[K]): void {

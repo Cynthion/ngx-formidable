@@ -1,21 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabilities';
 import {
+  LABEL_POSITION_LABELS,
   PortalFieldDecoration,
   PortalFieldSpec,
   PortalFieldState,
   PortalLocaleId,
-  PortalOptionSpec
+  PortalOptionSpec,
+  SLOT_LABELS
 } from '../../model/field-spec.model';
 import { PORTAL_LOCALES } from '../../model/locales';
 import { FormDefinitionStore } from '../../state/form-definition.store';
-
-const SLOTS = [
-  ['none', 'None'],
-  ['icon', 'Icon'],
-  ['text', 'Text'],
-  ['button', 'Button']
-] as const;
 
 const FORMATTERS = [
   ['none', 'Raw number'],
@@ -41,7 +36,8 @@ const FORMATTERS = [
 export class FieldEditorComponent {
   protected readonly store = inject(FormDefinitionStore);
 
-  protected readonly slots = SLOTS;
+  protected readonly slots = Object.entries(SLOT_LABELS);
+  protected readonly labelPositions = Object.entries(LABEL_POSITION_LABELS);
   protected readonly formatters = FORMATTERS;
   protected readonly locales = PORTAL_LOCALES;
   protected readonly kindLabels = FIELD_KIND_LABELS;

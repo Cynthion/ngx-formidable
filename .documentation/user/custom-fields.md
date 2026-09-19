@@ -2,7 +2,7 @@
 
 The library's eleven fields do not cover everything, so `BaseFieldDirective` is the extension point. A field built on it is decorated, validated, themed and made accessible exactly like a built-in one — nothing in the library knows the difference.
 
-The worked example below is `example-counter-field` in the demo app, quoted as it ships.
+The worked example below is `example-counter-field` in the portal, quoted as it ships.
 
 ## What You Get For Free
 

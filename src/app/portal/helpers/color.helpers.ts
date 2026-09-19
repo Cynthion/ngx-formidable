@@ -65,7 +65,7 @@ function channelLuminance(value: number): number {
 }
 
 /** WCAG relative luminance. */
-export function relativeLuminance(color: Rgb): number {
+function relativeLuminance(color: Rgb): number {
   return 0.2126 * channelLuminance(color.r) + 0.7152 * channelLuminance(color.g) + 0.0722 * channelLuminance(color.b);
 }
 

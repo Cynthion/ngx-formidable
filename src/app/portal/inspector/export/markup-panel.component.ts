@@ -1,7 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { AccordionComponent } from '../../chrome/accordion/accordion.component';
 import { MARKUP_NOTE_LABELS, MarkupParseResult, parseMarkup } from '../../export/markup-parser';
 import { serializeDefinition } from '../../export/markup-serializer';
+import { copyText } from '../../helpers/clipboard.helpers';
 import { FormDefinitionStore } from '../../state/form-definition.store';
+import { ExportDirection, InspectorStore } from '../../state/inspector.store';
 
 /**
  * The template the configuration produces, and a way to read one back.
@@ -9,15 +12,20 @@ import { FormDefinitionStore } from '../../state/form-definition.store';
  * An Angular production build contains no template compiler, so pasted markup cannot become live
  * components. The configuration is the source of truth: this is derived from it, read-only, and an import
  * is parsed back into it.
+ *
+ * Out and back in are an accordion each, the same two the theme half has, so the area reads the same
+ * whichever half is showing.
  */
 @Component({
   selector: 'portal-markup-panel',
   templateUrl: './markup-panel.component.html',
   styleUrl: './markup-panel.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [AccordionComponent]
 })
 export class MarkupPanelComponent {
   protected readonly store = inject(FormDefinitionStore);
+  private readonly inspector = inject(InspectorStore);
   protected readonly noteLabels = MARKUP_NOTE_LABELS;
 
   protected readonly importText = signal('');
@@ -25,15 +33,18 @@ export class MarkupPanelComponent {
   protected readonly justCopied = signal(false);
 
   protected readonly markup = computed(() => serializeDefinition(this.store.definition()));
+  protected readonly fieldCount = computed(() => this.store.fields().length);
 
-  protected async copy(): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(this.markup());
-      this.justCopied.set(true);
-      setTimeout(() => this.justCopied.set(false), 1600);
-    } catch {
-      // The markup is on screen to select.
-    }
+  protected isOpen(direction: ExportDirection): boolean {
+    return this.inspector.exportDirection() === direction;
+  }
+
+  protected toggle(direction: ExportDirection): void {
+    this.inspector.exportDirection.update((current) => (current === direction ? null : direction));
+  }
+
+  protected copy(): Promise<void> {
+    return copyText(this.markup(), this.justCopied);
   }
 
   /** Replaces the whole form. Sections come from the comments the serializer writes above each run. */

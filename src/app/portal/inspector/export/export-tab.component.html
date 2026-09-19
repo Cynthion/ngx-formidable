@@ -1,22 +1,15 @@
-<p class="strapline">
-  Two things to take away, and the way back in for each. Both are derived from what is on the stage, so neither can drift from what you are looking at — and
-  pasting either one back puts the stage where it came from.
-</p>
+<portal-sub-tabs
+  ariaLabel="Import and export sections"
+  [tabs]="subTabs"
+  [active]="inspector.exportSection()"
+  [strapline]="straplines[inspector.exportSection()]"
+  (selected)="select($event)" />
 
-<portal-accordion
-  heading="Theme CSS"
-  lede="Out: the block to paste into your own :root, with declarations that only restate a library default left out. In: a block you saved earlier."
-  [hint]="variableCount() + ' Variables'"
-  [open]="openSection() === 'theme'"
-  (toggled)="toggle('theme')">
-  <portal-theme-panel />
-</portal-accordion>
-
-<portal-accordion
-  heading="Markup"
-  lede="Out: the Angular template this configuration produces — an Angular production build contains no template compiler, so the configuration is the source and this is derived from it. In: a whole form, sections included."
-  [hint]="fieldCount() + ' Fields'"
-  [open]="openSection() === 'markup'"
-  (toggled)="toggle('markup')">
-  <portal-markup-panel />
-</portal-accordion>
+@switch (inspector.exportSection()) {
+  @case ('theme') {
+    <portal-theme-panel />
+  }
+  @case ('markup') {
+    <portal-markup-panel />
+  }
+}

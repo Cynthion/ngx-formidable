@@ -29,10 +29,11 @@ import { ExampleCounterFieldComponent } from '../../../example-counter-field/exa
 import { ExampleFuzzyOptionComponent } from '../../../example-fuzzy-option/example-fuzzy-option.component';
 import { ExampleIconComponent } from '../../../example-icon/example-icon.component';
 import { ExampleTooltipComponent } from '../../../example-tooltip/example-tooltip.component';
+import { describeFieldSettings } from '../../helpers/field-summary';
 import { fuzzyFilter } from '../../helpers/fuzzy.helpers';
 import { AccessibilityReadoutComponent } from '../accessibility/accessibility-readout.component';
 import { CALENDAR_SVG, MARKER_SVG, SPARK_SVG } from './preview-icons';
-import { FIELD_CAPABILITIES } from '../../model/field-capabilities';
+import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabilities';
 import { PortalFieldSpec, PortalFormOptions, PortalOptionSpec } from '../../model/field-spec.model';
 import { localeOf } from '../../model/locales';
 import { ANGULAR_MIN_LENGTHS, ANGULAR_REQUIRED_FIELDS } from '../../model/preview-form.validation';
@@ -103,12 +104,12 @@ export class PreviewFieldComponent {
   public readonly value = input<unknown>(null);
   public readonly selected = input(false);
   public readonly showAccessibility = input(false);
-  public readonly showCaptions = input(true);
+  public readonly showFieldTypes = input(true);
 
   /** Selection follows focus, so clicking a field uses it rather than only selecting it. */
   public readonly focused = output<string>();
-  /** A caption chip is a control: it opens the inspector at the field it names. */
-  public readonly captionActivated = output<string>();
+  /** The chip is a control: it opens the editor panel at the field it names. */
+  public readonly chipActivated = output<string>();
 
   protected readonly host = this.elementRef.nativeElement;
 
@@ -117,6 +118,24 @@ export class PreviewFieldComponent {
   protected readonly sparkSvg = SPARK_SVG;
 
   protected readonly capabilities = computed(() => FIELD_CAPABILITIES[this.spec().kind]);
+
+  /** The chip states which component this is, so it cannot disagree with the field it sits under. */
+  protected readonly kindLabel = computed(() => FIELD_KIND_LABELS[this.spec().kind]);
+
+  /**
+   * The chip's tooltip: what this field is set to, read off the specification rather than written by hand.
+   * A hand-written description survives neither an edit on the Fields tab nor a field added in the
+   * structure editor.
+   */
+  protected readonly settingsTitle = computed(() => {
+    const spec = this.spec();
+    const settings = describeFieldSettings(spec);
+    const heading = `${spec.label} — ${this.kindLabel()}`;
+
+    if (!settings.length) return `${heading}\nEvery input at its default.`;
+
+    return [heading, ...settings.map((setting) => `${setting.name}: ${setting.value}`)].join('\n');
+  });
 
   /** Bumped whenever this field may have repainted, so the accessibility readout re-reads the DOM. */
   protected readonly revision = computed(() => {
@@ -182,8 +201,8 @@ export class PreviewFieldComponent {
     if (isFocused) this.focused.emit(this.spec().id);
   }
 
-  protected onCaption(): void {
-    this.captionActivated.emit(this.spec().id);
+  protected onChip(): void {
+    this.chipActivated.emit(this.spec().id);
   }
 
   private formatter(id: string | undefined): ((value: number) => string) | undefined {

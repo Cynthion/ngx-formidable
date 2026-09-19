@@ -14,7 +14,9 @@ function roundTrip(options: ThemeExportOptions) {
 
 describe('theme export and import', () => {
   it('round-trips every variable, the family and the page surface', () => {
-    const result = roundTrip(DEFAULT_EXPORT_OPTIONS);
+    // Asked for explicitly: the page behind the form is the consumer's rather than the library's, so the
+    // export leaves it out until it is wanted.
+    const result = roundTrip({ ...DEFAULT_EXPORT_OPTIONS, includePageSurface: true });
 
     expect(result.vars).toEqual(THEME);
     expect(result.fontFamily).toBe(FONT);
@@ -40,11 +42,8 @@ describe('theme export and import', () => {
     expect(result.skipped).toEqual([]);
   });
 
-  it('omits the page surface when asked to', () => {
-    const css = exportTheme(
-      { vars: THEME, fontFamily: null, page: PAGE },
-      { ...DEFAULT_EXPORT_OPTIONS, includePageSurface: false }
-    );
+  it('leaves the page surface out until it is asked for', () => {
+    const css = exportTheme({ vars: THEME, fontFamily: null, page: PAGE }, DEFAULT_EXPORT_OPTIONS);
 
     expect(css).not.toContain('body {');
     expect(importTheme(css).page).toEqual({});

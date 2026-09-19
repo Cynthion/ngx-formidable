@@ -30,7 +30,7 @@ Both register ngx-mask and set `FORMIDABLE_MASK_DEFAULTS` from `globalMaskConfig
 
 ## Base Field Directive
 
-`BaseFieldDirective<T = string | null>` — exported abstract `@Directive()` (no selector). The base class for every field and the extension point for custom fields (reference implementation: `example-counter-field` in the demo, walked through in `user/custom-fields.md`). Implements `ControlValueAccessor` + `IFormidableField<T>`.
+`BaseFieldDirective<T = string | null>` — exported abstract `@Directive()` (no selector). The base class for every field and the extension point for custom fields (reference implementation: `example-counter-field` in the portal, walked through in `user/custom-fields.md`). Implements `ControlValueAccessor` + `IFormidableField<T>`.
 
 Inherited by every field:
 
@@ -164,7 +164,7 @@ Supports projected `formidable-field-option` children. **Use when** you need a s
 
 **Selector** `formidable-autocomplete-field` · **Value** `string | null`
 
-Dropdown panel plus a filter input. Emits filter text; the consumer supplies filtered options (the demo pairs it with fuse.js). Option inputs come from **Base Option Field Directive**.
+Dropdown panel plus a filter input. Emits filter text; the consumer supplies filtered options (the portal pairs it with fuse.js). Option inputs come from **Base Option Field Directive**.
 
 | Input           | Type                      | Default  | Description     |
 | :-------------- | :------------------------ | :------- | :-------------- |

@@ -1,5 +1,5 @@
 import { DOC_PAGES } from './doc-pages';
-import { renderDoc, rewriteDocHref, slugify } from './markdown.helpers';
+import { renderDoc, rewriteDocHref } from './markdown.helpers';
 
 const SLUGS = new Set(DOC_PAGES.map((page) => page.slug));
 
@@ -109,11 +109,5 @@ describe('renderDoc', () => {
       expect(page.markdown.length).withContext(page.slug).toBeGreaterThan(1000);
       expect(page.markdown).withContext(page.slug).toContain('#');
     }
-  });
-});
-
-describe('slugify', () => {
-  it('makes a heading into an id', () => {
-    expect(slugify('Five Things That Will Catch You Out')).toBe('five-things-that-will-catch-you-out');
   });
 });

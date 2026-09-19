@@ -34,8 +34,8 @@ describe('top bar OnPush contract', () => {
     return root.querySelector('.count') as HTMLElement;
   }
 
-  function exportButton(): HTMLButtonElement {
-    return root.querySelector('.export-button') as HTMLButtonElement;
+  function exportButtons(): HTMLButtonElement[] {
+    return Array.from(root.querySelectorAll<HTMLButtonElement>('.export-button'));
   }
 
   beforeEach(() => {
@@ -82,22 +82,62 @@ describe('top bar OnPush contract', () => {
     expect(count().textContent?.trim()).toBe(String(before + 1));
   }));
 
-  // The copy button copies the theme; the control beside it reaches everything there is to take away,
-  // which is the theme CSS and the template both.
-  it('opens the export beside the copy button', fakeAsync(() => {
+  // Each copy button copies one thing outright; the control beside it opens the half of Import & Export
+  // that holds the same block — so a group that landed on the wrong half would be worse than no control.
+  it('opens each export control at its own half', fakeAsync(() => {
     settle();
 
     const inspector = TestBed.inject(InspectorStore);
+
+    expect(exportButtons().length).toBe(2);
+
     inspector.tab.set('form');
-
-    expect(exportButton().textContent).toContain('Export');
-
-    exportButton().click();
+    exportButtons()[0]!.click();
     settle();
 
     expect(inspector.tab()).toBe('export');
     expect(inspector.exportSection()).toBe('theme');
+
+    inspector.tab.set('form');
+    exportButtons()[1]!.click();
+    settle();
+
+    expect(inspector.tab()).toBe('export');
+    expect(inspector.exportSection()).toBe('markup');
   }));
+
+  it('offers a copy for each thing there is to take away', fakeAsync(() => {
+    settle();
+
+    const labels = Array.from(root.querySelectorAll('.copy-button')).map((el) => (el.textContent ?? '').trim());
+
+    expect(labels.length).toBe(2);
+    expect(labels[0]).toContain('Copy Theme');
+    expect(labels[1]).toContain('Copy Markup');
+  }));
+
+  // The bar is on the Docs route too, where there is no inspector to open — so setting the area without
+  // navigating would look like the control had done nothing at all.
+  it('comes back to the Studio when the export control is used from a document', async () => {
+    const router = TestBed.inject(Router);
+    const location = TestBed.inject(Location);
+    const inspector = TestBed.inject(InspectorStore);
+
+    fixture.detectChanges();
+
+    await router.navigateByUrl('/docs/theming');
+    fixture.detectChanges();
+    expect(location.path()).toBe('/docs/theming');
+
+    exportButtons()[1]!.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    // `Location.path()` is empty at the root, so the router's own url is what says where we landed.
+    expect(router.url).toBe('/');
+    expect(inspector.tab()).toBe('export');
+    expect(inspector.exportSection()).toBe('markup');
+  });
 
   // `exact` is right for `/` and wrong for `/docs`, which is only ever seen with a document open.
   //

@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { serializeDefinition } from '../../export/markup-serializer';
+import { copyText } from '../../helpers/clipboard.helpers';
 import { ExampleIconComponent } from '../../../example-icon/example-icon.component';
 import { FormDefinitionStore } from '../../state/form-definition.store';
-import { InspectorStore } from '../../state/inspector.store';
+import { ExportSection, InspectorStore } from '../../state/inspector.store';
 import { PortalAppearance, ThemeStore } from '../../state/theme.store';
 import { GITHUB_SVG } from './top-bar-icons';
 
@@ -12,7 +14,7 @@ const REPOSITORY_URL = 'https://github.com/Cynthion/ngx-formidable';
 /**
  * The two places there are to be. They are routes, so the bar is the only way between them.
  *
- * There is no separate preview route: turning the captions off leaves the Studio's stage showing the form
+ * There is no separate preview route: turning `Field Types` off leaves the Studio's stage showing the form
  * exactly as a consumer's page would, which is what a third route would have duplicated.
  */
 const ROUTES: readonly { path: string; label: string; title: string; exact: boolean }[] = [
@@ -30,11 +32,13 @@ const APPEARANCES: readonly { value: PortalAppearance; label: string; glyph: str
 
 /**
  * Fixed across the top on every route: what this is, the two places there are to be, the repository, the
- * portal's own appearance, and the export controls.
+ * portal's own appearance, and one export group per thing there is to take away.
  *
- * The copy button states the number of variables the user has changed, never the size of the token surface —
- * a number that rises as they work says the library needs eight to twelve variables without a sentence of
- * explanation.
+ * Two groups rather than one, because the theme and the template are two round trips and a single control
+ * could only land on one of them. Each states a count of its own: the theme's is the number of variables the
+ * user has changed, never the size of the token surface — a number that rises as they work says the library
+ * needs eight to twelve variables without a sentence of explanation — and the markup's is the fields it
+ * carries.
  */
 @Component({
   selector: 'portal-top-bar',
@@ -45,32 +49,40 @@ const APPEARANCES: readonly { value: PortalAppearance; label: string; glyph: str
 })
 export class TopBarComponent {
   protected readonly theme = inject(ThemeStore);
-  protected readonly fields = inject(FormDefinitionStore).fields;
+
+  private readonly definition = inject(FormDefinitionStore);
   private readonly inspector = inject(InspectorStore);
+  private readonly router = inject(Router);
+
+  protected readonly fields = this.definition.fields;
 
   protected readonly repositoryUrl = REPOSITORY_URL;
   protected readonly routes = ROUTES;
-  protected readonly appearances = APPEARANCES;
   protected readonly githubSvg = GITHUB_SVG;
 
-  /**
-   * Copying the theme is the common ending, so it stays the primary action. The second segment is the rest
-   * of what there is to take away — the same CSS to read before copying, and the template beside it.
-   */
-  protected showExport(): void {
-    this.inspector.openExport();
+  protected readonly copiedTheme = signal(false);
+  protected readonly copiedMarkup = signal(false);
+
+  protected copyTheme(): Promise<void> {
+    return copyText(this.theme.exportText(), this.copiedTheme);
   }
 
-  protected readonly justCopied = signal(false);
+  /** Serialized on demand rather than held: the definition is the source and this is a function of it. */
+  protected copyMarkup(): Promise<void> {
+    return copyText(serializeDefinition(this.definition.definition()), this.copiedMarkup);
+  }
 
-  protected async copyTheme(): Promise<void> {
-    try {
-      await navigator.clipboard.writeText(this.theme.exportText());
-      this.justCopied.set(true);
-      setTimeout(() => this.justCopied.set(false), 1600);
-    } catch {
-      // A denied clipboard is not a failure worth a dialog: the export panel shows the same text to select.
-    }
+  /**
+   * The control beside each copy button reaches the rest of that round trip — the same block to read before
+   * copying, its options, and the box to paste one back into.
+   *
+   * It navigates as well as setting the area, because the bar is on the Docs route too and there is no
+   * inspector there to open. Setting the area alone would look like the control had done nothing.
+   */
+  protected showExport(section: ExportSection): Promise<boolean> {
+    this.inspector.openExport(section);
+
+    return this.router.navigate(['/']);
   }
 
   protected cycleAppearance(): void {

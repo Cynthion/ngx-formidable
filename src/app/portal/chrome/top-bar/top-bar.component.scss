@@ -37,7 +37,7 @@
   white-space: nowrap;
 }
 
-// The only navigation there is: `/preview` keeps this bar rather than carrying a back button of its own.
+// The only navigation there is, so no route carries a back button of its own.
 .tabs {
   display: flex;
   gap: 2px;
@@ -125,8 +125,8 @@
   display: inline-flex;
 }
 
-// One control to copy the common thing, one to reach everything there is to take away. The second says
-// `Export` rather than showing a bare number, because what it opens holds the template as well as the CSS.
+// One group per thing there is to take away: the copy does it outright, and the segment beside it opens the
+// half of Import & Export holding the same block, its options and the way back in.
 .copy-group {
   display: inline-flex;
   align-items: stretch;
@@ -203,10 +203,6 @@
   opacity: 0.85;
 }
 
-.github {
-  display: inline-flex;
-}
-
 @media (width <= 1000px) {
   .tagline {
     display: none;
@@ -215,6 +211,22 @@
 
 @media (width <= 820px) {
   .link {
+    display: none;
+  }
+}
+
+// Two copy buttons and two shortcuts beside them do not fit a phone. The copies are the point, so the
+// shortcuts go: at this width the panel is a bottom sheet with its own tab strip a thumb's reach away.
+@media (width <= 760px) {
+  .export-button {
+    display: none;
+  }
+}
+
+// Last to go, because it is the only thing in the bar that is not a control: the document title says as
+// much, and the two tabs say where in it you are.
+@media (width <= 640px) {
+  .brand {
     display: none;
   }
 }

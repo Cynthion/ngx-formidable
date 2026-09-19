@@ -1,5 +1,5 @@
 /** How a variable reaches the cascade, which decides whether the portal may offer a control for it. */
-export type ThemeTokenClass =
+type ThemeTokenClass =
   /** Declared in the library's `:root` block. The bulk of the surface. */
   | 'declared'
   /** Overridable, read at a use site, never declared — the four logical corners and two thicknesses. */
@@ -10,7 +10,7 @@ export type ThemeTokenClass =
  * function, unitless line heights used as multiplicands, box-shadow composites and a colour whose name
  * carries no colour prefix all defeat inference from the value.
  */
-export type ThemeTokenControl =
+type ThemeTokenControl =
   | 'color'
   | 'length'
   | 'radius-shorthand'

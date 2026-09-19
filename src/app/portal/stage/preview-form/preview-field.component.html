@@ -282,7 +282,7 @@
             <example-tooltip
               placement="right"
               trigger="hover"
-              [text]="field.caption || field.label" />
+              [text]="field.label" />
           }
           @case ('button') {
             <button type="button">Help</button>
@@ -344,20 +344,31 @@
   }
 </formidable-field-decorator>
 
-@if (showCaptions()) {
-  <div class="caption-row">
+@if (showFieldTypes()) {
+  <div class="chip-row">
     <button
       type="button"
-      class="caption"
-      [title]="'Edit ' + field.label + ' on the Fields tab'"
-      (click)="onCaption()">
-      <span class="caption-text">{{ field.caption || field.kind }}</span>
+      class="chip"
+      [attr.aria-describedby]="'chip-tip-' + field.id"
+      [attr.aria-label]="kindLabel() + ' — edit ' + field.label"
+      (click)="onChip()">
+      <span class="chip-text">{{ kindLabel() }}</span>
       <span
-        class="caption-glyph"
+        class="chip-glyph"
         aria-hidden="true">
         ↗
       </span>
     </button>
+
+    <!-- The portal's own tooltip rather than the browser's: a native `title` waits about a second, which is
+         long enough that the chip reads as inert. It stays the chip's accessible description, which is what
+         the `title` was. -->
+    <span
+      role="tooltip"
+      class="chip-tip"
+      [id]="'chip-tip-' + field.id">
+      {{ settingsTitle() }}
+    </span>
   </div>
 }
 

@@ -7,7 +7,7 @@ import { PortalFieldSpec } from '../model/field-spec.model';
  * `binding` decides the syntax: a plain attribute for a string, a one-way binding with a literal for anything
  * that is not one. `read` returns `null` where the attribute is omitted.
  */
-export interface MarkupAttribute {
+interface MarkupAttribute {
   readonly name: string;
   readonly binding: boolean;
   readonly read: (spec: PortalFieldSpec) => string | null;
@@ -29,13 +29,13 @@ export const unquote = (raw: string): string =>
     .replace(/^"(.*)"$/s, '$1');
 
 /** The attributes every field carries, whatever its kind. */
-export const COMMON_ATTRIBUTES: readonly MarkupAttribute[] = [
+const COMMON_ATTRIBUTES: readonly MarkupAttribute[] = [
   { name: 'name', binding: false, read: (s) => s.name, write: (raw) => ({ name: raw }) },
   { name: 'placeholder', binding: false, read: (s) => text(s.placeholder), write: (raw) => ({ placeholder: raw }) }
 ];
 
 /** The kind-specific inputs, keyed by the member they map to. */
-export const FIELD_ATTRIBUTES: readonly MarkupAttribute[] = [
+const FIELD_ATTRIBUTES: readonly MarkupAttribute[] = [
   { name: 'mask', binding: false, read: (s) => text(s.mask), write: (raw) => ({ mask: raw }) },
   { name: 'minLength', binding: true, read: (s) => num(s.minLength), write: (raw) => ({ minLength: parseNum(raw) }) },
   { name: 'maxLength', binding: true, read: (s) => num(s.maxLength), write: (raw) => ({ maxLength: parseNum(raw) }) },

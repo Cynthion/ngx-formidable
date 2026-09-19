@@ -62,7 +62,7 @@ Behavior that carries real risk, tested through a minimal host — not the frame
 ## Running Tests
 
 - Library: `ng test ngx-formidable`, which `npm test` also resolves to.
-- Demo: `ng test ngx-formidable-demo`, which has to be named.
+- Demo: `ng test ngx-formidable-portal`, which has to be named.
 
 Prove work by pasting command output — do not claim success. When a change is logic-bearing, add the helper spec in the same commit.
 
@@ -70,4 +70,4 @@ Prove work by pasting command output — do not claim success. When a change is 
 
 ## Visual Testing
 
-There is no Storybook or visual-regression layer yet; it is Phase 18 in `impl/implementation.md`. Until then, the portal is the manual visual check — run `npm start` and exercise the changed field in its preview form. `/preview` renders that form without the portal's own chrome.
+There is no Storybook or visual-regression layer yet; it is Phase 18 in `impl/implementation.md`. Until then, the portal is the manual visual check — run `npm start` and exercise the changed field in its preview form. Turning the `Field Types` switch off leaves that form without the portal's own annotations.

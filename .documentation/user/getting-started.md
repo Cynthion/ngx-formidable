@@ -220,5 +220,6 @@ onSubmit(): void {
 | Label it, prefix it, hint it, mark it required            | `user/decoration.md`    |
 | Connect Vest, zod, Angular's validators, or none          | `user/validation.md`    |
 | Repaint and reshape it                                    | `user/theming.md`       |
+| Build a theme in the browser and paste the result back    | `user/studio.md`        |
 | Build a field the library does not have                   | `user/custom-fields.md` |
 | Look up an input, a type or a token                       | `user/components.md`    |

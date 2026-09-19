@@ -1,21 +1,33 @@
-<pre class="markup">{{ markup() }}</pre>
+<portal-accordion
+  heading="Export"
+  lede="The Angular template this configuration produces. A production build contains no template compiler, so the configuration is the source and this is derived from it — which is why it is read-only."
+  [hint]="fieldCount() + ' Fields'"
+  [open]="isOpen('export')"
+  (toggled)="toggle('export')">
+  <pre class="markup">{{ markup() }}</pre>
 
-<div class="pc-buttons">
-  <button
-    type="button"
-    class="pc-button is-primary"
-    (click)="copy()">
-    {{ justCopied() ? 'Copied' : 'Copy The Template' }}
-  </button>
-</div>
+  <div class="pc-buttons">
+    <button
+      type="button"
+      class="pc-button is-primary"
+      (click)="copy()">
+      {{ justCopied() ? 'Copied' : 'Copy Markup' }}
+    </button>
+    <button
+      type="button"
+      class="pc-button is-quiet"
+      (click)="store.reset()">
+      Reset Markup
+    </button>
+  </div>
+</portal-accordion>
 
-<div class="import">
-  <h4 class="import-title">Import A Form</h4>
-  <p class="pc-help">
-    Paste a whole form. It replaces the one on the stage, sections included — those come from the comments above each run of fields. A static, attribute-only
-    subset: bindings to expressions and control flow are listed rather than silently dropped.
-  </p>
-
+<portal-accordion
+  heading="Import"
+  lede="A whole form, read back in. It replaces the one on the stage, sections included — those come from the comments above each run of fields. A static, attribute-only subset: bindings to expressions and control flow are listed rather than silently dropped."
+  hint="Paste A Form"
+  [open]="isOpen('import')"
+  (toggled)="toggle('import')">
   <textarea
     rows="4"
     spellcheck="false"
@@ -27,7 +39,7 @@
   <div class="pc-buttons">
     <button
       type="button"
-      class="pc-button"
+      class="pc-button is-primary"
       [disabled]="!importText().trim()"
       (click)="runImport()">
       Replace The Form
@@ -50,4 +62,4 @@
       }
     </div>
   }
-</div>
+</portal-accordion>

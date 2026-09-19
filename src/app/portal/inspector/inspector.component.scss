@@ -46,57 +46,42 @@
   }
 }
 
-// The area names itself, as the stage and the drawer do — three labelled regions rather than two and an
-// unmarked panel.
+// The tab strip names the area, so the header is that strip plus the control that closes it. Its height is
+// the stage bar's, so the two column headers line up and the rule under them runs unbroken across the page.
 .head {
-  border-bottom: 1px solid var(--portal-border);
-}
-
-// Collapsed, the panel is 44px wide: the title turns on its side so the area still names itself, and the
-// control that reopens it has to stay reachable — it is the only way back.
-.title-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 8px 5px 16px;
+  // Border-box, so the rule under the strip lands on the stage bar's own bottom edge rather than a pixel
+  // below it.
+  box-sizing: border-box;
+  height: var(--portal-section-header-height);
+  padding: 0 8px;
+  border-bottom: 1px solid var(--portal-border);
 }
 
-.title {
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  opacity: 0.55;
-}
-
-// Reversed, so the control that reopens the panel is at the top where a collapsed rail is looked at first.
-:host(.is-collapsed) .title-row {
-  flex-direction: column-reverse;
-  justify-content: flex-end;
-  gap: 12px;
+// Collapsed, the panel is a 44px rail holding one control — the only way back.
+:host(.is-collapsed) .head {
+  justify-content: center;
+  height: auto;
   padding: 8px 0;
+  border-bottom: 0;
 }
 
-:host(.is-collapsed) .title {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-}
-
-:host(.is-collapsed) .collapse {
-  margin: 0;
-}
-
+// Full height, so the active tab's underline sits on the header's own bottom edge while its label stays
+// centred with the chevron beside it.
 .tabs {
   display: flex;
+  align-self: stretch;
   gap: 2px;
   min-width: 0;
-  padding: 0 8px;
   overflow: hidden;
 }
 
 .tab {
-  padding: 6px 9px;
+  display: flex;
+  align-items: center;
+  padding: 0 9px;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
@@ -119,6 +104,8 @@
 }
 
 .collapse {
+  flex: none;
+  align-self: center;
   margin-left: auto;
   padding: 3px 8px;
   border: 1px solid var(--portal-border);

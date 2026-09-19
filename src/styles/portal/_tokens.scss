@@ -50,8 +50,14 @@
   --portal-radius: 10px;
   --portal-radius-sm: 6px;
   --portal-top-bar-height: 56px;
-  --portal-inspector-width: 400px;
-  --portal-gap: 16px;
+
+  // The stage bar and the editor panel's tab strip are the two column headers, side by side across the
+  // page. One height for both, so the line under them is continuous rather than stepped.
+  --portal-section-header-height: 38px;
+
+  // A tooltip of the portal's own waits this long before it appears. A native `title` waits about a second,
+  // which is long enough that the control it belongs to reads as inert.
+  --portal-tooltip-delay: 120ms;
 
   // One above the higher of the library's two public z-indices, so a panel scrolled beneath the inspector
   // cannot punch through it. Stated as a calculation so the two cannot drift apart.

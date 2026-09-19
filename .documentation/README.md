@@ -17,6 +17,7 @@ For consumers of the library. A **guide** teaches a topic; a **reference** lists
 | `user/decoration.md`      |   Guide   | Labels, adornments, prefixes, suffixes, hints, required marker |
 | `user/validation.md`      |   Guide   | How to connect a validator: Vest, Angular, zod or none         |
 | `user/theming.md`         |   Guide   | The default theme, how theming works, and how to find your own |
+| `user/studio.md`          |   Guide   | The Studio: build a theme and a form, and take both away       |
 | `user/custom-fields.md`   |   Guide   | Building a field, an option or a validator of your own         |
 | `user/components.md`      | Reference | Catalogue of every public component, directive, token and type |
 | `user/theme-reference.md` | Reference | Every overridable `--formidable-*` custom property             |
@@ -29,7 +30,7 @@ For maintainers of the library.
 
 | File                   | Purpose                                                            |
 | :--------------------- | :----------------------------------------------------------------- |
-| `tech/architecture.md` | Workspace structure, library and demo roles, build and publish     |
+| `tech/architecture.md` | Workspace structure, library and portal roles, build and publish   |
 | `tech/decoration.md`   | The decorator, field and errors wiring: slot, ids, repaint, insets |
 | `tech/layering.md`     | Stacking contexts, the layer ordinals and the two public z-indices |
 | `tech/validation.md`   | The validation seam, its three layers and the package layout       |

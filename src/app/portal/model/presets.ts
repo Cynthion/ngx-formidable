@@ -25,7 +25,7 @@ export interface ThemePreset {
  * deploy is static and must work offline and behind a proxy, and a fetched family adds a third-party origin
  * and a flash of unstyled text that undoes the instant repaint the presets exist to demonstrate.
  */
-export interface FontOption {
+interface FontOption {
   readonly key: string;
   readonly label: string;
   readonly stack: string;

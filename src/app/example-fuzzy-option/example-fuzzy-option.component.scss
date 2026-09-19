@@ -1,15 +1,17 @@
-@use '../../styles/variables' as *;
-
 :host {
   display: block;
 }
 
 .option-label {
-  @include font-m;
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 1.6;
 }
 
 .option-subtitle {
-  @include font-xs-bold;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.6;
 }
 
 .option-highlight {

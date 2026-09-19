@@ -14,7 +14,7 @@ interface PersistedLayout {
   readonly inspectorWidth: number;
   readonly drawerHeight: number;
   readonly drawerOpen: boolean;
-  readonly showCaptions: boolean;
+  readonly showFieldTypes: boolean;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -37,8 +37,8 @@ export class LayoutStore {
   public readonly drawerHeight = signal(DRAWER_HEIGHT_DEFAULT);
   public readonly drawerOpen = signal(false);
 
-  /** The caption chips under each field. They are the portal's annotation, not part of the form. */
-  public readonly showCaptions = signal(true);
+  /** The chip naming each field's component. It is the portal's annotation, not part of the form. */
+  public readonly showFieldTypes = signal(true);
 
   /** The accessibility readout beside each field. Off by default: it is an inspection, not the page. */
   public readonly showAccessibility = signal(false);
@@ -70,7 +70,7 @@ export class LayoutStore {
       inspectorWidth: this.inspectorWidth(),
       drawerHeight: this.drawerHeight(),
       drawerOpen: this.drawerOpen(),
-      showCaptions: this.showCaptions()
+      showFieldTypes: this.showFieldTypes()
     };
 
     try {
@@ -88,7 +88,7 @@ export class LayoutStore {
     if (Number.isFinite(stored.inspectorWidth)) this.setInspectorWidth(stored.inspectorWidth);
     if (Number.isFinite(stored.drawerHeight)) this.setDrawerHeight(stored.drawerHeight);
     if (typeof stored.drawerOpen === 'boolean') this.drawerOpen.set(stored.drawerOpen);
-    if (typeof stored.showCaptions === 'boolean') this.showCaptions.set(stored.showCaptions);
+    if (typeof stored.showFieldTypes === 'boolean') this.showFieldTypes.set(stored.showFieldTypes);
   }
 
   private readStored(): PersistedLayout | null {

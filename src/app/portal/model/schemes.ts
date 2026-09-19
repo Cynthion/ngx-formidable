@@ -17,7 +17,7 @@ export type GeometryKey =
 export type ColorKey =
   'slate' | 'ocean' | 'sand' | 'forest' | 'plum' | 'mono' | 'clinical' | 'ledger' | 'sunset' | 'midnight';
 
-export interface SchemeMeta<K extends string> {
+interface SchemeMeta<K extends string> {
   readonly key: K;
   readonly label: string;
   readonly reads: string;

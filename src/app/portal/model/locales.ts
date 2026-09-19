@@ -5,7 +5,7 @@ import { PortalLocaleId } from './field-spec.model';
  * together. Splitting those into separate controls would lose the demonstration: the two dates in the preview
  * differ because their locales do, not because three unrelated inputs were set to three unrelated values.
  */
-export interface PortalLocale {
+interface PortalLocale {
   readonly id: PortalLocaleId;
   readonly label: string;
   /** `Pikaday`'s own i18n shape, passed straight through the date field's `i18n` input. */
@@ -147,11 +147,11 @@ export const PORTAL_LOCALES: readonly PortalLocale[] = [
   }
 ];
 
-export const LOCALES_BY_ID: ReadonlyMap<PortalLocaleId, PortalLocale> = new Map(
+const LOCALES_BY_ID: ReadonlyMap<PortalLocaleId, PortalLocale> = new Map(
   PORTAL_LOCALES.map((locale) => [locale.id, locale])
 );
 
-export const DEFAULT_LOCALE = PORTAL_LOCALES[0]!;
+const DEFAULT_LOCALE = PORTAL_LOCALES[0]!;
 
 export function localeOf(id: PortalLocaleId | undefined): PortalLocale {
   return (id && LOCALES_BY_ID.get(id)) || DEFAULT_LOCALE;

@@ -2,6 +2,7 @@ import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testin
 import { provideRouter } from '@angular/router';
 import { provideNgxMask } from 'ngx-mask';
 import { importTheme } from './export/theme-import';
+import { FIELD_KIND_LABELS } from './model/field-capabilities';
 import { PREVIEW_FIELDS } from './model/preview-form.definition';
 import { THEME_PRESETS } from './model/presets';
 import { PortalComponent } from './portal.component';
@@ -235,19 +236,126 @@ describe('portal', () => {
     expect(text?.passes).toBe(false);
   }));
 
-  it('opens the inspector at the Fields tab when a caption chip is used', fakeAsync(() => {
+  it('opens the editor panel at the Fields tab when a chip is used', fakeAsync(() => {
     settle();
 
     const inspector = TestBed.inject(InspectorStore);
     inspector.tab.set('theme');
 
-    const chip = root.querySelector('portal-preview-field .caption') as HTMLElement;
+    const chip = root.querySelector('portal-preview-field .chip') as HTMLElement;
     chip.click();
     settle();
 
     expect(inspector.tab()).toBe('form');
     expect(inspector.formTab()).toBe('fields');
     expect(root.querySelector('portal-field-editor')).toBeTruthy();
+  }));
+
+  // Moving to a tab behind a collapsed panel changes nothing the user can see, so the move has to open it.
+  it('expands a collapsed editor panel rather than moving a tab behind it', fakeAsync(() => {
+    settle();
+
+    const inspector = TestBed.inject(InspectorStore);
+    const layout = TestBed.inject(LayoutStore);
+
+    inspector.tab.set('theme');
+    layout.inspectorCollapsed.set(true);
+    settle();
+
+    const chip = root.querySelector('portal-preview-field .chip') as HTMLElement;
+    chip.click();
+    settle();
+
+    expect(layout.inspectorCollapsed()).toBeFalse();
+    expect(inspector.formTab()).toBe('fields');
+    expect(root.querySelector('portal-field-editor')).toBeTruthy();
+  }));
+
+  // The chip names the component rather than describing the configuration, because a description written
+  // once cannot survive the field being edited — and says nothing at all about a field added later.
+  it('names the component under every field, including one added in the structure editor', fakeAsync(() => {
+    settle();
+
+    const texts = Array.from(root.querySelectorAll('portal-preview-field .chip-text')).map((element) =>
+      (element.textContent ?? '').trim()
+    );
+
+    expect(texts.length).toBe(PREVIEW_FIELDS.length);
+    expect(texts).toContain('Date');
+    expect(texts.filter((text) => text === 'Date').length).toBe(2);
+    expect(texts.every((text) => Object.values(FIELD_KIND_LABELS).includes(text))).toBeTrue();
+
+    TestBed.inject(FormDefinitionStore).addField('radio-group', 'rules');
+    settle();
+
+    const added = Array.from(root.querySelectorAll('portal-preview-field .chip-text')).map((element) =>
+      (element.textContent ?? '').trim()
+    );
+
+    expect(added.length).toBe(PREVIEW_FIELDS.length + 1);
+    expect(added.every((text) => Object.values(FIELD_KIND_LABELS).includes(text))).toBeTrue();
+  }));
+
+  // The defect this replaces: the chip held a string, so editing the field left it stating the old value.
+  it('restates what a field is set to once the field has been edited', fakeAsync(() => {
+    settle();
+
+    const store = TestBed.inject(FormDefinitionStore);
+    const tipFor = (id: string): string => {
+      const tip = root.querySelector(`#chip-tip-${id}`) as HTMLElement;
+
+      return (tip.textContent ?? '').trim();
+    };
+
+    // The chip names it as its accessible description, exactly as the `title` it replaced did. No `title`
+    // anywhere on the run of them: the browser holds one back about a second, which is what this is not.
+    const chip = root.querySelector('portal-preview-field .chip') as HTMLElement;
+    expect(chip.getAttribute('aria-describedby')).toBe('chip-tip-travellerName');
+    expect(Array.from(root.querySelectorAll('portal-preview-field .chip[title]')).length).toBe(0);
+
+    expect(tipFor('arrivalDate')).toContain('panelPosition: right');
+
+    store.updateField('arrivalDate', { panelPosition: 'sheet' });
+    settle();
+
+    expect(tipFor('arrivalDate')).toContain('panelPosition: sheet');
+    expect(tipFor('arrivalDate')).not.toContain('panelPosition: right');
+  }));
+
+  // The two column headers sit side by side, so a difference between them reads as a step in the rule under
+  // them. Read off the rules rather than the layout: the runner's viewport is below the two-column
+  // breakpoint, where the stage bar wraps to two rows and the columns are stacked, so measuring there would
+  // be measuring the wrong mode.
+  it('gives the two column headers one height', fakeAsync(() => {
+    settle();
+
+    const declaredHeights = (selector: string): string[] =>
+      Array.from(document.styleSheets)
+        .flatMap((sheet) => Array.from(sheet.cssRules))
+        .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule)
+        .filter((rule) => rule.selectorText.includes(selector))
+        .map((rule) => rule.style.height)
+        .filter(Boolean);
+
+    expect(
+      getComputedStyle(document.documentElement).getPropertyValue('--portal-section-header-height').trim()
+    ).toBeTruthy();
+
+    for (const selector of ['.stage-bar', '.head']) {
+      expect(declaredHeights(selector)).withContext(selector).toContain('var(--portal-section-header-height)');
+    }
+  }));
+
+  // The tabs say what the panel is, so a title row over them would only add the word "Inspector" — which
+  // names a panel that edits rather than inspects, and costs a row of the height the bottom sheet is short of.
+  it('makes the tab strip the editor panel’s header', fakeAsync(() => {
+    settle();
+
+    const head = root.querySelector('portal-inspector .head') as HTMLElement;
+
+    expect(head.querySelector('[role="tablist"]')).toBeTruthy();
+    expect(head.textContent).not.toContain('Inspector');
+    expect(head.querySelector('.collapse')).toBeTruthy();
   }));
 
   // Four tabs and three sub-tabs is the navigation a visitor has to learn, so every one of them has to
@@ -390,8 +498,17 @@ describe('portal', () => {
     (root.querySelectorAll<HTMLElement>('portal-structure-tab .start')[2] as HTMLElement).click();
     settle();
 
+    // Not merely the markup half: the box a form goes into, rather than the block that comes out of it.
     expect(inspector.tab()).toBe('export');
-    expect(root.querySelector('portal-markup-panel .import')).toBeTruthy();
+    expect(inspector.exportSection()).toBe('markup');
+
+    const open = Array.from(root.querySelectorAll('portal-export-tab portal-accordion .trigger')).filter(
+      (el) => el.getAttribute('aria-expanded') === 'true'
+    );
+
+    expect(open.length).toBe(1);
+    expect((open[0]?.textContent ?? '').trim()).toContain('Import');
+    expect(root.querySelector('portal-markup-panel .pc-textarea')).toBeTruthy();
   }));
 
   it('names the tab for both directions it goes in', fakeAsync(() => {
@@ -404,31 +521,100 @@ describe('portal', () => {
     expect(labels).toEqual(['Theme', 'Form', 'Import & Export']);
   }));
 
-  it('puts both exports on one scroll, an accordion each', fakeAsync(() => {
+  // Two halves, navigated the way the other two areas are: the same strip in the same place on all three.
+  it('splits the two round trips into sub-tabs, one showing at a time', fakeAsync(() => {
     settle();
 
-    TestBed.inject(InspectorStore).tab.set('export');
+    const inspector = TestBed.inject(InspectorStore);
+    inspector.tab.set('export');
     settle();
 
+    const labels = Array.from(root.querySelectorAll('portal-export-tab .sub-tab')).map((el) =>
+      (el.textContent ?? '').trim()
+    );
+
+    expect(labels).toEqual(['Theme', 'Markup']);
+
+    expect(root.querySelector('portal-theme-panel')).toBeTruthy();
+    expect(root.querySelector('portal-markup-panel')).toBeNull();
+
+    (root.querySelectorAll<HTMLElement>('portal-export-tab .sub-tab')[1] as HTMLElement).click();
+    settle();
+
+    expect(inspector.exportSection()).toBe('markup');
+    expect(root.querySelector('portal-markup-panel')).toBeTruthy();
+    expect(root.querySelector('portal-theme-panel')).toBeNull();
+  }));
+
+  // Both halves are a round trip, so both say so the same way: the pair of headings is the same on each and
+  // a reader who has learned one half has learned the other.
+  it('gives both halves the same two directions', fakeAsync(() => {
+    settle();
+
+    const inspector = TestBed.inject(InspectorStore);
     const headings = () =>
       Array.from(root.querySelectorAll('portal-export-tab portal-accordion .title')).map((el) =>
         (el.textContent ?? '').trim()
       );
 
-    expect(headings()).toEqual(['Theme CSS', 'Markup']);
+    inspector.openExport('theme');
+    settle();
+    expect(headings()).toEqual(['Export', 'Import']);
 
-    // The theme opens first; only the open section renders its body, which is what the accordion is for.
-    expect(root.querySelector('portal-theme-panel')).toBeTruthy();
-    expect(root.querySelector('portal-markup-panel')).toBeNull();
+    inspector.openExport('markup');
+    settle();
+    expect(headings()).toEqual(['Export', 'Import']);
+  }));
 
-    const markupHeader = Array.from(
-      root.querySelectorAll<HTMLElement>('portal-export-tab portal-accordion .trigger')
-    )[1]!;
-    markupHeader.click();
+  // The theme half can be put back to the shipped default; the markup half needs the same way out of a form
+  // the user has taken apart, or the two are only symmetric to look at.
+  it('offers a reset beside the copy in both halves', fakeAsync(() => {
     settle();
 
-    expect(root.querySelector('portal-markup-panel')).toBeTruthy();
-    expect(root.querySelector('portal-theme-panel')).toBeNull();
+    const inspector = TestBed.inject(InspectorStore);
+    const definition = TestBed.inject(FormDefinitionStore);
+
+    inspector.openExport('theme');
+    settle();
+    expect(root.querySelector('portal-theme-panel .pc-button.is-quiet')?.textContent?.trim()).toBe('Reset Theme');
+
+    inspector.openExport('markup');
+    settle();
+
+    definition.removeField(PREVIEW_FIELDS[0]!.id);
+    settle();
+    expect(definition.fields().length).toBe(PREVIEW_FIELDS.length - 1);
+
+    const reset = root.querySelector('portal-markup-panel .pc-button.is-quiet') as HTMLElement;
+    expect(reset.textContent?.trim()).toBe('Reset Markup');
+
+    reset.click();
+    settle();
+
+    expect(definition.fields().length).toBe(PREVIEW_FIELDS.length);
+  }));
+
+  // All three areas carry the same second level, so the strip is learned once rather than per tab.
+  it('gives every area the same two-half strip', fakeAsync(() => {
+    settle();
+
+    const inspector = TestBed.inject(InspectorStore);
+    const expected: [InspectorTab, string[]][] = [
+      ['theme', ['Design', 'Variables']],
+      ['form', ['Structure', 'Fields']],
+      ['export', ['Theme', 'Markup']]
+    ];
+
+    for (const [tab, labels] of expected) {
+      inspector.tab.set(tab);
+      settle();
+
+      const rendered = Array.from(root.querySelectorAll('portal-inspector .sub-tab')).map((el) =>
+        (el.textContent ?? '').trim()
+      );
+
+      expect(rendered).withContext(tab).toEqual(labels);
+    }
   }));
 
   it('opens one accordion section at a time', fakeAsync(() => {
@@ -445,17 +631,17 @@ describe('portal', () => {
     expect(openCount()).toBe(1);
   }));
 
-  it('hides the caption chips when the stage says so', fakeAsync(() => {
+  it('hides the chips when the stage says so', fakeAsync(() => {
     settle();
     const layout = TestBed.inject(LayoutStore);
 
-    layout.showCaptions.set(true);
+    layout.showFieldTypes.set(true);
     settle();
-    expect(root.querySelectorAll('portal-preview-field .caption').length).toBeGreaterThan(0);
+    expect(root.querySelectorAll('portal-preview-field .chip').length).toBeGreaterThan(0);
 
-    layout.showCaptions.set(false);
+    layout.showFieldTypes.set(false);
     settle();
-    expect(root.querySelectorAll('portal-preview-field .caption').length).toBe(0);
+    expect(root.querySelectorAll('portal-preview-field .chip').length).toBe(0);
   }));
 
   // The stage is a fixed three-row grid, so an optional child of it shifts every row below — which once
@@ -465,15 +651,15 @@ describe('portal', () => {
     settle();
     const layout = TestBed.inject(LayoutStore);
 
-    for (const captions of [false, true]) {
+    for (const chips of [false, true]) {
       for (const accessibility of [false, true]) {
-        layout.showCaptions.set(captions);
+        layout.showFieldTypes.set(chips);
         layout.showAccessibility.set(accessibility);
         settle();
 
         const stage = root.querySelector('portal-stage') as HTMLElement;
         const children = Array.from(stage.children);
-        const context = `captions ${captions}, accessibility ${accessibility}`;
+        const context = `chips ${chips}, accessibility ${accessibility}`;
 
         expect(children.length).withContext(context).toBe(3);
         expect(children[0]?.classList).withContext(context).toContain('stage-head');
@@ -488,12 +674,12 @@ describe('portal', () => {
     const layout = TestBed.inject(LayoutStore);
     const lines = () => root.querySelectorAll('portal-stage .stage-status').length;
 
-    layout.showCaptions.set(false);
+    layout.showFieldTypes.set(false);
     layout.showAccessibility.set(false);
     settle();
     expect(lines()).toBe(0);
 
-    layout.showCaptions.set(true);
+    layout.showFieldTypes.set(true);
     settle();
     expect(lines()).toBe(1);
 

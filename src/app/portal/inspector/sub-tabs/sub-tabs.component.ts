@@ -10,7 +10,7 @@ export interface SubTab {
  * The second level of the sidebar's navigation, shared by the areas that have two halves.
  *
  * Controlled rather than self-managing: the area owns which half is showing, because the store outside it
- * moves that too — a caption chip opens Fields, a derived variable's link opens Variables.
+ * moves that too — a field chip opens Fields, a derived variable's link opens Variables.
  */
 @Component({
   selector: 'portal-sub-tabs',

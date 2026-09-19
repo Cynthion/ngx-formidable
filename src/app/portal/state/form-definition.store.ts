@@ -1,6 +1,7 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { FIELD_CAPABILITIES } from '../model/field-capabilities';
 import {
+  DEFAULT_DECORATION,
+  DEFAULT_STATE,
   PortalFieldKind,
   PortalFieldSpec,
   PortalFormDefinition,
@@ -31,12 +32,6 @@ export class FormDefinitionStore {
     const id = this.selectedFieldId();
 
     return this.fields().find((field) => field.id === id) ?? null;
-  });
-
-  public readonly selectedCapabilities = computed(() => {
-    const field = this.selectedField();
-
-    return field ? FIELD_CAPABILITIES[field.kind] : null;
   });
 
   /** The sections with their fields, which is what the stage and the model drawer both render from. */
@@ -143,21 +138,9 @@ export class FormDefinitionStore {
           name: id,
           label: 'New field',
           placeholder: '',
-          caption: 'Added in the structure editor',
           span: 1,
-          decoration: {
-            showLabel: true,
-            labelPosition: 'inside',
-            showRequiredMarker: false,
-            labelAdornment: 'none',
-            prefix: 'none',
-            prefixAlign: 'center',
-            suffix: 'none',
-            suffixAlign: 'center',
-            hint: '',
-            hintAlign: 'start'
-          },
-          state: { readonly: false, disabled: false, autoFocus: false }
+          decoration: DEFAULT_DECORATION,
+          state: DEFAULT_STATE
         };
 
     const added: PortalFieldSpec = {
@@ -165,8 +148,7 @@ export class FormDefinitionStore {
       id,
       name: id,
       sectionId,
-      label: `New ${kind}`,
-      caption: 'Added in the structure editor'
+      label: `New ${kind}`
     };
 
     this.definition.update((definition) => ({ ...definition, fields: [...definition.fields, added] }));

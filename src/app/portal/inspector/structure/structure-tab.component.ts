@@ -69,8 +69,9 @@ export class StructureTabComponent {
     this.openSection.set('list');
   }
 
+  /** The third way to start is somebody else's markup, so this goes to the box one is pasted into. */
   protected startImport(): void {
-    this.inspector.openMarkupImport();
+    this.inspector.openExport('markup', 'import');
   }
 
   /** The list is where a field is found; the Fields tab is where it is changed. */

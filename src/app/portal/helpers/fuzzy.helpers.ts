@@ -3,7 +3,7 @@ import { HighlightedEntries } from '../../example-fuzzy-option/example-fuzzy-opt
 import { PortalOptionSpec } from '../model/field-spec.model';
 
 /** One option after filtering, carrying the runs the filter matched so the option can mark them. */
-export interface FuzzyMatch {
+interface FuzzyMatch {
   readonly option: PortalOptionSpec;
   readonly highlights: HighlightedEntries;
 }
@@ -39,7 +39,7 @@ export function fuzzyFilter(options: readonly PortalOptionSpec[], filter: string
 }
 
 /** Splits each matched field into alternating unmatched and matched runs, in source order. */
-export function extractHighlights(result: FuseResult<PortalOptionSpec>): HighlightedEntries {
+function extractHighlights(result: FuseResult<PortalOptionSpec>): HighlightedEntries {
   const highlights: HighlightedEntries = { labelEntries: [], subtitleEntries: [] };
 
   for (const match of result.matches ?? []) {

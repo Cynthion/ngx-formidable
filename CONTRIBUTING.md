@@ -1,27 +1,28 @@
 # Contributing
 
-Contributions are welcome. This repository is an Angular workspace holding two projects: the publishable library in `projects/ngx-formidable/`, and the demo app in `src/` that showcases it.
+Contributions are welcome. This repository is an Angular workspace holding two projects: the publishable library in `projects/ngx-formidable/`, and the portal in `src/` that showcases it.
 
 ## Getting Set Up
 
 ```bash
 npm install       # from the workspace root — never from inside projects/ngx-formidable
-npm start         # serve the demo at http://localhost:4200
+npm start         # serve the portal at http://localhost:4200
 ```
 
 A nested `projects/ngx-formidable/node_modules` shadows the root install with a second copy of `@angular/core` and breaks the test runner. If you have one, delete it and install from the root.
 
 ## Scripts
 
-| Script                   | Does                                                     |
-| :----------------------- | :------------------------------------------------------- |
-| `npm start`              | Serve the demo app                                       |
-| `npm run build`          | Build the demo app                                       |
-| `npm run build:lib`      | Build the library, which is also the type/template check |
-| `npm test`               | Run the tests                                            |
-| `npm run lint`           | ESLint over the library sources                          |
-| `npm run style-lint`     | Stylelint over the library SCSS                          |
-| `npm run prettier:check` | Formatting check across the repo                         |
+| Script                   | Does                                                          |
+| :----------------------- | :------------------------------------------------------------ |
+| `npm start`              | Serve the portal                                              |
+| `npm run build`          | Build the portal                                              |
+| `npm run build:lib`      | Build the library, which is also the type/template check      |
+| `npm test`               | Run the tests                                                 |
+| `npm run lint`           | ESLint over the library and the portal                        |
+| `npm run style-lint`     | Stylelint over the library and portal SCSS                    |
+| `npm run prettier:check` | Formatting check across the repo                              |
+| `npm run docs:check`     | The portal's token manifest against `user/theme-reference.md` |
 
 There is no standalone typecheck script — `build:lib` is it.
 
