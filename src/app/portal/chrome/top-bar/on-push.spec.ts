@@ -103,7 +103,7 @@ describe('top bar OnPush contract', () => {
     settle();
 
     expect(inspector.tab()).toBe('export');
-    expect(inspector.exportSection()).toBe('markup');
+    expect(inspector.exportSection()).toBe('form');
   }));
 
   it('offers a copy for each thing there is to take away', fakeAsync(() => {
@@ -113,7 +113,7 @@ describe('top bar OnPush contract', () => {
 
     expect(labels.length).toBe(2);
     expect(labels[0]).toContain('Copy Theme');
-    expect(labels[1]).toContain('Copy Markup');
+    expect(labels[1]).toContain('Copy Template');
   }));
 
   // The bar is on the Docs route too, where there is no inspector to open — so setting the area without
@@ -136,7 +136,7 @@ describe('top bar OnPush contract', () => {
     // `Location.path()` is empty at the root, so the router's own url is what says where we landed.
     expect(router.url).toBe('/');
     expect(inspector.tab()).toBe('export');
-    expect(inspector.exportSection()).toBe('markup');
+    expect(inspector.exportSection()).toBe('form');
   });
 
   // `exact` is right for `/` and wrong for `/docs`, which is only ever seen with a document open.

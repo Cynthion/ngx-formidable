@@ -11,7 +11,7 @@ export type ThemeSubTab = 'design' | 'variables';
 export type FormSubTab = 'structure' | 'fields';
 
 /** The Import & Export area's own two halves — one round trip each. */
-export type ExportSection = 'theme' | 'markup';
+export type ExportSection = 'theme' | 'form';
 
 /** Which way round a half is being used. Both halves offer both, as the area's name says. */
 export type ExportDirection = 'export' | 'import';
@@ -41,7 +41,7 @@ export class InspectorStore {
 
   /**
    * Which accordion is open inside whichever half is showing, or neither. Here rather than in the panels
-   * because Structure's third way to start asks for the markup half open at its **import**, and a panel's
+   * because Structure's third way to start asks for the form half open at its **import**, and a panel's
    * own state is not something the structure editor can reach.
    */
   public readonly exportDirection = signal<ExportDirection | null>('export');

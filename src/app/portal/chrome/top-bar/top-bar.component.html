@@ -73,17 +73,17 @@
       type="button"
       class="copy-button"
       [class.copied]="copiedMarkup()"
-      [title]="'Copy the Angular template for ' + fields().length + ' fields'"
+      [title]="'Copy the Angular template for ' + fields().length + ' fields. Its component is in Import & Export.'"
       (click)="copyMarkup()">
-      {{ copiedMarkup() ? 'Copied' : 'Copy Markup' }}
+      {{ copiedMarkup() ? 'Copied' : 'Copy Template' }}
       <span class="count">{{ fields().length }}</span>
     </button>
     <button
       type="button"
-      title="Open Import &amp; Export at the markup"
+      title="Open Import &amp; Export at the form"
       class="export-button"
-      aria-label="Open Import and Export at the markup"
-      (click)="showExport('markup')">
+      aria-label="Open Import and Export at the form"
+      (click)="showExport('form')">
       <span
         class="export-glyph"
         aria-hidden="true">

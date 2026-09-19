@@ -1,6 +1,6 @@
 <portal-accordion
   heading="Start"
-  lede="A form is sections, and each section holds fields. Begin from nothing, from the sample you landed on, or from markup you already have."
+  lede="A form is sections, and each section holds fields. Begin from nothing, from the sample you landed on, or from a template you already have."
   [step]="1"
   [hint]="startHint()"
   [startHere]="!fieldCount()"
@@ -25,7 +25,7 @@
       type="button"
       class="start"
       (click)="startImport()">
-      <span class="start-name">Paste Markup</span>
+      <span class="start-name">Paste Template</span>
       <span class="start-note">A form you already wrote, read back in. Opens Import &amp; Export.</span>
     </button>
   </div>

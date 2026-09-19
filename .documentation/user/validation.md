@@ -10,6 +10,20 @@ So any validator works, including none:
 - your own, see [The Validator Contract](#the-validator-contract)
 - none
 
+## The Model
+
+The library prescribes no model type. `formValue` takes any object, and a validator reads whatever it is handed. The one contract is Angular's: `NgForm` builds its value from the control tree, so the model follows that tree.
+
+| In The Model    | Comes From                                                       |
+| :-------------- | :--------------------------------------------------------------- |
+| A key           | A control's `name`                                               |
+| A nested object | An `ngModelGroup` around its controls                            |
+| A value's type  | The field that writes it — its **Value** in `user/components.md` |
+
+A target is a path into the same tree, so a rule whose target names no control never runs.
+
+Everything beyond that is convention — `DeepPartial`, the shape, one `*.form.ts` per form — see [The Convention](#the-convention). The Studio's `Copy Component` generates it for the form on its stage, see `user/studio.md`.
+
 ## Rule Targets
 
 Every rule has a **target** it reports on.
@@ -259,45 +273,17 @@ import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/ve
 
 ### The Convention
 
-One `*.form.ts` per form holds everything about it — model, shape, field names, suite and an equality function:
-
-```ts
-export interface AppointmentPage {
-  chosenDate: Date | null;
-  details: string;
-}
-
-export const APPOINTMENT_PAGE_FORM_FIELD_NAMES = {
-  chosenDate: 'chosenDate',
-  details: 'details'
-} as const;
-
-export type AppointmentPageFormModel = DeepPartial<AppointmentPage>;
-export type AppointmentPageFormShape = DeepRequired<AppointmentPageFormModel>;
-
-/** Every key the model can carry, so a typo in a target or a model key fails the build. */
-export const appointmentPageFormShape: AppointmentPageFormShape = {
-  chosenDate: new Date(),
-  details: ''
-};
-
-export const appointmentPageFormSuite: Suite<string, string, (model: AppointmentPageFormModel, field?: string) => void> = create((model: AppointmentPageFormModel, field?: string) => {
-  mode(Modes.ALL); // set it explicitly: Vest 6 defaults to Modes.EAGER, only the first failure per target
-
-  if (field) {
-    only(field); // one target is validated at a time — without this the suite runs every rule
-  }
-
-  test(APPOINTMENT_PAGE_FORM_FIELD_NAMES.details, 'view.appointment.form.details.required', () => {
-    enforce(model[APPOINTMENT_PAGE_FORM_FIELD_NAMES.details]).isNotBlank();
-  });
-});
-```
-
-Notes on the pieces:
+One `*.form.ts` per form holds its model, shape and suite. `user/getting-started.md` builds one in full, and the Studio's `Copy Component` generates one. Notes on the pieces:
 
 - **`only(field)`** is required. The form directive asks the suite about one target at a time, and `only` is what keeps a run from reporting every other target too.
-- **`FIELD_NAMES`** keeps the target, the control `name` and the model key from drifting apart.
+- **`FIELD_NAMES`** keeps the target, the control `name` and the model key from drifting apart:
+  ```ts
+  export const USER_FORM_FIELD_NAMES = { name: 'name' } as const;
+
+  test(USER_FORM_FIELD_NAMES.name, 'user.form.name.required', () => {
+    enforce(model[USER_FORM_FIELD_NAMES.name]).isNotBlank();
+  });
+  ```
 - **`formShape`** is a dev-mode typo check, not a validator. It has no runtime cost in production.
 - **Messages are translation keys**, resolved by `FORMIDABLE_ERROR_TRANSLATOR`.
 - **Group rules** target the group (`test('passwords', …)`), usually inside `omitWhen`. Pair them with `dependentFields` so changing one member re-runs the rule:
@@ -306,19 +292,6 @@ Notes on the pieces:
   ```
 - **Whole-form rules** use `test(WHOLE_FORM, …)` and need `formidableValidateWholeForm` on the `<form>`.
 - **`debounceMs`** sits on the `<form>` and governs every target on it.
-
-The form component exposes the form directive's outputs as subjects and derives from them:
-
-```ts
-readonly isDirty$ = new BehaviorSubject<boolean | null>(null);
-readonly isValid$ = new BehaviorSubject<boolean | null>(null);
-readonly errors$ = new BehaviorSubject<FormidableFormErrors>({});
-readonly formValue$ = new BehaviorSubject<FormModel>(this.formModel);
-
-readonly isSubmitDisabled$ = combineLatest([this.isValid$, this.hasChanges$]).pipe(
-  map(([isValid, hasChanges]) => !(!!isValid && hasChanges))
-);
-```
 
 ---
 
@@ -348,12 +321,14 @@ export class ZodValidatorDirective<T extends Record<string, unknown>> implements
       return of(null);
     }
 
-    const messages = result.error.issues.filter((issue) => issue.path.join('.') === target).map((issue) => issue.message);
+    const messages = result.error.issues.filter((issue) => (issue.path.join('.') || WHOLE_FORM) === target).map((issue) => issue.message);
 
     return of(messages.length ? messages : null);
   }
 }
 ```
+
+A `refine` on the whole schema reports an empty path, which the filter maps to `WHOLE_FORM`. Like any whole-form rule, it needs `formidableValidateWholeForm` on the `<form>`.
 
 ---
 

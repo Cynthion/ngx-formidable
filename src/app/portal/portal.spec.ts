@@ -529,9 +529,9 @@ describe('portal', () => {
     (root.querySelectorAll<HTMLElement>('portal-structure-tab .start')[2] as HTMLElement).click();
     settle();
 
-    // Not merely the markup half: the box a form goes into, rather than the block that comes out of it.
+    // Not merely the form half: the box a form goes into, rather than the block that comes out of it.
     expect(inspector.tab()).toBe('export');
-    expect(inspector.exportSection()).toBe('markup');
+    expect(inspector.exportSection()).toBe('form');
 
     const open = Array.from(root.querySelectorAll('portal-export-tab portal-accordion .trigger')).filter(
       (el) => el.getAttribute('aria-expanded') === 'true'
@@ -564,7 +564,7 @@ describe('portal', () => {
       (el.textContent ?? '').trim()
     );
 
-    expect(labels).toEqual(['Theme', 'Markup']);
+    expect(labels).toEqual(['Theme', 'Form']);
 
     expect(root.querySelector('portal-theme-panel')).toBeTruthy();
     expect(root.querySelector('portal-markup-panel')).toBeNull();
@@ -572,7 +572,7 @@ describe('portal', () => {
     (root.querySelectorAll<HTMLElement>('portal-export-tab .sub-tab')[1] as HTMLElement).click();
     settle();
 
-    expect(inspector.exportSection()).toBe('markup');
+    expect(inspector.exportSection()).toBe('form');
     expect(root.querySelector('portal-markup-panel')).toBeTruthy();
     expect(root.querySelector('portal-theme-panel')).toBeNull();
   }));
@@ -592,12 +592,12 @@ describe('portal', () => {
     settle();
     expect(headings()).toEqual(['Export', 'Import']);
 
-    inspector.openExport('markup');
+    inspector.openExport('form');
     settle();
     expect(headings()).toEqual(['Export', 'Import']);
   }));
 
-  // The theme half can be put back to the shipped default; the markup half needs the same way out of a form
+  // The theme half can be put back to the shipped default; the form half needs the same way out of a form
   // the user has taken apart, or the two are only symmetric to look at.
   it('offers a reset beside the copy in both halves', fakeAsync(() => {
     settle();
@@ -609,7 +609,7 @@ describe('portal', () => {
     settle();
     expect(root.querySelector('portal-theme-panel .pc-button.is-quiet')?.textContent?.trim()).toBe('Reset Theme');
 
-    inspector.openExport('markup');
+    inspector.openExport('form');
     settle();
 
     definition.removeField(PREVIEW_FIELDS[0]!.id);
@@ -617,12 +617,31 @@ describe('portal', () => {
     expect(definition.fields().length).toBe(PREVIEW_FIELDS.length - 1);
 
     const reset = root.querySelector('portal-markup-panel .pc-button.is-quiet') as HTMLElement;
-    expect(reset.textContent?.trim()).toBe('Reset Markup');
+    expect(reset.textContent?.trim()).toBe('Reset Form');
 
     reset.click();
     settle();
 
     expect(definition.fields().length).toBe(PREVIEW_FIELDS.length);
+  }));
+
+  // The template binds names only a component defines, so the component sits beside it rather than in a
+  // third top-bar group of its own.
+  it('offers the component beside the template', fakeAsync(() => {
+    settle();
+
+    TestBed.inject(InspectorStore).openExport('form');
+    settle();
+
+    const blocks = root.querySelectorAll('portal-markup-panel pre.markup');
+    const buttons = Array.from(root.querySelectorAll('portal-markup-panel .pc-button')).map((el) =>
+      (el.textContent ?? '').trim()
+    );
+
+    expect(blocks.length).toBe(2);
+    expect(blocks[0]?.textContent).toContain('<form');
+    expect(blocks[1]?.textContent).toContain('export class MyFormComponent');
+    expect(buttons).toEqual(['Copy Template', 'Reset Form', 'Copy Component']);
   }));
 
   // All three areas carry the same second level, so the strip is learned once rather than per tab.
@@ -633,7 +652,7 @@ describe('portal', () => {
     const expected: [InspectorTab, string[]][] = [
       ['theme', ['Design', 'Variables']],
       ['form', ['Structure', 'Fields']],
-      ['export', ['Theme', 'Markup']]
+      ['export', ['Theme', 'Form']]
     ];
 
     for (const [tab, labels] of expected) {

@@ -95,7 +95,7 @@ The library holds the model and renders the fields. Rules come from whatever val
 
 ### 1. Declare The Model, The Shape And The Rules
 
-Keep them in one `*.form.ts` per form.
+Keep them in one `*.form.ts` per form. The layout is a convention, not a requirement: what the model has to match is **The Model** in `user/validation.md`.
 
 ```ts
 // user.form.ts

@@ -10,9 +10,9 @@ import { ThemeStore } from '../../state/theme.store';
  * The theme, as the block a consumer pastes. The copy button in the top bar copies the same text with no
  * intermediate dialog; this is where its options live and where a pasted block comes back in.
  *
- * Out and back in are an accordion each, the same two the markup half has, so the area reads the same
+ * Out and back in are an accordion each, the same two the form half has, so the area reads the same
  * whichever half is showing. Which is open lives in the inspector store, because the structure editor opens
- * the markup half at its import and a panel's own state is not something it can reach.
+ * the form half at its import and a panel's own state is not something it can reach.
  */
 @Component({
   selector: 'portal-theme-panel',

@@ -2,6 +2,23 @@
   display: block;
 }
 
+.block-title {
+  margin: 0 0 6px;
+  color: var(--portal-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  .pc-buttons + & {
+    margin-top: 16px;
+  }
+}
+
+.pc-help {
+  margin: 0 0 8px;
+}
+
 .markup {
   max-height: 44dvh;
   margin: 0 0 8px;

@@ -23,7 +23,7 @@ The top bar carries both, the repository link, the page's own light or dark appe
 
 | Region           | Where            | Holds                                                                     |
 | :--------------- | :--------------- | :------------------------------------------------------------------------ |
-| **Top Bar**      | Across the top   | The two routes, the appearance toggle, `Copy Theme` and `Copy Markup`     |
+| **Top Bar**      | Across the top   | The two routes, the appearance toggle, `Copy Theme` and `Copy Template`   |
 | **Stage**        | The wide column  | The form, on an explicit page surface, with the model drawer beneath it   |
 | **Editor Panel** | Beside the stage | `Theme`, `Form` and `Import & Export`, each a tab over the same live form |
 
@@ -33,7 +33,7 @@ The panel's width and the drawer's height are dragged from the divider on their 
 
 ### The Stage's Own Switches
 
-Two switches annotate the preview rather than change it. Both are the Studio's own marks, not part of the form, and neither reaches the exported markup.
+Two switches annotate the preview rather than change it. Both are the Studio's own marks, not part of the form, and neither reaches the exported template.
 
 | Switch            | Default | Shows                                                                                         |
 | :---------------- | :-----: | :-------------------------------------------------------------------------------------------- |
@@ -89,11 +89,11 @@ The `Form` tab has two halves, in the order the work happens.
 
 ### Structure
 
-| Step                      | Offers                                                                         |
-| :------------------------ | :----------------------------------------------------------------------------- |
-| **1 Start**               | `Blank Form`, `The Sample`, or `Paste Markup` — the last opens Import & Export |
-| **2 Sections And Fields** | Reorder a field, remove it, or open it for editing                             |
-| **3 Add**                 | A field of any type into any section, or a new section                         |
+| Step                      | Offers                                                                           |
+| :------------------------ | :------------------------------------------------------------------------------- |
+| **1 Start**               | `Blank Form`, `The Sample`, or `Paste Template` — the last opens Import & Export |
+| **2 Sections And Fields** | Reorder a field, remove it, or open it for editing                               |
+| **3 Add**                 | A field of any type into any section, or a new section                           |
 
 Starting over replaces the fields on the stage and leaves the theme untouched. A blank form is one empty section rather than none, because every add needs somewhere to add into.
 
@@ -119,18 +119,20 @@ A control appears only where that kind of field honours the input. The decorator
 
 The `Import & Export` tab has two halves, one per thing the Studio produces. Each is derived from what is on the stage, so neither can disagree with what you are looking at, and pasting either back reproduces it.
 
-| Half       | Export                                                      | Import                              |
-| :--------- | :---------------------------------------------------------- | :---------------------------------- |
-| **Theme**  | The `:root` block to paste into your own stylesheet         | A block you saved earlier           |
-| **Markup** | The Angular template this configuration produces, read-only | A whole form, its sections included |
+| Half      | Export                                                                              | Import                                  |
+| :-------- | :---------------------------------------------------------------------------------- | :-------------------------------------- |
+| **Theme** | The `:root` block to paste into your own stylesheet                                 | A block you saved earlier               |
+| **Form**  | The Angular template this configuration produces, and a component for it, read-only | A whole template, its sections included |
 
 Both halves are the same pair of sections, `Export` and `Import`. Each `Export` carries the block, a copy, and a reset that puts that half back to where it started — the shipped theme, or the sample form.
 
-The top bar carries a copy for each half and, beside it, a control that opens that half here. `Copy Theme` and `Copy Markup` copy with no intermediate dialog; the theme's export options cover CSS or SCSS, whether the page surface is included, and whether the per-variable comments are emitted. Declarations that only restate a library default are left out.
+The top bar carries a copy for each half and, beside it, a control that opens that half here. `Copy Theme` and `Copy Template` copy with no intermediate dialog; the theme's export options cover CSS or SCSS, whether the page surface is included, and whether the per-variable comments are emitted. Declarations that only restate a library default are left out.
 
-**What An Import Ignores, It Lists.** A theme import applies the variables the library declares and lists the rest, because a variable the library does not declare would produce a control that appears to do nothing. A markup import handles a static, attribute-only subset: bindings to expressions and control flow are reported rather than silently dropped.
+**The Component Is A Proposal.** The template binds `model`, `shape` and, under Vest, `suite`. `Copy Component` copies one standalone component that declares them the way `user/validation.md` lays a form out: the model typed by what each field writes, its shape, and under Vest a suite with no rules in it — the Studio has no rule editor. Any component that provides the three names serves the template as well. The component is not read back in.
 
-**The Markup Is Derived, Not Authored.** An Angular production build contains no template compiler, so pasted markup cannot become live components. The configuration is the source of truth and the template is generated from it, which is why the template is read-only and why structure is edited through controls rather than by typing.
+**What An Import Ignores, It Lists.** A theme import applies the variables the library declares and lists the rest, because a variable the library does not declare would produce a control that appears to do nothing. A template import handles a static, attribute-only subset: bindings to expressions and control flow are reported rather than silently dropped.
+
+**The Form Is Derived, Not Authored.** An Angular production build contains no template compiler, so a pasted template cannot become live components. The configuration is the source of truth and the template and component are generated from it, which is why both are read-only and why structure is edited through controls rather than by typing.
 
 ---
 

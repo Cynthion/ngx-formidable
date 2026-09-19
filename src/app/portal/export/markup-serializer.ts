@@ -15,13 +15,13 @@ export function serializeDefinition(definition: PortalFormDefinition): string {
   lines.push('<form');
   lines.push('  formidableForm');
   lines.push('  formidableValidateWholeForm');
-  lines.push('  [formValue]="model"');
+  lines.push('  [formValue]="model()"');
   lines.push('  [formShape]="shape"');
   if (options.validator === 'vest') lines.push('  [formSuite]="suite"');
   lines.push(`  [revealOn]="'${options.revealOn}'"`);
   lines.push(`  [ngFormOptions]="{ updateOn: '${options.updateOn}' }"`);
   lines.push(`  [showRequiredMarkers]="${options.showRequiredMarkers}"`);
-  lines.push('  (formValueChange)="model = $event">');
+  lines.push('  (formValueChange)="model.set($event)">');
 
   for (const section of definition.sections) {
     const fields = definition.fields.filter((field) => field.sectionId === section.id);
@@ -38,6 +38,16 @@ export function serializeDefinition(definition: PortalFormDefinition): string {
   lines.push('</form>');
 
   return lines.join('\n') + '\n';
+}
+
+/** Whether a model key can be written bare. A field added here is named after its kind, so `radio-group1`. */
+export function isIdentifier(name: string): boolean {
+  return /^[A-Za-z_$][\w$]*$/.test(name);
+}
+
+/** The model key as the template reads it. Dot access would parse `model().radio-group1` as a subtraction. */
+function modelAccess(name: string): string {
+  return isIdentifier(name) ? `model().${name}` : `model()['${name}']`;
 }
 
 function slotContent(slot: PortalSlotContent, fallback: string): string {
@@ -70,7 +80,7 @@ function serializeField(spec: PortalFieldSpec, definition: PortalFormDefinition)
   if (spec.state.autoFocus) lines.push('    [autoFocus]="true"');
   if (spec.decoration.showRequiredMarker) lines.push('    [showRequiredMarker]="true"');
 
-  lines.push(`    [ngModel]="model.${spec.name}">`);
+  lines.push(`    [ngModel]="${modelAccess(spec.name)}">`);
 
   if (spec.defaultOption) {
     lines.push(`    <!-- pinned first, never sorted and never filtered -->`);

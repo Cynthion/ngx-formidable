@@ -4,16 +4,16 @@ import { SubTab, SubTabsComponent } from '../sub-tabs/sub-tabs.component';
 import { MarkupPanelComponent } from './markup-panel.component';
 import { ThemePanelComponent } from './theme-panel.component';
 
-/** The two things there are to take away, in the order the top bar offers them. */
+/** The two things there are to take away, named after the inspector tabs that make them. */
 const SUB_TABS: readonly SubTab[] = [
   { id: 'theme', label: 'Theme' },
-  { id: 'markup', label: 'Markup' }
+  { id: 'form', label: 'Form' }
 ];
 
 // Short, because each half's two accordions carry the explanation of what goes out and what comes back in.
 const STRAPLINES: Readonly<Record<ExportSection, string>> = {
   theme: 'The CSS your theme is, out and back in.',
-  markup: 'The template your form is, out and back in.'
+  form: 'The template and component your form is, out and back in.'
 };
 
 /**
@@ -24,7 +24,7 @@ const STRAPLINES: Readonly<Record<ExportSection, string>> = {
  * body that has to be opened before it can be read.
  *
  * Which half is showing lives in the inspector store rather than here: each of the top bar's two export
- * controls opens the one it belongs to, Structure's third way to start opens the markup half, and none of
+ * controls opens the one it belongs to, Structure's third way to start opens the form half, and none of
  * them is in a position to reach into this component.
  */
 @Component({

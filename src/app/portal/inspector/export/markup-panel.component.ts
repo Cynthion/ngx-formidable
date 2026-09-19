@@ -1,17 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AccordionComponent } from '../../chrome/accordion/accordion.component';
 import { MARKUP_NOTE_LABELS, MarkupParseResult, parseMarkup } from '../../export/markup-parser';
+import { serializeComponent } from '../../export/component-serializer';
 import { serializeDefinition } from '../../export/markup-serializer';
 import { copyText } from '../../helpers/clipboard.helpers';
 import { FormDefinitionStore } from '../../state/form-definition.store';
 import { ExportDirection, InspectorStore } from '../../state/inspector.store';
 
 /**
- * The template the configuration produces, and a way to read one back.
+ * The Form half: the template the configuration produces, a component for it to bind to, and a way to read
+ * a template back.
  *
  * An Angular production build contains no template compiler, so pasted markup cannot become live
- * components. The configuration is the source of truth: this is derived from it, read-only, and an import
- * is parsed back into it.
+ * components. The configuration is the source of truth: both are derived from it, read-only, and an import
+ * is parsed back into it. Only the template is read back — the component holds nothing the Studio configures.
  *
  * Out and back in are an accordion each, the same two the theme half has, so the area reads the same
  * whichever half is showing.
@@ -31,8 +33,10 @@ export class MarkupPanelComponent {
   protected readonly importText = signal('');
   protected readonly importResult = signal<MarkupParseResult | null>(null);
   protected readonly justCopied = signal(false);
+  protected readonly justCopiedComponent = signal(false);
 
   protected readonly markup = computed(() => serializeDefinition(this.store.definition()));
+  protected readonly component = computed(() => serializeComponent(this.store.definition()));
   protected readonly fieldCount = computed(() => this.store.fields().length);
 
   protected isOpen(direction: ExportDirection): boolean {
@@ -45,6 +49,10 @@ export class MarkupPanelComponent {
 
   protected copy(): Promise<void> {
     return copyText(this.markup(), this.justCopied);
+  }
+
+  protected copyComponent(): Promise<void> {
+    return copyText(this.component(), this.justCopiedComponent);
   }
 
   /** Replaces the whole form. Sections come from the comments the serializer writes above each run. */

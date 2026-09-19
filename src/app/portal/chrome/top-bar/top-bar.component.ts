@@ -37,8 +37,9 @@ const APPEARANCES: readonly { value: PortalAppearance; label: string; glyph: str
  * Two groups rather than one, because the theme and the template are two round trips and a single control
  * could only land on one of them. Each states a count of its own: the theme's is the number of variables the
  * user has changed, never the size of the token surface — a number that rises as they work says the library
- * needs eight to twelve variables without a sentence of explanation — and the markup's is the fields it
- * carries.
+ * needs eight to twelve variables without a sentence of explanation — and the template's is the fields it
+ * carries. The form's component has no copy here: it is the template's other half rather than a third thing
+ * to take away, so it sits beside the template in Import & Export.
  */
 @Component({
   selector: 'portal-top-bar',

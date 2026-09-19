@@ -106,11 +106,11 @@ deploy workflow is not touched by the portal at any phase.
 **Tabs Are Not Routes**: the inspector's tabs are simultaneous views of one live object, and routing them
 would hide either the preview or the editor. There are three, in the order the work happens.
 
-| Area                | Halves                 | Answers                                                               |
-| :------------------ | :--------------------- | :-------------------------------------------------------------------- |
-| **Theme**           | `Design`, `Variables`  | How the fields look                                                   |
-| **Form**            | `Structure`, `Fields`  | Which fields exist, and what each one is                              |
-| **Import & Export** | One scroll, two blocks | What you take away and paste back: the `:root` block and the template |
+| Area                | Halves                | Answers                                                                                   |
+| :------------------ | :-------------------- | :---------------------------------------------------------------------------------------- |
+| **Theme**           | `Design`, `Variables` | How the fields look                                                                       |
+| **Form**            | `Structure`, `Fields` | Which fields exist, and what each one is                                                  |
+| **Import & Export** | `Theme`, `Form`       | What you take away and paste back: the `:root` block, and the template with its component |
 
 `Form` is `Structure` first: which fields exist has to be settled before what one of them is is worth
 saying. All three areas carry the same second level, so the strip is learned once rather than per tab, and
@@ -120,7 +120,7 @@ out, which is what the tab is named for. A reader who has learned one half has l
 
 Which half is showing and which of its two accordions is open are both held in the inspector store rather
 than in the components: each of the top bar's export controls opens the half it belongs to, and `Structure`'s
-third way to start opens the markup half **at its import**, which a panel's own state could not be reached to
+third way to start opens the form half **at its import**, which a panel's own state could not be reached to
 say. Inside every area the sections are accordions with one open at a time, so the run of collapsed headers is
 the panel's table of contents rather than a scroll the user has to survey.
 
@@ -390,21 +390,23 @@ switches the paired field's format. Splitting it into separate controls would lo
 An Angular production build contains no template compiler, so user-authored markup cannot become live
 components. The configuration is therefore the source of truth and the markup is derived from it.
 
-| Direction     | Mechanism                                                                                   |
-| :------------ | :------------------------------------------------------------------------------------------ |
-| **Out**       | The configuration serialized to an Angular template, read-only, with a copy control         |
-| **In**        | A pasted template parsed with `DOMParser` into the configuration, reporting what it ignored |
-| **Structure** | Fields added, removed and reordered through controls rather than by typing                  |
+| Direction     | Mechanism                                                                                                       |
+| :------------ | :-------------------------------------------------------------------------------------------------------------- |
+| **Out**       | The configuration serialized to an Angular template and a component for it, read-only, each with a copy control |
+| **In**        | A pasted template parsed with `DOMParser` into the configuration, reporting what it ignored                     |
+| **Structure** | Fields added, removed and reordered through controls rather than by typing                                      |
+
+**The Component Is The Template's Other Half**: the template binds `model`, `shape` and, under Vest, `suite`, which only a component defines. `component-serializer.ts` emits one — each key typed from `FIELD_KIND_VALUE_TYPES`, the table the preview's own shape reads, and the suite a skeleton, because the Studio has no rule editor. It sits beside the template rather than in a third top-bar group, since it is not a third thing to take away, and it is not read back in, since it holds nothing the configuration does not.
 
 `Structure` is three numbered steps rather than one accordion per form section, because a visitor who wants
 their own form has to be told that starting over is possible before being shown a list of somebody else's
 fields.
 
-| Step                      | Offers                                                                      |
-| :------------------------ | :-------------------------------------------------------------------------- |
-| **1 Start**               | `Blank Form`, `The Sample`, `Paste Markup` — the last opens Import & Export |
-| **2 Sections And Fields** | The form as it is: reorder, remove, or open a field on `Fields`             |
-| **3 Add**                 | A field of any type into any section, or a new section                      |
+| Step                      | Offers                                                                        |
+| :------------------------ | :---------------------------------------------------------------------------- |
+| **1 Start**               | `Blank Form`, `The Sample`, `Paste Template` — the last opens Import & Export |
+| **2 Sections And Fields** | The form as it is: reorder, remove, or open a field on `Fields`               |
+| **3 Add**                 | A field of any type into any section, or a new section                        |
 
 A blank form is one empty section rather than none: every add needs somewhere to add into, so a form with no
 sections at all would be a dead end rather than a beginning. Adding leaves step 3 open — building a form is a

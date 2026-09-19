@@ -1,5 +1,6 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { FormidableFormErrors, WHOLE_FORM } from '@cynthion/ngx-formidable';
+import { FIELD_KIND_VALUE_TYPES } from '../model/field-capabilities';
 import { PortalFieldKind, PortalFieldSpec } from '../model/field-spec.model';
 import { PREVIEW_INITIAL_MODEL } from '../model/preview-form.definition';
 import { FormDefinitionStore } from './form-definition.store';
@@ -8,18 +9,16 @@ export type PortalModel = Record<string, unknown>;
 
 /** What the shape holds for a kind. The library checks the model against it in dev mode. */
 function shapeValueFor(kind: PortalFieldKind): unknown {
-  switch (kind) {
-    case 'checkbox-group':
+  switch (FIELD_KIND_VALUE_TYPES[kind]) {
+    case 'string[]':
       return [];
-    case 'date':
-    case 'time':
+    case 'Date':
       return new Date();
-    case 'toggle':
+    case 'boolean':
       return false;
-    case 'slider':
-    case 'counter':
+    case 'number':
       return 0;
-    default:
+    case 'string':
       return '';
   }
 }

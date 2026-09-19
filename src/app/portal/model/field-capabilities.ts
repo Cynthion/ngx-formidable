@@ -89,6 +89,25 @@ export const FIELD_KIND_SELECTORS: Readonly<Record<PortalFieldKind, string>> = {
   'counter': 'example-counter-field'
 };
 
+/** A field's value type, as TypeScript spells it. `user/components.md` states each one beside its selector. */
+export type PortalValueType = 'string' | 'string[]' | 'Date' | 'boolean' | 'number';
+
+/** What each kind writes into the model. The preview's shape and the exported component both read it. */
+export const FIELD_KIND_VALUE_TYPES: Readonly<Record<PortalFieldKind, PortalValueType>> = {
+  'input': 'string',
+  'textarea': 'string',
+  'select': 'string',
+  'dropdown': 'string',
+  'autocomplete': 'string',
+  'date': 'Date',
+  'time': 'Date',
+  'toggle': 'boolean',
+  'slider': 'number',
+  'radio-group': 'string',
+  'checkbox-group': 'string[]',
+  'counter': 'number'
+};
+
 /** The reverse lookup the markup parser needs. */
 export const FIELD_KIND_BY_SELECTOR: ReadonlyMap<string, PortalFieldKind> = new Map(
   Object.entries(FIELD_KIND_SELECTORS).map(([kind, selector]) => [selector, kind as PortalFieldKind])
