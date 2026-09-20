@@ -80,11 +80,15 @@
                           type="button"
                           class="entry-name"
                           (click)="select(entry.spec.id)">
-                          {{ entry.spec.name }}
+                          {{ entry.path }}
                         </button>
                       </dt>
                       <dd>
-                        {{ entry.display }}
+                        @if (entry.hidden) {
+                          <span class="message">Not rendered — no control, no key.</span>
+                        } @else {
+                          {{ entry.display }}
+                        }
                         @for (message of entry.messages; track message) {
                           <span class="message">{{ message }}</span>
                         }

@@ -1,25 +1,54 @@
 // The inspector's own controls. Global rather than per component: every panel is its own component for the
-// per-component style budget, and a component stylesheet cannot be shared. Section headings are not here —
-// `portal-accordion` owns those.
+// per-component style budget, and a component stylesheet cannot be shared. A section's own heading is not
+// here — `portal-accordion` owns that.
+
+// The divider inside a panel that has no accordion of its own, or one group of a panel that has. Its rule
+// is the only thing separating two runs of controls, so it wants more air above it than the controls it
+// heads have between them.
+.pc-group-title {
+  margin: 20px 0 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--portal-border);
+  color: var(--portal-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
 
 .pc-help {
-  margin: 4px 0 0;
+  margin: 5px 0 0;
   color: var(--portal-text-muted);
   font-size: 11px;
   line-height: 1.5;
 }
 
+// A help paragraph is normally the last line of the field it explains, and sits close to it. One that ends a
+// block instead explains what is above it, so the control after it needs the gap two fields have — without
+// it the sentence reads as the next control's own label.
+.pc-help + .pc-field,
+.pc-help + .pc-row,
+.pc-help + .pc-checks {
+  margin-top: 14px;
+}
+
 .pc-field {
   display: grid;
-  gap: 4px;
-  margin-bottom: 10px;
+  gap: 5px;
+  margin-bottom: 14px;
   min-width: 0;
 }
 
+// Two controls beside each other only while both still have room to be read. The panel is resizable down to
+// a third of the stage, and a pair split across a 130px column says less than the same pair stacked.
 .pc-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0 10px;
 }
 
 .pc-label {
@@ -78,8 +107,9 @@
 
 .pc-checks {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 0 12px;
+  margin-bottom: 12px;
 }
 
 .pc-button {

@@ -1,6 +1,6 @@
 import Fuse, { FuseResult, IFuseOptions } from 'fuse.js';
 import { HighlightedEntries } from '../../example-fuzzy-option/example-fuzzy-option.model';
-import { PortalOptionSpec } from '../model/field-spec.model';
+import { PortalFilterStrategy, PortalOptionSpec } from '../model/field-spec.model';
 
 /** One option after filtering, carrying the runs the filter matched so the option can mark them. */
 interface FuzzyMatch {
@@ -25,17 +25,53 @@ const FUSE_OPTIONS: IFuseOptions<PortalOptionSpec> = {
 /**
  * Filters an option list the way a consumer would: the field emits the filter text and the consumer supplies
  * the filtered options. The match runs come back with them, which is what `example-fuzzy-option` renders.
+ *
+ * The strategy is a setting because the choice is the consumer's, not the field's: swapping it changes what
+ * a typo finds without any field input moving, which is the division `user/fields.md` states in prose.
  */
-export function fuzzyFilter(options: readonly PortalOptionSpec[], filter: string): readonly FuzzyMatch[] {
+export function filterOptions(
+  options: readonly PortalOptionSpec[],
+  filter: string,
+  strategy: PortalFilterStrategy = 'fuzzy'
+): readonly FuzzyMatch[] {
   const trimmed = filter.trim();
 
   if (!trimmed) return options.map((option) => ({ option, highlights: EMPTY }));
 
-  const results = new Fuse([...options], FUSE_OPTIONS).search(trimmed);
+  if (strategy === 'fuzzy') {
+    const results = new Fuse([...options], FUSE_OPTIONS).search(trimmed);
 
-  return [...results]
-    .sort((a, b) => (a.score ?? 1) - (b.score ?? 1))
-    .map((result) => ({ option: result.item, highlights: extractHighlights(result) }));
+    return [...results]
+      .sort((a, b) => (a.score ?? 1) - (b.score ?? 1))
+      .map((result) => ({ option: result.item, highlights: extractHighlights(result) }));
+  }
+
+  const needle = trimmed.toLowerCase();
+
+  return options
+    .map((option) => ({ option, index: matchIndex(option.label, needle, strategy) }))
+    .filter((entry) => entry.index >= 0)
+    .map(({ option, index }) => ({ option, highlights: runsAt(option.label, index, needle.length) }));
+}
+
+/** Where the needle matches the label under a literal strategy, or -1 for no match. */
+function matchIndex(label: string, needle: string, strategy: PortalFilterStrategy): number {
+  const haystack = label.toLowerCase();
+
+  if (strategy === 'starts-with') return haystack.startsWith(needle) ? 0 : -1;
+
+  return haystack.indexOf(needle);
+}
+
+/** The same three runs fuse.js would report for one contiguous match, so the option renders identically. */
+function runsAt(label: string, start: number, length: number): HighlightedEntries {
+  const labelEntries = [
+    { text: label.slice(0, start), isHighlighted: false },
+    { text: label.slice(start, start + length), isHighlighted: true },
+    { text: label.slice(start + length), isHighlighted: false }
+  ].filter((entry) => entry.text.length > 0);
+
+  return { labelEntries, subtitleEntries: [] };
 }
 
 /** Splits each matched field into alternating unmatched and matched runs, in source order. */

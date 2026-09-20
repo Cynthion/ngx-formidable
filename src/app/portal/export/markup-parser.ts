@@ -8,14 +8,15 @@ import {
   PortalFieldSpec,
   PortalFieldState,
   PortalOptionSpec,
-  PortalSectionSpec
+  PortalSectionSpec,
+  PortalVisibilitySpec
 } from '../model/field-spec.model';
 import { slugify } from '../helpers/slug.helpers';
 import { ATTRIBUTES_BY_LOWER_NAME, unquote } from './markup-attributes';
 
 interface MarkupParseNote {
   readonly text: string;
-  readonly reason: 'unknown-element' | 'unknown-attribute' | 'dynamic-binding' | 'control-flow';
+  readonly reason: 'unknown-element' | 'unknown-attribute' | 'dynamic-binding' | 'control-flow' | 'in-the-component';
 }
 
 export interface MarkupParseResult {
@@ -37,8 +38,89 @@ const STRUCTURAL = new Set(['formidablefielderrors', '[ngmodel]', '#field']);
 
 const FALLBACK_SECTION: PortalSectionSpec = { id: 'imported', title: 'Imported' };
 
+/** Where a lifted `@if` condition is parked so the `DOMParser` carries it to its decorator. */
+const CONDITION_ATTRIBUTE = 'data-portal-visible-when';
+
 function slugOf(title: string): string {
   return slugify(title) || 'imported';
+}
+
+/**
+ * The one `@if` condition the import reads: a key of the model against a literal, which is what
+ * `visibleWhen` serializes to. Anything else stays in the source and is reported as control flow.
+ *
+ * The key may be a path, because the watched field can be inside an `ngModelGroup`. Only its last step is
+ * kept: `visibleWhen` names a field, and the group is resolved from wherever that field ends up.
+ */
+function parseCondition(expression: string): PortalVisibilitySpec | null {
+  const match = /^model\(\)((?:\.[A-Za-z_$][\w$]*|\['[^']*'\])+)\s*===\s*(.+)$/.exec(expression.trim());
+  if (!match) return null;
+
+  const steps = match[1]!.match(/\.[A-Za-z_$][\w$]*|\['[^']*'\]/g) ?? [];
+  const last = steps[steps.length - 1];
+  if (!last) return null;
+
+  const field = last.startsWith('.') ? last.slice(1) : last.slice(2, -2);
+  const raw = match[2]!.trim();
+
+  if (raw === 'true' || raw === 'false') return { field, equals: raw === 'true' };
+  if (/^-?\d+(\.\d+)?$/.test(raw)) return { field, equals: Number(raw) };
+
+  const quoted = /^'([^']*)'$/.exec(raw);
+
+  return quoted ? { field, equals: quoted[1]! } : null;
+}
+
+/**
+ * Lifts every `@if` the import understands onto the decorator it wraps, as an attribute.
+ *
+ * A line pass before the `DOMParser`, because `@if` is Angular's own syntax and not markup: the parser reads
+ * the braces as text and would drop the condition while keeping the field. An `@if` whose condition does not
+ * parse is left exactly where it is, so it still reaches the control-flow note.
+ */
+function liftConditions(source: string): string {
+  const lines = source.split('\n');
+  const output: string[] = [];
+  // One frame per `@if`, holding whether this pass consumed it, so the matching `}` goes the same way.
+  const frames: boolean[] = [];
+  let pending: string | null = null;
+
+  for (const line of lines) {
+    const opened = /^\s*@if\s*\((.+)\)\s*\{\s*$/.exec(line);
+
+    if (opened) {
+      const expression = opened[1]!.trim();
+      const understood = parseCondition(expression) !== null;
+      frames.push(understood);
+
+      if (understood) {
+        pending = expression;
+      } else {
+        output.push(line);
+      }
+
+      continue;
+    }
+
+    if (/^\s*\}\s*$/.test(line) && frames.length) {
+      if (!frames.pop()) output.push(line);
+
+      continue;
+    }
+
+    if (pending && line.includes('<formidable-field-decorator')) {
+      output.push(
+        line.replace('<formidable-field-decorator', `<formidable-field-decorator ${CONDITION_ATTRIBUTE}="${pending}"`)
+      );
+      pending = null;
+
+      continue;
+    }
+
+    output.push(line);
+  }
+
+  return output.join('\n');
 }
 
 /**
@@ -57,24 +139,34 @@ export function parseMarkup(source: string): MarkupParseResult {
   const fields: PortalFieldSpec[] = [];
   const sections: PortalSectionSpec[] = [];
 
-  if (/@(if|for|switch)\b|\*ngIf|\*ngFor/.test(source)) {
+  // The conditions the import understands are lifted onto their decorators first, so what is left under the
+  // control-flow test is only what really was dropped.
+  const lifted = liftConditions(source);
+
+  if (/@(if|for|switch)\b|\*ngIf|\*ngFor/.test(lifted)) {
     notes.push({ text: 'Control flow', reason: 'control-flow' });
   }
 
-  const parsed = new DOMParser().parseFromString(source, 'text/html');
+  const parsed = new DOMParser().parseFromString(lifted, 'text/html');
   const scope = parsed.querySelector('form') ?? parsed.body;
 
   let current: PortalSectionSpec | null = null;
   let index = 0;
 
+  /** Replaces the section being filled, which is how a group name found mid-section reaches it. */
+  const setCurrent = (section: PortalSectionSpec): void => {
+    current = section;
+    const at = sections.findIndex((candidate) => candidate.id === section.id);
+
+    if (at < 0) sections.push(section);
+    else sections[at] = section;
+  };
+
   const walk = (node: Node): void => {
     if (node.nodeType === Node.COMMENT_NODE) {
       const title = (node.textContent ?? '').trim();
 
-      if (title && !title.startsWith('pinned')) {
-        current = { id: slugOf(title), title };
-        if (!sections.some((section) => section.id === current!.id)) sections.push(current);
-      }
+      if (title && !title.startsWith('pinned')) setCurrent({ id: slugOf(title), title });
 
       return;
     }
@@ -82,17 +174,18 @@ export function parseMarkup(source: string): MarkupParseResult {
     if (!(node instanceof Element)) return;
 
     if (node.tagName.toLowerCase() === 'formidable-field-decorator') {
-      if (!current) {
-        current = FALLBACK_SECTION;
-        if (!sections.some((section) => section.id === current!.id)) sections.push(current);
-      }
+      if (!current) setCurrent(FALLBACK_SECTION);
 
-      const field = parseDecorator(node, current.id, index, notes);
+      const field = parseDecorator(node, current!.id, index, notes);
       index += 1;
       if (field) fields.push(field);
 
       return;
     }
+
+    // An `ngModelGroup` around a section's fields belongs to the section, which is where the portal keeps it.
+    const groupName = node.getAttribute('ngModelGroup') ?? node.getAttribute('ngmodelgroup');
+    if (groupName && current) setCurrent({ ...(current as PortalSectionSpec), groupName });
 
     node.childNodes.forEach(walk);
   };
@@ -145,7 +238,14 @@ function parseDecorator(
     const bound = raw.startsWith('[') && raw.endsWith(']');
     const key = bound ? raw.slice(1, -1) : raw;
 
-    if (STRUCTURAL.has(raw) || key === 'ngmodel' || raw.startsWith('(') || raw.startsWith('#')) continue;
+    // A handler names behaviour the component holds — a preset map, for instance — and the import reads
+    // only the template, so it says what it is leaving behind rather than dropping it in silence.
+    if (raw.startsWith('(')) {
+      notes.push({ text: `${attribute.name}="${attribute.value}"`, reason: 'in-the-component' });
+      continue;
+    }
+
+    if (STRUCTURAL.has(raw) || key === 'ngmodel' || raw.startsWith('#')) continue;
 
     if (key === 'readonly' || key === 'disabled' || key === 'autofocus') {
       const on = attribute.value.trim() === 'true' || attribute.value === '';
@@ -207,8 +307,9 @@ function parseDecorator(
   }
 
   const name = spec.name || `imported${index + 1}`;
+  const visibleWhen = parseCondition(decorator.getAttribute(CONDITION_ATTRIBUTE) ?? '') ?? undefined;
 
-  return { ...spec, id: name, name, decoration, state };
+  return { ...spec, id: name, name, decoration, state, visibleWhen };
 }
 
 function parseOptions(fieldElement: Element): PortalOptionSpec[] {
@@ -241,5 +342,6 @@ export const MARKUP_NOTE_LABELS: Readonly<Record<MarkupParseNote['reason'], stri
   'unknown-element': 'Not a field the portal knows',
   'unknown-attribute': 'Not an input the portal exposes',
   'dynamic-binding': 'A binding to an expression, not a literal',
-  'control-flow': 'Control flow is out of scope for the import'
+  'control-flow': 'Control flow is out of scope for the import',
+  'in-the-component': 'Behaviour that lives in the component, which the import does not read'
 };

@@ -22,6 +22,8 @@ interface PortalFieldCapabilities {
   readonly textLength: boolean;
   readonly locale: boolean;
   readonly range: boolean;
+  /** Whether the field hands its filter text to the consumer, who supplies the narrowed list back. */
+  readonly filter: boolean;
   /** Whether the field draws a panel toggle inside its own box, which a projected icon replaces. */
   readonly toggleIcon: boolean;
 }
@@ -38,6 +40,7 @@ const OFF = {
   textLength: false,
   locale: false,
   range: false,
+  filter: false,
   toggleIcon: false
 } as const;
 
@@ -47,7 +50,7 @@ export const FIELD_CAPABILITIES: Readonly<Record<PortalFieldKind, PortalFieldCap
   'textarea': { ...HORIZONTAL, ...OFF, placeholder: true, mask: true, textLength: true },
   'select': { ...HORIZONTAL, ...OFF, placeholder: true, options: true },
   'dropdown': { ...HORIZONTAL, ...OFF, placeholder: true, options: true, panel: true },
-  'autocomplete': { ...HORIZONTAL, ...OFF, placeholder: true, options: true, panel: true },
+  'autocomplete': { ...HORIZONTAL, ...OFF, placeholder: true, options: true, panel: true, filter: true },
   'date': { ...HORIZONTAL, ...OFF, placeholder: true, panel: true, locale: true, toggleIcon: true },
   'time': { ...HORIZONTAL, ...OFF, placeholder: true, locale: true },
   'toggle': { ...INLINE, ...OFF },

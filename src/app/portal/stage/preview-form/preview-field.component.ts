@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, output, signal } from '@angular/core';
-import { ControlContainer, FormsModule, NgForm } from '@angular/forms';
+import { ControlContainer, FormsModule } from '@angular/forms';
 import {
   AutocompleteFieldComponent,
   CheckboxGroupFieldComponent,
@@ -30,7 +30,7 @@ import { ExampleFuzzyOptionComponent } from '../../../example-fuzzy-option/examp
 import { ExampleIconComponent } from '../../../example-icon/example-icon.component';
 import { ExampleTooltipComponent } from '../../../example-tooltip/example-tooltip.component';
 import { describeFieldSettings } from '../../helpers/field-summary';
-import { fuzzyFilter } from '../../helpers/fuzzy.helpers';
+import { filterOptions } from '../../helpers/fuzzy.helpers';
 import { AccessibilityReadoutComponent } from '../accessibility/accessibility-readout.component';
 import { CALENDAR_SVG, MARKER_SVG, SPARK_SVG } from './preview-icons';
 import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabilities';
@@ -90,7 +90,10 @@ const FORMATTERS: Readonly<Record<string, (value: number) => string>> = {
   // boundary — so without this every control would register as standalone, outside the form. A standalone
   // `ngModel` also sets its control up before the field's view exists, which `impl/backlog.md` records as a
   // crash, so this is what makes the per-field component workable at all.
-  viewProviders: [{ provide: ControlContainer, useExisting: NgForm }],
+  //
+  // The container is resolved rather than named: a field inside a section's `ngModelGroup` has to register
+  // on that group, and pinning every field to the `NgForm` instead would flatten the group out of the model.
+  viewProviders: [{ provide: ControlContainer, useFactory: () => inject(ControlContainer, { skipSelf: true }) }],
   host: {
     '[class.is-selected]': 'selected()',
     '[style.grid-column]': "spec().span === 2 ? '1 / -1' : null"
@@ -194,8 +197,16 @@ export class PreviewFieldComponent {
   /** An autocomplete emits its filter text and the consumer supplies the filtered list. */
   protected readonly filterText = signal('');
 
-  /** Filtered with fuse.js, so the projected custom option has real match runs to mark. */
-  protected readonly fuzzyMatches = computed(() => fuzzyFilter(this.options(), this.filterText()));
+  /**
+   * The narrowed list the autocomplete renders, with the match runs its projected option marks.
+   *
+   * The strategy is the consumer's choice, not the field's — which is the point of offering it as a setting:
+   * the same typed text finds a typo under `fuzzy` and nothing under the two literal strategies, with no
+   * input on the field having moved.
+   */
+  protected readonly fuzzyMatches = computed(() =>
+    filterOptions(this.options(), this.filterText(), this.spec().filterStrategy ?? 'fuzzy')
+  );
 
   protected onFocus(isFocused: boolean): void {
     if (isFocused) this.focused.emit(this.spec().id);

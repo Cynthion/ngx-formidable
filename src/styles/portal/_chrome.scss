@@ -1,5 +1,17 @@
 @use 'formidable-vars' as vars;
 
+// The chrome measures border-box. Its controls are `width: 100%` inside a padded column, and the content
+// box would put their own padding and border outside that width — Chrome's user agent already does this for
+// a `button` and a `select`, which is why only the inputs and textareas bled into the gutter.
+// Scoped to the chrome rather than global: the preview form is the library under a consumer's page, and the
+// library states its own box model where it needs one.
+.portal-chrome,
+.portal-chrome *,
+.portal-chrome *::before,
+.portal-chrome *::after {
+  box-sizing: border-box;
+}
+
 // The portal's own controls are built from the library's components, so they read `--formidable-*` and a
 // `:root` theme reaches them. The cascade cannot insulate them by scoping alone: most of the library's
 // variables are derived and are declared once, in the `:root` block, so an override further down the tree

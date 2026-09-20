@@ -166,6 +166,11 @@ already reaches library styles by path through the `stylePreprocessorOptions.inc
 The chrome's own theme is compact and is not user-editable. Font family is an ordinary inherited property
 rather than a custom property, so the chrome pins its own.
 
+**The chrome measures border-box**: `.portal-chrome` and its subtree set `box-sizing: border-box`, and the
+preview form is left on the box model a consumer's page gives it. A panel control is `width: 100%` inside a
+padded column, and a content box would put its own padding and border outside that column — which a user
+agent already prevents for a `button` and a `select`, and does not for an `input` or a `textarea`.
+
 ### The Theme Editor
 
 The ladder in `user/theming.md` is the layout: one scrollable column of numbered steps, in that order, which
@@ -277,43 +282,132 @@ display face has no reliable stand-in; bundling licensed `woff2` files is filed 
 
 ## Preview Form
 
-**The Context Is A Time Traveller's Visa Application.** It is chosen for the date field, which is the
-library's most configurable component and the one a contrived pairing shows on: two dates in two formats and
-two locales is the premise rather than a contrivance. It also gives every option field a real reason for a
-`disabled` and a `readonly` entry, and it carries a submit destination — an issued visa — so the form is
-visibly a form.
+**The Context Is A Pizza Order.** It is chosen for being a domain nobody has to be taught. A visitor changing
+a setting in the sidebar has to see the consequence and recognise it, and a form about its own subject matter
+cannot do that — reading the domain competes with reading the change. It also gives every option field a
+reason for a `disabled` and a `readonly` entry that needs no caption, and it carries a submit destination.
 
 **Every Field Is Previewed**, inside one example form with a consistent context, laid out on a grid rather
 than at uniform full width. The form is fully functional and fillable, and starts pre-filled: an empty form
 shows none of the filled, selected or floating-label states that a theme is judged by.
 
-| Section           | Field                   | Type                             |
-| :---------------- | :---------------------- | :------------------------------- |
-| **The Traveller** | Name                    | `input`                          |
-|                   | Temporal identifier     | `input`, masked                  |
-|                   | Origin era              | `select`                         |
-| **The Journey**   | Destination era         | `dropdown`                       |
-|                   | Arrival date            | `date`                           |
-|                   | Return date             | `date`, second locale and format |
-|                   | Arrival time            | `time`                           |
-|                   | Companions              | the custom counter field         |
-| **The Rules**     | Purpose of visit        | `radio-group`                    |
-|                   | Declarations            | `checkbox-group`                 |
-|                   | Paradox tolerance       | `slider`                         |
-|                   | Anchor point            | `autocomplete`                   |
-| **Small Print**   | Have you met yourself   | `toggle`                         |
-|                   | Notes to your past self | `textarea`                       |
+| Section                       | Field                 | Type                     | Columns |       Rendered       |
+| :---------------------------- | :-------------------- | :----------------------- | :-----: | :------------------: |
+| **Your Pizza**                | Pizza                 | `dropdown`, with presets |    2    |        Always        |
+|                               | Size                  | `select`                 |    1    |        Always        |
+|                               | Crust                 | `select`                 |    1    |        Always        |
+|                               | Sauce                 | `radio-group`            |    1    |        Always        |
+|                               | Toppings              | `checkbox-group`         |    1    |        Always        |
+|                               | Spice                 | `slider`                 |    2    |        Always        |
+| **Delivery Or Collection**    | How To Get It         | `toggle`                 |    2    |        Always        |
+|                               | Delivery Address      | `autocomplete`           |    2    |   While delivering   |
+|                               | Pick Up From          | `dropdown`               |    2    |   While collecting   |
+| **When** (group `when`)       | Date                  | `date`                   |    1    |        Always        |
+|                               | Time                  | `time`                   |    1    |        Always        |
+| **Payment** (group `payment`) | Pay By                | `radio-group`            |    1    |        Always        |
+|                               | Card Number           | `input`, masked          |    1    | While paying by card |
+| **Your Order**                | Name On The Order     | `input`                  |    1    |        Always        |
+|                               | How Many              | the custom counter field |    1    |        Always        |
+|                               | Phone Number          | `input`, masked          |    1    |        Always        |
+|                               | Email Address         | `input`                  |    1    |        Always        |
+|                               | Notes For The Kitchen | `textarea`               |    2    |        Always        |
 
-**Disabled And Readonly Carry The Context**: an era closed for maintenance is `disabled`, an era open to
-observers only is `readonly`. The state has a reason a visitor understands without a caption, which is what
-makes the sample honest rather than decorative.
+**Every Type Is On Screen When The Form Loads.** The one rule the layout cannot trade away: a component
+reachable only by flipping a switch is a component a visitor never finds, and the Studio's whole claim is
+that every field is on the page. It is what decides where a type is carried more than once.
 
-**Several Fields Per Type**: the table above is the core set, not the final field list. Each type appears at
-least twice with deliberately different configuration, adjacent in the same row so the difference is visible
-without scrolling. The two dates are the pair the context exists for. Nothing states the difference in prose:
-the two chips read the same kind and the two fields render differently, which shows the pairing instead of
-claiming it — and survives a reorder, a removal and the one-column collapse, none of which a written caption
-does.
+| Type          | More Than Once Because                                                                                                 |
+| :------------ | :--------------------------------------------------------------------------------------------------------------------- |
+| `input`       | Two unmasked and two masked show what a mask does; an off-by-default mask is an invisible feature                      |
+| `dropdown`    | The pizza picker is unconditional, so the branch is free to be one half of the swap without taking the type off screen |
+| `select`      | Two lists of the same component, differing only in their options                                                       |
+| `radio-group` | The payment method reveals a field the way the handover toggle does, one group deeper                                  |
+
+**The Section Title And Its Fields Never Repeat A Name.** `Delivery Or Collection` heads the section whose
+toggle is `How To Get It`; a heading and a label reading the same words twice is the page stuttering at the
+visitor.
+
+**A Pizza Is A Template.** The picker carries `presets`, a patch per option, so choosing one fills the sauce
+and the toppings and leaves every other field alone. The patch is applied when that field's own value moves
+and never again, so an edit afterwards stands — the choice is a starting point, not a lock. An option with
+no entry patches nothing, which is what makes `Custom` the absence of a rule rather than a special case.
+
+Presets are applied in `FormValueStore.setModel`, which is the one place the model is written, and their
+keys are **top-level** model keys. That is deliberate: the patch is a spread, and a spread is exactly what
+the exported component's handler does. A preset the Studio could apply and the export could not would be the
+divergence the export contract exists to prevent.
+
+The export splits in two, because a map is data and a template cannot hold one. The template binds
+`(ngModelChange)="applyPizzaPreset($event)"`; the component declares `pizzaPresets` and that handler, both
+named off the field by `presetHandlerName` so the two halves cannot drift. The import reads only the
+template, so a re-imported form arrives without its presets and says so — the one `in-the-component` note.
+
+**Labels Are Title Case**, on the sample form as on the inspector's own controls, so the two halves of the
+page read as one product. It covers field labels, a toggle's `onLabel` and `offLabel`, and an option's
+choice text. It does not cover the sentences: a placeholder, a hint and the clause after an em dash in an
+option label explain rather than name, and stay as written — `Family — sold out today`.
+
+**One Field Overrides The Form's Label Position.** The card number labels `outside`, because it shares a row
+with a radio group, and a vertical layout labels `outside` and cannot do otherwise — so an `inside` label
+beside it would put the two labels of one row at different heights. It is also what the `All Fields` scope
+counts as the sample's one built-in override.
+
+**The Two Group Fields Share A Row**, at one column each. A single-choice list and a multi-choice list read
+against each other, which is what makes the difference between them legible without a caption.
+
+**The Custom Field Sits Late.** `How Many` is a cart quantity and belongs beside the order, not at the top of
+the pizza. Placing it in the last section also keeps the library's own components first, which is what a
+visitor came for.
+
+**Disabled And Readonly Carry The Context**: a sold-out topping is `disabled`, one already in the price is
+`readonly`. The state has a reason a visitor reads off the label, which is what makes the sample honest
+rather than decorative.
+
+**Otherwise One Field Per Type.** A second copy was the old way to show two configurations side by side; the
+sidebar shows the same difference on one field, live, and a short field list is what leaves the form
+readable at a glance. The exceptions above each buy something a setting cannot.
+
+**Four Behaviours A Single Field Cannot Show.** Each is carried by the sample rather than described beside
+it, and each is visible in the model drawer.
+
+| Behaviour              | Carried By                                       | What It Demonstrates                                                                  |
+| :--------------------- | :----------------------------------------------- | :------------------------------------------------------------------------------------ |
+| **Groups**             | `groupName` on the `When` and `Payment` sections | An `ngModelGroup` and a nested model; `When` adds a rule that reports on the group    |
+| **Conditional fields** | `visibleWhen` on the address, branch and card    | `@if` destroys the control, so the key leaves the model — and `omitWhen` in the suite |
+| **A template picker**  | `presets` on the pizza field                     | One choice filling several fields, and an export split between template and component |
+| **Consumer filtering** | `filterStrategy` on the autocomplete             | The field emits filter text and renders what it is handed; the matching is not its    |
+
+**Two Groups, Two Reasons.** `When` is the one a rule needs: neither the date nor the time is wrong alone,
+so the rule reading both has nowhere to report but the group. `Payment` is the plainer case — details that
+belong together in the model, whether or not a rule ever reads two of them at once. Both are worth showing,
+because a group is not only for cross-field rules.
+
+**The Swap Is Both Halves Of The Pair.** One toggle, two fields, one each way: the address is on screen at
+load and the branch replaces it. Neither takes a type off the form, because the branch's type is also the
+pizza picker's — which is part of why the picker is a `dropdown`.
+
+**A Condition Names A Field, Not A Path.** `visibleWhen` carries the watched field's `name`, and the group
+is resolved wherever that field turns out to sit: the renderer resolves it through `pathById`, and the
+serializer through the section the field belongs to, which is what writes `model().payment.method === 'card'`.
+Keeping the path out of the specification is what lets a field move into or out of a group without every
+condition naming it having to be rewritten.
+
+**The Group Sits On The Section**, not on each field. A group is a run of adjacent controls, which is what a
+section already is, and one member per field would be a second ordering to keep in step with the first. The
+model path follows from it — `FormDefinitionStore.pathById` is the one place that resolves `group.name`, and
+the shape, the drawer, the rule targets and the exported model access all read it.
+
+**Conditional Fields Are A Condition, Not A Predicate.** Equality against one field is the whole grammar,
+because it has to survive a round trip: the serializer writes it as an `@if` and the import reads it back.
+That is also what keeps the Studio a form previewer rather than a form builder — there is no sidebar control
+for it, and the sample is where a visitor meets it.
+
+**The Per-Field Component Resolves Its Own `ControlContainer`.** A field lives in its own component, so
+`ngModel`'s `@Host()` injection stops at that boundary and the component has to provide one. It provides the
+**nearest** container rather than the `NgForm`, or a field inside a grouped section would register on the form
+and flatten the group out of the model. For the same reason the field loop is written out under both branches
+of the group's `@if` rather than shared through an `ng-template`: an embedded view resolves DI where the
+template is declared, not where it is inserted.
 
 **Chips Are Controls, And Are Derived**: each chip names the component its field is, opens that field on the
 `Settings` tab, and carries a `↗` to say so. The preview explains itself, and every explanation is also the way

@@ -8,6 +8,7 @@ import {
   PortalFormOptions,
   PortalSectionSpec
 } from '../model/field-spec.model';
+import { pathOf } from '../helpers/model-path.helpers';
 import { localeOf } from '../model/locales';
 import { PREVIEW_FORM_DEFINITION } from '../model/preview-form.definition';
 
@@ -45,6 +46,17 @@ export class FormDefinitionStore {
       }));
     }
   );
+
+  /**
+   * Each field's model path, keyed by field id. One computed rather than a member on the field, because the
+   * path is a fact about where the field sits — moving a field into a grouped section has to move its key
+   * with it, and a stored copy would be a second truth to keep in step.
+   */
+  public readonly pathById = computed<ReadonlyMap<string, string>>(() => {
+    const groups = new Map(this.sections().map((section) => [section.id, section.groupName]));
+
+    return new Map(this.fields().map((field) => [field.id, pathOf(field.name, groups.get(field.sectionId))]));
+  });
 
   public select(id: string | null): void {
     this.selectedFieldId.set(id);
@@ -148,7 +160,10 @@ export class FormDefinitionStore {
       id,
       name: id,
       sectionId,
-      label: `New ${kind}`
+      label: `New ${kind}`,
+      // The template is an existing field of the same kind, and the sample's autocomplete is conditional —
+      // copying that would add a field nobody can see.
+      visibleWhen: undefined
     };
 
     this.definition.update((definition) => ({ ...definition, fields: [...definition.fields, added] }));

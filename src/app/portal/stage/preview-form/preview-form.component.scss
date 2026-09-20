@@ -53,6 +53,14 @@
   align-items: stretch;
 }
 
+// An `ngModelGroup` section. The group's own errors render as a sibling of the grid rather than inside it,
+// so a message reporting on the pair is not laid out as if it belonged to one of the two fields.
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .form-footer {
   display: flex;
   align-items: center;

@@ -31,6 +31,12 @@ export function describeFieldSettings(spec: PortalFieldSpec): readonly FieldSett
 
   if (spec.sortAlphabetically) settings.push({ name: 'sortFn', value: 'alphabetical' });
   if (spec.locale) settings.push({ name: 'locale', value: spec.locale });
+  if (spec.filterStrategy) settings.push({ name: 'filter', value: spec.filterStrategy });
+
+  // Not an input on the field either: the `@if` around it is, which is exactly what the chip should say.
+  if (spec.visibleWhen) {
+    settings.push({ name: '@if', value: `${spec.visibleWhen.field} === ${String(spec.visibleWhen.equals)}` });
+  }
 
   if (spec.state.readonly) settings.push({ name: 'readonly', value: 'true' });
   if (spec.state.disabled) settings.push({ name: 'disabled', value: 'true' });

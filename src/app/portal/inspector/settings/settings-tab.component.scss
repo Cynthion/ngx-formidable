@@ -1,12 +1,12 @@
 :host {
   display: block;
-  padding: 0 16px 16px;
+  padding: 14px 16px 20px;
 }
 
 // Deliberately unlike the sub-tab strip above it: that one says where you are, this one says how far a
 // control reaches. Two identical strips stacked would read as one broken navigation.
 .scope {
-  margin-bottom: 4px;
+  margin-bottom: 16px;
 }
 
 .scope-label {
@@ -66,5 +66,5 @@
 }
 
 .picker {
-  margin-bottom: 4px;
+  margin-bottom: 16px;
 }

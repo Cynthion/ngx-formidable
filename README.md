@@ -34,7 +34,7 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
-- [Features](#features)
+- [Features](#features) - [🧩 Fields](#-fields) - [🎀 Decorator](#-decorator) - [✅ Bring Your Own Validator](#-bring-your-own-validator) - [🎨 Themeable To The Corner](#-themeable-to-the-corner) - [⌨️ Keyboard And Screen Readers](#️-keyboard-and-screen-readers) - [🛡️ Masking And Panels](#️-masking-and-panels) - [🧠 Typed Model And Shape](#-typed-model-and-shape) - [🛠️ Extensible](#️-extensible) - [🚀 Zero Boilerplate](#-zero-boilerplate)
 - [When To Pick This Over Angular Material](#when-to-pick-this-over-angular-material)
 - [Installation](#installation)
 - [Setup](#setup)
@@ -50,7 +50,7 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 <tr>
 <td width="33%" valign="top">
 
-##### [🧩 Eleven Fields](.documentation/user/components.md)
+##### [🧩 Fields](.documentation/user/components.md)
 
 • Input, Textarea
 • Select, Dropdown, Autocomplete
@@ -63,7 +63,7 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 </td>
 <td width="33%" valign="top">
 
-##### [🎀 One Decorator](.documentation/user/decoration.md)
+##### [🎀 Decorator](.documentation/user/decoration.md)
 
 • Six label positions — outside, inside, inside-placeholder, inside-floating, border, border-prefix
 • A slot beside the label for anything you like
@@ -330,9 +330,9 @@ Full API — every input, output, type and token — in the [component catalogue
 
 | Category             | Directive                                                                                                                                                                              |
 | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Form-level**       | `formidableForm`, `formidableValidateWholeForm`, plus the two that attach themselves to `ngModel` and `ngModelGroup`                                                                   |
+| **Form-Level**       | `formidableForm`, `formidableValidateWholeForm`, plus the two that attach themselves to `ngModel` and `ngModelGroup`                                                                   |
 | **Decoration**       | `formidableFieldLabel`, `formidableFieldLabelAdornment`, `formidableFieldPrefix`, `formidableFieldSuffix`, `formidableFieldHint`, `formidableFieldErrors`, `formidableFieldToggleIcon` |
-| **Vest entry point** | `formSuite`, from `@cynthion/ngx-formidable/vest`                                                                                                                                      |
+| **Vest Entry Point** | `formSuite`, from `@cynthion/ngx-formidable/vest`                                                                                                                                      |
 
 ## Documentation
 
@@ -343,7 +343,7 @@ Guides teach a topic; references list what it accepts.
 | [Getting Started](.documentation/user/getting-started.md) | Registry, install, wiring, the stylesheet, a first form        |
 | [Fields](.documentation/user/fields.md)                   | Options, panels, keyboard, dates and times, masking, focus     |
 | [Decoration](.documentation/user/decoration.md)           | Labels, adornments, prefixes, suffixes, hints, required marker |
-| [Validation](.documentation/user/validation.md)           | Targets, timing, Vest, zod, Angular's validators, messages     |
+| [Validation](.documentation/user/validation.md)           | Targets, timing, conditional fields, Vest, zod, messages       |
 | [Theming](.documentation/user/theming.md)                 | The default theme, what to override, worked examples           |
 | [Studio](.documentation/user/studio.md)                   | Building a theme and a form in the browser, and exporting both |
 | [Custom Fields](.documentation/user/custom-fields.md)     | Building a field, an option or a validator of your own         |

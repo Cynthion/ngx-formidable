@@ -1,7 +1,7 @@
 @if (!total()) {
   <p class="pc-help">No fields yet. Add one under <strong>Structure</strong>.</p>
 } @else {
-  <h3 class="group-title">Decoration</h3>
+  <h3 class="pc-group-title">Decoration</h3>
 
   @for (control of controls; track control.id) {
     @let state = stateOf(control);

@@ -12,7 +12,7 @@
   align-items: baseline;
   gap: 8px;
   width: 100%;
-  padding: 11px 16px;
+  padding: 12px 16px;
   border: 0;
   background: transparent;
   color: var(--portal-text);
@@ -78,12 +78,15 @@
   background: var(--portal-surface-sunken);
 }
 
+// The open header is a tinted band, and its own padding stops at its edge. Without a top padding of its own
+// the section's first line — usually the lede, which is the sentence explaining the band it is under —
+// starts against that edge and reads as part of the header rather than as the answer to it.
 .body {
-  padding: 0 16px 16px;
+  padding: 14px 16px 16px;
 }
 
 .lede {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   color: var(--portal-text-muted);
   font-size: 11px;
   line-height: 1.55;

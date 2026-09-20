@@ -295,6 +295,54 @@ One `*.form.ts` per form holds its model, shape and suite. `user/getting-started
 
 ---
 
+## Conditional Fields
+
+A field that appears only under some condition is Angular's `@if`, not a library feature. The library has no input for it and needs none.
+
+```html
+<formidable-toggle-field
+  name="pickup"
+  [ngModel]="model().pickup" />
+
+@if (!model().pickup) {
+<formidable-field-decorator>
+  <formidable-autocomplete-field
+    formidableFieldErrors
+    name="address"
+    [ngModel]="model().address" />
+  <div formidableFieldLabel>Delivery Address</div>
+</formidable-field-decorator>
+}
+```
+
+`@if` **destroys** the control rather than hiding it. Angular deregisters it, `NgForm` rebuilds its value without that key, and the model shrinks. Everything below follows from that one fact.
+
+| Concern           | What To Do                                                                                                      |
+| :---------------- | :-------------------------------------------------------------------------------------------------------------- |
+| The rule          | Wrap it in `omitWhen`, or it reports on a target nobody can see or fix                                          |
+| The re-run        | Name the controlling field in `dependentFields`, or the last message stands after the field has gone            |
+| The value         | Yours to clear. Angular removes the control, never your model key — the field returns carrying its old value    |
+| A whole-form rule | Reads a key that may be absent, so it handles `undefined` rather than assuming the field is there               |
+| `formShape`       | Nothing to do. It is `DeepPartial` and is checked against the keys the **model** has, so a missing one is legal |
+
+```ts
+omitWhen(model.pickup === true, () => {
+  test('address', 'We need an address to deliver to.', () => {
+    enforce(model.address).isNotBlank();
+  });
+});
+```
+
+```ts
+dependentFields = { pickup: ['address', 'branch'] };
+```
+
+**Two Fields, One Switch.** A pair that swaps — one field replaced by another — is two `@if` blocks over the same control and two `omitWhen` rules with opposite conditions. Both fields belong in the shape; only one is ever in the model.
+
+**Not `[disabled]`.** A disabled control keeps its key: the form still carries it, and the raw value a group or whole-form rule reads still holds it. Use `[disabled]` for a field that is present but not editable, and `@if` for a field that is not part of this form right now.
+
+---
+
 ## Zod
 
 Not shipped. But it is the same shape, and the library is built so this is all it takes:

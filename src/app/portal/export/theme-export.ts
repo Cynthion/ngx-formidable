@@ -20,7 +20,7 @@ interface ThemeExportInput {
 
 export const DEFAULT_EXPORT_OPTIONS: ThemeExportOptions = {
   format: 'css',
-  includeComments: true,
+  includeComments: false,
   includePageSurface: false
 };
 

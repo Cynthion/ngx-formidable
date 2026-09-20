@@ -20,20 +20,18 @@ function valueOf(id: string, name: string): string | undefined {
 
 describe('describeFieldSettings', () => {
   it('reads the inputs a field actually carries', () => {
-    expect(namesOf('arrivalDate')).toEqual(
+    expect(namesOf('date')).toEqual(
       jasmine.arrayContaining(['panelPosition', 'unicodeTokenFormat', 'emptyHint', 'locale'])
     );
   });
 
-  it('separates the two halves of a pair by what each is set to', () => {
-    expect(valueOf('arrivalDate', 'locale')).toBe('en-GB');
-    expect(valueOf('returnDate', 'locale')).toBe('ja-JP');
-    expect(valueOf('arrivalDate', 'panelPosition')).toBe('right');
-    expect(valueOf('returnDate', 'panelPosition')).toBe('left');
+  it('separates two fields of one kind by what each is set to', () => {
+    expect(valueOf('phone', 'mask')).toBe('000 000 00 00');
+    expect(namesOf('orderName')).not.toContain('mask');
   });
 
   it('strips the quotes a one-way binding to a string literal carries', () => {
-    expect(valueOf('arrivalDate', 'unicodeTokenFormat')).toBe('dd . MM . yyyy');
+    expect(valueOf('date', 'unicodeTokenFormat')).toBe('dd . MM . yyyy');
   });
 
   it('never states the name, which is the field’s identity rather than one of its settings', () => {
@@ -51,26 +49,41 @@ describe('describeFieldSettings', () => {
   });
 
   it('carries the state flags, which the serializer emits outside the attribute table', () => {
-    expect(namesOf('clearance')).toContain('disabled');
-    expect(namesOf('luggage')).toContain('readonly');
-    expect(namesOf('travellerName')).not.toContain('disabled');
+    const base = fieldById('orderName');
+
+    expect(describeFieldSettings({ ...base, state: { ...base.state, disabled: true } }).map((s) => s.name)).toContain(
+      'disabled'
+    );
+    expect(describeFieldSettings({ ...base, state: { ...base.state, readonly: true } }).map((s) => s.name)).toContain(
+      'readonly'
+    );
+    expect(namesOf('orderName')).not.toContain('disabled');
   });
 
   it('carries the sort, which is a function input the markup cannot express', () => {
-    expect(valueOf('originSector', 'sortFn')).toBe('alphabetical');
-    expect(namesOf('originEra')).not.toContain('sortFn');
+    expect(valueOf('toppings', 'sortFn')).toBe('alphabetical');
+    expect(namesOf('sauce')).not.toContain('sortFn');
+  });
+
+  // Neither of these is an input on the field: the filter is the consumer's matching and the condition is
+  // the `@if` around the field. Both change what the visitor sees, so the chip has to state them.
+  it('carries the filter strategy and the visibility condition', () => {
+    expect(valueOf('address', 'filter')).toBe('fuzzy');
+    expect(valueOf('address', '@if')).toBe('pickup === false');
+    expect(valueOf('branch', '@if')).toBe('pickup === true');
+    expect(namesOf('orderName')).not.toContain('@if');
   });
 
   it('says nothing for a field sitting entirely on its defaults', () => {
     const bare: PortalFieldSpec = {
       id: 'bare',
       kind: 'input',
-      sectionId: 'traveller',
+      sectionId: 'pizza',
       name: 'bare',
       label: 'Bare',
       placeholder: '',
       span: 1,
-      decoration: fieldById('travellerName').decoration,
+      decoration: { ...fieldById('orderName').decoration, showRequiredMarker: false },
       state: { readonly: false, disabled: false, autoFocus: false }
     };
 

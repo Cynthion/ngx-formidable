@@ -217,15 +217,17 @@ describe('studio settings', () => {
     it('states what most fields carry, and counts the rest', fakeAsync(() => {
       settle();
 
+      // The sample ships one deliberate override: the card number labels `outside` so that it lines up with
+      // the radio group it shares a row with. Every other field sits on the form's own `inside`.
       expect(control('label-position').value).toBe('inside');
-      expect(overrides('label-position')).toBe('');
+      expect(overrides('label-position')).toBe(`1 of ${store.fields().length} fields override this.`);
 
       store.updateDecoration(PREVIEW_FORM_DEFINITION.fields[0]!.id, { labelPosition: 'border' });
       settle();
 
-      // Still `inside`: one field overriding does not make the other 23 disappear, which is what `Mixed` did.
+      // Still `inside`: a field overriding does not make the rest disappear, which is what `Mixed` did.
       expect(control('label-position').value).toBe('inside');
-      expect(overrides('label-position')).toBe(`1 of ${store.fields().length} fields override this.`);
+      expect(overrides('label-position')).toBe(`2 of ${store.fields().length} fields override this.`);
     }));
 
     it('reasserts the stated value over the fields that override it', fakeAsync(() => {
@@ -234,7 +236,8 @@ describe('studio settings', () => {
       store.updateDecoration(PREVIEW_FORM_DEFINITION.fields[0]!.id, { labelPosition: 'border' });
       store.updateDecoration(PREVIEW_FORM_DEFINITION.fields[1]!.id, { labelPosition: 'outside' });
       settle();
-      expect(overrides('label-position')).toBe(`2 of ${store.fields().length} fields override this.`);
+      // These two, plus the card number the sample already ships overriding.
+      expect(overrides('label-position')).toBe(`3 of ${store.fields().length} fields override this.`);
 
       const apply = control('label-position').closest('.pc-field')!.querySelector('.pc-reset') as HTMLElement;
       apply.click();

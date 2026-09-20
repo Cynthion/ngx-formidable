@@ -38,19 +38,58 @@
     @for (entry of sections(); track entry.section.id) {
       <section class="form-section">
         <h2>{{ entry.section.title }}</h2>
-        <div class="field-grid">
-          @for (field of entry.fields; track field.id) {
-            <portal-preview-field
-              [spec]="field"
-              [formOptions]="opts"
-              [value]="valueFor(field.name)"
-              [selected]="definitionStore.selectedFieldId() === field.id"
-              [showFieldTypes]="showFieldTypes()"
-              [showAccessibility]="showAccessibility()"
-              (focused)="onFieldFocused($event)"
-              (chipActivated)="openInInspector($event)" />
-          }
-        </div>
+
+        <!--
+          A section carrying a `groupName` renders as an `ngModelGroup`, which nests its fields in the model
+          and gives a rule reading two of them somewhere to report. `formidableFieldErrors` on the group is
+          what draws that rule's messages, under the group rather than under either field.
+
+          The field loop is written out under both branches rather than shared through an `ng-template`: an
+          embedded view resolves DI where the template is *declared*, so fields rendered through an outlet
+          would inject the `NgForm` and register outside the group they are sitting in.
+        -->
+        @if (entry.section.groupName; as groupName) {
+          <div
+            formidableFieldErrors
+            class="form-group"
+            [ngModelGroup]="groupName">
+            <div class="field-grid">
+              @for (field of entry.fields; track field.id) {
+                @if (!valueStore.hiddenFieldIds().has(field.id)) {
+                  <portal-preview-field
+                    [spec]="field"
+                    [formOptions]="opts"
+                    [value]="valueFor(field.id)"
+                    [selected]="definitionStore.selectedFieldId() === field.id"
+                    [showFieldTypes]="showFieldTypes()"
+                    [showAccessibility]="showAccessibility()"
+                    (focused)="onFieldFocused($event)"
+                    (chipActivated)="openInInspector($event)" />
+                }
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="field-grid">
+            @for (field of entry.fields; track field.id) {
+              <!--
+                A conditional field is destroyed, not hidden: Angular removes the control with it and the
+                model loses the key, which `user/validation.md` covers under Conditional Fields.
+              -->
+              @if (!valueStore.hiddenFieldIds().has(field.id)) {
+                <portal-preview-field
+                  [spec]="field"
+                  [formOptions]="opts"
+                  [value]="valueFor(field.id)"
+                  [selected]="definitionStore.selectedFieldId() === field.id"
+                  [showFieldTypes]="showFieldTypes()"
+                  [showAccessibility]="showAccessibility()"
+                  (focused)="onFieldFocused($event)"
+                  (chipActivated)="openInInspector($event)" />
+              }
+            }
+          </div>
+        }
       </section>
     }
 

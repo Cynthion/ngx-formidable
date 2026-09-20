@@ -56,6 +56,35 @@ type PortalFormatterId = 'none' | 'percent' | 'years' | 'currency' | 'ordinal';
 /** The locales the date pair switches between, each moving translations, first day and token format at once. */
 export type PortalLocaleId = 'en-GB' | 'en-US' | 'de-CH' | 'fr-FR' | 'ja-JP';
 
+/**
+ * How an autocomplete's consumer narrows the list.
+ *
+ * The field does not filter — it emits `filterChanged` and renders whatever it is handed back — so this is a
+ * property of the portal's own filtering code, not of the component. Offering it as a setting is what makes
+ * that division visible rather than merely stated.
+ */
+export type PortalFilterStrategy = 'fuzzy' | 'contains' | 'starts-with';
+
+export const FILTER_STRATEGY_LABELS: Readonly<Record<PortalFilterStrategy, string>> = {
+  'fuzzy': 'Fuzzy (fuse.js)',
+  'contains': 'Contains',
+  'starts-with': 'Starts With'
+};
+
+/**
+ * What a field waits for before it renders: another field holding a given value.
+ *
+ * A condition rather than a predicate, because it has to survive a round trip through the exported template —
+ * the serializer writes it as an `@if` and the import reads it back. Equality against one field is the whole
+ * grammar, which is enough for the sample and is what keeps the Studio a form previewer rather than a form
+ * builder.
+ */
+export interface PortalVisibilitySpec {
+  /** The `name` of the field this one watches. */
+  readonly field: string;
+  readonly equals: string | number | boolean;
+}
+
 /** One option in an option field's list. */
 export interface PortalOptionSpec {
   readonly value: string;
@@ -128,6 +157,19 @@ export interface PortalFieldSpec {
   readonly span: 1 | 2;
   readonly decoration: PortalFieldDecoration;
   readonly state: PortalFieldState;
+  /** Absent means always rendered. Present, the field is destroyed while the condition does not hold. */
+  readonly visibleWhen?: PortalVisibilitySpec;
+  /**
+   * What choosing an option writes into the rest of the model, keyed by that option's value.
+   *
+   * A template picker: the field carries the patch its own options stand for, so picking one fills the
+   * fields it decides and leaves every other alone. An option with no entry patches nothing, which is what
+   * makes a `Custom` choice the absence of a rule rather than a special case.
+   *
+   * Keys are **top-level** model keys, not paths. That is what keeps the patch a spread, which is what the
+   * exported component does too — a preset the Studio applies and the export cannot would be a divergence.
+   */
+  readonly presets?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
 
   // Text fields
   readonly mask?: string;
@@ -148,6 +190,8 @@ export interface PortalFieldSpec {
   readonly defaultOptionMode?: FieldDefaultOptionMode;
   readonly noOptionsText?: string;
   readonly sortAlphabetically?: boolean;
+  /** The autocomplete's filtering, which belongs to the consumer rather than to the field. */
+  readonly filterStrategy?: PortalFilterStrategy;
 
   // Date and time
   readonly unicodeTokenFormat?: string;
@@ -178,6 +222,14 @@ export interface PortalFieldSpec {
 export interface PortalSectionSpec {
   readonly id: string;
   readonly title: string;
+  /**
+   * Set, the section's fields are wrapped in an `ngModelGroup` of this name and their values nest under it.
+   *
+   * The group sits on the section rather than on each field: a group is a run of adjacent controls, which is
+   * exactly what a section already is, and one member per field would be a second ordering to keep in step
+   * with the first.
+   */
+  readonly groupName?: string;
 }
 
 /** Which validator the form is wired to, and so what the errors under each field come from. */

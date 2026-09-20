@@ -60,11 +60,144 @@ describe('portal', () => {
     expect(root.querySelector('portal-inspector')).toBeTruthy();
   }));
 
-  it('renders every field of the preview form, each in a decorator', fakeAsync(() => {
+  // Every field except the one its condition is currently holding back. That field is not hidden but
+  // destroyed, which is the whole point of the pair — see `user/validation.md`, Conditional Fields.
+  it('renders every unconditional field of the preview form, each in a decorator', fakeAsync(() => {
     settle();
 
-    expect(root.querySelectorAll('portal-preview-field').length).toBe(PREVIEW_FIELDS.length);
-    expect(root.querySelectorAll('formidable-field-decorator').length).toBeGreaterThanOrEqual(PREVIEW_FIELDS.length);
+    const rendered = PREVIEW_FIELDS.length - 1;
+
+    expect(root.querySelectorAll('portal-preview-field').length).toBe(rendered);
+    expect(root.querySelectorAll('formidable-field-decorator').length).toBeGreaterThanOrEqual(rendered);
+  }));
+
+  // The rule the layout cannot trade away: a component reachable only by flipping a switch is a component a
+  // visitor never finds. It is what decides that the branch dropdown has a second, unconditional sibling.
+  it('has every field kind on screen in the form’s default state', fakeAsync(() => {
+    settle();
+
+    const onScreen = new Set(
+      Array.from(root.querySelectorAll('portal-preview-field .chip-text')).map((element) =>
+        (element.textContent ?? '').trim()
+      )
+    );
+
+    expect(Array.from(onScreen).sort()).toEqual(Object.values(FIELD_KIND_LABELS).sort());
+  }));
+
+  // The group is the one place the model is not flat, and it is flat unless every field registers on the
+  // group rather than on the form — which the per-field component's own `ControlContainer` decides.
+  it('nests a grouped section’s fields under its group name in the model', fakeAsync(() => {
+    settle();
+
+    const model = TestBed.inject(FormValueStore).model() as Record<string, unknown>;
+    const when = model['when'] as Record<string, unknown>;
+
+    expect(when).toBeTruthy();
+    expect(when['date'] instanceof Date).toBeTrue();
+    expect(when['time'] instanceof Date).toBeTrue();
+    expect(model['date']).toBeUndefined();
+  }));
+
+  // The group rule reads both members and reports on neither, so its message has to land on the group.
+  it('reports a group rule under the group rather than under either field', fakeAsync(() => {
+    settle();
+
+    const values = TestBed.inject(FormValueStore);
+
+    // 02:00 is outside the opening hours the group rule states; neither field is wrong on its own.
+    const when = values.model()['when'] as Record<string, unknown>;
+    values.setModel({ ...values.model(), when: { ...when, time: new Date(2000, 0, 1, 2, 0) } });
+    settle();
+
+    expect(values.errors()['when']).toEqual(['We are open from 11:00 to 23:00.']);
+    expect(values.errors()['when.time']).toBeUndefined();
+  }));
+
+  // One toggle, two fields, one each way. The hidden one is destroyed with its control, so its key leaves
+  // the model entirely — which is what the rules have to survive and what `omitWhen` is there for.
+  it('swaps the two conditional fields when the toggle moves, and moves the key with them', fakeAsync(() => {
+    settle();
+
+    const values = TestBed.inject(FormValueStore);
+    const names = (): string[] =>
+      Array.from(root.querySelectorAll('portal-preview-field')).map(
+        (element) => element.querySelector('[name]')?.getAttribute('name') ?? ''
+      );
+
+    expect(names()).toContain('address');
+    expect(names()).not.toContain('branch');
+    expect(values.model()['address']).toBe('langstrasse');
+    expect(values.model()['branch']).toBeUndefined();
+
+    values.setModel({ ...values.model(), pickup: true });
+    settle();
+
+    expect(names()).toContain('branch');
+    expect(names()).not.toContain('address');
+    expect(values.model()['address']).toBeUndefined();
+
+    // The crust is the reason the swap is workable: the dropdown never leaves the form with the branch.
+    expect(names()).toContain('crust');
+  }));
+
+  // The template picker: choosing a pizza writes the two fields it stands for and leaves every other alone,
+  // and a later edit to one of those fields is not undone — a pizza is a starting point, not a lock.
+  it('applies a pizza’s preset when the picker moves, and does not re-apply it afterwards', fakeAsync(() => {
+    settle();
+
+    const values = TestBed.inject(FormValueStore);
+
+    expect(values.model()['sauce']).toBe('tomato');
+    expect(values.model()['toppings']).toEqual(['mozzarella', 'basil']);
+
+    values.setModel({ ...values.model(), pizza: 'diavola' });
+    settle();
+
+    expect(values.model()['sauce']).toBe('arrabbiata');
+    expect(values.model()['toppings']).toEqual(['mozzarella', 'salami', 'chilli']);
+    // Untouched by the preset, which patches only the keys it names.
+    expect(values.model()['size']).toBe('large');
+
+    values.setModel({ ...values.model(), sauce: 'pesto' });
+    settle();
+
+    expect(values.model()['sauce']).toBe('pesto');
+  }));
+
+  it('leaves the model alone for an option that carries no preset', fakeAsync(() => {
+    settle();
+
+    const values = TestBed.inject(FormValueStore);
+
+    values.setModel({ ...values.model(), sauce: 'bbq', pizza: 'custom' });
+    settle();
+
+    expect(values.model()['sauce']).toBe('bbq');
+    expect(values.model()['toppings']).toEqual(['mozzarella', 'basil']);
+  }));
+
+  // The second group, and a condition reading into it: `visibleWhen` names `method`, which the model holds
+  // at `payment.method`.
+  it('nests the payment group and resolves its conditional field through it', fakeAsync(() => {
+    settle();
+
+    const values = TestBed.inject(FormValueStore);
+    const payment = (): Record<string, unknown> => values.model()['payment'] as Record<string, unknown>;
+    const names = (): string[] =>
+      Array.from(root.querySelectorAll('portal-preview-field')).map(
+        (element) => element.querySelector('[name]')?.getAttribute('name') ?? ''
+      );
+
+    expect(payment()['method']).toBe('card');
+    expect(payment()['cardNumber']).toBe('4242 4242 4242 4242');
+    expect(names()).toContain('cardNumber');
+
+    values.setModel({ ...values.model(), payment: { ...payment(), method: 'twint' } });
+    settle();
+
+    expect(names()).not.toContain('cardNumber');
+    expect(payment()['cardNumber']).toBeUndefined();
   }));
 
   it('starts pre-filled, so the filled and floating-label states are on screen from the first frame', fakeAsync(() => {
@@ -315,19 +448,18 @@ describe('portal', () => {
       (element.textContent ?? '').trim()
     );
 
-    expect(texts.length).toBe(PREVIEW_FIELDS.length);
+    expect(texts.length).toBe(PREVIEW_FIELDS.length - 1);
     expect(texts).toContain('Date');
-    expect(texts.filter((text) => text === 'Date').length).toBe(2);
     expect(texts.every((text) => Object.values(FIELD_KIND_LABELS).includes(text))).toBeTrue();
 
-    TestBed.inject(FormDefinitionStore).addField('radio-group', 'rules');
+    TestBed.inject(FormDefinitionStore).addField('radio-group', 'pizza');
     settle();
 
     const added = Array.from(root.querySelectorAll('portal-preview-field .chip-text')).map((element) =>
       (element.textContent ?? '').trim()
     );
 
-    expect(added.length).toBe(PREVIEW_FIELDS.length + 1);
+    expect(added.length).toBe(PREVIEW_FIELDS.length);
     expect(added.every((text) => Object.values(FIELD_KIND_LABELS).includes(text))).toBeTrue();
   }));
 
@@ -345,16 +477,16 @@ describe('portal', () => {
     // The chip names it as its accessible description, exactly as the `title` it replaced did. No `title`
     // anywhere on the run of them: the browser holds one back about a second, which is what this is not.
     const chip = root.querySelector('portal-preview-field .chip') as HTMLElement;
-    expect(chip.getAttribute('aria-describedby')).toBe('chip-tip-travellerName');
+    expect(chip.getAttribute('aria-describedby')).toBe('chip-tip-pizza');
     expect(Array.from(root.querySelectorAll('portal-preview-field .chip[title]')).length).toBe(0);
 
-    expect(tipFor('arrivalDate')).toContain('panelPosition: right');
+    expect(tipFor('date')).toContain('panelPosition: right');
 
-    store.updateField('arrivalDate', { panelPosition: 'sheet' });
+    store.updateField('date', { panelPosition: 'sheet' });
     settle();
 
-    expect(tipFor('arrivalDate')).toContain('panelPosition: sheet');
-    expect(tipFor('arrivalDate')).not.toContain('panelPosition: right');
+    expect(tipFor('date')).toContain('panelPosition: sheet');
+    expect(tipFor('date')).not.toContain('panelPosition: right');
   }));
 
   // The two column headers sit side by side, so a difference between them reads as a step in the rule under

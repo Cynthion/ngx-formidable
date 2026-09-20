@@ -113,7 +113,26 @@ Decoration belongs to a field, so `All Fields` has no value of its own to show. 
 
 A control appears only where that kind of field honours the input. The decorator layout is fixed per component and decides two answers outright: only the horizontal layout honours a label position other than `outside`, and the vertical layout renders no prefix or suffix at all. `user/decoration.md` states the rule, and the Studio never offers a control that would silently do nothing.
 
-**Locale** is one control, because it moves the date field's translations, its first day and its token format together, and switches the paired field's format with them.
+**Locale** is one control, because it moves the date field's translations, its first day and its token format together.
+
+**Filtering** is the one control that is not an input on the field. The autocomplete does not filter: it emits its filter text and renders whatever list it is handed back, so the matching is the consumer's. The control swaps the Studio's own — fuzzy, contains or starts-with — which is what makes the division visible. Type a typo under each. `user/fields.md` states the rule.
+
+### What The Sample Form Shows
+
+The sample form is a pizza order that starts already filled in, because an empty form shows none of the filled, selected and floating-label states a theme is judged by. Beyond a field of every type, it carries four things a single field cannot show on its own.
+
+| Feature                | Where                                                                                                                                     |
+| :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Groups**             | `When` and `Payment` each wrap their fields in an `ngModelGroup`, so they nest in the model. `When` adds a rule that reports on the group |
+| **Conditional Fields** | The handover toggle decides whether the address or the branch is rendered, and the payment method whether the card number is              |
+| **A Template Picker**  | Choosing a pizza fills the sauce and the toppings below it, and leaves every other field alone                                            |
+| **A Masked Field**     | An unmasked and a masked input side by side, so the mask is visible without being described                                               |
+
+**Every field type is on screen when the form loads.** Some appear more than once for that reason — the branch dropdown can be swapped out only because the pizza picker keeps that component on the page.
+
+**The pizza is a starting point, not a lock.** Its preset is applied when you change the picker and never again, so anything you edit afterwards stands. `Custom` carries no preset, so it changes nothing.
+
+The model drawer is where all of this is legible: the two groups nest, and a conditional field that is not rendered has no key at all. `user/validation.md` covers what conditional fields mean for the rules.
 
 ---
 
@@ -132,7 +151,11 @@ The top bar carries a copy for each half and, beside it, a control that opens th
 
 **The Component Is A Proposal.** The template binds `model`, `shape` and, under Vest, `suite`. `Copy Component` copies one standalone component that declares them the way `user/validation.md` lays a form out: the model typed by what each field writes, its shape, and under Vest a suite with no rules in it — the Studio has no rule editor. Any component that provides the three names serves the template as well. The component is not read back in.
 
-**What An Import Ignores, It Lists.** A theme import applies the variables the library declares and lists the rest, because a variable the library does not declare would produce a control that appears to do nothing. A template import handles a static, attribute-only subset: bindings to expressions and control flow are reported rather than silently dropped.
+**The Export Carries Behaviour, Not State.** A conditional field is emitted inside the `@if` its condition states, and a grouped section inside its `ngModelGroup` — so a field the stage is currently hiding is still in the template, and the model access under a group is nested. The template is the form, not a snapshot of it.
+
+**Some Behaviour Belongs To The Component.** A template picker's presets are a map, and a template cannot hold one. The template binds the handler, `(ngModelChange)="applyPizzaPreset($event)"`, and `Copy Component` declares that handler and the map beside it. The two names are derived from the field, so the pair always fits together.
+
+**What An Import Ignores, It Lists.** A theme import applies the variables the library declares and lists the rest, because a variable the library does not declare would produce a control that appears to do nothing. A template import handles a static, attribute-only subset, plus the two structures the Studio itself emits: an `ngModelGroup` and an `@if` comparing one model key with a literal. Bindings to expressions, any other control flow, and a handler whose behaviour lives in the component are reported rather than silently dropped — so re-importing the sample tells you its presets did not come with it.
 
 **The Form Is Derived, Not Authored.** An Angular production build contains no template compiler, so a pasted template cannot become live components. The configuration is the source of truth and the template and component are generated from it, which is why both are read-only and why structure is edited through controls rather than by typing.
 

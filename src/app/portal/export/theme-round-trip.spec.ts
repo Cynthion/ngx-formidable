@@ -24,10 +24,12 @@ describe('theme export and import', () => {
     expect(result.skipped).toEqual([]);
   });
 
+  // Comments are asked for rather than taken from the default, because what this pins is their syntax: a
+  // format that emitted `/* */` into SCSS would still be valid CSS and would still round-trip.
   it('round-trips in the SCSS format, whose comments are line comments', () => {
     const scss = exportTheme(
       { vars: THEME, fontFamily: FONT, page: PAGE },
-      { ...DEFAULT_EXPORT_OPTIONS, format: 'scss' }
+      { ...DEFAULT_EXPORT_OPTIONS, format: 'scss', includeComments: true }
     );
 
     expect(scss).toContain('// ');

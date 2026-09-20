@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FieldDecoratorComponent, FieldLabelDirective, InputFieldComponent } from '@cynthion/ngx-formidable';
+import { SelectedValueDirective } from '../../chrome/selected-value.directive';
 import { ThemeScopeDirective } from '../../chrome/theme-scope.directive';
 import { FONT_OPTIONS, THEME_PRESETS, ThemePreset } from '../../model/presets';
 import {
@@ -12,7 +13,6 @@ import {
   USE_SITE_VARS
 } from '../../model/schemes';
 import { ThemeStore } from '../../state/theme.store';
-import { SelectedValueDirective } from '../../chrome/selected-value.directive';
 
 /**
  * The named looks a cold visitor clicks first, each a live miniature of a real field — the fastest evidence
@@ -70,10 +70,6 @@ export class PresetGalleryComponent {
     this.theme.setColor(key as ColorKey);
   }
 
-  /**
-   * A starting point nobody would have picked. The two axes are independent, so any pair is valid — which is
-   * the claim the presets make, made testable by the visitor in one click.
-   */
   protected randomize(): void {
     const geometry = pick(this.geometries).key;
     const color = pick(this.colors).key;

@@ -1,11 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
+  FieldErrorsDirective,
   FormidableFormErrors,
   NgxFormidableFormDirective,
+  NgxFormidableGroupValidateDirective,
   NgxFormidableWholeFormValidateDirective
 } from '@cynthion/ngx-formidable';
 import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/vest';
+import { readPath } from '../../helpers/model-path.helpers';
 import { createPreviewValidationSuite, PREVIEW_DEPENDENT_FIELDS } from '../../model/preview-form.validation';
 import { FormDefinitionStore } from '../../state/form-definition.store';
 import { FormValueStore, PortalModel } from '../../state/form-value.store';
@@ -26,7 +29,9 @@ import { PreviewFieldComponent } from './preview-field.component';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
+    FieldErrorsDirective,
     NgxFormidableFormDirective,
+    NgxFormidableGroupValidateDirective,
     NgxFormidableWholeFormValidateDirective,
     NgxFormidableVestValidatorDirective,
     PreviewFieldComponent
@@ -89,8 +94,11 @@ export class PreviewFormComponent {
     this.valueStore.submitted.set(true);
   }
 
-  protected valueFor(name: string): unknown {
-    return this.valueStore.model()[name] ?? null;
+  /** By field id, because the model path is `group.name` for a field in an `ngModelGroup` section. */
+  protected valueFor(id: string): unknown {
+    const path = this.definitionStore.pathById().get(id);
+
+    return (path ? readPath(this.valueStore.model(), path) : null) ?? null;
   }
 
   /**

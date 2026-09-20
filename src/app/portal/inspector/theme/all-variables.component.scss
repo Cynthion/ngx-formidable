@@ -2,10 +2,12 @@
   display: block;
 }
 
+// The filter belongs to the list rather than to a group in it, so it sits above the first header and needs
+// the gutter the accordions under it get from their own padding.
 .tools {
   display: grid;
-  gap: 6px;
-  padding: 0 16px 12px;
+  gap: 8px;
+  padding: 14px 16px;
 }
 
 .written {

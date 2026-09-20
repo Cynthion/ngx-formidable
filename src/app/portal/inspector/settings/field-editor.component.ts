@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabilities';
 import {
+  FILTER_STRATEGY_LABELS,
   LABEL_POSITION_LABELS,
   PortalFieldDecoration,
   PortalFieldSpec,
@@ -40,6 +41,7 @@ export class FieldEditorComponent {
 
   protected readonly slots = Object.entries(SLOT_LABELS);
   protected readonly labelPositions = Object.entries(LABEL_POSITION_LABELS);
+  protected readonly filterStrategies = Object.entries(FILTER_STRATEGY_LABELS);
   protected readonly formatters = FORMATTERS;
   protected readonly locales = PORTAL_LOCALES;
   protected readonly kindLabels = FIELD_KIND_LABELS;
