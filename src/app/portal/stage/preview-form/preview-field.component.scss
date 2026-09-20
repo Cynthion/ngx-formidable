@@ -1,18 +1,21 @@
-// A column, so the chip sits at the bottom of the grid row whatever height the field above it takes —
-// a hint row on one field of a pair would otherwise stagger the two chips.
+// Three rows the whole grid row shares — the field with its support text, the chip, the accessibility
+// readout — so both annotations under a pair of unequal fields start on the same line. A flex column can
+// only push the pair to the bottom, which staggers them again as soon as one readout is taller than the
+// other. The space inside is each annotation's own top margin, and the margin below is what separates this
+// field from the next; the grid it sits in carries no row gap. A row nobody fills costs nothing.
 :host {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
   min-width: 0;
-  height: 100%;
+  margin-bottom: 18px;
   position: relative;
 }
 
 .chip-row {
   display: flex;
   position: relative;
-  margin-top: auto;
-  padding-top: 2px;
+  margin-top: 10px;
 }
 
 // Portal chrome rather than the user's page surface, unlike the chip it belongs to: it is the portal

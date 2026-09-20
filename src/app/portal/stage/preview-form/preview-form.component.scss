@@ -46,11 +46,16 @@
   }
 }
 
+// Each field spans three rows of this grid — itself, its chip, its accessibility readout — and lays them
+// out as a subgrid, so the annotations under two fields of unequal height still line up.
+// The rows carry no gap of their own: a gap between the tracks of one field would separate that field from
+// its own annotations. Each field states the space below itself instead, and the grid pulls the last one
+// back off so a section does not end on it.
 .field-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px 20px;
-  align-items: stretch;
+  gap: 0 20px;
+  margin-bottom: -18px;
 }
 
 // An `ngModelGroup` section. The group's own errors render as a sibling of the grid rather than inside it,

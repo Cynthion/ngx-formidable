@@ -420,9 +420,11 @@ tab leaves it stating the old value, and a field added in the structure editor h
 would be contradicting itself at exactly the moment the user starts working.
 
 A chip is the portal's annotation rather than part of the form, so the `Field Types` switch on the stage bar
-turns the run of them off, which is what leaves the stage showing the form as a consumer's page would. Each
-sits at the bottom of its grid row, so a pair stays aligned when one field carries a hint and the other does
-not.
+turns the run of them off, which is what leaves the stage showing the form as a consumer's page would. Each field
+spans three rows of the field grid — itself, its chip, its accessibility readout — and lays them out as a
+subgrid, so a pair stays aligned when one field carries a hint or an error and the other does not, and the
+readouts start on the same line as well. The grid itself carries no row gap: each field states the space
+below itself, which is what keeps a field's own annotations closer to it than the next field is.
 
 **Option Fields** always carry a sample option that is `disabled` and one that is `readonly`, so their theming
 is demonstrable.

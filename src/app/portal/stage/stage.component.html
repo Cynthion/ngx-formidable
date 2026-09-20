@@ -16,6 +16,13 @@
         [attr.aria-pressed]="layout.showFieldTypes()"
         (click)="toggleFieldTypes()">
         Field Types
+        <!-- The chip's own glyph, so the button reads as the switch for those chips rather than for
+             something else on the page. -->
+        <span
+          class="tool-glyph"
+          aria-hidden="true">
+          ↗
+        </span>
       </button>
       <button
         type="button"

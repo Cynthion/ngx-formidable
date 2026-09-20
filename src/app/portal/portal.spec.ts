@@ -880,6 +880,49 @@ describe('portal', () => {
     expect(root.querySelectorAll('portal-preview-field .chip').length).toBe(0);
   }));
 
+  // Two fields sharing a grid row are rarely the same height — one carries a hint or an error and the other
+  // does not — and the annotations under them are what a reader compares across the row. They line up
+  // because each field lays its three rows out as a subgrid of the field grid, not because anything pushes
+  // them to the bottom of the row, which staggers them again as soon as one readout is taller.
+  it('starts the chip and the accessibility readout of a pair on the same line', fakeAsync(() => {
+    settle();
+    const layout = TestBed.inject(LayoutStore);
+
+    layout.showFieldTypes.set(true);
+    layout.showAccessibility.set(true);
+    settle();
+
+    // Below 900px the grid is one column, where a pair has no row to share. The banding is what is under
+    // test, not the breakpoint that suspends it, so the columns are stated here.
+    for (const grid of Array.from(root.querySelectorAll<HTMLElement>('.field-grid'))) {
+      grid.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
+    }
+    settle();
+
+    const top = (element: Element) => element.getBoundingClientRect().top;
+    const hasHint = (host: Element) => !host.querySelector('.hint-wrapper')?.classList.contains('hidden');
+    const hosts = Array.from(root.querySelectorAll('portal-preview-field'));
+
+    // The pair has to be uneven, or they would line up by accident and prove nothing. Their rendered
+    // heights cannot say so — the bands equalize them, which is the thing under test — so the hint one of
+    // them carries is what states it.
+    const pair = hosts.slice(1).find((host, index) => {
+      const previous = hosts[index]!;
+
+      return top(host) === top(previous) && hasHint(host) !== hasHint(previous);
+    });
+
+    expect(pair).withContext('a row holding two fields of unequal height').toBeTruthy();
+
+    const first = hosts[hosts.indexOf(pair!) - 1]!;
+
+    expect(top(pair!.querySelector('.chip-row')!)).toBeCloseTo(top(first.querySelector('.chip-row')!), 0);
+    expect(top(pair!.querySelector('portal-accessibility-readout')!)).toBeCloseTo(
+      top(first.querySelector('portal-accessibility-readout')!),
+      0
+    );
+  }));
+
   // The stage is a fixed three-row grid, so an optional child of it shifts every row below — which once
   // pushed the drawer off the bottom of the viewport. Whatever the switches add has to stay inside the
   // head, leaving the head, the scroller and the drawer as the only three rows.

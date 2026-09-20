@@ -45,6 +45,9 @@
 }
 
 .tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 2px 8px;
   border: 1px solid transparent;
   border-radius: var(--portal-radius-sm);
@@ -71,6 +74,13 @@
     outline: 2px solid var(--portal-accent);
     outline-offset: 1px;
   }
+}
+
+// The same glyph the chips carry, at the same size, so the two read as one thing.
+.tool-glyph {
+  flex: none;
+  font-size: 10px;
+  opacity: 0.8;
 }
 
 // Wraps, because an explanation that is cut off explains nothing.
