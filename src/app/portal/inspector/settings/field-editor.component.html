@@ -112,7 +112,7 @@
       class="pc-select"
       [id]="'fe-label-position-' + f.id"
       [disabled]="!labelPositionApplies()"
-      [value]="f.decoration.labelPosition"
+      [portalSelectedValue]="f.decoration.labelPosition"
       (change)="setDecoration('labelPosition', $any($event.target).value)">
       @for (entry of labelPositions; track entry[0]) {
         <option [value]="entry[0]">{{ entry[1] }}</option>
@@ -133,7 +133,7 @@
       <select
         class="pc-select"
         [id]="'fe-adornment-' + f.id"
-        [value]="f.decoration.labelAdornment"
+        [portalSelectedValue]="f.decoration.labelAdornment"
         (change)="setDecoration('labelAdornment', $any($event.target).value)">
         @for (slot of slots; track slot[0]) {
           <option [value]="slot[0]">{{ slot[1] }}</option>
@@ -149,7 +149,7 @@
       <select
         class="pc-select"
         [id]="'fe-hint-align-' + f.id"
-        [value]="f.decoration.hintAlign"
+        [portalSelectedValue]="f.decoration.hintAlign"
         (change)="setDecoration('hintAlign', $any($event.target).value)">
         <option value="start">Start</option>
         <option value="center">Centre</option>
@@ -183,7 +183,7 @@
         <select
           class="pc-select"
           [id]="'fe-prefix-' + f.id"
-          [value]="f.decoration.prefix"
+          [portalSelectedValue]="f.decoration.prefix"
           (change)="setDecoration('prefix', $any($event.target).value)">
           @for (slot of slots; track slot[0]) {
             <option [value]="slot[0]">{{ slot[1] }}</option>
@@ -199,7 +199,7 @@
         <select
           class="pc-select"
           [id]="'fe-suffix-' + f.id"
-          [value]="f.decoration.suffix"
+          [portalSelectedValue]="f.decoration.suffix"
           (change)="setDecoration('suffix', $any($event.target).value)">
           @for (slot of slots; track slot[0]) {
             <option [value]="slot[0]">{{ slot[1] }}</option>
@@ -217,7 +217,7 @@
         <select
           class="pc-select"
           [id]="'fe-prefix-align-' + f.id"
-          [value]="f.decoration.prefixAlign"
+          [portalSelectedValue]="f.decoration.prefixAlign"
           (change)="setDecoration('prefixAlign', $any($event.target).value)">
           <option value="center">Centre Of The Box</option>
           <option value="value">The Value</option>
@@ -232,7 +232,7 @@
         <select
           class="pc-select"
           [id]="'fe-suffix-align-' + f.id"
-          [value]="f.decoration.suffixAlign"
+          [portalSelectedValue]="f.decoration.suffixAlign"
           (change)="setDecoration('suffixAlign', $any($event.target).value)">
           <option value="center">Centre Of The Box</option>
           <option value="value">The Value</option>
@@ -246,7 +246,9 @@
     <p class="pc-help">A {{ caps.layout }} layout leaves a prefix nothing to sit beside and no value to inset, so the slots are not rendered.</p>
   }
 
-  <h3 class="group-title">Behaviour</h3>
+  @if (caps.mask || caps.textLength || f.kind === 'textarea') {
+    <h3 class="group-title">Text</h3>
+  }
 
   @if (caps.mask) {
     <div class="pc-field">
@@ -340,6 +342,7 @@
   }
 
   @if (caps.panel) {
+    <h3 class="group-title">Panel</h3>
     <div class="pc-field">
       <label
         class="pc-label"
@@ -349,7 +352,7 @@
       <select
         class="pc-select"
         [id]="'fe-panel-' + f.id"
-        [value]="f.panelPosition ?? store.options().panelPosition"
+        [portalSelectedValue]="f.panelPosition ?? store.options().panelPosition"
         (change)="set('panelPosition', $any($event.target).value)">
         <option value="left">Left</option>
         <option value="right">Right</option>
@@ -361,6 +364,7 @@
   }
 
   @if (caps.locale) {
+    <h3 class="group-title">Locale And Format</h3>
     <div class="pc-row">
       <div class="pc-field">
         <label
@@ -371,7 +375,7 @@
         <select
           class="pc-select"
           [id]="'fe-locale-' + f.id"
-          [value]="f.locale ?? store.options().locale"
+          [portalSelectedValue]="f.locale ?? store.options().locale"
           (change)="setLocale($any($event.target).value)">
           @for (locale of locales; track locale.id) {
             <option [value]="locale.id">{{ locale.label }}</option>
@@ -402,7 +406,7 @@
       <select
         class="pc-select"
         [id]="'fe-empty-hint-' + f.id"
-        [value]="f.emptyHint ?? 'underscores'"
+        [portalSelectedValue]="f.emptyHint ?? 'underscores'"
         (change)="set('emptyHint', $any($event.target).value)">
         <option value="underscores">Underscores</option>
         <option value="format">The Token Format</option>
@@ -412,6 +416,7 @@
   }
 
   @if (f.kind === 'toggle') {
+    <h3 class="group-title">On And Off</h3>
     <div class="pc-row">
       <div class="pc-field">
         <label
@@ -449,7 +454,7 @@
       <select
         class="pc-select"
         [id]="'fe-toggle-position-' + f.id"
-        [value]="f.toggleLabelPosition ?? 'before'"
+        [portalSelectedValue]="f.toggleLabelPosition ?? 'before'"
         (change)="set('toggleLabelPosition', $any($event.target).value)">
         <option value="before">Label Before The Switch</option>
         <option value="after">Label After The Switch</option>
@@ -458,6 +463,7 @@
   }
 
   @if (caps.range) {
+    <h3 class="group-title">Range</h3>
     <div class="pc-row">
       <div class="pc-field">
         <label
@@ -502,6 +508,7 @@
   }
 
   @if (f.kind === 'slider') {
+    <h3 class="group-title">Ticks And Labels</h3>
     <div class="pc-checks">
       <label class="pc-check">
         <input
@@ -588,7 +595,7 @@
         <select
           class="pc-select"
           [id]="'fe-thumb-format-' + f.id"
-          [value]="f.thumbLabelFormat ?? 'none'"
+          [portalSelectedValue]="f.thumbLabelFormat ?? 'none'"
           (change)="set('thumbLabelFormat', $any($event.target).value)">
           @for (entry of formatters; track entry[0]) {
             <option [value]="entry[0]">{{ entry[1] }}</option>
@@ -604,7 +611,7 @@
         <select
           class="pc-select"
           [id]="'fe-tick-format-' + f.id"
-          [value]="f.tickLabelFormat ?? 'none'"
+          [portalSelectedValue]="f.tickLabelFormat ?? 'none'"
           (change)="set('tickLabelFormat', $any($event.target).value)">
           @for (entry of formatters; track entry[0]) {
             <option [value]="entry[0]">{{ entry[1] }}</option>
@@ -630,7 +637,7 @@
         <select
           class="pc-select"
           [id]="'fe-default-mode-' + f.id"
-          [value]="f.defaultOptionMode ?? 'always'"
+          [portalSelectedValue]="f.defaultOptionMode ?? 'always'"
           (change)="set('defaultOptionMode', $any($event.target).value)">
           <option value="always">Always, Pinned First</option>
           <option value="fallback">Only When The List Is Empty</option>

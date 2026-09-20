@@ -21,7 +21,7 @@ import { PREVIEW_FORM_DEFINITION } from '../model/preview-form.definition';
 export class FormDefinitionStore {
   public readonly definition = signal<PortalFormDefinition>(PREVIEW_FORM_DEFINITION);
 
-  /** Which field the inspector is editing. Followed from focus only while the Fields tab is showing. */
+  /** Which field the inspector is editing. Followed from focus only while the Settings tab is showing. */
   public readonly selectedFieldId = signal<string | null>(PREVIEW_FORM_DEFINITION.fields[0]?.id ?? null);
 
   public readonly fields = computed(() => this.definition().fields);

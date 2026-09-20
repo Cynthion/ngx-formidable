@@ -94,12 +94,12 @@ export class PreviewFormComponent {
   }
 
   /**
-   * Selection follows focus only while Form ▸ Fields is showing. Anywhere else, clicking a field uses it
+   * Selection follows focus only while Form ▸ Settings is showing. Anywhere else, clicking a field uses it
    * rather than selecting it — which is the point: a user adjusting a colour should be able to focus a field
    * to see the focus state without the inspector moving under them.
    */
   protected onFieldFocused(id: string): void {
-    const showingFields = this.inspectorStore.tab() === 'form' && this.inspectorStore.formTab() === 'fields';
+    const showingFields = this.inspectorStore.tab() === 'form' && this.inspectorStore.formTab() === 'settings';
 
     if (showingFields) this.definitionStore.select(id);
   }
@@ -107,6 +107,6 @@ export class PreviewFormComponent {
   /** A chip is a control: it opens the editor panel at the field it names. */
   protected openInInspector(id: string): void {
     this.definitionStore.select(id);
-    this.inspectorStore.openFields();
+    this.inspectorStore.openFieldSettings();
   }
 }

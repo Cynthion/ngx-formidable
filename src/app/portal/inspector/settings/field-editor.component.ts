@@ -11,6 +11,7 @@ import {
 } from '../../model/field-spec.model';
 import { PORTAL_LOCALES } from '../../model/locales';
 import { FormDefinitionStore } from '../../state/form-definition.store';
+import { SelectedValueDirective } from '../../chrome/selected-value.directive';
 
 const FORMATTERS = [
   ['none', 'Raw number'],
@@ -31,7 +32,8 @@ const FORMATTERS = [
   selector: 'portal-field-editor',
   templateUrl: './field-editor.component.html',
   styleUrl: './field-editor.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SelectedValueDirective]
 })
 export class FieldEditorComponent {
   protected readonly store = inject(FormDefinitionStore);

@@ -1,12 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
-import {
-  LABEL_POSITION_LABELS,
-  PortalFieldDecoration,
-  PortalFormOptions,
-  PortalLocaleId,
-  PortalSlotContent,
-  SLOT_LABELS
-} from '../../model/field-spec.model';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { SelectedValueDirective } from '../../chrome/selected-value.directive';
+import { PortalFormOptions, PortalLocaleId } from '../../model/field-spec.model';
 import { PORTAL_LOCALES } from '../../model/locales';
 import { FormDefinitionStore } from '../../state/form-definition.store';
 
@@ -37,29 +31,28 @@ const VALIDATORS = [
 ] as const;
 
 /**
- * The repeated inputs, set once for every field.
+ * What the form owns rather than a field: the master switches every field obeys, and the validation.
+ *
+ * These are settings with nowhere else to live — a field has no copy of them to override, which is what
+ * separates them from the decoration on the `All Fields` scope beside this one.
  *
  * Run and reveal are two axes, not one setting: run is Angular's `updateOn` and decides when the validator
  * runs, reveal is the library's `revealOn` and decides when the messages appear.
  */
 @Component({
-  selector: 'portal-form-defaults',
-  templateUrl: './form-defaults.component.html',
-  styleUrl: './form-defaults.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'portal-form-settings',
+  templateUrl: './form-settings.component.html',
+  styleUrl: './form-settings.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SelectedValueDirective]
 })
-export class FormDefaultsComponent {
+export class FormSettingsComponent {
   protected readonly store = inject(FormDefinitionStore);
 
-  /** Which half to render. The two are separate accordions, but one component owns both. */
-  public readonly section = input.required<'decoration' | 'validation'>();
-
-  protected readonly labelPositions = Object.entries(LABEL_POSITION_LABELS);
   protected readonly panelPositions = PANEL_POSITIONS;
   protected readonly reveals = REVEAL;
   protected readonly updateOns = UPDATE_ON;
   protected readonly validators = VALIDATORS;
-  protected readonly slots = Object.entries(SLOT_LABELS);
   protected readonly locales = PORTAL_LOCALES;
 
   protected set<K extends keyof PortalFormOptions>(key: K, value: PortalFormOptions[K]): void {
@@ -68,10 +61,5 @@ export class FormDefaultsComponent {
 
   protected setLocale(value: string): void {
     this.store.setFormLocale(value as PortalLocaleId);
-  }
-
-  /** Sets one adornment slot on every field. The same four choices a single field offers. */
-  protected setSlotOnAllFields(slot: keyof PortalFieldDecoration, value: string): void {
-    this.store.setDecorationOnAllFields({ [slot]: value as PortalSlotContent } as Partial<PortalFieldDecoration>);
   }
 }

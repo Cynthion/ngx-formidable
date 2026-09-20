@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, output, si
 import { isGradient, toHex } from '../../helpers/color.helpers';
 import { ThemeToken } from '../../model/token-manifest.model';
 import { ThemeStore } from '../../state/theme.store';
+import { SelectedValueDirective } from '../../chrome/selected-value.directive';
 
 const LENGTH_UNITS = ['px', 'rem', 'em', '%', 'dvh', 'vh', 'vw', 'ch'] as const;
 const FONT_WEIGHTS = ['300', '400', '500', '600', '700', '800'] as const;
@@ -23,7 +24,8 @@ interface Length {
   selector: 'portal-token-control',
   templateUrl: './token-control.component.html',
   styleUrl: './token-control.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SelectedValueDirective]
 })
 export class TokenControlComponent {
   protected readonly theme = inject(ThemeStore);

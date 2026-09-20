@@ -267,18 +267,22 @@ describe('portal', () => {
     expect(text?.passes).toBe(false);
   }));
 
-  it('opens the editor panel at the Fields tab when a chip is used', fakeAsync(() => {
+  // A chip names one field, so it has to land on that field's own scope — the two wider ones would answer
+  // a question the chip did not ask.
+  it('opens the editor panel at the Settings tab, at the field’s own scope, when a chip is used', fakeAsync(() => {
     settle();
 
     const inspector = TestBed.inject(InspectorStore);
     inspector.tab.set('theme');
+    inspector.fieldScope.set('form');
 
     const chip = root.querySelector('portal-preview-field .chip') as HTMLElement;
     chip.click();
     settle();
 
     expect(inspector.tab()).toBe('form');
-    expect(inspector.formTab()).toBe('fields');
+    expect(inspector.formTab()).toBe('settings');
+    expect(inspector.fieldScope()).toBe('field');
     expect(root.querySelector('portal-field-editor')).toBeTruthy();
   }));
 
@@ -298,7 +302,7 @@ describe('portal', () => {
     settle();
 
     expect(layout.inspectorCollapsed()).toBeFalse();
-    expect(inspector.formTab()).toBe('fields');
+    expect(inspector.formTab()).toBe('settings');
     expect(root.querySelector('portal-field-editor')).toBeTruthy();
   }));
 
@@ -438,7 +442,7 @@ describe('portal', () => {
       (el.textContent ?? '').trim()
     );
 
-    expect(labels).toEqual(['Structure', 'Fields']);
+    expect(labels).toEqual(['Structure', 'Settings']);
     expect(root.querySelector('portal-structure-tab')).toBeTruthy();
   }));
 
@@ -447,7 +451,7 @@ describe('portal', () => {
 
     const inspector = TestBed.inject(InspectorStore);
     const expected: [FormSubTab, string][] = [
-      ['fields', 'portal-fields-tab'],
+      ['settings', 'portal-settings-tab'],
       ['structure', 'portal-structure-tab']
     ];
 
@@ -458,6 +462,56 @@ describe('portal', () => {
 
       expect(root.querySelector(selector)).withContext(subTab).toBeTruthy();
     }
+  }));
+
+  /**
+   * Scope is a control, not the wording of three headings. Each position has to render its own editor and
+   * only its own — the defect the three sibling accordions had was the same Decoration group on screen
+   * twice, under names that had to be read to be told apart.
+   */
+  it('gives the Settings half one editor per scope, and only one', fakeAsync(() => {
+    settle();
+
+    const inspector = TestBed.inject(InspectorStore);
+    inspector.tab.set('form');
+    inspector.formTab.set('settings');
+    settle();
+
+    const labels = Array.from(root.querySelectorAll('portal-settings-tab .scope-option-label')).map((el) =>
+      (el.textContent ?? '').trim()
+    );
+
+    expect(labels).toEqual(['The Form', 'All Fields', 'This Field']);
+
+    const panels = ['portal-form-settings', 'portal-all-fields', 'portal-field-editor'];
+
+    for (const [index, scope] of (['form', 'all', 'field'] as const).entries()) {
+      (root.querySelectorAll<HTMLElement>('portal-settings-tab .scope-option')[index] as HTMLElement).click();
+      settle();
+
+      expect(inspector.fieldScope()).withContext(scope).toBe(scope);
+      expect(panels.filter((selector) => root.querySelector(selector)))
+        .withContext(scope)
+        .toEqual([panels[index]!]);
+    }
+  }));
+
+  // The picker governs one scope, so it belongs inside it. Above the switch it was the first control on the
+  // page and reached nothing a visitor could see.
+  it('shows the field picker only at the field scope', fakeAsync(() => {
+    settle();
+
+    const inspector = TestBed.inject(InspectorStore);
+    inspector.tab.set('form');
+    inspector.formTab.set('settings');
+
+    inspector.fieldScope.set('all');
+    settle();
+    expect(root.querySelector('#ft-select')).toBeNull();
+
+    inspector.fieldScope.set('field');
+    settle();
+    expect(root.querySelector('#ft-select')).toBeTruthy();
   }));
 
   // The three steps are the answer to "how do I make my own form?", which the old one-accordion-per-section
@@ -651,7 +705,7 @@ describe('portal', () => {
     const inspector = TestBed.inject(InspectorStore);
     const expected: [InspectorTab, string[]][] = [
       ['theme', ['Design', 'Variables']],
-      ['form', ['Structure', 'Fields']],
+      ['form', ['Structure', 'Settings']],
       ['export', ['Theme', 'Form']]
     ];
 

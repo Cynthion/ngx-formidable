@@ -124,7 +124,7 @@ export class PreviewFieldComponent {
 
   /**
    * The chip's tooltip: what this field is set to, read off the specification rather than written by hand.
-   * A hand-written description survives neither an edit on the Fields tab nor a field added in the
+   * A hand-written description survives neither an edit on the Settings tab nor a field added in the
    * structure editor.
    */
   protected readonly settingsTitle = computed(() => {

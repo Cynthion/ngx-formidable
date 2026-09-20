@@ -7,8 +7,17 @@ export type InspectorTab = 'theme' | 'form' | 'export';
 /** The Theme area's own two halves — the ladder, and the whole variable surface behind it. */
 export type ThemeSubTab = 'design' | 'variables';
 
-/** The Form area's own two halves — which fields there are, and what each one is. */
-export type FormSubTab = 'structure' | 'fields';
+/** The Form area's own two halves — which fields there are, and what everything is set to. */
+export type FormSubTab = 'structure' | 'settings';
+
+/**
+ * How far a control in the Settings half reaches.
+ *
+ * The three are the three kinds of state there are: the form's own options, the decoration every field
+ * carries a copy of, and one field's specification. Scope is a control rather than the wording of three
+ * headings, so the answer to "how much does this change?" is on screen and selected.
+ */
+export type FieldScope = 'form' | 'all' | 'field';
 
 /** The Import & Export area's own two halves — one round trip each. */
 export type ExportSection = 'theme' | 'form';
@@ -36,6 +45,7 @@ export class InspectorStore {
   public readonly tab = signal<InspectorTab>('theme');
   public readonly themeTab = signal<ThemeSubTab>('design');
   public readonly formTab = signal<FormSubTab>('structure');
+  public readonly fieldScope = signal<FieldScope>('field');
   /** Never null: it is a sub-tab, and one of the two halves is always the one showing. */
   public readonly exportSection = signal<ExportSection>('theme');
 
@@ -46,10 +56,11 @@ export class InspectorStore {
    */
   public readonly exportDirection = signal<ExportDirection | null>('export');
 
-  /** What a field chip asks for: the field it names, open for editing. */
-  public openFields(): void {
+  /** What a field chip asks for: the field it names, open for editing — so at that field's own scope. */
+  public openFieldSettings(): void {
     this.tab.set('form');
-    this.formTab.set('fields');
+    this.formTab.set('settings');
+    this.fieldScope.set('field');
     this.reveal();
   }
 

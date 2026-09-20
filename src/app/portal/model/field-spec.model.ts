@@ -183,14 +183,18 @@ export interface PortalSectionSpec {
 /** Which validator the form is wired to, and so what the errors under each field come from. */
 type PortalValidatorKind = 'vest' | 'angular' | 'none';
 
-/** The form-level options, which every field takes unless it states its own. */
+/**
+ * The form-level options, which every field takes unless it states its own.
+ *
+ * Only what the form really owns. A label position and an adornment alignment are per-field decoration, so
+ * the form-scope controls for those bulk-set every field rather than keeping a second value here — one that
+ * nothing could read without leaving the field's own unreadable.
+ */
 export interface PortalFormOptions {
-  readonly labelPosition: FieldLabelPosition;
   readonly showLabels: boolean;
   readonly showRequiredMarkers: boolean;
   readonly showHints: boolean;
   readonly showAdornments: boolean;
-  readonly adornmentAlignment: FieldAdornmentAlignment;
   readonly panelPosition: FormidablePanelPosition;
   readonly readonly: boolean;
   readonly disabled: boolean;

@@ -1,0 +1,70 @@
+:host {
+  display: block;
+  padding: 0 16px 16px;
+}
+
+// Deliberately unlike the sub-tab strip above it: that one says where you are, this one says how far a
+// control reaches. Two identical strips stacked would read as one broken navigation.
+.scope {
+  margin-bottom: 4px;
+}
+
+.scope-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--portal-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scope-switch {
+  display: flex;
+  padding: 2px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface-sunken);
+}
+
+.scope-option {
+  display: flex;
+  flex: 1;
+  gap: 5px;
+  align-items: baseline;
+  justify-content: center;
+  padding: 5px 6px;
+  border: 0;
+  border-radius: calc(var(--portal-radius-sm) - 2px);
+  background: transparent;
+  color: var(--portal-text-muted);
+  font-family: var(--portal-font);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--portal-text);
+  }
+
+  &.active {
+    background: var(--portal-accent-soft);
+    color: var(--portal-accent);
+    font-weight: 650;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: -2px;
+  }
+}
+
+.scope-option-reach {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+.picker {
+  margin-bottom: 4px;
+}

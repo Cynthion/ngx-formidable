@@ -367,12 +367,10 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
 ];
 
 const PREVIEW_FORM_OPTIONS: PortalFormOptions = {
-  labelPosition: 'inside',
   showLabels: true,
   showRequiredMarkers: true,
   showHints: true,
   showAdornments: false,
-  adornmentAlignment: 'center',
   panelPosition: 'right',
   readonly: false,
   disabled: false,

@@ -1,18 +1,18 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormSubTab, InspectorStore } from '../../state/inspector.store';
-import { FieldsTabComponent } from '../fields/fields-tab.component';
+import { SettingsTabComponent } from '../settings/settings-tab.component';
 import { StructureTabComponent } from '../structure/structure-tab.component';
 import { SubTab, SubTabsComponent } from '../sub-tabs/sub-tabs.component';
 
 // Structure first: which fields exist has to be settled before what one of them is worth saying.
 const SUB_TABS: readonly SubTab[] = [
   { id: 'structure', label: 'Structure' },
-  { id: 'fields', label: 'Fields' }
+  { id: 'settings', label: 'Settings' }
 ];
 
 const STRAPLINES: Readonly<Record<FormSubTab, string>> = {
   structure: 'Build the form: start it, then say which fields exist, in which section, in what order.',
-  fields: 'Tune a field: its label, its state, its decoration and its behaviour.'
+  settings: 'What everything is set to, at whichever scope you pick: the form, every field, or one field.'
 };
 
 /**
@@ -26,7 +26,7 @@ const STRAPLINES: Readonly<Record<FormSubTab, string>> = {
   templateUrl: './form-tab.component.html',
   styleUrl: './form-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SubTabsComponent, FieldsTabComponent, StructureTabComponent]
+  imports: [SubTabsComponent, SettingsTabComponent, StructureTabComponent]
 })
 export class FormTabComponent {
   protected readonly inspector = inject(InspectorStore);

@@ -12,6 +12,7 @@ import {
   USE_SITE_VARS
 } from '../../model/schemes';
 import { ThemeStore } from '../../state/theme.store';
+import { SelectedValueDirective } from '../../chrome/selected-value.directive';
 
 /**
  * The named looks a cold visitor clicks first, each a live miniature of a real field — the fastest evidence
@@ -25,7 +26,13 @@ import { ThemeStore } from '../../state/theme.store';
   templateUrl: './preset-gallery.component.html',
   styleUrl: './preset-gallery.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ThemeScopeDirective, FieldDecoratorComponent, FieldLabelDirective, InputFieldComponent]
+  imports: [
+    ThemeScopeDirective,
+    FieldDecoratorComponent,
+    FieldLabelDirective,
+    InputFieldComponent,
+    SelectedValueDirective
+  ]
 })
 export class PresetGalleryComponent {
   protected readonly theme = inject(ThemeStore);

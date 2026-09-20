@@ -37,7 +37,7 @@
 
 <portal-accordion
   heading="Sections And Fields"
-  lede="What the form is now. Reorder a field with the arrows, remove it with the cross, or pick one to open it on the Fields tab."
+  lede="What the form is now. Reorder a field with the arrows, remove it with the cross, or pick one to open it on the Settings tab."
   [step]="2"
   [hint]="listHint()"
   [open]="openSection() === 'list'"
@@ -96,7 +96,7 @@
 
 <portal-accordion
   heading="Add"
-  lede="A new field takes the defaults for its type; open it on the Fields tab to say what it is. A new section appears at the bottom of the form."
+  lede="A new field takes the defaults for its type; open it on the Settings tab to say what it is. A new section appears at the bottom of the form."
   [step]="3"
   [hint]="addHint"
   [startHere]="!fieldCount()"
@@ -107,7 +107,7 @@
     <select
       class="pc-select"
       aria-label="Field Type To Add"
-      [value]="newKind()"
+      [portalSelectedValue]="newKind()"
       (change)="newKind.set($any($event.target).value)">
       @for (kind of kinds; track kind) {
         <option [value]="kind">{{ kindLabels[kind] }}</option>
@@ -116,7 +116,7 @@
     <select
       class="pc-select"
       aria-label="Section To Add To"
-      [value]="newSection()"
+      [portalSelectedValue]="newSection()"
       (change)="newSection.set($any($event.target).value)">
       @for (section of store.sections(); track section.id) {
         <option [value]="section.id">{{ section.title }}</option>

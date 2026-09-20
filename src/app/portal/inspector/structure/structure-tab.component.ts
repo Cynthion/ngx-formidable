@@ -5,6 +5,7 @@ import { PortalFieldKind } from '../../model/field-spec.model';
 import { PREVIEW_FORM_DEFINITION } from '../../model/preview-form.definition';
 import { FormDefinitionStore } from '../../state/form-definition.store';
 import { InspectorStore } from '../../state/inspector.store';
+import { SelectedValueDirective } from '../../chrome/selected-value.directive';
 
 /** The three steps of building a form: where it comes from, what it is, and how it grows. */
 type StructureStep = 'start' | 'list' | 'add';
@@ -30,7 +31,7 @@ function count(n: number, noun: string): string {
   templateUrl: './structure-tab.component.html',
   styleUrl: './structure-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AccordionComponent]
+  imports: [AccordionComponent, SelectedValueDirective]
 })
 export class StructureTabComponent {
   protected readonly store = inject(FormDefinitionStore);
@@ -74,10 +75,10 @@ export class StructureTabComponent {
     this.inspector.openExport('form', 'import');
   }
 
-  /** The list is where a field is found; the Fields tab is where it is changed. */
+  /** The list is where a field is found; the Settings tab is where it is changed. */
   protected edit(id: string): void {
     this.store.select(id);
-    this.inspector.openFields();
+    this.inspector.openFieldSettings();
   }
 
   /**

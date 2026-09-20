@@ -75,7 +75,7 @@
           <select
             class="pc-select"
             [attr.aria-label]="t.name + ' unit'"
-            [value]="parts.unit"
+            [portalSelectedValue]="parts.unit"
             (change)="setLength(parts.amount, $any($event.target).value)">
             @for (unit of units; track unit) {
               <option [value]="unit">{{ unit }}</option>
@@ -96,7 +96,7 @@
       <select
         class="pc-select"
         [id]="'tc-' + t.name"
-        [value]="current"
+        [portalSelectedValue]="current"
         (change)="set($any($event.target).value)">
         @for (weight of fontWeights; track weight) {
           <option [value]="weight">{{ weight }}</option>
@@ -107,7 +107,7 @@
       <select
         class="pc-select"
         [id]="'tc-' + t.name"
-        [value]="current"
+        [portalSelectedValue]="current"
         (change)="set($any($event.target).value)">
         @for (easing of easings; track easing) {
           <option [value]="easing">{{ easing }}</option>

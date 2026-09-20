@@ -97,17 +97,19 @@ The `Form` tab has two halves, in the order the work happens.
 
 Starting over replaces the fields on the stage and leaves the theme untouched. A blank form is one empty section rather than none, because every add needs somewhere to add into.
 
-### Fields
+### Settings
 
-Three blocks over two scopes, spelled out on screen so it is never unclear how far a control reaches: the first two change every field at once, the last only the selected one.
+One editor, with an `Applies to` switch above it. The switch is how far a control reaches, so it is selected rather than read.
 
-| Scope                          | Changes                                                                                    |
-| :----------------------------- | :----------------------------------------------------------------------------------------- |
-| **Every Field: Decoration**    | Label position, required markers, hints, adornments, alignment, readonly, disabled, locale |
-| **Every Field: Validation**    | Which validator runs, when it runs, and when its messages appear                           |
-| **This Field Only: `<label>`** | Identity, state, decoration, behaviour and options for the selected field                  |
+| Scope          | Changes                                                                                   |
+| :------------- | :---------------------------------------------------------------------------------------- |
+| **The Form**   | The master switches every field obeys, the panel position, the locale, and the validation |
+| **All Fields** | Decoration, on every field at once                                                        |
+| **This Field** | Identity, state, decoration, behaviour and options for the selected field                 |
 
-Selecting a field selects it for editing; while the `Fields` half is showing, focusing a field in the preview selects it too.
+Selecting a field selects it for editing; while the `Settings` half is showing, focusing a field in the preview selects it too. A field chip opens this half at `This Field`.
+
+Decoration belongs to a field, so `All Fields` has no value of its own to show. Each control there states what most fields carry, says how many override it, and offers `Apply To All` to reassert it over them.
 
 A control appears only where that kind of field honours the input. The decorator layout is fixed per component and decides two answers outright: only the horizontal layout honours a label position other than `outside`, and the vertical layout renders no prefix or suffix at all. `user/decoration.md` states the rule, and the Studio never offers a control that would silently do nothing.
 

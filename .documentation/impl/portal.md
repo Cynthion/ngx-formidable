@@ -106,11 +106,11 @@ deploy workflow is not touched by the portal at any phase.
 **Tabs Are Not Routes**: the inspector's tabs are simultaneous views of one live object, and routing them
 would hide either the preview or the editor. There are three, in the order the work happens.
 
-| Area                | Halves                | Answers                                                                                   |
-| :------------------ | :-------------------- | :---------------------------------------------------------------------------------------- |
-| **Theme**           | `Design`, `Variables` | How the fields look                                                                       |
-| **Form**            | `Structure`, `Fields` | Which fields exist, and what each one is                                                  |
-| **Import & Export** | `Theme`, `Form`       | What you take away and paste back: the `:root` block, and the template with its component |
+| Area                | Halves                  | Answers                                                                                   |
+| :------------------ | :---------------------- | :---------------------------------------------------------------------------------------- |
+| **Theme**           | `Design`, `Variables`   | How the fields look                                                                       |
+| **Form**            | `Structure`, `Settings` | Which fields exist, and what everything is set to                                         |
+| **Import & Export** | `Theme`, `Form`         | What you take away and paste back: the `:root` block, and the template with its component |
 
 `Form` is `Structure` first: which fields exist has to be settled before what one of them is is worth
 saying. All three areas carry the same second level, so the strip is learned once rather than per tab, and
@@ -316,12 +316,12 @@ claiming it — and survives a reorder, a removal and the one-column collapse, n
 does.
 
 **Chips Are Controls, And Are Derived**: each chip names the component its field is, opens that field on the
-`Fields` tab, and carries a `↗` to say so. The preview explains itself, and every explanation is also the way
+`Settings` tab, and carries a `↗` to say so. The preview explains itself, and every explanation is also the way
 to change it — which is what replaces the instructions the page is required not to need.
 
 Both halves of a chip come from the specification rather than from prose written beside it: the text is the
 kind's display name, and the tooltip is what the field is set to, read through the same `ALL_FIELD_ATTRIBUTES`
-table the markup serializer emits from. A written description cannot hold — editing the field on the `Fields`
+table the markup serializer emits from. A written description cannot hold — editing the field on the `Settings`
 tab leaves it stating the old value, and a field added in the structure editor has none at all — so the page
 would be contradicting itself at exactly the moment the user starts working.
 
@@ -357,18 +357,24 @@ is never hidden, because it is the cheapest evidence that the form is real.
 The library's Ubiquitous Language names the object a form edits the **model**. `formValue` remains the
 directive's input name, which is the binding rather than the concept.
 
-### Fields And Decoration
+### Settings And Decoration
 
-Two scopes, so that the repeated inputs are set once and the specific ones are set per field.
+One editor, under an `Applies to` switch. The three positions are the three kinds of state there are, so
+nothing is filed under a scope it does not belong to.
 
-| Scope                          | Holds                                                                                      |
-| :----------------------------- | :----------------------------------------------------------------------------------------- |
-| **Every Field: Decoration**    | Label position, required markers, hints, adornments, alignment, readonly, disabled, locale |
-| **Every Field: Validation**    | Which validator runs, when it runs, and when its messages appear                           |
-| **This Field Only: `<label>`** | Identity, state, decoration, behaviour and options for the selected field                  |
+| Scope          | Holds                                               | State                          |
+| :------------- | :-------------------------------------------------- | :----------------------------- |
+| **The Form**   | Master switches, panel position, locale, validation | `PortalFormDefinition.options` |
+| **All Fields** | Decoration, written to every field at once          | `PortalFieldSpec.decoration`   |
+| **This Field** | Identity, state, decoration, behaviour, options     | One `PortalFieldSpec`          |
 
-The scopes are spelled out on screen rather than named "form defaults" and "this field": a user arriving cold
-cannot infer how far a control reaches from a heading that does not say.
+**Scope Is A Control, Not A Heading.** One editor with one set of groups is learned once, and a selected
+scope answers "how much does this change?" without being read. Decoration exists at two of the three scopes,
+so naming them in headings alone would put the same group on screen twice under names that have to be read to
+be told apart.
+
+**The Field Picker Lives Inside Its Scope**, so every control on screen reaches something the visitor can
+see.
 
 **Selection Follows Focus** while the tab is active, so that clicking a field uses it rather than selecting
 it. A hover-revealed chip and a field list cover the cases focus cannot reach.
@@ -389,6 +395,21 @@ preset sets.
 
 **Adornments** are content projection rather than inputs, so they live in the decoration group at both scopes,
 each slot offering none, an icon, text or a button.
+
+**Decoration Has No Form-Level Value.** Every decoration setting belongs to a field, so `All Fields` holds
+none of its own. A control there tallies the fields, states what most of them carry, counts the rest as
+overrides and offers to reassert its value over them. Holding a value instead would be a second source of
+truth that nothing renders from and that goes stale against the fields it claims to describe.
+
+**Behaviour Is Split By Subject** — `Text`, `Panel`, `Locale And Format`, `On And Off`, `Range`,
+`Ticks And Labels` — each rendered only where the capability table says the field has it. One `Behaviour`
+group was 26 controls, over half the editor, of which a date field showed eight.
+
+**A Select States Its Value Through `portalSelectedValue`**, never through `[value]`, wherever its options
+come from `@for` or `@if`. A property binding on the `<select>` is applied in the update pass, before the
+control-flow block has produced any options, and a `<select>` given a value it cannot match falls back to its
+first option — a control stating the wrong setting, which then writes nothing when the user picks the value it
+was already claiming.
 
 **Locale** is one control that moves the date field's translations, first day and token format together, and
 switches the paired field's format. Splitting it into separate controls would lose the demonstration.
@@ -413,7 +434,7 @@ fields.
 | Step                      | Offers                                                                        |
 | :------------------------ | :---------------------------------------------------------------------------- |
 | **1 Start**               | `Blank Form`, `The Sample`, `Paste Template` — the last opens Import & Export |
-| **2 Sections And Fields** | The form as it is: reorder, remove, or open a field on `Fields`               |
+| **2 Sections And Fields** | The form as it is: reorder, remove, or open a field on `Settings`             |
 | **3 Add**                 | A field of any type into any section, or a new section                        |
 
 A blank form is one empty section rather than none: every add needs somewhere to add into, so a form with no
