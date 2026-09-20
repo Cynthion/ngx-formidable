@@ -6,7 +6,7 @@ import {
   NgxFormidableWholeFormValidateDirective
 } from '@cynthion/ngx-formidable';
 import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/vest';
-import { PREVIEW_DEPENDENT_FIELDS, previewValidationSuite } from '../../model/preview-form.validation';
+import { createPreviewValidationSuite, PREVIEW_DEPENDENT_FIELDS } from '../../model/preview-form.validation';
 import { FormDefinitionStore } from '../../state/form-definition.store';
 import { FormValueStore, PortalModel } from '../../state/form-value.store';
 import { InspectorStore } from '../../state/inspector.store';
@@ -47,13 +47,22 @@ export class PreviewFormComponent {
   protected readonly intro = computed(() => this.definitionStore.definition().intro);
   protected readonly submit = computed(() => this.definitionStore.definition().submit);
 
-  protected readonly suite = computed(() => (this.options().validator === 'vest' ? previewValidationSuite : null));
-
   protected readonly dependentFields = PREVIEW_DEPENDENT_FIELDS;
 
   /** Changing the run axis rebuilds the form; nothing else does. */
   protected readonly formKey = signal(0);
   protected readonly ngFormOptions = computed(() => ({ updateOn: this.options().updateOn }));
+
+  /**
+   * One suite per form, built fresh whenever the form is. Read through `validator` rather than `options()`
+   * so an unrelated option does not discard the validation state the current form has built up.
+   */
+  private readonly validator = computed(() => this.options().validator);
+  protected readonly suite = computed(() => {
+    this.formKey();
+
+    return this.validator() === 'vest' ? createPreviewValidationSuite() : null;
+  });
 
   private lastUpdateOn = this.options().updateOn;
 

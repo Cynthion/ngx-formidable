@@ -24,11 +24,20 @@ describe('component serializer', () => {
     expect(source).toContain('  paradoxTolerance: number;');
     expect(source).toContain('  declarations: string[];');
 
-    expect(source).toContain("  travellerName: '',");
-    expect(source).toContain('  arrivalDate: new Date(),');
-    expect(source).toContain('  metYourself: false,');
-    expect(source).toContain('  paradoxTolerance: 0,');
-    expect(source).toContain('  declarations: []\n};');
+    // Keys follow the definition's field order, not the order asked for here, and only the last drops
+    // its comma — so the block is asserted whole rather than a line at a time.
+    expect(source).toContain(
+      [
+        'export const myFormShape: MyFormShape = {',
+        "  travellerName: '',",
+        '  arrivalDate: new Date(),',
+        '  arrivalTime: new Date(),',
+        '  declarations: [],',
+        '  paradoxTolerance: 0,',
+        '  metYourself: false',
+        '};'
+      ].join('\n')
+    );
   });
 
   it('provides every name the template binds', () => {

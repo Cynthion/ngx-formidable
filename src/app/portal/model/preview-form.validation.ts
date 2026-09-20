@@ -17,11 +17,16 @@ function date(value: unknown): Date | null {
 }
 
 /**
- * The Vest suite behind the preview form. Rules are written against the field ids in
+ * Builds the Vest suite behind the preview form. Rules are written against the field ids in
  * `preview-form.definition.ts`; a renamed field is a rule that stops matching, which the model drawer shows.
+ *
+ * A factory rather than a shared constant: a suite from `create` carries its own state, and the cost of a
+ * run grows with every form that has ever used it — `runStatic` does not isolate that, and `reset()` does
+ * not clear it. One suite across many forms turns the portal's spec into a quadratic, and rebuilding the
+ * form on a new `updateOn` degrades the running app the same way. Each form gets its own.
  */
-export const previewValidationSuite: Suite<string, string, (model: PreviewModel, field?: string) => void> = create(
-  (model: PreviewModel, field?: string) => {
+export function createPreviewValidationSuite(): Suite<string, string, (model: PreviewModel, field?: string) => void> {
+  return create((model: PreviewModel, field?: string) => {
     mode(Modes.ALL);
 
     if (field) {
@@ -74,8 +79,8 @@ export const previewValidationSuite: Suite<string, string, (model: PreviewModel,
       const tolerance = typeof model['paradoxTolerance'] === 'number' ? model['paradoxTolerance'] : 0;
       enforce(met && tolerance < 100).isFalsy();
     });
-  }
-);
+  });
+}
 
 /** The rules the `angular` validator mode wires with Angular's own validators instead of a suite. */
 export const ANGULAR_REQUIRED_FIELDS: ReadonlySet<string> = new Set([

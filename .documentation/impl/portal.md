@@ -333,6 +333,14 @@ not.
 **Option Fields** always carry a sample option that is `disabled` and one that is `readonly`, so their theming
 is demonstrable.
 
+**A Vest Suite Belongs To One Form.** Changing the run axis rebuilds the form — `NgForm` reads `updateOn`
+once — and each rebuild gets a suite of its own from `createPreviewValidationSuite()`. A suite from `create`
+carries state, and the cost of a run grows with every form that has ever used it: `runStatic` does not
+isolate that and `reset()` does not clear it. One module-level suite shared across forms is therefore
+quadratic, which cost the portal's spec 4m41s of its 4m47s before each form got its own. The suite is read
+through the `validator` option alone, so changing an unrelated option does not discard the validation state
+the current form has built up.
+
 **Starting Theme**: a preset that is not the shipped default, so that the page is evidence of configurability
 from the first frame.
 
