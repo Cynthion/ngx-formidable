@@ -870,8 +870,10 @@
 
 // The error list under a field. Rendered only while there is a message, so a field that never fails costs
 // nothing below itself — reserving the line instead is the consumer's call, and their layout's to make.
+// Half the gap the hint row takes from the field: hints and messages are one block of support text, and
+// the block reads as one only while the space inside it stays smaller than the space above it.
 @mixin field-validation-errors {
-  margin-top: utils.rem(8);
+  margin-top: utils.rem(4);
 }
 
 // A single error message.

@@ -263,7 +263,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     decoration: {
       ...DECORATION,
       showRequiredMarker: true,
-      hint: 'Fuzzy search over a custom option component — try “8004”, or a typo.',
+      hint: 'Fuzzy search over a custom option component.',
       hintAlign: 'start'
     }
   }),
