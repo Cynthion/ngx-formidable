@@ -155,19 +155,19 @@ describe('FieldDecoratorComponent hint slot', () => {
     expect(textRect(counter!).left).toBeCloseTo(counter!.getBoundingClientRect().left, 1);
   });
 
-  it('reserves one line for a single hint, so nothing shifts as its text comes and goes', () => {
+  it('sizes the row to the hint and reserves nothing beyond it', () => {
     host.showCounter = false;
     fixture.detectChanges();
 
-    const reserved = parseFloat(getComputedStyle(wrapper()).minHeight);
+    const lineHeight = parseFloat(getComputedStyle(wrapper()).lineHeight);
 
-    expect(reserved).toBeGreaterThan(0);
-    expect(wrapper().getBoundingClientRect().height).toBeCloseTo(reserved, 0);
+    expect(getComputedStyle(wrapper()).minHeight).toBe('0px');
+    expect(wrapper().getBoundingClientRect().height).toBeCloseTo(lineHeight, 0);
   });
 
   it('leaves spacing below the decorator to the consumer', () => {
-    const errors = root.querySelector('.errors') as HTMLElement;
+    const decorator = root.querySelector('formidable-field-decorator') as HTMLElement;
 
-    expect(getComputedStyle(errors).marginBottom).toBe('0px');
+    expect(getComputedStyle(decorator).marginBottom).toBe('0px');
   });
 });

@@ -1,5 +1,5 @@
-<div class="errors">
-  @if (invalid()) {
+@if (invalid()) {
+  <div class="errors">
     <ul>
       @for (error of errors(); track error) {
         <li class="error">
@@ -7,5 +7,5 @@
         </li>
       }
     </ul>
-  }
-</div>
+  </div>
+}

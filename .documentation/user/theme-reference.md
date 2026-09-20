@@ -75,7 +75,6 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-label-border-band-reach-focus`     | What that reach becomes while the field is focused, so the band covers the ring too. Follows the ring's width unless set.                                                                                                |
 | `--formidable-label-required-marker`             | The `content` string suffixed to a required field's label — `'*'`, or a word such as `' (required)'`.                                                                                                                    |
 | `--formidable-field-group-option-padding`        | Padding of options within a field group.                                                                                                                                                                                 |
-| `--formidable-field-support-min-height`          | Minimum reserved height of a support-text row below a field — the hints and the validation errors.                                                                                                                       |
 
 ---
 

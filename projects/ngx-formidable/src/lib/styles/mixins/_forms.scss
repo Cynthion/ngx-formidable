@@ -868,10 +868,10 @@
 
 // #region Support
 
-// The error list under a field. Reserves its min-height so a message appearing does not shift the form.
+// The error list under a field. Rendered only while there is a message, so a field that never fails costs
+// nothing below itself — reserving the line instead is the consumer's call, and their layout's to make.
 @mixin field-validation-errors {
   margin-top: utils.rem(8);
-  min-height: var(--formidable-field-support-min-height, #{tokens.$formidable-field-support-min-height});
 }
 
 // A single error message.
@@ -895,7 +895,6 @@
   display: flex;
   column-gap: utils.rem(8);
   margin-top: utils.rem(8);
-  min-height: var(--formidable-field-support-min-height, #{tokens.$formidable-field-support-min-height});
   font-size: var(--formidable-field-hint-font-size, #{tokens.$formidable-field-hint-font-size});
   font-weight: var(--formidable-field-hint-font-weight, #{tokens.$formidable-field-hint-font-weight});
   line-height: var(--formidable-field-hint-line-height, #{tokens.$formidable-field-hint-line-height});
@@ -1114,7 +1113,9 @@
   .slider-label-row {
     position: relative;
     user-select: none;
-    height: $label-line-height;
+    // Its labels are absolutely placed along the track, so the row has to state the line box they take —
+    // and the line height is a unitless factor, which is not a length until it is multiplied by the size.
+    height: calc(#{$label-line-height} * #{$label-font-size});
     margin-top: var(--formidable-slider-tick-labels-margin-top, #{tokens.$formidable-slider-tick-labels-margin-top});
     pointer-events: none;
   }

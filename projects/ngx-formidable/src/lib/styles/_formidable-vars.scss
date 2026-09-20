@@ -191,11 +191,6 @@
 
   --formidable-field-group-option-padding: #{tokens.$formidable-field-group-option-padding};
 
-  --formidable-field-support-min-height: calc(
-    var(--formidable-field-validation-error-line-height, #{tokens.$formidable-field-validation-error-line-height}) *
-      var(--formidable-field-validation-error-font-size, #{tokens.$formidable-field-validation-error-font-size})
-  );
-
   // #endregion
 
   // #region Colors

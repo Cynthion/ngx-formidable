@@ -236,7 +236,7 @@ A hint is always-visible support text on a row below the field and above the err
 </formidable-field-decorator>
 ```
 
-`align` takes `start` (the default), `center` or `end`. The row reserves the same single line the errors do and collapses entirely when nothing is projected. There are no pre-defined hints: the library owns the slot, never what goes in it.
+`align` takes `start` (the default), `center` or `end`. The row is sized by its content and collapses entirely when nothing is projected. There are no pre-defined hints: the library owns the slot, never what goes in it.
 
 ---
 

@@ -321,11 +321,11 @@ describe('formidable-field-decorator layout', () => {
       expect(errors.compareDocumentPosition(container()) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
     });
 
-    it('reserves a line for the errors even while the field is valid, so nothing shifts later', () => {
-      const errors = root.querySelector('.errors') as HTMLElement;
+    it('takes no space while the field is valid, so a field that never fails costs nothing below it', () => {
+      const errors = root.querySelector('formidable-field-errors') as HTMLElement;
 
-      expect(errors.querySelector('ul')).toBeNull();
-      expect(errors.getBoundingClientRect().height).toBeCloseTo(rem(1.2), 0);
+      expect(root.querySelector('.errors')).toBeNull();
+      expect(errors.getBoundingClientRect().height).toBe(0);
     });
 
     // Angular's own form state is not signal-backed, so the component only re-reads the control when the

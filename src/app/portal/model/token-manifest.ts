@@ -392,14 +392,6 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     description: 'Padding of options within a field group.'
   },
   {
-    name: '--formidable-field-support-min-height',
-    group: 'Field Dimensions',
-    control: 'length',
-    class: 'declared',
-    derivedFrom: '--formidable-field-validation-error-line-height',
-    description: 'Minimum reserved height of a support-text row below a field — the hints and the validation errors.'
-  },
-  {
     name: '--formidable-color-validation-error',
     group: 'Colors',
     control: 'color',
