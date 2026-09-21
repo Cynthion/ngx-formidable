@@ -423,7 +423,9 @@ export abstract class BaseFieldDirective<T = string | null>
 
     if (this.windowResizeScrollCallback) {
       const resize$ = fromEvent(window, 'resize');
-      const scroll$ = fromEvent(window, 'scroll');
+      // Captured on the document rather than listened for on `window`: `scroll` does not bubble, so a
+      // field scrolling inside a pane of its own would otherwise never hear that it has moved.
+      const scroll$ = fromEvent(document, 'scroll', { capture: true });
 
       merge(resize$, scroll$)
         .pipe(debounceTime(50), takeUntil(this.destroy$))

@@ -10,6 +10,34 @@ export function openPanelPosition(field?: unknown): FormidablePanelPosition | nu
 }
 
 /**
+ * The band a panel has to fit into: the viewport, cropped by every ancestor that clips its overflow. A
+ * field inside a scrolling pane has far less room above and below it than the window suggests, and a panel
+ * placed against the window is the one that ends up cut off by the pane.
+ *
+ * The walk stops below `<body>`: a scrolling body scrolls the viewport itself, and its box is only as tall
+ * as its content — cropping against that would shrink the band on any ordinary page.
+ */
+function clipBand(element: HTMLElement): { top: number; bottom: number } {
+  let top = 0;
+  let bottom = window.innerHeight;
+
+  for (
+    let ancestor = element.parentElement;
+    ancestor && ancestor !== document.body;
+    ancestor = ancestor.parentElement
+  ) {
+    if (getComputedStyle(ancestor).overflowY === 'visible') continue;
+
+    const rect = ancestor.getBoundingClientRect();
+
+    top = Math.max(top, rect.top);
+    bottom = Math.min(bottom, rect.bottom);
+  }
+
+  return { top, bottom };
+}
+
+/**
  * Opens the panel below the field, or above it when there is no room below and there is above. The panel
  * carries the direction so its own styling can follow it — the field is never touched: its corners are its
  * own, and an open panel mirrors them rather than the other way round. A sheet is exempt: it is pinned to
@@ -30,10 +58,10 @@ export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef
 
   const fieldRect = field.getBoundingClientRect();
   const panelHeight = panel.offsetHeight;
-  const windowHeight = window.innerHeight;
+  const band = clipBand(field);
 
-  const spaceBelow = windowHeight - fieldRect.bottom;
-  const spaceAbove = fieldRect.top;
+  const spaceBelow = band.bottom - fieldRect.bottom;
+  const spaceAbove = fieldRect.top - band.top;
 
   // Below unless it does not fit there and does fit above — including when it fits neither way, so a
   // panel with nowhere to go is at least clipped predictably.

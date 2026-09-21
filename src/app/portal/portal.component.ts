@@ -18,9 +18,10 @@ const NARROW = '(max-width: 900px)';
 /**
  * The portal shell: a fixed top bar, the stage, and the inspector.
  *
- * Below the two-column breakpoint the inspector becomes a bottom sheet. A library `sheet` panel is anchored
- * to the screen too, so when one opens the inspector collapses out of its way — the decorator's own
- * `has-open-sheet` class is what says so, which is why this watches for it rather than tracking panel state.
+ * Below the two-column breakpoint the inspector becomes a bottom sheet and the stage keeps only the height
+ * it leaves. A library `sheet` panel fills the bottom of that stage, so when one opens the inspector
+ * collapses to leave it the height — the decorator's own `has-open-sheet` class is what says so, which is
+ * why this watches for it rather than tracking panel state.
  */
 @Component({
   selector: 'portal-root',

@@ -65,7 +65,8 @@ collapsed bar always states the fill count and validity.
 
 **Narrow Viewports**: below the two-column breakpoint the inspector becomes a bottom sheet covering at most
 three fifths of the height, so fields stay visible and live while they are edited. When a library `sheet`
-panel opens, the inspector sheet collapses, because a `sheet` is anchored to the screen.
+panel opens, the inspector sheet collapses, because that panel fills the bottom of the stage and an expanded
+inspector leaves the stage too short to show it.
 
 **Stacking**: the inspector takes a `z-index` above `--formidable-sheet-z-index`, so a panel scrolled beneath
 it cannot punch through. `tech/layering.md` holds the layer model.

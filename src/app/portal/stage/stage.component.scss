@@ -102,6 +102,16 @@
   font-weight: 650;
 }
 
+// The preview's own viewport. A `sheet` panel is `position: fixed`, and the page it belongs to ends at
+// this pane's edges, not at the browser window's — without a containing block here it pins to the window
+// and slides under the inspector, off-centre and half covered. `contain: paint` supplies one. It cannot go
+// on `.stage-scroll` below: a fixed child of a scroll container scrolls away with the content.
+.stage-viewport {
+  display: grid;
+  min-height: 0;
+  contain: paint;
+}
+
 .stage-scroll {
   min-height: 0;
   padding: 24px;

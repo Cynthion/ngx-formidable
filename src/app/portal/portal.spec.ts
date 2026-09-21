@@ -925,7 +925,7 @@ describe('portal', () => {
 
   // The stage is a fixed three-row grid, so an optional child of it shifts every row below — which once
   // pushed the drawer off the bottom of the viewport. Whatever the switches add has to stay inside the
-  // head, leaving the head, the scroller and the drawer as the only three rows.
+  // head, leaving the head, the preview viewport and the drawer as the only three rows.
   it('keeps the model drawer in the last row whatever the stage is showing', fakeAsync(() => {
     settle();
     const layout = TestBed.inject(LayoutStore);
@@ -942,7 +942,7 @@ describe('portal', () => {
 
         expect(children.length).withContext(context).toBe(3);
         expect(children[0]?.classList).withContext(context).toContain('stage-head');
-        expect(children[1]?.classList).withContext(context).toContain('stage-scroll');
+        expect(children[1]?.classList).withContext(context).toContain('stage-viewport');
         expect(children[2]?.tagName.toLowerCase()).withContext(context).toBe('portal-model-drawer');
       }
     }
@@ -977,6 +977,31 @@ describe('portal', () => {
     const inspector = root.querySelector('portal-inspector') as HTMLElement;
 
     expect(inspector.style.width).toBe('640px');
+  }));
+
+  // A `sheet` panel is `position: fixed`, and the page it belongs to ends at the preview's edges. Without a
+  // containing block on the preview viewport it spans the browser window instead, which puts it off-centre
+  // and half under the inspector.
+  it('pins a fixed child of the preview to the stage rather than to the window', fakeAsync(() => {
+    settle();
+
+    const viewport = root.querySelector('.stage-viewport') as HTMLElement;
+    const probe = document.createElement('div');
+
+    probe.style.cssText = 'position: fixed; inset: auto 0 0; height: 10px';
+    viewport.appendChild(probe);
+
+    const stage = viewport.getBoundingClientRect();
+    const pinned = probe.getBoundingClientRect();
+
+    probe.remove();
+
+    // Guards the assertions below against passing on a preview that happens to fill the window.
+    expect(stage.bottom).toBeLessThan(window.innerHeight);
+
+    expect(pinned.left).toBeCloseTo(stage.left, 0);
+    expect(pinned.right).toBeCloseTo(stage.right, 0);
+    expect(pinned.bottom).toBeCloseTo(stage.bottom, 0);
   }));
 
   it('keeps the inspector above the library’s own sheet z-index', fakeAsync(() => {

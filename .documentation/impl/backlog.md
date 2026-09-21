@@ -2,7 +2,6 @@
 
 ## Bugs
 
-- The panels do not change orientation (above/below) the field when there is not enough space below/above the field in the sample form.
 - The select-field and autocomplete fields currently look exactly like a regular input field. Visually, nothing gives away that they are "dropdowns" or "selections". The dropdown field has an icon. What can be done about it and should it be changed? Do "native" selects and autocomplete fields differ visually from native input files?
 - All fields where users can enter text must support: click into text -> cursor at that position (also in masks), Ctrl/Cmd + A to select all (also for masks)
 

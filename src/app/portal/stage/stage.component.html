@@ -52,12 +52,14 @@
   }
 </div>
 
-<div class="stage-scroll">
-  <!-- The page surface: an explicit edge, so a dark theme has the object it needs. -->
-  <div class="page-surface">
-    <portal-preview-form
-      [showFieldTypes]="layout.showFieldTypes()"
-      [showAccessibility]="layout.showAccessibility()" />
+<div class="stage-viewport">
+  <div class="stage-scroll">
+    <!-- The page surface: an explicit edge, so a dark theme has the object it needs. -->
+    <div class="page-surface">
+      <portal-preview-form
+        [showFieldTypes]="layout.showFieldTypes()"
+        [showAccessibility]="layout.showAccessibility()" />
+    </div>
   </div>
 </div>
 
