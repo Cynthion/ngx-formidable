@@ -3,7 +3,7 @@ import { contrastRatio, parseRgb, Rgb, toHex } from '../helpers/color.helpers';
 import { DEFAULT_EXPORT_OPTIONS, exportTheme, ThemeExportOptions } from '../export/theme-export';
 import { importTheme, ThemeImportResult } from '../export/theme-import';
 import { DEFAULT_FONT_STACK, PageSurface, PRESETS_BY_KEY, STARTING_PRESET_KEY, ThemePreset } from '../model/presets';
-import { COLOR_SCHEMES, ColorKey, GEOMETRY_SCHEMES, GeometryKey, ThemeVars } from '../model/schemes';
+import { COLOR_SCHEMES, ColorKey, GEOMETRY_SCHEMES, GeometryKey, SCHEME_VARS, ThemeVars } from '../model/schemes';
 import { THEME_TOKENS_BY_NAME } from '../model/token-manifest';
 
 /** How the portal's own chrome paints itself. Not the page behind the form, and never exported. */
@@ -25,8 +25,8 @@ const DEFAULT_PAGE: PageSurface = { background: '#ffffff', text: '#1e293b' };
 
 interface PersistedTheme {
   readonly presetKey: string | null;
-  readonly geometry: GeometryKey;
-  readonly color: ColorKey;
+  readonly geometry: GeometryKey | null;
+  readonly color: ColorKey | null;
   readonly overrides: Record<string, string>;
   readonly page: PageSurface;
   readonly fontFamily: string;
@@ -54,8 +54,10 @@ export class ThemeStore {
   private readonly doc = inject(DOCUMENT);
 
   public readonly presetKey = signal<string | null>(STARTING_PRESET_KEY);
-  public readonly geometry = signal<GeometryKey>('outlined');
-  public readonly color = signal<ColorKey>('slate');
+
+  /** Either axis is `null` once a theme has been imported onto the library defaults: there is no scheme then. */
+  public readonly geometry = signal<GeometryKey | null>('outlined');
+  public readonly color = signal<ColorKey | null>('slate');
 
   /** The user's own per-variable edits, which outrank whatever the schemes set. */
   public readonly overrides = signal<Readonly<Record<string, string>>>({});
@@ -68,11 +70,16 @@ export class ThemeStore {
   public readonly showOnlyChanged = signal(false);
 
   /** The one computed both the applied properties and the export text are read off. */
-  public readonly resolved = computed<Readonly<Record<string, string>>>(() => ({
-    ...GEOMETRY_SCHEMES[this.geometry()],
-    ...COLOR_SCHEMES[this.color()],
-    ...this.overrides()
-  }));
+  public readonly resolved = computed<Readonly<Record<string, string>>>(() => {
+    const geometry = this.geometry();
+    const color = this.color();
+
+    return {
+      ...(geometry ? GEOMETRY_SCHEMES[geometry] : {}),
+      ...(color ? COLOR_SCHEMES[color] : {}),
+      ...this.overrides()
+    };
+  });
 
   /**
    * The resolved theme with every declaration that only restates the library's own default dropped.
@@ -93,8 +100,40 @@ export class ThemeStore {
       (this.isPageChanged() ? 1 : 0)
   );
 
+  /**
+   * What the export block carries.
+   *
+   * The delta on its own reproduces the theme on the library's own defaults, which is what a consumer pastes
+   * onto — and nothing else. Asked for explicitly, the block also states the value in force for every
+   * variable a scheme could set and the delta leaves out, so that pasted over another theme it overwrites
+   * rather than inherits.
+   */
+  public readonly exportVars = computed<Readonly<Record<string, string>>>(() => {
+    const changed = this.changedVars();
+
+    if (!this.exportOptions().includeDefaults) return changed;
+
+    const style = getComputedStyle(this.ensureThemedProbe(this.resolved()));
+    const stated: Record<string, string> = { ...changed };
+
+    for (const name of SCHEME_VARS) {
+      if (name in stated) continue;
+
+      const value = this.inForceOn(style, name);
+
+      if (value) stated[name] = value;
+    }
+
+    return stated;
+  });
+
+  /** What the Export accordion states: the user's own count, or the size of the block when it is stated in full. */
+  public readonly exportCount = computed(() =>
+    this.exportOptions().includeDefaults ? Object.keys(this.exportVars()).length : this.changeCount()
+  );
+
   public readonly exportText = computed(() =>
-    exportTheme({ vars: this.changedVars(), fontFamily: this.fontFamily(), page: this.page() }, this.exportOptions())
+    exportTheme({ vars: this.exportVars(), fontFamily: this.fontFamily(), page: this.page() }, this.exportOptions())
   );
 
   /** Whether the current fill is dark enough that the four values the seeds cannot derive are needed. */
@@ -129,6 +168,8 @@ export class ThemeStore {
 
   private appliedKeys = new Set<string>();
   private defaultsProbe: HTMLElement | null = null;
+  private themedProbe: HTMLElement | null = null;
+  private themedProbeKeys = new Set<string>();
   private colorProbe: HTMLElement | null = null;
 
   constructor() {
@@ -249,8 +290,25 @@ export class ThemeStore {
     this.fontFamily.set(DEFAULT_FONT_STACK);
   }
 
-  public importFrom(source: string): ThemeImportResult {
+  /**
+   * Reads a pasted block back in.
+   *
+   * `applyDefaults` first strips the theme back to the library's own defaults — both axes dropped, no
+   * overrides, the default page and family — so a block that only states the delta reproduces exactly the
+   * theme that produced it. Merged onto what is on screen instead, any scheme value the delta does not
+   * happen to restate survives into the result, which is a theme neither side asked for.
+   */
+  public importFrom(source: string, applyDefaults = false): ThemeImportResult {
     const result = importTheme(source);
+
+    if (applyDefaults) {
+      this.presetKey.set(null);
+      this.geometry.set(null);
+      this.color.set(null);
+      this.overrides.set({});
+      this.page.set(DEFAULT_PAGE);
+      this.fontFamily.set(DEFAULT_FONT_STACK);
+    }
 
     if (Object.keys(result.vars).length) this.setVariables(result.vars);
     if (result.fontFamily) this.fontFamily.set(result.fontFamily);
@@ -323,6 +381,25 @@ export class ThemeStore {
     return (0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b) / 255;
   }
 
+  /**
+   * The value a variable has under a theme, read off the browser rather than worked out.
+   *
+   * The manifest records what a variable falls back to, not whether the library's declaration is an alias
+   * for that one or builds something else out of it — the focus shadow is three values wide and names two
+   * variables. The block recomputes, so a declared variable's value already carries whatever the theme says
+   * about the ones underneath it. Only the six the library declares nowhere have to follow their own
+   * fallback, and those are aliases outright.
+   */
+  private inForceOn(style: CSSStyleDeclaration, name: string): string {
+    const declared = style.getPropertyValue(name).trim();
+
+    if (declared) return declared;
+
+    const base = THEME_TOKENS_BY_NAME.get(name)?.derivedFrom;
+
+    return base ? this.inForceOn(style, base) : '';
+  }
+
   private isPageChanged(): boolean {
     const page = this.page();
 
@@ -390,6 +467,33 @@ export class ThemeStore {
     return this.defaultsProbe;
   }
 
+  /**
+   * The same re-emitted block with the theme written over it, which is where a variable the theme leaves
+   * unsaid recomputes against the ones it does say. Kept off `:root` so a read is not waiting on the effect
+   * that paints the page.
+   */
+  private ensureThemedProbe(vars: Readonly<Record<string, string>>): HTMLElement {
+    if (!this.themedProbe) {
+      const element = this.doc.createElement('div');
+      element.className = 'portal-token-defaults';
+      element.setAttribute('aria-hidden', 'true');
+      this.doc.body.appendChild(element);
+      this.themedProbe = element;
+    }
+
+    const next = new Set(Object.keys(vars));
+
+    for (const key of this.themedProbeKeys) {
+      if (!next.has(key)) this.themedProbe.style.removeProperty(key);
+    }
+    for (const [key, value] of Object.entries(vars)) {
+      this.themedProbe.style.setProperty(key, value);
+    }
+    this.themedProbeKeys = next;
+
+    return this.themedProbe;
+  }
+
   private ensureColorProbe(): HTMLElement {
     if (!this.colorProbe) {
       const element = this.doc.createElement('span');
@@ -430,8 +534,8 @@ export class ThemeStore {
       return;
     }
 
-    if (stored.geometry in GEOMETRY_SCHEMES) this.geometry.set(stored.geometry);
-    if (stored.color in COLOR_SCHEMES) this.color.set(stored.color);
+    if (stored.geometry === null || stored.geometry in GEOMETRY_SCHEMES) this.geometry.set(stored.geometry);
+    if (stored.color === null || stored.color in COLOR_SCHEMES) this.color.set(stored.color);
     this.presetKey.set(stored.presetKey);
     this.overrides.set(stored.overrides ?? {});
     if (stored.page) this.page.set(stored.page);

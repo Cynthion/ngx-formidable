@@ -1,7 +1,7 @@
 <portal-accordion
   heading="Export"
-  lede="The block to paste into your own :root. Declarations that only restate a library default are left out, so what you take away is your theme rather than the library's."
-  [hint]="theme.changeCount() + ' Variables'"
+  lede="The block to paste into your own :root. Declarations that only restate a library default are left out, so what you take away is your theme rather than the library's. Explicit Defaults states them anyway, which makes the block stand on its own wherever it lands."
+  [hint]="theme.exportCount() + ' Variables'"
   [open]="isOpen('export')"
   (toggled)="toggle('export')">
   <div class="options">
@@ -35,6 +35,13 @@
         (change)="setIncludePageSurface($any($event.target).checked)" />
       Page Surface
     </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="theme.exportOptions().includeDefaults"
+        (change)="setIncludeDefaults($any($event.target).checked)" />
+      Explicit Defaults
+    </label>
   </div>
 
   <pre class="preview">{{ theme.exportText() }}</pre>
@@ -57,7 +64,7 @@
 
 <portal-accordion
   heading="Import"
-  lede="A block you saved earlier, read back in. Anything outside the manifest is listed rather than applied — a variable the library does not declare would produce a control that appears to do nothing."
+  lede="A block you saved earlier, read back in. Anything outside the manifest is listed rather than applied — a variable the library does not declare would produce a control that appears to do nothing. Read onto the defaults, a block reproduces the theme it came from; read onto the theme on screen, whatever it leaves unstated stays as it is."
   hint="Paste A Block"
   [open]="isOpen('import')"
   (toggled)="toggle('import')">
@@ -68,6 +75,16 @@
     class="pc-textarea"
     [value]="importText()"
     (input)="importText.set($any($event.target).value)"></textarea>
+
+  <div class="options is-import">
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="applyDefaults()"
+        (change)="applyDefaults.set($any($event.target).checked)" />
+      Onto The Defaults
+    </label>
+  </div>
 
   <div class="pc-buttons">
     <button

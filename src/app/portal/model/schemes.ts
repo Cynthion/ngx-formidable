@@ -319,6 +319,17 @@ export const COLOR_SCHEMES: Readonly<Record<ColorKey, ThemeVars>> = {
   }
 };
 
+/**
+ * Every variable either axis can set. A block that is to survive being pasted onto another theme rather
+ * than onto the library's own defaults has to say something about each of these: what it leaves unsaid is
+ * whatever the theme underneath happens to say.
+ */
+export const SCHEME_VARS: readonly string[] = [
+  ...new Set(
+    [...Object.values(GEOMETRY_SCHEMES), ...Object.values(COLOR_SCHEMES)].flatMap((scheme) => Object.keys(scheme))
+  )
+];
+
 /** The four values a dark fill needs beyond the eight seeds, offered by the dark-fill notice. */
 export const DARK_FILL_COMPANIONS: readonly string[] = [
   '--formidable-color-field-background-readonly',

@@ -1,6 +1,7 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideNgxMask } from 'ngx-mask';
+import { DEFAULT_EXPORT_OPTIONS } from './export/theme-export';
 import { importTheme } from './export/theme-import';
 import { FIELD_KIND_LABELS } from './model/field-capabilities';
 import { PREVIEW_FIELDS } from './model/preview-form.definition';
@@ -330,6 +331,83 @@ describe('portal', () => {
 
     expect(Object.keys(exported.vars).length).toBe(Object.keys(theme.changedVars()).length);
     expect(theme.changeCount()).toBeGreaterThanOrEqual(Object.keys(exported.vars).length);
+  }));
+
+  /**
+   * What the stage's own field paints. Measured rather than compared as declarations, because the export
+   * drops what only restates a default and the two can say the same thing differently — `1px` against the
+   * shipped `0.0625rem`, a hex against an `rgb()`. Those are not a difference in the view, and the view is
+   * the claim.
+   */
+  function painted(): Record<string, string> {
+    const field = root.querySelector('portal-stage formidable-input-field .field') as HTMLElement;
+    const style = getComputedStyle(field);
+    const properties = [
+      'height',
+      'backgroundColor',
+      'color',
+      'fontSize',
+      'borderTopWidth',
+      'borderTopColor',
+      'borderStartStartRadius',
+      'boxShadow',
+      'paddingLeft'
+    ];
+
+    return Object.fromEntries(properties.map((property) => [property, String(style[property as never])]));
+  }
+
+  it('reproduces the theme when the delta is read back onto the defaults', fakeAsync(() => {
+    settle();
+
+    theme.exportOptions.set({ ...DEFAULT_EXPORT_OPTIONS, includePageSurface: true });
+    theme.applyPreset(THEME_PRESETS.find((preset) => preset.key === 'consumer')!);
+    settle();
+
+    const block = theme.exportText();
+    const before = painted();
+
+    theme.applyPreset(THEME_PRESETS.find((preset) => preset.key === 'brutalist')!);
+    settle();
+    expect(painted()).not.toEqual(before);
+
+    // The bug this pins: the delta states only what differs from the library's defaults, so merged onto
+    // another scheme every value that scheme sets and the delta does not restate survives into the result.
+    theme.importFrom(block, false);
+    settle();
+    expect(painted()).not.toEqual(before);
+
+    theme.importFrom(block, true);
+    settle();
+
+    expect(painted()).toEqual(before);
+    expect(theme.page()).toEqual(THEME_PRESETS.find((preset) => preset.key === 'consumer')!.page);
+    expect(theme.fontFamily()).toBe(THEME_PRESETS.find((preset) => preset.key === 'consumer')!.fontFamily);
+  }));
+
+  // The other half of the pair: a block that states the defaults outright needs no help on the way in. Every
+  // preset, because the hazard is per-variable — a scheme states a base and leaves what follows it unsaid,
+  // and a default written over that base would contradict it.
+  it('reproduces every preset when the block states the defaults and is merged in', fakeAsync(() => {
+    settle();
+
+    theme.exportOptions.set({ ...DEFAULT_EXPORT_OPTIONS, includeDefaults: true, includePageSurface: true });
+
+    for (const preset of THEME_PRESETS) {
+      theme.applyPreset(preset);
+      settle();
+
+      const block = theme.exportText();
+      const before = painted();
+
+      theme.applyPreset(THEME_PRESETS.find((other) => other.key !== preset.key)!);
+      settle();
+
+      theme.importFrom(block, false);
+      settle();
+
+      expect(painted()).withContext(preset.key).toEqual(before);
+    }
   }));
 
   // The counter is the page's primary claim: eight to twelve variables are enough. It has to start at the

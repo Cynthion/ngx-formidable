@@ -49,7 +49,7 @@
     <span class="pc-label">Geometry</span>
     <select
       class="pc-select"
-      [portalSelectedValue]="theme.geometry()"
+      [portalSelectedValue]="theme.geometry() ?? ''"
       (change)="setGeometry($any($event.target).value)">
       @for (scheme of geometries; track scheme.key) {
         <option [value]="scheme.key">{{ scheme.label }} — {{ scheme.reads }}</option>
@@ -61,7 +61,7 @@
     <span class="pc-label">Colour</span>
     <select
       class="pc-select"
-      [portalSelectedValue]="theme.color()"
+      [portalSelectedValue]="theme.color() ?? ''"
       (change)="setColor($any($event.target).value)">
       @for (scheme of colors; track scheme.key) {
         <option [value]="scheme.key">{{ scheme.label }} — {{ scheme.reads }}</option>

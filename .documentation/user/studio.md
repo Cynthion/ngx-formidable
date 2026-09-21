@@ -147,7 +147,16 @@ The `Import & Export` tab has two halves, one per thing the Studio produces. Eac
 
 Both halves are the same pair of sections, `Export` and `Import`. Each `Export` carries the block, a copy, and a reset that puts that half back to where it started — the shipped theme, or the sample form.
 
-The top bar carries a copy for each half and, beside it, a control that opens that half here. `Copy Theme` and `Copy Template` copy with no intermediate dialog; the theme's export options cover CSS or SCSS, whether the page surface is included, and whether the per-variable comments are emitted. Declarations that only restate a library default are left out.
+The top bar carries a copy for each half and, beside it, a control that opens that half here. `Copy Theme` and `Copy Template` copy with no intermediate dialog; the theme's export options cover CSS or SCSS, whether the page surface is included, whether the per-variable comments are emitted, and whether the defaults are stated explicitly. Declarations that only restate a library default are left out.
+
+**A Theme Block States A Delta.** The `:root` block carries what the theme says the library's defaults do not, so it reproduces the theme wherever those defaults are what it lands on — your own stylesheet. Read back into the Studio it lands on the theme already on the stage instead, and what a delta leaves unsaid stays as it is. Either checkbox closes that gap:
+
+| Checkbox              |  Half  | Effect                                                                                         |
+| :-------------------- | :----: | :--------------------------------------------------------------------------------------------- |
+| **Explicit Defaults** | Export | States the value in force for every variable a Studio theme can set, not only the changed ones |
+| **Onto The Defaults** | Import | Puts the theme back to the library's defaults first, then applies the block. On by default     |
+
+The page surface and the font family are the page's rather than the library's, so `Onto The Defaults` returns them to the Studio's own starting pair unless the block states them — which is what `Page Surface` is for.
 
 **The Component Is A Proposal.** The template binds `model`, `shape` and, under Vest, `suite`. `Copy Component` copies one standalone component that declares them the way `user/validation.md` lays a form out: the model typed by what each field writes, its shape, and under Vest a suite with no rules in it — the Studio has no rule editor. Any component that provides the three names serves the template as well. The component is not read back in.
 

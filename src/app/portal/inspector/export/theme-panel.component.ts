@@ -38,6 +38,12 @@ export class ThemePanelComponent {
   protected readonly importResult = signal<ThemeImportResult | null>(null);
   protected readonly justCopied = signal(false);
 
+  /**
+   * On, because the export states the delta: read back onto the library's own defaults, a block reproduces
+   * the theme it came from. Off is for merging a snippet into the theme on screen.
+   */
+  protected readonly applyDefaults = signal(true);
+
   protected setFormat(format: string): void {
     this.theme.exportOptions.update((options) => ({ ...options, format: format as ThemeExportFormat }));
   }
@@ -50,12 +56,16 @@ export class ThemePanelComponent {
     this.theme.exportOptions.update((options) => ({ ...options, includeComments: on }));
   }
 
+  protected setIncludeDefaults(on: boolean): void {
+    this.theme.exportOptions.update((options) => ({ ...options, includeDefaults: on }));
+  }
+
   protected copy(): Promise<void> {
     return copyText(this.theme.exportText(), this.justCopied);
   }
 
   protected runImport(): void {
-    this.importResult.set(this.theme.importFrom(this.importText()));
+    this.importResult.set(this.theme.importFrom(this.importText(), this.applyDefaults()));
   }
 
   protected countOf(result: ThemeImportResult): number {

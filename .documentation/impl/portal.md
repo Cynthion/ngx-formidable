@@ -217,7 +217,29 @@ inaccessible theme from being exported at all.
 format, whether the page surface is included, and whether the per-variable comments are emitted. The page
 surface is emitted as a separately commented block, because the distinction between what the library styles
 and what the consumer styles is the most confusable thing on the page. Import parses a pasted block, applies
-what it recognises, and lists what it did not. Export and import round-trip without loss.
+what it recognises, and lists what it did not.
+
+**The Round Trip Needs A Base To Land On**: the block states the delta against the library's defaults, which is
+what a consumer's own stylesheet is. The portal's own base is a geometry and a colour scheme, so a delta merged
+onto it keeps whatever those schemes say and the delta does not restate — a theme neither side asked for. Two
+controls close that, and the import's is on by default so that the shipped pair round-trips:
+
+| Control             |  Half  | Does                                                                                |
+| :------------------ | :----: | :---------------------------------------------------------------------------------- |
+| `Explicit Defaults` | Export | States the value in force for every variable in `SCHEME_VARS`, not only the changed |
+| `Onto The Defaults` | Import | Drops both scheme axes, the overrides, the page and the family, then applies        |
+
+`SCHEME_VARS` is the union of what the two axes can set, which is what can pollute an import. Stating the whole
+manifest instead would freeze the derived ladder — `--formidable-field-inner-height` and the label offsets are
+`calc()` over the seeds, and a consumer who pinned them would find the seeds no longer move anything.
+
+**The Value In Force Is Measured, Not Derived**: `Explicit Defaults` reads each value off a second probe
+carrying the library's block with the theme written over it. The manifest records what a variable falls back to,
+not whether the library's declaration aliases that variable or builds something else out of it — the focus
+shadow is three values wide and names two. A declared variable's computed value already carries the theme
+underneath it; only the variables the library declares nowhere have to follow their own fallback, and those are
+aliases outright. The probe is separate from `:root` so that a read is not waiting on the effect that paints the
+page.
 
 ### Token Manifest
 

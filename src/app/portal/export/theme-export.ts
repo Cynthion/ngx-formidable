@@ -9,6 +9,11 @@ export interface ThemeExportOptions {
   readonly includePageSurface: boolean;
   /** Whether each variable carries its one-line description from the manifest. */
   readonly includeComments: boolean;
+  /**
+   * Whether every variable in the manifest is stated, including the ones that only restate a library
+   * default. Such a block reproduces the theme wherever it is pasted, rather than on the defaults alone.
+   */
+  readonly includeDefaults: boolean;
 }
 
 interface ThemeExportInput {
@@ -21,7 +26,8 @@ interface ThemeExportInput {
 export const DEFAULT_EXPORT_OPTIONS: ThemeExportOptions = {
   format: 'css',
   includeComments: false,
-  includePageSurface: false
+  includePageSurface: false,
+  includeDefaults: false
 };
 
 const MANIFEST_ORDER: ReadonlyMap<string, number> = new Map(THEME_TOKENS.map((token, index) => [token.name, index]));
