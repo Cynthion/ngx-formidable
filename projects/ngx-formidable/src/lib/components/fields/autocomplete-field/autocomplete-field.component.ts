@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
-import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
+import { replaceText } from '../../../helpers/input.helpers';
 import { applyDefaultOption, combineFieldOptions, getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
 import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import {
@@ -205,9 +205,9 @@ export class AutocompleteFieldComponent
       disabled: option.disabled
     };
 
-    // commit selection + update displayed label
+    // commit selection + update displayed label, with the caret behind it
     this.selectedOption.set(newOption);
-    this.inputRef().nativeElement.value = newOption.label!; // update input value with selected option label
+    replaceText(this.inputRef().nativeElement, newOption.label!);
 
     // emit value change
     this.valueChangeSubject$.next(newOption.value);
@@ -222,9 +222,6 @@ export class AutocompleteFieldComponent
 
     // close panel
     this.togglePanel(false);
-
-    // move caret to end of input
-    setCaretPositionToEnd(this.inputRef().nativeElement);
   }
 
   private deselectOption(opts: { clearInput?: boolean } = {}): void {

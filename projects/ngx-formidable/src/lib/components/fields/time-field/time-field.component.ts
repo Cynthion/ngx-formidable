@@ -24,7 +24,7 @@ import {
   UNICODE_TIME_TOKENS,
   validateUnicodeTimeTokenFormat
 } from '../../../helpers/format.helpers';
-import { renderEmptyMask } from '../../../helpers/input.helpers';
+import { keepClickedCaret, renderEmptyMask } from '../../../helpers/input.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
@@ -128,6 +128,11 @@ export class TimeFieldComponent
 
     // try set time on blur
     this.trySetTimeFromInput(this.inputRef().nativeElement.value);
+  }
+
+  /** Keeps the caret where the pointer put it, which ngx-mask pulls back to the end of the typed text. */
+  protected onMouseUp(): void {
+    keepClickedCaret(this.inputRef().nativeElement, !this.isInputCleared);
   }
 
   private handleKeydown(event: KeyboardEvent): void {

@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgxMaskConfig, NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
-import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
+import { keepClickedCaret, placeCaretAtNextSlot, replaceText } from '../../../helpers/input.helpers';
 import {
   analyzeMaskDisplayLength,
   DEFAULT_PATTERNS,
@@ -124,8 +124,20 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
     this.autoResize();
   }
 
-  protected doOnFocusChange(_isFocused: boolean): void {
-    // No additional actions needed
+  // A masked field takes the caret at the slot the next character fills, so tabbing in lands where typing
+  // continues. A pointer overrides it: the browser places the caret from the click after this, and
+  // `onMouseUp` is what holds it there.
+  protected doOnFocusChange(isFocused: boolean): void {
+    const el = this.textareaElement;
+
+    if (isFocused && this.mask() && el) placeCaretAtNextSlot(el);
+  }
+
+  /** Keeps the caret where the pointer put it, which ngx-mask pulls back to the end of the typed text. */
+  protected onMouseUp(): void {
+    const el = this.textareaElement;
+
+    if (el) keepClickedCaret(el, !!this.value);
   }
 
   // #region ControlValueAccessor
@@ -145,8 +157,7 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
       // task — a microtask would land before it and the value would be written unmasked.
       setTimeout(() => {
         const maskedValue = this.maskPipe.transform(newValue, this.mask()!, this.mergedMaskConfig);
-        el.value = maskedValue;
-        setCaretPositionToEnd(el);
+        replaceText(el, maskedValue);
 
         // notify the form control again (since usually done in base directive)
         if (newValue) {
@@ -154,8 +165,7 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
         }
       });
     } else {
-      el.value = newValue;
-      setCaretPositionToEnd(el);
+      replaceText(el, newValue);
     }
   }
 

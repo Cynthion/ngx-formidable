@@ -28,7 +28,7 @@ import {
   UNICODE_DATE_TOKENS,
   validateUnicodeDateTokenFormat
 } from '../../../helpers/format.helpers';
-import { renderEmptyMask } from '../../../helpers/input.helpers';
+import { keepClickedCaret, renderEmptyMask } from '../../../helpers/input.helpers';
 import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
@@ -247,6 +247,11 @@ export class DateFieldComponent
 
     // try set date on blur
     this.trySetDateFromInput(this.inputRef().nativeElement.value);
+  }
+
+  /** Keeps the caret where the pointer put it, which ngx-mask pulls back to the end of the typed text. */
+  protected onMouseUp(): void {
+    keepClickedCaret(this.inputRef().nativeElement, !this.isInputCleared);
   }
 
   // Focus moved onto this field's own panel, so the blur that follows is neither a commit nor a touch.

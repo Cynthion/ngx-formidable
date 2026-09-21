@@ -25,6 +25,7 @@
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
       [attr.aria-readonly]="readonly() || null"
+      (mouseup)="onMouseUp()"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />

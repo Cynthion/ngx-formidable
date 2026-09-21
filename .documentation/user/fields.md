@@ -198,3 +198,17 @@ bootstrapApplication(AppComponent, {
 `NgxFormidableModule.forRoot()` takes the same object. Either way it lands on the `FORMIDABLE_MASK_DEFAULTS` token.
 
 **A Masked Field Commits On Blur.** A half-typed date is not a date, so the masked fields keep what is typed in the DOM until focus leaves. The one exception is wiping the text: clearing a committed value reports `null` immediately, so the field is empty rather than stale.
+
+### The Caret In A Masked Field
+
+A mask renders a `_` slot for every character not yet typed, and those slots are part of what a pointer can aim at.
+
+| Field Holds           |     Focused By      | Caret Lands                                                        |
+| :-------------------- | :-----------------: | :----------------------------------------------------------------- |
+| Nothing but slots     | Keyboard or pointer | At the front, where typing starts                                  |
+| Some text, some slots |      Keyboard       | In front of the first unfilled slot, where the next character goes |
+| Some text, some slots |       Pointer       | Where the click landed, on text or on a slot alike                 |
+| Text, no slots left   |      Keyboard       | At the end                                                         |
+| Text, no slots left   |       Pointer       | Where the click landed                                             |
+
+`Arrow Left` and `Arrow Right` always move the caret. Select all covers the text that has been typed and never the slots, so it selects nothing in a field holding only slots.

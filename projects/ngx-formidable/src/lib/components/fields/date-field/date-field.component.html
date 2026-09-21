@@ -29,6 +29,7 @@
       [attr.aria-readonly]="readonly() || null"
       [attr.aria-expanded]="isPanelOpen()"
       [attr.aria-controls]="panelId"
+      (mouseup)="onMouseUp()"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />

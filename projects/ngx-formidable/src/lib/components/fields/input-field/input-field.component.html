@@ -29,6 +29,7 @@
     [leadZeroDateTime]="mergedMaskConfig.leadZeroDateTime"
     [patterns]="mergedMaskConfig.patterns"
     [clearIfNotMatch]="mergedMaskConfig.clearIfNotMatch"
+    (mouseup)="onMouseUp()"
     (input)="onValueChange()"
     (focus)="onFocusChange(true)"
     (blur)="onFocusChange(false)" />
