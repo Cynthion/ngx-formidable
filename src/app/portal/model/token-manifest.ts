@@ -264,7 +264,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     group: 'Field Dimensions',
     control: 'length',
     class: 'declared',
-    description: 'Size of the panel toggle a dropdown or date field draws inside its own box.'
+    description: 'Size of the toggle a select, dropdown or date field draws inside its own box.'
   },
   {
     name: '--formidable-field-toggle-inset',

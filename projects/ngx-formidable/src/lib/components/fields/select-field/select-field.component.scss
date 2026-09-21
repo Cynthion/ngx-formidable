@@ -1,11 +1,15 @@
 @use '../../../styles/variables' as *;
 
 :host {
-  display: block;
+  @include select-field-host;
 }
 
 .field {
   @include select-field;
+}
+
+.toggle {
+  @include select-toggle;
 }
 
 .no-option {

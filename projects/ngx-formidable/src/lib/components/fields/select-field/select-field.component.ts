@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   contentChildren,
   effect,
   ElementRef,
@@ -141,6 +142,11 @@ export class SelectFieldComponent extends BaseFieldDirective<string | null> impl
   // A native <select> always renders something in its value area, so a label can never rest there: with
   // nothing selected it shows its first option, and with no options at all it shows `noOptionsText`.
   protected override readonly showsEmptyValueHint = signal(true);
+
+  // Mirrors the template: the arrow is drawn only while the field can actually open its list. It overlays
+  // the select instead of taking a slot beside the value, but the inset it asks the decorator for is the
+  // same — a label still has to clear it.
+  readonly hasInFieldToggle = computed(() => !this.readonly() && !this.disabled());
 
   // #endregion
 
