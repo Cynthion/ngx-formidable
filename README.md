@@ -34,7 +34,7 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
-- [Features](#features) - [🧩 Fields](#-fields) - [🎀 Decorator](#-decorator) - [✅ Bring Your Own Validator](#-bring-your-own-validator) - [🎨 Themeable To The Corner](#-themeable-to-the-corner) - [⌨️ Keyboard And Screen Readers](#️-keyboard-and-screen-readers) - [🛡️ Masking And Panels](#️-masking-and-panels) - [🧠 Typed Model And Shape](#-typed-model-and-shape) - [🛠️ Extensible](#️-extensible) - [🚀 Zero Boilerplate](#-zero-boilerplate)
+- [Features](#features)
 - [When To Pick This Over Angular Material](#when-to-pick-this-over-angular-material)
 - [Installation](#installation)
 - [Setup](#setup)
@@ -46,122 +46,15 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 
 ## Features
 
-<table>
-<tr>
-<td width="33%" valign="top">
-
-##### [🧩 Fields](.documentation/user/components.md)
-
-• Input, Textarea
-• Select, Dropdown, Autocomplete
-• Radio Group, Checkbox Group
-• Date, Time
-• Toggle, Slider
-• One `formidable-field-option` for every option field, with your own template inside it
-• Pinned or fallback `defaultOption`, `sortFn`, empty-state text
-
-</td>
-<td width="33%" valign="top">
-
-##### [🎀 Decorator](.documentation/user/decoration.md)
-
-• Six label positions — outside, inside, inside-placeholder, inside-floating, border, border-prefix
-• A slot beside the label for anything you like
-• Prefix and suffix, centred or following the value
-• Clickable prefixes and suffixes: clear, copy, retry, loading
-• Always-visible hints sharing one row
-• A required marker, per field or switched off form-wide
-• Three layouts, picked by the field
-
-</td>
-<td width="33%" valign="top">
-
-##### [✅ Bring Your Own Validator](.documentation/user/validation.md)
-
-• Vest, zod, Angular's own, or none
-• Field, group and whole-form rules
-• Two timing axes: when it **runs**, when it **reveals**
-• `debounceMs` on the form
-• `FORMIDABLE_ERROR_EXTRACTOR` reads any error shape
-• `FORMIDABLE_ERROR_TRANSLATOR` for i18n
-• Live `formValueChange`, `validChange`, `dirtyChange`, `errorsChange`
-
-</td>
-</tr>
-
-<tr>
-<td width="33%" valign="top">
-
-##### [🎨 Themeable To The Corner](.documentation/user/theming.md)
-
-• ~200 overridable CSS custom properties
-• Rebrand from a single variable
-• Per-corner field radius, underline family, focus rings
-• A colour set per field state
-• Overridable Pikaday classes
-• Ten palettes and eleven field shapes to start from, in the Studio
-• No SCSS build hooks, no theme to initialise
-
-</td>
-<td width="33%" valign="top">
-
-##### [⌨️ Keyboard And Screen Readers](.documentation/user/fields.md#keyboard)
-
-• `Enter`, `Esc`, `Tab`, arrows, `Alt` + arrows
-• Type-ahead buffers on the option panels
-• Arrow-stepping of date and time segments
-• Managed focus and scroll-into-view
-• `focus()` and `autoFocus` on every field
-• Combobox, listbox, dialog, switch and group roles
-• Errors in an `aria-live` region
-
-</td>
-<td width="33%" valign="top">
-
-##### [🛡️ Masking And Panels](.documentation/user/fields.md)
-
-• ngx-mask on the input and textarea fields
-• Per-field `[mask]` / `[maskConfig]`, app-wide `FORMIDABLE_MASK_DEFAULTS`
-• Date and time parsed and formatted by one token string
-• Panels anchored left, right or full width, flipping when there is no room
-• A `sheet` panel for phones
-• Panels that cannot escape their field's stacking context
-
-</td>
-</tr>
-
-<tr>
-<td width="33%" valign="top">
-
-##### [🧠 Typed Model And Shape](.documentation/user/getting-started.md)
-
-• `DeepPartial` model, `DeepRequired` shape
-• A typo in a model key or a rule target fails the build
-• Strongly-typed templates and suites
-
-</td>
-<td width="33%" valign="top">
-
-##### [🛠️ Extensible](.documentation/user/custom-fields.md)
-
-• `BaseFieldDirective` for a custom field
-• `BaseOptionFieldDirective` when it walks an option list
-• Custom options, custom option fields, custom validators
-• A custom field is decorated, validated and themed like a built-in one
-
-</td>
-<td width="33%" valign="top">
-
-##### [🚀 Zero Boilerplate](.documentation/user/getting-started.md)
-
-• One directive on the `<form>`
-• Standalone or NgModule, same providers
-• No store, no reactive-forms scaffolding
-• `ngModel` all the way down
-
-</td>
-</tr>
-</table>
+- 🧩 **Eleven fields, one decorator** — input, textarea, select, dropdown, autocomplete, radio and checkbox group, date, time, toggle, slider. [`<formidable-field-decorator>`](.documentation/user/decoration.md) puts the label, prefixes, suffixes, hints and errors around any of them, in [six label positions](.documentation/user/decoration.md).
+- ✅ **Bring your own validator** — [Vest, zod, Angular's own, or none](.documentation/user/validation.md). Field, group and whole-form rules, with when a rule _runs_ and when it _reveals_ set separately.
+- 🎨 **Themeable to the corner** — [~200 CSS custom properties](.documentation/user/theme-reference.md) and no design system in your bundle. Rebrand from one variable; no SCSS hooks, no theme to initialise.
+- 🚀 **Template-driven, no boilerplate** — one directive on the `<form>`, `ngModel` all the way down. No store, no reactive-forms scaffolding, [standalone or NgModule](.documentation/user/getting-started.md).
+- 🧠 **Typed end to end** — a `DeepPartial` model and a `DeepRequired` shape, so a typo in a model key or a rule target [fails the build](.documentation/user/getting-started.md).
+- ⌨️ **Accessible by default** — [full keyboard handling](.documentation/user/fields.md), managed focus, combobox, listbox, switch and group roles, and errors in an `aria-live` region.
+- 🛡️ **Masking, dates and panels** — [ngx-mask on text fields](.documentation/user/fields.md), one token string for parsing and formatting a date or time, and panels that flip when there is no room and become a sheet on phones.
+- 🛠️ **Extensible** — [`BaseFieldDirective`](.documentation/user/custom-fields.md) makes a field of your own decorated, validated and themed like a built-in one.
+- 🎛️ **[Studio](https://cynthion.github.io/ngx-formidable/)** — build the theme and the form against the real components in the browser, then copy out the CSS and the Angular template.
 
 ## When To Pick This Over Angular Material
 
@@ -177,8 +70,6 @@ Material is a design system with a form library in it. This is a form library wi
 | Components beyond forms — tables, dialogs, menus, navigation          | Angular Material   |
 | The CDK: overlays, drag and drop, virtual scroll, a11y utilities      | Angular Material   |
 | A large ecosystem, many maintainers and a long support horizon        | Angular Material   |
-
-Be honest about the last one: this library is young and has one maintainer. It is a good fit when the form is the product's face and you want it to be yours; it is the wrong fit when you need a whole component suite behind it.
 
 ## Installation
 
@@ -309,7 +200,7 @@ The whole walkthrough, with the component state and where each piece goes: [Gett
 
 ## What's In The Box
 
-Full API — every input, output, type and token — in the [component catalogue](.documentation/user/components.md).
+Full API — every input, output, type and token — in the [Component Catalogue](.documentation/user/components.md).
 
 | Category          | Component                           | Value             |
 | :---------------- | :---------------------------------- | :---------------- |

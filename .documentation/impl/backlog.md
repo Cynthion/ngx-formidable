@@ -2,6 +2,10 @@
 
 ## Bugs
 
+- The panels do not change orientation (above/below) the field when there is not enough space below/above the field in the sample form.
+- The select-field and autocomplete fields currently look exactly like a regular input field. Visually, nothing gives away that they are "dropdowns" or "selections". The dropdown field has an icon. What can be done about it and should it be changed? Do "native" selects and autocomplete fields differ visually from native input files?
+- All fields where users can enter text must support: click into text -> cursor at that position (also in masks), Ctrl/Cmd + A to select all (also for masks)
+
 - An option's `select` never reaches the rendered option. Every option field re-creates its options from the plain list and binds `[value]`, `[label]`, `[readonly]`, `[disabled]`, `[selected]`, `[highlighted]` and — on the autocomplete only — `[match]`. It does not bind `[select]`, so a `select` a consumer sets on a projected `formidable-field-option` or on an `options` entry is carried in the plain option and then dropped: the rendered option always falls back to its own default. Either bind it or drop `select` from `IFormidableOption`.
 
 - `textarea-field`'s length indicator renders `{{ value?.length || 0 }}`, and `value` reads the textarea element — a DOM read, against the `impl/conventions.md` rule that state a template reads is a signal. Under zone change detection every write path is followed by a tick, so it keeps up; zonelessly a programmatic masked write repaints nothing and the count goes stale. The fix is to back the count with a signal written wherever the element's value is, as `select-field` now does for its selection.
