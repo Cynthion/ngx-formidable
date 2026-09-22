@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   ElementRef,
   forwardRef,
   input,
@@ -13,14 +14,21 @@ import {
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { replaceText } from '../../../helpers/input.helpers';
-import { applyDefaultOption, combineFieldOptions, getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
+import {
+  applyActionOption,
+  applyDefaultOption,
+  combineFieldOptions,
+  getNextAvailableOptionIndex
+} from '../../../helpers/option.helpers';
 import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import {
   FieldDecoratorLayout,
+  FieldDefaultOptionMode,
   FieldOptionRole,
   FORMIDABLE_FIELD,
   FORMIDABLE_OPTION_FIELD,
   FormidablePanelPosition,
+  IFormidableActionOption,
   IFormidableAutocompleteField,
   IFormidableOption
 } from '../../../models/formidable.model';
@@ -81,6 +89,7 @@ export class AutocompleteFieldComponent
   protected onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value ?? '';
 
+    // The user's own typing, which always reports — it is the filter.
     this.filterChangeSubject$.next(value);
     this.filterChanged.emit(value);
 
@@ -152,7 +161,7 @@ export class AutocompleteFieldComponent
     this.isFieldFilled.set(this.inputRef().nativeElement.value.length > 0);
 
     // keep filter/list consistent with displayed value
-    this.filterChangeSubject$.next(this.inputRef().nativeElement.value);
+    this.setFilterText(this.inputRef().nativeElement.value);
   }
 
   // #endregion
@@ -182,15 +191,55 @@ export class AutocompleteFieldComponent
   /** The filter text, so options can be fetched for it rather than filtered out of a list already bound. */
   public readonly filterChanged = output<string>();
 
+  /**
+   * The filter text the field moved on its own, rather than the user typing it.
+   *
+   * A value written from outside takes the filter with it — to the selected label, or to nothing where the
+   * field cannot place the value yet — and a consumer who supplies the options is the only one who can put
+   * the matching option back into the list. Move the field's filter without telling them and the two lists
+   * drift: the field holds a value whose option the consumer has filtered out, and has nothing left to
+   * display it with. That is the second lap of an `actionOption` round trip, where the created option
+   * carries a label the text typed to find it does not match.
+   *
+   * Reported only while the field is not the user's. A focused field is one being typed into, where the
+   * typed text is the filter and the field's own narrowing — a deselect, or a written value re-applied
+   * because the list moved — must not pull the list out from under them.
+   */
+  private setFilterText(value: string): void {
+    this.filterChangeSubject$.next(value);
+
+    if (!this.isFieldFocused()) this.filterChanged.emit(value);
+  }
+
   // #endregion
 
   // #region IFormidableOptionField
 
   public readonly optionRole: FieldOptionRole = 'option';
 
+  /** An entry pinned to the end of the list that runs an action instead of becoming a value. */
+  public readonly actionOption = input<IFormidableActionOption | undefined>(undefined);
+
+  /** Whether the `actionOption` always renders, or only when the list would otherwise be empty. */
+  public readonly actionOptionMode = input<FieldDefaultOptionMode>('always');
+
   protected readonly activeOptions = signal<IFormidableOption[]>([]);
 
   protected readonly selectedOption = signal<IFormidableOption | undefined>(undefined);
+
+  protected readonly hasSelectableOptions = computed(() =>
+    this.activeOptions().some((option) => !this.isActionOption(option))
+  );
+
+  protected override optionSources(): unknown[] {
+    return [...super.optionSources(), this.actionOption(), this.actionOptionMode()];
+  }
+
+  private isActionOption(option: IFormidableOption): boolean {
+    const actionOption = this.actionOption();
+
+    return !!actionOption && option.value === actionOption.value;
+  }
 
   protected override get selectedOptionValue(): string | null {
     return this.selectedOption()?.value ?? null;
@@ -198,6 +247,16 @@ export class AutocompleteFieldComponent
 
   public selectOption(option: IFormidableOption): void {
     if (option.disabled) return;
+
+    // An action entry is not a value: the panel closes first, so whatever the action opens takes focus from
+    // a field that has already settled, and nothing reaches the model. The typed filter stays put, which is
+    // what lets the action read it.
+    if (this.isActionOption(option)) {
+      this.togglePanel(false);
+      this.actionOption()!.action();
+
+      return;
+    }
 
     const newOption: IFormidableOption = {
       value: option.value,
@@ -234,7 +293,7 @@ export class AutocompleteFieldComponent
 
     if (opts.clearInput) {
       this.inputRef().nativeElement.value = '';
-      this.filterChangeSubject$.next(''); // optional: keeps filter + list consistent
+      this.setFilterText(''); // keeps filter + list consistent
     }
 
     this.valueChangeSubject$.next(null);
@@ -293,8 +352,15 @@ export class AutocompleteFieldComponent
         )
       : allOptions;
 
-    // the default option is pinned after filtering, so an `always` default survives a non-matching filter
-    this.activeOptions.set(applyDefaultOption(filteredOptions, this.defaultOption(), this.defaultOptionMode()));
+    // Both are applied after filtering, so an `always` default and the action entry survive a filter that
+    // matches nothing — which is the moment the action entry exists for.
+    this.activeOptions.set(
+      applyActionOption(
+        applyDefaultOption(filteredOptions, this.defaultOption(), this.defaultOptionMode()),
+        this.actionOption(),
+        this.actionOptionMode()
+      )
+    );
   }
 
   private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {

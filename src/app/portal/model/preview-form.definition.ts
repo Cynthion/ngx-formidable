@@ -254,9 +254,10 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     placeholder: 'Start typing a street…',
     span: 2,
     options: ADDRESSES,
-    // Pinned first, never sorted and never filtered, which is what an `always` default is for.
-    defaultOption: { value: 'new', label: 'Add A New Address…' },
-    defaultOptionMode: 'always',
+    // Last in the list and exempt from the filter, so it is there precisely when nothing matched. It runs
+    // the page's own create process instead of committing a value — see `user/fields.md`.
+    actionOption: { value: 'add-address', label: 'Add A New Address…' },
+    actionOptionMode: 'always',
     panelPosition: 'full',
     filterStrategy: 'fuzzy',
     visibleWhen: { field: 'pickup', equals: false },

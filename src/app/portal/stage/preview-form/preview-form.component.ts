@@ -9,11 +9,13 @@ import {
 } from '@cynthion/ngx-formidable';
 import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/vest';
 import { readPath } from '../../helpers/model-path.helpers';
+import { PortalOptionSpec } from '../../model/field-spec.model';
 import { createPreviewValidationSuite, PREVIEW_DEPENDENT_FIELDS } from '../../model/preview-form.validation';
 import { FormDefinitionStore } from '../../state/form-definition.store';
 import { FormValueStore, PortalModel } from '../../state/form-value.store';
 import { InspectorStore } from '../../state/inspector.store';
-import { PreviewFieldComponent } from './preview-field.component';
+import { CreateOptionDialogComponent } from './create-option-dialog.component';
+import { PortalActionRequest, PreviewFieldComponent } from './preview-field.component';
 
 /**
  * The preview form itself, rendered from the definition tree.
@@ -34,7 +36,8 @@ import { PreviewFieldComponent } from './preview-field.component';
     NgxFormidableGroupValidateDirective,
     NgxFormidableWholeFormValidateDirective,
     NgxFormidableVestValidatorDirective,
-    PreviewFieldComponent
+    PreviewFieldComponent,
+    CreateOptionDialogComponent
   ]
 })
 export class PreviewFormComponent {
@@ -117,4 +120,76 @@ export class PreviewFormComponent {
     this.definitionStore.select(id);
     this.inspectorStore.openFieldSettings();
   }
+
+  // #region Action Option
+
+  /**
+   * The process an `actionOption` stands in for, emulated end to end: the field hands over the text typed
+   * into it, a dialog turns that into an option the list did not have, and the model is pointed at it.
+   *
+   * It sits here rather than on the field because both halves of the round trip are the page's, not the
+   * field's — the option list is the definition's and the value is the model's, and a field owns neither.
+   *
+   * `null` is "nothing was asked": the empty string is a legitimate prefill, from a dropdown that has no
+   * filter text to offer.
+   */
+  protected readonly actionPrefill = signal<string | null>(null);
+  private actionFieldId: string | null = null;
+
+  protected onActionRequested(request: PortalActionRequest): void {
+    this.actionFieldId = request.fieldId;
+    this.actionPrefill.set(request.prefill);
+  }
+
+  protected onOptionCreated(label: string): void {
+    const id = this.actionFieldId;
+    if (!id) return;
+
+    const field = this.definitionStore.fields().find((candidate) => candidate.id === id);
+    if (!field) return;
+
+    const value = uniqueValue(label, field.options ?? []);
+
+    // The option first, then the value: either order works, because a field re-applies a value it could not
+    // place when the options it was missing arrive. This one reads as what happened.
+    this.definitionStore.addFieldOption(id, { value, label, subtitle: 'Added from the form' });
+
+    const path = this.definitionStore.pathById().get(id);
+    if (path) this.valueStore.setModel(withValueAt(this.valueStore.model(), path, value));
+
+    this.closeActionDialog();
+  }
+
+  protected closeActionDialog(): void {
+    this.actionFieldId = null;
+    this.actionPrefill.set(null);
+  }
+
+  // #endregion
+}
+
+/** A value for a created option: its label, slugged, and suffixed until no option already holds it. */
+function uniqueValue(label: string, options: readonly PortalOptionSpec[]): string {
+  const base =
+    label
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'option';
+  const taken = new Set(options.map((option) => option.value));
+
+  if (!taken.has(base)) return base;
+
+  let suffix = 2;
+  while (taken.has(`${base}-${suffix}`)) suffix++;
+
+  return `${base}-${suffix}`;
+}
+
+/** One value written into the model by its path, which is `group.name` for a field inside an `ngModelGroup`. */
+function withValueAt(model: PortalModel, path: string, value: unknown): PortalModel {
+  const [head, tail] = path.split('.');
+
+  if (!tail) return { ...model, [head!]: value };
+
+  return { ...model, [head!]: { ...((model[head!] ?? {}) as PortalModel), [tail]: value } };
 }

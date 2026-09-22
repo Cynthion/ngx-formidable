@@ -188,6 +188,9 @@ export interface PortalFieldSpec {
   readonly options?: readonly PortalOptionSpec[];
   readonly defaultOption?: PortalOptionSpec;
   readonly defaultOptionMode?: FieldDefaultOptionMode;
+  /** An entry that runs an action instead of becoming a value. The action itself lives in the component. */
+  readonly actionOption?: PortalOptionSpec;
+  readonly actionOptionMode?: FieldDefaultOptionMode;
   readonly noOptionsText?: string;
   readonly sortAlphabetically?: boolean;
   /** The autocomplete's filtering, which belongs to the consumer rather than to the field. */

@@ -64,7 +64,8 @@
                     [showFieldTypes]="showFieldTypes()"
                     [showAccessibility]="showAccessibility()"
                     (focused)="onFieldFocused($event)"
-                    (chipActivated)="openInInspector($event)" />
+                    (chipActivated)="openInInspector($event)"
+                    (actionRequested)="onActionRequested($event)" />
                 }
               }
             </div>
@@ -85,7 +86,8 @@
                   [showFieldTypes]="showFieldTypes()"
                   [showAccessibility]="showAccessibility()"
                   (focused)="onFieldFocused($event)"
-                  (chipActivated)="openInInspector($event)" />
+                  (chipActivated)="openInInspector($event)"
+                  (actionRequested)="onActionRequested($event)" />
               }
             }
           </div>
@@ -111,3 +113,13 @@
     </footer>
   </form>
 }
+
+<!--
+  Outside the form on purpose: it carries a form of its own, and a rebuild of the preview form must not take
+  an open dialog down with it.
+-->
+<portal-create-option-dialog
+  title="Add A New Address"
+  [prefill]="actionPrefill()"
+  (created)="onOptionCreated($event)"
+  (dismissed)="closeActionDialog()" />

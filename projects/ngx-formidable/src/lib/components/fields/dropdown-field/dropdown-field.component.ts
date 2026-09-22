@@ -14,14 +14,21 @@ import {
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { isPrintableCharacter } from '../../../helpers/input.helpers';
-import { applyDefaultOption, combineFieldOptions, getNextAvailableOptionIndex } from '../../../helpers/option.helpers';
+import {
+  applyActionOption,
+  applyDefaultOption,
+  combineFieldOptions,
+  getNextAvailableOptionIndex
+} from '../../../helpers/option.helpers';
 import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import {
   FieldDecoratorLayout,
+  FieldDefaultOptionMode,
   FieldOptionRole,
   FORMIDABLE_FIELD,
   FORMIDABLE_OPTION_FIELD,
   FormidablePanelPosition,
+  IFormidableActionOption,
   IFormidableDropdownField,
   IFormidableOption
 } from '../../../models/formidable.model';
@@ -174,8 +181,28 @@ export class DropdownFieldComponent
 
   public readonly optionRole: FieldOptionRole = 'option';
 
+  /** An entry pinned to the end of the list that runs an action instead of becoming a value. */
+  public readonly actionOption = input<IFormidableActionOption | undefined>(undefined);
+
+  /** Whether the `actionOption` always renders, or only when the list would otherwise be empty. */
+  public readonly actionOptionMode = input<FieldDefaultOptionMode>('always');
+
   protected readonly activeOptions = signal<IFormidableOption[]>([]);
   private readonly typeahead$ = new BehaviorSubject<string>('');
+
+  protected readonly hasSelectableOptions = computed(() =>
+    this.activeOptions().some((option) => !this.isActionOption(option))
+  );
+
+  protected override optionSources(): unknown[] {
+    return [...super.optionSources(), this.actionOption(), this.actionOptionMode()];
+  }
+
+  private isActionOption(option: IFormidableOption): boolean {
+    const actionOption = this.actionOption();
+
+    return !!actionOption && option.value === actionOption.value;
+  }
 
   protected readonly selectedOption = signal<IFormidableOption | undefined>(undefined);
 
@@ -185,6 +212,15 @@ export class DropdownFieldComponent
 
   public selectOption(option: IFormidableOption): void {
     if (option.disabled) return;
+
+    // An action entry is not a value: the panel closes first, so whatever the action opens takes focus from
+    // a field that has already settled, and nothing reaches the model.
+    if (this.isActionOption(option)) {
+      this.togglePanel(false);
+      this.actionOption()!.action();
+
+      return;
+    }
 
     const newOption: IFormidableOption = {
       value: option.value,
@@ -257,7 +293,7 @@ export class DropdownFieldComponent
   }
 
   private updateOptions(allOptions: IFormidableOption[]): void {
-    this.activeOptions.set(allOptions);
+    this.activeOptions.set(applyActionOption(allOptions, this.actionOption(), this.actionOptionMode()));
 
     // keep current value in sync with newly combined options
     this.writeValue(this._writtenValue);
@@ -347,8 +383,9 @@ export class DropdownFieldComponent
       this.togglePanel(true);
     }
 
-    const matchIndex = this.activeOptions().findIndex((opt) =>
-      (opt.label || opt.value).toLowerCase().startsWith(term.toLowerCase())
+    // The action entry is skipped: typing "a" looks for a value, not for "Add A New Address…".
+    const matchIndex = this.activeOptions().findIndex(
+      (opt) => !this.isActionOption(opt) && (opt.label || opt.value).toLowerCase().startsWith(term.toLowerCase())
     );
 
     this.setHighlightedIndex(matchIndex >= 0 ? matchIndex : -1);

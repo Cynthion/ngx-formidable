@@ -15,6 +15,7 @@ import {
   FieldPrefixDirective,
   FieldSuffixDirective,
   FieldToggleIconDirective,
+  IFormidableActionOption,
   IFormidableOption,
   InputFieldComponent,
   NgxFormidableFieldValidateDirective,
@@ -37,6 +38,12 @@ import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabil
 import { PortalFieldSpec, PortalFormOptions, PortalOptionSpec } from '../../model/field-spec.model';
 import { localeOf } from '../../model/locales';
 import { ANGULAR_MIN_LENGTHS, ANGULAR_REQUIRED_FIELDS } from '../../model/preview-form.validation';
+
+/** What a picked `actionOption` hands to the form: which field asked, and the text typed into it so far. */
+export interface PortalActionRequest {
+  readonly fieldId: string;
+  readonly prefill: string;
+}
 
 /** The named formatters offered in place of a code editor for a slider's function-typed inputs. */
 const FORMATTERS: Readonly<Record<string, (value: number) => string>> = {
@@ -113,6 +120,8 @@ export class PreviewFieldComponent {
   public readonly focused = output<string>();
   /** The chip is a control: it opens the editor panel at the field it names. */
   public readonly chipActivated = output<string>();
+  /** An `actionOption` was picked. The form owns what happens next, because it owns the model. */
+  public readonly actionRequested = output<PortalActionRequest>();
 
   protected readonly host = this.elementRef.nativeElement;
 
@@ -183,6 +192,23 @@ export class PreviewFieldComponent {
     const option = this.spec().defaultOption;
 
     return option ? { value: option.value, label: option.label } : undefined;
+  });
+
+  /**
+   * The action entry, folded out of the specification with the handler the specification cannot hold.
+   *
+   * `filterText` is read inside the closure rather than in the computed, so typing does not rebuild the
+   * entry on every keystroke — which would move the option list under the panel the visitor is reading.
+   */
+  protected readonly actionOption = computed<IFormidableActionOption | undefined>(() => {
+    const option = this.spec().actionOption;
+    if (!option) return undefined;
+
+    return {
+      value: option.value,
+      label: option.label,
+      action: () => this.actionRequested.emit({ fieldId: this.spec().id, prefill: this.filterText() })
+    };
   });
 
   protected readonly sortFn = computed(() =>

@@ -149,6 +149,10 @@ function serializeField(spec: PortalFieldSpec, definition: PortalFormDefinition,
     lines.push(`    <!-- pinned first, never sorted and never filtered -->`);
   }
 
+  if (spec.actionOption) {
+    lines.push(`    <!-- [actionOption]="${spec.actionOption.value}": last in the list, and runs an action -->`);
+  }
+
   for (const option of spec.options ?? []) {
     lines.push(...serializeOption(option).map((line) => `    ${line}`));
   }

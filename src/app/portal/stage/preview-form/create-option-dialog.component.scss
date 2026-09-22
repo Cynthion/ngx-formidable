@@ -1,0 +1,75 @@
+.create-dialog {
+  min-width: 320px;
+  max-width: 420px;
+  padding: 0;
+  border: 1px solid var(--portal-border);
+  border-radius: 10px;
+  background: var(--portal-surface-raised);
+  color: var(--portal-text);
+  box-shadow: var(--portal-shadow);
+
+  &::backdrop {
+    background: rgb(15 23 42 / 45%);
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 650;
+  }
+
+  p {
+    margin: 0;
+    color: var(--portal-text-muted);
+    font-size: 13px;
+  }
+
+  footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 6px;
+  }
+}
+
+.create-label {
+  margin-top: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.create-input {
+  padding: 8px 10px;
+  border: 1px solid var(--portal-border-strong);
+  border-radius: 6px;
+  background: var(--portal-bg);
+  color: inherit;
+  font: inherit;
+}
+
+button {
+  padding: 7px 14px;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &.primary {
+    border: 1px solid transparent;
+    background: var(--portal-accent);
+    color: var(--portal-accent-contrast);
+  }
+
+  &.ghost {
+    border: 1px solid var(--portal-border-strong);
+    background: transparent;
+    color: inherit;
+  }
+}

@@ -76,6 +76,44 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 **The Autocomplete Does Not Filter For You.** It emits `filterChanged` and renders whatever `options` it is given back, so the matching strategy — substring, fuzzy, a server call — stays yours.
 
+**`filterChanged` Reports More Than Typing.** The field takes its filter with the value: selecting narrows it to the selected label, and a value it cannot place yet clears it. Those moves are reported too, so the list you supply can follow the value the field was given — without them, a value written from outside names an option your filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under whoever is typing.
+
+**An Action Row Is Not A Value.** `dropdown-field` and `autocomplete-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. What the action does is entirely yours; the field closes its panel, runs it and touches nothing else. The following is an example.
+
+```ts
+readonly filter = signal('');
+readonly addresses = signal<IFormidableOption[]>([...ADDRESSES]);
+
+readonly addAddress: IFormidableActionOption = {
+  value: 'add-address',
+  label: 'Add A New Address…',
+  action: () => this.createAddress()
+};
+
+private async createAddress(): Promise<void> {
+  const created = await this.dialog.open(NewAddressDialog, { street: this.filter() });
+  if (!created) return;
+
+  this.addresses.update((list) => [...list, created]);
+  this.model.address = created.value;
+}
+```
+
+```html
+<formidable-autocomplete-field
+  name="address"
+  ngModel
+  [options]="addresses()"
+  [actionOption]="addAddress"
+  (filterChanged)="filter.set($event)" />
+```
+
+Three things that recipe relies on:
+
+- **The typed text is yours already.** `filterChanged` carries it, which is what lets the dialog open on "Wiesenstrasse 5" rather than on nothing.
+- **The order of those two writes does not matter.** A value the field cannot place yet is kept and re-applied when the option it names arrives.
+- **The list still reports itself empty.** `noOptionsText` renders beside the action entry rather than being replaced by it: nothing matched _and_ here is what to do about it.
+
 ---
 
 ## Panels

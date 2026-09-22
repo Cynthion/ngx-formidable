@@ -97,6 +97,7 @@ Inherited by those four:
 All extend `BaseFieldDirective<T>` (inherited API above); the four option fields extend `BaseOptionFieldDirective<T>`. Tables list each field's OWN inputs only.
 
 **Panel Control**: the three fields with a panel — `dropdown-field`, `autocomplete-field` and `date-field` — expose `isPanelOpen` as a signal to read and `togglePanel(isOpen)` as the way to open or close it from outside. There is no `isPanelOpen` input: a panel is state the field owns and closes by itself (on a selection, an outside click, `Escape`), so a one-way binding would go stale the moment it did. Reach the method through a template reference (`#field`) or a `viewChild()`, exactly as `focus()` is reached.
+**Action Option**: the two panel fields take an `actionOption` — an entry pinned to the end of the list that runs an action instead of becoming a value, which is what an "Add A New Address…" row is. It renders as an option and the keyboard walks it as one, because `aria-activedescendant` may only name an option the `listbox` owns; what separates it is every value path, none of which it takes. Picking it closes the panel, runs its `action` and commits nothing; a model written to its value finds no option; the autocomplete never auto-selects it off an exact label and the dropdown's type-ahead walks past it. It never stands in for a result either — an otherwise empty list still renders `noOptionsText`, because that is a status and the action is a control. What happens next is the consumer's: see **An Action Row Is Not A Value** in `user/fields.md` for the round trip.
 
 ### Input Field
 
@@ -154,9 +155,11 @@ These five look like the option inputs above but are declared on the field itsel
 
 Custom single-select with a floating panel. Option inputs come from **Base Option Field Directive**.
 
-| Input           | Type                      | Default  | Description     |
-| :-------------- | :------------------------ | :------- | :-------------- |
-| `panelPosition` | `FormidablePanelPosition` | `'full'` | Panel placement |
+| Input              | Type                      | Default     | Description                                                  |
+| :----------------- | :------------------------ | :---------- | :----------------------------------------------------------- |
+| `panelPosition`    | `FormidablePanelPosition` | `'full'`    | Panel placement                                              |
+| `actionOption`     | `IFormidableActionOption` | `undefined` | An entry that runs an action instead of becoming a value     |
+| `actionOptionMode` | `FieldDefaultOptionMode`  | `'always'`  | When it renders: always last, or only when the list is empty |
 
 Supports projected `formidable-field-option` children. **Use when** you need a styled dropdown with rich option content. The panel is opened and closed from outside through `togglePanel(isOpen)` — see **Panel Control**.
 
@@ -166,11 +169,13 @@ Supports projected `formidable-field-option` children. **Use when** you need a s
 
 Dropdown panel plus a filter input. Emits filter text; the consumer supplies filtered options (the portal pairs it with fuse.js). Option inputs come from **Base Option Field Directive**.
 
-| Input           | Type                      | Default  | Description     |
-| :-------------- | :------------------------ | :------- | :-------------- |
-| `panelPosition` | `FormidablePanelPosition` | `'full'` | Panel placement |
+| Input              | Type                      | Default     | Description                                                  |
+| :----------------- | :------------------------ | :---------- | :----------------------------------------------------------- |
+| `panelPosition`    | `FormidablePanelPosition` | `'full'`    | Panel placement                                              |
+| `actionOption`     | `IFormidableActionOption` | `undefined` | An entry that runs an action instead of becoming a value     |
+| `actionOptionMode` | `FieldDefaultOptionMode`  | `'always'`  | When it renders: always last, or only when the list is empty |
 
-The default option is pinned after filtering, so an `always` default stays visible even when the filter matches nothing. **Output** `filterChanged: string` (+ `filterChange$`). The panel is opened and closed from outside through `togglePanel(isOpen)` — see **Panel Control**. **Use when** the option set is large or fetched/filtered dynamically.
+The default option and the action entry are both applied after filtering, so an `always` default and the action entry stay visible even when the filter matches nothing — which is the moment the action entry exists for. **Output** `filterChanged: string` (+ `filterChange$`), which reports the filter the field moves itself as well as the text typed into it — see **`filterChanged` Reports More Than Typing** in `user/fields.md`. The panel is opened and closed from outside through `togglePanel(isOpen)` — see **Panel Control**. **Use when** the option set is large or fetched/filtered dynamically.
 
 ### Date Field
 
@@ -453,6 +458,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `FormidableReveal`                   | `'touched' \| 'dirty' \| 'submitted' \| 'always'`                                                   |
 | `FormidableToggleFieldLabelPosition` | `'before' \| 'after'`                                                                               |
 | `IFormidableOption`                  | `{ value: string; label?; template?; readonly?; disabled?; match?(filter) }`                        |
+| `IFormidableActionOption`            | `IFormidableOption` plus a required `action(): void`                                                |
 
 `FieldDefaultOptionMode` decides when an option field renders its `defaultOption`: `always`, pinned first and exempt from both `sortFn` and the autocomplete filter, or as a `fallback` only when the list would otherwise be empty.
 
@@ -473,6 +479,7 @@ The contracts a custom field, option or validator implements. Every field compon
 | `IFormidableField<T>`     | every field, and the decorator  | What the decorator reads off a field: refs, id, state, value and both streams      |
 | `IFormidableOptionField`  | the five option fields          | `options`, `defaultOption`, `defaultOptionMode`, `selectOption`, `optionRole`      |
 | `IFormidableOption<T>`    | plain data, written by hand     | One option: `value`, `label`, `template`, its flags and `match`                    |
+| `IFormidableActionOption` | plain data, written by hand     | An option plus the `action` that replaces committing it — see **Action Option**    |
 | `IFormidableOptionSource` | `FieldOptionComponent`          | `option` — the plain option a component hands to the field that owns it            |
 | `IFormidablePanelField`   | dropdown, autocomplete, date    | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                          |
 | `IFormidableMaskField`    | input, textarea                 | `mask`, `maskConfig`                                                               |

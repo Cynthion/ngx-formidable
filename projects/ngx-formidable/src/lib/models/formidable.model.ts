@@ -162,6 +162,15 @@ export interface IFormidableOption<T = unknown> {
 }
 
 /**
+ * An entry that runs an action instead of becoming a value. The two panel fields take one as `actionOption`:
+ * it renders last, the keyboard walks it like any option, and picking it closes the panel and commits nothing.
+ */
+export interface IFormidableActionOption<T = unknown> extends IFormidableOption<T> {
+  /** Runs when the entry is picked. */
+  action: () => void;
+}
+
+/**
  * What a component that **is** an option exposes, so the field that owns it can read one option out of it.
  * Provided as `FORMIDABLE_OPTION`; `FieldOptionComponent` implements it, and so does anything extending it.
  */

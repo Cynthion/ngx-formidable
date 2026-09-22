@@ -17,6 +17,8 @@ interface PortalFieldCapabilities {
   readonly adornments: boolean;
   readonly placeholder: boolean;
   readonly options: boolean;
+  /** Whether the field takes an entry that runs an action instead of becoming a value. Panel fields only. */
+  readonly actionOption: boolean;
   readonly panel: boolean;
   readonly mask: boolean;
   readonly textLength: boolean;
@@ -35,6 +37,7 @@ const INLINE = { layout: 'inline', labelPositions: false, adornments: true } as 
 const OFF = {
   placeholder: false,
   options: false,
+  actionOption: false,
   panel: false,
   mask: false,
   textLength: false,
@@ -49,8 +52,16 @@ export const FIELD_CAPABILITIES: Readonly<Record<PortalFieldKind, PortalFieldCap
   'input': { ...HORIZONTAL, ...OFF, placeholder: true, mask: true, textLength: true },
   'textarea': { ...HORIZONTAL, ...OFF, placeholder: true, mask: true, textLength: true },
   'select': { ...HORIZONTAL, ...OFF, placeholder: true, options: true },
-  'dropdown': { ...HORIZONTAL, ...OFF, placeholder: true, options: true, panel: true },
-  'autocomplete': { ...HORIZONTAL, ...OFF, placeholder: true, options: true, panel: true, filter: true },
+  'dropdown': { ...HORIZONTAL, ...OFF, placeholder: true, options: true, actionOption: true, panel: true },
+  'autocomplete': {
+    ...HORIZONTAL,
+    ...OFF,
+    placeholder: true,
+    options: true,
+    actionOption: true,
+    panel: true,
+    filter: true
+  },
   'date': { ...HORIZONTAL, ...OFF, placeholder: true, panel: true, locale: true, toggleIcon: true },
   'time': { ...HORIZONTAL, ...OFF, placeholder: true, locale: true },
   'toggle': { ...INLINE, ...OFF },

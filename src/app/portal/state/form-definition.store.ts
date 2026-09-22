@@ -6,6 +6,7 @@ import {
   PortalFieldSpec,
   PortalFormDefinition,
   PortalFormOptions,
+  PortalOptionSpec,
   PortalSectionSpec
 } from '../model/field-spec.model';
 import { pathOf } from '../helpers/model-path.helpers';
@@ -70,6 +71,16 @@ export class FormDefinitionStore {
     this.definition.update((definition) => ({
       ...definition,
       fields: definition.fields.map((field) => (field.id === id ? { ...field, ...patch } : field))
+    }));
+  }
+
+  /** Appends an option to a field — what an `actionOption` that creates one comes back to. */
+  public addFieldOption(id: string, option: PortalOptionSpec): void {
+    this.definition.update((definition) => ({
+      ...definition,
+      fields: definition.fields.map((field) =>
+        field.id === id ? { ...field, options: [...(field.options ?? []), option] } : field
+      )
     }));
   }
 

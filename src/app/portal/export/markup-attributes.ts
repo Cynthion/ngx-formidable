@@ -70,6 +70,12 @@ const FIELD_ATTRIBUTES: readonly MarkupAttribute[] = [
     write: (raw) => ({ defaultOptionMode: unquote(raw) as PortalFieldSpec['defaultOptionMode'] })
   },
   {
+    name: 'actionOptionMode',
+    binding: true,
+    read: (s) => (s.actionOptionMode ? `'${s.actionOptionMode}'` : null),
+    write: (raw) => ({ actionOptionMode: unquote(raw) as PortalFieldSpec['actionOptionMode'] })
+  },
+  {
     name: 'unicodeTokenFormat',
     binding: true,
     read: (s) => (s.unicodeTokenFormat ? `'${s.unicodeTokenFormat}'` : null),
