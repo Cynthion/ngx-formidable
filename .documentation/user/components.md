@@ -367,13 +367,12 @@ A single option inside an option-based field. Provides `FORMIDABLE_OPTION` and t
 | `disabled`    | `boolean`             | `false`                            | Disabled option                                                    |
 | `selected`    | `boolean`             | `false`                            | Selected state                                                     |
 | `highlighted` | `boolean`             | `false`                            | Highlighted state                                                  |
-| `select`      | `() => void`          | Selects it in the parent field     | Overrides what picking the option does                             |
 | `match`       | `(filter) => boolean` | Case-insensitive `label` substring | Overrides how the autocomplete filter matches it                   |
 | `layout`      | `FieldOptionLayout`   | `'inline'`                         | Option layout, a look only. The ARIA role follows the parent field |
 | `template`    | getter                | —                                  | The projected content, or `undefined` when none was projected      |
 | `option`      | computed              | —                                  | The plain `IFormidableOption` the owning field reads — see below   |
 
-**Component And Data**: `IFormidableOption` is plain data — the shape a consumer writes into a field's `options` input, and the shape every field works with internally. A component is a different thing: its members are signals. `option` is the one boundary between them, and it is what `FORMIDABLE_OPTION` provides: the component folds its inputs, its projected content and its two behaviour defaults into one plain option, and the owning field reads that. `label` therefore falls back to the text taken off the projected content, and `select` and `match` resolve their defaults there rather than on the input — which is why the plain option a field holds always carries both.
+**Component And Data**: `IFormidableOption` is plain data — the shape a consumer writes into a field's `options` input, and the shape every field works with internally. A component is a different thing: its members are signals. `option` is the one boundary between them, and it is what `FORMIDABLE_OPTION` provides: the component folds its inputs, its projected content and its `match` default into one plain option, and the owning field reads that. `label` therefore falls back to the text taken off the projected content, and `match` resolves its default there rather than on the input — which is why the plain option a field holds always carries one.
 
 **Accessibility**: the option's ARIA lands on its host element, not on the inner `div` — the host is the direct child of the `listbox` / `radiogroup` / `group` that owns it, and an element with no role in between would break that ownership. The role comes from the parent field's `optionRole`, never from `layout`: `layout` is a look a consumer may set freely, while the role has to follow the container. It is also what chooses the state attribute — `aria-selected` for an `option`, `aria-checked` for a `radio` or a `checkbox`, each binding its boolean raw so an unselected option reports `false`. `readonly` folds into `aria-disabled` alongside `disabled`: ARIA has no `aria-readonly` for these roles, and both flags mean the same thing here. The option's `id` is bound by the parent, which is what knows the index — see **Combobox And Options**.
 
@@ -453,7 +452,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `FormidablePanelPosition`            | `'left' \| 'right' \| 'full' \| 'sheet'`                                                            |
 | `FormidableReveal`                   | `'touched' \| 'dirty' \| 'submitted' \| 'always'`                                                   |
 | `FormidableToggleFieldLabelPosition` | `'before' \| 'after'`                                                                               |
-| `IFormidableOption`                  | `{ value: string; label?; template?; readonly?; disabled?; select?(); match?(filter) }`             |
+| `IFormidableOption`                  | `{ value: string; label?; template?; readonly?; disabled?; match?(filter) }`                        |
 
 `FieldDefaultOptionMode` decides when an option field renders its `defaultOption`: `always`, pinned first and exempt from both `sortFn` and the autocomplete filter, or as a `fallback` only when the list would otherwise be empty.
 
@@ -473,7 +472,7 @@ The contracts a custom field, option or validator implements. Every field compon
 | :------------------------ | :------------------------------ | :--------------------------------------------------------------------------------- |
 | `IFormidableField<T>`     | every field, and the decorator  | What the decorator reads off a field: refs, id, state, value and both streams      |
 | `IFormidableOptionField`  | the five option fields          | `options`, `defaultOption`, `defaultOptionMode`, `selectOption`, `optionRole`      |
-| `IFormidableOption<T>`    | plain data, written by hand     | One option: `value`, `label`, `template`, its flags, `select` and `match`          |
+| `IFormidableOption<T>`    | plain data, written by hand     | One option: `value`, `label`, `template`, its flags and `match`                    |
 | `IFormidableOptionSource` | `FieldOptionComponent`          | `option` — the plain option a component hands to the field that owns it            |
 | `IFormidablePanelField`   | dropdown, autocomplete, date    | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                          |
 | `IFormidableMaskField`    | input, textarea                 | `mask`, `maskConfig`                                                               |

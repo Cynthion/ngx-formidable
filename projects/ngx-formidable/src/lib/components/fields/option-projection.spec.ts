@@ -184,8 +184,8 @@ describe('option projection', () => {
   /**
    * The option a field reads off a projected component is `FieldOptionComponent.option` — one plain
    * `IFormidableOption` folded out of its signal inputs and its projected content. These two claims are the
-   * whole boundary: the label falls back to the projected text, and the default `select` the computed
-   * resolves is what commits when the rendered option is clicked.
+   * whole boundary: the label falls back to the projected text, and clicking the rendered option commits
+   * that plain option to the field that owns it.
    */
   describe('the option a component hands over', () => {
     let fixture: ComponentFixture<ProjectedContentHostComponent>;
@@ -203,7 +203,7 @@ describe('option projection', () => {
       expect(renderedOptionValues(fixture)).toEqual(['Apple', 'Bound Banana']);
     });
 
-    it('commits through the select the option resolves for itself', async () => {
+    it('commits to the owning field when the rendered option is clicked', async () => {
       const option = fixture.nativeElement.querySelectorAll('formidable-field-option')[0] as HTMLElement;
 
       // The `(click)` sits on the option's inner div, which is what the field renders.

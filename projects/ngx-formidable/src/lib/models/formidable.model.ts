@@ -157,8 +157,6 @@ export interface IFormidableOption<T = unknown> {
   template?: TemplateRef<T>;
   readonly?: boolean;
   disabled?: boolean;
-  /** Runs instead of the field's own selection handling, for an option that does something else. */
-  select?: () => void;
   /** Whether an autocomplete's filter text matches this option. Replaces the default substring test. */
   match?: (filterValue: string) => boolean;
 }

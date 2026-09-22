@@ -72,7 +72,7 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 **Projected Options Must Be Written Inside The Field.** Angular resolves both the parent injection and the content query from where the option is _declared_, not from where it renders, so an option in a shared template outside the field cannot join it.
 
-**An Option Owns Its Own Content.** Anything projected into `formidable-field-option` becomes that option's template, which is how an option carries a subtitle, an icon or highlighted match text. Its `select` and `match` inputs override what picking it does and how the autocomplete filter matches it.
+**An Option Owns Its Own Content.** Anything projected into `formidable-field-option` becomes that option's template, which is how an option carries a subtitle, an icon or highlighted match text. Its `match` input overrides how the autocomplete filter matches it.
 
 **The Autocomplete Does Not Filter For You.** It emits `filterChanged` and renders whatever `options` it is given back, so the matching strategy — substring, fuzzy, a server call — stays yours.
 
