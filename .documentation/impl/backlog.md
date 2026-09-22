@@ -2,13 +2,12 @@
 
 ## Bugs
 
-- `dropdown-field`'s value can be selected by keyboard but not by mouse. Its display input is `readonly` with `pointer-events: none`, and `toggleMouseDown` calls `preventDefault()`, so a drag never starts a selection — but `Cmd/Ctrl+A`, `Shift+Arrow` and `Shift+Home/End` reach the input untouched, because `isPrintableCharacter` excludes modifier combos and `onTypeaheadKeydown` prevents nothing. The result is a highlight no mouse gesture could have produced. Either add `user-select: none` to the mixin's `.wrapped-input`, as `dropdown-toggle` already has, so the field behaves like a native `<select>`; or decide the value is meant to be copyable and unblock the mouse too, which then fights the click-to-open gesture. The first is the smaller change and the one that matches the control.
 - An option's `select` never reaches the rendered option. Every option field re-creates its options from the plain list and binds `[value]`, `[label]`, `[readonly]`, `[disabled]`, `[selected]`, `[highlighted]` and — on the autocomplete only — `[match]`. It does not bind `[select]`, so a `select` a consumer sets on a projected `formidable-field-option` or on an `options` entry is carried in the plain option and then dropped: the rendered option always falls back to its own default. Either bind it or drop `select` from `IFormidableOption`.
 - `textarea-field`'s length indicator renders `{{ value?.length || 0 }}`, and `value` reads the textarea element — a DOM read, against the `impl/conventions.md` rule that state a template reads is a signal. Under zone change detection every write path is followed by a tick, so it keeps up; zonelessly a programmatic masked write repaints nothing and the count goes stale. The fix is to back the count with a signal written wherever the element's value is, as `select-field` now does for its selection.
 
 - A standalone `ngModel` — one outside a `<form>` — sets up its control synchronously from `NgModel.ngOnChanges`, which is before the field's own view exists. Every field whose `doWriteValue` reaches for a view ref therefore crashes: `input-field` throws NG0951 on `inputRef()`, and did the same in kind before the query was a signal. `focus.spec.ts` already documents the timing; the fix is either to guard the write or to defer it until the view is there. Reproduce with a decorated `formidable-input-field` carrying `ngModel` and no `<form>` around it. The portal's preset thumbnails work around it by showing a `placeholder` instead of binding a value.
 - Before releasing to npmjs with version 1.0.0, fix the README.md. It's relative links don't work on npmjs.org (https://www.npmjs.com/package/ngx-formidable)
-- Before releaseing: npm pkg fix would normalize the repository.url warning, and the publish:lib script still has the bare-path bug.
+- Before releasing: npm pkg fix would normalize the repository.url warning, and the publish:lib script still has the bare-path bug.
 
 ## Features
 

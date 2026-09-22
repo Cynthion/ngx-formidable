@@ -354,6 +354,13 @@ export class DropdownFieldComponent
   }
 
   protected onTypeaheadKeydown(event: KeyboardEvent): void {
+    // The display input is readonly and takes no pointer events, so a select-all is the one gesture that can
+    // still leave a highlight on the value — one no mouse could have made.
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'a') {
+      event.preventDefault();
+      return;
+    }
+
     if (isPrintableCharacter(event) && !this.readonly() && !this.disabled()) {
       this._typedBuffer += event.key;
       this.typeahead$.next(this._typedBuffer);
