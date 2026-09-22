@@ -69,19 +69,15 @@ export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef
 }
 
 /**
- * Brings the field, and optionally its open panel, back into the viewport — but only the one that has left
- * it, so opening a panel on a fully visible field never scrolls the page.
+ * Brings a field and its just-opened panel back into the viewport — but only the one that has left it, so
+ * opening a panel on a fully visible field never scrolls the page. Called only while opening: a closing
+ * panel reveals nothing, so scrolling then would move the page under the user.
  */
-export function scrollIntoView(
-  fieldRef?: ElementRef<HTMLElement>,
-  panelRef?: ElementRef<HTMLElement>,
-  scrollToPanel = true
-): void {
+export function scrollIntoView(fieldRef?: ElementRef<HTMLElement>, panelRef?: ElementRef<HTMLElement>): void {
   const field = fieldRef?.nativeElement;
   const panel = panelRef?.nativeElement;
 
-  if (!field) return;
-  if (!panel && scrollToPanel) return;
+  if (!field || !panel) return;
 
   const viewportHeight = window.innerHeight;
 
@@ -97,14 +93,12 @@ export function scrollIntoView(
     });
   }
 
-  if (!panel) return;
-
   const panelRect = panel.getBoundingClientRect();
   const panelBottomEdge = panelRect.bottom;
   const panelTopEdge = panelRect.top;
   const isPanelOutOfView = panelBottomEdge > viewportHeight || panelTopEdge < 0;
 
-  if (isPanelOutOfView && scrollToPanel) {
+  if (isPanelOutOfView) {
     panel.scrollIntoView({
       behavior: 'smooth',
       block: 'nearest'

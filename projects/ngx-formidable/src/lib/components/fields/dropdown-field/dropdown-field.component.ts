@@ -301,12 +301,13 @@ export class DropdownFieldComponent
   public togglePanel(isOpen: boolean): void {
     this.isPanelOpen.set(isOpen);
 
-    // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
-    // before change detection. A timer lands after it even zonelessly: the `set` above notifies the
-    // scheduler, which queues its own timer from inside that call, so ours is behind it in the queue.
-    setTimeout(() => scrollIntoView(this.dropdownRef(), this.panelRef(), isOpen));
-
     if (isOpen) {
+      // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
+      // before change detection. A timer lands after it even zonelessly: the `set` above notifies the
+      // scheduler, which queues its own timer from inside that call, so ours is behind it in the queue.
+      // Only while opening: closing reveals nothing, so scrolling then just moves the page under the user.
+      setTimeout(() => scrollIntoView(this.dropdownRef(), this.panelRef()));
+
       this.highlightSelectedOption();
       // Synchronous on purpose: a closed panel is `visibility: hidden`, not `display: none`, so it is
       // already laid out and measurable. Deferring would flip it after paint, which is a visible jump.

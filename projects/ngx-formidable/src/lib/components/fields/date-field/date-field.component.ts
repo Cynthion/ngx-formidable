@@ -598,14 +598,13 @@ export class DateFieldComponent
   public togglePanel(isOpen: boolean): void {
     this.isPanelOpen.set(isOpen);
 
-    // Reads the panel's box while opening, so it has to wait for the open state to render — a microtask
-    // would run before change detection. Closing reaches here from `selectDate` with the panel already
-    // closed, where the `set` above moves nothing and so schedules nothing; that is harmless, because
-    // `scrollIntoView` skips the panel entirely when it is not scrolling to it and measures only the field,
-    // whose box an absolutely positioned panel cannot move.
-    setTimeout(() => scrollIntoView(this.dateRef(), this.panelRef(), isOpen));
-
     if (isOpen) {
+      // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
+      // before change detection. Only while opening: closing reveals nothing, and `selectDate` closes an
+      // already-closed panel on every write, including the one that seeds the field's initial value —
+      // which used to scroll an off-screen field into view on load.
+      setTimeout(() => scrollIntoView(this.dateRef(), this.panelRef()));
+
       // Synchronous on purpose: a closed panel is `visibility: hidden`, not `display: none`, so it is
       // already laid out and measurable. Deferring would flip it after paint, which is a visible jump.
       // The panel is not focused here: it is still `visibility: hidden` at this point and so cannot take

@@ -91,6 +91,8 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 The three anchored values flip above the field when there is no room below, and adopt the two field corners they sit against so the pair reads as one box. A sheet never flips.
 
+Opening a panel scrolls the field, or the panel, into view — but only the one that the viewport actually cuts off.
+
 ```html
 <formidable-date-field
   name="birthdate"
