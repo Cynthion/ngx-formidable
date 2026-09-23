@@ -169,7 +169,9 @@ describe('masked date/time field', () => {
       expect(state(input)).toBe('12 . __ . ____|2');
     }));
 
-    it('does not move the caret when focus lands on a filled field', fakeAsync(() => {
+    // Where focus leaves the caret is `focus-caret.spec.ts`; what matters here is that it leaves the
+    // value alone, and that a selection the user makes afterwards is still theirs to type over.
+    it('does not rewrite a filled field when focus lands on it', fakeAsync(() => {
       const { input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
 
       input.focus();
@@ -179,7 +181,6 @@ describe('masked date/time field', () => {
 
       input.focus();
 
-      // focusing a filled field must not rewrite it, nor reset the caret
       expect(input.value).toBe('12 . 05 . 2024');
 
       // a click-drag selects the second month digit; typing replaces just that digit

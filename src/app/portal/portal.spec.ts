@@ -497,6 +497,17 @@ describe('portal', () => {
     expect(root.querySelector('portal-field-editor')).toBeTruthy();
   }));
 
+  // Tabbing through the sample form is the thing being tested; a chip between every two fields doubles the
+  // presses it takes and puts portal chrome in the middle of the run.
+  it('keeps the chips out of the tab order', fakeAsync(() => {
+    settle();
+
+    const chips = Array.from(root.querySelectorAll('portal-preview-field .chip'));
+
+    expect(chips.length).toBeGreaterThan(0);
+    expect(chips.every((chip) => chip.getAttribute('tabindex') === '-1')).toBeTrue();
+  }));
+
   // Moving to a tab behind a collapsed panel changes nothing the user can see, so the move has to open it.
   it('expands a collapsed editor panel rather than moving a tab behind it', fakeAsync(() => {
     settle();

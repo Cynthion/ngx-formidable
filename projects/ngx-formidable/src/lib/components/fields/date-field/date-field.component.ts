@@ -28,8 +28,9 @@ import {
   UNICODE_DATE_TOKENS,
   validateUnicodeDateTokenFormat
 } from '../../../helpers/format.helpers';
-import { keepClickedCaret, renderEmptyMask } from '../../../helpers/input.helpers';
+import { renderEmptyMask } from '../../../helpers/input.helpers';
 import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
+import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../../helpers/mask.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
@@ -241,17 +242,13 @@ export class DateFieldComponent
 
     // hand the empty display over to ngxMask while focused (see renderEmpty)
     if (isFocused) {
-      if (this.selectedDate == null) this.renderEmpty();
+      if (this.showsNothingTyped) this.renderEmpty();
+      this.selectOnKeyboardFocus(this.inputRef().nativeElement, true);
       return;
     }
 
     // try set date on blur
     this.trySetDateFromInput(this.inputRef().nativeElement.value);
-  }
-
-  /** Keeps the caret where the pointer put it, which ngx-mask pulls back to the end of the typed text. */
-  protected onMouseUp(): void {
-    keepClickedCaret(this.inputRef().nativeElement, !this.isInputCleared);
   }
 
   // Focus moved onto this field's own panel, so the blur that follows is neither a commit nor a touch.
@@ -403,8 +400,14 @@ export class DateFieldComponent
 
   protected readonly ngxMask = computed(() => formatToDateTokenMask(this.tokenFormat(), this.maskChar));
 
-  protected ngxMaskConfig: Pick<NgxMaskConfig, 'showMaskTyped' | 'leadZeroDateTime' | 'dropSpecialCharacters'> = {
+  protected ngxMaskConfig: Pick<
+    NgxMaskConfig,
+    'showMaskTyped' | 'leadZeroDateTime' | 'dropSpecialCharacters' | 'placeHolderCharacter'
+  > = {
     showMaskTyped: true,
+    // Bound rather than inherited: the empty display is compared against character by character, so a
+    // global `provideNgxMask` must not be able to change it out from under that.
+    placeHolderCharacter: DEFAULT_PLACEHOLDER_CHARACTER,
     leadZeroDateTime: false, // must be enforced by unicodeTokenFormat, if required
     dropSpecialCharacters: false // keep special characters like '-', '.' or '/' in the input
   };
@@ -414,7 +417,7 @@ export class DateFieldComponent
 
   // ngxMask's own empty display: the mask with every slot as its placeholder character.
   private get maskPlaceholder(): string {
-    return this.ngxMask().replace(/\w/g, '_');
+    return this.ngxMask().replace(/\w/g, this.maskPlaceholderCharacter);
   }
 
   // The resting display of an empty field for the current `emptyHint`: the format string, or
@@ -428,6 +431,13 @@ export class DateFieldComponent
     const value = this.inputRef().nativeElement.value;
 
     return value === '' || value === this.maskPlaceholder;
+  }
+
+  // Whether the input is showing one of its two empty displays rather than characters somebody typed.
+  // Focus hands the display to ngxMask, and that must not overwrite a half-typed date — which survives a
+  // blur onto this field's own panel, and is there to come back to when focus returns.
+  private get showsNothingTyped(): boolean {
+    return this.isInputCleared || this.inputRef().nativeElement.value === this.emptyDisplay;
   }
 
   // Shows the `emptyHint` at rest, but lets ngxMask own the text while focused.

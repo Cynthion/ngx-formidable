@@ -46,6 +46,20 @@ Every field has a `focus()` method. `autoFocus` calls it once the view is ready,
 
 **Focusing Never Opens A Panel.** The dropdown, autocomplete and date fields open on click, on `ArrowDown`, or on typing, so a focused field is ready for input without a list covering the page. A `disabled` field ignores `focus()` entirely.
 
+### The Caret On Focus
+
+| Field Holds     |     Focused By     | Caret Lands                                                    |
+| :-------------- | :----------------: | :------------------------------------------------------------- |
+| Nothing         | Keyboard / Pointer | At the front, wherever the pointer aimed                       |
+| Text or a value |      Keyboard      | Selecting the content, so the next character typed replaces it |
+| Text or a value |      Pointer       | Where the click landed, and never behind the value             |
+
+`focus()` and `autoFocus` count as the keyboard. `textarea-field` is the exception and keeps the browser's own behaviour — a caret, no selection — because a paragraph should not be one keystroke from being wiped, and no browser does it either.
+
+The rules run on the way in and then stop. Clicking again, moving the caret, typing or a repaint never re-runs them, so a field is never locked to one caret position; leaving the field and coming back reads the rules again against whatever it holds by then. Focusing a field never changes its value.
+
+Browsers disagree about the keyboard half of this — Chrome selects an input's content on `Tab`, Firefox leaves a caret — so the library settles it rather than inheriting the difference.
+
 ---
 
 ## Options
@@ -237,18 +251,30 @@ bootstrapApplication(AppComponent, {
 
 `NgxFormidableModule.forRoot()` takes the same object. Either way it lands on the `FORMIDABLE_MASK_DEFAULTS` token.
 
+**The Slot Character Is The Field's, Not The App's.** A field reads its value back out of what the mask renders, by looking for the character drawn in a position nobody has filled. So every masked field binds `placeHolderCharacter` itself, and an `ngx-mask` setting made globally — through `provideNgxMask` — does not reach it. Set it per field through `maskConfig`, or app-wide through `globalMaskConfig`, and the display and the caret move together.
+
+Pick one the mask cannot produce on its own. Where a token pattern accepts it, or the mask draws it as a literal, a filled position and an empty one look identical and the field cannot tell them apart — it logs a warning naming the field when it spots the collision. The default `_` is safe for every built-in pattern; a mask like `000_000`, or a custom pattern such as `/\w/` that accepts `_`, needs a different character.
+
+```html
+<formidable-input-field
+  name="serial"
+  [mask]="'XXXXXX'"
+  [maskConfig]="{ patterns: wordPatterns, placeHolderCharacter: '•' }"
+  ngModel />
+```
+
 **A Masked Field Commits On Blur.** A half-typed date is not a date, so the masked fields keep what is typed in the DOM until focus leaves. The one exception is wiping the text: clearing a committed value reports `null` immediately, so the field is empty rather than stale.
 
 ### The Caret In A Masked Field
 
-A mask renders a `_` slot for every character not yet typed, and those slots are part of what a pointer can aim at.
+A mask renders a `_` slot for every character not yet typed. Those slots are not a value, so they are not somewhere the caret goes: `The Caret On Focus` above is the whole rule, and a mask only changes where the content is taken to end.
 
-| Field Holds           |     Focused By      | Caret Lands                                                        |
-| :-------------------- | :-----------------: | :----------------------------------------------------------------- |
-| Nothing but slots     | Keyboard or pointer | At the front, where typing starts                                  |
-| Some text, some slots |      Keyboard       | In front of the first unfilled slot, where the next character goes |
-| Some text, some slots |       Pointer       | Where the click landed, on text or on a slot alike                 |
-| Text, no slots left   |      Keyboard       | At the end                                                         |
-| Text, no slots left   |       Pointer       | Where the click landed                                             |
+| Mask State        | Counts As | Content Ends                                                           |
+| :---------------- | :-------: | :--------------------------------------------------------------------- |
+| Nothing but slots |   Empty   | At the front — literals and unfilled slots are not a value             |
+| Some filled       |  Content  | After the last filled slot, short of the separator leading to the rest |
+| Every slot filled |  Content  | After the whole display, trailing literals included                    |
+
+So keyboard focus on `12/3_/____` selects `12/3` and stops, and a click anywhere in the empty tail of `079 ___ __ __` puts the caret behind the `9`, not out among the slots.
 
 `Arrow Left` and `Arrow Right` always move the caret. Select all covers the text that has been typed and never the slots, so it selects nothing in a field holding only slots.

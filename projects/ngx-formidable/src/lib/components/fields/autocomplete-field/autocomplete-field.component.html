@@ -26,6 +26,7 @@
       [attr.aria-expanded]="isPanelOpen()"
       [attr.aria-controls]="panelId"
       [attr.aria-activedescendant]="optionId(highlightedOptionIndex())"
+      (mousedown)="onEditorMouseDown()"
       (input)="onInput($event)"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />

@@ -13,11 +13,13 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgxMaskConfig, NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
-import { keepClickedCaret, placeCaretAtNextSlot, replaceText } from '../../../helpers/input.helpers';
+import { replaceText } from '../../../helpers/input.helpers';
 import {
   analyzeMaskDisplayLength,
   DEFAULT_PATTERNS,
+  DEFAULT_PLACEHOLDER_CHARACTER,
   DEFAULT_SPECIAL_CHARACTERS,
+  isPlaceholderAmbiguous,
   MaskConfigSubset
 } from '../../../helpers/mask.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
@@ -75,7 +77,7 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
     super.ngAfterViewInit();
 
     this.adjustLayout();
-    this.warnIfMaskConflictsWithMinMax();
+    this.warnAboutMaskConfig();
   }
 
   constructor() {
@@ -83,7 +85,7 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
 
     onSignalChange(
       () => [this.mask(), this.maskConfig(), this.minLength(), this.maxLength()],
-      () => this.warnIfMaskConflictsWithMinMax()
+      () => this.warnAboutMaskConfig()
     );
 
     // Re-applies the formatting the new mask asks for, and resizes to whatever it produced. Separate, so a
@@ -124,20 +126,10 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
     this.autoResize();
   }
 
-  // A masked field takes the caret at the slot the next character fills, so tabbing in lands where typing
-  // continues. A pointer overrides it: the browser places the caret from the click after this, and
-  // `onMouseUp` is what holds it there.
-  protected doOnFocusChange(isFocused: boolean): void {
-    const el = this.textareaElement;
-
-    if (isFocused && this.mask() && el) placeCaretAtNextSlot(el);
-  }
-
-  /** Keeps the caret where the pointer put it, which ngx-mask pulls back to the end of the typed text. */
-  protected onMouseUp(): void {
-    const el = this.textareaElement;
-
-    if (el) keepClickedCaret(el, !!this.value);
+  // A textarea keeps the browser's own focus behaviour — a caret, and no selection. One keystroke wiping
+  // a paragraph is not what a multi-line field should offer, and no browser offers it.
+  protected doOnFocusChange(): void {
+    // No additional actions needed
   }
 
   // #region ControlValueAccessor
@@ -238,6 +230,7 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
   private readonly LOCAL_MASK_DEFAULTS: Required<MaskConfigSubset> = {
     validation: true,
     showMaskTyped: false,
+    placeHolderCharacter: DEFAULT_PLACEHOLDER_CHARACTER,
     dropSpecialCharacters: true,
     specialCharacters: DEFAULT_SPECIAL_CHARACTERS,
     thousandSeparator: ' ', // ngx-mask default is a space
@@ -259,9 +252,21 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
     } as Required<MaskConfigSubset>;
   }
 
-  private warnIfMaskConflictsWithMinMax(): void {
+  protected override get maskPlaceholderCharacter(): string {
+    return this.mergedMaskConfig.placeHolderCharacter;
+  }
+
+  private warnAboutMaskConfig(): void {
     const mask = this.mask();
     if (!mask) return;
+
+    if (isPlaceholderAmbiguous(mask, this.mergedMaskConfig)) {
+      console.warn(
+        `[ngx-formidable] <${this.name() || 'textarea'}>: placeHolderCharacter "${this.mergedMaskConfig.placeHolderCharacter}" ` +
+          `can also appear as content under this mask, so the field cannot tell a filled position from an ` +
+          `empty one. Set a placeHolderCharacter the mask cannot produce.`
+      );
+    }
 
     const { prefix, suffix } = this.mergedMaskConfig;
     const { min, max, variable } = analyzeMaskDisplayLength(mask, { prefix, suffix });

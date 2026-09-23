@@ -31,6 +31,7 @@ For maintainers of the library.
 | File                   | Purpose                                                            |
 | :--------------------- | :----------------------------------------------------------------- |
 | `tech/architecture.md` | Workspace structure, library and portal roles, build and publish   |
+| `tech/caret.md`        | Caret placement on focus entry, and the ngx-mask timing around it  |
 | `tech/decoration.md`   | The decorator, field and errors wiring: slot, ids, repaint, insets |
 | `tech/layering.md`     | Stacking contexts, the layer ordinals and the two public z-indices |
 | `tech/validation.md`   | The validation seam, its three layers and the package layout       |

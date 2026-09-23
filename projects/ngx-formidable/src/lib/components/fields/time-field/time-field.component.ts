@@ -24,7 +24,8 @@ import {
   UNICODE_TIME_TOKENS,
   validateUnicodeTimeTokenFormat
 } from '../../../helpers/format.helpers';
-import { keepClickedCaret, renderEmptyMask } from '../../../helpers/input.helpers';
+import { renderEmptyMask } from '../../../helpers/input.helpers';
+import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../../helpers/mask.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
@@ -123,16 +124,12 @@ export class TimeFieldComponent
     // hand the empty display over to ngxMask while focused (see renderEmpty)
     if (isFocused) {
       if (this.selectedTime == null) this.renderEmpty();
+      this.selectOnKeyboardFocus(this.inputRef().nativeElement, true);
       return;
     }
 
     // try set time on blur
     this.trySetTimeFromInput(this.inputRef().nativeElement.value);
-  }
-
-  /** Keeps the caret where the pointer put it, which ngx-mask pulls back to the end of the typed text. */
-  protected onMouseUp(): void {
-    keepClickedCaret(this.inputRef().nativeElement, !this.isInputCleared);
   }
 
   private handleKeydown(event: KeyboardEvent): void {
@@ -209,8 +206,14 @@ export class TimeFieldComponent
 
   protected readonly ngxMask = computed(() => formatToTimeTokenMask(this.tokenFormat(), this.maskChar));
 
-  protected ngxMaskConfig: Pick<NgxMaskConfig, 'showMaskTyped' | 'leadZeroDateTime' | 'dropSpecialCharacters'> = {
+  protected ngxMaskConfig: Pick<
+    NgxMaskConfig,
+    'showMaskTyped' | 'leadZeroDateTime' | 'dropSpecialCharacters' | 'placeHolderCharacter'
+  > = {
     showMaskTyped: true,
+    // Bound rather than inherited: the empty display is compared against character by character, so a
+    // global `provideNgxMask` must not be able to change it out from under that.
+    placeHolderCharacter: DEFAULT_PLACEHOLDER_CHARACTER,
     leadZeroDateTime: false, // must be enforced by unicodeTokenFormat, if required
     dropSpecialCharacters: false // keep special characters like '-', '.' or '/' in the input
   };
@@ -220,7 +223,7 @@ export class TimeFieldComponent
 
   // ngxMask's own empty display: the mask with every slot as its placeholder character.
   private get maskPlaceholder(): string {
-    return this.ngxMask().replace(/\w/g, '_');
+    return this.ngxMask().replace(/\w/g, this.maskPlaceholderCharacter);
   }
 
   // The resting display of an empty field for the current `emptyHint`: the format string, or

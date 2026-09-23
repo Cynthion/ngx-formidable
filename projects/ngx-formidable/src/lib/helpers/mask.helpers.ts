@@ -5,6 +5,12 @@ import { NgxMaskConfig } from 'ngx-mask';
 /** ngx-mask's token table: one entry per mask character, mapping it to the characters it accepts. */
 export type MaskPatterns = Record<string, { pattern: RegExp; optional?: boolean; symbol?: string }>;
 
+/**
+ * ngx-mask's own placeholder character. Every masked field binds it explicitly rather than inheriting it,
+ * so a global `provideNgxMask` cannot change what the library reads a value back out of.
+ */
+export const DEFAULT_PLACEHOLDER_CHARACTER = '_';
+
 /** Defaults from https://github.com/JsDaddy/ngx-mask/blob/develop/USAGE.md */
 export const DEFAULT_SPECIAL_CHARACTERS: string[] = [
   '-',
@@ -39,6 +45,7 @@ export type MaskConfigSubset = Partial<
     NgxMaskConfig,
     | 'validation'
     | 'showMaskTyped'
+    | 'placeHolderCharacter'
     | 'dropSpecialCharacters'
     | 'specialCharacters'
     | 'thousandSeparator'
@@ -51,6 +58,26 @@ export type MaskConfigSubset = Partial<
     | 'clearIfNotMatch'
   >
 >;
+
+// #endregion
+
+// #region Placeholder Validation
+
+/**
+ * Whether a mask could render its placeholder character where a value character belongs, which makes the
+ * two indistinguishable in the rendered text — and that text is all the caret rules have to read.
+ *
+ * True when a token pattern accepts the character, or when the mask draws it as a literal. The way out is
+ * a `placeHolderCharacter` the mask cannot otherwise produce.
+ */
+export function isPlaceholderAmbiguous(mask: string, config: Required<MaskConfigSubset>): boolean {
+  const { placeHolderCharacter, patterns, specialCharacters } = config;
+  if (!placeHolderCharacter) return false;
+
+  const typeable = Object.values(patterns).some((token) => token.pattern.test(placeHolderCharacter));
+
+  return typeable || specialCharacters.includes(placeHolderCharacter) || mask.includes(placeHolderCharacter);
+}
 
 // #endregion
 

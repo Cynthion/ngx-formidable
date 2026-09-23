@@ -103,7 +103,10 @@ export class AutocompleteFieldComponent
   protected doOnFocusChange(isFocused: boolean): void {
     if (!isFocused) {
       this.highlightedOptionValue = null;
+      return;
     }
+
+    this.selectOnKeyboardFocus(this.inputRef().nativeElement, false);
   }
 
   private handleKeydown(event: KeyboardEvent): void {
@@ -308,10 +311,11 @@ export class AutocompleteFieldComponent
 
     this.updateFilteredOptions(allOptions);
 
-    // Only re-apply the written value when there actually is one. Calling writeValue(null)
-    // would clear the native input and reset the filter subject, erasing the user's typed
-    // text whenever the option list refreshes (e.g. during fuzzy-search updates).
-    if (this._writtenValue !== null) {
+    // Re-apply the written value only while the field has not managed to place it, which is the whole
+    // point of keeping it: the option it names had not arrived yet. Re-applying one already placed — or
+    // a `null` — rewrites the input from the model on every options refresh, and a fuzzy search refreshes
+    // on each keystroke, so what the user is typing is overwritten as they type it.
+    if (this._writtenValue !== null && !this.selectedOption()) {
       this.writeValue(this._writtenValue);
     }
 

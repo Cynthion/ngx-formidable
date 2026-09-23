@@ -1,9 +1,9 @@
-import { fakeAsync, tick } from '@angular/core/testing';
-import { keepClickedCaret, placeCaretAtNextSlot, replaceText } from './input.helpers';
+import { endOfMaskedValue, replaceText } from './input.helpers';
+import { DEFAULT_PLACEHOLDER_CHARACTER } from './mask.helpers';
 
 /**
- * The caret rules a masked field keeps, on the helpers that carry them. The fields themselves are covered
- * by `components/fields/caret.spec.ts`; these are the three decisions behind them.
+ * Where a masked editor's value ends, which is the one thing the caret rules cannot read straight off it. The fields themselves are covered by
+ * `components/fields/focus-caret.spec.ts`, which drives whole interactions against real editors.
  */
 describe('input helpers', () => {
   let element: HTMLInputElement;
@@ -44,67 +44,47 @@ describe('input helpers', () => {
     });
   });
 
-  describe('placeCaretAtNextSlot', () => {
-    it('puts the caret at the first unfilled slot', () => {
-      element.value = '079 ___ __ __';
+  describe('endOfMaskedValue', () => {
+    const cases: Array<[string, number, string]> = [
+      ['079 123 45 67', 13, 'a full mask ends after its last character'],
+      ['12/34/5678', 10, 'and so does one with no slots rendered'],
+      ['079 123', 7, 'a mask told not to render its slots ends where its text does'],
+      ['12/3_/____', 4, 'a partial mask ends after the last filled position'],
+      ['079 123 __ __', 7, 'dropping the separator that leads into the unused area'],
+      ['079 1__ __ __', 5, 'wherever that boundary falls'],
+      ['0__ ___ __ __', 1, 'including after a single character'],
+      ['___ ___ __ __', 0, 'and at the front when nothing is filled'],
+      ['(___) ___', 0, 'even behind a literal the mask opens with'],
+      ['', 0, 'an empty editor ends at 0']
+    ];
 
-      placeCaretAtNextSlot(element);
+    for (const [text, end, why] of cases) {
+      it(`${why}: "${text}" ends at ${end}`, () => {
+        element.value = text;
 
-      expect(element.selectionStart).toBe(4);
-    });
-
-    it('puts it at the front of a field that is nothing but slots', () => {
-      element.value = '___ ___ __ __';
-      element.setSelectionRange(6, 6);
-
-      placeCaretAtNextSlot(element);
-
-      expect(element.selectionStart).toBe(0);
-    });
-
-    it('puts it at the end once there are no slots left', () => {
-      element.value = '079 123 45 67';
-      element.setSelectionRange(2, 2);
-
-      placeCaretAtNextSlot(element);
-
-      expect(element.selectionStart).toBe('079 123 45 67'.length);
-    });
+        expect(endOfMaskedValue(element, DEFAULT_PLACEHOLDER_CHARACTER)).toBe(end);
+      });
+    }
   });
 
-  describe('keepClickedCaret', () => {
-    it('restores the caret the pointer set, after the mask has moved it', fakeAsync(() => {
-      element.value = '079 ___ __ __';
-      element.setSelectionRange(8, 8);
+  describe('endOfMaskedValue, with the placeholder changed', () => {
+    it('reads a value back out against the character the mask actually renders', () => {
+      element.value = '079 123 ** **';
 
-      keepClickedCaret(element, true);
-      // what ngx-mask does between the mouseup and the restore
-      element.setSelectionRange(4, 4);
-      tick();
+      expect(endOfMaskedValue(element, '*')).toBe(7);
+    });
 
-      expect(element.selectionStart).toBe(8);
-    }));
+    it('and stops seeing slots that are no longer slots', () => {
+      element.value = '079 123 ** **';
 
-    it('restores a dragged selection, not just a caret', fakeAsync(() => {
-      element.value = '079 123 45 67';
-      element.setSelectionRange(2, 9);
+      expect(endOfMaskedValue(element, '_')).toBe(13);
+    });
 
-      keepClickedCaret(element, true);
-      element.setSelectionRange(4, 4);
-      tick();
+    // The point of changing it: a mask whose own alphabet includes the default character.
+    it('lets an underscore be content when something else marks the empty slots', () => {
+      element.value = 'ab_cd*';
 
-      expect([element.selectionStart, element.selectionEnd]).toEqual([2, 9]);
-    }));
-
-    it('leaves a field of nothing but slots to the mask', fakeAsync(() => {
-      element.value = '___ ___ __ __';
-      element.setSelectionRange(6, 6);
-
-      keepClickedCaret(element, false);
-      element.setSelectionRange(0, 0);
-      tick();
-
-      expect(element.selectionStart).toBe(0);
-    }));
+      expect(endOfMaskedValue(element, '*')).toBe(5);
+    });
   });
 });

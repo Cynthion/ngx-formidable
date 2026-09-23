@@ -19,6 +19,7 @@
     [mask]="mask()"
     [validation]="mergedMaskConfig.validation && !readonly() && !disabled()"
     [showMaskTyped]="mergedMaskConfig.showMaskTyped"
+    [placeHolderCharacter]="mergedMaskConfig.placeHolderCharacter"
     [dropSpecialCharacters]="mergedMaskConfig.dropSpecialCharacters"
     [specialCharacters]="mergedMaskConfig.specialCharacters"
     [thousandSeparator]="mergedMaskConfig.thousandSeparator"
@@ -29,7 +30,9 @@
     [leadZeroDateTime]="mergedMaskConfig.leadZeroDateTime"
     [patterns]="mergedMaskConfig.patterns"
     [clearIfNotMatch]="mergedMaskConfig.clearIfNotMatch"
-    (mouseup)="onMouseUp()"
+    (mousedown)="onEditorMouseDown()"
+    (mouseup)="rememberClickedCaret(inputRef)"
+    (click)="restoreClickedCaret(inputRef)"
     (input)="onValueChange()"
     (focus)="onFocusChange(true)"
     (blur)="onFocusChange(false)" />
@@ -50,6 +53,7 @@
     [attr.aria-required]="showRequiredMarker() || null"
     [attr.aria-invalid]="isInvalid || null"
     [attr.aria-describedby]="describedBy"
+    (mousedown)="onEditorMouseDown()"
     (input)="onValueChange()"
     (focus)="onFocusChange(true)"
     (blur)="onFocusChange(false)" />

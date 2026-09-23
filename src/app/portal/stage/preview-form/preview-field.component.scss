@@ -45,8 +45,7 @@
 }
 
 // Delayed on the way in so a pointer crossing the row does not trail tooltips, immediate on the way out.
-.chip:hover + .chip-tip,
-.chip:focus-visible + .chip-tip {
+.chip:hover + .chip-tip {
   opacity: 1;
   transition-delay: var(--portal-tooltip-delay);
 }

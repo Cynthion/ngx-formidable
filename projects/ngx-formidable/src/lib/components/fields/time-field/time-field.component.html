@@ -13,6 +13,7 @@
       class="wrapped-input"
       [mask]="ngxMask()"
       [showMaskTyped]="ngxMaskConfig.showMaskTyped"
+      [placeHolderCharacter]="ngxMaskConfig.placeHolderCharacter"
       [leadZeroDateTime]="ngxMaskConfig.leadZeroDateTime"
       [dropSpecialCharacters]="ngxMaskConfig.dropSpecialCharacters"
       [id]="fieldId"
@@ -25,7 +26,9 @@
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
       [attr.aria-readonly]="readonly() || null"
-      (mouseup)="onMouseUp()"
+      (mousedown)="onEditorMouseDown()"
+      (mouseup)="rememberClickedCaret(inputRef)"
+      (click)="restoreClickedCaret(inputRef)"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />

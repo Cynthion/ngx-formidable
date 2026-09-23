@@ -33,38 +33,25 @@ export function renderEmptyMask(
 }
 
 /**
- * Keeps the caret where a pointer put it in a masked field that already holds text.
+ * The end of what a masked editor actually holds, which is as far as a caret in it can go.
  *
- * ngx-mask pulls the caret back to the end of what has been typed on every click, so a click on one of the
- * empty slots it renders lands short of where it was aimed. Call this on `mouseup`, which is after the
- * browser has placed the caret and before the `click` the mask acts on: the position read here is the one
- * the user chose, and the timer puts it back once the mask has had its say.
+ * A mask with no placeholder left shows only content, trailing literals and all. One with placeholders
+ * left ends after the last filled position: the empty slots are not a value, and neither is the separator
+ * drawn between them and the last character — `079 123 __ __` ends at 7, not at 8 or 13.
  *
- * A field holding nothing but slots is left alone — there is no text to click into, and the mask's caret at
- * the first slot is where typing starts.
+ * `placeholder` is the character the mask renders for a position not yet filled, which ngx-mask lets a
+ * consumer change. Only meaningful for a masked editor, since plain text may hold that character itself.
  */
-export function keepClickedCaret(elementRef: HTMLInputElement | HTMLTextAreaElement, hasText: boolean): void {
-  if (!hasText) return;
+export function endOfMaskedValue(elementRef: HTMLInputElement | HTMLTextAreaElement, placeholder: string): number {
+  const text = elementRef.value;
+  const slot = text.indexOf(placeholder);
 
-  const { selectionStart, selectionEnd } = elementRef;
+  if (slot === -1) return text.length;
 
-  // A timer and not a microtask: the mask acts on `click`, which is dispatched in the same task as this
-  // `mouseup`, so a microtask queued here would still run before it.
-  setTimeout(() => elementRef.setSelectionRange(selectionStart, selectionEnd));
-}
+  let end = slot;
+  while (end > 0 && !/[a-z0-9]/i.test(text.charAt(end - 1))) end--;
 
-/**
- * Puts the caret in front of the first slot a masked field has not filled yet, which is where the next
- * character typed lands. A field with no slots left — empty of them or full of text — takes the caret at
- * the end instead, and an empty one takes it at the front, since its first slot is its first character.
- *
- * `_` is ngx-mask's placeholder character, which the library does not let a consumer change.
- */
-export function placeCaretAtNextSlot(elementRef: HTMLInputElement | HTMLTextAreaElement): void {
-  const slot = elementRef.value.indexOf('_');
-  const caret = slot === -1 ? elementRef.value.length : slot;
-
-  elementRef.setSelectionRange(caret, caret);
+  return end;
 }
 
 /** Whether a keystroke is one that types a character, which is what starts a type-ahead. */

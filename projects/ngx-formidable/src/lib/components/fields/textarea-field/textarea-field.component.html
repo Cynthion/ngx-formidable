@@ -21,6 +21,7 @@
       [mask]="mask()"
       [validation]="!!mask() && mergedMaskConfig.validation && !readonly() && !disabled()"
       [showMaskTyped]="mergedMaskConfig.showMaskTyped"
+      [placeHolderCharacter]="mergedMaskConfig.placeHolderCharacter"
       [dropSpecialCharacters]="mergedMaskConfig.dropSpecialCharacters"
       [specialCharacters]="mergedMaskConfig.specialCharacters"
       [thousandSeparator]="mergedMaskConfig.thousandSeparator"
@@ -31,7 +32,8 @@
       [leadZeroDateTime]="mergedMaskConfig.leadZeroDateTime"
       [patterns]="mergedMaskConfig.patterns"
       [clearIfNotMatch]="mergedMaskConfig.clearIfNotMatch"
-      (mouseup)="onMouseUp()"
+      (mouseup)="rememberClickedCaret(maskedTextareaRef)"
+      (click)="restoreClickedCaret(maskedTextareaRef)"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)">
