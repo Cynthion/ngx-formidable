@@ -15,6 +15,7 @@ import { FieldDecoratorComponent } from '../field-decorator/field-decorator.comp
 import { DateFieldComponent } from './date-field/date-field.component';
 import { DropdownFieldComponent } from './dropdown-field/dropdown-field.component';
 import { InputFieldComponent } from './input-field/input-field.component';
+import { TextareaFieldComponent } from './textarea-field/textarea-field.component';
 
 /**
  * Contract of the paths that repaint with no Angular listener anywhere in the callstack: a third party's
@@ -77,6 +78,20 @@ class DropdownHostComponent {
 })
 class LabelHostComponent {
   readonly value = 'written in';
+}
+
+@Component({
+  imports: [TextareaFieldComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    <formidable-textarea-field
+      name="code"
+      mask="000-000"
+      [showLengthIndicator]="true" />
+  `
+})
+class TextareaHostComponent {
+  readonly textarea = viewChild.required(TextareaFieldComponent);
 }
 
 describe('zoneless change detection', () => {
@@ -199,5 +214,18 @@ describe('zoneless change detection', () => {
     expect(root.querySelectorAll('formidable-field-option').length).toBe(3);
 
     discardPeriodicTasks();
+  }));
+
+  /**
+   * A masked write lands in a bare `setTimeout`, and its correction finds the value unchanged, so nothing
+   * but the count's own signal can carry the new length onto the screen.
+   */
+  it('counts a programmatic masked write', fakeAsync(() => {
+    const host = mount(TextareaHostComponent);
+
+    host.textarea().writeValue('123456');
+    flush();
+
+    expect(element('.length-indicator').textContent!.trim()).toBe('7'); // `123-456`, as `maxlength` counts it
   }));
 });

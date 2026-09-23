@@ -1103,4 +1103,19 @@ describe('portal', () => {
 
     expect(Number(getComputedStyle(inspector).zIndex)).toBeGreaterThan(sheet);
   }));
+
+  it('applies the mask the settings give a textarea', fakeAsync(() => {
+    settle();
+
+    TestBed.inject(FormDefinitionStore).updateField('notes', { mask: '000-000' });
+    settle();
+
+    const textarea = root.querySelector('formidable-textarea-field textarea') as HTMLTextAreaElement;
+
+    textarea.value = '123456';
+    textarea.dispatchEvent(new Event('input'));
+    settle();
+
+    expect(textarea.value).toBe('123-456');
+  }));
 });

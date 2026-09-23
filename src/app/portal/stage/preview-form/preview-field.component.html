@@ -33,6 +33,8 @@
         [showRequiredMarker]="decoration.showRequiredMarker"
         [enableAutosize]="field.enableAutosize ?? true"
         [showLengthIndicator]="field.showLengthIndicator ?? false"
+        [mask]="field.mask"
+        [maskConfig]="field.showMaskTyped ? { showMaskTyped: true } : undefined"
         [minLength]="field.minLength ?? -1"
         [maxLength]="field.maxLength ?? -1"
         [autocomplete]="field.autocompleteHint ?? 'off'"

@@ -8,6 +8,7 @@ import {
   forwardRef,
   inject,
   input,
+  signal,
   untracked,
   viewChild
 } from '@angular/core';
@@ -123,6 +124,7 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
   }
 
   protected doOnValueChange(): void {
+    this.valueLength.set(this.value?.length ?? 0);
     this.autoResize();
   }
 
@@ -149,7 +151,7 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
       // task — a microtask would land before it and the value would be written unmasked.
       setTimeout(() => {
         const maskedValue = this.maskPipe.transform(newValue, this.mask()!, this.mergedMaskConfig);
-        replaceText(el, maskedValue);
+        this.replaceText(el, maskedValue);
 
         // notify the form control again (since usually done in base directive)
         if (newValue) {
@@ -157,8 +159,19 @@ export class TextareaFieldComponent extends BaseFieldDirective implements IFormi
         }
       });
     } else {
-      replaceText(el, newValue);
+      this.replaceText(el, newValue);
     }
+  }
+
+  /**
+   * What the length indicator shows, as a signal: a masked write lands in a timer no render owns, and its
+   * correction finds the value unchanged, so reading the element from the template would go stale.
+   */
+  protected readonly valueLength = signal(0);
+
+  private replaceText(el: HTMLTextAreaElement, text: string): void {
+    replaceText(el, text);
+    this.valueLength.set(this.value?.length ?? 0);
   }
 
   // #endregion
