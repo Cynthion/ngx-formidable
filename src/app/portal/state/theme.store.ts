@@ -1,8 +1,8 @@
 import { computed, DOCUMENT, effect, inject, Injectable, signal } from '@angular/core';
-import { contrastRatio, parseRgb, Rgb, toHex } from '../helpers/color.helpers';
 import { DEFAULT_EXPORT_OPTIONS, exportTheme, ThemeExportOptions } from '../export/theme-export';
 import { importTheme, ThemeImportResult } from '../export/theme-import';
-import { DEFAULT_FONT_STACK, PageSurface, PRESETS_BY_KEY, STARTING_PRESET_KEY, ThemePreset } from '../model/presets';
+import { contrastRatio, parseRgb, Rgb, toHex } from '../helpers/color.helpers';
+import { FONT_FAMILY_TOKEN, PageSurface, PRESETS_BY_KEY, STARTING_PRESET_KEY, ThemePreset } from '../model/presets';
 import { COLOR_SCHEMES, ColorKey, GEOMETRY_SCHEMES, GeometryKey, SCHEME_VARS, ThemeVars } from '../model/schemes';
 import { THEME_TOKENS_BY_NAME } from '../model/token-manifest';
 
@@ -29,7 +29,6 @@ interface PersistedTheme {
   readonly color: ColorKey | null;
   readonly overrides: Record<string, string>;
   readonly page: PageSurface;
-  readonly fontFamily: string;
   readonly appearance: PortalAppearance;
 }
 
@@ -63,7 +62,6 @@ export class ThemeStore {
   public readonly overrides = signal<Readonly<Record<string, string>>>({});
 
   public readonly page = signal<PageSurface>(DEFAULT_PAGE);
-  public readonly fontFamily = signal<string>(DEFAULT_FONT_STACK);
   public readonly appearance = signal<PortalAppearance>('system');
 
   public readonly exportOptions = signal<ThemeExportOptions>(DEFAULT_EXPORT_OPTIONS);
@@ -93,12 +91,7 @@ export class ThemeStore {
   );
 
   /** What the copy button states: the number of variables the user has changed, not the token surface. */
-  public readonly changeCount = computed(
-    () =>
-      Object.keys(this.changedVars()).length +
-      (this.fontFamily() === DEFAULT_FONT_STACK ? 0 : 1) +
-      (this.isPageChanged() ? 1 : 0)
-  );
+  public readonly changeCount = computed(() => Object.keys(this.changedVars()).length + (this.isPageChanged() ? 1 : 0));
 
   /**
    * What the export block carries.
@@ -133,7 +126,7 @@ export class ThemeStore {
   );
 
   public readonly exportText = computed(() =>
-    exportTheme({ vars: this.exportVars(), fontFamily: this.fontFamily(), page: this.page() }, this.exportOptions())
+    exportTheme({ vars: this.exportVars(), page: this.page() }, this.exportOptions())
   );
 
   /** Whether the current fill is dark enough that the four values the seeds cannot derive are needed. */
@@ -197,7 +190,6 @@ export class ThemeStore {
 
       root.style.setProperty('--portal-page-background', page.background);
       root.style.setProperty('--portal-page-text', page.text);
-      root.style.setProperty('font-family', this.fontFamily());
     });
 
     effect(() => {
@@ -213,9 +205,8 @@ export class ThemeStore {
     this.presetKey.set(preset.key);
     this.geometry.set(preset.geometry);
     this.color.set(preset.color);
-    this.overrides.set({});
+    this.overrides.set(preset.fontFamily ? { [FONT_FAMILY_TOKEN]: preset.fontFamily } : {});
     this.page.set(preset.page);
-    this.fontFamily.set(preset.fontFamily);
   }
 
   public setGeometry(key: GeometryKey): void {
@@ -236,8 +227,7 @@ export class ThemeStore {
     this.presetKey.set(null);
     this.geometry.set(geometry);
     this.color.set(color);
-    this.overrides.set({});
-    this.fontFamily.set(fontFamily);
+    this.overrides.set({ [FONT_FAMILY_TOKEN]: fontFamily });
     this.page.set(this.pageForPalette(color));
   }
 
@@ -287,14 +277,13 @@ export class ThemeStore {
     this.color.set('slate');
     this.presetKey.set(null);
     this.page.set(DEFAULT_PAGE);
-    this.fontFamily.set(DEFAULT_FONT_STACK);
   }
 
   /**
    * Reads a pasted block back in.
    *
    * `applyDefaults` first strips the theme back to the library's own defaults — both axes dropped, no
-   * overrides, the default page and family — so a block that only states the delta reproduces exactly the
+   * overrides, the default page — so a block that only states the delta reproduces exactly the
    * theme that produced it. Merged onto what is on screen instead, any scheme value the delta does not
    * happen to restate survives into the result, which is a theme neither side asked for.
    */
@@ -307,11 +296,9 @@ export class ThemeStore {
       this.color.set(null);
       this.overrides.set({});
       this.page.set(DEFAULT_PAGE);
-      this.fontFamily.set(DEFAULT_FONT_STACK);
     }
 
     if (Object.keys(result.vars).length) this.setVariables(result.vars);
-    if (result.fontFamily) this.fontFamily.set(result.fontFamily);
     if (result.page.background || result.page.text) {
       this.page.update((page) => ({
         background: result.page.background ?? page.background,
@@ -345,13 +332,17 @@ export class ThemeStore {
    * the derived values recompute against the defaults instead of against the user's theme.
    */
   public defaultOf(name: string): string {
-    const probe = this.ensureDefaultsProbe();
-    const declared = getComputedStyle(probe).getPropertyValue(name).trim();
+    const token = THEME_TOKENS_BY_NAME.get(name);
 
-    if (declared) return declared;
+    // The ones read at a use site are declared nowhere, so their default is whatever they fall back to. They
+    // are never read off the probe: undeclared, it inherits them from the user's theme on `:root`.
+    if (token?.class !== 'overridable') {
+      const declared = getComputedStyle(this.ensureDefaultsProbe()).getPropertyValue(name).trim();
 
-    // The six read at a use site are declared nowhere, so their default is whatever they fall back to.
-    const base = THEME_TOKENS_BY_NAME.get(name)?.derivedFrom;
+      if (declared) return declared;
+    }
+
+    const base = token?.derivedFrom;
 
     return base ? this.defaultOf(base) : '';
   }
@@ -513,7 +504,6 @@ export class ThemeStore {
       color: this.color(),
       overrides: { ...this.overrides() },
       page: this.page(),
-      fontFamily: this.fontFamily(),
       appearance: this.appearance()
     };
 
@@ -539,7 +529,6 @@ export class ThemeStore {
     this.presetKey.set(stored.presetKey);
     this.overrides.set(stored.overrides ?? {});
     if (stored.page) this.page.set(stored.page);
-    if (stored.fontFamily) this.fontFamily.set(stored.fontFamily);
     if (stored.appearance) this.appearance.set(stored.appearance);
   }
 

@@ -6,10 +6,10 @@ import { importTheme } from './theme-import';
 const PAGE: PageSurface = { background: '#0b0e16', text: '#e8ecf5' };
 const FONT = "system-ui, 'Segoe UI', sans-serif";
 
-const THEME = { ...GEOMETRY_SCHEMES.soft, ...COLOR_SCHEMES.midnight };
+const THEME = { ...GEOMETRY_SCHEMES.soft, ...COLOR_SCHEMES.midnight, '--formidable-font-family': FONT };
 
 function roundTrip(options: ThemeExportOptions) {
-  return importTheme(exportTheme({ vars: THEME, fontFamily: FONT, page: PAGE }, options));
+  return importTheme(exportTheme({ vars: THEME, page: PAGE }, options));
 }
 
 describe('theme export and import', () => {
@@ -19,7 +19,6 @@ describe('theme export and import', () => {
     const result = roundTrip({ ...DEFAULT_EXPORT_OPTIONS, includePageSurface: true });
 
     expect(result.vars).toEqual(THEME);
-    expect(result.fontFamily).toBe(FONT);
     expect(result.page).toEqual({ background: PAGE.background, text: PAGE.text });
     expect(result.skipped).toEqual([]);
   });
@@ -28,7 +27,7 @@ describe('theme export and import', () => {
   // format that emitted `/* */` into SCSS would still be valid CSS and would still round-trip.
   it('round-trips in the SCSS format, whose comments are line comments', () => {
     const scss = exportTheme(
-      { vars: THEME, fontFamily: FONT, page: PAGE },
+      { vars: THEME, page: PAGE },
       { ...DEFAULT_EXPORT_OPTIONS, format: 'scss', includeComments: true }
     );
 
@@ -45,7 +44,7 @@ describe('theme export and import', () => {
   });
 
   it('leaves the page surface out until it is asked for', () => {
-    const css = exportTheme({ vars: THEME, fontFamily: null, page: PAGE }, DEFAULT_EXPORT_OPTIONS);
+    const css = exportTheme({ vars: THEME, page: PAGE }, DEFAULT_EXPORT_OPTIONS);
 
     expect(css).not.toContain('body {');
     expect(importTheme(css).page).toEqual({});
@@ -61,7 +60,7 @@ describe('theme export and import', () => {
     const vars = {
       '--formidable-color-field-focus-box-shadow': GEOMETRY_SCHEMES.soft['--formidable-color-field-focus-box-shadow']!
     };
-    const result = importTheme(exportTheme({ vars, fontFamily: null, page: PAGE }, DEFAULT_EXPORT_OPTIONS));
+    const result = importTheme(exportTheme({ vars, page: PAGE }, DEFAULT_EXPORT_OPTIONS));
 
     expect(result.vars).toEqual(vars);
   });

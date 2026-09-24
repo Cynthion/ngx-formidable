@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FieldDecoratorComponent, FieldLabelDirective, InputFieldComponent } from '@cynthion/ngx-formidable';
 import { SelectedValueDirective } from '../../chrome/selected-value.directive';
 import { ThemeScopeDirective } from '../../chrome/theme-scope.directive';
-import { FONT_OPTIONS, THEME_PRESETS, ThemePreset } from '../../model/presets';
+import { FONT_FAMILY_TOKEN, FONT_OPTIONS, THEME_PRESETS, ThemePreset } from '../../model/presets';
 import {
   COLOR_SCHEME_META,
   COLOR_SCHEMES,
@@ -54,7 +54,8 @@ export class PresetGalleryComponent {
     vars: {
       ...Object.fromEntries(USE_SITE_VARS.map((name) => [name, 'initial'])),
       ...GEOMETRY_SCHEMES[preset.geometry],
-      ...COLOR_SCHEMES[preset.color]
+      ...COLOR_SCHEMES[preset.color],
+      [FONT_FAMILY_TOKEN]: preset.fontFamily ?? 'initial'
     }
   }));
 

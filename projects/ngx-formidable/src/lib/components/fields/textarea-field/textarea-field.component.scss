@@ -1,6 +1,7 @@
 @use '../../../styles/variables' as *;
 
 :host {
+  font-family: var(--formidable-font-family);
   display: block;
 
   // 1. Removes default vertical scrollbar in IE 8/9.

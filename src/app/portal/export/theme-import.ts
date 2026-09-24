@@ -11,7 +11,6 @@ interface ImportSkip {
 
 export interface ThemeImportResult {
   readonly vars: Readonly<Record<string, string>>;
-  readonly fontFamily: string | null;
   readonly page: Partial<PageSurface>;
   readonly skipped: readonly ImportSkip[];
 }
@@ -66,7 +65,6 @@ export function importTheme(source: string): ThemeImportResult {
   const vars: Record<string, string> = {};
   const page: { background?: string; text?: string } = {};
   const skipped: ImportSkip[] = [];
-  let fontFamily: string | null = null;
 
   const parsed = blocks(cleaned);
   const bare = parsed.length === 0 ? [{ selector: ':root', body: cleaned }] : parsed;
@@ -88,11 +86,6 @@ export function importTheme(source: string): ThemeImportResult {
         continue;
       }
 
-      if (property === 'font-family') {
-        fontFamily = value;
-        continue;
-      }
-
       if (isPageBlock && (property === 'background' || property === 'background-color')) {
         page.background = value;
         continue;
@@ -107,7 +100,7 @@ export function importTheme(source: string): ThemeImportResult {
     }
   }
 
-  return { vars, fontFamily, page, skipped };
+  return { vars, page, skipped };
 }
 
 /** How the import report names each reason. */

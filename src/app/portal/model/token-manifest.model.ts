@@ -15,6 +15,7 @@ type ThemeTokenControl =
   | 'length'
   | 'radius-shorthand'
   | 'multiplier'
+  | 'font-family'
   | 'font-weight'
   | 'integer'
   | 'duration'

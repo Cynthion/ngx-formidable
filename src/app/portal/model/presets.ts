@@ -17,7 +17,8 @@ export interface ThemePreset {
   readonly geometry: GeometryKey;
   readonly color: ColorKey;
   readonly page: PageSurface;
-  readonly fontFamily: string;
+  /** Absent on the shipped default, which leaves the family to the page as the library does. */
+  readonly fontFamily?: string;
 }
 
 /**
@@ -55,7 +56,8 @@ export const FONT_OPTIONS: readonly FontOption[] = [
   }
 ];
 
-export const DEFAULT_FONT_STACK = FONT_OPTIONS[0]!.stack;
+/** Where a preset's family goes: an ordinary override, like any other variable. */
+export const FONT_FAMILY_TOKEN = '--formidable-font-family';
 
 const LIGHT_PAGE: PageSurface = { background: '#ffffff', text: '#1e293b' };
 
@@ -66,8 +68,7 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
     fits: 'The shipped default',
     geometry: 'outlined',
     color: 'slate',
-    page: LIGHT_PAGE,
-    fontFamily: FONT_OPTIONS[0]!.stack
+    page: LIGHT_PAGE
   },
   {
     key: 'material',

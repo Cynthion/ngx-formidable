@@ -14,6 +14,13 @@ import { ThemeToken, ThemeTokenGroup, WrittenToken } from './token-manifest.mode
  */
 export const THEME_TOKENS: readonly ThemeToken[] = [
   {
+    name: '--formidable-font-family',
+    group: 'Font Sizes And Line Heights',
+    control: 'font-family',
+    class: 'overridable',
+    description: "Font family for every field, label, hint and panel. Unset, the page's family."
+  },
+  {
     name: '--formidable-field-font-size',
     group: 'Font Sizes And Line Heights',
     control: 'length',

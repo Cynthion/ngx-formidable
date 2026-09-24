@@ -18,8 +18,6 @@ export interface ThemeExportOptions {
 
 interface ThemeExportInput {
   readonly vars: Readonly<Record<string, string>>;
-  /** Emitted as an ordinary declaration: the library exposes no font-family token. */
-  readonly fontFamily: string | null;
   readonly page: PageSurface;
 }
 
@@ -67,15 +65,6 @@ export function exportTheme(input: ThemeExportInput, options: ThemeExportOptions
       lines.push(`  ${comment(token.description, options.format)}`);
     }
     lines.push(`  ${name}: ${input.vars[name]};`);
-  }
-
-  if (input.fontFamily) {
-    if (options.includeComments) {
-      lines.push(
-        `  ${comment('The library exposes no font-family token: every field takes the page family through `font: inherit`.', options.format)}`
-      );
-    }
-    lines.push(`  font-family: ${input.fontFamily};`);
   }
 
   lines.push('}');

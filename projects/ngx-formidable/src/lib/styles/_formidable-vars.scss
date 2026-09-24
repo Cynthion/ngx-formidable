@@ -9,6 +9,9 @@
 @mixin formidable-vars {
   // #region Font Sizes & Line Heights
 
+  // `--formidable-font-family` is read on every component host and deliberately has no declaration here:
+  // unset, the `var()` is invalid at computed-value time and `font-family`, being inherited, takes the page's.
+
   --formidable-field-font-size: #{tokens.$formidable-field-font-size};
   --formidable-field-font-weight: #{tokens.$formidable-field-font-weight};
   --formidable-field-line-height: #{tokens.$formidable-field-line-height};

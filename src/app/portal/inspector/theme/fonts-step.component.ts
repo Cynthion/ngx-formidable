@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { FONT_OPTIONS } from '../../model/presets';
+import { FONT_FAMILY_TOKEN, FONT_OPTIONS } from '../../model/presets';
 import { THEME_TOKENS_BY_NAME } from '../../model/token-manifest';
 import { ThemeToken } from '../../model/token-manifest.model';
 import { ThemeStore } from '../../state/theme.store';
@@ -15,11 +15,7 @@ const TYPE_TOKENS: readonly string[] = [
 ];
 
 /**
- * Step 5: the family, and the size, weight and line height the library does expose.
- *
- * The library exposes no font-family token — every field takes the host page's family through
- * `font: inherit` — so the portal writes `font-family` to `:root` beside the tokens and exports it as an
- * ordinary declaration. Adding a family token is a public API change and is filed in `impl/backlog.md`.
+ * Step 5: the family, size, weight and line height.
  *
  * The families are stacks over faces the platform already has, not fetched or bundled files: the deploy is
  * static and must work offline and behind a proxy, and a fetched family adds a third-party origin and a flash
@@ -37,17 +33,19 @@ export class FontsStepComponent {
 
   protected readonly fonts = FONT_OPTIONS;
 
+  protected readonly familyToken = THEME_TOKENS_BY_NAME.get(FONT_FAMILY_TOKEN)!;
+
   protected readonly typeTokens = computed<ThemeToken[]>(() =>
     TYPE_TOKENS.map((name) => THEME_TOKENS_BY_NAME.get(name)).filter((token): token is ThemeToken => !!token)
   );
 
   protected readonly activeKey = computed(() => {
-    const current = this.theme.fontFamily();
+    const current = this.theme.valueOf(FONT_FAMILY_TOKEN);
 
     return this.fonts.find((font) => font.stack === current)?.key ?? null;
   });
 
   protected setFamily(stack: string): void {
-    this.theme.fontFamily.set(stack);
+    this.theme.setVariable(FONT_FAMILY_TOKEN, stack);
   }
 }

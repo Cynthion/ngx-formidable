@@ -12,25 +12,7 @@
   }
 </div>
 
-<div class="pc-field">
-  <label
-    for="font-stack"
-    class="pc-label">
-    <span class="pc-label-name">font-family</span>
-  </label>
-  <input
-    type="text"
-    spellcheck="false"
-    id="font-stack"
-    class="pc-input pc-code"
-    [value]="theme.fontFamily()"
-    (change)="setFamily($any($event.target).value)" />
-  <p class="pc-help">
-    The library exposes no family token: every field takes the page's family through
-    <code class="pc-code">font: inherit</code>. This is written to <code class="pc-code">:root</code> beside the variables and exported as an ordinary
-    declaration.
-  </p>
-</div>
+<portal-token-control [token]="familyToken" />
 
 <details class="type">
   <summary>Size, Weight And Line Height</summary>

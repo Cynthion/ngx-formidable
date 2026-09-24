@@ -382,7 +382,9 @@ describe('portal', () => {
 
     expect(painted()).toEqual(before);
     expect(theme.page()).toEqual(THEME_PRESETS.find((preset) => preset.key === 'consumer')!.page);
-    expect(theme.fontFamily()).toBe(THEME_PRESETS.find((preset) => preset.key === 'consumer')!.fontFamily);
+    expect(theme.valueOf('--formidable-font-family')).toBe(
+      THEME_PRESETS.find((preset) => preset.key === 'consumer')!.fontFamily!
+    );
   }));
 
   // The other half of the pair: a block that states the defaults outright needs no help on the way in. Every
@@ -447,6 +449,11 @@ describe('portal', () => {
     settle();
 
     expect(theme.changeCount()).toBe(1);
+
+    theme.setVariable('--formidable-font-family', 'monospace');
+    settle();
+
+    expect(theme.changeCount()).toBe(2);
   }));
 
   it('measures contrast against what the page actually paints', fakeAsync(() => {

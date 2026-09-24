@@ -3,6 +3,7 @@
 :host {
   @include field-atom;
 
+  font-family: var(--formidable-font-family);
   display: block;
 }
 

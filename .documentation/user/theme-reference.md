@@ -6,26 +6,27 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 
 ## Font Sizes And Line Heights
 
-| Variable                                          | Description                                    |
-| :------------------------------------------------ | :--------------------------------------------- |
-| `--formidable-field-font-size`                    | Base font size for form field text.            |
-| `--formidable-field-font-weight`                  | Font weight for form field text.               |
-| `--formidable-field-line-height`                  | Line height for form field text.               |
-| `--formidable-label-font-size`                    | Font size for labels.                          |
-| `--formidable-label-font-weight`                  | Font weight for labels.                        |
-| `--formidable-label-line-height`                  | Line height for labels.                        |
-| `--formidable-label-floating-font-size`           | Font size for a floating label.                |
-| `--formidable-label-floating-font-weight`         | Font weight for a floating label.              |
-| `--formidable-label-floating-line-height`         | Line height for a floating label.              |
-| `--formidable-field-validation-error-font-size`   | Font size for validation error messages.       |
-| `--formidable-field-validation-error-font-weight` | Font weight for validation error messages.     |
-| `--formidable-field-validation-error-line-height` | Line height for validation error messages.     |
-| `--formidable-field-hint-font-size`               | Font size for hint text.                       |
-| `--formidable-field-hint-font-weight`             | Font weight for hint text.                     |
-| `--formidable-field-hint-line-height`             | Line height for hint text.                     |
-| `--formidable-length-indicator-font-size`         | Font size for the textarea length indicator.   |
-| `--formidable-length-indicator-font-weight`       | Font weight for the textarea length indicator. |
-| `--formidable-length-indicator-line-height`       | Line height for the textarea length indicator. |
+| Variable                                          | Description                                                                   |
+| :------------------------------------------------ | :---------------------------------------------------------------------------- |
+| `--formidable-font-family`                        | Font family for every field, label, hint and panel. Unset, the page's family. |
+| `--formidable-field-font-size`                    | Base font size for form field text.                                           |
+| `--formidable-field-font-weight`                  | Font weight for form field text.                                              |
+| `--formidable-field-line-height`                  | Line height for form field text.                                              |
+| `--formidable-label-font-size`                    | Font size for labels.                                                         |
+| `--formidable-label-font-weight`                  | Font weight for labels.                                                       |
+| `--formidable-label-line-height`                  | Line height for labels.                                                       |
+| `--formidable-label-floating-font-size`           | Font size for a floating label.                                               |
+| `--formidable-label-floating-font-weight`         | Font weight for a floating label.                                             |
+| `--formidable-label-floating-line-height`         | Line height for a floating label.                                             |
+| `--formidable-field-validation-error-font-size`   | Font size for validation error messages.                                      |
+| `--formidable-field-validation-error-font-weight` | Font weight for validation error messages.                                    |
+| `--formidable-field-validation-error-line-height` | Line height for validation error messages.                                    |
+| `--formidable-field-hint-font-size`               | Font size for hint text.                                                      |
+| `--formidable-field-hint-font-weight`             | Font weight for hint text.                                                    |
+| `--formidable-field-hint-line-height`             | Line height for hint text.                                                    |
+| `--formidable-length-indicator-font-size`         | Font size for the textarea length indicator.                                  |
+| `--formidable-length-indicator-font-weight`       | Font weight for the textarea length indicator.                                |
+| `--formidable-length-indicator-line-height`       | Line height for the textarea length indicator.                                |
 
 #### Slider
 

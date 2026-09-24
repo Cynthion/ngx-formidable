@@ -164,8 +164,8 @@ mixin is not forwarded, so the closed SCSS surface described in `impl/convention
 already reaches library styles by path through the `stylePreprocessorOptions.includePaths` entry in
 `angular.json`.
 
-The chrome's own theme is compact and is not user-editable. Font family is an ordinary inherited property
-rather than a custom property, so the chrome pins its own.
+The chrome's own theme is compact and is not user-editable. `--formidable-font-family` is declared nowhere in
+the library's block, so the re-emitted block cannot reset it; the chrome pins it to its own family instead.
 
 **The chrome measures border-box**: `.portal-chrome` and its subtree set `box-sizing: border-box`, and the
 preview form is left on the box model a consumer's page gives it. A panel control is `width: 100%` inside a
@@ -227,7 +227,7 @@ controls close that, and the import's is on by default so that the shipped pair 
 | Control             |  Half  | Does                                                                                |
 | :------------------ | :----: | :---------------------------------------------------------------------------------- |
 | `Explicit Defaults` | Export | States the value in force for every variable in `SCHEME_VARS`, not only the changed |
-| `Onto The Defaults` | Import | Drops both scheme axes, the overrides, the page and the family, then applies        |
+| `Onto The Defaults` | Import | Drops both scheme axes, the overrides and the page, then applies                    |
 
 `SCHEME_VARS` is the union of what the two axes can set, which is what can pollute an import. Stating the whole
 manifest instead would freeze the derived ladder — `--formidable-field-inner-height` and the label offsets are
@@ -288,12 +288,9 @@ A dark fill needs four values beyond the seeds, because the readonly and disable
 
 ### Fonts
 
-The library exposes font size, weight and line height. It exposes no font family: every field takes the host
-page's family through `font: inherit`. The portal therefore writes `font-family` to `:root` beside the tokens
-and exports it as an ordinary declaration together with its `@font-face`.
-
-Adding a family token to the library is a public API change with its own Definition-of-Done obligations, and
-is filed in `impl/backlog.md` rather than absorbed into this phase.
+The family is `--formidable-font-family`, an ordinary override like any other variable: a preset and
+`Randomize` write it into the overrides, and it exports and imports through the manifest. Unset, the fields
+take the page's family, so the page surface pins a family of its own.
 
 **Fonts Are Local**, as stacks over faces the platform already has, covering the common archetypes plus a
 free-text entry. The deploy is static and must work offline and behind a proxy, and a fetched family adds a

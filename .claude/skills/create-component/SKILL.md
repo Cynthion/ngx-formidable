@@ -35,6 +35,7 @@ Reference implementation: `example-counter-field` in the demo. Full contract: @.
 
 - External `*.component.ts` / `.html` / `.scss` — never inline templates or styles.
 - Style via the SCSS mixins + `--formidable-*` CSS custom properties; expose new theming as a CSS variable, never a hardcoded value.
+- `:host` starts with `font-family: var(--formidable-font-family);`
 - Signal `input()` / `output()` on fields; signal queries (`viewChild()`, `contentChildren()`); observable names get the `$` suffix.
 - Mirror sibling fields (input/output order, provider block, template attribute order).
 
