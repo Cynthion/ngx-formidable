@@ -21,6 +21,7 @@
   "js/ts.preferences.quoteStyle": "single",
   "js/ts.preferences.importModuleSpecifier": "relative",
   "js/ts.preferences.autoImportFileExcludePatterns": ["@ionic/angular/common", "@ionic/angular"], // https://ionicframework.com/docs/angular/build-options#standalone-based-applications
+  "js/ts.updateImportsOnFileMove.enabled": "always",
 
   /* EXTENSIONS */
   "eslint.enable": true,
