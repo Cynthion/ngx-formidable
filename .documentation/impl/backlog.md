@@ -11,4 +11,3 @@
 ## Features
 
 - Add Renovate, group dependencies that change together, so that dependencies that change together or have to be changed together are grouped appropriately. Add renovate documentation. The creation of less PRs is desired. The creation of PRs that will work is the goal. Replace ?dependency-check.yml` with it.
-- Provide a global config for consumer applications with default settings for all fields, such as label position, etc. Otherwise, each single field needs to define these.

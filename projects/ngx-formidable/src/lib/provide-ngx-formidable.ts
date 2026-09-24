@@ -1,11 +1,13 @@
 import { Provider } from '@angular/core';
 import { NgxMaskConfig, provideNgxMask } from 'ngx-mask';
-import { FORMIDABLE_MASK_DEFAULTS } from './models/formidable.model';
+import { FORMIDABLE_DEFAULTS, FORMIDABLE_MASK_DEFAULTS, FormidableDefaults } from './models/formidable.model';
 
 /** Library-wide setup, all of it optional. */
 export interface NgxFormidableConfig {
   /** App-wide ngx-mask defaults, which any field's own `maskConfig` still overrides. */
   globalMaskConfig?: Partial<NgxMaskConfig>;
+  /** App-wide defaults for label position, adornment alignment, panel position and the form's options. */
+  defaults?: FormidableDefaults;
 }
 
 /**
@@ -20,6 +22,7 @@ export function provideNgxFormidable(config: NgxFormidableConfig = {}): Provider
     // Register ngx-mask once for consumers (standalone or module)
     provideNgxMask(),
     // library-wide defaults/tokens
-    { provide: FORMIDABLE_MASK_DEFAULTS, useValue: config.globalMaskConfig ?? {} }
+    { provide: FORMIDABLE_MASK_DEFAULTS, useValue: config.globalMaskConfig ?? {} },
+    { provide: FORMIDABLE_DEFAULTS, useValue: config.defaults ?? {} }
   ];
 }

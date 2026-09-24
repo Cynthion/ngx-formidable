@@ -37,6 +37,22 @@
       {{ justCopiedComponent() ? 'Copied' : 'Copy Component' }}
     </button>
   </div>
+
+  <h4 class="block-title">App Config</h4>
+  <p class="pc-help">
+    The app defaults from <strong>Settings ▸ App Defaults</strong>. The template leaves out whatever these supply, so take both. Not read back in: it belongs to
+    the app, not the form.
+  </p>
+  <pre class="markup">{{ appConfig() }}</pre>
+
+  <div class="pc-buttons">
+    <button
+      type="button"
+      class="pc-button is-primary"
+      (click)="copyConfig()">
+      {{ justCopiedConfig() ? 'Copied' : 'Copy App Config' }}
+    </button>
+  </div>
 </portal-accordion>
 
 <portal-accordion

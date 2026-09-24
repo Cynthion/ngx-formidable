@@ -1,5 +1,5 @@
-import { Directive, input } from '@angular/core';
-import { FieldLabelPosition } from '../models/formidable.model';
+import { Directive, inject, input } from '@angular/core';
+import { FieldLabelPosition, FORMIDABLE_DEFAULTS } from '../models/formidable.model';
 
 /**
  * Marks a projected element as the field's label. Set `position` to move it; the accessible name is wired up
@@ -7,6 +7,13 @@ import { FieldLabelPosition } from '../models/formidable.model';
  */
 @Directive({ selector: '[formidableFieldLabel]', standalone: true })
 export class FieldLabelDirective {
-  /** Where the label renders. Every position other than `outside` needs a `horizontal` field. */
-  public readonly position = input<FieldLabelPosition>('inside');
+  private readonly defaultPosition = inject(FORMIDABLE_DEFAULTS).labelPosition ?? 'inside';
+
+  /**
+   * Where the label renders. Every position other than `outside` needs a `horizontal` field. Unset or
+   * `undefined`, the app default applies.
+   */
+  public readonly position = input(this.defaultPosition, {
+    transform: (position: FieldLabelPosition | undefined) => position ?? this.defaultPosition
+  });
 }

@@ -3,6 +3,7 @@ import {
   FieldDefaultOptionMode,
   FieldHintAlignment,
   FieldLabelPosition,
+  FormidableDefaults,
   FormidableEmptyHint,
   FormidablePanelPosition,
   FormidableReveal,
@@ -41,6 +42,41 @@ export const LABEL_POSITION_LABELS: Readonly<Record<FieldLabelPosition, string>>
   'border': 'Border',
   'border-prefix': 'Border, At The Prefix'
 };
+
+/** Display names for the adornment alignments, exhaustive over the library's union for the same reason. */
+export const ADORNMENT_ALIGN_LABELS: Readonly<Record<FieldAdornmentAlignment, string>> = {
+  center: 'Centre Of The Box',
+  value: 'The Value'
+};
+
+/** Display names for the panel positions. */
+export const PANEL_POSITION_LABELS: Readonly<Record<FormidablePanelPosition, string>> = {
+  left: 'Left',
+  right: 'Right',
+  full: 'Full Width',
+  sheet: 'Bottom Sheet'
+};
+
+/** Display names for when a field's messages appear. */
+export const REVEAL_LABELS: Readonly<Record<FormidableReveal, string>> = {
+  touched: 'Touched',
+  dirty: 'Dirty',
+  submitted: 'Submitted',
+  always: 'Always'
+};
+
+/**
+ * What the library falls back to where neither a binding nor an app default says anything. The panel
+ * position differs per field, so it is the capability table's `panel` instead.
+ */
+export const LIBRARY_DEFAULTS = {
+  labelPosition: 'inside',
+  prefixAlign: 'center',
+  suffixAlign: 'center',
+  revealOn: 'touched',
+  showRequiredMarkers: true,
+  debounceMs: 0
+} as const satisfies Omit<Required<FormidableDefaults>, 'panelPosition'>;
 
 /** Display names for the adornment slots, exhaustive over `PortalSlotContent` for the same reason. */
 export const SLOT_LABELS: Readonly<Record<PortalSlotContent, string>> = {
@@ -95,16 +131,20 @@ export interface PortalOptionSpec {
   readonly disabled?: boolean;
 }
 
-/** Label, adornments and hints for one field. Every slot is per-field; the form supplies the defaults. */
+/**
+ * Label, adornments and hints for one field. The three optional members are what the library can default
+ * app-wide: absent, the field states nothing and the app default applies, as it would in a template that
+ * leaves the attribute out.
+ */
 export interface PortalFieldDecoration {
   readonly showLabel: boolean;
-  readonly labelPosition: FieldLabelPosition;
+  readonly labelPosition?: FieldLabelPosition;
   readonly showRequiredMarker: boolean;
   readonly labelAdornment: PortalSlotContent;
   readonly prefix: PortalSlotContent;
-  readonly prefixAlign: FieldAdornmentAlignment;
+  readonly prefixAlign?: FieldAdornmentAlignment;
   readonly suffix: PortalSlotContent;
-  readonly suffixAlign: FieldAdornmentAlignment;
+  readonly suffixAlign?: FieldAdornmentAlignment;
   readonly hint: string;
   readonly hintAlign: FieldHintAlignment;
 }
@@ -125,13 +165,10 @@ export interface PortalFieldState {
  */
 export const DEFAULT_DECORATION: PortalFieldDecoration = {
   showLabel: true,
-  labelPosition: 'inside',
   showRequiredMarker: false,
   labelAdornment: 'none',
   prefix: 'none',
-  prefixAlign: 'center',
   suffix: 'none',
-  suffixAlign: 'center',
   hint: '',
   hintAlign: 'start'
 };
@@ -182,6 +219,7 @@ export interface PortalFieldSpec {
   readonly showLengthIndicator?: boolean;
 
   // Panel fields
+  /** Absent, the app default applies, then the field's own. */
   readonly panelPosition?: FormidablePanelPosition;
 
   // Option fields
@@ -239,21 +277,20 @@ export interface PortalSectionSpec {
 type PortalValidatorKind = 'vest' | 'angular' | 'none';
 
 /**
- * The form-level options, which every field takes unless it states its own.
+ * The form-level options: the portal's master switches, and the form directive's own inputs.
  *
- * Only what the form really owns. A label position and an adornment alignment are per-field decoration, so
- * the form-scope controls for those bulk-set every field rather than keeping a second value here — one that
- * nothing could read without leaving the field's own unreadable.
+ * A label position, an adornment alignment and a panel position are not here: the library has no form-level
+ * value for them, only a field's own and the app default. The two optional members are inputs the app
+ * default covers too — absent, the form states nothing and the default applies.
  */
 export interface PortalFormOptions {
   readonly showLabels: boolean;
-  readonly showRequiredMarkers: boolean;
+  readonly showRequiredMarkers?: boolean;
   readonly showHints: boolean;
   readonly showAdornments: boolean;
-  readonly panelPosition: FormidablePanelPosition;
   readonly readonly: boolean;
   readonly disabled: boolean;
-  readonly revealOn: FormidableReveal;
+  readonly revealOn?: FormidableReveal;
   readonly updateOn: 'change' | 'blur' | 'submit';
   readonly validator: PortalValidatorKind;
   readonly locale: PortalLocaleId;

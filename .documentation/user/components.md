@@ -17,14 +17,15 @@ Every component is `standalone` and uses `ChangeDetectionStrategy.OnPush`, with 
 
 Wire the library once, then import the standalone components where they are used. Both paths register the same providers, so neither is primary.
 
-| Symbol                                 | Kind      | Purpose                                                               |
-| :------------------------------------- | :-------- | :-------------------------------------------------------------------- |
-| `provideNgxFormidable(config?)`        | function  | Standalone path. Put it in `app.config.ts` providers                  |
-| `NgxFormidableModule.forRoot(config?)` | NgModule  | NgModule path. Import it once in the root module                      |
-| `NgxFormidableModule`                  | NgModule  | Re-exports every component and directive, for NgModule consumers      |
-| `NgxFormidableConfig`                  | interface | `{ globalMaskConfig?: Partial<NgxMaskConfig> }`, the argument to both |
+| Symbol                                 | Kind      | Purpose                                                                      |
+| :------------------------------------- | :-------- | :--------------------------------------------------------------------------- |
+| `provideNgxFormidable(config?)`        | function  | Standalone path. Put it in `app.config.ts` providers                         |
+| `NgxFormidableModule.forRoot(config?)` | NgModule  | NgModule path. Import it once in the root module                             |
+| `NgxFormidableModule`                  | NgModule  | Re-exports every component and directive, for NgModule consumers             |
+| `NgxFormidableConfig`                  | interface | `{ globalMaskConfig?, defaults?: FormidableDefaults }`, the argument to both |
+| `FormidableDefaults`                   | interface | App-wide defaults for the inputs every template would repeat                 |
 
-Both register ngx-mask and set `FORMIDABLE_MASK_DEFAULTS` from `globalMaskConfig`. Styling is a separate stylesheet import — see `user/getting-started.md`.
+Both register ngx-mask, set `FORMIDABLE_MASK_DEFAULTS` from `globalMaskConfig` and `FORMIDABLE_DEFAULTS` from `defaults`. The defaults below are the library's own; which inputs `FormidableDefaults` overrides, and how, is in `user/getting-started.md`. Styling is a separate stylesheet import — see `user/getting-started.md`.
 
 ---
 
@@ -433,6 +434,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `FORMIDABLE_OPTION_FIELD`     | Identifies an option-hosting field                                                         |
 | `FORMIDABLE_OPTION`           | Identifies an option within an option field                                                |
 | `FORMIDABLE_MASK_DEFAULTS`    | Global ngx-mask config (set via `provideNgxFormidable`)                                    |
+| `FORMIDABLE_DEFAULTS`         | App-wide `FormidableDefaults` (set via `provideNgxFormidable`, or scoped by a component)   |
 | `FORMIDABLE_ERROR_EXTRACTOR`  | `ValidationErrors` → displayed messages (default: the `errors` array, else the error keys) |
 | `FORMIDABLE_ERROR_TRANSLATOR` | i18n hook for error strings (default: identity)                                            |
 | `FORMIDABLE_VALIDATOR`        | The validator the form directive delegates to (unset: nothing validates)                   |

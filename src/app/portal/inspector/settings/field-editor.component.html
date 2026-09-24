@@ -112,8 +112,9 @@
       class="pc-select"
       [id]="'fe-label-position-' + f.id"
       [disabled]="!labelPositionApplies()"
-      [portalSelectedValue]="f.decoration.labelPosition"
-      (change)="setDecoration('labelPosition', $any($event.target).value)">
+      [portalSelectedValue]="f.decoration.labelPosition ?? ''"
+      (change)="setDecoration('labelPosition', $any($event.target).value || undefined)">
+      <option value="">App Default ({{ inherited().labelPosition }})</option>
       @for (entry of labelPositions; track entry[0]) {
         <option [value]="entry[0]">{{ entry[1] }}</option>
       }
@@ -217,10 +218,12 @@
         <select
           class="pc-select"
           [id]="'fe-prefix-align-' + f.id"
-          [portalSelectedValue]="f.decoration.prefixAlign"
-          (change)="setDecoration('prefixAlign', $any($event.target).value)">
-          <option value="center">Centre Of The Box</option>
-          <option value="value">The Value</option>
+          [portalSelectedValue]="f.decoration.prefixAlign ?? ''"
+          (change)="setDecoration('prefixAlign', $any($event.target).value || undefined)">
+          <option value="">App Default ({{ inherited().prefixAlign }})</option>
+          @for (entry of alignments; track entry[0]) {
+            <option [value]="entry[0]">{{ entry[1] }}</option>
+          }
         </select>
       </div>
       <div class="pc-field">
@@ -232,10 +235,12 @@
         <select
           class="pc-select"
           [id]="'fe-suffix-align-' + f.id"
-          [portalSelectedValue]="f.decoration.suffixAlign"
-          (change)="setDecoration('suffixAlign', $any($event.target).value)">
-          <option value="center">Centre Of The Box</option>
-          <option value="value">The Value</option>
+          [portalSelectedValue]="f.decoration.suffixAlign ?? ''"
+          (change)="setDecoration('suffixAlign', $any($event.target).value || undefined)">
+          <option value="">App Default ({{ inherited().suffixAlign }})</option>
+          @for (entry of alignments; track entry[0]) {
+            <option [value]="entry[0]">{{ entry[1] }}</option>
+          }
         </select>
       </div>
     </div>
@@ -352,12 +357,12 @@
       <select
         class="pc-select"
         [id]="'fe-panel-' + f.id"
-        [portalSelectedValue]="f.panelPosition ?? store.options().panelPosition"
-        (change)="set('panelPosition', $any($event.target).value)">
-        <option value="left">Left</option>
-        <option value="right">Right</option>
-        <option value="full">Full Width</option>
-        <option value="sheet">Bottom Sheet</option>
+        [portalSelectedValue]="f.panelPosition ?? ''"
+        (change)="set('panelPosition', $any($event.target).value || undefined)">
+        <option value="">App Default ({{ inherited().panelPosition }})</option>
+        @for (entry of panelPositions; track entry[0]) {
+          <option [value]="entry[0]">{{ entry[1] }}</option>
+        }
       </select>
       <p class="pc-help">The first three are anchored and flip above the field when there is no room. A sheet is pinned to the viewport and never moves.</p>
     </div>

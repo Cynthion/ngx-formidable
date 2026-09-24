@@ -13,13 +13,6 @@
   <label class="pc-check">
     <input
       type="checkbox"
-      [checked]="options.showRequiredMarkers"
-      (change)="set('showRequiredMarkers', $any($event.target).checked)" />
-    Required Markers
-  </label>
-  <label class="pc-check">
-    <input
-      type="checkbox"
       [checked]="options.showHints"
       (change)="set('showHints', $any($event.target).checked)" />
     Hints
@@ -51,20 +44,20 @@
 
 <div class="pc-field">
   <label
-    for="fs-panel"
+    for="fs-required-markers"
     class="pc-label">
-    <span class="pc-label-name">Panel Position</span>
+    <span class="pc-label-name">Required Markers</span>
   </label>
   <select
-    id="fs-panel"
+    id="fs-required-markers"
     class="pc-select"
-    [portalSelectedValue]="options.panelPosition"
-    (change)="set('panelPosition', $any($event.target).value)">
-    @for (entry of panelPositions; track entry[0]) {
-      <option [value]="entry[0]">{{ entry[1] }}</option>
-    }
+    [portalSelectedValue]="stated(options.showRequiredMarkers)"
+    (change)="setRequiredMarkers($any($event.target).value)">
+    <option value="">App Default ({{ defaultMarkers() }})</option>
+    <option value="true">Shown</option>
+    <option value="false">Hidden</option>
   </select>
-  <p class="pc-help">Where a panel field opens, unless that field states its own.</p>
+  <p class="pc-help">A master switch too, but one the app default covers, so the form can also state nothing.</p>
 </div>
 
 <div class="pc-field">
@@ -84,6 +77,15 @@
   </select>
   <p class="pc-help">One control: the calendar's translations, its first day and the token format move together, on every date and time field.</p>
 </div>
+
+<h3 class="pc-group-title">Adornment Examples</h3>
+
+<portal-adornment-examples />
+
+<p class="pc-help">
+  Projected content is markup you write per field, so no app default can supply it. These fill every field with a sample, shown while
+  <strong>Adornments</strong> is on; the template export marks where yours goes.
+</p>
 
 <h3 class="pc-group-title">Validation</h3>
 
@@ -136,8 +138,9 @@
     <select
       id="fs-reveal-on"
       class="pc-select"
-      [portalSelectedValue]="options.revealOn"
-      (change)="set('revealOn', $any($event.target).value)">
+      [portalSelectedValue]="stated(options.revealOn)"
+      (change)="setRevealOn($any($event.target).value)">
+      <option value="">App Default ({{ defaultReveal() }})</option>
       @for (entry of reveals; track entry[0]) {
         <option [value]="entry[0]">{{ entry[1] }}</option>
       }

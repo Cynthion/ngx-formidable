@@ -576,13 +576,13 @@ describe('portal', () => {
     expect(chip.getAttribute('aria-describedby')).toBe('chip-tip-pizza');
     expect(Array.from(root.querySelectorAll('portal-preview-field .chip[title]')).length).toBe(0);
 
-    expect(tipFor('date')).toContain('panelPosition: right');
+    // The sample's date states no panel position of its own, so it has none to state.
+    expect(tipFor('date')).not.toContain('panelPosition');
 
     store.updateField('date', { panelPosition: 'sheet' });
     settle();
 
     expect(tipFor('date')).toContain('panelPosition: sheet');
-    expect(tipFor('date')).not.toContain('panelPosition: right');
   }));
 
   // The two column headers sit side by side, so a difference between them reads as a step in the rule under
@@ -709,11 +709,11 @@ describe('portal', () => {
       (el.textContent ?? '').trim()
     );
 
-    expect(labels).toEqual(['The Form', 'All Fields', 'This Field']);
+    expect(labels).toEqual(['App Defaults', 'The Form', 'This Field']);
 
-    const panels = ['portal-form-settings', 'portal-all-fields', 'portal-field-editor'];
+    const panels = ['portal-app-defaults', 'portal-form-settings', 'portal-field-editor'];
 
-    for (const [index, scope] of (['form', 'all', 'field'] as const).entries()) {
+    for (const [index, scope] of (['app', 'form', 'field'] as const).entries()) {
       (root.querySelectorAll<HTMLElement>('portal-settings-tab .scope-option')[index] as HTMLElement).click();
       settle();
 
@@ -733,7 +733,7 @@ describe('portal', () => {
     inspector.tab.set('form');
     inspector.formTab.set('settings');
 
-    inspector.fieldScope.set('all');
+    inspector.fieldScope.set('app');
     settle();
     expect(root.querySelector('#ft-select')).toBeNull();
 
@@ -907,9 +907,9 @@ describe('portal', () => {
     expect(definition.fields().length).toBe(PREVIEW_FIELDS.length);
   }));
 
-  // The template binds names only a component defines, so the component sits beside it rather than in a
-  // third top-bar group of its own.
-  it('offers the component beside the template', fakeAsync(() => {
+  // The template binds names only a component defines, and leaves out what the app config supplies, so both
+  // sit beside it rather than in top-bar groups of their own.
+  it('offers the component and the app config beside the template', fakeAsync(() => {
     settle();
 
     TestBed.inject(InspectorStore).openExport('form');
@@ -920,10 +920,11 @@ describe('portal', () => {
       (el.textContent ?? '').trim()
     );
 
-    expect(blocks.length).toBe(2);
+    expect(blocks.length).toBe(3);
     expect(blocks[0]?.textContent).toContain('<form');
     expect(blocks[1]?.textContent).toContain('export class MyFormComponent');
-    expect(buttons).toEqual(['Copy Template', 'Reset Form', 'Copy Component']);
+    expect(blocks[2]?.textContent).toContain('provideNgxFormidable');
+    expect(buttons).toEqual(['Copy Template', 'Reset Form', 'Copy Component', 'Copy App Config']);
   }));
 
   // All three areas carry the same second level, so the strip is learned once rather than per tab.

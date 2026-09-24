@@ -114,6 +114,8 @@ import { NgxFormidableModule } from '@cynthion/ngx-formidable';
 export class AppModule {}
 ```
 
+Both take an optional config, including app-wide `defaults` for what every template would otherwise repeat: the label position, the adornment alignment, the panel position and the form's reveal, required-marker and debounce settings. See [Getting Started](.documentation/user/getting-started.md).
+
 Then the stylesheet, which is imported separately because it is a stylesheet and not a provider:
 
 ```scss

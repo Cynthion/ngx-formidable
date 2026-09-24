@@ -1,10 +1,11 @@
 @let opts = options();
 
-<!-- `NgForm` reads its options once, so a new `updateOn` only reaches the controls when the form is rebuilt. -->
+<!-- `NgForm` reads its options once, and a field its app defaults, so either change rebuilds the form. -->
 @for (key of [formKey()]; track key) {
   <form
     formidableForm
     formidableValidateWholeForm
+    portalAppDefaults
     class="preview-form"
     [formValue]="valueStore.model()"
     [formShape]="valueStore.shape()"

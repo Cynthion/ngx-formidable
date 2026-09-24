@@ -12,7 +12,7 @@ const SUB_TABS: readonly SubTab[] = [
 
 const STRAPLINES: Readonly<Record<FormSubTab, string>> = {
   structure: 'Build the form: start it, then say which fields exist, in which section, in what order.',
-  settings: 'What everything is set to, at whichever scope you pick: the form, every field, or one field.'
+  settings: 'What everything is set to, at whichever scope you pick: the app, the form, or one field.'
 };
 
 /**

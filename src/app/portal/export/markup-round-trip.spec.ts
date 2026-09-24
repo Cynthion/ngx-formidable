@@ -80,6 +80,29 @@ describe('markup serializer', () => {
   });
 
   // A preset writes keys the field does not own, so it is a handler on the component rather than an input.
+  // What an app default is for: the template states only what a field or the form states itself.
+  it('leaves out what the field and the form state nothing for, so the app default applies', () => {
+    const markup = serializeDefinition(only(['orderName', 'date']));
+
+    expect(markup).toContain('<div formidableFieldLabel>');
+    expect(markup).not.toContain('position=');
+    expect(markup).not.toContain('[panelPosition]');
+    expect(markup).not.toContain('[revealOn]');
+    expect(markup).not.toContain('[showRequiredMarkers]');
+  });
+
+  it('states what the field and the form state themselves', () => {
+    const definition = only(['cardNumber']);
+    const markup = serializeDefinition({
+      ...definition,
+      options: { ...definition.options, revealOn: 'dirty', showRequiredMarkers: false }
+    });
+
+    expect(markup).toContain('position="outside"');
+    expect(markup).toContain(`[revealOn]="'dirty'"`);
+    expect(markup).toContain('[showRequiredMarkers]="false"');
+  });
+
   it('binds a preset field to the handler the component declares', () => {
     const markup = serializeDefinition(only(['pizza']));
 
@@ -126,7 +149,27 @@ describe('markup import', () => {
     const { definition, result } = roundTrip(['date']);
 
     expect(result.fields[0]?.unicodeTokenFormat).toBe(definition.fields[0]!.unicodeTokenFormat);
-    expect(result.fields[0]?.panelPosition).toBe('right');
+  });
+
+  it('round-trips a stated panel position, and an unstated one as unstated', () => {
+    expect(roundTrip(['pizza']).result.fields[0]?.panelPosition).toBe('right');
+    expect(roundTrip(['date']).result.fields[0]?.panelPosition).toBeUndefined();
+  });
+
+  it('round-trips a stated label position, and an unstated one as unstated', () => {
+    expect(roundTrip(['cardNumber']).result.fields[0]?.decoration.labelPosition).toBe('outside');
+    expect(roundTrip(['orderName']).result.fields[0]?.decoration.labelPosition).toBeUndefined();
+  });
+
+  it('round-trips an adornment’s stated alignment, and an unstated one as unstated', () => {
+    const definition = only(['orderName']);
+    const field = definition.fields[0]!;
+    const decoration = { ...field.decoration, prefix: 'text', suffix: 'text', prefixAlign: 'value' } as const;
+    const markup = serializeDefinition({ ...definition, fields: [{ ...field, decoration }] });
+    const parsed = parseMarkup(markup).fields[0]!.decoration;
+
+    expect(parsed.prefixAlign).toBe('value');
+    expect(parsed.suffixAlign).toBeUndefined();
   });
 
   it('round-trips an option list, its disabled entry and its readonly entry', () => {

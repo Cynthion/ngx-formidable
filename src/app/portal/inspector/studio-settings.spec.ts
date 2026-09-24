@@ -1,16 +1,19 @@
+import { Type } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
+import { DateFieldComponent, DropdownFieldComponent, NgxFormidableFormDirective } from '@cynthion/ngx-formidable';
 import { provideNgxMask } from 'ngx-mask';
-import { FIELD_KIND_LABELS } from '../model/field-capabilities';
+import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../model/field-capabilities';
 import { PortalFieldKind } from '../model/field-spec.model';
 import { PREVIEW_FORM_DEFINITION } from '../model/preview-form.definition';
 import { PreviewFormComponent } from '../stage/preview-form/preview-form.component';
 import { FormDefinitionStore } from '../state/form-definition.store';
-import { AllFieldsComponent } from './settings/all-fields.component';
+import { AppDefaultsComponent } from './settings/app-defaults.component';
 import { FieldEditorComponent } from './settings/field-editor.component';
 import { FormSettingsComponent } from './settings/form-settings.component';
 
 /**
- * Every control in the Studio writes something, and the form-scope decoration controls reach the preview.
+ * Every control in the Studio writes something, and the app defaults reach the preview through the library.
  *
  * The sweep is deliberately generic rather than a list of assertions per control. A hand-written list covers
  * what somebody remembered; walking the rendered controls covers whatever is on screen, including a control
@@ -73,8 +76,13 @@ describe('studio settings', () => {
     return true;
   }
 
+  /** Everything a control can write: the form, or the app defaults beside it. */
+  function snapshot(): string {
+    return JSON.stringify([store.definition(), store.appDefaults()]);
+  }
+
   /**
-   * Every control in the panel, one at a time, each proved to write something into the definition.
+   * Every control in the panel, one at a time, each proved to write something into the store.
    *
    * The controls are re-queried per step rather than held: each write replaces the definition, and an `@if`
    * in the panel can rebuild the very element being driven.
@@ -90,13 +98,13 @@ describe('studio settings', () => {
       if (!control) continue;
 
       const name = `${context} ▸ ${describeControl(control)}`;
-      const before = JSON.stringify(store.definition());
+      const before = snapshot();
 
       if (!exercise(control)) continue;
 
       fixture.detectChanges();
 
-      expect(JSON.stringify(store.definition())).withContext(name).not.toBe(before);
+      expect(snapshot()).withContext(name).not.toBe(before);
     }
   }
 
@@ -104,8 +112,8 @@ describe('studio settings', () => {
     sweep(TestBed.createComponent(FormSettingsComponent), 'The Form');
   });
 
-  it('writes something from every control of the all-fields scope', () => {
-    sweep(TestBed.createComponent(AllFieldsComponent), 'All Fields');
+  it('writes something from every control of the app-defaults scope', () => {
+    sweep(TestBed.createComponent(AppDefaultsComponent), 'App Defaults');
   });
 
   it('writes something from every control of the field editor, for every kind of field', () => {
@@ -122,10 +130,10 @@ describe('studio settings', () => {
 
   // #endregion
 
-  // #region The all-fields scope
+  // #region The app-defaults scope
 
-  describe('all fields', () => {
-    let panel: ComponentFixture<AllFieldsComponent>;
+  describe('app defaults', () => {
+    let panel: ComponentFixture<AppDefaultsComponent>;
     let preview: ComponentFixture<PreviewFormComponent>;
     let stage: HTMLElement;
 
@@ -139,22 +147,27 @@ describe('studio settings', () => {
       preview.detectChanges();
     }
 
-    function control(id: string): HTMLSelectElement {
-      return (panel.nativeElement as HTMLElement).querySelector(`#af-${id}`) as HTMLSelectElement;
+    function control(key: string): HTMLSelectElement {
+      return (panel.nativeElement as HTMLElement).querySelector(`#ad-${key}`) as HTMLSelectElement;
     }
 
-    function choose(id: string, value: string): void {
-      const select = control(id);
+    function choose(key: string, value: string): void {
+      const select = control(key);
       select.value = value;
       select.dispatchEvent(new Event('change'));
       settle();
     }
 
-    /** The override line under one control, or `''` while every field agrees with it. */
-    function overrides(id: string): string {
-      const note = control(id).closest('.pc-field')?.querySelector('.overrides span');
+    /** The line under one control naming who states their own, or `''` while everything inherits. */
+    function overrides(key: string): string {
+      const note = control(key).closest('.pc-field')?.querySelector('.pc-overrides span');
 
       return (note?.textContent ?? '').trim();
+    }
+
+    function clear(key: string): void {
+      (control(key).closest('.pc-field')!.querySelector('.pc-reset') as HTMLElement).click();
+      settle();
     }
 
     /**
@@ -165,41 +178,54 @@ describe('studio settings', () => {
      */
     const STATES = ['label-outside', 'label-resting', 'label-floating', 'label-border', 'label-border-prefix'];
 
+    function stateOf(label: Element): string {
+      return Array.from(label.classList).find((name) => STATES.includes(name)) ?? '(none)';
+    }
+
     function labelClasses(): string[] {
-      return Array.from(stage.querySelectorAll('.label-wrapper')).map(
-        (label) => Array.from(label.classList).find((name) => STATES.includes(name)) ?? '(none)'
-      );
+      return Array.from(stage.querySelectorAll('.label-wrapper')).map(stateOf);
+    }
+
+    function labelOf(id: string): string {
+      const field = stage.querySelector(`#chip-tip-${id}`)!.closest('portal-preview-field')!;
+
+      return stateOf(field.querySelector('.label-wrapper')!);
+    }
+
+    function instance<T>(type: Type<T>): T[] {
+      return preview.debugElement.queryAll(By.directive(type)).map((element) => element.injector.get(type));
     }
 
     beforeEach(() => {
-      panel = TestBed.createComponent(AllFieldsComponent);
+      panel = TestBed.createComponent(AppDefaultsComponent);
       preview = TestBed.createComponent(PreviewFormComponent);
       stage = preview.nativeElement as HTMLElement;
     });
 
-    it('moves every label the preview renders', fakeAsync(() => {
+    it('moves every label that states nothing, and leaves the one that states its own', fakeAsync(() => {
       settle();
 
-      // The sample starts `inside`, which resolves to resting or floating depending on the field's value.
+      // Nothing set: the library's own `inside`, which rests or floats depending on the field's value.
       expect(labelClasses().some((name) => name === 'label-resting' || name === 'label-floating')).toBeTrue();
 
-      choose('label-position', 'border');
+      choose('labelPosition', 'border');
 
       expect(labelClasses()).toContain('label-border');
       expect(labelClasses()).not.toContain('label-resting');
       expect(labelClasses()).not.toContain('label-floating');
 
-      // A layout that cannot honour a position still labels outside, which is the capability table's answer
-      // rather than the control's — so the control is not lying when it reads `border`.
-      expect(labelClasses()).toContain('label-outside');
+      // The card number states `outside`, and a layout that cannot honour a position labels outside anyway.
+      expect(labelOf('cardNumber')).toBe('label-outside');
+      expect(labelOf('orderName')).toBe('label-border');
     }));
 
-    it('aligns every adornment the preview renders', fakeAsync(() => {
+    it('aligns every adornment that states nothing', fakeAsync(() => {
       settle();
 
       // Adornments are off and empty in the sample, so the alignment has nothing to act on until both are set.
       store.updateOptions({ showAdornments: true });
-      choose('prefix', 'text');
+      store.setDecorationOnAllFields({ prefix: 'text' });
+      settle();
 
       const wrappers = (): HTMLElement[] =>
         Array.from(stage.querySelectorAll<HTMLElement>('.adornment-wrapper:not(.hidden)'));
@@ -207,57 +233,108 @@ describe('studio settings', () => {
       expect(wrappers().length).toBeGreaterThan(0);
       expect(wrappers().every((wrapper) => wrapper.classList.contains('align-value'))).toBeFalse();
 
-      choose('adornment-align', 'value');
+      choose('prefixAlign', 'value');
 
       expect(wrappers().length).toBeGreaterThan(0);
       expect(wrappers().every((wrapper) => wrapper.classList.contains('align-value'))).toBeTrue();
     }));
 
+    // The preview is provided the defaults, rather than the portal resolving them beside the library.
+    it('reaches the fields and the form through the library’s own resolution', fakeAsync(() => {
+      settle();
+
+      choose('panelPosition', 'sheet');
+      choose('revealOn', 'always');
+
+      // The date states nothing; the pizza picker states `right`.
+      expect(instance(DateFieldComponent).map((field) => field.panelPosition())).toEqual(['sheet']);
+      expect(instance(DropdownFieldComponent).map((field) => field.panelPosition())).toContain('right');
+      expect(instance(NgxFormidableFormDirective)[0]!.revealOn()).toBe('always');
+
+      choose('panelPosition', '');
+
+      expect(instance(DateFieldComponent).map((field) => field.panelPosition())).toEqual(['right']);
+    }));
+
+    it('counts the fields that state their own, and clears them back to inheriting', fakeAsync(() => {
+      settle();
+
+      const reached = store.fields().filter((field) => FIELD_CAPABILITIES[field.kind].labelPositions).length;
+
+      // The sample ships one: the card number labels `outside`, to line up with the radio group beside it.
+      expect(overrides('labelPosition')).toBe(`1 of ${reached} fields state their own.`);
+
+      store.updateDecoration(PREVIEW_FORM_DEFINITION.fields[0]!.id, { labelPosition: 'border' });
+      settle();
+
+      expect(overrides('labelPosition')).toBe(`2 of ${reached} fields state their own.`);
+
+      clear('labelPosition');
+
+      expect(overrides('labelPosition')).toBe('');
+      expect(store.fields().every((field) => field.decoration.labelPosition === undefined)).toBeTrue();
+    }));
+
+    it('says when the form states its own, and clears it back to inheriting', fakeAsync(() => {
+      settle();
+
+      expect(overrides('revealOn')).toBe('');
+
+      store.updateOptions({ revealOn: 'dirty' });
+      settle();
+
+      expect(overrides('revealOn')).toBe('This form states its own.');
+
+      clear('revealOn');
+
+      expect(store.options().revealOn).toBeUndefined();
+    }));
+  });
+
+  // #endregion
+
+  // #region The adornment examples, on the form scope
+
+  describe('adornment examples', () => {
+    let panel: ComponentFixture<FormSettingsComponent>;
+
+    function control(id: string): HTMLSelectElement {
+      return (panel.nativeElement as HTMLElement).querySelector(`#ae-${id}`) as HTMLSelectElement;
+    }
+
+    function overrides(id: string): string {
+      const note = control(id).closest('.pc-field')?.querySelector('.pc-overrides span');
+
+      return (note?.textContent ?? '').trim();
+    }
+
+    beforeEach(() => {
+      panel = TestBed.createComponent(FormSettingsComponent);
+      panel.detectChanges();
+    });
+
+    it('fills every field’s slot with a sample', () => {
+      control('prefix').value = 'icon';
+      control('prefix').dispatchEvent(new Event('change'));
+      panel.detectChanges();
+
+      expect(store.fields().every((field) => field.decoration.prefix === 'icon')).toBeTrue();
+    });
+
     // The control has no value of its own, so it can only be wrong by disagreeing with the fields.
-    it('states what most fields carry, and counts the rest', fakeAsync(() => {
-      settle();
+    it('states what most fields carry, counts the rest, and reasserts it over them', () => {
+      store.updateDecoration(PREVIEW_FORM_DEFINITION.fields[0]!.id, { prefix: 'icon' });
+      panel.detectChanges();
 
-      // The sample ships one deliberate override: the card number labels `outside` so that it lines up with
-      // the radio group it shares a row with. Every other field sits on the form's own `inside`.
-      expect(control('label-position').value).toBe('inside');
-      expect(overrides('label-position')).toBe(`1 of ${store.fields().length} fields override this.`);
+      expect(control('prefix').value).toBe('none');
+      expect(overrides('prefix')).toBe(`1 of ${store.fields().length} fields override this.`);
 
-      store.updateDecoration(PREVIEW_FORM_DEFINITION.fields[0]!.id, { labelPosition: 'border' });
-      settle();
+      (control('prefix').closest('.pc-field')!.querySelector('.pc-reset') as HTMLElement).click();
+      panel.detectChanges();
 
-      // Still `inside`: a field overriding does not make the rest disappear, which is what `Mixed` did.
-      expect(control('label-position').value).toBe('inside');
-      expect(overrides('label-position')).toBe(`2 of ${store.fields().length} fields override this.`);
-    }));
-
-    it('reasserts the stated value over the fields that override it', fakeAsync(() => {
-      settle();
-
-      store.updateDecoration(PREVIEW_FORM_DEFINITION.fields[0]!.id, { labelPosition: 'border' });
-      store.updateDecoration(PREVIEW_FORM_DEFINITION.fields[1]!.id, { labelPosition: 'outside' });
-      settle();
-      // These two, plus the card number the sample already ships overriding.
-      expect(overrides('label-position')).toBe(`3 of ${store.fields().length} fields override this.`);
-
-      const apply = control('label-position').closest('.pc-field')!.querySelector('.pc-reset') as HTMLElement;
-      apply.click();
-      settle();
-
-      expect(overrides('label-position')).toBe('');
-      expect(store.fields().every((field) => field.decoration.labelPosition === 'inside')).toBeTrue();
-    }));
-
-    // Both slots move together, so a field that splits them agrees with neither answer.
-    it('counts a field whose prefix and suffix disagree as an override', fakeAsync(() => {
-      settle();
-
-      expect(overrides('adornment-align')).toBe('');
-
-      store.updateDecoration(PREVIEW_FORM_DEFINITION.fields[0]!.id, { prefixAlign: 'value' });
-      settle();
-
-      expect(overrides('adornment-align')).toBe(`1 of ${store.fields().length} fields override this.`);
-    }));
+      expect(overrides('prefix')).toBe('');
+      expect(store.fields().every((field) => field.decoration.prefix === 'none')).toBeTrue();
+    });
   });
 
   // #endregion

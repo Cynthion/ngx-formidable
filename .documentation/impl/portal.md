@@ -107,11 +107,11 @@ deploy workflow is not touched by the portal at any phase.
 **Tabs Are Not Routes**: the inspector's tabs are simultaneous views of one live object, and routing them
 would hide either the preview or the editor. There are three, in the order the work happens.
 
-| Area                | Halves                  | Answers                                                                                   |
-| :------------------ | :---------------------- | :---------------------------------------------------------------------------------------- |
-| **Theme**           | `Design`, `Variables`   | How the fields look                                                                       |
-| **Form**            | `Structure`, `Settings` | Which fields exist, and what everything is set to                                         |
-| **Import & Export** | `Theme`, `Form`         | What you take away and paste back: the `:root` block, and the template with its component |
+| Area                | Halves                  | Answers                                                                                                  |
+| :------------------ | :---------------------- | :------------------------------------------------------------------------------------------------------- |
+| **Theme**           | `Design`, `Variables`   | How the fields look                                                                                      |
+| **Form**            | `Structure`, `Settings` | Which fields exist, and what everything is set to                                                        |
+| **Import & Export** | `Theme`, `Form`         | What you take away and paste back: the `:root` block, and the template with its component and app config |
 
 `Form` is `Structure` first: which fields exist has to be settled before what one of them is is worth
 saying. All three areas carry the same second level, so the strip is learned once rather than per tab, and
@@ -367,10 +367,7 @@ page read as one product. It covers field labels, a toggle's `onLabel` and `offL
 choice text. It does not cover the sentences: a placeholder, a hint and the clause after an em dash in an
 option label explain rather than name, and stay as written — `Family — sold out today`.
 
-**One Field Overrides The Form's Label Position.** The card number labels `outside`, because it shares a row
-with a radio group, and a vertical layout labels `outside` and cannot do otherwise — so an `inside` label
-beside it would put the two labels of one row at different heights. It is also what the `All Fields` scope
-counts as the sample's one built-in override.
+**One Field States Its Own Label Position.** The card number labels `outside`, because it shares a row with a radio group, and a vertical layout labels `outside` and cannot do otherwise — so an `inside` label beside it would put the two labels of one row at different heights. Every other field states nothing, so the `App Defaults` scope counts it as the sample's one field stating its own.
 
 **The Two Group Fields Share A Row**, at one column each. A single-choice list and a multi-choice list read
 against each other, which is what makes the difference between them legible without a caption.
@@ -478,11 +475,11 @@ directive's input name, which is the binding rather than the concept.
 One editor, under an `Applies to` switch. The three positions are the three kinds of state there are, so
 nothing is filed under a scope it does not belong to.
 
-| Scope          | Holds                                               | State                          |
-| :------------- | :-------------------------------------------------- | :----------------------------- |
-| **The Form**   | Master switches, panel position, locale, validation | `PortalFormDefinition.options` |
-| **All Fields** | Decoration, written to every field at once          | `PortalFieldSpec.decoration`   |
-| **This Field** | Identity, state, decoration, behaviour, options     | One `PortalFieldSpec`          |
+| Scope            | Holds                                                   | State                             |
+| :--------------- | :------------------------------------------------------ | :-------------------------------- |
+| **App Defaults** | What `provideNgxFormidable({ defaults })` says          | `FormDefinitionStore.appDefaults` |
+| **The Form**     | Master switches, adornment examples, locale, validation | `PortalFormDefinition.options`    |
+| **This Field**   | Identity, state, decoration, behaviour, options         | One `PortalFieldSpec`             |
 
 **Scope Is A Control, Not A Heading.** One editor with one set of groups is learned once, and a selected
 scope answers "how much does this change?" without being read. Decoration exists at two of the three scopes,
@@ -509,13 +506,13 @@ carries its one-line description. Function-typed inputs are offered as named pre
 editor, because their purpose is to demonstrate what the input is for. Object-typed inputs are offered as
 preset sets.
 
-**Adornments** are content projection rather than inputs, so they live in the decoration group at both scopes,
-each slot offering none, an icon, text or a button.
+**Adornments** are content projection rather than inputs, so no app default can supply one. They live in a field's decoration group and, as adornment examples, on `The Form`, each slot offering none, an icon, text or a button.
 
-**Decoration Has No Form-Level Value.** Every decoration setting belongs to a field, so `All Fields` holds
-none of its own. A control there tallies the fields, states what most of them carry, counts the rest as
-overrides and offers to reassert its value over them. Holding a value instead would be a second source of
-truth that nothing renders from and that goes stale against the fields it claims to describe.
+**App Defaults Are Given To The Preview.** `App Defaults` holds values of its own, because the library renders from them: `AppDefaultsDirective` provides `FORMIDABLE_DEFAULTS` on the preview `<form>` from `FormDefinitionStore.appDefaults`, so the stage runs the library's resolution rather than a copy of it, and the chrome keeps the library's own. A field and the form read their defaults once, when they are created, so a change rebuilds the preview, as a new `updateOn` does.
+
+**A Field States Its Own Value Or Nothing.** An app-defaulted member is `undefined` in the specification until a field or the form states one, and the editor offers that as a first `App Default` choice naming the value in force. Each `App Defaults` control counts who states their own and clears them back to inheriting. `LIBRARY_DEFAULTS` and the capability table's `panel` name the library's own fallbacks for the `Library Default` choice.
+
+**Adornment Examples Hold No Value.** A control there tallies the fields, states what most of them carry, counts the rest as overrides and offers to reassert its value over them. Holding a value instead would be a second source of truth that nothing renders from and that goes stale against the fields it claims to describe.
 
 **Behaviour Is Split By Subject** — `Text`, `Panel`, `Locale And Format`, `On And Off`, `Range`,
 `Ticks And Labels` — each rendered only where the capability table says the field has it. One `Behaviour`
@@ -535,13 +532,15 @@ switches the paired field's format. Splitting it into separate controls would lo
 An Angular production build contains no template compiler, so user-authored markup cannot become live
 components. The configuration is therefore the source of truth and the markup is derived from it.
 
-| Direction     | Mechanism                                                                                                       |
-| :------------ | :-------------------------------------------------------------------------------------------------------------- |
-| **Out**       | The configuration serialized to an Angular template and a component for it, read-only, each with a copy control |
-| **In**        | A pasted template parsed with `DOMParser` into the configuration, reporting what it ignored                     |
-| **Structure** | Fields added, removed and reordered through controls rather than by typing                                      |
+| Direction     | Mechanism                                                                                                                      |
+| :------------ | :----------------------------------------------------------------------------------------------------------------------------- |
+| **Out**       | The configuration serialized to an Angular template, a component and an app config for it, read-only, each with a copy control |
+| **In**        | A pasted template parsed with `DOMParser` into the configuration, reporting what it ignored                                    |
+| **Structure** | Fields added, removed and reordered through controls rather than by typing                                                     |
 
 **The Component Is The Template's Other Half**: the template binds `model`, `shape` and, under Vest, `suite`, which only a component defines. `component-serializer.ts` emits one — each key typed from `FIELD_KIND_VALUE_TYPES`, the table the preview's own shape reads, and the suite a skeleton, because the Studio has no rule editor. It sits beside the template rather than in a third top-bar group, since it is not a third thing to take away, and it is not read back in, since it holds nothing the configuration does not.
+
+**The App Config Is What The Template Leaves Out**: the template states a label position, an adornment alignment, a panel position, `revealOn` and `showRequiredMarkers` only where a field or the form states its own, so the app defaults are what give the rest their value. `config-serializer.ts` emits the `app.config.ts` that provides them, beside the template for that reason. It is not read back in: it belongs to the app rather than the form, which is also why replacing the form leaves it alone.
 
 `Structure` is three numbered steps rather than one accordion per form section, because a visitor who wants
 their own form has to be told that starting over is possible before being shown a list of somebody else's
@@ -594,11 +593,11 @@ aside — and turning it on states the instruction to verify with a real screen 
 Three stores, holding signals. Everything a template reads is a `signal` or a `computed`, per
 `impl/conventions.md`.
 
-| Store               | Holds                                                                         |
-| :------------------ | :---------------------------------------------------------------------------- |
-| **Form Definition** | One immutable field-specification tree, plus the form-level options           |
-| **Form Value**      | The model, and the shape derived from the definition                          |
-| **Theme**           | The user's overrides, the selected preset and scheme, and the resolved result |
+| Store               | Holds                                                                                    |
+| :------------------ | :--------------------------------------------------------------------------------------- |
+| **Form Definition** | One immutable field-specification tree, plus the form-level options and the app defaults |
+| **Form Value**      | The model, and the shape derived from the definition                                     |
+| **Theme**           | The user's overrides, the selected preset and scheme, and the resolved result            |
 
 **One Signal Over A Tree**, not one signal per input. The renderer tracks by field identity, and each field
 component takes its specification as an input, so only the changed field's view is marked.

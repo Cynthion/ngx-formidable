@@ -13,11 +13,11 @@ export type FormSubTab = 'structure' | 'settings';
 /**
  * How far a control in the Settings half reaches.
  *
- * The three are the three kinds of state there are: the form's own options, the decoration every field
- * carries a copy of, and one field's specification. Scope is a control rather than the wording of three
- * headings, so the answer to "how much does this change?" is on screen and selected.
+ * The three are the three kinds of state there are: the app's defaults, the form's own options, and one
+ * field's specification. Scope is a control rather than the wording of three headings, so the answer to "how
+ * much does this change?" is on screen and selected.
  */
-export type FieldScope = 'form' | 'all' | 'field';
+export type FieldScope = 'app' | 'form' | 'field';
 
 /** The Import & Export area's own two halves — one round trip each. */
 export type ExportSection = 'theme' | 'form';

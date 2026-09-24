@@ -24,6 +24,7 @@ import {
   timer
 } from 'rxjs';
 import { cloneDeep } from '../helpers/utility.helpers';
+import { FORMIDABLE_DEFAULTS } from '../models/formidable.model';
 import { DeepRequired } from '../models/utility-types';
 import {
   FORMIDABLE_ERROR_EXTRACTOR,
@@ -54,6 +55,12 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
 
   private readonly extractErrors = inject(FORMIDABLE_ERROR_EXTRACTOR);
 
+  // The app defaults, which the three options below fall back to when unset or bound to `undefined`.
+  private readonly defaults = inject(FORMIDABLE_DEFAULTS);
+  private readonly defaultDebounceMs = this.defaults.debounceMs ?? 0;
+  private readonly defaultShowRequiredMarkers = this.defaults.showRequiredMarkers ?? true;
+  private readonly defaultRevealOn = this.defaults.revealOn ?? 'touched';
+
   /**
    * The model the form edits. The validator is handed the form's live control values, with this filling in
    * whatever has no control of its own.
@@ -70,19 +77,25 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
    * How long to wait after a change before running the validator, for every target on this form.
    * One setting per form: a field, a group and the whole form all debounce together.
    */
-  public readonly debounceMs = input(0);
+  public readonly debounceMs = input(this.defaultDebounceMs, {
+    transform: (debounceMs: number | undefined) => debounceMs ?? this.defaultDebounceMs
+  });
 
   /**
    * Whether the fields on this form may render their required marker, so one switch hides all of them.
    * A field still has to ask for its own with `showRequiredMarker`. Presentational only.
    */
-  public readonly showRequiredMarkers = input(true);
+  public readonly showRequiredMarkers = input(this.defaultShowRequiredMarkers, {
+    transform: (show: boolean | undefined) => show ?? this.defaultShowRequiredMarkers
+  });
 
   /**
    * When the fields on this form reveal their messages. A field overrides it with its own `revealOn` on
    * `formidableFieldErrors`. Independent of when the validator runs, which is Angular's `updateOn`.
    */
-  public readonly revealOn = input<FormidableReveal>('touched');
+  public readonly revealOn = input(this.defaultRevealOn, {
+    transform: (revealOn: FormidableReveal | undefined) => revealOn ?? this.defaultRevealOn
+  });
 
   /**
    * Maps a target to the targets that depend on it, so a rule reading more than one field re-runs when any of

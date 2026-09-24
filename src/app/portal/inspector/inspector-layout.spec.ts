@@ -19,7 +19,7 @@ describe('inspector layout', () => {
   let inspector: InspectorStore;
   let store: FormDefinitionStore;
 
-  const SCOPES: readonly FieldScope[] = ['form', 'all', 'field'];
+  const SCOPES: readonly FieldScope[] = ['app', 'form', 'field'];
 
   beforeEach(() => {
     localStorage.clear();

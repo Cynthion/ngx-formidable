@@ -25,6 +25,7 @@ import {
   FieldAdornmentAlignment,
   FieldDecoratorLayout,
   FieldValueAlignment,
+  FORMIDABLE_DEFAULTS,
   FORMIDABLE_FIELD
 } from '../../models/formidable.model';
 import { FieldErrorsComponent } from '../field-errors/field-errors.component';
@@ -52,6 +53,7 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
 // signal on the field, and a signal read inside a getter is tracked by whichever view called it.
 export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
   private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true });
+  private readonly defaultShowRequiredMarkers = inject(FORMIDABLE_DEFAULTS).showRequiredMarkers ?? true;
 
   // View children are used to access the prefix and suffix wrappers
   readonly prefixWrapper = viewChild<ElementRef<HTMLDivElement>>('prefixWrapperRef');
@@ -190,10 +192,14 @@ export class FieldDecoratorComponent implements AfterViewInit, OnDestroy {
     return this.projectedField()?.disabled() ?? false;
   }
 
-  /** Drives the label's required marker. Presentational only, and the form may switch it off for all fields. */
+  /**
+   * Drives the label's required marker. Presentational only, and the form — or, without one, the app
+   * default — may switch it off for all fields.
+   */
   get showRequiredMarker(): boolean {
     return (
-      (this.formDirective?.showRequiredMarkers() ?? true) && (this.projectedField()?.showRequiredMarker() ?? false)
+      (this.formDirective?.showRequiredMarkers() ?? this.defaultShowRequiredMarkers) &&
+      (this.projectedField()?.showRequiredMarker() ?? false)
     );
   }
 

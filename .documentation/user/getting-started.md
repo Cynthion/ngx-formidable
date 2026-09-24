@@ -72,7 +72,35 @@ import { AppComponent } from './app.component';
 export class AppModule {}
 ```
 
-Both accept a `NgxFormidableConfig`, whose only member is `globalMaskConfig` — see `user/fields.md`.
+Both accept a `NgxFormidableConfig`: `globalMaskConfig` (see `user/fields.md`) and `defaults`, below.
+
+### App-Wide Defaults
+
+`defaults` sets once what every template would otherwise repeat.
+
+```ts
+provideNgxFormidable({
+  defaults: {
+    labelPosition: 'border',
+    panelPosition: 'sheet',
+    revealOn: 'dirty'
+  }
+});
+```
+
+| Key                   | Defaults                                                            | Library's Own |
+| :-------------------- | :------------------------------------------------------------------ | :------------ |
+| `labelPosition`       | `formidableFieldLabel`'s `position`                                 | `'inside'`    |
+| `prefixAlign`         | `formidableFieldPrefix`'s `align`                                   | `'center'`    |
+| `suffixAlign`         | `formidableFieldSuffix`'s `align`                                   | `'center'`    |
+| `panelPosition`       | `panelPosition` on the dropdown, autocomplete and date fields       | Per field     |
+| `revealOn`            | The form's `revealOn`, and a field's when it has no form            | `'touched'`   |
+| `showRequiredMarkers` | The form's `showRequiredMarkers`, and a field's when it has no form | `true`        |
+| `debounceMs`          | The form's `debounceMs`                                             | `0`           |
+
+- **A Binding Wins.** An input left unset, or bound to `undefined`, takes the app default, then the library's own. Binding `undefined` is how a dynamic template states nothing.
+- **Read Once.** A field or form reads its defaults when it is created. A default changed afterwards reaches only what is created afterwards.
+- **Scoped By Providing.** Provide `FORMIDABLE_DEFAULTS` in a component's `providers` to give that subtree defaults of its own. They replace the app's, they do not merge with them.
 
 ---
 
