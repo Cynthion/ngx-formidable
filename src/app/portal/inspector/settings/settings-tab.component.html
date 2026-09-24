@@ -1,0 +1,62 @@
+@let scope = inspector.fieldScope();
+
+<div class="scope">
+  <span
+    id="fields-scope-label"
+    class="scope-label">
+    Applies to
+  </span>
+  <div
+    role="group"
+    class="scope-switch"
+    aria-labelledby="fields-scope-label">
+    @for (option of scopes; track option.id) {
+      <button
+        type="button"
+        class="scope-option"
+        [class.active]="scope === option.id"
+        [attr.aria-pressed]="scope === option.id"
+        (click)="inspector.fieldScope.set(option.id)">
+        <span class="scope-option-label">{{ option.label }}</span>
+        @if (reach(option.id); as count) {
+          <span class="scope-option-reach">{{ count }}</span>
+        }
+      </button>
+    }
+  </div>
+  <p class="pc-help">{{ lede() }}</p>
+</div>
+
+@switch (scope) {
+  @case ('form') {
+    <portal-form-settings />
+  }
+  @case ('all') {
+    <portal-all-fields />
+  }
+  @case ('field') {
+    <div class="pc-field picker">
+      <label
+        for="ft-select"
+        class="pc-label">
+        <span class="pc-label-name">Field</span>
+      </label>
+      <select
+        id="ft-select"
+        class="pc-select"
+        [portalSelectedValue]="store.selectedFieldId() ?? ''"
+        (change)="store.select($any($event.target).value)">
+        @for (entry of store.sectionsWithFields(); track entry.section.id) {
+          <optgroup [label]="entry.section.title">
+            @for (field of entry.fields; track field.id) {
+              <option [value]="field.id">{{ field.label }} — {{ kindLabels[field.kind] }}</option>
+            }
+          </optgroup>
+        }
+      </select>
+      <p class="pc-help">Clicking a field in the preview selects it here.</p>
+    </div>
+
+    <portal-field-editor />
+  }
+}

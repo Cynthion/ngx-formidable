@@ -1,0 +1,230 @@
+// The drawn height is the whole drawer's, bar included, because the divider sits on the drawer's own top
+// edge — sizing only the body would make the bar's height an offset and the divider lag the pointer by it.
+:host {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  position: relative;
+  border-top: 1px solid var(--portal-border);
+  background: var(--portal-surface-raised);
+  color: var(--portal-text);
+  font-family: var(--portal-font);
+}
+
+// Sits on the drawer's own top edge, overhanging it, so the hit area does not eat into the bar below.
+.divider {
+  position: absolute;
+  top: -3px;
+  right: 0;
+  left: 0;
+  height: 7px;
+  cursor: row-resize;
+  touch-action: none;
+  z-index: 1;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 3px 0;
+    background: transparent;
+    transition: background var(--portal-hover-duration, 120ms) ease;
+  }
+
+  &:hover::after,
+  &.is-dragging::after,
+  &:focus-visible::after {
+    background: var(--portal-accent);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 16px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--portal-surface-sunken);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: -2px;
+  }
+}
+
+.chevron {
+  color: var(--portal-text-muted);
+}
+
+.title {
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.counts {
+  font-variant-numeric: tabular-nums;
+}
+
+.validity {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--portal-surface-sunken);
+
+  &.is-valid {
+    background: color-mix(in srgb, var(--portal-ok) 16%, transparent);
+    color: var(--portal-ok);
+  }
+
+  &.is-invalid {
+    background: color-mix(in srgb, var(--portal-danger) 16%, transparent);
+    color: var(--portal-danger);
+  }
+}
+
+.dirty {
+  color: var(--portal-warn);
+}
+
+// The height is the user's, and it does not move when the panel below changes: each panel scrolls inside
+// this box rather than resizing it, so switching tabs never shifts the form above.
+.body {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  border-top: 1px solid var(--portal-border);
+  overflow: hidden;
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 12px 0;
+  border-bottom: 1px solid var(--portal-border);
+  background: var(--portal-surface-raised);
+}
+
+.tab {
+  padding: 5px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--portal-text-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+
+  &.active {
+    border-bottom-color: var(--portal-accent);
+    color: var(--portal-text);
+  }
+}
+
+.panel {
+  min-height: 0;
+  padding: 8px 12px 14px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  font-size: 12px;
+}
+
+.group-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 2px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.group-count {
+  margin-left: auto;
+  color: var(--portal-text-muted);
+  font-weight: 400;
+}
+
+.entries {
+  display: grid;
+  gap: 2px;
+  margin: 0 0 6px;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 10px;
+  padding: 3px 2px;
+  border-radius: 4px;
+
+  &.is-empty {
+    opacity: 0.55;
+  }
+
+  &:hover {
+    background: var(--portal-surface-sunken);
+  }
+}
+
+dt {
+  color: var(--portal-text-muted);
+  overflow-wrap: anywhere;
+}
+
+dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.entry-name {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline dotted;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--portal-accent);
+  }
+}
+
+.message {
+  display: block;
+  color: var(--portal-danger);
+}
+
+.empty {
+  margin: 4px 2px;
+  color: var(--portal-text-muted);
+}
+
+.raw {
+  margin: 0;
+  font-family: var(--portal-mono);
+  font-size: 11px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

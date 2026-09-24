@@ -1,11 +1,16 @@
 @use '../../../styles/variables' as *;
 
 :host {
-  display: block;
+  font-family: var(--formidable-font-family);
+  @include select-field-host;
 }
 
 .field {
   @include select-field;
+}
+
+.toggle {
+  @include select-toggle;
 }
 
 .no-option {

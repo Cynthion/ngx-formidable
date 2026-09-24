@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.layout-note {
+  margin: 0 0 14px;
+  color: var(--portal-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.options {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto auto auto;
+  gap: 4px;
+  align-items: center;
+}

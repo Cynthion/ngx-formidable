@@ -1,0 +1,94 @@
+<div class="brand">
+  <span class="brand-text">
+    <span class="name">ngx-formidable</span>
+    <span class="tagline">Angular form fields you can actually theme, configure and customize.</span>
+  </span>
+</div>
+
+<nav
+  class="tabs"
+  aria-label="Portal">
+  @for (entry of routes; track entry.path) {
+    <a
+      routerLinkActive="active"
+      class="tab"
+      [routerLink]="entry.path"
+      [routerLinkActiveOptions]="{ exact: entry.exact }"
+      [title]="entry.title">
+      {{ entry.label }}
+    </a>
+  }
+</nav>
+
+<div class="actions">
+  <a
+    target="_blank"
+    rel="noreferrer noopener"
+    class="link"
+    [href]="repositoryUrl">
+    <example-icon
+      class="github"
+      [svg]="githubSvg"
+      [size]="15" />
+    GitHub
+  </a>
+
+  <button
+    type="button"
+    class="icon-button"
+    [attr.aria-label]="'Portal appearance: ' + labelFor(theme.appearance())"
+    [title]="'Portal appearance: ' + labelFor(theme.appearance())"
+    (click)="cycleAppearance()">
+    {{ glyphFor(theme.appearance()) }}
+  </button>
+
+  <!-- One group per thing there is to take away: the copy does it outright, the control beside it opens the
+       half of Import & Export that holds the same block, its options and the way back in. -->
+  <div class="copy-group">
+    <button
+      type="button"
+      class="copy-button"
+      [class.copied]="copiedTheme()"
+      [title]="'Copy ' + theme.exportCount() + ' variables as a :root block'"
+      (click)="copyTheme()">
+      {{ copiedTheme() ? 'Copied' : 'Copy Theme' }}
+      <span class="count">{{ theme.changeCount() }}</span>
+    </button>
+    <button
+      type="button"
+      title="Open Import &amp; Export at the theme CSS"
+      class="export-button"
+      aria-label="Open Import and Export at the theme CSS"
+      (click)="showExport('theme')">
+      <span
+        class="export-glyph"
+        aria-hidden="true">
+        ↗
+      </span>
+    </button>
+  </div>
+
+  <div class="copy-group">
+    <button
+      type="button"
+      class="copy-button"
+      [class.copied]="copiedMarkup()"
+      [title]="'Copy the Angular template for ' + fields().length + ' fields. Its component is in Import & Export.'"
+      (click)="copyMarkup()">
+      {{ copiedMarkup() ? 'Copied' : 'Copy Template' }}
+      <span class="count">{{ fields().length }}</span>
+    </button>
+    <button
+      type="button"
+      title="Open Import &amp; Export at the form"
+      class="export-button"
+      aria-label="Open Import and Export at the form"
+      (click)="showExport('form')">
+      <span
+        class="export-glyph"
+        aria-hidden="true">
+        ↗
+      </span>
+    </button>
+  </div>
+</div>

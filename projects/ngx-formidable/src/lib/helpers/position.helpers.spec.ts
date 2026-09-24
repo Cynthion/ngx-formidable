@@ -19,6 +19,17 @@ function elementAt(top: number, height: number): ElementRef<HTMLElement> {
   return new ElementRef(element);
 }
 
+/** Hangs a field in a pane that clips at the given band, the way a scrolling layout column does. */
+function inScrollPane(field: ElementRef<HTMLElement>, top: number, bottom: number): void {
+  const pane = document.createElement('div');
+
+  pane.className = 'test-scroll-pane';
+  pane.style.overflowY = 'auto';
+  pane.getBoundingClientRect = () => ({ top, bottom, height: bottom - top }) as DOMRect;
+  pane.appendChild(field.nativeElement);
+  document.body.appendChild(pane);
+}
+
 /** A stand-in for a panel: only its height is read. */
 function panelOf(height: number): ElementRef<HTMLElement> {
   const element = document.createElement('div');
@@ -30,6 +41,8 @@ function panelOf(height: number): ElementRef<HTMLElement> {
 
 describe('updatePanelPosition', () => {
   const viewport = window.innerHeight;
+
+  afterEach(() => document.querySelectorAll('.test-scroll-pane').forEach((pane) => pane.remove()));
 
   it('opens below while there is room below', () => {
     const field = elementAt(0, 60);
@@ -69,6 +82,31 @@ describe('updatePanelPosition', () => {
     expect(panel.nativeElement.classList.contains('above')).toBe(true);
 
     updatePanelPosition(elementAt(0, 60), panel);
+
+    expect(panel.nativeElement.classList.contains('above')).toBe(false);
+  });
+
+  // The window is not the box the panel has to fit in — an ancestor that clips its overflow is. A panel
+  // measured against the window opens into room the pane it lives in does not have, and is cut off.
+  it('flips above when the panel fits below in the window but not in the pane the field scrolls in', () => {
+    const field = elementAt(200, 60);
+    const panel = panelOf(120);
+
+    inScrollPane(field, 40, 300);
+
+    updatePanelPosition(field, panel);
+
+    expect(panel.nativeElement.classList.contains('above')).toBe(true);
+  });
+
+  // The other half of the same mistake: flipping above is only an improvement while the pane has the room.
+  it('stays below when the room above is the window’s rather than the pane’s', () => {
+    const field = elementAt(viewport - 70, 60);
+    const panel = panelOf(120);
+
+    inScrollPane(field, viewport - 120, viewport);
+
+    updatePanelPosition(field, panel);
 
     expect(panel.nativeElement.classList.contains('above')).toBe(false);
   });

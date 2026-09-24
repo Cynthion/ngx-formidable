@@ -14,6 +14,8 @@ import { getFieldTarget } from './form.helpers';
  * on the same control are untouched either way.
  */
 @Directive({
+  // Deliberately hijacks Angular's own selector so it attaches to every model-bound control.
+  // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[ngModel]',
   standalone: true,
   providers: [

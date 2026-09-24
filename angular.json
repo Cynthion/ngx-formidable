@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "ngx-formidable-demo": {
+    "ngx-formidable-portal": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -18,13 +18,12 @@
           "builder": "@angular/build:application",
           "options": {
             "outputPath": {
-              "base": "dist/ngx-formidable-demo"
+              "base": "dist/ngx-formidable-portal"
             },
             "index": "src/index.html",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              "src/assets",
               {
                 "glob": "**/*",
                 "input": "public"
@@ -36,7 +35,10 @@
             },
             "scripts": [],
             "allowedCommonJsDependencies": ["pikaday"],
-            "browser": "src/main.ts"
+            "browser": "src/main.ts",
+            "loader": {
+              ".md": "text"
+            }
           },
           "configurations": {
             "production": {
@@ -66,10 +68,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "ngx-formidable-demo:build:production"
+              "buildTarget": "ngx-formidable-portal:build:production"
             },
             "development": {
-              "buildTarget": "ngx-formidable-demo:build:development"
+              "buildTarget": "ngx-formidable-portal:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -80,6 +82,7 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
+            "karmaConfig": "karma.conf.cjs",
             "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
@@ -93,6 +96,9 @@
             "scripts": [],
             "stylePreprocessorOptions": {
               "includePaths": ["projects/ngx-formidable/src/lib/styles"]
+            },
+            "loader": {
+              ".md": "text"
             }
           }
         }

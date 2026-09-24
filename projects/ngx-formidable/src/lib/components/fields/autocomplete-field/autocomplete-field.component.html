@@ -26,6 +26,7 @@
       [attr.aria-expanded]="isPanelOpen()"
       [attr.aria-controls]="panelId"
       [attr.aria-activedescendant]="optionId(highlightedOptionIndex())"
+      (mousedown)="onEditorMouseDown()"
       (input)="onInput($event)"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
@@ -42,6 +43,11 @@
       role="listbox"
       class="panel-scrollcontainer"
       [id]="panelId">
+      <!-- Empty State -->
+      @if (!hasSelectableOptions()) {
+        <div class="no-option">{{ noOptionsText() }}</div>
+      }
+
       <!-- Options -->
       <!-- Option components are re-created in order to control and filter them. -->
       @for (option of activeOptions(); track option.value; let i = $index) {
@@ -61,9 +67,6 @@
             {{ option.label || option.value }}
           }
         </formidable-field-option>
-      } @empty {
-        <!-- Plain text, not an option: a listbox must not offer its empty state as something to pick. -->
-        <div class="no-option">{{ noOptionsText() }}</div>
       }
     </div>
   </div>

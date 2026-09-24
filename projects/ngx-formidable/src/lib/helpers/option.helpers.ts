@@ -1,4 +1,4 @@
-import { FieldDefaultOptionMode, IFormidableOption } from '../models/formidable.model';
+import { FieldDefaultOptionMode, IFormidableActionOption, IFormidableOption } from '../models/formidable.model';
 
 /** Merges an option field's `options` input with its projected option components, sorted if a `sortFn` is given. */
 export function combineFieldOptions(
@@ -24,6 +24,23 @@ export function applyDefaultOption(
   }
 
   return [defaultOption, ...options];
+}
+
+/**
+ * Puts a panel field's `actionOption` at the end of its rendered list — the mirror of `applyDefaultOption`,
+ * which pins to the front. `fallback` counts the list it is handed, so a `defaultOption` already in it keeps
+ * the list from being empty.
+ */
+export function applyActionOption(
+  options: IFormidableOption[],
+  actionOption?: IFormidableActionOption,
+  mode: FieldDefaultOptionMode = 'always'
+): IFormidableOption[] {
+  if (!actionOption) return options;
+
+  if (mode === 'fallback' && options.length) return options;
+
+  return [...options, actionOption];
 }
 
 /**

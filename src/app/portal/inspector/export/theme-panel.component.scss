@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 10px;
+  margin-bottom: 10px;
+
+  // The import's one option follows its textarea rather than leading a block, so it needs the room above.
+  &.is-import {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 8px;
+  }
+}
+
+.preview {
+  max-height: 44dvh;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface-sunken);
+  font-family: var(--portal-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow: auto;
+}
+
+.report {
+  margin-top: 10px;
+  font-size: 11px;
+}
+
+.applied {
+  margin: 0 0 4px;
+  color: var(--portal-ok);
+}
+
+.skipped-head {
+  margin: 0 0 3px;
+  color: var(--portal-text-muted);
+}
+
+.skipped {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    gap: 1px;
+  }
+}
+
+.reason {
+  color: var(--portal-warn);
+}

@@ -1,0 +1,153 @@
+// One above the higher of the library's two public z-indices, so a panel scrolled beneath the inspector
+// cannot punch through it. `tech/layering.md` holds the layer model.
+:host {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  position: relative;
+  z-index: var(--portal-chrome-z-index);
+  min-height: 0;
+  border-left: 1px solid var(--portal-border);
+  background: var(--portal-surface-raised);
+  color: var(--portal-text);
+  font-size: 12px;
+}
+
+:host(.is-collapsed) {
+  width: 44px;
+}
+
+// Sits on the panel's own left edge, overhanging it, so the hit area does not eat into the content.
+.divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  width: 7px;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 1;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0 3px;
+    background: transparent;
+    transition: background var(--portal-hover-duration, 120ms) ease;
+  }
+
+  &:hover::after,
+  &.is-dragging::after,
+  &:focus-visible::after {
+    background: var(--portal-accent);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+// The tab strip names the area, so the header is that strip plus the control that closes it. Its height is
+// the stage bar's, so the two column headers line up and the rule under them runs unbroken across the page.
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  // Border-box, so the rule under the strip lands on the stage bar's own bottom edge rather than a pixel
+  // below it.
+  box-sizing: border-box;
+  height: var(--portal-section-header-height);
+  padding: 0 8px;
+  border-bottom: 1px solid var(--portal-border);
+}
+
+// Collapsed, the panel is a 44px rail holding one control — the only way back.
+:host(.is-collapsed) .head {
+  justify-content: center;
+  height: auto;
+  padding: 8px 0;
+  border-bottom: 0;
+}
+
+// Full height, so the active tab's underline sits on the header's own bottom edge while its label stays
+// centred with the chevron beside it.
+.tabs {
+  display: flex;
+  align-self: stretch;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  padding: 0 11px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--portal-text-muted);
+  font-family: var(--portal-font);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &.active {
+    border-bottom-color: var(--portal-accent);
+    color: var(--portal-text);
+    font-weight: 600;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: -2px;
+  }
+}
+
+.collapse {
+  flex: none;
+  align-self: center;
+  margin-left: auto;
+  padding: 3px 8px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface-raised);
+  color: var(--portal-text-muted);
+  font-family: var(--portal-font);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--portal-text);
+  }
+}
+
+.body {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+// Below the two-column breakpoint the inspector becomes a bottom sheet covering at most three fifths of the
+// height, so the fields stay visible and live while they are edited. Its width is the column's, not the
+// dragged one, so the divider goes away with the second column.
+@media (width <= 900px) {
+  :host {
+    width: auto !important;
+    max-height: 60dvh;
+    border-top: 1px solid var(--portal-border);
+    border-left: 0;
+    box-shadow: var(--portal-shadow);
+  }
+
+  :host(.is-collapsed) {
+    width: auto !important;
+    max-height: none;
+  }
+
+  .divider {
+    display: none;
+  }
+
+  .collapse {
+    transform: rotate(90deg);
+  }
+}

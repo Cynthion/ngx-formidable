@@ -1,0 +1,44 @@
+:host {
+  display: block;
+  margin-top: 6px;
+}
+
+.badges {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badge {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 6px;
+  align-items: baseline;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--portal-ok) 12%, transparent);
+  color: var(--portal-ok);
+  font-size: 11px;
+
+  &.fails {
+    background: color-mix(in srgb, var(--portal-danger) 12%, transparent);
+    color: var(--portal-danger);
+  }
+}
+
+.name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ratio {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+
+.need {
+  opacity: 0.7;
+}

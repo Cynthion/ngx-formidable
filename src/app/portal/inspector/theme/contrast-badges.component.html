@@ -1,0 +1,12 @@
+<ul class="badges">
+  @for (check of theme.contrastChecks(); track check.token) {
+    <li
+      class="badge"
+      [class.fails]="!check.passes"
+      [title]="check.label + ' against the field fill — needs ' + check.required + ':1'">
+      <span class="name">{{ check.label }}</span>
+      <span class="ratio">{{ format(check.ratio) }}</span>
+      <span class="need">/ {{ check.required }}</span>
+    </li>
+  }
+</ul>

@@ -1,6 +1,7 @@
 @use '../../styles/variables' as *;
 
 :host {
+  font-family: var(--formidable-font-family);
   display: block;
 
   ul {

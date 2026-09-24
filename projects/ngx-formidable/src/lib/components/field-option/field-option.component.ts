@@ -70,9 +70,6 @@ export class FieldOptionComponent implements IFormidableOptionSource, OnInit, Af
   /** Whether the keyboard cursor is on this option. Driven by the field — do not bind it yourself. */
   readonly highlighted = input(false);
 
-  /** Replaces the field's own selection handling, for an option that does something else instead. */
-  readonly select = input<(() => void) | undefined>(undefined);
-
   /** Whether an autocomplete's filter text matches. The default is a case-insensitive substring test. */
   readonly match = input<((filterValue: string) => boolean) | undefined>(undefined);
 
@@ -96,11 +93,9 @@ export class FieldOptionComponent implements IFormidableOptionSource, OnInit, Af
     template: this.template,
     readonly: this.readonly(),
     disabled: this.disabled(),
-    select: this.select() ?? this.selectSelf,
     match: this.match() ?? this.matchSelf
   }));
 
-  private readonly selectSelf: () => void = () => this.parent.selectOption(this.option());
   private readonly matchSelf: (filterValue: string) => boolean = (filterValue) =>
     this.option().label?.toLowerCase().includes(filterValue.toLowerCase()) ?? false;
 
@@ -170,6 +165,6 @@ export class FieldOptionComponent implements IFormidableOptionSource, OnInit, Af
   protected onClick(): void {
     if (this.readonly() || this.disabled()) return;
 
-    this.option().select?.();
+    this.parent.selectOption(this.option());
   }
 }

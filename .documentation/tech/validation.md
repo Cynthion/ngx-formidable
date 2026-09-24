@@ -89,6 +89,7 @@ The run axis only works because every field keeps to two rules. Angular commits 
 
 - **Touch Last**: `onTouched()` is the last act of a blur. `BaseFieldDirective.onFocusChange` calls `doOnFocusChange` first, so a field that commits on blur, as `date-field` and `time-field` do, has written its value before the touch that commits it.
 - **Programmatic Paths Are Silent**: `runSilently(cause, work)` marks work the user did not cause, and both `touch()` and `commit()` respect it. Nothing on such a path touches the control or leaves it dirty.
+- **A Write Does Not Take The Caret**: a text field writes through `replaceText`, which leaves the element alone when it already shows that text and collapses the caret behind the text only when it replaced something. A consumer that echoes its model back writes the displayed value on every keystroke, and the caret and selection stay the user's.
 - **A Field May Disown A Blur**: `ignoresBlur()` suppresses both the commit and the touch, for a field that moved focus onto something it owns. `date-field` does this so a control inside its panel stays clickable.
 
 A touch is not cosmetic. Under `blur` it is the commit, and under `submit` it pre-sets the pending touch, so a touch nobody made would commit and reveal a field nobody has visited. Dirty is not cosmetic either: it is what `revealOn="dirty"` reads.
@@ -147,7 +148,7 @@ A `/zod` entry point would be the same three files as `/vest`:
 | `zod/src/public-api.ts`                  | one re-export                                     |
 | `zod/src/lib/zod-validator.directive.ts` | the adapter, importing `@cynthion/ngx-formidable` |
 
-Plus `zod` in `peerDependencies` marked optional, and a `tsconfig.json` path alias for the demo. Note that a secondary entry point must import the primary by its **package name**, not the dev alias — importing `ngx-formidable` puts the primary's sources under the secondary's `rootDir` and the build fails.
+Plus `zod` in `peerDependencies` marked optional, and a `tsconfig.json` path alias for the portal. Note that a secondary entry point must import the primary by its **package name**, not the dev alias — importing `ngx-formidable` puts the primary's sources under the secondary's `rootDir` and the build fails.
 
 ## Whole-Form Rules
 

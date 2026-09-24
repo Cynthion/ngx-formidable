@@ -1,0 +1,84 @@
+// The portal's own appearance. Distinct from the page behind the form, which is the consumer's and is
+// exported; this one is the portal's and is never exported.
+
+@mixin light {
+  --portal-bg: #ffffff;
+  --portal-surface: #f6f7f9;
+  --portal-surface-raised: #ffffff;
+  --portal-surface-sunken: #eef0f4;
+  --portal-border: #d9dee7;
+  --portal-border-strong: #b6bfcd;
+  --portal-text: #1f2937;
+  --portal-text-muted: #647087;
+  --portal-accent: #3f3ac9;
+  --portal-accent-soft: #eceafc;
+  --portal-accent-contrast: #ffffff;
+  --portal-danger: #c81e1e;
+  --portal-ok: #1a7f3c;
+  --portal-warn: #a15c07;
+  --portal-shadow: 0 1px 2px rgb(15 23 42 / 8%), 0 10px 30px rgb(15 23 42 / 10%);
+  --portal-shadow-soft: 0 1px 2px rgb(15 23 42 / 6%);
+}
+
+@mixin dark {
+  --portal-bg: #12151c;
+  --portal-surface: #181c25;
+  --portal-surface-raised: #1f242f;
+  --portal-surface-sunken: #0e1117;
+  --portal-border: #2c3240;
+  --portal-border-strong: #3d4453;
+  --portal-text: #e7ebf3;
+  --portal-text-muted: #98a2b6;
+  --portal-accent: #8b86ff;
+  --portal-accent-soft: #24243c;
+  --portal-accent-contrast: #12151c;
+  --portal-danger: #f87171;
+  --portal-ok: #4ade80;
+  --portal-warn: #fbbf24;
+  --portal-shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 10px 30px rgb(0 0 0 / 50%);
+  --portal-shadow-soft: 0 1px 2px rgb(0 0 0 / 40%);
+}
+
+:root {
+  @include light;
+
+  // Font family is an ordinary inherited property rather than a custom property, so the chrome pins its own
+  // against whatever the user writes to `:root`.
+  --portal-font: system-ui, -apple-system, 'Segoe UI', roboto, helvetica, arial, sans-serif;
+  --portal-mono: ui-monospace, 'SF Mono', sfmono-regular, menlo, consolas, monospace;
+
+  --portal-radius: 10px;
+  --portal-radius-sm: 6px;
+  --portal-top-bar-height: 56px;
+
+  // The stage bar and the editor panel's tab strip are the two column headers, side by side across the
+  // page. One height for both, so the line under them is continuous rather than stepped.
+  --portal-section-header-height: 38px;
+
+  // A tooltip of the portal's own waits this long before it appears. A native `title` waits about a second,
+  // which is long enough that the control it belongs to reads as inert.
+  --portal-tooltip-delay: 120ms;
+
+  // One above the higher of the library's two public z-indices, so a panel scrolled beneath the inspector
+  // cannot punch through it. Stated as a calculation so the two cannot drift apart.
+  --portal-chrome-z-index: calc(var(--formidable-sheet-z-index, 1000) + 1);
+
+  // Written by the theme store. Declared here so the stage has a surface before the first frame.
+  --portal-page-background: #ffffff;
+  --portal-page-text: #1f2937;
+}
+
+// The portal's own appearance follows the operating system preference by default, and the toggle pins it.
+@media (prefers-color-scheme: dark) {
+  :root:not([data-portal-appearance='light']) {
+    @include dark;
+  }
+}
+
+:root[data-portal-appearance='dark'] {
+  @include dark;
+}
+
+:root[data-portal-appearance='light'] {
+  @include light;
+}

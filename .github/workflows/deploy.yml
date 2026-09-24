@@ -38,7 +38,7 @@ jobs:
         id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/ngx-formidable-demo/browser
+          path: dist/ngx-formidable-portal/browser
 
   deploy:
     needs: build

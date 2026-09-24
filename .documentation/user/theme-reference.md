@@ -1,31 +1,32 @@
 # Theme Reference
 
-Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these you actually need, is in `user/theming.md`; complete schemes to copy are in `user/theme-options.md`.
+Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these you actually need, is in `user/theming.md`; complete schemes to start from are in the Studio, which `user/studio.md` covers.
 
 ---
 
 ## Font Sizes And Line Heights
 
-| Variable                                          | Description                                    |
-| :------------------------------------------------ | :--------------------------------------------- |
-| `--formidable-field-font-size`                    | Base font size for form field text.            |
-| `--formidable-field-font-weight`                  | Font weight for form field text.               |
-| `--formidable-field-line-height`                  | Line height for form field text.               |
-| `--formidable-label-font-size`                    | Font size for labels.                          |
-| `--formidable-label-font-weight`                  | Font weight for labels.                        |
-| `--formidable-label-line-height`                  | Line height for labels.                        |
-| `--formidable-label-floating-font-size`           | Font size for a floating label.                |
-| `--formidable-label-floating-font-weight`         | Font weight for a floating label.              |
-| `--formidable-label-floating-line-height`         | Line height for a floating label.              |
-| `--formidable-field-validation-error-font-size`   | Font size for validation error messages.       |
-| `--formidable-field-validation-error-font-weight` | Font weight for validation error messages.     |
-| `--formidable-field-validation-error-line-height` | Line height for validation error messages.     |
-| `--formidable-field-hint-font-size`               | Font size for hint text.                       |
-| `--formidable-field-hint-font-weight`             | Font weight for hint text.                     |
-| `--formidable-field-hint-line-height`             | Line height for hint text.                     |
-| `--formidable-length-indicator-font-size`         | Font size for the textarea length indicator.   |
-| `--formidable-length-indicator-font-weight`       | Font weight for the textarea length indicator. |
-| `--formidable-length-indicator-line-height`       | Line height for the textarea length indicator. |
+| Variable                                          | Description                                                                   |
+| :------------------------------------------------ | :---------------------------------------------------------------------------- |
+| `--formidable-font-family`                        | Font family for every field, label, hint and panel. Unset, the page's family. |
+| `--formidable-field-font-size`                    | Base font size for form field text.                                           |
+| `--formidable-field-font-weight`                  | Font weight for form field text.                                              |
+| `--formidable-field-line-height`                  | Line height for form field text.                                              |
+| `--formidable-label-font-size`                    | Font size for labels.                                                         |
+| `--formidable-label-font-weight`                  | Font weight for labels.                                                       |
+| `--formidable-label-line-height`                  | Line height for labels.                                                       |
+| `--formidable-label-floating-font-size`           | Font size for a floating label.                                               |
+| `--formidable-label-floating-font-weight`         | Font weight for a floating label.                                             |
+| `--formidable-label-floating-line-height`         | Line height for a floating label.                                             |
+| `--formidable-field-validation-error-font-size`   | Font size for validation error messages.                                      |
+| `--formidable-field-validation-error-font-weight` | Font weight for validation error messages.                                    |
+| `--formidable-field-validation-error-line-height` | Line height for validation error messages.                                    |
+| `--formidable-field-hint-font-size`               | Font size for hint text.                                                      |
+| `--formidable-field-hint-font-weight`             | Font weight for hint text.                                                    |
+| `--formidable-field-hint-line-height`             | Line height for hint text.                                                    |
+| `--formidable-length-indicator-font-size`         | Font size for the textarea length indicator.                                  |
+| `--formidable-length-indicator-font-weight`       | Font weight for the textarea length indicator.                                |
+| `--formidable-length-indicator-line-height`       | Line height for the textarea length indicator.                                |
 
 #### Slider
 
@@ -58,7 +59,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-label-height`                      | Derived: height of the label text line box.                                                                                                                                                                              |
 | `--formidable-field-height`                      | Default height for single-line fields.                                                                                                                                                                                   |
 | `--formidable-field-padding-x`                   | Horizontal padding of a field: where its value, and a projected prefix's text, start.                                                                                                                                    |
-| `--formidable-field-toggle-size`                 | Size of the panel toggle a dropdown or date field draws inside its own box.                                                                                                                                              |
+| `--formidable-field-toggle-size`                 | Size of the toggle a select, dropdown or date field draws inside its own box.                                                                                                                                            |
 | `--formidable-field-toggle-inset`                | How much of a field's right edge that toggle claims. Raised by the decorator for the fields that have one.                                                                                                               |
 | `--formidable-field-inner-height`                | Derived: height inside a field's borders.                                                                                                                                                                                |
 | `--formidable-field-value-height`                | Derived: height of a field value's text line box.                                                                                                                                                                        |
@@ -75,7 +76,6 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-label-border-band-reach-focus`     | What that reach becomes while the field is focused, so the band covers the ring too. Follows the ring's width unless set.                                                                                                |
 | `--formidable-label-required-marker`             | The `content` string suffixed to a required field's label — `'*'`, or a word such as `' (required)'`.                                                                                                                    |
 | `--formidable-field-group-option-padding`        | Padding of options within a field group.                                                                                                                                                                                 |
-| `--formidable-field-support-min-height`          | Minimum reserved height of a support-text row below a field — the hints and the validation errors.                                                                                                                       |
 
 ---
 
@@ -292,7 +292,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 
 ```scss
 .app-header {
-	z-index: calc(var(--formidable-sheet-z-index, 1000) + 1);
+  z-index: calc(var(--formidable-sheet-z-index, 1000) + 1);
 }
 ```
 
@@ -342,9 +342,9 @@ Every corner of a field falls back to `--formidable-field-border-radius`, and ea
 
 ```scss
 :root {
-	--formidable-field-border-radius: 0.5rem;
-	--formidable-field-border-end-start-radius: 0; /* top-rounded only */
-	--formidable-field-border-end-end-radius: 0;
+  --formidable-field-border-radius: 0.5rem;
+  --formidable-field-border-end-start-radius: 0; /* top-rounded only */
+  --formidable-field-border-end-end-radius: 0;
 }
 ```
 
@@ -360,10 +360,10 @@ A field can carry an extra line inside its bottom edge, thickening on focus and 
 
 ```scss
 :root {
-	--formidable-field-border-thickness: 0px;
-	--formidable-field-underline-thickness: 1px;
-	--formidable-field-underline-thickness-focus: 2px;
-	--formidable-field-underline-thickness-invalid: 2px;
+  --formidable-field-border-thickness: 0px;
+  --formidable-field-underline-thickness: 1px;
+  --formidable-field-underline-thickness-focus: 2px;
+  --formidable-field-underline-thickness-invalid: 2px;
 }
 ```
 
@@ -379,6 +379,6 @@ The date field's calendar is rendered by Pikaday, which brings its own class nam
 
 ```scss
 .pika-lendar {
-	background-color: #8a2b75ff;
+  background-color: #8a2b75ff;
 }
 ```

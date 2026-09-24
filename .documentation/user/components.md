@@ -30,7 +30,7 @@ Both register ngx-mask and set `FORMIDABLE_MASK_DEFAULTS` from `globalMaskConfig
 
 ## Base Field Directive
 
-`BaseFieldDirective<T = string | null>` — exported abstract `@Directive()` (no selector). The base class for every field and the extension point for custom fields (reference implementation: `example-counter-field` in the demo, walked through in `user/custom-fields.md`). Implements `ControlValueAccessor` + `IFormidableField<T>`.
+`BaseFieldDirective<T = string | null>` — exported abstract `@Directive()` (no selector). The base class for every field and the extension point for custom fields (reference implementation: `example-counter-field` in the portal, walked through in `user/custom-fields.md`). Implements `ControlValueAccessor` + `IFormidableField<T>`.
 
 Inherited by every field:
 
@@ -54,7 +54,7 @@ Inherited by every field:
 | `hasInFieldToggle`   | optional signal | Whether the field renders a panel toggle inside its own box, which the value and a label must clear |
 | `valueAlignment`     | optional        | Where the value sits vertically, which a prefix/suffix aligns with: `'center'` (default) or `'top'` |
 
-**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners, readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly or disabled. A `placeholder` is not part of it — whether that blocks a resting label belongs to the label's position (see **Label As Placeholder** below). A field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` **signal** (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always) — a signal and not a getter, because `canLabelRest` is a `computed` over it and a computed would cache whatever a getter returned first. A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field`, with their panel toggle — declares `hasInFieldToggle` as a signal, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it. A field whose `fieldRef` is not the element that takes focus overrides the protected `focusElement` getter (see **Focus**).
+**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners, readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly or disabled. A `placeholder` is not part of it — whether that blocks a resting label belongs to the label's position (see **Label As Placeholder** below). A field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` **signal** (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always) — a signal and not a getter, because `canLabelRest` is a `computed` over it and a computed would cache whatever a getter returned first. A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field` with their panel toggle, `select-field` with its dropdown arrow — declares `hasInFieldToggle` as a signal, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it. A field whose `fieldRef` is not the element that takes focus overrides the protected `focusElement` getter (see **Focus**).
 
 **Disabled**: `disabled` has two writers, so it is the one member of the surface that is a `model` rather than an `input`. A consumer binds `[disabled]`, and Angular's own forms write the same state through `setDisabledState` when the control is disabled programmatically (`control.disable()`); neither goes through the other, and whichever wrote last is what the field renders. A binding that does not change is not a writer, so a `[disabled]="false"` left in place does not undo a `control.disable()`. The `model` brings a `disabledChange` output with it, which reports either writer — including Angular's.
 
@@ -97,6 +97,7 @@ Inherited by those four:
 All extend `BaseFieldDirective<T>` (inherited API above); the four option fields extend `BaseOptionFieldDirective<T>`. Tables list each field's OWN inputs only.
 
 **Panel Control**: the three fields with a panel — `dropdown-field`, `autocomplete-field` and `date-field` — expose `isPanelOpen` as a signal to read and `togglePanel(isOpen)` as the way to open or close it from outside. There is no `isPanelOpen` input: a panel is state the field owns and closes by itself (on a selection, an outside click, `Escape`), so a one-way binding would go stale the moment it did. Reach the method through a template reference (`#field`) or a `viewChild()`, exactly as `focus()` is reached.
+**Action Option**: the two panel fields take an `actionOption` — an entry pinned to the end of the list that runs an action instead of becoming a value, which is what an "Add A New Address…" row is. It renders as an option and the keyboard walks it as one, because `aria-activedescendant` may only name an option the `listbox` owns; what separates it is every value path, none of which it takes. Picking it closes the panel, runs its `action` and commits nothing; a model written to its value finds no option; the autocomplete never auto-selects it off an exact label and the dropdown's type-ahead walks past it. It never stands in for a result either — an otherwise empty list still renders `noOptionsText`, because that is a status and the action is a control. What happens next is the consumer's: see **An Action Row Is Not A Value** in `user/fields.md` for the round trip.
 
 ### Input Field
 
@@ -136,7 +137,7 @@ Multi-line text with optional autosize and a length indicator.
 
 **Selector** `formidable-select-field` · **Value** `string | null`
 
-Native-style single select. Options come from the `options` input or projected `formidable-field-option` children.
+Native-style single select. Options come from the `options` input or projected `formidable-field-option` children. The field draws its own dropdown arrow, from the same icon and `--formidable-field-toggle-size` box as the panel fields' toggle, because the shared field reset takes the user agent's away with `appearance: none`. The arrow overlays the control and takes no pointer events, so a click anywhere in the field still opens the platform's list; it is not projected content and, unlike the date field's toggle, has no icon slot.
 
 | Input               | Type                     | Default                   | Description                                                                                  |
 | :------------------ | :----------------------- | :------------------------ | :------------------------------------------------------------------------------------------- |
@@ -154,9 +155,11 @@ These five look like the option inputs above but are declared on the field itsel
 
 Custom single-select with a floating panel. Option inputs come from **Base Option Field Directive**.
 
-| Input           | Type                      | Default  | Description     |
-| :-------------- | :------------------------ | :------- | :-------------- |
-| `panelPosition` | `FormidablePanelPosition` | `'full'` | Panel placement |
+| Input              | Type                      | Default     | Description                                                  |
+| :----------------- | :------------------------ | :---------- | :----------------------------------------------------------- |
+| `panelPosition`    | `FormidablePanelPosition` | `'full'`    | Panel placement                                              |
+| `actionOption`     | `IFormidableActionOption` | `undefined` | An entry that runs an action instead of becoming a value     |
+| `actionOptionMode` | `FieldDefaultOptionMode`  | `'always'`  | When it renders: always last, or only when the list is empty |
 
 Supports projected `formidable-field-option` children. **Use when** you need a styled dropdown with rich option content. The panel is opened and closed from outside through `togglePanel(isOpen)` — see **Panel Control**.
 
@@ -164,13 +167,15 @@ Supports projected `formidable-field-option` children. **Use when** you need a s
 
 **Selector** `formidable-autocomplete-field` · **Value** `string | null`
 
-Dropdown panel plus a filter input. Emits filter text; the consumer supplies filtered options (the demo pairs it with fuse.js). Option inputs come from **Base Option Field Directive**.
+Dropdown panel plus a filter input. Emits filter text; the consumer supplies filtered options (the portal pairs it with fuse.js). Option inputs come from **Base Option Field Directive**.
 
-| Input           | Type                      | Default  | Description     |
-| :-------------- | :------------------------ | :------- | :-------------- |
-| `panelPosition` | `FormidablePanelPosition` | `'full'` | Panel placement |
+| Input              | Type                      | Default     | Description                                                  |
+| :----------------- | :------------------------ | :---------- | :----------------------------------------------------------- |
+| `panelPosition`    | `FormidablePanelPosition` | `'full'`    | Panel placement                                              |
+| `actionOption`     | `IFormidableActionOption` | `undefined` | An entry that runs an action instead of becoming a value     |
+| `actionOptionMode` | `FieldDefaultOptionMode`  | `'always'`  | When it renders: always last, or only when the list is empty |
 
-The default option is pinned after filtering, so an `always` default stays visible even when the filter matches nothing. **Output** `filterChanged: string` (+ `filterChange$`). The panel is opened and closed from outside through `togglePanel(isOpen)` — see **Panel Control**. **Use when** the option set is large or fetched/filtered dynamically.
+The default option and the action entry are both applied after filtering, so an `always` default and the action entry stay visible even when the filter matches nothing — which is the moment the action entry exists for. **Output** `filterChanged: string` (+ `filterChange$`), which reports the filter the field moves itself as well as the text typed into it — see **`filterChanged` Reports More Than Typing** in `user/fields.md`. The panel is opened and closed from outside through `togglePanel(isOpen)` — see **Panel Control**. **Use when** the option set is large or fetched/filtered dynamically.
 
 ### Date Field
 
@@ -282,9 +287,9 @@ Wraps a field and its label, label adornment, prefix, suffix, hints and errors i
 
 **Prefix And Suffix Actions**: the wrappers are `pointer-events: none`, so a text adornment over the field's edge still focuses the field. `_globals.scss` excepts a projected `button` and `a`, which is what makes a clear, copy, retry or loading action possible; the library ships none of them, only the slot. Such an action needs no refresh call — the `ResizeObserver` above already re-insets the field when the action appears, disappears or swaps its content.
 
-**Hints**: `formidableFieldHint` elements share one row below the field and above the errors, outside the layout container — so, like the errors, they render identically in all three `decoratorLayout`s. The row is content-only: the library owns the slot, never what goes in it, and there are no pre-defined hints. Hints split the row in equal parts and each aligns its own text via `align`, so a `start` note and an `end` counter sit on one line. The row reserves the same single line as the errors (`--formidable-field-support-min-height`) and collapses entirely when nothing is projected. Both the equal split and the per-hint alignment live in `_globals.scss`: the hint element belongs to the consumer's view, which the decorator's encapsulated stylesheet cannot reach.
+**Hints**: `formidableFieldHint` elements share one row below the field and above the errors, outside the layout container — so, like the errors, they render identically in all three `decoratorLayout`s. The row is content-only: the library owns the slot, never what goes in it, and there are no pre-defined hints. Hints split the row in equal parts and each aligns its own text via `align`, so a `start` note and an `end` counter sit on one line. The row is sized by its content and collapses entirely when nothing is projected. Both the equal split and the per-hint alignment live in `_globals.scss`: the hint element belongs to the consumer's view, which the decorator's encapsulated stylesheet cannot reach.
 
-**In-Field Toggle**: `dropdown-field` and `date-field` draw a panel toggle inside their own box, at the field's inner right edge. It is not projected content, so instead of measuring it the field declares `hasInFieldToggle` and the decorator turns that into a `has-in-field-toggle` host class, which raises `--formidable-field-toggle-inset` to `--formidable-field-toggle-size`. Both fields report it as `!readonly && !disabled` rather than as a constant, because neither renders the toggle in those states: the class and the inset go away with it, and the value reclaims the space. Only the value inset adds it: the toggle is a flex item inside the field's `padding-right`, so a projected suffix — measured into that padding — already pushes the toggle left of itself.
+**In-Field Toggle**: `dropdown-field` and `date-field` draw a panel toggle inside their own box, at the field's inner right edge, and `select-field` draws its dropdown arrow in the same place. It is not projected content, so instead of measuring it the field declares `hasInFieldToggle` and the decorator turns that into a `has-in-field-toggle` host class, which raises `--formidable-field-toggle-inset` to `--formidable-field-toggle-size`. All three report it as `!readonly && !disabled` rather than as a constant, because none renders the toggle in those states: the class and the inset go away with it, and the value reclaims the space. Only the value inset adds it: in the two panel fields the toggle is a flex item inside the field's `padding-right`, so a projected suffix — measured into that padding — already pushes the toggle left of itself. `select-field` cannot put anything in flow beside its value, since the value area is a native `<select>`, so its host is a one-cell grid that stacks the arrow over the control; the arrow takes no pointer events and the select reserves the room with its own `padding-right`, which is what keeps the whole box clickable.
 
 **Field State**: the decorator is where all of the field's state is reachable at once, so it mirrors it onto its own host as `is-readonly`, `is-disabled`, `is-focused`, `is-invalid`, `label-resting`, `label-inside`, `has-in-field-toggle`, `has-open-panel` and `has-open-sheet`. The last two lift the decorator into the consumer's stack for as long as a panel is open, and only then — see `tech/layering.md`. A field used **without** a decorator carries `is-undecorated`, `has-open-panel` and `has-open-sheet` on its own host instead, so its panel still paints correctly. `is-invalid` comes from the `FieldErrorsComponent` that `FieldErrorsDirective` registers with the decorator — nothing else in the library knows a control's validity, so a field used without a decorator has no invalid styling.
 
@@ -367,13 +372,12 @@ A single option inside an option-based field. Provides `FORMIDABLE_OPTION` and t
 | `disabled`    | `boolean`             | `false`                            | Disabled option                                                    |
 | `selected`    | `boolean`             | `false`                            | Selected state                                                     |
 | `highlighted` | `boolean`             | `false`                            | Highlighted state                                                  |
-| `select`      | `() => void`          | Selects it in the parent field     | Overrides what picking the option does                             |
 | `match`       | `(filter) => boolean` | Case-insensitive `label` substring | Overrides how the autocomplete filter matches it                   |
 | `layout`      | `FieldOptionLayout`   | `'inline'`                         | Option layout, a look only. The ARIA role follows the parent field |
 | `template`    | getter                | —                                  | The projected content, or `undefined` when none was projected      |
 | `option`      | computed              | —                                  | The plain `IFormidableOption` the owning field reads — see below   |
 
-**Component And Data**: `IFormidableOption` is plain data — the shape a consumer writes into a field's `options` input, and the shape every field works with internally. A component is a different thing: its members are signals. `option` is the one boundary between them, and it is what `FORMIDABLE_OPTION` provides: the component folds its inputs, its projected content and its two behaviour defaults into one plain option, and the owning field reads that. `label` therefore falls back to the text taken off the projected content, and `select` and `match` resolve their defaults there rather than on the input — which is why the plain option a field holds always carries both.
+**Component And Data**: `IFormidableOption` is plain data — the shape a consumer writes into a field's `options` input, and the shape every field works with internally. A component is a different thing: its members are signals. `option` is the one boundary between them, and it is what `FORMIDABLE_OPTION` provides: the component folds its inputs, its projected content and its `match` default into one plain option, and the owning field reads that. `label` therefore falls back to the text taken off the projected content, and `match` resolves its default there rather than on the input — which is why the plain option a field holds always carries one.
 
 **Accessibility**: the option's ARIA lands on its host element, not on the inner `div` — the host is the direct child of the `listbox` / `radiogroup` / `group` that owns it, and an element with no role in between would break that ownership. The role comes from the parent field's `optionRole`, never from `layout`: `layout` is a look a consumer may set freely, while the role has to follow the container. It is also what chooses the state attribute — `aria-selected` for an `option`, `aria-checked` for a `radio` or a `checkbox`, each binding its boolean raw so an unselected option reports `false`. `readonly` folds into `aria-disabled` alongside `disabled`: ARIA has no `aria-readonly` for these roles, and both flags mean the same thing here. The option's `id` is bound by the parent, which is what knows the index — see **Combobox And Options**.
 
@@ -381,7 +385,7 @@ A single option inside an option-based field. Provides `FORMIDABLE_OPTION` and t
 
 **Selector** `formidable-field-errors`
 
-Renders validation error messages for a control. Reads `control.errors` through `FORMIDABLE_ERROR_EXTRACTOR`, whose default takes the `errors` array the form directive writes and otherwise falls back to Angular's own error keys, so built-in validators render with nothing wired. Error strings then pass through `FORMIDABLE_ERROR_TRANSLATOR`. `invalid` is true once the control has errors **and** its `revealOn` says so: `always` immediately, `dirty` once edited, `submitted` once the form is submitted, and `touched` (the default) once visited. The container always reserves one line of height (`--formidable-field-support-min-height`) so a single-line error doesn't shift later fields; longer, wrapping errors still push later content down.
+Renders validation error messages for a control. Reads `control.errors` through `FORMIDABLE_ERROR_EXTRACTOR`, whose default takes the `errors` array the form directive writes and otherwise falls back to Angular's own error keys, so built-in validators render with nothing wired. Error strings then pass through `FORMIDABLE_ERROR_TRANSLATOR`. `invalid` is true once the control has errors **and** its `revealOn` says so: `always` immediately, `dirty` once edited, `submitted` once the form is submitted, and `touched` (the default) once visited. The message list renders only while `invalid` is true, so a field that never fails costs nothing below itself and a message appearing pushes later content down. Reserving space against that shift is the consumer's own layout, on the `formidable-field-errors` host, which is always present.
 
 Usually created by `FieldErrorsDirective` rather than written by hand. Inside a decorator it renders in that decorator's errors slot, after the field's layout container — never inside it, since that container is the positioning context for the label and the prefix/suffix and has to stay exactly the field's box. Placement is therefore the same for all three `decoratorLayout`s.
 
@@ -453,7 +457,8 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `FormidablePanelPosition`            | `'left' \| 'right' \| 'full' \| 'sheet'`                                                            |
 | `FormidableReveal`                   | `'touched' \| 'dirty' \| 'submitted' \| 'always'`                                                   |
 | `FormidableToggleFieldLabelPosition` | `'before' \| 'after'`                                                                               |
-| `IFormidableOption`                  | `{ value: string; label?; template?; readonly?; disabled?; select?(); match?(filter) }`             |
+| `IFormidableOption`                  | `{ value: string; label?; template?; readonly?; disabled?; match?(filter) }`                        |
+| `IFormidableActionOption`            | `IFormidableOption` plus a required `action(): void`                                                |
 
 `FieldDefaultOptionMode` decides when an option field renders its `defaultOption`: `always`, pinned first and exempt from both `sortFn` and the autocomplete filter, or as a `fallback` only when the list would otherwise be empty.
 
@@ -461,7 +466,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 
 `FormidableEmptyHint` sets what the date/time fields show while empty **and unfocused** — `_` slots or the `unicodeTokenFormat` itself. A focused empty field always shows `_` slots, because ngx-mask's caret arithmetic only recognizes its own placeholder character.
 
-`FormidablePanelPosition` picks between two kinds of panel. `left`, `right` and `full` are **anchored**: absolutely positioned against the field, flipping above it when there is no room below and adopting the two field corners they sit against. `sheet` is a **sheet**: `position: fixed` across the bottom of the viewport, full width, square where it meets the screen edge, and it never flips. A sheet is what a phone wants — an anchored panel in a narrow column is not. Two limits, both the consumer's to weigh: `fixed` is defeated by an ancestor `transform`, `filter` or `contain`, and an `autocomplete-field` sheet keeps focus in its filter input, so a soft keyboard can cover it. The date field moves focus to the panel when it opens, so its sheet is clear of the keyboard.
+`FormidablePanelPosition` picks between two kinds of panel. `left`, `right` and `full` are **anchored**: absolutely positioned against the field, flipping above it when there is no room below and adopting the two field corners they sit against. The room is the viewport cropped by every ancestor that clips its overflow, so a field in a scrolling pane is placed against that pane rather than against the window. `sheet` is a **sheet**: `position: fixed` across the bottom of the viewport, full width, square where it meets the screen edge, and it never flips. A sheet is what a phone wants — an anchored panel in a narrow column is not. Two limits, both the consumer's to weigh: `fixed` is defeated by an ancestor `transform`, `filter` or `contain`, and an `autocomplete-field` sheet keeps focus in its filter input, so a soft keyboard can cover it. The date field moves focus to the panel when it opens, so its sheet is clear of the keyboard.
 
 `DeepPartial<T>` and `DeepRequired<T>` (from `utility-types.ts`) build the form model and shape types. `formShape` takes a `DeepRequired<T>`.
 
@@ -473,7 +478,8 @@ The contracts a custom field, option or validator implements. Every field compon
 | :------------------------ | :------------------------------ | :--------------------------------------------------------------------------------- |
 | `IFormidableField<T>`     | every field, and the decorator  | What the decorator reads off a field: refs, id, state, value and both streams      |
 | `IFormidableOptionField`  | the five option fields          | `options`, `defaultOption`, `defaultOptionMode`, `selectOption`, `optionRole`      |
-| `IFormidableOption<T>`    | plain data, written by hand     | One option: `value`, `label`, `template`, its flags, `select` and `match`          |
+| `IFormidableOption<T>`    | plain data, written by hand     | One option: `value`, `label`, `template`, its flags and `match`                    |
+| `IFormidableActionOption` | plain data, written by hand     | An option plus the `action` that replaces committing it — see **Action Option**    |
 | `IFormidableOptionSource` | `FieldOptionComponent`          | `option` — the plain option a component hands to the field that owns it            |
 | `IFormidablePanelField`   | dropdown, autocomplete, date    | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                          |
 | `IFormidableMaskField`    | input, textarea                 | `mask`, `maskConfig`                                                               |

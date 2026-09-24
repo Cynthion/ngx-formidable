@@ -10,6 +10,20 @@ So any validator works, including none:
 - your own, see [The Validator Contract](#the-validator-contract)
 - none
 
+## The Model
+
+The library prescribes no model type. `formValue` takes any object, and a validator reads whatever it is handed. The one contract is Angular's: `NgForm` builds its value from the control tree, so the model follows that tree.
+
+| In The Model    | Comes From                                                       |
+| :-------------- | :--------------------------------------------------------------- |
+| A key           | A control's `name`                                               |
+| A nested object | An `ngModelGroup` around its controls                            |
+| A value's type  | The field that writes it — its **Value** in `user/components.md` |
+
+A target is a path into the same tree, so a rule whose target names no control never runs.
+
+Everything beyond that is convention — `DeepPartial`, the shape, one `*.form.ts` per form — see [The Convention](#the-convention). The Studio's `Copy Component` generates it for the form on its stage, see `user/studio.md`.
+
 ## Rule Targets
 
 Every rule has a **target** it reports on.
@@ -33,6 +47,14 @@ A target is what your validator receives as its second argument, and what `error
 | `@cynthion/ngx-formidable/vest` | An import — the Vest validator ships with the library      | Vest suites                                |
 | Nothing                         | Nothing                                                    | Display-only or externally validated forms |
 
+**A Field Inside Your Own Component**: `ngModel` injects its `ControlContainer` with `@Host()`, which stops at a component boundary. Wrap a field in a component of your own and its control registers as **standalone** — outside your `<form>`, invisible to the model and to every rule. Angular logs `NG01354` and names the fix; add it to the wrapping component:
+
+```ts
+viewProviders: [{ provide: ControlContainer, useExisting: NgForm }];
+```
+
+This applies to any wrapper, including one that renders fields from a configuration.
+
 ---
 
 ## Angular's Built-In Validators
@@ -41,13 +63,13 @@ Nothing to wire. Put the validator on the field and the error renders.
 
 ```html
 <formidable-field-decorator>
-	<formidable-input-field
-		formidableFieldErrors
-		name="name"
-		[required]="true"
-		[minlength]="3"
-		[(ngModel)]="name" />
-	<div formidableFieldLabel>Name</div>
+  <formidable-input-field
+    formidableFieldErrors
+    name="name"
+    [required]="true"
+    [minlength]="3"
+    [(ngModel)]="name" />
+  <div formidableFieldLabel>Name</div>
 </formidable-field-decorator>
 ```
 
@@ -94,17 +116,17 @@ Angular owns this one, so there is no library input for it. `ngFormOptions` on t
 
 ```html
 <form
-	formidableForm
-	[ngFormOptions]="{ updateOn: 'blur' }">
-	<formidable-input-field
-		name="firstName"
-		[ngModel]="model.firstName" />
+  formidableForm
+  [ngFormOptions]="{ updateOn: 'blur' }">
+  <formidable-input-field
+    name="firstName"
+    [ngModel]="model.firstName" />
 
-	<!-- this one field validates on every keystroke anyway -->
-	<formidable-input-field
-		name="lastName"
-		[ngModel]="model.lastName"
-		[ngModelOptions]="{ updateOn: 'change' }" />
+  <!-- this one field validates on every keystroke anyway -->
+  <formidable-input-field
+    name="lastName"
+    [ngModel]="model.lastName"
+    [ngModelOptions]="{ updateOn: 'change' }" />
 </form>
 ```
 
@@ -129,19 +151,19 @@ A field takes it on `formidableFieldErrors`, which is the directive that renders
 
 ```html
 <form
-	formidableForm
-	revealOn="submitted">
-	<formidable-input-field
-		formidableFieldErrors
-		name="firstName"
-		[ngModel]="model.firstName" />
+  formidableForm
+  revealOn="submitted">
+  <formidable-input-field
+    formidableFieldErrors
+    name="firstName"
+    [ngModel]="model.firstName" />
 
-	<!-- this one reports as soon as it is edited -->
-	<formidable-input-field
-		formidableFieldErrors
-		name="lastName"
-		revealOn="dirty"
-		[ngModel]="model.lastName" />
+  <!-- this one reports as soon as it is edited -->
+  <formidable-input-field
+    formidableFieldErrors
+    name="lastName"
+    revealOn="dirty"
+    [ngModel]="model.lastName" />
 </form>
 ```
 
@@ -186,8 +208,8 @@ Everything else goes through one interface. `NgxFormidableFormDirective` owns th
 
 ```ts
 export interface IFormidableValidator<T = Record<string, unknown>> {
-	/** Runs the rules for one target against the whole model. `null` means valid. */
-	validate(model: T, target: string): Observable<string[] | null>;
+  /** Runs the rules for one target against the whole model. `null` means valid. */
+  validate(model: T, target: string): Observable<string[] | null>;
 }
 ```
 
@@ -197,16 +219,16 @@ A directive on the form is the idiomatic way to supply one, because it can take 
 
 ```ts
 @Directive({
-	selector: 'form[mySchema]',
-	standalone: true,
-	providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: MySchemaValidatorDirective }]
+  selector: 'form[mySchema]',
+  standalone: true,
+  providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: MySchemaValidatorDirective }]
 })
 export class MySchemaValidatorDirective<T extends Record<string, unknown>> implements IFormidableValidator<T> {
-	public readonly mySchema = input.required<MySchema<T>>();
+  public readonly mySchema = input.required<MySchema<T>>();
 
-	public validate(model: T, target: string): Observable<string[] | null> {
-		return of(this.mySchema().messagesFor(model, target) ?? null);
-	}
+  public validate(model: T, target: string): Observable<string[] | null> {
+    return of(this.mySchema().messagesFor(model, target) ?? null);
+  }
 }
 ```
 
@@ -234,62 +256,34 @@ import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/ve
 
 ```html
 <form
-	formidableForm
-	formidableValidateWholeForm
-	[formValue]="formValue$ | async"
-	[formShape]="formShape"
-	[formSuite]="formSuite"
-	[debounceMs]="0"
-	(formValueChange)="formValue$.next($event)"
-	(validChange)="isValid$.next($event)"
-	(dirtyChange)="isDirty$.next($event)"
-	(errorsChange)="errors$.next($event)"
-	(ngSubmit)="onSubmit()">
-	<!-- fields -->
+  formidableForm
+  formidableValidateWholeForm
+  [formValue]="formValue$ | async"
+  [formShape]="formShape"
+  [formSuite]="formSuite"
+  [debounceMs]="0"
+  (formValueChange)="formValue$.next($event)"
+  (validChange)="isValid$.next($event)"
+  (dirtyChange)="isDirty$.next($event)"
+  (errorsChange)="errors$.next($event)"
+  (ngSubmit)="onSubmit()">
+  <!-- fields -->
 </form>
 ```
 
 ### The Convention
 
-One `*.form.ts` per form holds everything about it — model, shape, field names, suite and an equality function:
-
-```ts
-export interface AppointmentPage {
-	chosenDate: Date | null;
-	details: string;
-}
-
-export const APPOINTMENT_PAGE_FORM_FIELD_NAMES = {
-	chosenDate: 'chosenDate',
-	details: 'details'
-} as const;
-
-export type AppointmentPageFormModel = DeepPartial<AppointmentPage>;
-export type AppointmentPageFormShape = DeepRequired<AppointmentPageFormModel>;
-
-/** Every key the model can carry, so a typo in a target or a model key fails the build. */
-export const appointmentPageFormShape: AppointmentPageFormShape = {
-	chosenDate: new Date(),
-	details: ''
-};
-
-export const appointmentPageFormSuite: Suite<string, string, (model: AppointmentPageFormModel, field?: string) => void> = create((model: AppointmentPageFormModel, field?: string) => {
-	mode(Modes.ALL); // set it explicitly: Vest 6 defaults to Modes.EAGER, only the first failure per target
-
-	if (field) {
-		only(field); // one target is validated at a time — without this the suite runs every rule
-	}
-
-	test(APPOINTMENT_PAGE_FORM_FIELD_NAMES.details, 'view.appointment.form.details.required', () => {
-		enforce(model[APPOINTMENT_PAGE_FORM_FIELD_NAMES.details]).isNotBlank();
-	});
-});
-```
-
-Notes on the pieces:
+One `*.form.ts` per form holds its model, shape and suite. `user/getting-started.md` builds one in full, and the Studio's `Copy Component` generates one. Notes on the pieces:
 
 - **`only(field)`** is required. The form directive asks the suite about one target at a time, and `only` is what keeps a run from reporting every other target too.
-- **`FIELD_NAMES`** keeps the target, the control `name` and the model key from drifting apart.
+- **`FIELD_NAMES`** keeps the target, the control `name` and the model key from drifting apart:
+  ```ts
+  export const USER_FORM_FIELD_NAMES = { name: 'name' } as const;
+
+  test(USER_FORM_FIELD_NAMES.name, 'user.form.name.required', () => {
+    enforce(model[USER_FORM_FIELD_NAMES.name]).isNotBlank();
+  });
+  ```
 - **`formShape`** is a dev-mode typo check, not a validator. It has no runtime cost in production.
 - **Messages are translation keys**, resolved by `FORMIDABLE_ERROR_TRANSLATOR`.
 - **Group rules** target the group (`test('passwords', …)`), usually inside `omitWhen`. Pair them with `dependentFields` so changing one member re-runs the rule:
@@ -299,18 +293,53 @@ Notes on the pieces:
 - **Whole-form rules** use `test(WHOLE_FORM, …)` and need `formidableValidateWholeForm` on the `<form>`.
 - **`debounceMs`** sits on the `<form>` and governs every target on it.
 
-The form component exposes the form directive's outputs as subjects and derives from them:
+---
+
+## Conditional Fields
+
+A field that appears only under some condition is Angular's `@if`, not a library feature. The library has no input for it and needs none.
+
+```html
+<formidable-toggle-field
+  name="pickup"
+  [ngModel]="model().pickup" />
+
+@if (!model().pickup) {
+<formidable-field-decorator>
+  <formidable-autocomplete-field
+    formidableFieldErrors
+    name="address"
+    [ngModel]="model().address" />
+  <div formidableFieldLabel>Delivery Address</div>
+</formidable-field-decorator>
+}
+```
+
+`@if` **destroys** the control rather than hiding it. Angular deregisters it, `NgForm` rebuilds its value without that key, and the model shrinks. Everything below follows from that one fact.
+
+| Concern           | What To Do                                                                                                      |
+| :---------------- | :-------------------------------------------------------------------------------------------------------------- |
+| The rule          | Wrap it in `omitWhen`, or it reports on a target nobody can see or fix                                          |
+| The re-run        | Name the controlling field in `dependentFields`, or the last message stands after the field has gone            |
+| The value         | Yours to clear. Angular removes the control, never your model key — the field returns carrying its old value    |
+| A whole-form rule | Reads a key that may be absent, so it handles `undefined` rather than assuming the field is there               |
+| `formShape`       | Nothing to do. It is `DeepPartial` and is checked against the keys the **model** has, so a missing one is legal |
 
 ```ts
-readonly isDirty$ = new BehaviorSubject<boolean | null>(null);
-readonly isValid$ = new BehaviorSubject<boolean | null>(null);
-readonly errors$ = new BehaviorSubject<FormidableFormErrors>({});
-readonly formValue$ = new BehaviorSubject<FormModel>(this.formModel);
-
-readonly isSubmitDisabled$ = combineLatest([this.isValid$, this.hasChanges$]).pipe(
-  map(([isValid, hasChanges]) => !(!!isValid && hasChanges))
-);
+omitWhen(model.pickup === true, () => {
+  test('address', 'We need an address to deliver to.', () => {
+    enforce(model.address).isNotBlank();
+  });
+});
 ```
+
+```ts
+dependentFields = { pickup: ['address', 'branch'] };
+```
+
+**Two Fields, One Switch.** A pair that swaps — one field replaced by another — is two `@if` blocks over the same control and two `omitWhen` rules with opposite conditions. Both fields belong in the shape; only one is ever in the model.
+
+**Not `[disabled]`.** A disabled control keeps its key: the form still carries it, and the raw value a group or whole-form rule reads still holds it. Use `[disabled]` for a field that is present but not editable, and `@if` for a field that is not part of this form right now.
 
 ---
 
@@ -320,32 +349,34 @@ Not shipped. But it is the same shape, and the library is built so this is all i
 
 ```ts
 @Directive({
-	selector: 'form[formSchema]',
-	standalone: true,
-	providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: ZodValidatorDirective }]
+  selector: 'form[formSchema]',
+  standalone: true,
+  providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: ZodValidatorDirective }]
 })
 export class ZodValidatorDirective<T extends Record<string, unknown>> implements IFormidableValidator<T> {
-	public readonly formSchema = input<ZodType<T> | null>(null);
+  public readonly formSchema = input<ZodType<T> | null>(null);
 
-	public validate(model: T, target: string): Observable<string[] | null> {
-		const schema = this.formSchema();
+  public validate(model: T, target: string): Observable<string[] | null> {
+    const schema = this.formSchema();
 
-		if (!schema) {
-			return of(null);
-		}
+    if (!schema) {
+      return of(null);
+    }
 
-		const result = schema.safeParse(model);
+    const result = schema.safeParse(model);
 
-		if (result.success) {
-			return of(null);
-		}
+    if (result.success) {
+      return of(null);
+    }
 
-		const messages = result.error.issues.filter((issue) => issue.path.join('.') === target).map((issue) => issue.message);
+    const messages = result.error.issues.filter((issue) => (issue.path.join('.') || WHOLE_FORM) === target).map((issue) => issue.message);
 
-		return of(messages.length ? messages : null);
-	}
+    return of(messages.length ? messages : null);
+  }
 }
 ```
+
+A `refine` on the whole schema reports an empty path, which the filter maps to `WHOLE_FORM`. Like any whole-form rule, it needs `formidableValidateWholeForm` on the `<form>`.
 
 ---
 

@@ -1,0 +1,127 @@
+<button
+  type="button"
+  class="bar"
+  [attr.aria-expanded]="layout.drawerOpen()"
+  (click)="toggle()">
+  <span
+    class="chevron"
+    aria-hidden="true">
+    {{ layout.drawerOpen() ? '▾' : '▴' }}
+  </span>
+  <span class="title">Model</span>
+  <span class="counts">{{ valueStore.filledCount() }} of {{ valueStore.fieldCount() }} filled</span>
+  <span
+    class="validity"
+    [class.is-invalid]="valueStore.valid() === false"
+    [class.is-valid]="valueStore.valid() === true">
+    {{ validity() }}
+  </span>
+  @if (valueStore.dirty()) {
+    <span class="dirty">Dirty</span>
+  }
+</button>
+
+@if (layout.drawerOpen()) {
+  <div
+    portalResizeHandle
+    axis="y"
+    handleLabel="Resize the model drawer"
+    class="divider"
+    (moved)="onDividerMoved($event)"
+    (nudged)="onDividerNudged($event)"
+    (resetRequested)="layout.resetDrawerHeight()"></div>
+
+  <div class="body">
+    <nav
+      role="tablist"
+      class="tabs">
+      @for (
+        entry of [
+          ['sections', 'By Section'],
+          ['errors', 'Errors'],
+          ['raw', 'Raw']
+        ];
+        track entry[0]
+      ) {
+        <button
+          type="button"
+          role="tab"
+          class="tab"
+          [class.active]="panel() === entry[0]"
+          [attr.aria-selected]="panel() === entry[0]"
+          (click)="panel.set($any(entry[0]))">
+          {{ entry[1] }}
+        </button>
+      }
+    </nav>
+
+    <div class="panel">
+      @switch (panel()) {
+        @case ('sections') {
+          @for (group of sections(); track group.section.id) {
+            <section class="group">
+              <button
+                type="button"
+                class="group-head"
+                [attr.aria-expanded]="isOpen(group.section.id)"
+                (click)="toggleSection(group.section.id)">
+                <span aria-hidden="true">{{ isOpen(group.section.id) ? '▾' : '▸' }}</span>
+                {{ group.section.title }}
+                <span class="group-count">{{ group.entries.length }}</span>
+              </button>
+              @if (isOpen(group.section.id)) {
+                <dl class="entries">
+                  @for (entry of group.entries; track entry.spec.id) {
+                    <div
+                      class="entry"
+                      [class.is-empty]="!entry.filled">
+                      <dt>
+                        <button
+                          type="button"
+                          class="entry-name"
+                          (click)="select(entry.spec.id)">
+                          {{ entry.path }}
+                        </button>
+                      </dt>
+                      <dd>
+                        @if (entry.hidden) {
+                          <span class="message">Not rendered — no control, no key.</span>
+                        } @else {
+                          {{ entry.display }}
+                        }
+                        @for (message of entry.messages; track message) {
+                          <span class="message">{{ message }}</span>
+                        }
+                      </dd>
+                    </div>
+                  }
+                </dl>
+              }
+            </section>
+          }
+        }
+        @case ('errors') {
+          @if (errorEntries().length) {
+            <dl class="entries">
+              @for (entry of errorEntries(); track entry[0]) {
+                <div class="entry">
+                  <dt>{{ entry[0] }}</dt>
+                  <dd>
+                    @for (message of entry[1]; track message) {
+                      <span class="message">{{ message }}</span>
+                    }
+                  </dd>
+                </div>
+              }
+            </dl>
+          } @else {
+            <p class="empty">No errors reported.</p>
+          }
+        }
+        @case ('raw') {
+          <pre class="raw">{{ valueStore.serialized() }}</pre>
+        }
+      }
+    </div>
+  </div>
+}

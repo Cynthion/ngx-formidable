@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+// The count and its remedy read as one line: the number alone states a problem and offers nothing.
+.overrides {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin: 5px 0 0;
+  color: var(--portal-accent);
+  font-size: 11px;
+  line-height: 1.5;
+}

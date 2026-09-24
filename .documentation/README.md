@@ -10,17 +10,17 @@ Three buckets, one per audience. The root `README.md` is the entry point for con
 
 For consumers of the library. A **guide** teaches a topic; a **reference** lists what it accepts.
 
-| File                      |   Kind    | Purpose                                                        |
-| :------------------------ | :-------: | :------------------------------------------------------------- |
-| `user/getting-started.md` |   Guide   | Registry, install, wiring, the stylesheet, a first form        |
-| `user/fields.md`          |   Guide   | Options, panels, keyboard, dates and times, masking, focus     |
-| `user/decoration.md`      |   Guide   | Labels, adornments, prefixes, suffixes, hints, required marker |
-| `user/validation.md`      |   Guide   | How to connect a validator: Vest, Angular, zod or none         |
-| `user/theming.md`         |   Guide   | The default theme, how theming works, and how to find your own |
-| `user/custom-fields.md`   |   Guide   | Building a field, an option or a validator of your own         |
-| `user/components.md`      | Reference | Catalogue of every public component, directive, token and type |
-| `user/theme-reference.md` | Reference | Every overridable `--formidable-*` custom property             |
-| `user/theme-options.md`   | Reference | Colour and geometry schemes to start from                      |
+| File                      |   Kind    | Purpose                                                                |
+| :------------------------ | :-------: | :--------------------------------------------------------------------- |
+| `user/getting-started.md` |   Guide   | Registry, install, wiring, the stylesheet, a first form                |
+| `user/fields.md`          |   Guide   | Options, panels, keyboard, dates and times, masking, focus             |
+| `user/decoration.md`      |   Guide   | Labels, adornments, prefixes, suffixes, hints, required marker         |
+| `user/validation.md`      |   Guide   | Connecting a validator: Vest, Angular, zod or none; conditional fields |
+| `user/theming.md`         |   Guide   | The default theme, how theming works, and how to find your own         |
+| `user/studio.md`          |   Guide   | The Studio: build a theme and a form, and take both away               |
+| `user/custom-fields.md`   |   Guide   | Building a field, an option or a validator of your own                 |
+| `user/components.md`      | Reference | Catalogue of every public component, directive, token and type         |
+| `user/theme-reference.md` | Reference | Every overridable `--formidable-*` custom property                     |
 
 ---
 
@@ -30,7 +30,8 @@ For maintainers of the library.
 
 | File                   | Purpose                                                            |
 | :--------------------- | :----------------------------------------------------------------- |
-| `tech/architecture.md` | Workspace structure, library and demo roles, build and publish     |
+| `tech/architecture.md` | Workspace structure, library and portal roles, build and publish   |
+| `tech/caret.md`        | Caret placement on focus entry, and the ngx-mask timing around it  |
 | `tech/decoration.md`   | The decorator, field and errors wiring: slot, ids, repaint, insets |
 | `tech/layering.md`     | Stacking contexts, the layer ordinals and the two public z-indices |
 | `tech/validation.md`   | The validation seam, its three layers and the package layout       |
@@ -48,4 +49,5 @@ For whoever works the repo.
 | `impl/conventions.md`    | Coding conventions, Definition of Done                   |
 | `impl/documentation.md`  | Documentation style and authoring guide                  |
 | `impl/implementation.md` | Phased roadmap, the source of truth for outstanding work |
+| `impl/portal.md`         | Portal design: structure, theming, state, phases         |
 | `impl/testing.md`        | Testing strategy, helpers first                          |

@@ -1,0 +1,56 @@
+@for (token of shape(); track token.name) {
+  <portal-token-control
+    [token]="token"
+    [compact]="true"
+    (baseRequested)="baseRequested.emit($event)" />
+}
+
+@if (belowHeightFloor()) {
+  <div class="pc-notice">
+    <span class="pc-notice-title">Below the 44px floor</span>
+    The floating label's line box and the value's no longer both fit the field's inner height. The slack is clamped at zero, so the field overflows its own box
+    instead of inverting the two.
+  </div>
+}
+
+@if (theme.isBorderless() && !companionsRestored()) {
+  <div class="pc-notice">
+    <span class="pc-notice-title">A zero border erases five other lengths</span>
+    The field group's border, a panel's outline, every focus ring, the toggle's track and the slider's track all default to the field's border thickness. A
+    focused group loses its only focus indicator.
+    <div class="pc-buttons">
+      <button
+        type="button"
+        class="pc-button"
+        (click)="restoreCompanions()">
+        Restore The Five
+      </button>
+    </div>
+  </div>
+}
+
+@if (companionsRestored()) {
+  <details class="extra">
+    <summary>The Five A Borderless Theme Restores</summary>
+    @for (token of companions(); track token.name) {
+      <portal-token-control
+        [token]="token"
+        [compact]="true" />
+    }
+  </details>
+}
+
+<details class="extra">
+  <summary>Shape The Corners One At A Time</summary>
+  <div class="corners">
+    @for (token of corners(); track token.name) {
+      <portal-token-control
+        [token]="token"
+        [compact]="true"
+        (baseRequested)="baseRequested.emit($event)" />
+    }
+  </div>
+  <p class="pc-help">
+    Logical corners: <code class="pc-code">start-start</code> is the top-left in a left-to-right, top-to-bottom writing mode. They shape the field box alone.
+  </p>
+</details>

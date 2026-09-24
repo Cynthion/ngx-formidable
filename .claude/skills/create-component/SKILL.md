@@ -12,10 +12,13 @@ description: Guidance for adding a field or structural component to ngx-formidab
   → element selector `formidable-<name>`, `standalone: true`, `ChangeDetectionStrategy.OnPush`
   → export from `public-api.ts` and add to `NgxFormidableModule`
   → **must** add or update its entry in @.documentation/user/components.md
-  → **must** showcase it in the demo (`example-form`) — add the field to its template + model so it renders and can be tried.
+  → **must** showcase it in the portal — add a `PortalFieldKind`, a row to `FIELD_CAPABILITIES` and `FIELD_KIND_SELECTORS`, a `@case` in `preview-field.component.html`, and at least two specifications in `preview-form.definition.ts` so it renders and can be tried.
+  → a new `--formidable-*` variable also goes into `src/app/portal/model/token-manifest.ts`, or `token-manifest.spec.ts` fails.
 - **Demo example** (showcase/playground only, not published)
   → `src/app/example-<name>/`, element selector `example-<name>`
-  → not exported, not listed in `user/components.md`.
+  → not exported, not listed in `user/components.md`; must still be reachable from `src/main.ts`, or `tsconfig.app.json` never compiles it.
+- **Portal component** (the portal's own chrome)
+  → `src/app/portal/<area>/<name>/`, element selector `portal-<name>`, enforced by `eslint.config.js`.
 
 ## 2. Field contract (for a new field)
 
@@ -32,6 +35,7 @@ Reference implementation: `example-counter-field` in the demo. Full contract: @.
 
 - External `*.component.ts` / `.html` / `.scss` — never inline templates or styles.
 - Style via the SCSS mixins + `--formidable-*` CSS custom properties; expose new theming as a CSS variable, never a hardcoded value.
+- `:host` starts with `font-family: var(--formidable-font-family);`
 - Signal `input()` / `output()` on fields; signal queries (`viewChild()`, `contentChildren()`); observable names get the `$` suffix.
 - Mirror sibling fields (input/output order, provider block, template attribute order).
 

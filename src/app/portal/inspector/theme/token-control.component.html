@@ -1,0 +1,169 @@
+@let t = token();
+@let current = value();
+
+<div
+  class="pc-field"
+  [attr.data-token]="t.name">
+  <label
+    class="pc-label"
+    [for]="'tc-' + t.name">
+    @if (changed()) {
+      <span
+        class="pc-changed-dot"
+        aria-hidden="true"></span>
+    }
+    <span class="pc-label-name">{{ t.name.replace('--formidable-', '') }}</span>
+    @if (changed()) {
+      <button
+        type="button"
+        title="Drop this override"
+        class="pc-reset"
+        (click)="reset()">
+        reset
+      </button>
+    }
+  </label>
+
+  @switch (t.control) {
+    @case ('color') {
+      <span class="pc-color">
+        <input
+          type="color"
+          class="pc-color-well"
+          [id]="'tc-' + t.name"
+          [value]="hex()"
+          [attr.aria-label]="t.name"
+          (input)="set($any($event.target).value)" />
+        <input
+          type="text"
+          spellcheck="false"
+          class="pc-input"
+          [value]="current"
+          (change)="set($any($event.target).value)" />
+      </span>
+    }
+    @case ('length') {
+      @if (length(); as parts) {
+        <span class="pc-length">
+          <span class="pc-stepper">
+            <input
+              type="number"
+              step="any"
+              class="pc-stepper-input"
+              [id]="'tc-' + t.name"
+              [value]="parts.amount"
+              (input)="setLength($any($event.target).value, parts.unit)" />
+            <span class="pc-stepper-buttons">
+              <button
+                type="button"
+                tabindex="-1"
+                class="pc-stepper-button"
+                [attr.aria-label]="'Increase ' + t.name"
+                (click)="step(1)">
+                <span aria-hidden="true">▲</span>
+              </button>
+              <button
+                type="button"
+                tabindex="-1"
+                class="pc-stepper-button"
+                [attr.aria-label]="'Decrease ' + t.name"
+                (click)="step(-1)">
+                <span aria-hidden="true">▼</span>
+              </button>
+            </span>
+          </span>
+          <select
+            class="pc-select"
+            [attr.aria-label]="t.name + ' unit'"
+            [portalSelectedValue]="parts.unit"
+            (change)="setLength(parts.amount, $any($event.target).value)">
+            @for (unit of units; track unit) {
+              <option [value]="unit">{{ unit }}</option>
+            }
+          </select>
+        </span>
+      } @else {
+        <input
+          type="text"
+          spellcheck="false"
+          class="pc-input pc-code"
+          [id]="'tc-' + t.name"
+          [value]="current"
+          (change)="set($any($event.target).value)" />
+      }
+    }
+    @case ('font-weight') {
+      <select
+        class="pc-select"
+        [id]="'tc-' + t.name"
+        [portalSelectedValue]="current"
+        (change)="set($any($event.target).value)">
+        @for (weight of fontWeights; track weight) {
+          <option [value]="weight">{{ weight }}</option>
+        }
+      </select>
+    }
+    @case ('easing') {
+      <select
+        class="pc-select"
+        [id]="'tc-' + t.name"
+        [portalSelectedValue]="current"
+        (change)="set($any($event.target).value)">
+        @for (easing of easings; track easing) {
+          <option [value]="easing">{{ easing }}</option>
+        }
+      </select>
+    }
+    @case ('multiplier') {
+      <input
+        type="number"
+        step="0.05"
+        min="0"
+        class="pc-input"
+        [id]="'tc-' + t.name"
+        [value]="current"
+        (input)="set($any($event.target).value)" />
+    }
+    @case ('integer') {
+      <input
+        type="number"
+        step="1"
+        class="pc-input"
+        [id]="'tc-' + t.name"
+        [value]="current"
+        (input)="set($any($event.target).value)" />
+    }
+    @default {
+      <input
+        type="text"
+        spellcheck="false"
+        class="pc-input pc-code"
+        [id]="'tc-' + t.name"
+        [value]="current"
+        (change)="set($any($event.target).value)" />
+    }
+  }
+
+  @if (following(); as base) {
+    <span class="pc-derived">
+      Follows
+      <button
+        type="button"
+        class="pc-link-button"
+        (click)="goToBase()">
+        {{ base.replace('--formidable-', '') }}
+      </button>
+      · editing this pins it
+    </span>
+  }
+
+  @if (rejected(); as refused) {
+    <span class="pc-derived is-warning">
+      Not applied: <code class="pc-code">{{ refused }}</code> is not a colour. A gradient invalidates every value mixed from this one.
+    </span>
+  }
+
+  @if (!compact()) {
+    <p class="pc-help">{{ t.description }}</p>
+  }
+</div>

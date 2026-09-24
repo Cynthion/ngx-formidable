@@ -28,23 +28,37 @@ Every field has a `focus()` method. `autoFocus` calls it once the view is ready,
 ```html
 <!-- focused on load -->
 <formidable-input-field
-	name="firstName"
-	[autoFocus]="true"
-	ngModel />
+  name="firstName"
+  [autoFocus]="true"
+  ngModel />
 
 <!-- or from anywhere that can reach the field -->
 <formidable-dropdown-field
-	#nationality
-	name="nationality"
-	ngModel />
+  #nationality
+  name="nationality"
+  ngModel />
 <button
-	type="button"
-	(click)="nationality.focus()">
-	Jump to Nationality
+  type="button"
+  (click)="nationality.focus()">
+  Jump to Nationality
 </button>
 ```
 
 **Focusing Never Opens A Panel.** The dropdown, autocomplete and date fields open on click, on `ArrowDown`, or on typing, so a focused field is ready for input without a list covering the page. A `disabled` field ignores `focus()` entirely.
+
+### The Caret On Focus
+
+| Field Holds     |     Focused By     | Caret Lands                                                    |
+| :-------------- | :----------------: | :------------------------------------------------------------- |
+| Nothing         | Keyboard / Pointer | At the front, wherever the pointer aimed                       |
+| Text or a value |      Keyboard      | Selecting the content, so the next character typed replaces it |
+| Text or a value |      Pointer       | Where the click landed, and never behind the value             |
+
+`focus()` and `autoFocus` count as the keyboard. `textarea-field` is the exception and keeps the browser's own behaviour — a caret, no selection — because a paragraph should not be one keystroke from being wiped, and no browser does it either.
+
+The rules run on the way in and then stop. Clicking again, moving the caret, typing or a repaint never re-runs them, so a field is never locked to one caret position; leaving the field and coming back reads the rules again against whatever it holds by then. Focusing a field never changes its value.
+
+Browsers disagree about the keyboard half of this — Chrome selects an input's content on `Tab`, Firefox leaves a caret — so the library settles it rather than inheriting the difference.
 
 ---
 
@@ -54,11 +68,11 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 ```html
 <formidable-dropdown-field
-	name="hobby"
-	[options]="hobbyOptions"
-	[defaultOption]="{ value: '', label: 'None' }">
-	<!-- projected options may sit anywhere inside the field, including in a @for or a wrapper element -->
-	<formidable-field-option [value]="'gardening'">Gardening</formidable-field-option>
+  name="hobby"
+  [options]="hobbyOptions"
+  [defaultOption]="{ value: '', label: 'None' }">
+  <!-- projected options may sit anywhere inside the field, including in a @for or a wrapper element -->
+  <formidable-field-option [value]="'gardening'">Gardening</formidable-field-option>
 </formidable-dropdown-field>
 ```
 
@@ -72,9 +86,47 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 **Projected Options Must Be Written Inside The Field.** Angular resolves both the parent injection and the content query from where the option is _declared_, not from where it renders, so an option in a shared template outside the field cannot join it.
 
-**An Option Owns Its Own Content.** Anything projected into `formidable-field-option` becomes that option's template, which is how an option carries a subtitle, an icon or highlighted match text. Its `select` and `match` inputs override what picking it does and how the autocomplete filter matches it.
+**An Option Owns Its Own Content.** Anything projected into `formidable-field-option` becomes that option's template, which is how an option carries a subtitle, an icon or highlighted match text. Its `match` input overrides how the autocomplete filter matches it.
 
 **The Autocomplete Does Not Filter For You.** It emits `filterChanged` and renders whatever `options` it is given back, so the matching strategy — substring, fuzzy, a server call — stays yours.
+
+**`filterChanged` Reports More Than Typing.** The field takes its filter with the value: selecting narrows it to the selected label, and a value it cannot place yet clears it. Those moves are reported too, so the list you supply can follow the value the field was given — without them, a value written from outside names an option your filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under whoever is typing.
+
+**An Action Row Is Not A Value.** `dropdown-field` and `autocomplete-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. What the action does is entirely yours; the field closes its panel, runs it and touches nothing else. The following is an example.
+
+```ts
+readonly filter = signal('');
+readonly addresses = signal<IFormidableOption[]>([...ADDRESSES]);
+
+readonly addAddress: IFormidableActionOption = {
+  value: 'add-address',
+  label: 'Add A New Address…',
+  action: () => this.createAddress()
+};
+
+private async createAddress(): Promise<void> {
+  const created = await this.dialog.open(NewAddressDialog, { street: this.filter() });
+  if (!created) return;
+
+  this.addresses.update((list) => [...list, created]);
+  this.model.address = created.value;
+}
+```
+
+```html
+<formidable-autocomplete-field
+  name="address"
+  ngModel
+  [options]="addresses()"
+  [actionOption]="addAddress"
+  (filterChanged)="filter.set($event)" />
+```
+
+Three things that recipe relies on:
+
+- **The typed text is yours already.** `filterChanged` carries it, which is what lets the dialog open on "Wiesenstrasse 5" rather than on nothing.
+- **The order of those two writes does not matter.** A value the field cannot place yet is kept and re-applied when the option it names arrives.
+- **The list still reports itself empty.** `noOptionsText` renders beside the action entry rather than being replaced by it: nothing matched _and_ here is what to do about it.
 
 ---
 
@@ -91,10 +143,12 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 The three anchored values flip above the field when there is no room below, and adopt the two field corners they sit against so the pair reads as one box. A sheet never flips.
 
+Opening a panel scrolls the field, or the panel, into view — but only the one that the viewport actually cuts off.
+
 ```html
 <formidable-date-field
-	name="birthdate"
-	[panelPosition]="'sheet'" />
+  name="birthdate"
+  [panelPosition]="'sheet'" />
 ```
 
 Two things to know before reaching for a sheet:
@@ -157,9 +211,9 @@ The date field passes a set of options straight through to Pikaday — `minDate`
 
 ```html
 <formidable-date-field
-	name="birthdate"
-	ngModel>
-	<span formidableFieldToggleIcon>📅</span>
+  name="birthdate"
+  ngModel>
+  <span formidableFieldToggleIcon>📅</span>
 </formidable-date-field>
 ```
 
@@ -175,10 +229,10 @@ The toggle centres what is projected; its size, colour and hover feedback are yo
 
 ```html
 <formidable-input-field
-	name="price"
-	[mask]="'000.00'"
-	[maskConfig]="{ prefix: 'CHF ', decimalMarker: ',' }"
-	ngModel />
+  name="price"
+  [mask]="'000.00'"
+  [maskConfig]="{ prefix: 'CHF ', decimalMarker: ',' }"
+  ngModel />
 ```
 
 Set `mask` when you want masking; `maskConfig` is optional on top of it.
@@ -187,14 +241,40 @@ Set `mask` when you want masking; `maskConfig` is optional on top of it.
 
 ```ts
 bootstrapApplication(AppComponent, {
-	providers: [
-		...provideNgxFormidable({
-			globalMaskConfig: { validation: true, dropSpecialCharacters: true }
-		})
-	]
+  providers: [
+    ...provideNgxFormidable({
+      globalMaskConfig: { validation: true, dropSpecialCharacters: true }
+    })
+  ]
 });
 ```
 
 `NgxFormidableModule.forRoot()` takes the same object. Either way it lands on the `FORMIDABLE_MASK_DEFAULTS` token.
 
+**The Slot Character Is The Field's, Not The App's.** A field reads its value back out of what the mask renders, by looking for the character drawn in a position nobody has filled. So every masked field binds `placeHolderCharacter` itself, and an `ngx-mask` setting made globally — through `provideNgxMask` — does not reach it. Set it per field through `maskConfig`, or app-wide through `globalMaskConfig`, and the display and the caret move together.
+
+Pick one the mask cannot produce on its own. Where a token pattern accepts it, or the mask draws it as a literal, a filled position and an empty one look identical and the field cannot tell them apart — it logs a warning naming the field when it spots the collision. The default `_` is safe for every built-in pattern; a mask like `000_000`, or a custom pattern such as `/\w/` that accepts `_`, needs a different character.
+
+```html
+<formidable-input-field
+  name="serial"
+  [mask]="'XXXXXX'"
+  [maskConfig]="{ patterns: wordPatterns, placeHolderCharacter: '•' }"
+  ngModel />
+```
+
 **A Masked Field Commits On Blur.** A half-typed date is not a date, so the masked fields keep what is typed in the DOM until focus leaves. The one exception is wiping the text: clearing a committed value reports `null` immediately, so the field is empty rather than stale.
+
+### The Caret In A Masked Field
+
+A mask renders a `_` slot for every character not yet typed. Those slots are not a value, so they are not somewhere the caret goes: `The Caret On Focus` above is the whole rule, and a mask only changes where the content is taken to end.
+
+| Mask State        | Counts As | Content Ends                                                           |
+| :---------------- | :-------: | :--------------------------------------------------------------------- |
+| Nothing but slots |   Empty   | At the front — literals and unfilled slots are not a value             |
+| Some filled       |  Content  | After the last filled slot, short of the separator leading to the rest |
+| Every slot filled |  Content  | After the whole display, trailing literals included                    |
+
+So keyboard focus on `12/3_/____` selects `12/3` and stops, and a click anywhere in the empty tail of `079 ___ __ __` puts the caret behind the `9`, not out among the slots.
+
+`Arrow Left` and `Arrow Right` always move the caret. Select all covers the text that has been typed and never the slots, so it selects nothing in a field holding only slots.

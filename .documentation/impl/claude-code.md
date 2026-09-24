@@ -1,6 +1,6 @@
 # Claude Code Setup
 
-This repo uses Claude Code. It mirrors the setup of the sibling EnerQi project, adapted for a standalone Angular library + demo-app workspace.
+This repo uses Claude Code. It mirrors the setup of the sibling EnerQi project, adapted for a standalone Angular library + portal workspace.
 
 ## CLAUDE.md Is Intentionally Minimal
 

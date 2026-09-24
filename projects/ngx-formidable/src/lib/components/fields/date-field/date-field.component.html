@@ -15,6 +15,7 @@
       aria-haspopup="dialog"
       [mask]="ngxMask()"
       [showMaskTyped]="ngxMaskConfig.showMaskTyped"
+      [placeHolderCharacter]="ngxMaskConfig.placeHolderCharacter"
       [leadZeroDateTime]="ngxMaskConfig.leadZeroDateTime"
       [dropSpecialCharacters]="ngxMaskConfig.dropSpecialCharacters"
       [id]="fieldId"
@@ -29,6 +30,9 @@
       [attr.aria-readonly]="readonly() || null"
       [attr.aria-expanded]="isPanelOpen()"
       [attr.aria-controls]="panelId"
+      (mousedown)="onEditorMouseDown()"
+      (mouseup)="rememberClickedCaret(inputRef)"
+      (click)="restoreClickedCaret(inputRef)"
       (input)="onValueChange()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />

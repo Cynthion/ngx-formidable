@@ -1,0 +1,319 @@
+// The inspector's own controls. Global rather than per component: every panel is its own component for the
+// per-component style budget, and a component stylesheet cannot be shared. A section's own heading is not
+// here — `portal-accordion` owns that.
+
+// The divider inside a panel that has no accordion of its own, or one group of a panel that has. Its rule
+// is the only thing separating two runs of controls, so it wants more air above it than the controls it
+// heads have between them.
+.pc-group-title {
+  margin: 20px 0 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--portal-border);
+  color: var(--portal-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.pc-help {
+  margin: 5px 0 0;
+  color: var(--portal-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+// A help paragraph is normally the last line of the field it explains, and sits close to it. One that ends a
+// block instead explains what is above it, so the control after it needs the gap two fields have — without
+// it the sentence reads as the next control's own label.
+.pc-help + .pc-field,
+.pc-help + .pc-row,
+.pc-help + .pc-checks {
+  margin-top: 14px;
+}
+
+.pc-field {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 14px;
+  min-width: 0;
+}
+
+// Two controls beside each other only while both still have room to be read. The panel is resizable down to
+// a third of the stage, and a pair split across a 130px column says less than the same pair stacked.
+.pc-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0 10px;
+}
+
+.pc-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--portal-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.pc-label-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.pc-input,
+.pc-select,
+.pc-textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface-raised);
+  color: var(--portal-text);
+  font-family: var(--portal-font);
+  font-size: 12px;
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: -1px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.pc-textarea {
+  font-family: var(--portal-mono);
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.pc-check {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 0;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pc-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0 12px;
+  margin-bottom: 12px;
+}
+
+.pc-button {
+  padding: 6px 11px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface-raised);
+  color: var(--portal-text);
+  font-family: var(--portal-font);
+  font-size: 12px;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--portal-surface-sunken);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: 1px;
+  }
+
+  &.is-primary {
+    border-color: transparent;
+    background: var(--portal-accent);
+    color: var(--portal-accent-contrast);
+  }
+
+  &.is-quiet {
+    border-color: transparent;
+    background: transparent;
+    color: var(--portal-text-muted);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.pc-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pc-color {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 6px;
+  align-items: center;
+}
+
+.pc-color-well {
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: none;
+  cursor: pointer;
+}
+
+.pc-length {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  gap: 6px;
+}
+
+// The platform's own spinner is two arrows a few pixels tall, drawn in the field's own text colour and
+// pinned to its edge. This is the same control, at a size a pointer can hit and in the portal's palette.
+.pc-stepper {
+  display: flex;
+  min-width: 0;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface-raised);
+  overflow: hidden;
+
+  &:focus-within {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: -1px;
+  }
+}
+
+.pc-stepper-input {
+  appearance: textfield;
+  min-width: 0;
+  flex: 1;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--portal-text);
+  font-family: var(--portal-font);
+  font-size: 12px;
+
+  &::-webkit-inner-spin-button,
+  &::-webkit-outer-spin-button {
+    appearance: none;
+    margin: 0;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.pc-stepper-buttons {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  flex: none;
+  width: 20px;
+  border-left: 1px solid var(--portal-border);
+}
+
+.pc-stepper-button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: var(--portal-surface);
+  color: var(--portal-text-muted);
+  font-size: 7px;
+  line-height: 1;
+  cursor: pointer;
+
+  & + & {
+    border-top: 1px solid var(--portal-border);
+  }
+
+  &:hover {
+    background: var(--portal-accent-soft);
+    color: var(--portal-accent);
+  }
+
+  &:active {
+    background: var(--portal-accent);
+    color: var(--portal-accent-contrast);
+  }
+}
+
+.pc-changed-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--portal-accent);
+  flex: none;
+}
+
+.pc-reset {
+  margin-left: auto;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--portal-text-muted);
+  font-family: var(--portal-font);
+  font-size: 11px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--portal-accent);
+  }
+}
+
+.pc-notice {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--portal-warn);
+  border-radius: var(--portal-radius-sm);
+  background: color-mix(in srgb, var(--portal-warn) 10%, transparent);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.pc-notice-title {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 650;
+}
+
+.pc-code {
+  font-family: var(--portal-mono);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.pc-derived {
+  color: var(--portal-text-muted);
+  font-size: 10px;
+}
+
+.pc-link-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--portal-accent);
+  font: inherit;
+  font-size: 10px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pc-empty {
+  padding: 24px 16px;
+  color: var(--portal-text-muted);
+  font-size: 12px;
+  text-align: center;
+}

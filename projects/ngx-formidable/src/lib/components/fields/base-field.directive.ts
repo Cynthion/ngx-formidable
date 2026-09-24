@@ -16,6 +16,8 @@ import {
 } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NgControl } from '@angular/forms';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
+import { endOfMaskedValue } from '../../helpers/input.helpers';
+import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../helpers/mask.helpers';
 import { openPanelPosition } from '../../helpers/position.helpers';
 import { FieldDecoratorLayout, IFormidableField } from '../../models/formidable.model';
 import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
@@ -110,6 +112,68 @@ export abstract class BaseFieldDirective<T = string | null>
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  // #region Caret
+
+  // Whether focus arriving by `Tab` selects an input's content is the browser's call, and not one to pass
+  // on to a consumer, so the library makes it. That needs the one thing the DOM does not say for itself:
+  // whether a pointer press is what brought focus in. See `tech/caret.md`.
+  private pointerPress = false;
+
+  // Where the pointer left the caret, read on `mouseup` and written back on `click`.
+  private clickedSelection: [number, number] | null = null;
+
+  /**
+   * The character a mask renders for a position nobody has filled yet. Overridden by a field that lets a
+   * consumer configure it, and the only thing telling the value from the empty slots behind it.
+   */
+  protected get maskPlaceholderCharacter(): string {
+    return DEFAULT_PLACEHOLDER_CHARACTER;
+  }
+
+  /** Bind to the editor's `mousedown` in a field that has one. */
+  protected onEditorMouseDown(): void {
+    this.pointerPress = true;
+
+    // The focus this press causes and the `mouseup` that follows are both dispatched inside it, so a
+    // timer is the first point after the whole interaction.
+    setTimeout(() => (this.pointerPress = false));
+  }
+
+  /**
+   * Selects what the editor holds, so the next character typed replaces it. Does nothing for focus a
+   * pointer brought in, where the caret belongs where the click landed.
+   */
+  protected selectOnKeyboardFocus(element: HTMLInputElement | HTMLTextAreaElement, isMasked: boolean): void {
+    if (this.pointerPress) return;
+
+    const end = isMasked ? endOfMaskedValue(element, this.maskPlaceholderCharacter) : element.value.length;
+
+    element.setSelectionRange(0, end);
+  }
+
+  /**
+   * Bind to a masked editor's `mouseup`, where the caret is still the one the browser placed. ngx-mask
+   * pulls it to the end of the typed text on a `click` listener of its own, so a click on one of the
+   * empty slots it renders lands short of where it was aimed.
+   */
+  protected rememberClickedCaret(element: HTMLInputElement | HTMLTextAreaElement): void {
+    this.clickedSelection = [element.selectionStart ?? 0, element.selectionEnd ?? 0];
+  }
+
+  /** Bind to the same editor's `click`, which Angular runs after the mask has had its say. */
+  protected restoreClickedCaret(element: HTMLInputElement | HTMLTextAreaElement): void {
+    const clicked = this.clickedSelection;
+    this.clickedSelection = null;
+    if (!clicked) return;
+
+    // Never past the value: a click aimed into the unused slots belongs at the end of what is filled.
+    const end = endOfMaskedValue(element, this.maskPlaceholderCharacter);
+
+    element.setSelectionRange(Math.min(clicked[0], end), Math.min(clicked[1], end));
+  }
+
+  // #endregion
 
   protected onValueChange(): void {
     const value = this.value;
@@ -423,7 +487,9 @@ export abstract class BaseFieldDirective<T = string | null>
 
     if (this.windowResizeScrollCallback) {
       const resize$ = fromEvent(window, 'resize');
-      const scroll$ = fromEvent(window, 'scroll');
+      // Captured on the document rather than listened for on `window`: `scroll` does not bubble, so a
+      // field scrolling inside a pane of its own would otherwise never hear that it has moved.
+      const scroll$ = fromEvent(document, 'scroll', { capture: true });
 
       merge(resize$, scroll$)
         .pipe(debounceTime(50), takeUntil(this.destroy$))

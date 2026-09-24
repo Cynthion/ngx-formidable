@@ -1,7 +1,7 @@
 <h1 align="center">ngx-formidable</h1>
 
 <p align="center">
-Angular form fields you can actually theme, validated by whatever you already use.
+Angular form fields you can actually theme, configure and customize. Validated by whatever you already use.
 </p>
 
 <p align="center">
@@ -13,7 +13,7 @@ Angular form fields you can actually theme, validated by whatever you already us
     <img src="https://github.com/Cynthion/ngx-formidable/actions/workflows/deploy.yml/badge.svg?branch=main" alt="Deploy">
   </a>
   <a href="https://cynthion.github.io/ngx-formidable/">
-    <img src="https://img.shields.io/badge/demo-live-4f46e5" alt="Live demo">
+    <img src="https://img.shields.io/badge/studio-live-4f46e5" alt="Live Studio">
   </a>
   <a href="https://angular.dev">
     <img src="https://img.shields.io/badge/Angular-%5E22-dd0031" alt="Angular ^22">
@@ -28,13 +28,13 @@ Angular form fields you can actually theme, validated by whatever you already us
 
 Eleven form fields, one decorator that puts labels, prefixes, hints and errors around them, and around two hundred CSS custom properties to make them look like your product instead of like a component library. It holds the model and renders the fields; the rules come from Vest, zod, Angular's own validators, or nothing at all.
 
-🌐 **[Live Demo](https://cynthion.github.io/ngx-formidable/)** — every field, every label position, ten palettes and eleven field shapes, switchable in the page.
-📚 **[Documentation](./.documentation/README.md)** — guides for consumers, design notes for maintainers.
+- **[Studio](https://cynthion.github.io/ngx-formidable/)** — a live form of every field. Theme it to your brand, configure the fields, and take away the CSS and the Angular template.
+- **[Docs](https://cynthion.github.io/ngx-formidable/#/docs)** — the guides and references below, rendered in the browser from the same files. [`.documentation/`](./.documentation/README.md) holds them, plus the design notes for maintainers.
 
 ## Table of Contents
 
 - [Table of Contents](#table-of-contents)
-- [Features](#features) - [🧩 Eleven Fields](#-eleven-fields) - [🎀 One Decorator](#-one-decorator) - [✅ Bring Your Own Validator](#-bring-your-own-validator) - [🎨 Themeable To The Corner](#-themeable-to-the-corner) - [⌨️ Keyboard And Screen Readers](#️-keyboard-and-screen-readers) - [🛡️ Masking And Panels](#️-masking-and-panels) - [🧠 Typed Model And Shape](#-typed-model-and-shape) - [🛠️ Extensible](#️-extensible) - [🚀 Zero Boilerplate](#-zero-boilerplate)
+- [Features](#features)
 - [When To Pick This Over Angular Material](#when-to-pick-this-over-angular-material)
 - [Installation](#installation)
 - [Setup](#setup)
@@ -46,122 +46,15 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 
 ## Features
 
-<table>
-<tr>
-<td width="33%" valign="top">
-
-##### [🧩 Eleven Fields](.documentation/user/components.md)
-
-• Input, Textarea
-• Select, Dropdown, Autocomplete
-• Radio Group, Checkbox Group
-• Date, Time
-• Toggle, Slider
-• One `formidable-field-option` for every option field, with your own template inside it
-• Pinned or fallback `defaultOption`, `sortFn`, empty-state text
-
-</td>
-<td width="33%" valign="top">
-
-##### [🎀 One Decorator](.documentation/user/decoration.md)
-
-• Six label positions — outside, inside, inside-placeholder, inside-floating, border, border-prefix
-• A slot beside the label for anything you like
-• Prefix and suffix, centred or following the value
-• Clickable prefixes and suffixes: clear, copy, retry, loading
-• Always-visible hints sharing one row
-• A required marker, per field or switched off form-wide
-• Three layouts, picked by the field
-
-</td>
-<td width="33%" valign="top">
-
-##### [✅ Bring Your Own Validator](.documentation/user/validation.md)
-
-• Vest, zod, Angular's own, or none
-• Field, group and whole-form rules
-• Two timing axes: when it **runs**, when it **reveals**
-• `debounceMs` on the form
-• `FORMIDABLE_ERROR_EXTRACTOR` reads any error shape
-• `FORMIDABLE_ERROR_TRANSLATOR` for i18n
-• Live `formValueChange`, `validChange`, `dirtyChange`, `errorsChange`
-
-</td>
-</tr>
-
-<tr>
-<td width="33%" valign="top">
-
-##### [🎨 Themeable To The Corner](.documentation/user/theming.md)
-
-• ~200 overridable CSS custom properties
-• Rebrand from a single variable
-• Per-corner field radius, underline family, focus rings
-• A colour set per field state
-• Overridable Pikaday classes
-• Ten palettes and eleven field shapes to start from
-• No SCSS build hooks, no theme to initialise
-
-</td>
-<td width="33%" valign="top">
-
-##### [⌨️ Keyboard And Screen Readers](.documentation/user/fields.md#keyboard)
-
-• `Enter`, `Esc`, `Tab`, arrows, `Alt` + arrows
-• Type-ahead buffers on the option panels
-• Arrow-stepping of date and time segments
-• Managed focus and scroll-into-view
-• `focus()` and `autoFocus` on every field
-• Combobox, listbox, dialog, switch and group roles
-• Errors in an `aria-live` region
-
-</td>
-<td width="33%" valign="top">
-
-##### [🛡️ Masking And Panels](.documentation/user/fields.md)
-
-• ngx-mask on the input and textarea fields
-• Per-field `[mask]` / `[maskConfig]`, app-wide `FORMIDABLE_MASK_DEFAULTS`
-• Date and time parsed and formatted by one token string
-• Panels anchored left, right or full width, flipping when there is no room
-• A `sheet` panel for phones
-• Panels that cannot escape their field's stacking context
-
-</td>
-</tr>
-
-<tr>
-<td width="33%" valign="top">
-
-##### [🧠 Typed Model And Shape](.documentation/user/getting-started.md)
-
-• `DeepPartial` model, `DeepRequired` shape
-• A typo in a model key or a rule target fails the build
-• Strongly-typed templates and suites
-
-</td>
-<td width="33%" valign="top">
-
-##### [🛠️ Extensible](.documentation/user/custom-fields.md)
-
-• `BaseFieldDirective` for a custom field
-• `BaseOptionFieldDirective` when it walks an option list
-• Custom options, custom option fields, custom validators
-• A custom field is decorated, validated and themed like a built-in one
-
-</td>
-<td width="33%" valign="top">
-
-##### [🚀 Zero Boilerplate](.documentation/user/getting-started.md)
-
-• One directive on the `<form>`
-• Standalone or NgModule, same providers
-• No store, no reactive-forms scaffolding
-• `ngModel` all the way down
-
-</td>
-</tr>
-</table>
+- 🧩 **Eleven fields, one decorator** — input, textarea, select, dropdown, autocomplete, radio and checkbox group, date, time, toggle, slider. [`<formidable-field-decorator>`](.documentation/user/decoration.md) puts the label, prefixes, suffixes, hints and errors around any of them, in [six label positions](.documentation/user/decoration.md).
+- ✅ **Bring your own validator** — [Vest, zod, Angular's own, or none](.documentation/user/validation.md). Field, group and whole-form rules, with when a rule _runs_ and when it _reveals_ set separately.
+- 🎨 **Themeable to the corner** — [~200 CSS custom properties](.documentation/user/theme-reference.md) and no design system in your bundle. Rebrand from one variable; no SCSS hooks, no theme to initialise.
+- 🚀 **Template-driven, no boilerplate** — one directive on the `<form>`, `ngModel` all the way down. No store, no reactive-forms scaffolding, [standalone or NgModule](.documentation/user/getting-started.md).
+- 🧠 **Typed end to end** — a `DeepPartial` model and a `DeepRequired` shape, so a typo in a model key or a rule target [fails the build](.documentation/user/getting-started.md).
+- ⌨️ **Accessible by default** — [full keyboard handling](.documentation/user/fields.md), managed focus, combobox, listbox, switch and group roles, and errors in an `aria-live` region.
+- 🛡️ **Masking, dates and panels** — [ngx-mask on text fields](.documentation/user/fields.md), one token string for parsing and formatting a date or time, and panels that flip when there is no room and become a sheet on phones.
+- 🛠️ **Extensible** — [`BaseFieldDirective`](.documentation/user/custom-fields.md) makes a field of your own decorated, validated and themed like a built-in one.
+- 🎛️ **[Studio](https://cynthion.github.io/ngx-formidable/)** — build the theme and the form against the real components in the browser, then copy out the CSS and the Angular template.
 
 ## When To Pick This Over Angular Material
 
@@ -177,8 +70,6 @@ Material is a design system with a form library in it. This is a form library wi
 | Components beyond forms — tables, dialogs, menus, navigation          | Angular Material   |
 | The CDK: overlays, drag and drop, virtual scroll, a11y utilities      | Angular Material   |
 | A large ecosystem, many maintainers and a long support horizon        | Angular Material   |
-
-Be honest about the last one: this library is young and has one maintainer. It is a good fit when the form is the product's face and you want it to be yours; it is the wrong fit when you need a whole component suite behind it.
 
 ## Installation
 
@@ -208,7 +99,7 @@ Two paths, registering the same providers.
 import { provideNgxFormidable } from '@cynthion/ngx-formidable';
 
 bootstrapApplication(AppComponent, {
-	providers: [...provideNgxFormidable()]
+  providers: [...provideNgxFormidable()]
 }).catch(console.error);
 ```
 
@@ -217,8 +108,8 @@ bootstrapApplication(AppComponent, {
 import { NgxFormidableModule } from '@cynthion/ngx-formidable';
 
 @NgModule({
-	imports: [BrowserModule, NgxFormidableModule.forRoot()],
-	bootstrap: [AppComponent]
+  imports: [BrowserModule, NgxFormidableModule.forRoot()],
+  bootstrap: [AppComponent]
 })
 export class AppModule {}
 ```
@@ -234,8 +125,8 @@ That is the whole default theme. Redeclare whatever you want to change in your o
 
 ```scss
 :root {
-	--formidable-color-field-border-focus: #0f766e; // rebrand from this one variable
-	--formidable-field-height: 50px;
+  --formidable-color-field-border-focus: #0f766e; // rebrand from this one variable
+  --formidable-field-height: 50px;
 }
 ```
 
@@ -245,8 +136,8 @@ Declare the model, the shape and the rules in one `*.form.ts` — this one valid
 
 ```ts
 export interface User {
-	name: string;
-	birthdate: Date;
+  name: string;
+  birthdate: Date;
 }
 
 export type UserFormModel = DeepPartial<User>;
@@ -256,12 +147,12 @@ export type UserFormShape = DeepRequired<UserFormModel>;
 export const userFormShape: UserFormShape = { name: '', birthdate: new Date() };
 
 export const userFormSuite = create((model: UserFormModel, field?: string) => {
-	mode(Modes.ALL); // Vest 6 defaults to `EAGER`, which reports only a field's first failing message
-	if (field) only(field); // the form asks about one target at a time
+  mode(Modes.ALL); // Vest 6 defaults to `EAGER`, which reports only a field's first failing message
+  if (field) only(field); // the form asks about one target at a time
 
-	test('name', 'Name is required.', () => {
-		enforce(model.name).isNotBlank();
-	});
+  test('name', 'Name is required.', () => {
+    enforce(model.name).isNotBlank();
+  });
 });
 ```
 
@@ -269,37 +160,37 @@ Then the template:
 
 ```html
 <form
-	formidableForm
-	[formValue]="formValue$ | async"
-	[formShape]="formShape"
-	[formSuite]="formSuite"
-	(formValueChange)="formValue$.next($event)"
-	(validChange)="isValid$.next($event)"
-	(ngSubmit)="onSubmit()">
-	<formidable-field-decorator>
-		<formidable-input-field
-			formidableFieldErrors
-			name="name"
-			[showRequiredMarker]="true"
-			[ngModel]="(formValue$ | async)?.name" />
-		<div formidableFieldLabel>Name</div>
-		<div formidableFieldHint>As it appears on your passport</div>
-	</formidable-field-decorator>
+  formidableForm
+  [formValue]="formValue$ | async"
+  [formShape]="formShape"
+  [formSuite]="formSuite"
+  (formValueChange)="formValue$.next($event)"
+  (validChange)="isValid$.next($event)"
+  (ngSubmit)="onSubmit()">
+  <formidable-field-decorator>
+    <formidable-input-field
+      formidableFieldErrors
+      name="name"
+      [showRequiredMarker]="true"
+      [ngModel]="(formValue$ | async)?.name" />
+    <div formidableFieldLabel>Name</div>
+    <div formidableFieldHint>As it appears on your passport</div>
+  </formidable-field-decorator>
 
-	<formidable-field-decorator>
-		<formidable-date-field
-			formidableFieldErrors
-			name="birthdate"
-			[unicodeTokenFormat]="'dd.MM.yyyy'"
-			[ngModel]="(formValue$ | async)?.birthdate" />
-		<div
-			formidableFieldLabel
-			[position]="'border'">
-			Birthdate
-		</div>
-	</formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-date-field
+      formidableFieldErrors
+      name="birthdate"
+      [unicodeTokenFormat]="'dd.MM.yyyy'"
+      [ngModel]="(formValue$ | async)?.birthdate" />
+    <div
+      formidableFieldLabel
+      [position]="'border'">
+      Birthdate
+    </div>
+  </formidable-field-decorator>
 
-	<button type="submit">Submit</button>
+  <button type="submit">Submit</button>
 </form>
 ```
 
@@ -309,7 +200,7 @@ The whole walkthrough, with the component state and where each piece goes: [Gett
 
 ## What's In The Box
 
-Full API — every input, output, type and token — in the [component catalogue](.documentation/user/components.md).
+Full API — every input, output, type and token — in the [Component Catalogue](.documentation/user/components.md).
 
 | Category          | Component                           | Value             |
 | :---------------- | :---------------------------------- | :---------------- |
@@ -330,9 +221,9 @@ Full API — every input, output, type and token — in the [component catalogue
 
 | Category             | Directive                                                                                                                                                                              |
 | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Form-level**       | `formidableForm`, `formidableValidateWholeForm`, plus the two that attach themselves to `ngModel` and `ngModelGroup`                                                                   |
+| **Form-Level**       | `formidableForm`, `formidableValidateWholeForm`, plus the two that attach themselves to `ngModel` and `ngModelGroup`                                                                   |
 | **Decoration**       | `formidableFieldLabel`, `formidableFieldLabelAdornment`, `formidableFieldPrefix`, `formidableFieldSuffix`, `formidableFieldHint`, `formidableFieldErrors`, `formidableFieldToggleIcon` |
-| **Vest entry point** | `formSuite`, from `@cynthion/ngx-formidable/vest`                                                                                                                                      |
+| **Vest Entry Point** | `formSuite`, from `@cynthion/ngx-formidable/vest`                                                                                                                                      |
 
 ## Documentation
 
@@ -343,21 +234,21 @@ Guides teach a topic; references list what it accepts.
 | [Getting Started](.documentation/user/getting-started.md) | Registry, install, wiring, the stylesheet, a first form        |
 | [Fields](.documentation/user/fields.md)                   | Options, panels, keyboard, dates and times, masking, focus     |
 | [Decoration](.documentation/user/decoration.md)           | Labels, adornments, prefixes, suffixes, hints, required marker |
-| [Validation](.documentation/user/validation.md)           | Targets, timing, Vest, zod, Angular's validators, messages     |
+| [Validation](.documentation/user/validation.md)           | Targets, timing, conditional fields, Vest, zod, messages       |
 | [Theming](.documentation/user/theming.md)                 | The default theme, what to override, worked examples           |
+| [Studio](.documentation/user/studio.md)                   | Building a theme and a form in the browser, and exporting both |
 | [Custom Fields](.documentation/user/custom-fields.md)     | Building a field, an option or a validator of your own         |
 
-| Reference                                                 | Lists                                                  |
-| :-------------------------------------------------------- | :----------------------------------------------------- |
-| [Components](.documentation/user/components.md)           | Every component, directive, token, type and interface  |
-| [Theme Reference](.documentation/user/theme-reference.md) | Every overridable `--formidable-*` custom property     |
-| [Theme Options](.documentation/user/theme-options.md)     | The colour palettes and field shapes shown in the demo |
+| Reference                                                 | Lists                                                 |
+| :-------------------------------------------------------- | :---------------------------------------------------- |
+| [Components](.documentation/user/components.md)           | Every component, directive, token, type and interface |
+| [Theme Reference](.documentation/user/theme-reference.md) | Every overridable `--formidable-*` custom property    |
 
 Design notes for maintainers live in [`.documentation/tech/`](.documentation/README.md), and the repo's own conventions in [`.documentation/impl/`](.documentation/README.md).
 
 ## Contributing
 
-Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md).
+Contributions are welcome, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## License
 

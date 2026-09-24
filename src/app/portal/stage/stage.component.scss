@@ -1,0 +1,156 @@
+:host {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+  background: var(--portal-surface);
+}
+
+.stage-head {
+  border-bottom: 1px solid var(--portal-border);
+}
+
+// One height with the editor panel's tab strip beside it, so the two column headers line up.
+.stage-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--portal-section-header-height);
+  padding: 0 16px;
+  background: var(--portal-surface);
+  color: var(--portal-text);
+  font-size: 12px;
+}
+
+.stage-label {
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.stage-hint {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--portal-text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// Quiet by design: these annotate the preview, they are not part of building a theme.
+.stage-tools {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  color: var(--portal-text-muted);
+  font-family: var(--portal-font);
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--portal-border);
+    color: var(--portal-text);
+  }
+
+  &.is-on {
+    border-color: var(--portal-accent);
+    background: var(--portal-accent-soft);
+    color: var(--portal-accent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: 1px;
+  }
+}
+
+// The same glyph the chips carry, at the same size, so the two read as one thing.
+.tool-glyph {
+  flex: none;
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+// Wraps, because an explanation that is cut off explains nothing.
+.stage-status {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 5px 16px;
+  border-top: 1px solid var(--portal-border);
+  background: var(--portal-accent-soft);
+  color: var(--portal-text);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.status-name {
+  flex: none;
+  color: var(--portal-accent);
+  font-weight: 650;
+}
+
+// The preview's own viewport. A `sheet` panel is `position: fixed`, and the page it belongs to ends at
+// this pane's edges, not at the browser window's — without a containing block here it pins to the window
+// and slides under the inspector, off-centre and half covered. `contain: paint` supplies one. It cannot go
+// on `.stage-scroll` below: a fixed child of a scroll container scrolls away with the content.
+.stage-viewport {
+  display: grid;
+  min-height: 0;
+  contain: paint;
+}
+
+.stage-scroll {
+  min-height: 0;
+  padding: 24px;
+  overflow: auto;
+}
+
+.page-surface {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 32px;
+  border: 1px solid var(--portal-border);
+  border-radius: 14px;
+  background: var(--portal-page-background);
+  color: var(--portal-page-text);
+  font-family: var(--portal-font);
+  box-shadow: var(--portal-shadow);
+}
+
+@media (width <= 900px) {
+  .stage-scroll {
+    padding: 12px;
+  }
+
+  .page-surface {
+    padding: 18px;
+  }
+
+  // Kept, on a row of its own: it is the only line that says what the page is for, and a narrow viewport
+  // is where that is needed most. Two rows, so the height is the content's rather than the header's.
+  .stage-bar {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 6px 16px;
+  }
+
+  .stage-hint {
+    flex-basis: 100%;
+    order: 1;
+    overflow: visible;
+    white-space: normal;
+  }
+}

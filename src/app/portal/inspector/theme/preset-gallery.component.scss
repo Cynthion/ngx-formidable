@@ -1,0 +1,97 @@
+:host {
+  display: block;
+}
+
+// Leads the section, because a cold visitor's problem is having nowhere to start rather than too few looks.
+.lead {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 10px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.lead-note {
+  margin: 0;
+  color: var(--portal-text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.card {
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius);
+  background: var(--portal-surface-raised);
+  color: var(--portal-text);
+  font-family: var(--portal-font);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--portal-border-strong);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: 1px;
+  }
+
+  &.is-active {
+    border-color: var(--portal-accent);
+    box-shadow: 0 0 0 1px var(--portal-accent);
+  }
+}
+
+// A live miniature of a real field: the same components the preview renders, under that preset's own theme.
+// The geometry keeps its real height — that is what the thumbnail is for — so the box only clips the overflow.
+.thumb {
+  display: flex;
+  align-items: center;
+  height: 100px;
+  padding: 8px;
+  border-radius: var(--portal-radius-sm);
+  overflow: hidden;
+
+  --formidable-field-before-margin-bottom: 0;
+
+  formidable-field-decorator {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.card-name {
+  padding: 0 2px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.card-fits {
+  padding: 0 2px 2px;
+  color: var(--portal-text-muted);
+  font-size: 10px;
+}
+
+.axes {
+  margin-top: 12px;
+
+  summary {
+    padding: 4px 0;
+    color: var(--portal-text-muted);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  > :not(summary) {
+    margin-top: 8px;
+  }
+}

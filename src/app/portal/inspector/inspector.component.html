@@ -1,0 +1,60 @@
+@if (!layout.inspectorCollapsed()) {
+  <div
+    portalResizeHandle
+    axis="x"
+    handleLabel="Resize the inspector"
+    class="divider"
+    (moved)="onDividerMoved($event)"
+    (nudged)="onDividerNudged($event)"
+    (resetRequested)="layout.resetInspectorWidth()"></div>
+}
+
+<!-- The tab strip is the header. A title row above it would only add the word "Inspector", which names a
+     panel that edits rather than inspects, and which the three tabs under it already say better. -->
+<header class="head">
+  @if (!layout.inspectorCollapsed()) {
+    <nav
+      role="tablist"
+      class="tabs"
+      aria-label="Editor panel">
+      @for (entry of tabs; track entry.id) {
+        <button
+          type="button"
+          role="tab"
+          class="tab"
+          [class.active]="store.tab() === entry.id"
+          [attr.aria-selected]="store.tab() === entry.id"
+          [title]="entry.title"
+          (click)="store.tab.set(entry.id)">
+          {{ entry.label }}
+        </button>
+      }
+    </nav>
+  }
+
+  <!-- Collapsed, this is the whole panel: it has to stay reachable, because it is the only way back. -->
+  <button
+    type="button"
+    class="collapse"
+    [attr.aria-label]="layout.inspectorCollapsed() ? 'Expand the editor panel' : 'Collapse the editor panel'"
+    [title]="layout.inspectorCollapsed() ? 'Expand' : 'Collapse'"
+    (click)="toggle()">
+    {{ layout.inspectorCollapsed() ? '‹' : '›' }}
+  </button>
+</header>
+
+@if (!layout.inspectorCollapsed()) {
+  <div class="body">
+    @switch (store.tab()) {
+      @case ('theme') {
+        <portal-theme-tab />
+      }
+      @case ('form') {
+        <portal-form-tab />
+      }
+      @case ('export') {
+        <portal-export-tab />
+      }
+    }
+  </div>
+}

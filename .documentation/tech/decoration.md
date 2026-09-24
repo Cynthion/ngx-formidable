@@ -148,7 +148,7 @@ The measurement is the wrapper, not the content. Each wrapper shrink-wraps what 
 
 `ResizeObserver` covers every way the width moves — content added or removed, a font finishing loading, the wrapper hidden — which a one-off measurement in a lifecycle hook does not.
 
-**The in-field toggle is a class, not a measurement.** A panel toggle is a fixed-size square at the field's inner trailing edge, so `.has-in-field-toggle` becomes an inset in the stylesheet instead. That also spares a re-measure every time `readonly` or `disabled` adds or removes the toggle.
+**The in-field toggle is a class, not a measurement.** An in-field toggle is a fixed-size square at the field's inner trailing edge, so `.has-in-field-toggle` becomes an inset in the stylesheet instead. That also spares a re-measure every time `readonly` or `disabled` adds or removes the toggle. The inset says how much room the field's trailing edge claims, not how the field lays the toggle out — `select-field` overlays its arrow on a native `<select>` rather than placing it beside the value, and declares the same class.
 
 ---
 

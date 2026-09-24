@@ -1,0 +1,73 @@
+<portal-sub-tabs
+  ariaLabel="Theme sections"
+  [tabs]="subTabs"
+  [active]="inspector.themeTab()"
+  [strapline]="straplines[inspector.themeTab()]"
+  (selected)="select($event)" />
+
+@switch (inspector.themeTab()) {
+  @case ('design') {
+    <portal-accordion
+      heading="Presets"
+      hint="12 Looks"
+      lede="A named pair of one field shape and one palette. Each thumbnail is a real field under that theme, not a picture of one."
+      [open]="isOpen('presets')"
+      [startHere]="true"
+      (toggled)="toggle('presets')">
+      <portal-preset-gallery />
+    </portal-accordion>
+
+    <portal-accordion
+      heading="Brand Colour"
+      hint="1 Variable"
+      lede="If you change one thing, change this."
+      [step]="1"
+      [open]="isOpen('brand')"
+      (toggled)="toggle('brand')">
+      <portal-brand-step />
+    </portal-accordion>
+
+    <portal-accordion
+      heading="Repaint"
+      hint="8 Seeds"
+      lede="Everything else in the library derives from these eight."
+      [step]="2"
+      [open]="isOpen('repaint')"
+      (toggled)="toggle('repaint')">
+      <portal-seeds-step (baseRequested)="reveal($event)" />
+    </portal-accordion>
+
+    <portal-accordion
+      heading="Reshape"
+      hint="4 Lengths"
+      lede="The field's height, border, radius and horizontal padding."
+      [step]="3"
+      [open]="isOpen('reshape')"
+      (toggled)="toggle('reshape')">
+      <portal-shape-step (baseRequested)="reveal($event)" />
+    </portal-accordion>
+
+    <portal-accordion
+      heading="The Page Behind The Form"
+      hint="Yours"
+      lede="The library styles fields and never the surface they sit on, so this block is yours rather than its."
+      [step]="4"
+      [open]="isOpen('surface')"
+      (toggled)="toggle('surface')">
+      <portal-surface-step />
+    </portal-accordion>
+
+    <portal-accordion
+      heading="Fonts"
+      hint="Family And Scale"
+      lede="The family is an ordinary declaration; the size, weight and line height are the library's own variables."
+      [step]="5"
+      [open]="isOpen('fonts')"
+      (toggled)="toggle('fonts')">
+      <portal-fonts-step />
+    </portal-accordion>
+  }
+  @case ('variables') {
+    <portal-all-variables />
+  }
+}

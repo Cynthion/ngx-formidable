@@ -1,0 +1,20 @@
+<nav
+  role="tablist"
+  class="sub-tabs"
+  [attr.aria-label]="ariaLabel()">
+  @for (tab of tabs(); track tab.id) {
+    <button
+      type="button"
+      role="tab"
+      class="sub-tab"
+      [class.active]="active() === tab.id"
+      [attr.aria-selected]="active() === tab.id"
+      (click)="selected.emit(tab.id)">
+      {{ tab.label }}
+    </button>
+  }
+</nav>
+
+@if (strapline()) {
+  <p class="strapline">{{ strapline() }}</p>
+}

@@ -1,0 +1,115 @@
+<portal-accordion
+  heading="Export"
+  lede="The block to paste into your own :root. Declarations that only restate a library default are left out, so what you take away is your theme rather than the library's. Explicit Defaults states them anyway, which makes the block stand on its own wherever it lands."
+  [hint]="theme.exportCount() + ' Variables'"
+  [open]="isOpen('export')"
+  (toggled)="toggle('export')">
+  <div class="options">
+    <label class="pc-check">
+      <input
+        type="radio"
+        name="export-format"
+        [checked]="theme.exportOptions().format === 'css'"
+        (change)="setFormat('css')" />
+      CSS
+    </label>
+    <label class="pc-check">
+      <input
+        type="radio"
+        name="export-format"
+        [checked]="theme.exportOptions().format === 'scss'"
+        (change)="setFormat('scss')" />
+      SCSS
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="theme.exportOptions().includeComments"
+        (change)="setIncludeComments($any($event.target).checked)" />
+      Comments
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="theme.exportOptions().includePageSurface"
+        (change)="setIncludePageSurface($any($event.target).checked)" />
+      Page Surface
+    </label>
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="theme.exportOptions().includeDefaults"
+        (change)="setIncludeDefaults($any($event.target).checked)" />
+      Explicit Defaults
+    </label>
+  </div>
+
+  <pre class="preview">{{ theme.exportText() }}</pre>
+
+  <div class="pc-buttons">
+    <button
+      type="button"
+      class="pc-button is-primary"
+      (click)="copy()">
+      {{ justCopied() ? 'Copied' : 'Copy Theme' }}
+    </button>
+    <button
+      type="button"
+      class="pc-button is-quiet"
+      (click)="theme.reset()">
+      Reset Theme
+    </button>
+  </div>
+</portal-accordion>
+
+<portal-accordion
+  heading="Import"
+  lede="A block you saved earlier, read back in. Anything outside the manifest is listed rather than applied — a variable the library does not declare would produce a control that appears to do nothing. Read onto the defaults, a block reproduces the theme it came from; read onto the theme on screen, whatever it leaves unstated stays as it is."
+  hint="Paste A Block"
+  [open]="isOpen('import')"
+  (toggled)="toggle('import')">
+  <textarea
+    rows="4"
+    spellcheck="false"
+    placeholder=":root &#123; --formidable-field-height: 48px; &#125;"
+    class="pc-textarea"
+    [value]="importText()"
+    (input)="importText.set($any($event.target).value)"></textarea>
+
+  <div class="options is-import">
+    <label class="pc-check">
+      <input
+        type="checkbox"
+        [checked]="applyDefaults()"
+        (change)="applyDefaults.set($any($event.target).checked)" />
+      Onto The Defaults
+    </label>
+  </div>
+
+  <div class="pc-buttons">
+    <button
+      type="button"
+      class="pc-button is-primary"
+      [disabled]="!importText().trim()"
+      (click)="runImport()">
+      Apply
+    </button>
+  </div>
+
+  @if (importResult(); as result) {
+    <div class="report">
+      <p class="applied">Applied {{ countOf(result) }} variables.</p>
+      @if (result.skipped.length) {
+        <p class="skipped-head">Not applied:</p>
+        <ul class="skipped">
+          @for (skip of result.skipped; track skip.text) {
+            <li>
+              <code class="pc-code">{{ skip.text }}</code>
+              <span class="reason">{{ skipLabels[skip.reason] }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</portal-accordion>

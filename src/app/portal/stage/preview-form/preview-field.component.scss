@@ -1,0 +1,118 @@
+// Three rows the whole grid row shares — the field with its support text, the chip, the accessibility
+// readout — so both annotations under a pair of unequal fields start on the same line. A flex column can
+// only push the pair to the bottom, which staggers them again as soon as one readout is taller than the
+// other. The space inside is each annotation's own top margin, and the margin below is what separates this
+// field from the next; the grid it sits in carries no row gap. A row nobody fills costs nothing.
+:host {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  min-width: 0;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.chip-row {
+  display: flex;
+  position: relative;
+  margin-top: 10px;
+}
+
+// Portal chrome rather than the user's page surface, unlike the chip it belongs to: it is the portal
+// talking about the field, not part of the theme being judged.
+// Below the chip rather than above it: the chip sits under the field it describes, so a panel above would
+// cover exactly the thing the reader is asking about.
+.chip-tip {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 2;
+  width: max-content;
+  max-width: 100%;
+  padding: 6px 9px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface-raised);
+  box-shadow: var(--portal-shadow);
+  color: var(--portal-text);
+  font-family: var(--portal-font);
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-line;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 90ms ease;
+}
+
+// Delayed on the way in so a pointer crossing the row does not trail tooltips, immediate on the way out.
+.chip:hover + .chip-tip {
+  opacity: 1;
+  transition-delay: var(--portal-tooltip-delay);
+}
+
+// The chip is a control: it names the component this field is, and it is also the way to configure it. It
+// sits on the user's page surface, so it takes that surface's colours rather than the portal's own — the
+// chrome's palette would read as foreign on a theme the user chose.
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 2px 9px;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-family: var(--portal-font);
+  font-size: 11px;
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+  // Quiet, but not so quiet it is missed: this is the page's own way of explaining itself.
+  opacity: 0.72;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid currentcolor;
+    outline-offset: 1px;
+    opacity: 1;
+  }
+}
+
+.chip-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// Says the chip goes somewhere, which a pill on its own does not.
+.chip-glyph {
+  flex: none;
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+:host(.is-selected) .chip {
+  border-color: var(--formidable-color-field-border-focus);
+  color: var(--formidable-color-field-border-focus);
+  opacity: 1;
+}
+
+.adornment {
+  display: inline-flex;
+  align-items: center;
+
+  button {
+    padding: 2px 8px;
+    border: 1px solid currentcolor;
+    border-radius: var(--portal-radius-sm);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+  }
+}

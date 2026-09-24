@@ -1,0 +1,42 @@
+@if (!total()) {
+  <p class="pc-help">No fields yet. Add one under <strong>Structure</strong>.</p>
+} @else {
+  <h3 class="pc-group-title">Decoration</h3>
+
+  @for (control of controls; track control.id) {
+    @let state = stateOf(control);
+
+    <div class="pc-field">
+      <label
+        class="pc-label"
+        [for]="'af-' + control.id">
+        <span class="pc-label-name">{{ control.label }}</span>
+      </label>
+      <select
+        class="pc-select"
+        [id]="'af-' + control.id"
+        [portalSelectedValue]="state.value"
+        (change)="apply(control, $any($event.target).value)">
+        @for (choice of control.choices; track choice[0]) {
+          <option [value]="choice[0]">{{ choice[1] }}</option>
+        }
+      </select>
+
+      @if (state.overrides) {
+        <p class="overrides">
+          <span>{{ state.overrides }} of {{ total() }} fields override this.</span>
+          <button
+            type="button"
+            class="pc-reset"
+            (click)="apply(control, state.value)">
+            Apply To All
+          </button>
+        </p>
+      }
+
+      @if (control.help) {
+        <p class="pc-help">{{ control.help }}</p>
+      }
+    </div>
+  }
+}

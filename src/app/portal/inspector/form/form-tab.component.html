@@ -1,0 +1,15 @@
+<portal-sub-tabs
+  ariaLabel="Form sections"
+  [tabs]="subTabs"
+  [active]="inspector.formTab()"
+  [strapline]="straplines[inspector.formTab()]"
+  (selected)="select($event)" />
+
+@switch (inspector.formTab()) {
+  @case ('settings') {
+    <portal-settings-tab />
+  }
+  @case ('structure') {
+    <portal-structure-tab />
+  }
+}

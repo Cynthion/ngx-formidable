@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.page-contrast {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--portal-ok) 12%, transparent);
+  color: var(--portal-ok);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+
+  &.fails {
+    background: color-mix(in srgb, var(--portal-danger) 12%, transparent);
+    color: var(--portal-danger);
+  }
+}

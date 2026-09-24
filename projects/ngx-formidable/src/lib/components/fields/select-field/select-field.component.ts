@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   contentChildren,
   effect,
   ElementRef,
@@ -89,15 +90,39 @@ export class SelectFieldComponent extends BaseFieldDirective<string | null> impl
     // No additional actions needed
   }
 
+  /** The user picked one, so the element is now the source and the signal follows it. */
+  protected onSelectChanged(): void {
+    this.selectedValue.set(this.selectRef().nativeElement.value || null);
+    this.onValueChange();
+  }
+
   // #region ControlValueAccessor
 
+  /**
+   * What is selected, as a signal, because the element cannot be asked: a native `<select>` drops a value it
+   * has no `<option>` for, and the options only reach the DOM a change-detection pass after the list moves.
+   * The template marks the matching option from this, so the browser selects it as the options render.
+   */
+  protected readonly selectedValue = signal<string | null>(null);
+
+  /**
+   * What the form last asked for, which is not always what could be selected. Kept so a value written before
+   * its option existed can be applied again once the list arrives.
+   */
+  private lastWrittenValue: string | null = null;
+
   protected doWriteValue(value: string | null): void {
+    this.lastWrittenValue = value;
+
     const match = this.computeAllOptions().find((opt) => opt.value === value);
+    const next = match ? match.value : null;
+
+    this.selectedValue.set(next);
 
     // write to wrapped select element
-    this.selectRef().nativeElement.value = match ? match.value : '';
+    this.selectRef().nativeElement.value = next ?? '';
 
-    this.isFieldFilled.set(this.selectRef().nativeElement.value.length > 0);
+    this.isFieldFilled.set(next !== null);
   }
 
   // #endregion
@@ -117,6 +142,11 @@ export class SelectFieldComponent extends BaseFieldDirective<string | null> impl
   // A native <select> always renders something in its value area, so a label can never rest there: with
   // nothing selected it shows its first option, and with no options at all it shows `noOptionsText`.
   protected override readonly showsEmptyValueHint = signal(true);
+
+  // Mirrors the template: the arrow is drawn only while the field can actually open its list. It overlays
+  // the select instead of taking a slot beside the value, but the inset it asks the decorator for is the
+  // same — a label still has to clear it.
+  readonly hasInFieldToggle = computed(() => !this.readonly() && !this.disabled());
 
   // #endregion
 
@@ -168,18 +198,23 @@ export class SelectFieldComponent extends BaseFieldDirective<string | null> impl
   private updateOptions(allOptions: IFormidableOption[]): void {
     this.activeOptions.set(allOptions);
 
-    // keep current value consistent with updated options
-    this.writeValue(this.selectRef()?.nativeElement?.value ?? '');
+    // Keep the current value consistent with the updated options. The element comes first — it is what the
+    // user picked — then what is selected, then what the form last asked for, which is the one that recovers
+    // a value the element had to drop because its `<option>` did not exist yet.
+    const element = this.selectRef()?.nativeElement;
+
+    this.writeValue(element?.value || this.selectedValue() || this.lastWrittenValue || '');
   }
 
   private reconcileSelectionAgainstOptions(allOptions: IFormidableOption[]): void {
-    const current = this.selectRef().nativeElement.value;
+    const current = this.selectedValue();
     if (!current) return;
 
     const stillExists = allOptions.some((o) => o.value === current);
     if (stillExists) return;
 
     // clear selection + notify like other fields
+    this.selectedValue.set(null);
     this.selectRef().nativeElement.value = '';
     this.onValueChange();
   }

@@ -1,0 +1,15 @@
+<portal-sub-tabs
+  ariaLabel="Import and export sections"
+  [tabs]="subTabs"
+  [active]="inspector.exportSection()"
+  [strapline]="straplines[inspector.exportSection()]"
+  (selected)="select($event)" />
+
+@switch (inspector.exportSection()) {
+  @case ('theme') {
+    <portal-theme-panel />
+  }
+  @case ('form') {
+    <portal-markup-panel />
+  }
+}

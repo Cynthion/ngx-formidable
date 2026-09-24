@@ -1,0 +1,81 @@
+<div class="lead">
+  <button
+    type="button"
+    class="pc-button is-primary"
+    (click)="randomize()">
+    Randomize
+  </button>
+  <p class="lead-note">Nowhere to start? This picks one field shape, one palette and one font family at random.</p>
+</div>
+
+<div class="gallery">
+  @for (entry of thumbnails; track entry.preset.key) {
+    <button
+      type="button"
+      class="card"
+      [class.is-active]="theme.presetKey() === entry.preset.key"
+      (click)="apply(entry.preset)">
+      <span
+        class="thumb"
+        [style.background]="entry.preset.page.background"
+        [portalThemeScope]="entry.vars">
+        <!-- No `ngModel`: a standalone one sets its control up before the field's view exists, which
+             `impl/backlog.md` records as a crash. A placeholder floats the label and shows text anyway. -->
+        <formidable-field-decorator>
+          <formidable-input-field
+            placeholder="Sample"
+            name="preview" />
+          <div
+            formidableFieldLabel
+            position="inside">
+            Label
+          </div>
+        </formidable-field-decorator>
+      </span>
+      <span class="card-name">{{ entry.preset.label }}</span>
+      <span class="card-fits">{{ entry.preset.fits }}</span>
+    </button>
+  }
+</div>
+
+<details
+  class="axes"
+  [open]="axesOpen()"
+  (toggle)="axesOpen.set($any($event.target).open)">
+  <summary>The Two Axes On Their Own</summary>
+
+  <div class="pc-field">
+    <span class="pc-label">Geometry</span>
+    <select
+      class="pc-select"
+      [portalSelectedValue]="theme.geometry() ?? ''"
+      (change)="setGeometry($any($event.target).value)">
+      @for (scheme of geometries; track scheme.key) {
+        <option [value]="scheme.key">{{ scheme.label }} — {{ scheme.reads }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="pc-field">
+    <span class="pc-label">Colour</span>
+    <select
+      class="pc-select"
+      [portalSelectedValue]="theme.color() ?? ''"
+      (change)="setColor($any($event.target).value)">
+      @for (scheme of colors; track scheme.key) {
+        <option [value]="scheme.key">{{ scheme.label }} — {{ scheme.reads }}</option>
+      }
+    </select>
+  </div>
+
+  <p class="pc-help">Any geometry combines with any colour. A preset is one pair of the two.</p>
+</details>
+
+<div class="pc-buttons">
+  <button
+    type="button"
+    class="pc-button is-quiet"
+    (click)="theme.reset()">
+    Back To The Shipped Theme
+  </button>
+</div>

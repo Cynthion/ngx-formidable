@@ -12,9 +12,9 @@ Prioritize testing **logic** over Angular rendering: fast, reliable tests that c
 | Jasmine          | Assertion + spec framework                 |
 | ng-packagr build | Type + template checking (via `build:lib`) |
 
-`@angular/build:karma` is configured for both projects; there is no `karma.conf.js` or `test.ts` (builder defaults). Type errors are caught by `build:lib`, so there is no separate typecheck spec.
+`@angular/build:karma` is configured for both projects and there is no `test.ts` in either. The library runs on the builder's defaults; the portal names a `karma.conf.cjs`, which raises Karma's inactivity timeouts and, because supplying a config stops the builder contributing its own, redeclares the frameworks and plugins. That file exists only because `portal.spec.ts` used to take minutes — it now takes seconds, so the raised timeouts no longer protect anything. Type errors are caught by `build:lib`, so there is no separate typecheck spec.
 
-Not the newer `@angular/build:unit-test`: it is still experimental, its own `migrate-karma-to-vitest` migration skips library projects outright, and it takes no `polyfills`, `styles` or `stylePreprocessorOptions` of its own — it reads them from a `buildTarget`, which a library built by ng-packagr does not have. The library's specs need all three: `zone.js/testing` for `fakeAsync`, and `test-styles.scss` for the geometry specs that measure computed CSS.
+Not the newer `@angular/build:unit-test`, though the gap has narrowed since this was written. It is still marked experimental, and its `migrate-karma-to-vitest` migration still skips the library — it rewrites only an `application` project whose `build` target is `@angular/build:application`. The builder itself, though, does accept an `@angular/build:ng-packagr` `buildTarget` as of v22, so a library is no longer excluded outright. What the library still cannot get that way is `polyfills`, `styles` and `stylePreprocessorOptions`: the builder takes no options of its own for them and reads them from the build target, and an ng-packagr target carries none. The library's specs need all three — `zone.js/testing` for `fakeAsync`, and `test-styles.scss` for the geometry specs that measure computed CSS. Whether `setupFiles` and a `runnerConfig` close that gap is untested.
 
 **Both test targets run under zone change detection, and the app does not.** `@angular/build:karma` writes the test environment module itself, and it puts `provideZoneChangeDetection()` in it whenever `zone.js` is one of the target's `polyfills`. Removing that entry does not buy zoneless specs, because `zone.js/testing` carries no copy of zone.js and `fakeAsync` needs one. A spec that must run the way the app does provides `provideZonelessChangeDetection()` in its own `TestBed`, which overrides the environment's; `zoneless.spec.ts` is the one that does, and its header says why the NG0914 warning it logs is expected.
 
@@ -62,7 +62,7 @@ Behavior that carries real risk, tested through a minimal host — not the frame
 ## Running Tests
 
 - Library: `ng test ngx-formidable`, which `npm test` also resolves to.
-- Demo: `ng test ngx-formidable-demo`, which has to be named.
+- Demo: `ng test ngx-formidable-portal`, which has to be named.
 
 Prove work by pasting command output — do not claim success. When a change is logic-bearing, add the helper spec in the same commit.
 
@@ -70,4 +70,4 @@ Prove work by pasting command output — do not claim success. When a change is 
 
 ## Visual Testing
 
-There is no Storybook or visual-regression layer yet; it is Phase 17 in `impl/implementation.md`. Until then, the demo app (`example-form`) is the manual visual check — run `npm start` and exercise the changed field.
+There is no Storybook or visual-regression layer yet; it is Phase 18 in `impl/implementation.md`. Until then, the portal is the manual visual check — run `npm start` and exercise the changed field in its preview form. Turning the `Field Types` switch off leaves that form without the portal's own annotations.

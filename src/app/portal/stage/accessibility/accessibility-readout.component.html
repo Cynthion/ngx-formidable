@@ -1,0 +1,8 @@
+<dl class="facts">
+  @for (fact of facts(); track fact.label) {
+    <div class="fact">
+      <dt>{{ fact.label }}</dt>
+      <dd>{{ fact.value }}</dd>
+    </div>
+  }
+</dl>

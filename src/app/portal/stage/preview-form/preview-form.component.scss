@@ -1,0 +1,101 @@
+:host {
+  display: block;
+}
+
+.preview-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.form-header {
+  h1 {
+    margin: 0 0 6px;
+    font-size: 24px;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.7;
+  }
+}
+
+.whole-form-errors {
+  padding: 10px 14px;
+  border: 1px solid var(--formidable-color-validation-error);
+  border-radius: var(--formidable-border-radius, 8px);
+  color: var(--formidable-color-validation-error);
+  font-size: 13px;
+
+  p {
+    margin: 0;
+  }
+}
+
+.form-section {
+  h2 {
+    margin: 0 0 14px;
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    opacity: 0.55;
+  }
+}
+
+// Each field spans three rows of this grid — itself, its chip, its accessibility readout — and lays them
+// out as a subgrid, so the annotations under two fields of unequal height still line up.
+// The rows carry no gap of their own: a gap between the tracks of one field would separate that field from
+// its own annotations. Each field states the space below itself instead, and the grid pulls the last one
+// back off so a section does not end on it.
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 20px;
+  margin-bottom: -18px;
+}
+
+// An `ngModelGroup` section. The group's own errors render as a sibling of the grid rather than inside it,
+// so a message reporting on the pair is not laid out as if it belonged to one of the two fields.
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-footer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.submit {
+  padding: 10px 20px;
+  border: var(--formidable-field-border-thickness, 1px) solid var(--formidable-color-field-border-focus);
+  border-radius: var(--formidable-field-border-radius, 8px);
+  background: var(--formidable-color-field-border-focus);
+  color: var(--formidable-color-field-background);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--formidable-color-field-border-focus);
+    outline-offset: 2px;
+  }
+}
+
+.footer-note {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+@media (width <= 900px) {
+  .field-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,82 @@
+<portal-accordion
+  heading="Export"
+  lede="The Angular template this configuration produces, and a component for it to bind to. A production build contains no template compiler, so the configuration is the source and both are derived from it — which is why they are read-only."
+  [hint]="fieldCount() + ' Fields'"
+  [open]="isOpen('export')"
+  (toggled)="toggle('export')">
+  <h4 class="block-title">Template</h4>
+  <pre class="markup">{{ markup() }}</pre>
+
+  <div class="pc-buttons">
+    <button
+      type="button"
+      class="pc-button is-primary"
+      (click)="copy()">
+      {{ justCopied() ? 'Copied' : 'Copy Template' }}
+    </button>
+    <button
+      type="button"
+      class="pc-button is-quiet"
+      (click)="store.reset()">
+      Reset Form
+    </button>
+  </div>
+
+  <h4 class="block-title">Component</h4>
+  <p class="pc-help">
+    Optional. The library's convention for what the template binds to — the model, its shape and, under Vest, a suite for your rules. Any component that
+    provides them serves the template just as well.
+  </p>
+  <pre class="markup">{{ component() }}</pre>
+
+  <div class="pc-buttons">
+    <button
+      type="button"
+      class="pc-button is-primary"
+      (click)="copyComponent()">
+      {{ justCopiedComponent() ? 'Copied' : 'Copy Component' }}
+    </button>
+  </div>
+</portal-accordion>
+
+<portal-accordion
+  heading="Import"
+  lede="A template, read back in. It replaces the form on the stage, sections included — those come from the comments above each run of fields. A static, attribute-only subset: bindings to expressions and control flow are listed rather than silently dropped."
+  hint="Paste A Template"
+  [open]="isOpen('import')"
+  (toggled)="toggle('import')">
+  <textarea
+    rows="4"
+    spellcheck="false"
+    placeholder="<form formidableForm> … </form>"
+    class="pc-textarea"
+    [value]="importText()"
+    (input)="importText.set($any($event.target).value)"></textarea>
+
+  <div class="pc-buttons">
+    <button
+      type="button"
+      class="pc-button is-primary"
+      [disabled]="!importText().trim()"
+      (click)="runImport()">
+      Replace The Form
+    </button>
+  </div>
+
+  @if (importResult(); as result) {
+    <div class="report">
+      <p class="applied">Read {{ result.fields.length }} fields in {{ result.sections.length }} sections.</p>
+      @if (result.notes.length) {
+        <p class="notes-head">Ignored:</p>
+        <ul class="notes">
+          @for (note of result.notes; track $index) {
+            <li>
+              <code class="pc-code">{{ note.text }}</code>
+              <span class="reason">{{ noteLabels[note.reason] }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</portal-accordion>

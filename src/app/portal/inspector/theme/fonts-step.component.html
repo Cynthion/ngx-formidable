@@ -1,0 +1,24 @@
+<div class="families">
+  @for (font of fonts; track font.key) {
+    <button
+      type="button"
+      class="family"
+      [class.is-active]="activeKey() === font.key"
+      [style.font-family]="font.stack"
+      (click)="setFamily(font.stack)">
+      <span class="family-name">{{ font.label }}</span>
+      <span class="family-sample">Order A Pizza 0123</span>
+    </button>
+  }
+</div>
+
+<portal-token-control [token]="familyToken" />
+
+<details class="type">
+  <summary>Size, Weight And Line Height</summary>
+  @for (token of typeTokens(); track token.name) {
+    <portal-token-control
+      [token]="token"
+      [compact]="true" />
+  }
+</details>

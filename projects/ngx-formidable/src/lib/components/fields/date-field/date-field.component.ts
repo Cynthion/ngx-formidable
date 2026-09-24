@@ -30,6 +30,7 @@ import {
 } from '../../../helpers/format.helpers';
 import { renderEmptyMask } from '../../../helpers/input.helpers';
 import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
+import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../../helpers/mask.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
@@ -241,7 +242,8 @@ export class DateFieldComponent
 
     // hand the empty display over to ngxMask while focused (see renderEmpty)
     if (isFocused) {
-      if (this.selectedDate == null) this.renderEmpty();
+      if (this.showsNothingTyped) this.renderEmpty();
+      this.selectOnKeyboardFocus(this.inputRef().nativeElement, true);
       return;
     }
 
@@ -398,8 +400,14 @@ export class DateFieldComponent
 
   protected readonly ngxMask = computed(() => formatToDateTokenMask(this.tokenFormat(), this.maskChar));
 
-  protected ngxMaskConfig: Pick<NgxMaskConfig, 'showMaskTyped' | 'leadZeroDateTime' | 'dropSpecialCharacters'> = {
+  protected ngxMaskConfig: Pick<
+    NgxMaskConfig,
+    'showMaskTyped' | 'leadZeroDateTime' | 'dropSpecialCharacters' | 'placeHolderCharacter'
+  > = {
     showMaskTyped: true,
+    // Bound rather than inherited: the empty display is compared against character by character, so a
+    // global `provideNgxMask` must not be able to change it out from under that.
+    placeHolderCharacter: DEFAULT_PLACEHOLDER_CHARACTER,
     leadZeroDateTime: false, // must be enforced by unicodeTokenFormat, if required
     dropSpecialCharacters: false // keep special characters like '-', '.' or '/' in the input
   };
@@ -409,7 +417,7 @@ export class DateFieldComponent
 
   // ngxMask's own empty display: the mask with every slot as its placeholder character.
   private get maskPlaceholder(): string {
-    return this.ngxMask().replace(/\w/g, '_');
+    return this.ngxMask().replace(/\w/g, this.maskPlaceholderCharacter);
   }
 
   // The resting display of an empty field for the current `emptyHint`: the format string, or
@@ -423,6 +431,13 @@ export class DateFieldComponent
     const value = this.inputRef().nativeElement.value;
 
     return value === '' || value === this.maskPlaceholder;
+  }
+
+  // Whether the input is showing one of its two empty displays rather than characters somebody typed.
+  // Focus hands the display to ngxMask, and that must not overwrite a half-typed date — which survives a
+  // blur onto this field's own panel, and is there to come back to when focus returns.
+  private get showsNothingTyped(): boolean {
+    return this.isInputCleared || this.inputRef().nativeElement.value === this.emptyDisplay;
   }
 
   // Shows the `emptyHint` at rest, but lets ngxMask own the text while focused.
@@ -593,14 +608,13 @@ export class DateFieldComponent
   public togglePanel(isOpen: boolean): void {
     this.isPanelOpen.set(isOpen);
 
-    // Reads the panel's box while opening, so it has to wait for the open state to render — a microtask
-    // would run before change detection. Closing reaches here from `selectDate` with the panel already
-    // closed, where the `set` above moves nothing and so schedules nothing; that is harmless, because
-    // `scrollIntoView` skips the panel entirely when it is not scrolling to it and measures only the field,
-    // whose box an absolutely positioned panel cannot move.
-    setTimeout(() => scrollIntoView(this.dateRef(), this.panelRef(), isOpen));
-
     if (isOpen) {
+      // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
+      // before change detection. Only while opening: closing reveals nothing, and `selectDate` closes an
+      // already-closed panel on every write, including the one that seeds the field's initial value —
+      // which used to scroll an off-screen field into view on load.
+      setTimeout(() => scrollIntoView(this.dateRef(), this.panelRef()));
+
       // Synchronous on purpose: a closed panel is `visibility: hidden`, not `display: none`, so it is
       // already laid out and measurable. Deferring would flip it after paint, which is a visible jump.
       // The panel is not focused here: it is still `visibility: hidden` at this point and so cannot take

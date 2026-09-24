@@ -12,7 +12,9 @@ module.exports = tseslint.config(
     files: ['**/*.ts'],
     languageOptions: {
       parserOptions: {
-        project: ['./tsconfig.app.json', './projects/ngx-formidable/tsconfig.lib.json'] // enable type-aware linting
+        // Type-aware linting. `tsconfig.spec.json` is here for the sources only a spec reaches — the specs
+        // themselves are ignored above, but the modules they import still have to belong to a project.
+        project: ['./tsconfig.app.json', './tsconfig.spec.json', './projects/ngx-formidable/tsconfig.lib.json']
       }
     },
     plugins: {
@@ -79,7 +81,7 @@ module.exports = tseslint.config(
     rules: {}
   },
   {
-    files: ['projects/formidable/src/lib/**/*.ts'],
+    files: ['projects/ngx-formidable/src/lib/**/*.ts'],
     rules: {
       '@angular-eslint/component-selector': [
         'error',
@@ -94,6 +96,27 @@ module.exports = tseslint.config(
         {
           type: 'attribute',
           prefix: 'formidable',
+          style: 'camelCase'
+        }
+      ]
+    }
+  },
+  {
+    files: ['src/app/portal/**/*.ts'],
+    rules: {
+      '@angular-eslint/component-selector': [
+        'error',
+        {
+          type: 'element',
+          prefix: 'portal',
+          style: 'kebab-case'
+        }
+      ],
+      '@angular-eslint/directive-selector': [
+        'error',
+        {
+          type: 'attribute',
+          prefix: 'portal',
           style: 'camelCase'
         }
       ]

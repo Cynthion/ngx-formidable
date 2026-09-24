@@ -40,6 +40,10 @@ jobs:
       - name: Lint Styles
         run: npm run style-lint
 
+      # The portal's token manifest transcribes `user/theme-reference.md`; this is what stops it drifting.
+      - name: Check Token Descriptions
+        run: npm run docs:check
+
       # The library build is also the type and template check — there is no standalone typecheck script.
       - name: Build Library
         run: npm run build:lib
@@ -48,7 +52,7 @@ jobs:
         run: npm test -- ngx-formidable --watch=false --browsers=ChromeHeadless
 
       - name: Test Demo
-        run: npm test -- ngx-formidable-demo --watch=false --browsers=ChromeHeadless
+        run: npm test -- ngx-formidable-portal --watch=false --browsers=ChromeHeadless
 
       - name: Build Demo
         run: npm run build

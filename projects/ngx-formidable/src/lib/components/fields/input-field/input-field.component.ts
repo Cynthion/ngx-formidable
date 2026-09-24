@@ -13,11 +13,13 @@ import {
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgxMaskConfig, NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
-import { setCaretPositionToEnd } from '../../../helpers/input.helpers';
+import { replaceText } from '../../../helpers/input.helpers';
 import {
   analyzeMaskDisplayLength,
   DEFAULT_PATTERNS,
+  DEFAULT_PLACEHOLDER_CHARACTER,
   DEFAULT_SPECIAL_CHARACTERS,
+  isPlaceholderAmbiguous,
   MaskConfigSubset
 } from '../../../helpers/mask.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
@@ -71,7 +73,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   override ngAfterViewInit(): void {
     super.ngAfterViewInit();
 
-    this.warnIfMaskConflictsWithMinMax();
+    this.warnAboutMaskConfig();
   }
 
   constructor() {
@@ -79,40 +81,61 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
 
     onSignalChange(
       () => [this.mask(), this.maskConfig(), this.minLength(), this.maxLength()],
-      () => this.warnIfMaskConflictsWithMinMax()
+      () => this.warnAboutMaskConfig()
     );
 
     // Re-applies the formatting the new mask asks for. Separate, so a `minLength` change does not rewrite
     // the value the user is in the middle of typing — and it runs on the first pass too:
     // ngxMask initialises across a full task, so the value written before that has to be formatted again once it has.
+    let isFirstPass = true;
+
     effect(() => {
       this.mask();
       this.maskConfig();
 
-      untracked(() => queueMicrotask(() => this.doWriteValue(this.value ?? '')));
+      const firstPass = isFirstPass;
+      isFirstPass = false;
+
+      untracked(() => queueMicrotask(() => this.doWriteValue(this.valueToReapply(firstPass))));
     });
+  }
+
+  /**
+   * What the mask effect re-formats. On the first pass the element is not the source: ngxMask has not
+   * initialised, so a value written before this point is still sitting in `lastWrittenValue` while the
+   * element reads back empty — re-formatting the element would then erase it. Afterwards the element is
+   * authoritative, so a mask changed while the user is typing re-formats what they typed.
+   */
+  private valueToReapply(isFirstPass: boolean): string {
+    if (isFirstPass && this.lastWrittenValue) return this.lastWrittenValue;
+
+    return this.value ?? '';
   }
 
   protected doOnValueChange(): void {
     // No additional actions needed
   }
 
-  protected doOnFocusChange(_isFocused: boolean): void {
-    // No additional actions needed
+  protected doOnFocusChange(isFocused: boolean): void {
+    if (isFocused) this.selectOnKeyboardFocus(this.inputRef().nativeElement, !!this.mask());
   }
 
   // #region ControlValueAccessor
 
+  /** The last value the form wrote in, which the mask effect needs while the element cannot yet hold it. */
+  private lastWrittenValue = '';
+
   protected doWriteValue(value: string): void {
     const newValue = value ?? '';
+
+    this.lastWrittenValue = newValue;
 
     if (this.mask()) {
       // Waits for the ngxMask directive to initialize on the control, which it does across a full
       // task — a microtask would land before it and the value would be written unmasked.
       setTimeout(() => {
         const maskedValue = this.maskPipe.transform(newValue, this.mask()!, this.mergedMaskConfig);
-        this.inputRef().nativeElement.value = maskedValue;
-        setCaretPositionToEnd(this.inputRef().nativeElement);
+        replaceText(this.inputRef().nativeElement, maskedValue);
 
         // notify the form control again (since usually done in base directive)
         if (newValue) {
@@ -120,8 +143,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
         }
       });
     } else {
-      this.inputRef().nativeElement.value = newValue;
-      setCaretPositionToEnd(this.inputRef().nativeElement);
+      replaceText(this.inputRef().nativeElement, newValue);
     }
   }
 
@@ -182,6 +204,7 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   private readonly LOCAL_MASK_DEFAULTS: Required<MaskConfigSubset> = {
     validation: true,
     showMaskTyped: false,
+    placeHolderCharacter: DEFAULT_PLACEHOLDER_CHARACTER,
     dropSpecialCharacters: true,
     specialCharacters: DEFAULT_SPECIAL_CHARACTERS,
     thousandSeparator: ' ', // ngx-mask default is a space
@@ -203,9 +226,21 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     } as Required<MaskConfigSubset>;
   }
 
-  private warnIfMaskConflictsWithMinMax(): void {
+  protected override get maskPlaceholderCharacter(): string {
+    return this.mergedMaskConfig.placeHolderCharacter;
+  }
+
+  private warnAboutMaskConfig(): void {
     const mask = this.mask();
     if (!mask) return;
+
+    if (isPlaceholderAmbiguous(mask, this.mergedMaskConfig)) {
+      console.warn(
+        `[ngx-formidable] <${this.name() || 'input'}>: placeHolderCharacter "${this.mergedMaskConfig.placeHolderCharacter}" ` +
+          `can also appear as content under this mask, so the field cannot tell a filled position from an ` +
+          `empty one. Set a placeHolderCharacter the mask cannot produce.`
+      );
+    }
 
     const { prefix, suffix } = this.mergedMaskConfig;
     const { min, max, variable } = analyzeMaskDisplayLength(mask, { prefix, suffix });

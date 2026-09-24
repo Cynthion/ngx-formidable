@@ -1,8 +1,6 @@
-@use '../mixins/typography' as typo;
-
 html {
-  @include typo.font-base;
-
-  font-family: Mulish, Arial, sans-serif; // fallback fonts
+  font-size: 16px;
+  font-weight: normal;
+  line-height: 1.6;
   letter-spacing: 0;
 }
