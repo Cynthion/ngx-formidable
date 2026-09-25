@@ -165,7 +165,9 @@ export class PreviewFieldComponent {
 
   protected readonly showLabel = computed(() => this.formOptions().showLabels && this.spec().decoration.showLabel);
 
-  protected readonly labelPosition = computed<FieldLabelPosition>(() =>
+  // `undefined` binds as "state nothing", so the library resolves the app default exactly as it would for a
+  // template that leaves the attribute out.
+  protected readonly labelPosition = computed<FieldLabelPosition | undefined>(() =>
     this.capabilities().labelPositions ? this.spec().decoration.labelPosition : 'outside'
   );
 
@@ -175,7 +177,7 @@ export class PreviewFieldComponent {
     () => this.formOptions().showAdornments && this.capabilities().adornments
   );
 
-  protected readonly panelPosition = computed(() => this.spec().panelPosition ?? this.formOptions().panelPosition);
+  protected readonly panelPosition = computed(() => this.spec().panelPosition);
 
   protected readonly options = computed<PortalOptionSpec[]>(() => [...(this.spec().options ?? [])]);
 

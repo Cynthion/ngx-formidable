@@ -42,53 +42,21 @@
     {{ glyphFor(theme.appearance()) }}
   </button>
 
-  <!-- One group per thing there is to take away: the copy does it outright, the control beside it opens the
-       half of Import & Export that holds the same block, its options and the way back in. -->
-  <div class="copy-group">
-    <button
-      type="button"
-      class="copy-button"
-      [class.copied]="copiedTheme()"
-      [title]="'Copy ' + theme.exportCount() + ' variables as a :root block'"
-      (click)="copyTheme()">
-      {{ copiedTheme() ? 'Copied' : 'Copy Theme' }}
-      <span class="count">{{ theme.changeCount() }}</span>
-    </button>
-    <button
-      type="button"
-      title="Open Import &amp; Export at the theme CSS"
-      class="export-button"
-      aria-label="Open Import and Export at the theme CSS"
-      (click)="showExport('theme')">
-      <span
-        class="export-glyph"
-        aria-hidden="true">
-        ↗
-      </span>
-    </button>
-  </div>
-
-  <div class="copy-group">
-    <button
-      type="button"
-      class="copy-button"
-      [class.copied]="copiedMarkup()"
-      [title]="'Copy the Angular template for ' + fields().length + ' fields. Its component is in Import & Export.'"
-      (click)="copyMarkup()">
-      {{ copiedMarkup() ? 'Copied' : 'Copy Template' }}
-      <span class="count">{{ fields().length }}</span>
-    </button>
-    <button
-      type="button"
-      title="Open Import &amp; Export at the form"
-      class="export-button"
-      aria-label="Open Import and Export at the form"
-      (click)="showExport('form')">
-      <span
-        class="export-glyph"
-        aria-hidden="true">
-        ↗
-      </span>
-    </button>
-  </div>
+  <button
+    type="button"
+    title="Copy the theme as a :root block. The count is the variables you changed from the defaults."
+    class="copy-button"
+    [class.copied]="copiedTheme()"
+    (click)="copyTheme()">
+    <!-- One flex item, so the button's gap does not land between the verb and its noun. -->
+    <span>
+      @if (copiedTheme()) {
+        Copied
+      } @else {
+        Copy
+        <span class="noun">Theme</span>
+      }
+    </span>
+    <span class="count">{{ theme.changeCount() }}</span>
+  </button>
 </div>

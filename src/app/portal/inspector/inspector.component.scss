@@ -56,7 +56,8 @@
   // below it.
   box-sizing: border-box;
   height: var(--portal-section-header-height);
-  padding: 0 8px;
+  // The right is the content's 16px gutter, so the toggle's edge lines up with the controls under it.
+  padding: 0 16px 0 8px;
   border-bottom: 1px solid var(--portal-border);
 }
 
@@ -69,12 +70,14 @@
 }
 
 // Full height, so the active tab's underline sits on the header's own bottom edge while its label stays
-// centred with the chevron beside it.
+// centred with the chevron beside it. The auto margin pushes the toggle right; it lives here rather than on
+// the toggle, because collapsed the strip is gone and the toggle has to centre instead.
 .tabs {
   display: flex;
   align-self: stretch;
   gap: 4px;
   min-width: 0;
+  margin-right: auto;
   overflow: hidden;
 }
 
@@ -106,7 +109,6 @@
 .collapse {
   flex: none;
   align-self: center;
-  margin-left: auto;
   padding: 3px 8px;
   border: 1px solid var(--portal-border);
   border-radius: var(--portal-radius-sm);

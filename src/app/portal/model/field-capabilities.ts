@@ -1,4 +1,4 @@
-import { FieldDecoratorLayout } from '@cynthion/ngx-formidable';
+import { FieldDecoratorLayout, FormidablePanelPosition } from '@cynthion/ngx-formidable';
 import { PortalFieldKind } from './field-spec.model';
 
 /**
@@ -19,7 +19,8 @@ interface PortalFieldCapabilities {
   readonly options: boolean;
   /** Whether the field takes an entry that runs an action instead of becoming a value. Panel fields only. */
   readonly actionOption: boolean;
-  readonly panel: boolean;
+  /** Where the field's panel opens by the library's own default, which differs per field. `null` for no panel. */
+  readonly panel: FormidablePanelPosition | null;
   readonly mask: boolean;
   readonly textLength: boolean;
   readonly locale: boolean;
@@ -38,7 +39,7 @@ const OFF = {
   placeholder: false,
   options: false,
   actionOption: false,
-  panel: false,
+  panel: null,
   mask: false,
   textLength: false,
   locale: false,
@@ -52,17 +53,17 @@ export const FIELD_CAPABILITIES: Readonly<Record<PortalFieldKind, PortalFieldCap
   'input': { ...HORIZONTAL, ...OFF, placeholder: true, mask: true, textLength: true },
   'textarea': { ...HORIZONTAL, ...OFF, placeholder: true, mask: true, textLength: true },
   'select': { ...HORIZONTAL, ...OFF, placeholder: true, options: true },
-  'dropdown': { ...HORIZONTAL, ...OFF, placeholder: true, options: true, actionOption: true, panel: true },
+  'dropdown': { ...HORIZONTAL, ...OFF, placeholder: true, options: true, actionOption: true, panel: 'full' },
   'autocomplete': {
     ...HORIZONTAL,
     ...OFF,
     placeholder: true,
     options: true,
     actionOption: true,
-    panel: true,
+    panel: 'full',
     filter: true
   },
-  'date': { ...HORIZONTAL, ...OFF, placeholder: true, panel: true, locale: true, toggleIcon: true },
+  'date': { ...HORIZONTAL, ...OFF, placeholder: true, panel: 'right', locale: true, toggleIcon: true },
   'time': { ...HORIZONTAL, ...OFF, placeholder: true, locale: true },
   'toggle': { ...INLINE, ...OFF },
   'slider': { ...INLINE, ...OFF, range: true },

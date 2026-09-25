@@ -19,7 +19,7 @@ describe('inspector layout', () => {
   let inspector: InspectorStore;
   let store: FormDefinitionStore;
 
-  const SCOPES: readonly FieldScope[] = ['form', 'all', 'field'];
+  const SCOPES: readonly FieldScope[] = ['app', 'form', 'field'];
 
   beforeEach(() => {
     localStorage.clear();
@@ -119,6 +119,60 @@ describe('inspector layout', () => {
 
   it('paints nothing outside the gutter at the narrowest width the divider allows', fakeAsync(() => {
     expect(sweep(INSPECTOR_WIDTH_MIN)).toEqual([]);
+  }));
+
+  // Each area's halves are longer than the panel, so the strip saying which half is showing has to survive
+  // the scroll rather than leave with the content.
+  it('keeps the sub-tab strip at the top of the panel scrolled to its end', fakeAsync(() => {
+    sizeTo(INSPECTOR_WIDTH_DEFAULT);
+    // Short enough that every view below has to scroll, whatever the runner's viewport makes a `dvh`.
+    host.style.setProperty('height', '400px', 'important');
+
+    const views: [string, () => void][] = [
+      ['theme/design', () => inspector.tab.set('theme')],
+      ['form/settings', () => inspector.openFieldSettings()],
+      ['export/form', () => inspector.openExport('form')]
+    ];
+
+    for (const [where, open] of views) {
+      open();
+      settle();
+
+      const body = host.querySelector('.body') as HTMLElement;
+      body.scrollTop = body.scrollHeight;
+
+      const strip = host.querySelector('.sub-tabs') as HTMLElement;
+
+      // Scrolled for real, or the strip being at the top would prove nothing.
+      expect(body.scrollTop).withContext(where).toBeGreaterThan(100);
+      expect(strip.getBoundingClientRect().top - body.getBoundingClientRect().top)
+        .withContext(where)
+        .toBeCloseTo(0, 0);
+    }
+  }));
+
+  // Open, the toggle keeps the content's gutter, measured against the sub-tab strip so a scrollbar in the body
+  // cannot skew it. Collapsed, the rail holds nothing else, so the toggle centres.
+  it('lines the toggle up with the content open and centres it collapsed', fakeAsync(() => {
+    sizeTo(INSPECTOR_WIDTH_DEFAULT);
+
+    const toggle = (): DOMRect => (host.querySelector('.collapse') as HTMLElement).getBoundingClientRect();
+    const head = (host.querySelector('.head') as HTMLElement).getBoundingClientRect();
+    const strip = host.querySelector('.sub-tabs') as HTMLElement;
+    const stripGutter = strip.getBoundingClientRect().right - strip.lastElementChild!.getBoundingClientRect().right;
+
+    expect(head.right - toggle().right).toBeCloseTo(stripGutter, 0);
+
+    host.style.removeProperty('width');
+    TestBed.inject(LayoutStore).inspectorCollapsed.set(true);
+    settle();
+
+    const rail = host.getBoundingClientRect();
+    const left = toggle().left - (rail.left + host.clientLeft);
+    const right = rail.left + host.clientLeft + host.clientWidth - toggle().right;
+
+    expect(left).toBeGreaterThan(0);
+    expect(left).toBeCloseTo(right, 0);
   }));
 
   // The field editor renders a different set of controls per kind, so one selected field proves one of them.

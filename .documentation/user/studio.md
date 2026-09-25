@@ -15,7 +15,7 @@ How theming works, and which variables are worth setting, is in `user/theming.md
 | `/`     | The Studio: a live form, and the panel that changes it |
 | `/docs` | These documents                                        |
 
-The top bar carries both, the repository link, the page's own light or dark appearance, and a copy button for each of the two things you take away.
+The top bar carries both, the repository link, the page's own light or dark appearance, and a copy button for the theme.
 
 ---
 
@@ -23,7 +23,7 @@ The top bar carries both, the repository link, the page's own light or dark appe
 
 | Region           | Where            | Holds                                                                     |
 | :--------------- | :--------------- | :------------------------------------------------------------------------ |
-| **Top Bar**      | Across the top   | The two routes, the appearance toggle, `Copy Theme` and `Copy Template`   |
+| **Top Bar**      | Across the top   | The two routes, the appearance toggle and `Copy Theme`                    |
 | **Stage**        | The wide column  | The form, on an explicit page surface, with the model drawer beneath it   |
 | **Editor Panel** | Beside the stage | `Theme`, `Form` and `Import & Export`, each a tab over the same live form |
 
@@ -61,7 +61,7 @@ The `Theme` tab has two halves. `Design` is a ladder of numbered steps in the or
 | **4**       | The page behind the form                                      |         — |
 | **5**       | Fonts: the family, and the size, weight and line height       |         — |
 
-**Presets First**: each thumbnail is a real field rendered under that theme rather than a picture of one. `Randomize` pairs a shape, a palette and a family at random, which is the fastest way to see that the two axes are independent. `Back To The Shipped Theme` returns to the library's own defaults.
+**Presets First**: each thumbnail is a real field rendered under that theme rather than a picture of one. `Randomize` pairs a shape, a palette and a family at random, which is the fastest way to see that the two axes are independent. `Reset To Default Theme` returns to the library's own defaults.
 
 **The Page Behind The Form** is yours, not the library's. The library styles fields and never the surface they sit on, so this block is exported separately and commented as such.
 
@@ -101,15 +101,17 @@ Starting over replaces the fields on the stage and leaves the theme untouched. A
 
 One editor, with an `Applies to` switch above it. The switch is how far a control reaches, so it is selected rather than read.
 
-| Scope          | Changes                                                                                   |
-| :------------- | :---------------------------------------------------------------------------------------- |
-| **The Form**   | The master switches every field obeys, the panel position, the locale, and the validation |
-| **All Fields** | Decoration, on every field at once                                                        |
-| **This Field** | Identity, state, decoration, behaviour and options for the selected field                 |
+| Scope            | Changes                                                                                  |
+| :--------------- | :--------------------------------------------------------------------------------------- |
+| **App Defaults** | What `provideNgxFormidable({ defaults })` would say, for every form and field            |
+| **The Form**     | The master switches every field obeys, sample adornments, the locale, and the validation |
+| **This Field**   | Identity, state, decoration, behaviour and options for the selected field                |
 
 Selecting a field selects it for editing; while the `Settings` half is showing, focusing a field in the preview selects it too. A field chip opens this half at `This Field`.
 
-Decoration belongs to a field, so `All Fields` has no value of its own to show. Each control there states what most fields carry, says how many override it, and offers `Apply To All` to reassert it over them.
+**App Defaults Are What The Preview Is Given.** The stage runs the library's own resolution, as `user/getting-started.md` describes it. Each control there offers `Library Default` to set nothing, says how many fields — or whether the form — state their own value, and offers `Clear` to make them inherit again. At the two narrower scopes, the matching controls offer `App Default`, naming the value in force. A field reads its defaults when it is created, so changing one rebuilds the preview.
+
+**Adornment Examples Are Samples.** An adornment is markup you project per field, so no default can supply one. `The Form` fills every field's slot with a sample, states what most fields carry, and offers `Apply To All` to reassert it over the rest.
 
 A control appears only where that kind of field honours the input. The decorator layout is fixed per component and decides two answers outright: only the horizontal layout honours a label position other than `outside`, and the vertical layout renders no prefix or suffix at all. `user/decoration.md` states the rule, and the Studio never offers a control that would silently do nothing.
 
@@ -140,14 +142,14 @@ The model drawer is where all of this is legible: the two groups nest, and a con
 
 The `Import & Export` tab has two halves, one per thing the Studio produces. Each is derived from what is on the stage, so neither can disagree with what you are looking at, and pasting either back reproduces it.
 
-| Half      | Export                                                                              | Import                                  |
-| :-------- | :---------------------------------------------------------------------------------- | :-------------------------------------- |
-| **Theme** | The `:root` block to paste into your own stylesheet                                 | A block you saved earlier               |
-| **Form**  | The Angular template this configuration produces, and a component for it, read-only | A whole template, its sections included |
+| Half      | Export                                                                                            | Import                                  |
+| :-------- | :------------------------------------------------------------------------------------------------ | :-------------------------------------- |
+| **Theme** | The `:root` block to paste into your own stylesheet                                               | A block you saved earlier               |
+| **Form**  | The Angular template this configuration produces, a component and an app config for it, read-only | A whole template, its sections included |
 
-Both halves are the same pair of sections, `Export` and `Import`. Each `Export` carries the block, a copy, and a reset that puts that half back to where it started — the shipped theme, or the sample form.
+Both halves are the same pair of sections, `Export` and `Import`. Each `Export` carries the block and a copy. The form's `Export` holds three files, so it shows them as tabs — `Template`, `Component`, `App Config` — one at a time.
 
-The top bar carries a copy for each half and, beside it, a control that opens that half here. `Copy Theme` and `Copy Template` copy with no intermediate dialog; the theme's export options cover CSS or SCSS, whether the page surface is included, whether the per-variable comments are emitted, and whether the defaults are stated explicitly. Declarations that only restate a library default are left out.
+The top bar's `Copy Theme` copies the theme with no intermediate dialog. The form has no copy there: its template does not compile without its component, so both are taken from here. The theme's export options cover CSS or SCSS, whether the page surface is included, whether the per-variable comments are emitted, and whether the defaults are stated explicitly. Declarations that only restate a library default are left out.
 
 **A Theme Block States A Delta.** The `:root` block carries what the theme says the library's defaults do not, so it reproduces the theme wherever those defaults are what it lands on — your own stylesheet. Read back into the Studio it lands on the theme already on the stage instead, and what a delta leaves unsaid stays as it is. Either checkbox closes that gap:
 
@@ -159,6 +161,8 @@ The top bar carries a copy for each half and, beside it, a control that opens th
 The page surface is the page's rather than the library's, so `Onto The Defaults` returns it to the Studio's own starting surface unless the block states it — which is what `Page Surface` is for.
 
 **The Component Is A Proposal.** The template binds `model`, `shape` and, under Vest, `suite`. `Copy Component` copies one standalone component that declares them the way `user/validation.md` lays a form out: the model typed by what each field writes, its shape, and under Vest a suite with no rules in it — the Studio has no rule editor. Any component that provides the three names serves the template as well. The component is not read back in.
+
+**The App Config Holds What The Template Leaves Out.** A field or form that states nothing is emitted without the attribute, so the app defaults are what give it its value. `Copy App Config` copies the `app.config.ts` that provides them; it is also on `App Defaults`. The app config belongs to the app rather than the form, so it is not read back in.
 
 **The Export Carries Behaviour, Not State.** A conditional field is emitted inside the `@if` its condition states, and a grouped section inside its `ngModelGroup` — so a field the stage is currently hiding is still in the template, and the model access under a group is nested. The template is the form, not a snapshot of it.
 

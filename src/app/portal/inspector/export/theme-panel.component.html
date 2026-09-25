@@ -1,6 +1,6 @@
 <portal-accordion
   heading="Export"
-  lede="The block to paste into your own :root. Declarations that only restate a library default are left out, so what you take away is your theme rather than the library's. Explicit Defaults states them anyway, which makes the block stand on its own wherever it lands."
+  lede="The block to paste into your own :root. Only what differs from the library's defaults is in it; Explicit Defaults states the rest too, so the block stands on its own wherever it lands."
   [hint]="theme.exportCount() + ' Variables'"
   [open]="isOpen('export')"
   (toggled)="toggle('export')">
@@ -53,18 +53,12 @@
       (click)="copy()">
       {{ justCopied() ? 'Copied' : 'Copy Theme' }}
     </button>
-    <button
-      type="button"
-      class="pc-button is-quiet"
-      (click)="theme.reset()">
-      Reset Theme
-    </button>
   </div>
 </portal-accordion>
 
 <portal-accordion
   heading="Import"
-  lede="A block you saved earlier, read back in. Anything outside the manifest is listed rather than applied — a variable the library does not declare would produce a control that appears to do nothing. Read onto the defaults, a block reproduces the theme it came from; read onto the theme on screen, whatever it leaves unstated stays as it is."
+  lede="A block exported here, read back in. Onto The Defaults reproduces the theme it came from; off, the block merges into the theme on screen. Variables the library does not declare are listed, not applied."
   hint="Paste A Block"
   [open]="isOpen('import')"
   (toggled)="toggle('import')">

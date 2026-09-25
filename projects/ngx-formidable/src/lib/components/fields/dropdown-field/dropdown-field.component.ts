@@ -5,6 +5,7 @@ import {
   computed,
   ElementRef,
   forwardRef,
+  inject,
   input,
   OnDestroy,
   OnInit,
@@ -25,6 +26,7 @@ import {
   FieldDecoratorLayout,
   FieldDefaultOptionMode,
   FieldOptionRole,
+  FORMIDABLE_DEFAULTS,
   FORMIDABLE_FIELD,
   FORMIDABLE_OPTION_FIELD,
   FormidablePanelPosition,
@@ -318,8 +320,15 @@ export class DropdownFieldComponent
   /** Whether the panel is currently open. Call `togglePanel` to open or close it from outside. */
   public readonly isPanelOpen = signal(false);
 
-  /** Where the panel opens. The three anchored positions flip above the field when there is no room below. */
-  public readonly panelPosition = input<FormidablePanelPosition>('full');
+  private readonly defaultPanelPosition = inject(FORMIDABLE_DEFAULTS).panelPosition ?? 'full';
+
+  /**
+   * Where the panel opens. The three anchored positions flip above the field when there is no room below.
+   * Unset or `undefined`, the app default applies.
+   */
+  public readonly panelPosition = input(this.defaultPanelPosition, {
+    transform: (position: FormidablePanelPosition | undefined) => position ?? this.defaultPanelPosition
+  });
 
   // Mousedown is used to prevent sending focusChanged events.
   protected toggleMouseDown(event: MouseEvent): void {

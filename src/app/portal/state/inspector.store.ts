@@ -13,11 +13,11 @@ export type FormSubTab = 'structure' | 'settings';
 /**
  * How far a control in the Settings half reaches.
  *
- * The three are the three kinds of state there are: the form's own options, the decoration every field
- * carries a copy of, and one field's specification. Scope is a control rather than the wording of three
- * headings, so the answer to "how much does this change?" is on screen and selected.
+ * The three are the three kinds of state there are: the app's defaults, the form's own options, and one
+ * field's specification. Scope is a control rather than the wording of three headings, so the answer to "how
+ * much does this change?" is on screen and selected.
  */
-export type FieldScope = 'form' | 'all' | 'field';
+export type FieldScope = 'app' | 'form' | 'field';
 
 /** The Import & Export area's own two halves — one round trip each. */
 export type ExportSection = 'theme' | 'form';
@@ -29,8 +29,8 @@ export type ExportDirection = 'export' | 'import';
  * Which area of the sidebar is showing, and whether it is collapsed.
  *
  * It is a store rather than component state because three things outside the inspector move it: a field
- * chip in the preview opens the Fields sub-tab, the copy button's count opens Export, and a derived
- * variable's link opens Variables. An output chain through the stage would only move the coupling somewhere
+ * chip in the preview opens the Fields sub-tab, Structure's third way to start opens Import & Export, and a
+ * derived variable's link opens Variables. An output chain through the stage would only move the coupling somewhere
  * less obvious.
  */
 @Injectable({ providedIn: 'root' })
@@ -65,9 +65,8 @@ export class InspectorStore {
   }
 
   /**
-   * What each of the top bar's two export controls asks for, and what Structure's third way to start asks
-   * for: the half holding the round trip it names, which is the block to read before copying and the box to
-   * paste one back into.
+   * What App Defaults' export link and Structure's third way to start ask for: the half holding the round
+   * trip it names, which is the block to read before copying and the box to paste one back into.
    */
   public openExport(section: ExportSection, direction: ExportDirection = 'export'): void {
     this.tab.set('export');

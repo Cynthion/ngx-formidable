@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, HostBinding, inject, input, signal } from '@angular/core';
 import { AbstractControl, NgForm, NgModel, NgModelGroup } from '@angular/forms';
 import { NgxFormidableFormDirective } from '../../forms/form.directive';
+import { FORMIDABLE_DEFAULTS } from '../../models/formidable.model';
 import {
   FORMIDABLE_ERROR_EXTRACTOR,
   FORMIDABLE_ERROR_TRANSLATOR,
@@ -40,6 +41,7 @@ export class FieldErrorsComponent {
   // Optional: messages render for any validator, and for none — neither the form directive nor a form is required.
   private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true });
   private readonly ngForm = inject(NgForm, { optional: true });
+  private readonly defaultRevealOn = inject(FORMIDABLE_DEFAULTS).revealOn ?? 'touched';
 
   private previousError?: string[];
 
@@ -65,9 +67,9 @@ export class FieldErrorsComponent {
     return this.previousError;
   });
 
-  // This field's setting first, then the form's, then the default.
+  // This field's setting first, then the form's, then the app default.
   private get reveal(): FormidableReveal {
-    return this.revealOn() ?? this.formDirective?.revealOn() ?? 'touched';
+    return this.revealOn() ?? this.formDirective?.revealOn() ?? this.defaultRevealOn;
   }
 
   readonly invalid = computed(() => {

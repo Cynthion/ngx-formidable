@@ -31,9 +31,6 @@
     "time",
     "theming"
   ],
-  "engines": {
-    "node": ">=26.7.0"
-  },
   "publishConfig": {
     "access": "public",
     "registry": "https://npm.pkg.github.com"
@@ -51,7 +48,7 @@
     "@angular/common": "^22.0.0",
     "@angular/core": "^22.0.0",
     "@angular/forms": "^22.0.0",
-    "date-fns": "^4.0.0",
+    "date-fns": "^3.0.1 || ^4.0.0",
     "ngx-mask": "^22.0.0",
     "pikaday": "^1.8.0",
     "rxjs": "^7.8.0",

@@ -1,5 +1,5 @@
 import { Directive, ElementRef, inject, input } from '@angular/core';
-import { FieldAdornmentAlignment } from '../models/formidable.model';
+import { FieldAdornmentAlignment, FORMIDABLE_DEFAULTS } from '../models/formidable.model';
 
 /**
  * Marks a projected element as the field's prefix, rendered inside the field's box at its leading edge. The
@@ -11,6 +11,13 @@ import { FieldAdornmentAlignment } from '../models/formidable.model';
 export class FieldPrefixDirective {
   elementRef = inject(ElementRef);
 
-  /** What the prefix lines up with vertically: the field's box (`center`) or its value (`value`). */
-  public readonly align = input<FieldAdornmentAlignment>('center');
+  private readonly defaultAlign = inject(FORMIDABLE_DEFAULTS).prefixAlign ?? 'center';
+
+  /**
+   * What the prefix lines up with vertically: the field's box (`center`) or its value (`value`). Unset or
+   * `undefined`, the app default applies.
+   */
+  public readonly align = input(this.defaultAlign, {
+    transform: (align: FieldAdornmentAlignment | undefined) => align ?? this.defaultAlign
+  });
 }

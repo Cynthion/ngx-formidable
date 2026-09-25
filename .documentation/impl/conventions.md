@@ -82,7 +82,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 - Strict everything: `strict`, `noImplicitOverride`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noPropertyAccessFromIndexSignature`, `noUncheckedIndexedAccess`, `noUnusedLocals`, `noUnusedParameters`. Angular compiler runs `strictTemplates`, `strictInjectionParameters`, `strictInputAccessModifiers`, `strictStandalone`.
 - `module` is `preserve`, which implies `moduleResolution: bundler` and forces `esModuleInterop`, so neither is declared. `useDefineForClassFields` is left at its `ES2022` default of `true`; the extended diagnostics Angular 22 promoted to errors are **not** suppressed, so `nullishCoalescingNotNullable` and `optionalChainNotNullable` both fail the build.
-- **Version ceilings**: TypeScript is capped by `@angular/compiler-cli` and `ng-packagr`, which both peer `>=6.0 <6.1` — so TypeScript 7 is unavailable while Angular 22 is the floor. `jasmine-core` is capped at 6: Jasmine 7 makes `describe`/`it` read-only on the global, which breaks `zone.js`'s `patchJasmine` and with it every `fakeAsync` spec.
+- **Version Ceilings**: TypeScript is capped by `@angular/compiler-cli` and `ng-packagr`, which both peer `>=6.0 <6.1` — so TypeScript 7 is unavailable while Angular 22 is the floor. `jasmine-core` is capped at 6: Jasmine 7 makes `describe`/`it` read-only on the global, which breaks `zone.js`'s `patchJasmine` and with it every `fakeAsync` spec. `renovate.json` enforces both.
 
 ## Tooling
 
@@ -96,6 +96,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 
 - **Branches**: `main` is production — push triggers the GitHub Pages deploy of the portal. `feature/*` for work in progress.
 - **Checks**: every push to `main` and every pull request runs the Formatting, Tests and Build items below in CI. See `tech/architecture.md`.
+- **Dependencies**: Renovate proposes updates once a month; Angular majors stay an `ng update`. See `impl/renovate.md`.
 - **Publishing**: `build:lib` then `publish:lib` to GitHub Packages; `@cynthion` scope needs `~/.npmrc` auth. See `tech/architecture.md`.
 - **Roadmap**: `impl/implementation.md` is the source of truth for outstanding work — check it before starting. `impl/backlog.md` is the intake buffer for ideas that have not been triaged into a phase yet.
 

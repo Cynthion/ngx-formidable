@@ -1,4 +1,4 @@
-import { FieldLabelPosition } from '@cynthion/ngx-formidable';
+import { FieldAdornmentAlignment, FieldLabelPosition } from '@cynthion/ngx-formidable';
 import { FIELD_CAPABILITIES, FIELD_KIND_BY_SELECTOR } from '../model/field-capabilities';
 import {
   DEFAULT_DECORATION,
@@ -300,8 +300,11 @@ function parseDecorator(
     decoration = { ...decoration, hint: (hint.textContent ?? '').trim() };
   }
 
-  if (decorator.querySelector('[formidablefieldprefix]')) decoration = { ...decoration, prefix: 'text' };
-  if (decorator.querySelector('[formidablefieldsuffix]')) decoration = { ...decoration, suffix: 'text' };
+  const prefix = decorator.querySelector('[formidablefieldprefix]');
+  if (prefix) decoration = { ...decoration, prefix: 'text', prefixAlign: alignOf(prefix) };
+
+  const suffix = decorator.querySelector('[formidablefieldsuffix]');
+  if (suffix) decoration = { ...decoration, suffix: 'text', suffixAlign: alignOf(suffix) };
   if (decorator.querySelector('[formidablefieldlabeladornment]')) {
     decoration = { ...decoration, labelAdornment: 'text' };
   }
@@ -310,6 +313,13 @@ function parseDecorator(
   const visibleWhen = parseCondition(decorator.getAttribute(CONDITION_ATTRIBUTE) ?? '') ?? undefined;
 
   return { ...spec, id: name, name, decoration, state, visibleWhen };
+}
+
+/** A prefix or suffix's stated `align`, or `undefined` where it states none and the app default applies. */
+function alignOf(adornment: Element): FieldAdornmentAlignment | undefined {
+  const align = (adornment.getAttribute('align') ?? unquote(adornment.getAttribute('[align]') ?? '')).trim();
+
+  return align === 'center' || align === 'value' ? align : undefined;
 }
 
 function parseOptions(fieldElement: Element): PortalOptionSpec[] {

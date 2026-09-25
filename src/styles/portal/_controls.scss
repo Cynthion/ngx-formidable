@@ -273,6 +273,18 @@
   }
 }
 
+// A count of the fields that disagree and its remedy read as one line: the number alone states a problem and
+// offers nothing.
+.pc-overrides {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin: 5px 0 0;
+  color: var(--portal-accent);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
 .pc-notice {
   margin-top: 8px;
   padding: 8px 10px;

@@ -5,6 +5,7 @@ import {
   computed,
   ElementRef,
   forwardRef,
+  inject,
   input,
   OnInit,
   output,
@@ -25,6 +26,7 @@ import {
   FieldDecoratorLayout,
   FieldDefaultOptionMode,
   FieldOptionRole,
+  FORMIDABLE_DEFAULTS,
   FORMIDABLE_FIELD,
   FORMIDABLE_OPTION_FIELD,
   FormidablePanelPosition,
@@ -386,11 +388,16 @@ export class AutocompleteFieldComponent
   /** Whether the panel is currently open. Call `togglePanel` to open or close it from outside. */
   public readonly isPanelOpen = signal(false);
 
+  private readonly defaultPanelPosition = inject(FORMIDABLE_DEFAULTS).panelPosition ?? 'full';
+
   /**
    * Where the panel opens. The three anchored positions flip above the field when there is no room below; a
    * `sheet` keeps focus in its own filter input, so a soft keyboard can cover it.
+   * Unset or `undefined`, the app default applies.
    */
-  public readonly panelPosition = input<FormidablePanelPosition>('full');
+  public readonly panelPosition = input(this.defaultPanelPosition, {
+    transform: (position: FormidablePanelPosition | undefined) => position ?? this.defaultPanelPosition
+  });
 
   /** Opens or closes the panel. */
   public togglePanel(isOpen: boolean): void {

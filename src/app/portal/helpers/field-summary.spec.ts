@@ -20,9 +20,7 @@ function valueOf(id: string, name: string): string | undefined {
 
 describe('describeFieldSettings', () => {
   it('reads the inputs a field actually carries', () => {
-    expect(namesOf('date')).toEqual(
-      jasmine.arrayContaining(['panelPosition', 'unicodeTokenFormat', 'emptyHint', 'locale'])
-    );
+    expect(namesOf('date')).toEqual(jasmine.arrayContaining(['unicodeTokenFormat', 'emptyHint', 'locale']));
   });
 
   it('separates two fields of one kind by what each is set to', () => {

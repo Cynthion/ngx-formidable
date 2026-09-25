@@ -576,13 +576,13 @@ describe('portal', () => {
     expect(chip.getAttribute('aria-describedby')).toBe('chip-tip-pizza');
     expect(Array.from(root.querySelectorAll('portal-preview-field .chip[title]')).length).toBe(0);
 
-    expect(tipFor('date')).toContain('panelPosition: right');
+    // The sample's date states no panel position of its own, so it has none to state.
+    expect(tipFor('date')).not.toContain('panelPosition');
 
     store.updateField('date', { panelPosition: 'sheet' });
     settle();
 
     expect(tipFor('date')).toContain('panelPosition: sheet');
-    expect(tipFor('date')).not.toContain('panelPosition: right');
   }));
 
   // The two column headers sit side by side, so a difference between them reads as a step in the rule under
@@ -709,11 +709,11 @@ describe('portal', () => {
       (el.textContent ?? '').trim()
     );
 
-    expect(labels).toEqual(['The Form', 'All Fields', 'This Field']);
+    expect(labels).toEqual(['App Defaults', 'The Form', 'This Field']);
 
-    const panels = ['portal-form-settings', 'portal-all-fields', 'portal-field-editor'];
+    const panels = ['portal-app-defaults', 'portal-form-settings', 'portal-field-editor'];
 
-    for (const [index, scope] of (['form', 'all', 'field'] as const).entries()) {
+    for (const [index, scope] of (['app', 'form', 'field'] as const).entries()) {
       (root.querySelectorAll<HTMLElement>('portal-settings-tab .scope-option')[index] as HTMLElement).click();
       settle();
 
@@ -733,7 +733,7 @@ describe('portal', () => {
     inspector.tab.set('form');
     inspector.formTab.set('settings');
 
-    inspector.fieldScope.set('all');
+    inspector.fieldScope.set('app');
     settle();
     expect(root.querySelector('#ft-select')).toBeNull();
 
@@ -879,51 +879,61 @@ describe('portal', () => {
     expect(headings()).toEqual(['Export', 'Import']);
   }));
 
-  // The theme half can be put back to the shipped default; the form half needs the same way out of a form
-  // the user has taken apart, or the two are only symmetric to look at.
-  it('offers a reset beside the copy in both halves', fakeAsync(() => {
-    settle();
-
-    const inspector = TestBed.inject(InspectorStore);
-    const definition = TestBed.inject(FormDefinitionStore);
-
-    inspector.openExport('theme');
-    settle();
-    expect(root.querySelector('portal-theme-panel .pc-button.is-quiet')?.textContent?.trim()).toBe('Reset Theme');
-
-    inspector.openExport('form');
-    settle();
-
-    definition.removeField(PREVIEW_FIELDS[0]!.id);
-    settle();
-    expect(definition.fields().length).toBe(PREVIEW_FIELDS.length - 1);
-
-    const reset = root.querySelector('portal-markup-panel .pc-button.is-quiet') as HTMLElement;
-    expect(reset.textContent?.trim()).toBe('Reset Form');
-
-    reset.click();
-    settle();
-
-    expect(definition.fields().length).toBe(PREVIEW_FIELDS.length);
-  }));
-
-  // The template binds names only a component defines, so the component sits beside it rather than in a
-  // third top-bar group of its own.
-  it('offers the component beside the template', fakeAsync(() => {
+  // The template binds names only a component defines, and leaves out what the app config supplies, so both
+  // sit beside it — as tabs, one file on screen at a time, because stacked they buried the import under three
+  // screens of code.
+  it('offers the template, the component and the app config as tabs, one at a time', fakeAsync(() => {
     settle();
 
     TestBed.inject(InspectorStore).openExport('form');
     settle();
 
-    const blocks = root.querySelectorAll('portal-markup-panel pre.markup');
-    const buttons = Array.from(root.querySelectorAll('portal-markup-panel .pc-button')).map((el) =>
-      (el.textContent ?? '').trim()
-    );
+    const tabs = () => Array.from(root.querySelectorAll<HTMLElement>('portal-markup-panel .output'));
+    const shown = () => {
+      const blocks = root.querySelectorAll('portal-markup-panel pre.markup');
+      const copy = root.querySelector('portal-markup-panel .pc-button.is-primary');
 
-    expect(blocks.length).toBe(2);
-    expect(blocks[0]?.textContent).toContain('<form');
-    expect(blocks[1]?.textContent).toContain('export class MyFormComponent');
-    expect(buttons).toEqual(['Copy Template', 'Reset Form', 'Copy Component']);
+      return { count: blocks.length, text: blocks[0]?.textContent ?? '', copy: (copy?.textContent ?? '').trim() };
+    };
+
+    expect(tabs().map((el) => (el.textContent ?? '').trim())).toEqual(['Template', 'Component', 'App Config']);
+    expect(shown().count).toBe(1);
+    expect(shown().text).toContain('<form');
+    expect(shown().copy).toBe('Copy Template');
+
+    tabs()[1]!.click();
+    settle();
+    expect(shown().count).toBe(1);
+    expect(shown().text).toContain('export class MyFormComponent');
+    expect(shown().copy).toBe('Copy Component');
+
+    tabs()[2]!.click();
+    settle();
+    expect(shown().count).toBe(1);
+    expect(shown().text).toContain('provideNgxFormidable');
+    expect(shown().copy).toBe('Copy App Config');
+    expect(tabs()[2]!.getAttribute('aria-selected')).toBe('true');
+  }));
+
+  // A reset beside the copy is one misclick from wiping the work being exported, and each already lives where
+  // its half is built: the preset gallery, and Structure's first step.
+  it('keeps resets out of Import & Export', fakeAsync(() => {
+    settle();
+
+    const inspector = TestBed.inject(InspectorStore);
+
+    for (const section of ['theme', 'form'] as const) {
+      inspector.openExport(section);
+      settle();
+
+      const labels = Array.from(root.querySelectorAll('portal-export-tab .pc-button')).map((el) =>
+        (el.textContent ?? '').trim()
+      );
+
+      expect(labels.filter((label) => /reset/i.test(label)))
+        .withContext(section)
+        .toEqual([]);
+    }
   }));
 
   // All three areas carry the same second level, so the strip is learned once rather than per tab.

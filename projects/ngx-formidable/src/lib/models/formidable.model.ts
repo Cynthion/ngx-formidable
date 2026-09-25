@@ -3,6 +3,7 @@ import { NgxMaskConfig } from 'ngx-mask';
 import { PikadayOptions } from 'pikaday';
 import { Observable } from 'rxjs';
 import { SignalsOf } from './utility-types';
+import { FormidableReveal } from './validation.model';
 
 /**
  * Provide this from a custom field, as `{ provide: FORMIDABLE_FIELD, useExisting: forwardRef(() => MyField) }`,
@@ -99,6 +100,35 @@ export type FormidableToggleFieldLabelPosition = 'before' | 'after';
  * A focused empty field always shows underscores — ngxMask's caret arithmetic only recognizes its own placeholder.
  */
 export type FormidableEmptyHint = 'underscores' | 'format';
+
+/**
+ * App-wide defaults for the inputs every template would otherwise repeat. Set via `provideNgxFormidable`, or
+ * provide `FORMIDABLE_DEFAULTS` in a component's `providers` to scope them to that subtree. A binding still
+ * wins, and binding `undefined` falls back to the default. Each is read once, when its field or form is
+ * created, so changing one afterwards reaches only what is created afterwards.
+ */
+export interface FormidableDefaults {
+  /** `FieldLabelDirective.position`. The library's own: `inside`. */
+  labelPosition?: FieldLabelPosition;
+  /** `FieldPrefixDirective.align`. The library's own: `center`. */
+  prefixAlign?: FieldAdornmentAlignment;
+  /** `FieldSuffixDirective.align`. The library's own: `center`. */
+  suffixAlign?: FieldAdornmentAlignment;
+  /** `panelPosition` on the dropdown, autocomplete and date fields, which otherwise each keep their own. */
+  panelPosition?: FormidablePanelPosition;
+  /** The form's `revealOn`, and a field's without a form. The library's own: `touched`. */
+  revealOn?: FormidableReveal;
+  /** The form's `showRequiredMarkers`, and a field's without a form. The library's own: `true`. */
+  showRequiredMarkers?: boolean;
+  /** The form's `debounceMs`. The library's own: `0`. */
+  debounceMs?: number;
+}
+
+/** The app-wide defaults. Empty unless `provideNgxFormidable({ defaults })` or a component provides it. */
+export const FORMIDABLE_DEFAULTS = new InjectionToken<FormidableDefaults>('FORMIDABLE_DEFAULTS', {
+  providedIn: 'root',
+  factory: () => ({})
+});
 
 /**
  * What every field exposes to its decorator, and the contract a custom field satisfies. `BaseFieldDirective`

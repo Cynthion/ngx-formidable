@@ -1,4 +1,5 @@
 import { computed, Injectable, signal } from '@angular/core';
+import { FormidableDefaults } from '@cynthion/ngx-formidable';
 import {
   DEFAULT_DECORATION,
   DEFAULT_STATE,
@@ -22,6 +23,13 @@ import { PREVIEW_FORM_DEFINITION } from '../model/preview-form.definition';
 @Injectable({ providedIn: 'root' })
 export class FormDefinitionStore {
   public readonly definition = signal<PortalFormDefinition>(PREVIEW_FORM_DEFINITION);
+
+  /**
+   * What the consumer's `provideNgxFormidable({ defaults })` would say. The app's rather than the form's, so
+   * starting over, loading the sample or importing a template leaves it alone. Unset keys are absent, never
+   * `undefined`, so what is set is what is counted and exported.
+   */
+  public readonly appDefaults = signal<FormidableDefaults>({});
 
   /** Which field the inspector is editing. Followed from focus only while the Settings tab is showing. */
   public readonly selectedFieldId = signal<string | null>(PREVIEW_FORM_DEFINITION.fields[0]?.id ?? null);
@@ -67,6 +75,21 @@ export class FormDefinitionStore {
     this.definition.update((definition) => ({ ...definition, options: { ...definition.options, ...patch } }));
   }
 
+  /** Sets the app defaults in the patch, and unsets the ones it maps to `undefined`. */
+  public updateAppDefaults(patch: FormidableDefaults): void {
+    const merged = { ...this.appDefaults(), ...patch };
+
+    this.appDefaults.set(Object.fromEntries(Object.entries(merged).filter(([, value]) => value !== undefined)));
+  }
+
+  /** Writes the same members on every field — how the app-default scope makes every field inherit again. */
+  public updateAllFields(patch: Partial<PortalFieldSpec>): void {
+    this.definition.update((definition) => ({
+      ...definition,
+      fields: definition.fields.map((field) => ({ ...field, ...patch }))
+    }));
+  }
+
   public updateField(id: string, patch: Partial<PortalFieldSpec>): void {
     this.definition.update((definition) => ({
       ...definition,
@@ -85,9 +108,8 @@ export class FormDefinitionStore {
   }
 
   /**
-   * Sets one decoration slot on every field at once. Adornments are content projection, so the form scope
-   * offers the same four choices as a field does — but as a bulk set rather than a second default to resolve
-   * against, which would leave a field's own value unreadable from either control.
+   * Sets decoration on every field at once: an adornment example, which is content projection and so has no
+   * default to resolve against, or an app-defaulted member cleared back to `undefined`.
    */
   public setDecorationOnAllFields(patch: Partial<PortalFieldSpec['decoration']>): void {
     this.definition.update((definition) => ({

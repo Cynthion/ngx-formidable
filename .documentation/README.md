@@ -50,4 +50,5 @@ For whoever works the repo.
 | `impl/documentation.md`  | Documentation style and authoring guide                  |
 | `impl/implementation.md` | Phased roadmap, the source of truth for outstanding work |
 | `impl/portal.md`         | Portal design: structure, theming, state, phases         |
+| `impl/renovate.md`       | Dependency updates: groups, Angular majors, peer ranges  |
 | `impl/testing.md`        | Testing strategy, helpers first                          |

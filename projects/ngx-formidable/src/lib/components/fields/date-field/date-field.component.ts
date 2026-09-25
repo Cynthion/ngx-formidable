@@ -6,6 +6,7 @@ import {
   contentChild,
   ElementRef,
   forwardRef,
+  inject,
   input,
   linkedSignal,
   OnDestroy,
@@ -34,6 +35,7 @@ import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../../helpers/mask.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
+  FORMIDABLE_DEFAULTS,
   FORMIDABLE_FIELD,
   FormidableEmptyHint,
   FormidablePanelPosition,
@@ -571,8 +573,15 @@ export class DateFieldComponent
   /** Whether the calendar is currently open. Call `togglePanel` to open or close it from outside. */
   public readonly isPanelOpen = signal(false);
 
-  /** Where the calendar opens. The three anchored positions flip above the field when there is no room below. */
-  public readonly panelPosition = input<FormidablePanelPosition>('right');
+  private readonly defaultPanelPosition = inject(FORMIDABLE_DEFAULTS).panelPosition ?? 'right';
+
+  /**
+   * Where the calendar opens. The three anchored positions flip above the field when there is no room below.
+   * Unset or `undefined`, the app default applies.
+   */
+  public readonly panelPosition = input(this.defaultPanelPosition, {
+    transform: (position: FormidablePanelPosition | undefined) => position ?? this.defaultPanelPosition
+  });
 
   private ignoreNextBlur = false;
 

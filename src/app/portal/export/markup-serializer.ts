@@ -18,9 +18,12 @@ export function serializeDefinition(definition: PortalFormDefinition): string {
   lines.push('  [formValue]="model()"');
   lines.push('  [formShape]="shape"');
   if (options.validator === 'vest') lines.push('  [formSuite]="suite"');
-  lines.push(`  [revealOn]="'${options.revealOn}'"`);
+  // Stated only where the form states them: absent, the app default applies, which is the App Config's.
+  if (options.revealOn) lines.push(`  [revealOn]="'${options.revealOn}'"`);
   lines.push(`  [ngFormOptions]="{ updateOn: '${options.updateOn}' }"`);
-  lines.push(`  [showRequiredMarkers]="${options.showRequiredMarkers}"`);
+  if (options.showRequiredMarkers !== undefined) {
+    lines.push(`  [showRequiredMarkers]="${options.showRequiredMarkers}"`);
+  }
   lines.push('  (formValueChange)="model.set($event)">');
 
   for (const section of definition.sections) {
@@ -159,13 +162,11 @@ function serializeField(spec: PortalFieldSpec, definition: PortalFormDefinition,
 
   lines.push(`  </${selector}>`);
 
+  // A position, an alignment and a panel position are stated only where the field states its own; absent,
+  // the app default applies. A layout that cannot honour a label position labels outside regardless.
   if (definition.options.showLabels && spec.decoration.showLabel) {
-    const position = capabilities.labelPositions ? spec.decoration.labelPosition : 'outside';
-    lines.push(`  <div`);
-    lines.push(`    formidableFieldLabel`);
-    lines.push(`    position="${position}">`);
-    lines.push(`    ${escape(spec.label)}`);
-    lines.push(`  </div>`);
+    const position = capabilities.labelPositions ? spec.decoration.labelPosition : undefined;
+    lines.push(...decorationLines('formidableFieldLabel', 'position', position, escape(spec.label)));
   }
 
   if (spec.decoration.labelAdornment !== 'none') {
@@ -173,19 +174,13 @@ function serializeField(spec: PortalFieldSpec, definition: PortalFormDefinition,
   }
 
   if (capabilities.adornments && spec.decoration.prefix !== 'none') {
-    lines.push(`  <div`);
-    lines.push(`    formidableFieldPrefix`);
-    lines.push(`    align="${spec.decoration.prefixAlign}">`);
-    lines.push(`    ${slotContent(spec.decoration.prefix, 'Prefix')}`);
-    lines.push(`  </div>`);
+    const content = slotContent(spec.decoration.prefix, 'Prefix');
+    lines.push(...decorationLines('formidableFieldPrefix', 'align', spec.decoration.prefixAlign, content));
   }
 
   if (capabilities.adornments && spec.decoration.suffix !== 'none') {
-    lines.push(`  <div`);
-    lines.push(`    formidableFieldSuffix`);
-    lines.push(`    align="${spec.decoration.suffixAlign}">`);
-    lines.push(`    ${slotContent(spec.decoration.suffix, 'Suffix')}`);
-    lines.push(`  </div>`);
+    const content = slotContent(spec.decoration.suffix, 'Suffix');
+    lines.push(...decorationLines('formidableFieldSuffix', 'align', spec.decoration.suffixAlign, content));
   }
 
   if (definition.options.showHints && spec.decoration.hint) {
@@ -205,6 +200,13 @@ function serializeField(spec: PortalFieldSpec, definition: PortalFormDefinition,
   }
 
   return lines;
+}
+
+/** One projected decoration, carrying its attribute only when the field states it. */
+function decorationLines(marker: string, attribute: string, value: string | undefined, content: string): string[] {
+  const open = value ? ['  <div', `    ${marker}`, `    ${attribute}="${value}">`] : [`  <div ${marker}>`];
+
+  return [...open, `    ${content}`, '  </div>'];
 }
 
 function serializeOption(option: PortalOptionSpec): string[] {

@@ -258,7 +258,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     // the page's own create process instead of committing a value — see `user/fields.md`.
     actionOption: { value: 'add-address', label: 'Add A New Address…' },
     actionOptionMode: 'always',
-    panelPosition: 'full',
     filterStrategy: 'fuzzy',
     visibleWhen: { field: 'pickup', equals: false },
     decoration: {
@@ -295,7 +294,6 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     unicodeTokenFormat: 'dd . MM . yyyy',
     emptyHint: 'format',
     locale: 'en-GB',
-    panelPosition: 'right',
     decoration: { ...DECORATION, hint: 'Open 11:00 to 23:00, closed on Mondays.', hintAlign: 'start' }
   }),
   field({
@@ -330,9 +328,9 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     visibleWhen: { field: 'method', equals: 'card' },
     decoration: {
       ...DECORATION,
-      // The one field that overrides the form's label position. It shares a row with the radio group, whose
-      // vertical layout labels `outside` and cannot do otherwise, so an `inside` label here would put the
-      // two labels of one row at different heights.
+      // The one field that states its own label position. It shares a row with the radio group, whose
+      // vertical layout labels `outside` and cannot do otherwise, so the app default's `inside` here would
+      // put the two labels of one row at different heights.
       labelPosition: 'outside',
       showRequiredMarker: true,
       hint: 'This form posts nowhere. Type whatever you like.',
@@ -400,15 +398,13 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
   // #endregion
 ];
 
+// No `revealOn` or `showRequiredMarkers`: the form states neither, so both follow the app default.
 const PREVIEW_FORM_OPTIONS: PortalFormOptions = {
   showLabels: true,
-  showRequiredMarkers: true,
   showHints: true,
   showAdornments: false,
-  panelPosition: 'right',
   readonly: false,
   disabled: false,
-  revealOn: 'touched',
   updateOn: 'change',
   validator: 'vest',
   locale: 'en-GB'

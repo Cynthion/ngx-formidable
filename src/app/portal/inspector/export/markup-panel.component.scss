@@ -2,16 +2,40 @@
   display: block;
 }
 
-.block-title {
-  margin: 0 0 6px;
-  color: var(--portal-text-muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+// Which of the three files is showing. Underlined rather than boxed like the sub-tab strip above, so the two
+// levels do not read as one broken strip.
+.outputs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--portal-border);
+}
 
-  .pc-buttons + & {
-    margin-top: 16px;
+.output {
+  margin-bottom: -1px;
+  padding: 6px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--portal-text-muted);
+  font-family: var(--portal-font);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--portal-text);
+  }
+
+  &.active {
+    border-bottom-color: var(--portal-accent);
+    color: var(--portal-text);
+    font-weight: 600;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: -2px;
   }
 }
 

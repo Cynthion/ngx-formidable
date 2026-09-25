@@ -14,6 +14,7 @@ import { createPreviewValidationSuite, PREVIEW_DEPENDENT_FIELDS } from '../../mo
 import { FormDefinitionStore } from '../../state/form-definition.store';
 import { FormValueStore, PortalModel } from '../../state/form-value.store';
 import { InspectorStore } from '../../state/inspector.store';
+import { AppDefaultsDirective } from './app-defaults.directive';
 import { CreateOptionDialogComponent } from './create-option-dialog.component';
 import { PortalActionRequest, PreviewFieldComponent } from './preview-field.component';
 
@@ -21,8 +22,10 @@ import { PortalActionRequest, PreviewFieldComponent } from './preview-field.comp
  * The preview form itself, rendered from the definition tree.
  *
  * `NgForm` reads its options once, in `ngAfterViewInit`, so a new `updateOn` only reaches the controls when
- * the form is rebuilt — which is what the render flip does. `revealOn` deliberately does not flip: it has to
- * be live, or switching it would reset the touched and dirty state it reads.
+ * the form is rebuilt — which is what the render flip does. The app defaults flip it too: a field and the form
+ * read theirs once, when they are created, as they do at bootstrap in a consumer's app. The form's own
+ * `revealOn` deliberately does not flip: it has to be live, or switching it would reset the touched and dirty
+ * state it reads.
  */
 @Component({
   selector: 'portal-preview-form',
@@ -37,7 +40,8 @@ import { PortalActionRequest, PreviewFieldComponent } from './preview-field.comp
     NgxFormidableWholeFormValidateDirective,
     NgxFormidableVestValidatorDirective,
     PreviewFieldComponent,
-    CreateOptionDialogComponent
+    CreateOptionDialogComponent,
+    AppDefaultsDirective
   ]
 })
 export class PreviewFormComponent {
@@ -57,7 +61,7 @@ export class PreviewFormComponent {
 
   protected readonly dependentFields = PREVIEW_DEPENDENT_FIELDS;
 
-  /** Changing the run axis rebuilds the form; nothing else does. */
+  /** Changing the run axis or an app default rebuilds the form; nothing else does. */
   protected readonly formKey = signal(0);
   protected readonly ngFormOptions = computed(() => ({ updateOn: this.options().updateOn }));
 
@@ -73,14 +77,17 @@ export class PreviewFormComponent {
   });
 
   private lastUpdateOn = this.options().updateOn;
+  private lastAppDefaults = this.definitionStore.appDefaults();
 
   constructor() {
     effect(() => {
       const updateOn = this.options().updateOn;
+      const appDefaults = this.definitionStore.appDefaults();
 
-      if (updateOn === this.lastUpdateOn) return;
+      if (updateOn === this.lastUpdateOn && appDefaults === this.lastAppDefaults) return;
 
       this.lastUpdateOn = updateOn;
+      this.lastAppDefaults = appDefaults;
       this.formKey.update((key) => untracked(() => key + 1));
     });
   }

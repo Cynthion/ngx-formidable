@@ -125,30 +125,17 @@
   display: inline-flex;
 }
 
-// One group per thing there is to take away: the copy does it outright, and the segment beside it opens the
-// half of Import & Export holding the same block, its options and the way back in.
-.copy-group {
-  display: inline-flex;
-  align-items: stretch;
-  height: 32px;
-  border-radius: var(--portal-radius-sm);
-  background: var(--portal-accent);
-  color: var(--portal-accent-contrast);
-  overflow: hidden;
-
-  &:has(.copy-button.copied) {
-    background: var(--portal-ok);
-  }
-}
-
+// The page's one primary action, so the one accent control in the bar.
 .copy-button {
   display: inline-flex;
   align-items: center;
   gap: 7px;
+  height: 32px;
   padding: 0 11px;
   border: 0;
-  background: transparent;
-  color: inherit;
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-accent);
+  color: var(--portal-accent-contrast);
   font-family: var(--portal-font);
   font-size: 13px;
   font-weight: 600;
@@ -156,12 +143,16 @@
   cursor: pointer;
 
   &:hover {
-    background: rgb(255 255 255 / 14%);
+    background: color-mix(in srgb, var(--portal-accent) 86%, white);
+  }
+
+  &.copied {
+    background: var(--portal-ok);
   }
 
   &:focus-visible {
     outline: 2px solid var(--portal-accent);
-    outline-offset: -3px;
+    outline-offset: 1px;
   }
 }
 
@@ -172,35 +163,6 @@
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   font-weight: 650;
-}
-
-.export-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 0 11px;
-  border: 0;
-  border-left: 1px solid rgb(255 255 255 / 28%);
-  background: rgb(255 255 255 / 12%);
-  color: inherit;
-  font-family: var(--portal-font);
-  font-size: 12px;
-  white-space: nowrap;
-  cursor: pointer;
-
-  &:hover {
-    background: rgb(255 255 255 / 26%);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--portal-accent);
-    outline-offset: -3px;
-  }
-}
-
-.export-glyph {
-  font-size: 11px;
-  opacity: 0.85;
 }
 
 @media (width <= 1000px) {
@@ -215,18 +177,24 @@
   }
 }
 
-// Two copy buttons and two shortcuts beside them do not fit a phone. The copies are the point, so the
-// shortcuts go: at this width the panel is a bottom sheet with its own tab strip a thumb's reach away.
-@media (width <= 760px) {
-  .export-button {
+// Last to go, because it is the only thing in the bar that is not a control: the document title says as
+// much, and the two tabs say where in it you are. With it, the bar cannot be narrower than about 490px, and
+// below that the page clips the copy button; the rest is room for a three-digit count and a wider system font.
+@media (width <= 520px) {
+  .brand {
     display: none;
   }
 }
 
-// Last to go, because it is the only thing in the bar that is not a control: the document title says as
-// much, and the two tabs say where in it you are.
-@media (width <= 640px) {
-  .brand {
-    display: none;
+// Even without the brand the bar needs about 365px, so a small phone would clip the copy. "Theme" goes from
+// sight but not from the accessible name, where "Copy 17" alone would say nothing.
+@media (width <= 380px) {
+  .noun {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }

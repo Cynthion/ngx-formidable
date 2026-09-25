@@ -93,6 +93,8 @@ The `vertical` layout stacks its options inside the field's box, which leaves a 
 </div>
 ```
 
+To set one position for every label in an app, see `user/getting-started.md`.
+
 Four rules follow from the table:
 
 - **Only The `horizontal` Layout Has Room Over The Field.** Every position other than `outside` is therefore a no-op for the toggle, slider and the two group fields — their label always renders outside.
