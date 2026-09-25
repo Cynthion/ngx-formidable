@@ -1,0 +1,56 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Grouping, ceilings and the Angular procedure are explained in .documentation/impl/renovate.md",
+  "extends": ["config:recommended", "group:allNonMajor", "security:minimumReleaseAgeNpm"],
+  "schedule": ["* * 1 * *"],
+  "packageRules": [
+    {
+      "description": "Angular majors move with ng update, whose migrations Renovate cannot run",
+      "matchPackageNames": ["@angular/*", "angular-eslint", "ng-packagr", "ngx-mask", "typescript", "zone.js"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "Angular",
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "An app must run the Angular major the library was built with, so these peers move instead of widening",
+      "matchDepTypes": ["peerDependencies"],
+      "matchPackageNames": ["@angular/*", "ngx-mask"],
+      "rangeStrategy": "replace"
+    },
+    {
+      "matchPackageNames": ["eslint", "@eslint/js", "typescript-eslint", "eslint-plugin-rxjs-x"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "ESLint"
+    },
+    {
+      "matchPackageNames": ["stylelint", "stylelint-config-standard-scss"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "Stylelint"
+    },
+    {
+      "matchPackageNames": ["prettier", "prettier-plugin-organize-attributes"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "Prettier"
+    },
+    {
+      "matchPackageNames": ["karma", "karma-*", "jasmine-core", "@types/jasmine", "istanbul-lib-instrument"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "Karma"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "GitHub Actions"
+    },
+    {
+      "description": "Ceiling: @angular/compiler-cli, ng-packagr and typescript-eslint peer typescript >=6.0 <6.1",
+      "matchPackageNames": ["typescript"],
+      "allowedVersions": "<6.1"
+    },
+    {
+      "description": "Ceiling: Jasmine 7 makes describe and it read-only, which breaks every fakeAsync spec",
+      "matchPackageNames": ["jasmine-core", "@types/jasmine"],
+      "allowedVersions": "<7"
+    }
+  ]
+}

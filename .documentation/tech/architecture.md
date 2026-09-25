@@ -12,7 +12,7 @@ ngx-formidable/
 ├── src/                       # the portal
 ├── dist/                      # build output
 ├── .documentation/            # docs: user/ for consumers, tech/ for maintainers, impl/ for repo work
-└── .github/workflows/         # checks, the GitHub Pages deploy of the portal, the dependency check
+└── .github/workflows/         # checks and the GitHub Pages deploy of the portal
 ```
 
 Two Angular projects are declared:
@@ -92,17 +92,16 @@ ng-packagr config:
 
 ## Continuous Integration
 
-Three workflows in `.github/workflows/`. All three take the Node version from `.nvmrc` and install with `npm ci`, so a run resolves exactly the committed lockfile.
+Two workflows in `.github/workflows/`. Both take the Node version from `.nvmrc` and install with `npm ci`, so a run resolves exactly the committed lockfile.
 
-| Workflow               | Trigger                              | Does                                                                               |
-| :--------------------- | :----------------------------------- | :--------------------------------------------------------------------------------- |
-| `ci.yml`               | Push to `main`, pull request, manual | `prettier:check`, `lint`, `style-lint`, `build:lib`, both test projects, `build`   |
-| `deploy.yml`           | Push to `main`, manual               | Builds the portal and deploys `dist/ngx-formidable-portal/browser` to GitHub Pages |
-| `dependency-check.yml` | Monthly, manual                      | Reports `npm outdated` and `ng update` into a GitHub issue                         |
+| Workflow     | Trigger                              | Does                                                                               |
+| :----------- | :----------------------------------- | :--------------------------------------------------------------------------------- |
+| `ci.yml`     | Push to `main`, pull request, manual | `prettier:check`, `lint`, `style-lint`, `build:lib`, both test projects, `build`   |
+| `deploy.yml` | Push to `main`, manual               | Builds the portal and deploys `dist/ngx-formidable-portal/browser` to GitHub Pages |
 
 - **Checks Mirror The Scripts**: `ci.yml` runs the same scripts a contributor runs locally, in the order of the Definition of Done in `impl/conventions.md`. `build:lib` is in it because it is also the type and template check — there is no standalone typecheck script.
 - **Tests**: the two projects are separate steps, because `ng test` takes one project at a time. Both run in `ChromeHeadless` with `--watch=false`.
-- **Dependency Check**: the reports are read-only and the issue is the notification, so it opens one only when something is behind and only when no open `dependencies` issue is already waiting. Editing an open issue would not notify, which is why the check never does.
+- **Dependency Updates**: Renovate opens the pull requests, and `ci.yml` checks them like any other — see `impl/renovate.md`.
 
 ## Consumer Setup
 
