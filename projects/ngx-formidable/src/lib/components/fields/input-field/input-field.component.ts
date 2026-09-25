@@ -70,9 +70,12 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
+  private isViewReady = false;
+
   override ngAfterViewInit(): void {
     super.ngAfterViewInit();
 
+    this.isViewReady = true;
     this.warnAboutMaskConfig();
   }
 
@@ -129,6 +132,10 @@ export class InputFieldComponent extends BaseFieldDirective implements IFormidab
     const newValue = value ?? '';
 
     this.lastWrittenValue = newValue;
+
+    // A standalone `ngModel`, one outside a `<form>`, writes from its own `ngOnChanges`, before the view
+    // exists. The mask effect's first pass writes `lastWrittenValue` once it does.
+    if (!this.isViewReady) return;
 
     if (this.mask()) {
       // Waits for the ngxMask directive to initialize on the control, which it does across a full

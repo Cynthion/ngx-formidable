@@ -61,7 +61,6 @@ class DropdownHostComponent {
   readonly dropdown = viewChild.required(DropdownFieldComponent);
 }
 
-/** Inside a `<form>`: a standalone `ngModel` writes before the field's view exists — see `impl/backlog.md`. */
 @Component({
   imports: [FormsModule, FieldDecoratorComponent, FieldLabelDirective, InputFieldComponent],
   changeDetection: ChangeDetectionStrategy.Eager,

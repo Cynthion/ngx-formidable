@@ -216,6 +216,7 @@ describe('portal', () => {
 
     expect(thumbnails.length).toBe(THEME_PRESETS.length);
     expect(thumbnails[0]?.querySelector('formidable-input-field')).toBeTruthy();
+    expect(thumbnails[0]?.querySelector('input')?.value).toBe('Sample');
   }));
 
   /**

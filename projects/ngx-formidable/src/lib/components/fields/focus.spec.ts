@@ -29,8 +29,7 @@ import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
     SliderFieldComponent,
     ToggleFieldComponent
   ],
-  // Inside a `<form>`, like real usage: a standalone `ngModel` writes its value synchronously, before
-  // the fields whose control sits in an `@if` branch have resolved their view refs.
+  // Inside a `<form>`, like real usage.
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>

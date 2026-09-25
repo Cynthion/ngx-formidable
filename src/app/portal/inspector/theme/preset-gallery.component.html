@@ -19,11 +19,9 @@
         class="thumb"
         [style.background]="entry.preset.page.background"
         [portalThemeScope]="entry.vars">
-        <!-- No `ngModel`: a standalone one sets its control up before the field's view exists, which
-             `impl/backlog.md` records as a crash. A placeholder floats the label and shows text anyway. -->
         <formidable-field-decorator>
           <formidable-input-field
-            placeholder="Sample"
+            ngModel="Sample"
             name="preview" />
           <div
             formidableFieldLabel

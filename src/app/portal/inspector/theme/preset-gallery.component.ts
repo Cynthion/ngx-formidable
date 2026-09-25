@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { FieldDecoratorComponent, FieldLabelDirective, InputFieldComponent } from '@cynthion/ngx-formidable';
 import { SelectedValueDirective } from '../../chrome/selected-value.directive';
 import { ThemeScopeDirective } from '../../chrome/theme-scope.directive';
@@ -27,6 +28,7 @@ import { ThemeStore } from '../../state/theme.store';
   styleUrl: './preset-gallery.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FormsModule,
     ThemeScopeDirective,
     FieldDecoratorComponent,
     FieldLabelDirective,
