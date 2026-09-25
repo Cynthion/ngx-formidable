@@ -151,6 +151,30 @@ describe('inspector layout', () => {
     }
   }));
 
+  // Open, the toggle keeps the content's gutter, measured against the sub-tab strip so a scrollbar in the body
+  // cannot skew it. Collapsed, the rail holds nothing else, so the toggle centres.
+  it('lines the toggle up with the content open and centres it collapsed', fakeAsync(() => {
+    sizeTo(INSPECTOR_WIDTH_DEFAULT);
+
+    const toggle = (): DOMRect => (host.querySelector('.collapse') as HTMLElement).getBoundingClientRect();
+    const head = (host.querySelector('.head') as HTMLElement).getBoundingClientRect();
+    const strip = host.querySelector('.sub-tabs') as HTMLElement;
+    const stripGutter = strip.getBoundingClientRect().right - strip.lastElementChild!.getBoundingClientRect().right;
+
+    expect(head.right - toggle().right).toBeCloseTo(stripGutter, 0);
+
+    host.style.removeProperty('width');
+    TestBed.inject(LayoutStore).inspectorCollapsed.set(true);
+    settle();
+
+    const rail = host.getBoundingClientRect();
+    const left = toggle().left - (rail.left + host.clientLeft);
+    const right = rail.left + host.clientLeft + host.clientWidth - toggle().right;
+
+    expect(left).toBeGreaterThan(0);
+    expect(left).toBeCloseTo(right, 0);
+  }));
+
   // The field editor renders a different set of controls per kind, so one selected field proves one of them.
   it('paints nothing outside the gutter for any field the editor can open', fakeAsync(() => {
     const failures: string[] = [];
