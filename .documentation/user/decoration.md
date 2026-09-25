@@ -93,7 +93,7 @@ The `vertical` layout stacks its options inside the field's box, which leaves a 
 </div>
 ```
 
-To set one position for every label in an app, see `user/getting-started.md`.
+To set one position for every label in an app, see `user/getting-started.md`. The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every position on every field that honours it, empty and filled.
 
 Four rules follow from the table:
 

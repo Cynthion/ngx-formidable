@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input } from '@angular/core';
+import {
+  afterRenderEffect,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  input
+} from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { TopBarComponent } from '../chrome/top-bar/top-bar.component';
@@ -32,6 +40,9 @@ export class DocsPageComponent {
   /** Bound from the route parameter by `withComponentInputBinding()`. */
   public readonly topic = input<string | undefined>(undefined);
 
+  /** A heading or a variable's row to open the document at, bound the same way. */
+  public readonly anchor = input<string | undefined>(undefined);
+
   protected readonly pages = DOC_PAGES;
 
   protected readonly page = computed(() => DOC_PAGES_BY_SLUG.get(this.topic() ?? DEFAULT_DOC_SLUG) ?? DOC_PAGES[0]!);
@@ -46,11 +57,22 @@ export class DocsPageComponent {
   protected readonly references = computed(() => this.pages.filter((page) => page.kind === 'Reference'));
 
   constructor() {
-    // A new document starts at its top rather than wherever the last one was scrolled to.
-    effect(() => {
+    // A new document starts at its anchor, or at its top rather than wherever the last one was scrolled to. After
+    // the render, because the anchor is part of the document being rendered.
+    afterRenderEffect(() => {
       this.page();
 
-      queueMicrotask(() => this.elementRef.nativeElement.querySelector('.content')?.scrollTo({ top: 0 }));
+      const host = this.elementRef.nativeElement;
+      const anchor = this.anchor();
+      const target = anchor ? host.querySelector(`#${CSS.escape(anchor)}`) : null;
+
+      host.querySelector('.is-anchored')?.classList.remove('is-anchored');
+      if (!target) {
+        host.querySelector('.content')?.scrollTo({ top: 0 });
+        return;
+      }
+      target.classList.add('is-anchored');
+      target.scrollIntoView({ block: 'center' });
     });
   }
 

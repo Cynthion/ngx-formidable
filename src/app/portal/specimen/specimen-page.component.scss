@@ -1,0 +1,554 @@
+:host {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  background: var(--portal-bg);
+  color: var(--portal-text);
+  font-family: var(--portal-font);
+  overflow: hidden;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  min-height: 0;
+}
+
+code {
+  font-family: var(--portal-mono);
+}
+
+// #region Navigation
+
+.nav {
+  padding: 16px 12px;
+  border-right: 1px solid var(--portal-border);
+  overflow: auto;
+}
+
+.nav-head {
+  margin: 18px 0 4px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  color: var(--portal-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav-link {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  color: var(--portal-text-muted);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--portal-surface);
+    color: var(--portal-text);
+  }
+}
+
+.nav-number {
+  min-width: 12px;
+  color: var(--portal-accent);
+  font-weight: 700;
+}
+
+// #endregion
+
+// #region Theme Bar
+
+.content {
+  overflow: auto;
+}
+
+// Above the fields it repaints, including a label on a field's border and an open panel.
+.theme-bar {
+  position: sticky;
+  z-index: 10;
+  top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 40px;
+  border-bottom: 1px solid var(--portal-border);
+  background: var(--portal-bg);
+}
+
+.theme-picker {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  .pc-select {
+    width: 220px;
+  }
+}
+
+.bar-label {
+  color: var(--portal-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bar-hint {
+  color: var(--portal-text-muted);
+  font-size: 12px;
+}
+
+.chip {
+  padding: 4px 10px;
+  border: 1px solid var(--portal-border);
+  border-radius: 999px;
+  background: var(--portal-surface);
+  color: var(--portal-text);
+  font-family: var(--portal-font);
+  font-size: 12px;
+  cursor: pointer;
+
+  &.is-on {
+    border-color: var(--portal-accent);
+    background: var(--portal-accent-soft);
+    color: var(--portal-accent);
+  }
+}
+
+// #endregion
+
+// #region Chapters
+
+.scope {
+  padding: 40px 40px 120px;
+}
+
+// A reading measure for the prose, and a wider one for the demonstrations under it.
+.intro,
+.part-title,
+.part-lead,
+.chapter {
+  max-width: 1180px;
+}
+
+.intro {
+  h1 {
+    margin: 0 0 10px;
+    font-size: 26px;
+  }
+}
+
+.intro-lead,
+.part-lead,
+.lead {
+  max-width: 68ch;
+  color: var(--portal-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.intro-lead {
+  margin: 0 0 14px;
+}
+
+.intro-parts {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--portal-text-muted);
+  font-size: 13px;
+  line-height: 1.9;
+
+  strong {
+    color: var(--portal-text);
+  }
+}
+
+.part-title {
+  margin: 96px 0 6px;
+  padding-top: 20px;
+  border-top: 1px solid var(--portal-border);
+  color: var(--portal-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.part-lead {
+  margin: 0;
+}
+
+.chapter {
+  margin-top: 56px;
+  scroll-margin-top: 72px;
+}
+
+// Everything under a chapter's heading lines up with its title, not with its number.
+.chapter-head ~ * {
+  margin-left: 48px;
+}
+
+.chapter-head {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+
+  h2 {
+    margin: 2px 0 6px;
+    font-size: 19px;
+  }
+}
+
+.chapter-number {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--portal-accent-soft);
+  color: var(--portal-accent);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.lead {
+  margin: 0;
+}
+
+// What to look for and what to do, beside the snippet that does it: read before the demonstration, not after.
+.guide {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.notes,
+.code {
+  padding: 16px 18px;
+  border: 1px solid var(--portal-border);
+  border-radius: 12px;
+  background: var(--portal-surface);
+  font-size: 13px;
+  line-height: 1.55;
+
+  ul {
+    margin: 0 0 12px;
+    padding-left: 18px;
+  }
+
+  li + li {
+    margin-top: 6px;
+  }
+
+  p {
+    margin: 0 0 12px;
+  }
+
+  pre {
+    margin: 0 0 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    background: var(--portal-surface-sunken);
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-x: auto;
+  }
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Scoped like the paragraphs it heads, so its own margin outranks theirs.
+.notes .guide-label,
+.code .guide-label {
+  margin-bottom: 6px;
+  color: var(--portal-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.doc-link {
+  display: inline-block;
+  color: var(--portal-accent);
+  font-size: 12px;
+
+  &::after {
+    content: ' ↗';
+  }
+}
+
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+// #endregion
+
+// #region Presets
+
+.presets {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.preset {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px;
+  border: 1px solid var(--portal-border);
+  border-radius: 10px;
+  background: var(--portal-surface);
+  color: var(--portal-text);
+  font-family: var(--portal-font);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--portal-border-strong);
+  }
+
+  &.is-on {
+    border-color: var(--portal-accent);
+    background: var(--portal-accent-soft);
+  }
+}
+
+.preset-name {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.preset-fits,
+.preset-count {
+  color: var(--portal-text-muted);
+  font-size: 11px;
+}
+
+.preset-count {
+  margin-top: 4px;
+  font-family: var(--portal-mono);
+}
+
+// #endregion
+
+// #region Ladder
+
+// A fixed height, so every step is the same frame: the fields grow and the panel opens inside it.
+.ladder {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 28px;
+  height: 520px;
+  padding: 28px;
+  border-radius: 18px;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.ladder-code {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  pre {
+    flex: 1;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.9;
+    white-space: pre;
+    overflow: hidden;
+  }
+
+  a {
+    color: inherit;
+    text-decoration-color: rgb(148 163 184 / 40%);
+    text-underline-offset: 3px;
+  }
+}
+
+.code-muted {
+  color: #64748b;
+}
+
+.code-line {
+  color: #94a3b8;
+
+  &.is-new {
+    color: #5eead4;
+    font-weight: 600;
+  }
+}
+
+.ladder-caption {
+  min-height: 3em;
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.ladder-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 12px;
+  background: var(--portal-page-background);
+  color: var(--portal-page-text);
+}
+
+.ladder-cell {
+  margin: 0;
+}
+
+// #endregion
+
+// #region Panels
+
+// Room below, so three open panels fit inside the section rather than over the next one.
+.panels {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  min-height: 460px;
+  margin-top: 14px;
+  padding: 24px;
+  border: 1px solid var(--portal-border);
+  border-radius: 14px;
+  background: var(--portal-page-background);
+  color: var(--portal-page-text);
+  align-content: start;
+}
+
+// #endregion
+
+// #region Anatomy
+
+.anatomy {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 150px 0;
+  border: 1px solid var(--portal-border);
+  border-radius: 14px;
+  background: var(--portal-page-background);
+  color: var(--portal-page-text);
+}
+
+.anatomy-field {
+  width: 380px;
+}
+
+// Over the field, so the points that fall inside it are not painted over by its fill.
+.anatomy-lines {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+
+  line {
+    stroke-opacity: 0.6;
+    stroke-width: 1.25;
+  }
+}
+
+// One hue per kind of value, fixed rather than themed, so the legend reads on any page surface.
+.is-colour {
+  --group: #db2777;
+}
+
+.is-geometry {
+  --group: #0891b2;
+}
+
+.is-content {
+  --group: #ca8a04;
+}
+
+line[class^='is-'] {
+  stroke: var(--group);
+}
+
+circle[class^='is-'] {
+  fill: var(--group);
+}
+
+.legend {
+  position: absolute;
+  right: 20px;
+  bottom: 14px;
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  font-size: 11px;
+}
+
+.legend-item::before {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--group);
+  content: '';
+}
+
+.callout {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  padding-left: 8px;
+  color: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+  text-decoration: none;
+  white-space: nowrap;
+  transform: translateY(-50%);
+
+  &.is-left {
+    align-items: flex-end;
+    padding: 0 8px 0 0;
+    transform: translate(-100%, -50%);
+  }
+
+  code {
+    font-weight: 600;
+  }
+
+  &:hover code {
+    text-decoration: underline;
+  }
+}
+
+.callout-value {
+  max-width: 220px;
+  opacity: 0.65;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// #endregion

@@ -313,6 +313,11 @@ export class ThemeStore {
 
   // #region Values
 
+  /** How many of these variables say something the library's defaults do not, measured as `changeCount` is. */
+  public changesIn(vars: Readonly<Record<string, string>>): number {
+    return Object.entries(vars).filter(([name, value]) => this.differsFromDefault(name, value)).length;
+  }
+
   /** The value in force for a variable: the user's, the scheme's, or the library's own token default. */
   public valueOf(name: string): string {
     return this.resolved()[name] ?? this.defaultOf(name);

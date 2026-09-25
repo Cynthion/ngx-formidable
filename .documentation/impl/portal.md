@@ -89,16 +89,29 @@ drawer's, bar included, so the divider tracks the pointer rather than lagging it
 
 Routes are introduced with hash location.
 
-| Route                   | Tab      | Holds                                 |
-| :---------------------- | :------- | :------------------------------------ |
-| `/`                     | `Studio` | The stage and the inspector           |
-| `/docs`, `/docs/:topic` | `Docs`   | The documentation page, lazily loaded |
+| Route                   | Tab        | Holds                                            |
+| :---------------------- | :--------- | :----------------------------------------------- |
+| `/`                     | `Studio`   | The stage and the inspector                      |
+| `/specimen`             | `Specimen` | Every field, one change at a time, lazily loaded |
+| `/docs`, `/docs/:topic` | `Docs`     | The documentation page, lazily loaded            |
 
-The top bar is on both of them and its two tabs are the only navigation there is, so no route carries a back
+The top bar is on all of them and its tabs are the only navigation there is, so no route carries a back
 control of its own.
 
 **No Preview Route**: turning the `Field Types` switch off leaves the stage showing the form exactly as a
-consumer's page would, which is what a third route would have duplicated.
+consumer's page would, which is what a preview route would have duplicated.
+
+**The Specimen Is Not A Second Stage**: it holds fixed comparisons and no editor, so it cannot disagree with the
+Studio. Every cell is the Studio's own `PreviewFieldComponent` over the sample form's field of that kind, each in a
+form of its own so no two cells share a control; the invalid cells sit in a `formidableForm` whose validator
+reports every target, so they show the library's real invalid state. Its theme is a `ThemeScopeDirective` over the
+page rather than a write to `:root`, which is what lets a preset repaint the page without touching the Studio's
+theme. The chapters run concept first — what paints a field, then decoration, then behaviour — and a matrix opens
+on a few kinds covering the three layouts, because twelve rows at once teach nothing that four do not. The ladder carries `data-shot`, because `npm run screenshots` shoots it for the README.
+
+**Deep Links Into The Docs**: `docs/:topic/:anchor` opens a document at a heading or at a variable's row. The
+renderer gives every `##` and `###` heading and every Theme Reference row an id; only the `##` ones are listed in
+the contents.
 
 **Hash Location**: GitHub Pages serves no SPA fallback, so a path-routed deep link requires an `index.html`
 copy published as `404.html` and is then served with an HTTP 404 status. Hash location needs neither, and the

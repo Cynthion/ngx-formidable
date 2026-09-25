@@ -12,6 +12,11 @@ export const PORTAL_ROUTES: Routes = [
     title: 'ngx-formidable — Studio'
   },
   {
+    path: 'specimen',
+    loadComponent: () => import('./specimen/specimen-page.component').then((m) => m.SpecimenPageComponent),
+    title: 'ngx-formidable — Specimen'
+  },
+  {
     path: 'docs',
     loadComponent: () => import('./docs/docs-page.component').then((m) => m.DocsPageComponent),
     title: 'ngx-formidable — Docs'
@@ -20,6 +25,12 @@ export const PORTAL_ROUTES: Routes = [
     // A per-token deep link uses a route parameter and scrolls programmatically: a fragment on top of a hash
     // route is ambiguous.
     path: 'docs/:topic',
+    loadComponent: () => import('./docs/docs-page.component').then((m) => m.DocsPageComponent),
+    title: 'ngx-formidable — Docs'
+  },
+  {
+    // A heading, or a variable's row in the Theme Reference: what the Specimen links to.
+    path: 'docs/:topic/:anchor',
     loadComponent: () => import('./docs/docs-page.component').then((m) => m.DocsPageComponent),
     title: 'ngx-formidable — Docs'
   },

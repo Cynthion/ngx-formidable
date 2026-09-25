@@ -8,14 +8,15 @@ How theming works, and which variables are worth setting, is in `user/theming.md
 
 ---
 
-## The Two Routes
+## The Three Routes
 
-| Route   | Holds                                                  |
-| :------ | :----------------------------------------------------- |
-| `/`     | The Studio: a live form, and the panel that changes it |
-| `/docs` | These documents                                        |
+| Route       | Holds                                                            |
+| :---------- | :--------------------------------------------------------------- |
+| `/`         | The Studio: a live form, and the panel that changes it           |
+| `/specimen` | The Specimen: every field, one change at a time, under any theme |
+| `/docs`     | These documents                                                  |
 
-The top bar carries both, the repository link, the page's own light or dark appearance, and a copy button for the theme.
+The top bar carries all three, the repository link, the page's own light or dark appearance, and a copy button for the theme.
 
 ---
 
@@ -23,7 +24,7 @@ The top bar carries both, the repository link, the page's own light or dark appe
 
 | Region           | Where            | Holds                                                                     |
 | :--------------- | :--------------- | :------------------------------------------------------------------------ |
-| **Top Bar**      | Across the top   | The two routes, the appearance toggle and `Copy Theme`                    |
+| **Top Bar**      | Across the top   | The three routes, the appearance toggle and `Copy Theme`                  |
 | **Stage**        | The wide column  | The form, on an explicit page surface, with the model drawer beneath it   |
 | **Editor Panel** | Beside the stage | `Theme`, `Form` and `Import & Export`, each a tab over the same live form |
 
@@ -171,6 +172,28 @@ The page surface is the page's rather than the library's, so `Onto The Defaults`
 **What An Import Ignores, It Lists.** A theme import applies the variables the library declares and lists the rest, because a variable the library does not declare would produce a control that appears to do nothing. A template import handles a static, attribute-only subset, plus the two structures the Studio itself emits: an `ngModelGroup` and an `@if` comparing one model key with a literal. Bindings to expressions, any other control flow, and a handler whose behaviour lives in the component are reported rather than silently dropped — so re-importing the sample tells you its presets did not come with it.
 
 **The Form Is Derived, Not Authored.** An Angular production build contains no template compiler, so a pasted template cannot become live components. The configuration is the source of truth and the template and component are generated from it, which is why both are read-only and why structure is edited through controls rather than by typing.
+
+---
+
+## The Specimen
+
+`/specimen` teaches the library one idea at a time: seven numbered chapters in three parts, each changing one thing and holding everything else still. It changes nothing and exports nothing.
+
+| Part                         | Chapters                                                       |
+| :--------------------------- | :------------------------------------------------------------- |
+| **How A Field Is Painted**   | 1 What Paints What · 2 One Variable At A Time · 3 Whole Themes |
+| **How A Field Is Decorated** | 4 Label Positions · 5 Adornments                               |
+| **How A Field Behaves**      | 6 States · 7 Panels                                            |
+
+Each chapter states what to notice, one thing to try, and the snippet that does it in your own template or stylesheet.
+
+**What Paints What Comes First.** It names the variable behind each part of a field, with the value the current theme gives it, and the rest of the page builds on that map.
+
+**The Page Theme Repaints Everything.** The picker at the top offers `Your Studio Theme`, the one built on `/`, and each preset; a ladder step starts again from the library's defaults. None of them changes the Studio's theme.
+
+**A Matrix Opens On A Few Fields.** Chapters 4 to 6 compare fields in a grid and open on a few that cover the three layouts; `Show all` adds the rest.
+
+**Every Name Is A Link.** A field's name opens its entry in `user/components.md`, and a variable's name opens its own row in `user/theme-reference.md`.
 
 ---
 

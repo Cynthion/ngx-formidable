@@ -103,16 +103,30 @@ export function renderDoc(markdown: string, knownSlugs: ReadonlySet<string>): Re
 
   linkFileReferences(parsed, knownSlugs);
 
-  for (const heading of Array.from(parsed.querySelectorAll('h2'))) {
-    const text = (heading.textContent ?? '').trim();
+  const claim = (element: Element, text: string): string => {
     let id = slugify(text);
     let suffix = 2;
 
     while (taken.has(id)) id = `${slugify(text)}-${suffix++}`;
     taken.add(id);
+    element.setAttribute('id', id);
+    return id;
+  };
 
-    heading.setAttribute('id', id);
-    headings.push({ id, text });
+  for (const heading of Array.from(parsed.querySelectorAll('h2'))) {
+    const text = (heading.textContent ?? '').trim();
+
+    headings.push({ id: claim(heading, text), text });
+  }
+
+  // Only the `##` headings are listed in the contents, but a `###` one and a variable's row are both linked to:
+  // a component's entry in the catalogue, and a variable's line in the Theme Reference.
+  for (const heading of Array.from(parsed.querySelectorAll('h3'))) claim(heading, (heading.textContent ?? '').trim());
+
+  for (const row of Array.from(parsed.querySelectorAll('tr'))) {
+    const name = row.querySelector('td')?.textContent?.trim() ?? '';
+
+    if (/^--formidable-[a-z0-9-]+$/.test(name)) claim(row, name);
   }
 
   // The document's own `# Title` is rendered by the page around it, so it would otherwise appear twice.

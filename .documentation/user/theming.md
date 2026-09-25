@@ -26,7 +26,7 @@ The library ships neutral surfaces and text plus a single accent — deliberate 
 
 Everything else in this document derives from those twelve. **To rebrand, set `--formidable-color-field-border-focus`** — it carries the focus border, the focused label, the focused underline and both focus rings. Add `--formidable-color-field-label-floating` if you want the accent on resting labels too.
 
-Alternative colour and geometry schemes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one — are selectable in the Studio, which pairs them into named presets — see `user/studio.md`.
+Alternative colour and geometry schemes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one — are selectable in the Studio, which pairs them into named presets — see `user/studio.md`. The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every field under each preset, and steps through a theme one variable at a time.
 
 ---
 

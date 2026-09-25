@@ -1,0 +1,56 @@
+<div
+  class="matrix"
+  [style.grid-template-columns]="template()">
+  @for (column of columns(); track column.title) {
+    <code class="column-name">{{ column.title }}</code>
+  }
+
+  @for (row of rows(); track row.kind) {
+    <a
+      class="row-name"
+      [routerLink]="row.link"
+      [title]="'The reference for ' + row.selector">
+      <span>{{ row.label }}</span>
+      <code>{{ row.selector }}</code>
+    </a>
+
+    @for (cell of row.cells; track $index) {
+      <!-- A form per cell, so every field registers alone and no two share a control. -->
+      @if (cell.invalid) {
+        <form
+          formidableForm
+          portalReportsRequired
+          revealOn="always"
+          class="cell">
+          <portal-preview-field
+            [spec]="cell.spec"
+            [formOptions]="formOptions"
+            [value]="cell.value"
+            [showFieldTypes]="false" />
+        </form>
+      } @else {
+        <form class="cell">
+          <portal-preview-field
+            [spec]="cell.spec"
+            [formOptions]="formOptions"
+            [value]="cell.value"
+            [showFieldTypes]="false" />
+        </form>
+      }
+    }
+  }
+</div>
+
+@if (hiddenCount() > 0) {
+  <button
+    type="button"
+    class="more"
+    [attr.aria-expanded]="expanded()"
+    (click)="expanded.set(!expanded())">
+    @if (expanded()) {
+      Show {{ featured().length }} fields
+    } @else {
+      Show all {{ kinds().length }} fields
+    }
+  </button>
+}

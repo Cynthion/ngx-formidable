@@ -54,6 +54,18 @@ describe('renderDoc', () => {
     expect(headings.map((heading) => heading.id)).toEqual(['slider', 'slider-2']);
   });
 
+  // The Specimen links to a component's entry and to a variable's row, neither of which is in the contents.
+  it('gives third-level headings and variable rows an id, and lists neither', () => {
+    const { html, headings } = renderDoc(
+      '## Fields\n\n### Date Field\n\n| Variable | Does |\n| :-- | :-- |\n| `--formidable-field-height` | Height |',
+      SLUGS
+    );
+
+    expect(html).toContain('<h3 id="date-field">');
+    expect(html).toContain('<tr id="formidable-field-height">');
+    expect(headings.map((heading) => heading.id)).toEqual(['fields']);
+  });
+
   it('drops the document title, which the page renders itself', () => {
     expect(renderDoc('# Theming\n\n## How', SLUGS).html).not.toContain('<h1>');
   });

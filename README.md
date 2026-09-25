@@ -29,9 +29,17 @@ Angular form fields you can actually theme, configure and customize. Validated b
   </a>
 </p>
 
+<!-- An absolute URL: this file is also the npm package's README, where a repository-relative path does not resolve. -->
+<p align="center">
+  <a href="https://cynthion.github.io/ngx-formidable/#/specimen">
+    <img src="https://raw.githubusercontent.com/Cynthion/ngx-formidable/main/assets/ladder.png" alt="Four ngx-formidable fields, a dropdown open among them, restyled from the library's defaults in eight steps, one CSS variable per step, with the :root block growing beside them">
+  </a>
+</p>
+
 Eleven form fields, one decorator that puts labels, prefixes, hints and errors around them, and around two hundred CSS custom properties to make them look like your product instead of like a component library. It holds the model and renders the fields; the rules come from Vest, zod, Angular's own validators, or nothing at all.
 
 - **[Studio](https://cynthion.github.io/ngx-formidable/)** — a live form of every field. Theme it to your brand, configure the fields, and take away the CSS and the Angular template.
+- **[Specimen](https://cynthion.github.io/ngx-formidable/#/specimen)** — every field, one change at a time: every state, every label position, every adornment and every panel, under any preset or your own theme.
 - **[Docs](https://cynthion.github.io/ngx-formidable/#/docs)** — the guides and references below, rendered in the browser from the same files. [`.documentation/`](https://github.com/Cynthion/ngx-formidable/blob/main/.documentation/README.md) holds them, plus the design notes for maintainers.
 
 ## Table of Contents

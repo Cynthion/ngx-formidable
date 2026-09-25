@@ -122,4 +122,9 @@
   strong {
     font-weight: 650;
   }
+
+  // The row or heading a link opened the document at.
+  .is-anchored {
+    background: var(--portal-accent-soft);
+  }
 }

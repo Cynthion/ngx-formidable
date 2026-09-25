@@ -1,0 +1,524 @@
+<portal-top-bar class="portal-chrome" />
+
+<div class="layout">
+  <nav
+    class="nav"
+    aria-label="Specimen chapters">
+    @for (part of parts; track part.title) {
+      <p class="nav-head">{{ part.title }}</p>
+      @for (chapter of part.chapters; track chapter.id) {
+        <button
+          type="button"
+          class="nav-link"
+          (click)="scrollTo(chapter.id)">
+          <span class="nav-number">{{ chapter.number }}</span>
+          {{ chapter.title }}
+        </button>
+      }
+    }
+  </nav>
+
+  <main class="content">
+    <div class="theme-bar">
+      <label class="theme-picker">
+        <span class="bar-label">Page Theme</span>
+        <select
+          class="pc-select"
+          [value]="themeValue()"
+          (change)="pickTheme($any($event.target).value)">
+          <option value="studio">Your Studio Theme</option>
+          @for (entry of presets; track entry.preset.key) {
+            <option [value]="entry.preset.key">{{ entry.preset.label }}</option>
+          }
+          @if (ladderStep() !== null) {
+            <option value="ladder">Ladder, Step {{ ladderStep() }}</option>
+          }
+        </select>
+      </label>
+      <span class="bar-hint">Repaints every field on this page. Nothing here changes your Studio theme.</span>
+    </div>
+
+    <div
+      class="scope"
+      [portalThemeScope]="themeVars()">
+      <header class="intro">
+        <h1>Specimen</h1>
+        <p class="intro-lead">
+          Every field the library ships, taught one idea at a time. Each chapter changes one thing and holds everything else still, so what you see is the
+          effect of that one thing.
+        </p>
+        <ol class="intro-parts">
+          @for (part of parts; track part.title) {
+            <li>
+              <strong>{{ part.title }}</strong>
+              — chapters {{ part.chapters[0]!.number }} to {{ part.chapters.at(-1)!.number }}
+            </li>
+          }
+        </ol>
+      </header>
+
+      <!-- #region Part 1 -->
+      <p class="part-title">Part 1 · {{ parts[0]!.title }}</p>
+
+      <section
+        id="anatomy"
+        class="chapter">
+        <header class="chapter-head">
+          <span class="chapter-number">1</span>
+          <div>
+            <h2>What Paints What</h2>
+            <p class="lead">
+              A field is a handful of parts, and each part is painted by one <code>--formidable-*</code> variable. This is the map the rest of the page builds
+              on.
+            </p>
+          </div>
+        </header>
+
+        <div class="guide">
+          <div class="notes">
+            <p class="guide-label">Notice</p>
+            <ul>
+              <li>Colour, size and shape, and content are separate variables, so each changes without the others.</li>
+              <li>Every value is the one the page theme gives it right now.</li>
+            </ul>
+            <p class="guide-label">Try</p>
+            <p>Change the page theme at the top and watch the values change. Click a name to open its row in the Theme Reference.</p>
+          </div>
+          <div class="code">
+            <p class="guide-label">In Your Stylesheet</p>
+            <pre><code>:root {{ '{' }}
+  --formidable-color-field-border: #5eead4;
+  --formidable-field-height: 64px;
+{{ '}' }}</code></pre>
+            <a
+              class="doc-link"
+              [routerLink]="['/docs', 'theme-reference']">
+              Theme Reference
+            </a>
+          </div>
+        </div>
+
+        <div
+          #figure
+          class="anatomy">
+          <svg
+            class="anatomy-lines"
+            aria-hidden="true">
+            @for (callout of callouts(); track callout.part.variable + callout.part.selector) {
+              <line
+                [class]="'is-' + callout.group"
+                [attr.x1]="callout.lineX"
+                [attr.y1]="callout.labelY"
+                [attr.x2]="callout.anchorX"
+                [attr.y2]="callout.anchorY" />
+              <circle
+                r="4"
+                [class]="'is-' + callout.group"
+                [attr.cx]="callout.anchorX"
+                [attr.cy]="callout.anchorY" />
+            }
+          </svg>
+
+          @for (callout of callouts(); track callout.part.variable + callout.part.selector) {
+            <a
+              class="callout"
+              [class.is-left]="callout.part.side === 'left'"
+              [style.top.px]="callout.labelY"
+              [style.left.px]="callout.lineX"
+              [routerLink]="callout.link"
+              [title]="callout.description">
+              <code>{{ callout.part.variable }}</code>
+              <span class="callout-value">{{ callout.value }}</span>
+            </a>
+          }
+
+          <div class="anatomy-field">
+            <formidable-field-decorator>
+              <formidable-input-field
+                name="anatomy"
+                [showRequiredMarker]="true"
+                [ngModel]="'Langstrasse 84'" />
+              <div formidableFieldLabel>Delivery Address</div>
+              <div formidableFieldPrefix>
+                <example-icon
+                  [svg]="markerSvg"
+                  [size]="18" />
+              </div>
+              <div formidableFieldHint>We deliver within the city.</div>
+            </formidable-field-decorator>
+          </div>
+
+          <p class="legend">
+            <span class="legend-item is-colour">Colour</span>
+            <span class="legend-item is-geometry">Size And Shape</span>
+            <span class="legend-item is-content">Content</span>
+          </p>
+        </div>
+      </section>
+
+      <section
+        id="ladder"
+        class="chapter">
+        <header class="chapter-head">
+          <span class="chapter-number">2</span>
+          <div>
+            <h2>One Variable At A Time</h2>
+            <p class="lead">Eight declarations, one per step, from the library's defaults to a finished theme.</p>
+          </div>
+        </header>
+
+        <div class="guide">
+          <div class="notes">
+            <p class="guide-label">Notice</p>
+            <ul>
+              <li>Each step sets a base variable, so what derives from it follows: the radius also rounds the open panel, and the fill also paints it.</li>
+              <li>Every field on the page repaints, not only the ones beside the code.</li>
+            </ul>
+          </div>
+          <div class="notes">
+            <p class="guide-label">Try</p>
+            <p>Step from Defaults to 8, then scroll down: every chapter wears the step you stopped at.</p>
+            <a
+              class="doc-link"
+              [routerLink]="['/docs', 'theming', 'finding-your-theme']">
+              Finding Your Theme
+            </a>
+          </div>
+        </div>
+
+        <div
+          role="group"
+          class="steps"
+          aria-label="Ladder step">
+          @for (n of stepNumbers; track n) {
+            <button
+              type="button"
+              class="chip"
+              [class.is-on]="ladderStep() === n"
+              [attr.aria-pressed]="ladderStep() === n"
+              (click)="setStep(n)">
+              {{ n === 0 ? 'Defaults' : n }}
+            </button>
+          }
+        </div>
+
+        <div
+          data-shot="ladder"
+          class="ladder">
+          <div class="ladder-code">
+            <pre><code><span class="code-muted">:root {{ '{' }}</span>
+@for (entry of steps.slice(0, ladderStep() ?? 0); track entry.name; let last = $last) {<span class="code-line" [class.is-new]="last">  <a [routerLink]="variableLink(entry.name)">{{ entry.name }}</a>: {{ entry.value }};</span>
+}<span class="code-muted">{{ '}' }}</span></code></pre>
+            <p class="ladder-caption">{{ caption() }}</p>
+          </div>
+
+          <div class="ladder-fields">
+            @for (entry of ladderFields; track entry.kind) {
+              <form class="ladder-cell">
+                <portal-preview-field
+                  [spec]="entry.spec"
+                  [formOptions]="formOptions"
+                  [value]="entry.value"
+                  [showFieldTypes]="false" />
+              </form>
+            }
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="presets"
+        class="chapter">
+        <header class="chapter-head">
+          <span class="chapter-number">3</span>
+          <div>
+            <h2>Whole Themes</h2>
+            <p class="lead">A preset is one field shape and one palette: a dozen or so declarations, the size of theme most apps need.</p>
+          </div>
+        </header>
+
+        <div class="guide">
+          <div class="notes">
+            <p class="guide-label">Notice</p>
+            <ul>
+              <li>
+                The count on each is how many variables it changes from the library's defaults. There are about two hundred, and a theme needs few of them,
+                because the rest derive from those few.
+              </li>
+            </ul>
+          </div>
+          <div class="notes">
+            <p class="guide-label">Try</p>
+            <p>Pick one, then scroll back up to What Paints What: every value there has moved with it.</p>
+            <a
+              class="doc-link"
+              [routerLink]="['/docs', 'studio', 'building-a-theme']">
+              Build Your Own In The Studio
+            </a>
+          </div>
+        </div>
+
+        <div class="presets">
+          <button
+            type="button"
+            class="preset"
+            [class.is-on]="themeValue() === 'studio'"
+            [attr.aria-pressed]="themeValue() === 'studio'"
+            (click)="pickTheme('studio')">
+            <span class="preset-name">Your Studio Theme</span>
+            <span class="preset-fits">Whatever you built on the Studio</span>
+          </button>
+          @for (entry of presets; track entry.preset.key) {
+            <button
+              type="button"
+              class="preset"
+              [attr.data-preset]="entry.preset.key"
+              [class.is-on]="themeValue() === entry.preset.key"
+              [attr.aria-pressed]="themeValue() === entry.preset.key"
+              (click)="pickTheme(entry.preset.key)">
+              <span class="preset-name">{{ entry.preset.label }}</span>
+              <span class="preset-fits">{{ entry.preset.fits }}</span>
+              <span class="preset-count">
+                {{ entry.count ? entry.count + ' variables changed' : 'The library’s defaults' }}
+              </span>
+            </button>
+          }
+        </div>
+      </section>
+      <!-- #endregion -->
+
+      <!-- #region Part 2 -->
+      <p class="part-title">Part 2 · {{ parts[1]!.title }}</p>
+      <p class="part-lead">
+        The decorator puts a label, a prefix, a suffix and a hint around any field. Where each can go depends on the field's layout, so each chapter lists only
+        the fields that honour it.
+      </p>
+
+      <section
+        id="labels"
+        class="chapter">
+        <header class="chapter-head">
+          <span class="chapter-number">4</span>
+          <div>
+            <h2>Label Positions</h2>
+            <p class="lead">Six places a label can go, set by one input on <code>formidableFieldLabel</code>.</p>
+          </div>
+        </header>
+
+        <div class="guide">
+          <div class="notes">
+            <p class="guide-label">Notice</p>
+            <ul>
+              <li>They differ most on an empty field: whether the label rests in the value area or floats, and whether the placeholder shows.</li>
+              <li>Only the horizontal layout has room over a field. The toggle, the slider and the two groups always label outside, so they are not listed.</li>
+            </ul>
+            <p class="guide-label">Try</p>
+            <p>Switch between Empty and Filled.</p>
+          </div>
+          <div class="code">
+            <p class="guide-label">In Your Template</p>
+            <pre><code>&lt;div formidableFieldLabel position="border"&gt;
+  Street
+&lt;/div&gt;</code></pre>
+            <a
+              class="doc-link"
+              [routerLink]="['/docs', 'decoration', 'labels']">
+              Labels
+            </a>
+          </div>
+        </div>
+
+        <div
+          role="group"
+          class="steps"
+          aria-label="Field content">
+          <button
+            type="button"
+            class="chip"
+            [class.is-on]="!labelsFilled()"
+            [attr.aria-pressed]="!labelsFilled()"
+            (click)="labelsFilled.set(false)">
+            Empty
+          </button>
+          <button
+            type="button"
+            class="chip"
+            [class.is-on]="labelsFilled()"
+            [attr.aria-pressed]="labelsFilled()"
+            (click)="labelsFilled.set(true)">
+            Filled
+          </button>
+        </div>
+        <portal-specimen-matrix
+          [kinds]="labelKinds"
+          [featured]="labelFeatured"
+          [columns]="labelColumns()" />
+      </section>
+
+      <section
+        id="adornments"
+        class="chapter">
+        <header class="chapter-head">
+          <span class="chapter-number">5</span>
+          <div>
+            <h2>Adornments</h2>
+            <p class="lead">Content you project around a field: a prefix, a suffix, an adornment beside the label, and a hint.</p>
+          </div>
+        </header>
+
+        <div class="guide">
+          <div class="notes">
+            <p class="guide-label">Notice</p>
+            <ul>
+              <li>The content is yours — an icon, text, a button. The library places it and insets the value.</li>
+              <li>The two groups stack their options inside the field, which leaves a prefix nothing to sit beside.</li>
+            </ul>
+          </div>
+          <div class="code">
+            <p class="guide-label">In Your Template</p>
+            <pre><code>&lt;formidable-field-decorator&gt;
+  &lt;formidable-input-field name="amount" /&gt;
+  &lt;div formidableFieldLabel&gt;Amount&lt;/div&gt;
+  &lt;div formidableFieldPrefix&gt;CHF&lt;/div&gt;
+  &lt;div formidableFieldHint&gt;Before tax&lt;/div&gt;
+&lt;/formidable-field-decorator&gt;</code></pre>
+            <a
+              class="doc-link"
+              [routerLink]="['/docs', 'decoration', 'prefixes-and-suffixes']">
+              Prefixes And Suffixes
+            </a>
+          </div>
+        </div>
+
+        <portal-specimen-matrix
+          [kinds]="adornmentKinds"
+          [featured]="adornmentFeatured"
+          [columns]="adornmentColumns" />
+      </section>
+      <!-- #endregion -->
+
+      <!-- #region Part 3 -->
+      <p class="part-title">Part 3 · {{ parts[2]!.title }}</p>
+      <p class="part-lead">What the user and the form do to a field, and what the field shows in return.</p>
+
+      <section
+        id="states"
+        class="chapter">
+        <header class="chapter-head">
+          <span class="chapter-number">6</span>
+          <div>
+            <h2>States</h2>
+            <p class="lead">The same field empty, filled, readonly, disabled and invalid.</p>
+          </div>
+        </header>
+
+        <div class="guide">
+          <div class="notes">
+            <p class="guide-label">Notice</p>
+            <ul>
+              <li>Readonly blocks edits and stays focusable. Disabled cannot be focused at all.</li>
+              <li>
+                Invalid appears when a validator reports a message and <code>revealOn</code> allows it. Here a validator reports every field as required, and
+                reveals at once.
+              </li>
+              <li>Each state is a set of colour variables of its own, so a theme restyles one without the others.</li>
+            </ul>
+            <p class="guide-label">Try</p>
+            <p>Hover or focus any field: both states are live.</p>
+          </div>
+          <div class="code">
+            <p class="guide-label">In Your Template</p>
+            <pre><code>&lt;formidable-input-field [readonly]="true" /&gt;
+&lt;formidable-input-field [disabled]="true" /&gt;</code></pre>
+            <a
+              class="doc-link"
+              [routerLink]="['/docs', 'decoration', 'field-state']">
+              Field State
+            </a>
+          </div>
+        </div>
+
+        <portal-specimen-matrix
+          [kinds]="allKinds"
+          [featured]="stateFeatured"
+          [columns]="stateColumns" />
+      </section>
+
+      <section
+        id="panels"
+        class="chapter">
+        <header class="chapter-head">
+          <span class="chapter-number">7</span>
+          <div>
+            <h2>Panels</h2>
+            <p class="lead">The three fields that open a panel of their own.</p>
+          </div>
+        </header>
+
+        <div class="guide">
+          <div class="notes">
+            <p class="guide-label">Notice</p>
+            <ul>
+              <li>A panel is painted by the same variables as its field.</li>
+              <li>It opens below its field, flips above when there is no room, and closes on a click outside it.</li>
+            </ul>
+            <p class="guide-label">Try</p>
+            <p>
+              All three open when this chapter comes into view, which a visitor could not do: each click would close the others. Click anywhere to close them.
+            </p>
+            <button
+              type="button"
+              class="chip"
+              (click)="openPanels()">
+              Open All Three Again
+            </button>
+          </div>
+          <div class="code">
+            <p class="guide-label">In Your Template</p>
+            <pre><code>&lt;formidable-dropdown-field
+  [panelPosition]="'right'" /&gt;</code></pre>
+            <a
+              class="doc-link"
+              [routerLink]="['/docs', 'fields', 'panels']">
+              Panels
+            </a>
+          </div>
+        </div>
+
+        <div
+          #panelStage
+          class="panels">
+          <formidable-field-decorator>
+            <formidable-dropdown-field
+              name="pizza"
+              [options]="pizzas"
+              [ngModel]="'margherita'" />
+            <div formidableFieldLabel>Pizza</div>
+          </formidable-field-decorator>
+
+          <formidable-field-decorator>
+            <formidable-autocomplete-field
+              name="address"
+              [options]="addresses"
+              [ngModel]="null" />
+            <div formidableFieldLabel>Delivery Address</div>
+          </formidable-field-decorator>
+
+          <formidable-field-decorator>
+            <formidable-date-field
+              name="date"
+              [unicodeTokenFormat]="'dd.MM.yyyy'"
+              [ngModel]="null">
+              <example-icon
+                formidableFieldToggleIcon
+                [svg]="calendarSvg"
+                [size]="20" />
+            </formidable-date-field>
+            <div formidableFieldLabel>Date</div>
+          </formidable-field-decorator>
+        </div>
+      </section>
+      <!-- #endregion -->
+    </div>
+  </main>
+</div>

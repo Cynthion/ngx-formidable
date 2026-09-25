@@ -19,6 +19,7 @@ One name per concept, in code and in docs. Check a new name against this table b
 | When the messages appear                      | **reveal**     | "show", "display", "mode", "strategy"                          |
 | The application in `src/`                     | **portal**     | "demo", "demo app", "showcase" as a noun for it                |
 | The portal's `/` route                        | **Studio**     | "the portal" when the page a visitor themes on is meant        |
+| The portal's `/specimen` route                | **Specimen**   | "gallery", "showcase"                                          |
 
 A rule has exactly one target, and its name follows it: a **field rule**, a **group rule** or a **whole-form rule**. "Cross-field" describes what a rule _reads_, never what it reports on — a group rule reading two fields is cross-field, and so is a whole-form rule. Full reference: `user/validation.md`.
 

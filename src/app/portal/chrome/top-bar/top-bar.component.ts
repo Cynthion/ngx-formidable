@@ -9,7 +9,7 @@ import { GITHUB_SVG } from './top-bar-icons';
 const REPOSITORY_URL = 'https://github.com/Cynthion/ngx-formidable';
 
 /**
- * The two places there are to be. They are routes, so the bar is the only way between them.
+ * The three places there are to be. They are routes, so the bar is the only way between them.
  *
  * There is no separate preview route: turning `Field Types` off leaves the Studio's stage showing the form
  * exactly as a consumer's page would, which is what a third route would have duplicated.
@@ -18,6 +18,7 @@ const ROUTES: readonly { path: string; label: string; title: string; exact: bool
   // `/` has to match exactly or it would light up on every route; `/docs` must not, or it would go dark the
   // moment a document is open, which is the only way anyone ever sees it.
   { path: '/', label: 'Studio', title: 'Theme and configure the fields against a live form', exact: true },
+  { path: '/specimen', label: 'Specimen', title: 'One field, one change at a time, under your theme', exact: false },
   { path: '/docs', label: 'Docs', title: 'The consumer documentation, as the repository writes it', exact: false }
 ];
 
@@ -28,7 +29,7 @@ const APPEARANCES: readonly { value: PortalAppearance; label: string; glyph: str
 ];
 
 /**
- * Fixed across the top on every route: what this is, the two places there are to be, the repository, the
+ * Fixed across the top on every route: what this is, the three places there are to be, the repository, the
  * portal's own appearance, and the theme's copy.
  *
  * One copy, not one per thing to take away: the theme is the only one that stands on its own. The template

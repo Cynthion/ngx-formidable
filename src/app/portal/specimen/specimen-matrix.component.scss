@@ -1,0 +1,64 @@
+:host {
+  display: block;
+}
+
+.matrix {
+  display: grid;
+  gap: 16px 12px;
+  align-items: start;
+  padding: 24px;
+  border: 1px solid var(--portal-border);
+  border-radius: 14px;
+  background: var(--portal-page-background);
+  color: var(--portal-page-text);
+  overflow-x: auto;
+}
+
+.column-name {
+  align-self: end;
+  font-family: var(--portal-mono);
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+.row-name {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 10px;
+  align-items: baseline;
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, currentcolor 12%, transparent);
+  color: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+
+  code {
+    font-family: var(--portal-mono);
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.6;
+  }
+
+  &:hover span {
+    text-decoration: underline;
+  }
+}
+
+.cell {
+  min-width: 0;
+  margin: 0;
+}
+
+.more {
+  margin-top: 10px;
+  padding: 5px 12px;
+  border: 1px solid var(--portal-border);
+  border-radius: 999px;
+  background: var(--portal-surface);
+  color: var(--portal-text);
+  font-family: var(--portal-font);
+  font-size: 12px;
+  cursor: pointer;
+}
