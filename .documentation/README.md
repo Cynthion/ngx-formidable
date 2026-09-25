@@ -12,7 +12,7 @@ For consumers of the library. A **guide** teaches a topic; a **reference** lists
 
 | File                      |   Kind    | Purpose                                                                |
 | :------------------------ | :-------: | :--------------------------------------------------------------------- |
-| `user/getting-started.md` |   Guide   | Registry, install, wiring, the stylesheet, a first form                |
+| `user/getting-started.md` |   Guide   | Install, wiring, the stylesheet, a first form                          |
 | `user/fields.md`          |   Guide   | Options, panels, keyboard, dates and times, masking, focus             |
 | `user/decoration.md`      |   Guide   | Labels, adornments, prefixes, suffixes, hints, required marker         |
 | `user/validation.md`      |   Guide   | Connecting a validator: Vest, Angular, zod or none; conditional fields |

@@ -20,8 +20,6 @@ The source of truth for outstanding work. `impl/backlog.md` is the raw intake bu
 ### Phase 17 — Release
 
 - **Screenshots**: add screenshots to the README.md: build one that showcases different fields (input, dropdown with panel, date) and options but also different geometries and colors; make some sort of modern collage
-- **Package Registry**: change from GitHub Package registry to npm.
-- **Registry**: reconcile `publish:lib --access public` with the GitHub Packages registry.
 - **Tag**: tag the release commit. Final step.
 
 ### Phase 18 — Storybook

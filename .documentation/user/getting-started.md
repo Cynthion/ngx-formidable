@@ -6,19 +6,7 @@ The API each symbol carries is in `user/components.md`.
 
 ## Install
 
-The package is published to GitHub Packages under the `@cynthion` scope, so npm needs to be told where the scope lives. Put this in the `.npmrc` beside your `package.json`:
-
-```ini
-@cynthion:registry=https://npm.pkg.github.com
-```
-
-GitHub Packages authenticates every read, public package or not, so the same file (or `~/.npmrc`) needs a personal access token with the `read:packages` scope:
-
-```ini
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-```
-
-Then install the package and its peer dependencies:
+Install the package and its peer dependencies:
 
 ```bash
 npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday

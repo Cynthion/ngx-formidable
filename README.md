@@ -9,6 +9,9 @@ Angular form fields you can actually theme, configure and customize. Validated b
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/@cynthion/ngx-formidable">
+    <img src="https://img.shields.io/npm/v/@cynthion/ngx-formidable" alt="npm version">
+  </a>
   <a href="https://github.com/Cynthion/ngx-formidable/actions/workflows/deploy.yml">
     <img src="https://github.com/Cynthion/ngx-formidable/actions/workflows/deploy.yml/badge.svg?branch=main" alt="Deploy">
   </a>
@@ -18,7 +21,7 @@ Angular form fields you can actually theme, configure and customize. Validated b
   <a href="https://angular.dev">
     <img src="https://img.shields.io/badge/Angular-%5E22-dd0031" alt="Angular ^22">
   </a>
-  <a href="./LICENSE">
+  <a href="https://github.com/Cynthion/ngx-formidable/blob/main/LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License">
   </a>
   <a href="https://github.com/Cynthion/ngx-formidable">
@@ -29,7 +32,7 @@ Angular form fields you can actually theme, configure and customize. Validated b
 Eleven form fields, one decorator that puts labels, prefixes, hints and errors around them, and around two hundred CSS custom properties to make them look like your product instead of like a component library. It holds the model and renders the fields; the rules come from Vest, zod, Angular's own validators, or nothing at all.
 
 - **[Studio](https://cynthion.github.io/ngx-formidable/)** — a live form of every field. Theme it to your brand, configure the fields, and take away the CSS and the Angular template.
-- **[Docs](https://cynthion.github.io/ngx-formidable/#/docs)** — the guides and references below, rendered in the browser from the same files. [`.documentation/`](./.documentation/README.md) holds them, plus the design notes for maintainers.
+- **[Docs](https://cynthion.github.io/ngx-formidable/#/docs)** — the guides and references below, rendered in the browser from the same files. [`.documentation/`](https://github.com/Cynthion/ngx-formidable/blob/main/.documentation/README.md) holds them, plus the design notes for maintainers.
 
 ## Table of Contents
 
@@ -46,14 +49,14 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 
 ## Features
 
-- 🧩 **Eleven fields, one decorator** — input, textarea, select, dropdown, autocomplete, radio and checkbox group, date, time, toggle, slider. [`<formidable-field-decorator>`](.documentation/user/decoration.md) puts the label, prefixes, suffixes, hints and errors around any of them, in [six label positions](.documentation/user/decoration.md).
-- ✅ **Bring your own validator** — [Vest, zod, Angular's own, or none](.documentation/user/validation.md). Field, group and whole-form rules, with when a rule _runs_ and when it _reveals_ set separately.
-- 🎨 **Themeable to the corner** — [~200 CSS custom properties](.documentation/user/theme-reference.md) and no design system in your bundle. Rebrand from one variable; no SCSS hooks, no theme to initialise.
-- 🚀 **Template-driven, no boilerplate** — one directive on the `<form>`, `ngModel` all the way down. No store, no reactive-forms scaffolding, [standalone or NgModule](.documentation/user/getting-started.md).
-- 🧠 **Typed end to end** — a `DeepPartial` model and a `DeepRequired` shape, so a typo in a model key or a rule target [fails the build](.documentation/user/getting-started.md).
-- ⌨️ **Accessible by default** — [full keyboard handling](.documentation/user/fields.md), managed focus, combobox, listbox, switch and group roles, and errors in an `aria-live` region.
-- 🛡️ **Masking, dates and panels** — [ngx-mask on text fields](.documentation/user/fields.md), one token string for parsing and formatting a date or time, and panels that flip when there is no room and become a sheet on phones.
-- 🛠️ **Extensible** — [`BaseFieldDirective`](.documentation/user/custom-fields.md) makes a field of your own decorated, validated and themed like a built-in one.
+- 🧩 **Eleven fields, one decorator** — input, textarea, select, dropdown, autocomplete, radio and checkbox group, date, time, toggle, slider. [`<formidable-field-decorator>`](https://cynthion.github.io/ngx-formidable/#/docs/decoration) puts the label, prefixes, suffixes, hints and errors around any of them, in [six label positions](https://cynthion.github.io/ngx-formidable/#/docs/decoration).
+- ✅ **Bring your own validator** — [Vest, zod, Angular's own, or none](https://cynthion.github.io/ngx-formidable/#/docs/validation). Field, group and whole-form rules, with when a rule _runs_ and when it _reveals_ set separately.
+- 🎨 **Themeable to the corner** — [~200 CSS custom properties](https://cynthion.github.io/ngx-formidable/#/docs/theme-reference) and no design system in your bundle. Rebrand from one variable; no SCSS hooks, no theme to initialise.
+- 🚀 **Template-driven, no boilerplate** — one directive on the `<form>`, `ngModel` all the way down. No store, no reactive-forms scaffolding, [standalone or NgModule](https://cynthion.github.io/ngx-formidable/#/docs/getting-started).
+- 🧠 **Typed end to end** — a `DeepPartial` model and a `DeepRequired` shape, so a typo in a model key or a rule target [fails the build](https://cynthion.github.io/ngx-formidable/#/docs/getting-started).
+- ⌨️ **Accessible by default** — [full keyboard handling](https://cynthion.github.io/ngx-formidable/#/docs/fields), managed focus, combobox, listbox, switch and group roles, and errors in an `aria-live` region.
+- 🛡️ **Masking, dates and panels** — [ngx-mask on text fields](https://cynthion.github.io/ngx-formidable/#/docs/fields), one token string for parsing and formatting a date or time, and panels that flip when there is no room and become a sheet on phones.
+- 🛠️ **Extensible** — [`BaseFieldDirective`](https://cynthion.github.io/ngx-formidable/#/docs/custom-fields) makes a field of your own decorated, validated and themed like a built-in one.
 - 🎛️ **[Studio](https://cynthion.github.io/ngx-formidable/)** — build the theme and the form against the real components in the browser, then copy out the CSS and the Angular template.
 
 ## When To Pick This Over Angular Material
@@ -73,22 +76,13 @@ Material is a design system with a form library in it. This is a form library wi
 
 ## Installation
 
-The package is published to GitHub Packages under the `@cynthion` scope, so npm needs to be pointed at it. In the `.npmrc` beside your `package.json`:
-
-```ini
-@cynthion:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
-```
-
-GitHub Packages authenticates every read, public package or not, so the token needs the `read:packages` scope. Then:
-
 ```bash
 npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday
 ```
 
 The library does not validate, so it brings no validation library. Add one only if you want it — `npm i vest` for the validator that ships in `@cynthion/ngx-formidable/vest`, or wire your own.
 
-Full instructions, including what each peer dependency is for: [Getting Started](.documentation/user/getting-started.md).
+Full instructions, including what each peer dependency is for: [Getting Started](https://cynthion.github.io/ngx-formidable/#/docs/getting-started).
 
 ## Setup
 
@@ -114,7 +108,7 @@ import { NgxFormidableModule } from '@cynthion/ngx-formidable';
 export class AppModule {}
 ```
 
-Both take an optional config, including app-wide `defaults` for what every template would otherwise repeat: the label position, the adornment alignment, the panel position and the form's reveal, required-marker and debounce settings. See [Getting Started](.documentation/user/getting-started.md).
+Both take an optional config, including app-wide `defaults` for what every template would otherwise repeat: the label position, the adornment alignment, the panel position and the form's reveal, required-marker and debounce settings. See [Getting Started](https://cynthion.github.io/ngx-formidable/#/docs/getting-started).
 
 Then the stylesheet, which is imported separately because it is a stylesheet and not a provider:
 
@@ -198,11 +192,11 @@ Then the template:
 
 Every rule runs asynchronously, so the form is still `PENDING` when `ngSubmit` fires — gate a submit on `validChange` rather than reading `form.valid`.
 
-The whole walkthrough, with the component state and where each piece goes: [Getting Started](.documentation/user/getting-started.md).
+The whole walkthrough, with the component state and where each piece goes: [Getting Started](https://cynthion.github.io/ngx-formidable/#/docs/getting-started).
 
 ## What's In The Box
 
-Full API — every input, output, type and token — in the [Component Catalogue](.documentation/user/components.md).
+Full API — every input, output, type and token — in the [Component Catalogue](https://cynthion.github.io/ngx-formidable/#/docs/components).
 
 | Category          | Component                           | Value             |
 | :---------------- | :---------------------------------- | :---------------- |
@@ -231,30 +225,30 @@ Full API — every input, output, type and token — in the [Component Catalogue
 
 Guides teach a topic; references list what it accepts.
 
-| Guide                                                     | Covers                                                         |
-| :-------------------------------------------------------- | :------------------------------------------------------------- |
-| [Getting Started](.documentation/user/getting-started.md) | Registry, install, wiring, the stylesheet, a first form        |
-| [Fields](.documentation/user/fields.md)                   | Options, panels, keyboard, dates and times, masking, focus     |
-| [Decoration](.documentation/user/decoration.md)           | Labels, adornments, prefixes, suffixes, hints, required marker |
-| [Validation](.documentation/user/validation.md)           | Targets, timing, conditional fields, Vest, zod, messages       |
-| [Theming](.documentation/user/theming.md)                 | The default theme, what to override, worked examples           |
-| [Studio](.documentation/user/studio.md)                   | Building a theme and a form in the browser, and exporting both |
-| [Custom Fields](.documentation/user/custom-fields.md)     | Building a field, an option or a validator of your own         |
+| Guide                                                                               | Covers                                                         |
+| :---------------------------------------------------------------------------------- | :------------------------------------------------------------- |
+| [Getting Started](https://cynthion.github.io/ngx-formidable/#/docs/getting-started) | Install, wiring, the stylesheet, a first form                  |
+| [Fields](https://cynthion.github.io/ngx-formidable/#/docs/fields)                   | Options, panels, keyboard, dates and times, masking, focus     |
+| [Decoration](https://cynthion.github.io/ngx-formidable/#/docs/decoration)           | Labels, adornments, prefixes, suffixes, hints, required marker |
+| [Validation](https://cynthion.github.io/ngx-formidable/#/docs/validation)           | Targets, timing, conditional fields, Vest, zod, messages       |
+| [Theming](https://cynthion.github.io/ngx-formidable/#/docs/theming)                 | The default theme, what to override, worked examples           |
+| [Studio](https://cynthion.github.io/ngx-formidable/#/docs/studio)                   | Building a theme and a form in the browser, and exporting both |
+| [Custom Fields](https://cynthion.github.io/ngx-formidable/#/docs/custom-fields)     | Building a field, an option or a validator of your own         |
 
-| Reference                                                 | Lists                                                 |
-| :-------------------------------------------------------- | :---------------------------------------------------- |
-| [Components](.documentation/user/components.md)           | Every component, directive, token, type and interface |
-| [Theme Reference](.documentation/user/theme-reference.md) | Every overridable `--formidable-*` custom property    |
+| Reference                                                                           | Lists                                                 |
+| :---------------------------------------------------------------------------------- | :---------------------------------------------------- |
+| [Components](https://cynthion.github.io/ngx-formidable/#/docs/components)           | Every component, directive, token, type and interface |
+| [Theme Reference](https://cynthion.github.io/ngx-formidable/#/docs/theme-reference) | Every overridable `--formidable-*` custom property    |
 
-Design notes for maintainers live in [`.documentation/tech/`](.documentation/README.md), and the repo's own conventions in [`.documentation/impl/`](.documentation/README.md).
+Design notes for maintainers live in [`.documentation/tech/`](https://github.com/Cynthion/ngx-formidable/blob/main/.documentation/README.md), and the repo's own conventions in [`.documentation/impl/`](https://github.com/Cynthion/ngx-formidable/blob/main/.documentation/README.md).
 
 ## Contributing
 
-Contributions are welcome, see [CONTRIBUTING.md](./CONTRIBUTING.md).
+Contributions are welcome, see [CONTRIBUTING.md](https://github.com/Cynthion/ngx-formidable/blob/main/CONTRIBUTING.md).
 
 ## License
 
-Everything in this repository is licensed under the [MIT License](./LICENSE) unless otherwise specified.
+Everything in this repository is licensed under the [MIT License](https://github.com/Cynthion/ngx-formidable/blob/main/LICENSE) unless otherwise specified.
 
 In plain English: use it commercially, modify it, ship it inside a closed-source product, sublicense it — nothing has to be published back. The one condition is that the copyright notice and the license text travel with any copy or substantial portion of the code. It comes with no warranty and no liability.
 

@@ -97,7 +97,7 @@ A rule has exactly one target, and its name follows it: a **field rule**, a **gr
 - **Branches**: `main` is production — push triggers the GitHub Pages deploy of the portal. `feature/*` for work in progress.
 - **Checks**: every push to `main` and every pull request runs the Formatting, Tests and Build items below in CI. See `tech/architecture.md`.
 - **Dependencies**: Renovate proposes updates once a month; Angular majors stay an `ng update`. See `impl/renovate.md`.
-- **Publishing**: `build:lib` then `publish:lib` to GitHub Packages; `@cynthion` scope needs `~/.npmrc` auth. See `tech/architecture.md`.
+- **Publishing**: `build:lib` then `publish:lib` to npm; needs `npm login` as the owner of the `@cynthion` scope. See `tech/architecture.md`.
 - **Roadmap**: `impl/implementation.md` is the source of truth for outstanding work — check it before starting. `impl/backlog.md` is the intake buffer for ideas that have not been triaged into a phase yet.
 
 ## Definition Of Done

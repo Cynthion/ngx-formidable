@@ -88,7 +88,7 @@ The portal lives in `src/app/portal/` and is routed with hash location, because 
 ng-packagr config:
 
 - `ng-package.json` sets the entry file to `public-api.ts`, outputs to `dist/ngx-formidable`, and ships the library SCSS as assets under `dist/ngx-formidable/styles/`.
-- `vest/ng-package.json` declares the secondary entry point; ng-packagr builds it after the primary and it imports the primary by package name (see `tech/validation.md`). The package is published as `@cynthion/ngx-formidable` to GitHub Packages (`publishConfig.registry`).
+- `vest/ng-package.json` declares the secondary entry point; ng-packagr builds it after the primary and it imports the primary by package name (see `tech/validation.md`). The package is published as `@cynthion/ngx-formidable` to npm, public through `publishConfig.access`.
 
 ## Continuous Integration
 
