@@ -879,52 +879,61 @@ describe('portal', () => {
     expect(headings()).toEqual(['Export', 'Import']);
   }));
 
-  // The theme half can be put back to the shipped default; the form half needs the same way out of a form
-  // the user has taken apart, or the two are only symmetric to look at.
-  it('offers a reset beside the copy in both halves', fakeAsync(() => {
-    settle();
-
-    const inspector = TestBed.inject(InspectorStore);
-    const definition = TestBed.inject(FormDefinitionStore);
-
-    inspector.openExport('theme');
-    settle();
-    expect(root.querySelector('portal-theme-panel .pc-button.is-quiet')?.textContent?.trim()).toBe('Reset Theme');
-
-    inspector.openExport('form');
-    settle();
-
-    definition.removeField(PREVIEW_FIELDS[0]!.id);
-    settle();
-    expect(definition.fields().length).toBe(PREVIEW_FIELDS.length - 1);
-
-    const reset = root.querySelector('portal-markup-panel .pc-button.is-quiet') as HTMLElement;
-    expect(reset.textContent?.trim()).toBe('Reset Form');
-
-    reset.click();
-    settle();
-
-    expect(definition.fields().length).toBe(PREVIEW_FIELDS.length);
-  }));
-
   // The template binds names only a component defines, and leaves out what the app config supplies, so both
-  // sit beside it rather than in top-bar groups of their own.
-  it('offers the component and the app config beside the template', fakeAsync(() => {
+  // sit beside it — as tabs, one file on screen at a time, because stacked they buried the import under three
+  // screens of code.
+  it('offers the template, the component and the app config as tabs, one at a time', fakeAsync(() => {
     settle();
 
     TestBed.inject(InspectorStore).openExport('form');
     settle();
 
-    const blocks = root.querySelectorAll('portal-markup-panel pre.markup');
-    const buttons = Array.from(root.querySelectorAll('portal-markup-panel .pc-button')).map((el) =>
-      (el.textContent ?? '').trim()
-    );
+    const tabs = () => Array.from(root.querySelectorAll<HTMLElement>('portal-markup-panel .output'));
+    const shown = () => {
+      const blocks = root.querySelectorAll('portal-markup-panel pre.markup');
+      const copy = root.querySelector('portal-markup-panel .pc-button.is-primary');
 
-    expect(blocks.length).toBe(3);
-    expect(blocks[0]?.textContent).toContain('<form');
-    expect(blocks[1]?.textContent).toContain('export class MyFormComponent');
-    expect(blocks[2]?.textContent).toContain('provideNgxFormidable');
-    expect(buttons).toEqual(['Copy Template', 'Reset Form', 'Copy Component', 'Copy App Config']);
+      return { count: blocks.length, text: blocks[0]?.textContent ?? '', copy: (copy?.textContent ?? '').trim() };
+    };
+
+    expect(tabs().map((el) => (el.textContent ?? '').trim())).toEqual(['Template', 'Component', 'App Config']);
+    expect(shown().count).toBe(1);
+    expect(shown().text).toContain('<form');
+    expect(shown().copy).toBe('Copy Template');
+
+    tabs()[1]!.click();
+    settle();
+    expect(shown().count).toBe(1);
+    expect(shown().text).toContain('export class MyFormComponent');
+    expect(shown().copy).toBe('Copy Component');
+
+    tabs()[2]!.click();
+    settle();
+    expect(shown().count).toBe(1);
+    expect(shown().text).toContain('provideNgxFormidable');
+    expect(shown().copy).toBe('Copy App Config');
+    expect(tabs()[2]!.getAttribute('aria-selected')).toBe('true');
+  }));
+
+  // A reset beside the copy is one misclick from wiping the work being exported, and each already lives where
+  // its half is built: the preset gallery, and Structure's first step.
+  it('keeps resets out of Import & Export', fakeAsync(() => {
+    settle();
+
+    const inspector = TestBed.inject(InspectorStore);
+
+    for (const section of ['theme', 'form'] as const) {
+      inspector.openExport(section);
+      settle();
+
+      const labels = Array.from(root.querySelectorAll('portal-export-tab .pc-button')).map((el) =>
+        (el.textContent ?? '').trim()
+      );
+
+      expect(labels.filter((label) => /reset/i.test(label)))
+        .withContext(section)
+        .toEqual([]);
+    }
   }));
 
   // All three areas carry the same second level, so the strip is learned once rather than per tab.

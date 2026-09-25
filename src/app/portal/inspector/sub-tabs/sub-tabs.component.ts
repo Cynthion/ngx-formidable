@@ -11,6 +11,8 @@ export interface SubTab {
  *
  * Controlled rather than self-managing: the area owns which half is showing, because the store outside it
  * moves that too — a field chip opens Fields, a derived variable's link opens Variables.
+ *
+ * Sticky, because the halves are long and a user scrolled down one of them has to be able to see which it is.
  */
 @Component({
   selector: 'portal-sub-tabs',

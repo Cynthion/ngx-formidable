@@ -13,7 +13,7 @@ const SUB_TABS: readonly SubTab[] = [
 // Short, because each half's two accordions carry the explanation of what goes out and what comes back in.
 const STRAPLINES: Readonly<Record<ExportSection, string>> = {
   theme: 'The CSS your theme is, out and back in.',
-  form: 'The template and component your form is, out and back in.'
+  form: 'The code your form is, out and back in.'
 };
 
 /**
@@ -23,9 +23,9 @@ const STRAPLINES: Readonly<Record<ExportSection, string>> = {
  * strip is the same control in the same place on all three, and each half is a whole panel rather than a
  * body that has to be opened before it can be read.
  *
- * Which half is showing lives in the inspector store rather than here: each of the top bar's two export
- * controls opens the one it belongs to, Structure's third way to start opens the form half, and none of
- * them is in a position to reach into this component.
+ * Which half is showing lives in the inspector store rather than here: App Defaults' export link and
+ * Structure's third way to start both open the form half, and neither is in a position to reach into this
+ * component.
  */
 @Component({
   selector: 'portal-export-tab',

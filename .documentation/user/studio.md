@@ -15,7 +15,7 @@ How theming works, and which variables are worth setting, is in `user/theming.md
 | `/`     | The Studio: a live form, and the panel that changes it |
 | `/docs` | These documents                                        |
 
-The top bar carries both, the repository link, the page's own light or dark appearance, and a copy button for each of the two things you take away.
+The top bar carries both, the repository link, the page's own light or dark appearance, and a copy button for the theme.
 
 ---
 
@@ -23,7 +23,7 @@ The top bar carries both, the repository link, the page's own light or dark appe
 
 | Region           | Where            | Holds                                                                     |
 | :--------------- | :--------------- | :------------------------------------------------------------------------ |
-| **Top Bar**      | Across the top   | The two routes, the appearance toggle, `Copy Theme` and `Copy Template`   |
+| **Top Bar**      | Across the top   | The two routes, the appearance toggle and `Copy Theme`                    |
 | **Stage**        | The wide column  | The form, on an explicit page surface, with the model drawer beneath it   |
 | **Editor Panel** | Beside the stage | `Theme`, `Form` and `Import & Export`, each a tab over the same live form |
 
@@ -61,7 +61,7 @@ The `Theme` tab has two halves. `Design` is a ladder of numbered steps in the or
 | **4**       | The page behind the form                                      |         — |
 | **5**       | Fonts: the family, and the size, weight and line height       |         — |
 
-**Presets First**: each thumbnail is a real field rendered under that theme rather than a picture of one. `Randomize` pairs a shape, a palette and a family at random, which is the fastest way to see that the two axes are independent. `Back To The Shipped Theme` returns to the library's own defaults.
+**Presets First**: each thumbnail is a real field rendered under that theme rather than a picture of one. `Randomize` pairs a shape, a palette and a family at random, which is the fastest way to see that the two axes are independent. `Reset To Default Theme` returns to the library's own defaults.
 
 **The Page Behind The Form** is yours, not the library's. The library styles fields and never the surface they sit on, so this block is exported separately and commented as such.
 
@@ -147,9 +147,9 @@ The `Import & Export` tab has two halves, one per thing the Studio produces. Eac
 | **Theme** | The `:root` block to paste into your own stylesheet                                               | A block you saved earlier               |
 | **Form**  | The Angular template this configuration produces, a component and an app config for it, read-only | A whole template, its sections included |
 
-Both halves are the same pair of sections, `Export` and `Import`. Each `Export` carries the block, a copy, and a reset that puts that half back to where it started — the shipped theme, or the sample form.
+Both halves are the same pair of sections, `Export` and `Import`. Each `Export` carries the block and a copy. The form's `Export` holds three files, so it shows them as tabs — `Template`, `Component`, `App Config` — one at a time.
 
-The top bar carries a copy for each half and, beside it, a control that opens that half here. `Copy Theme` and `Copy Template` copy with no intermediate dialog; the theme's export options cover CSS or SCSS, whether the page surface is included, whether the per-variable comments are emitted, and whether the defaults are stated explicitly. Declarations that only restate a library default are left out.
+The top bar's `Copy Theme` copies the theme with no intermediate dialog. The form has no copy there: its template does not compile without its component, so both are taken from here. The theme's export options cover CSS or SCSS, whether the page surface is included, whether the per-variable comments are emitted, and whether the defaults are stated explicitly. Declarations that only restate a library default are left out.
 
 **A Theme Block States A Delta.** The `:root` block carries what the theme says the library's defaults do not, so it reproduces the theme wherever those defaults are what it lands on — your own stylesheet. Read back into the Studio it lands on the theme already on the stage instead, and what a delta leaves unsaid stays as it is. Either checkbox closes that gap:
 

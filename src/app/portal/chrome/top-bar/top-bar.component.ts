@@ -1,10 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { serializeDefinition } from '../../export/markup-serializer';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { copyText } from '../../helpers/clipboard.helpers';
 import { ExampleIconComponent } from '../../../example-icon/example-icon.component';
-import { FormDefinitionStore } from '../../state/form-definition.store';
-import { ExportSection, InspectorStore } from '../../state/inspector.store';
 import { PortalAppearance, ThemeStore } from '../../state/theme.store';
 import { GITHUB_SVG } from './top-bar-icons';
 
@@ -32,14 +29,14 @@ const APPEARANCES: readonly { value: PortalAppearance; label: string; glyph: str
 
 /**
  * Fixed across the top on every route: what this is, the two places there are to be, the repository, the
- * portal's own appearance, and one export group per thing there is to take away.
+ * portal's own appearance, and the theme's copy.
  *
- * Two groups rather than one, because the theme and the template are two round trips and a single control
- * could only land on one of them. Each states a count of its own: the theme's is the number of variables the
- * user has changed, never the size of the token surface — a number that rises as they work says the library
- * needs eight to twelve variables without a sentence of explanation — and the template's is the fields it
- * carries. The form's component has no copy here: it is the template's other half rather than a third thing
- * to take away, so it sits beside the template in Import & Export.
+ * One copy, not one per thing to take away: the theme is the only one that stands on its own. The template
+ * binds names only its component defines, so a one-click copy of it alone hands the user code that does not
+ * compile — it lives beside that component in Import & Export, whose tab is always in view on the Studio.
+ *
+ * The count is the number of variables the user has changed, never the size of the token surface: a number
+ * that rises as they work says the library needs eight to twelve variables without a sentence of explanation.
  */
 @Component({
   selector: 'portal-top-bar',
@@ -51,39 +48,14 @@ const APPEARANCES: readonly { value: PortalAppearance; label: string; glyph: str
 export class TopBarComponent {
   protected readonly theme = inject(ThemeStore);
 
-  private readonly definition = inject(FormDefinitionStore);
-  private readonly inspector = inject(InspectorStore);
-  private readonly router = inject(Router);
-
-  protected readonly fields = this.definition.fields;
-
   protected readonly repositoryUrl = REPOSITORY_URL;
   protected readonly routes = ROUTES;
   protected readonly githubSvg = GITHUB_SVG;
 
   protected readonly copiedTheme = signal(false);
-  protected readonly copiedMarkup = signal(false);
 
   protected copyTheme(): Promise<void> {
     return copyText(this.theme.exportText(), this.copiedTheme);
-  }
-
-  /** Serialized on demand rather than held: the definition is the source and this is a function of it. */
-  protected copyMarkup(): Promise<void> {
-    return copyText(serializeDefinition(this.definition.definition()), this.copiedMarkup);
-  }
-
-  /**
-   * The control beside each copy button reaches the rest of that round trip — the same block to read before
-   * copying, its options, and the box to paste one back into.
-   *
-   * It navigates as well as setting the area, because the bar is on the Docs route too and there is no
-   * inspector there to open. Setting the area alone would look like the control had done nothing.
-   */
-  protected showExport(section: ExportSection): Promise<boolean> {
-    this.inspector.openExport(section);
-
-    return this.router.navigate(['/']);
   }
 
   protected cycleAppearance(): void {

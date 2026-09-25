@@ -33,7 +33,7 @@ Three regions. The preview form is never hidden, because the form repainting is 
 
 ```txt
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ ◇ ngx-formidable      [ Studio │ Docs ]  ⌘GitHub ◐ [Copy 16│Export ↗]    │
+│ ◇ ngx-formidable      [ Studio │ Docs ]  ⌘GitHub ◐ [Copy Theme 16]       │
 │   Angular form fields you can actually theme, configure and customize.   │
 ├───────────────────────────────────────────┬──────────────────────────────┤
 │ PREVIEW  Field Types  Accessibility       │ Theme │ Form │ Import&Exp  › │
@@ -114,15 +114,17 @@ would hide either the preview or the editor. There are three, in the order the w
 | **Import & Export** | `Theme`, `Form`         | What you take away and paste back: the `:root` block, and the template with its component and app config |
 
 `Form` is `Structure` first: which fields exist has to be settled before what one of them is is worth
-saying. All three areas carry the same second level, so the strip is learned once rather than per tab, and
+saying. All three areas carry the same second level, so the strip is learned once rather than per tab. It sticks to
+the top of the panel's scroll, so which half is showing never leaves the screen.
 `Import & Export`'s two halves are the two things there are to take away. Each half is then the same pair of
 accordions — `Export` and `Import` — because both are round trips and the way back in belongs beside the way
-out, which is what the tab is named for. A reader who has learned one half has learned the other.
+out, which is what the tab is named for. A reader who has learned one half has learned the other. The form's
+`Export` holds three files, so they are tabs — `Template`, `Component`, `App Config` — one on screen at a time,
+which keeps the `Import` header in view beneath them.
 
 Which half is showing and which of its two accordions is open are both held in the inspector store rather
-than in the components: each of the top bar's export controls opens the half it belongs to, and `Structure`'s
-third way to start opens the form half **at its import**, which a panel's own state could not be reached to
-say. Inside every area the sections are accordions with one open at a time, so the run of collapsed headers is
+than in the components: `App Defaults` links to the form half, and `Structure`'s third way to start opens it
+**at its import**, which a panel's own state could not be reached to say. Inside every area the sections are accordions with one open at a time, so the run of collapsed headers is
 the panel's table of contents rather than a scroll the user has to survey.
 
 **Anchor Targets**: per-token deep links use a route parameter and scroll programmatically. A fragment on top
@@ -538,7 +540,7 @@ components. The configuration is therefore the source of truth and the markup is
 | **In**        | A pasted template parsed with `DOMParser` into the configuration, reporting what it ignored                                    |
 | **Structure** | Fields added, removed and reordered through controls rather than by typing                                                     |
 
-**The Component Is The Template's Other Half**: the template binds `model`, `shape` and, under Vest, `suite`, which only a component defines. `component-serializer.ts` emits one — each key typed from `FIELD_KIND_VALUE_TYPES`, the table the preview's own shape reads, and the suite a skeleton, because the Studio has no rule editor. It sits beside the template rather than in a third top-bar group, since it is not a third thing to take away, and it is not read back in, since it holds nothing the configuration does not.
+**The Component Is The Template's Other Half**: the template binds `model`, `shape` and, under Vest, `suite`, which only a component defines. `component-serializer.ts` emits one — each key typed from `FIELD_KIND_VALUE_TYPES`, the table the preview's own shape reads, and the suite a skeleton, because the Studio has no rule editor. It is a tab beside the template, since it is not a third thing to take away, and it is not read back in, since it holds nothing the configuration does not. The top bar copies the theme alone for the same reason: a template copied without its component does not compile.
 
 **The App Config Is What The Template Leaves Out**: the template states a label position, an adornment alignment, a panel position, `revealOn` and `showRequiredMarkers` only where a field or the form states its own, so the app defaults are what give the rest their value. `config-serializer.ts` emits the `app.config.ts` that provides them, beside the template for that reason. It is not read back in: it belongs to the app rather than the form, which is also why replacing the form leaves it alone.
 

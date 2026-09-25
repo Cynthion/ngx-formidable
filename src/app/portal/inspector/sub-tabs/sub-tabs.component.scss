@@ -1,15 +1,22 @@
-// The strip and the sentence under it are one band: what this half of the tab is, and what it is for. The
-// rule at its foot is where the band ends and the panel starts — the same rule an accordion header carries,
-// so a panel made of sections and a panel made of controls begin the same way.
+// The strip sticks to the top of the panel's scroll, so which half is showing never scrolls out of sight. The
+// sentence under it scrolls away with the content: once read, it would only cost height. `contents`, so the
+// strip's containing block is the whole area rather than this host, which would end — and unstick it — at
+// the sentence.
 :host {
-  display: block;
-  padding: 12px 16px 14px;
-  border-bottom: 1px solid var(--portal-border);
+  display: contents;
 }
 
+// The chrome's own z-index, so a library panel open in the content cannot paint over the strip it scrolls
+// under. `tech/layering.md` holds the layer model.
 .sub-tabs {
+  position: sticky;
+  top: 0;
+  z-index: var(--portal-chrome-z-index);
   display: flex;
   gap: 4px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--portal-border);
+  background: var(--portal-surface-raised);
 }
 
 .sub-tab {
@@ -41,8 +48,12 @@
   }
 }
 
+// Its own rule at its foot, the one an accordion header carries, so the panel under it starts the same way
+// whether it is made of sections or of controls.
 .strapline {
-  margin: 10px 0 0;
+  margin: 0;
+  padding: 10px 16px 12px;
+  border-bottom: 1px solid var(--portal-border);
   color: var(--portal-text-muted);
   font-size: 11px;
   line-height: 1.5;

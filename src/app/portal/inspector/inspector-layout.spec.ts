@@ -121,6 +121,36 @@ describe('inspector layout', () => {
     expect(sweep(INSPECTOR_WIDTH_MIN)).toEqual([]);
   }));
 
+  // Each area's halves are longer than the panel, so the strip saying which half is showing has to survive
+  // the scroll rather than leave with the content.
+  it('keeps the sub-tab strip at the top of the panel scrolled to its end', fakeAsync(() => {
+    sizeTo(INSPECTOR_WIDTH_DEFAULT);
+    // Short enough that every view below has to scroll, whatever the runner's viewport makes a `dvh`.
+    host.style.setProperty('height', '400px', 'important');
+
+    const views: [string, () => void][] = [
+      ['theme/design', () => inspector.tab.set('theme')],
+      ['form/settings', () => inspector.openFieldSettings()],
+      ['export/form', () => inspector.openExport('form')]
+    ];
+
+    for (const [where, open] of views) {
+      open();
+      settle();
+
+      const body = host.querySelector('.body') as HTMLElement;
+      body.scrollTop = body.scrollHeight;
+
+      const strip = host.querySelector('.sub-tabs') as HTMLElement;
+
+      // Scrolled for real, or the strip being at the top would prove nothing.
+      expect(body.scrollTop).withContext(where).toBeGreaterThan(100);
+      expect(strip.getBoundingClientRect().top - body.getBoundingClientRect().top)
+        .withContext(where)
+        .toBeCloseTo(0, 0);
+    }
+  }));
+
   // The field editor renders a different set of controls per kind, so one selected field proves one of them.
   it('paints nothing outside the gutter for any field the editor can open', fakeAsync(() => {
     const failures: string[] = [];
