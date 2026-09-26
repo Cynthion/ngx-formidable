@@ -81,7 +81,7 @@ describe('describeFieldSettings', () => {
       label: 'Bare',
       placeholder: '',
       span: 1,
-      decoration: { ...fieldById('orderName').decoration, showRequiredMarker: false },
+      decoration: { ...fieldById('orderName').decoration, markRequired: false },
       state: { readonly: false, disabled: false, autoFocus: false }
     };
 

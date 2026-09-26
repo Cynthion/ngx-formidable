@@ -173,7 +173,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     panelPosition: 'right',
     decoration: {
       ...DECORATION,
-      showRequiredMarker: true,
+      markRequired: true,
       hint: 'Fills the sauce and the toppings below. Change either afterwards — a pizza is a starting point, not a lock.',
       hintAlign: 'start'
     }
@@ -185,7 +185,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     label: 'Size',
     placeholder: 'Choose a size…',
     options: SIZES,
-    decoration: { ...DECORATION, showRequiredMarker: true }
+    decoration: { ...DECORATION, markRequired: true }
   }),
   field({
     id: 'crust',
@@ -194,7 +194,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     label: 'Crust',
     placeholder: 'Choose a crust…',
     options: CRUSTS,
-    decoration: { ...DECORATION, showRequiredMarker: true }
+    decoration: { ...DECORATION, markRequired: true }
   }),
   // The two group fields sit side by side at one column each, on option lists of equal length, so the
   // single-choice list and the multi-choice list are read against each other rather than one under the other.
@@ -204,7 +204,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'pizza',
     label: 'Sauce',
     options: SAUCES,
-    decoration: { ...DECORATION, showRequiredMarker: true }
+    decoration: { ...DECORATION, markRequired: true }
   }),
   field({
     id: 'toppings',
@@ -262,7 +262,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     visibleWhen: { field: 'pickup', equals: false },
     decoration: {
       ...DECORATION,
-      showRequiredMarker: true,
+      markRequired: true,
       hint: 'Fuzzy search over a custom option component.',
       hintAlign: 'start'
     }
@@ -281,7 +281,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     defaultOptionMode: 'always',
     panelPosition: 'left',
     visibleWhen: { field: 'pickup', equals: true },
-    decoration: { ...DECORATION, showRequiredMarker: true }
+    decoration: { ...DECORATION, markRequired: true }
   }),
   // #endregion
 
@@ -316,7 +316,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'payment',
     label: 'Pay By',
     options: PAYMENT_METHODS,
-    decoration: { ...DECORATION, showRequiredMarker: true }
+    decoration: { ...DECORATION, markRequired: true }
   }),
   field({
     id: 'cardNumber',
@@ -332,7 +332,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
       // vertical layout labels `outside` and cannot do otherwise, so the app default's `inside` here would
       // put the two labels of one row at different heights.
       labelPosition: 'outside',
-      showRequiredMarker: true,
+      markRequired: true,
       hint: 'This form posts nowhere. Type whatever you like.',
       hintAlign: 'start'
     }
@@ -346,7 +346,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'order',
     label: 'Name On The Order',
     placeholder: 'Who is it for?',
-    decoration: { ...DECORATION, showRequiredMarker: true }
+    decoration: { ...DECORATION, markRequired: true }
   }),
   // The custom field sits late: a cart quantity belongs beside the order, not at the top of the pizza, and
   // it keeps the library's own components first — which is what a visitor came for.
@@ -370,7 +370,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     showMaskTyped: true,
     decoration: {
       ...DECORATION,
-      showRequiredMarker: true,
+      markRequired: true,
       hint: 'Only used if the driver cannot find you.',
       hintAlign: 'start'
     }
@@ -382,7 +382,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     label: 'Email Address',
     placeholder: 'you@example.com',
     autocompleteHint: 'email',
-    decoration: { ...DECORATION, showRequiredMarker: true, hint: 'The receipt goes here.', hintAlign: 'start' }
+    decoration: { ...DECORATION, markRequired: true, hint: 'The receipt goes here.', hintAlign: 'start' }
   }),
   field({
     id: 'notes',
@@ -398,7 +398,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
   // #endregion
 ];
 
-// No `revealOn` or `showRequiredMarkers`: the form states neither, so both follow the app default.
+// No `revealOn` or `hideRequiredMarkers`: the form states neither, so both follow the app default.
 const PREVIEW_FORM_OPTIONS: PortalFormOptions = {
   showLabels: true,
   showHints: true,

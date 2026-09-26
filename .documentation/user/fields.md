@@ -8,14 +8,14 @@ Which field to pick, and the full input list for each, is in [`user/components.m
 
 Every field is a `ControlValueAccessor`, so it binds with `ngModel` and carries the same base inputs.
 
-| Input                | Does                                                                                 |
-| :------------------- | :----------------------------------------------------------------------------------- |
-| `name`               | The control name, the model key and the validation target, in one string             |
-| `placeholder`        | Placeholder text. A field with one leaves an `inside` label nothing to rest in       |
-| `readonly`           | Blocks edits, stays focusable, keeps its focus ring                                  |
-| `disabled`           | Blocks edits and leaves the tab order                                                |
-| `showRequiredMarker` | Marks the label and sets `aria-required` — see [`user/decoration.md`](decoration.md) |
-| `autoFocus`          | Focuses the field once its view is ready                                             |
+| Input          | Does                                                                                 |
+| :------------- | :----------------------------------------------------------------------------------- |
+| `name`         | The control name, the model key and the validation target, in one string             |
+| `placeholder`  | Placeholder text. A field with one leaves an `inside` label nothing to rest in       |
+| `readonly`     | Blocks edits, stays focusable, keeps its focus ring                                  |
+| `disabled`     | Blocks edits and leaves the tab order                                                |
+| `markRequired` | Marks the label and sets `aria-required` — see [`user/decoration.md`](decoration.md) |
+| `autoFocus`    | Focuses the field once its view is ready                                             |
 
 And the same outputs: `valueChanged` / `focusChanged` as signal outputs, `valueChange$` / `focusChange$` as observables.
 
@@ -44,7 +44,7 @@ Every field has a `focus()` method. `autoFocus` calls it once the view is ready,
 </button>
 ```
 
-**Focusing Never Opens A Panel.** The dropdown, autocomplete and date fields open on click, on `ArrowDown`, or on typing, so a focused field is ready for input without a list covering the page. A `disabled` field ignores `focus()` entirely.
+**Focusing Never Opens A Panel.** The dropdown and autocomplete fields open on click, on `ArrowDown`, or on typing, and the date field only from its toggle or `Alt` plus `ArrowDown`, so a focused field is ready for input without a list covering the page. A `disabled` field ignores `focus()` entirely.
 
 ### The Caret On Focus
 

@@ -115,24 +115,24 @@ An adornment decorates the label, so it lives and dies with the label's row: eve
 
 ### The Required Marker
 
-`showRequiredMarker` on the **field** suffixes a marker to its label, in every label position:
+`markRequired` on the **field** suffixes a marker to its label, in every label position:
 
 ```html
 <formidable-field-decorator>
   <formidable-input-field
     name="firstName"
-    [showRequiredMarker]="true"
+    [markRequired]="true"
     ngModel />
   <div formidableFieldLabel>First Name</div>
 </formidable-field-decorator>
 ```
 
-`showRequiredMarkers` on the `<form>` withholds the glyph from every field on it, so one switch decides whether this form marks its required fields at all.
+`hideRequiredMarkers` on the `<form>` withholds the glyph from every field on it, so one switch decides whether this form marks its required fields at all.
 
 - **The Glyph Is A Variable.** `--formidable-label-required-marker` holds it, so a theme swaps `*` for a word — `' (required)'` — without touching markup.
 - **It Inherits The Label's Colour**, and so follows every field state with it.
 - **It Is Never What Gets Cut Off.** The marker is a sibling of the projected label, so a label too long to fit ellipsizes its own text and the marker survives.
-- **It Validates Nothing.** It is presentational, and it sets `aria-required`. Which validator decides the field is invalid stays entirely yours — see [`user/validation.md`](validation.md).
+- **It Validates Nothing.** It marks the label and sets `aria-required`, nothing more. Which validator decides the field is invalid stays entirely yours — see [`user/validation.md`](validation.md).
 
 ---
 

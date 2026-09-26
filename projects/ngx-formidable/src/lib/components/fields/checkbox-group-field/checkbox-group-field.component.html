@@ -6,7 +6,7 @@
   [class.is-disabled]="disabled()"
   [tabindex]="readonly() || disabled() ? -1 : null"
   [attr.aria-labelledby]="labelledBy"
-  [attr.aria-required]="showRequiredMarker() || null"
+  [attr.aria-required]="markRequired() || null"
   [attr.aria-invalid]="isInvalid || null"
   [attr.aria-describedby]="describedBy"
   [attr.aria-readonly]="readonly() || null"

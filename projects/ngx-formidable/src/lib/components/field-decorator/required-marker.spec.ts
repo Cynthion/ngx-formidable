@@ -12,18 +12,18 @@ import { FieldDecoratorComponent } from './field-decorator.component';
 /**
  * Contract of the label's required marker.
  *
- * `showRequiredMarker` is declared on the field and mirrored by the decorator, which suffixes the marker to
+ * `markRequired` is declared on the field and mirrored by the decorator, which suffixes the marker to
  * the label. The marker is a sibling of the projected label rather than part of it, and that is the whole
  * point: the label wrapper is a flex row, so when a label is too long to fit, the consumer's own text is
  * what ellipsizes and the marker survives at full width. Its glyph comes from a theme variable, and it
  * carries no colour of its own, so it follows the label through every state.
  *
- * The flag is presentational. Nothing here asserts validity — the validation suite remains the only
+ * The flag validates nothing. Nothing here asserts validity — the validation suite remains the only
  * validator, and these specs deliberately do not imply otherwise. It is deliberately not called `required`:
  * Angular's own `RequiredValidator` matches `[required][ngModel]` on any element, so that name would attach
  * a sync validator and, since Angular skips async validators when a sync one fails, silence the suite.
  *
- * A form may switch every marker on it off at once with `showRequiredMarkers`.
+ * A form may hide every marker on it at once with `hideRequiredMarkers`.
  */
 
 @Component({
@@ -33,7 +33,7 @@ import { FieldDecoratorComponent } from './field-decorator.component';
     <formidable-field-decorator [style.width.rem]="width">
       <formidable-input-field
         name="field"
-        [showRequiredMarker]="showRequiredMarker" />
+        [markRequired]="markRequired" />
       @if (hasLabel) {
         <div
           formidableFieldLabel
@@ -45,7 +45,7 @@ import { FieldDecoratorComponent } from './field-decorator.component';
   `
 })
 class InputHostComponent {
-  showRequiredMarker = false;
+  markRequired = false;
   hasLabel = true;
   label = 'Label';
   position: FieldLabelPosition = 'outside';
@@ -60,7 +60,7 @@ class InputHostComponent {
     <formidable-field-decorator>
       <formidable-radio-group-field
         name="field"
-        [showRequiredMarker]="true" />
+        [markRequired]="true" />
       <div
         formidableFieldLabel
         position="outside">
@@ -78,12 +78,12 @@ class RadioGroupHostComponent {}
   template: `
     <form
       formidableForm
-      [showRequiredMarkers]="showRequiredMarkers">
+      [hideRequiredMarkers]="hideRequiredMarkers">
       <formidable-field-decorator>
         <formidable-input-field
           name="field"
           ngModel
-          [showRequiredMarker]="true" />
+          [markRequired]="true" />
         <div
           formidableFieldLabel
           position="outside">
@@ -94,7 +94,7 @@ class RadioGroupHostComponent {}
   `
 })
 class FormHostComponent {
-  showRequiredMarkers = true;
+  hideRequiredMarkers = false;
 }
 
 describe('required marker', () => {
@@ -124,7 +124,7 @@ describe('required marker', () => {
   });
 
   it('suffixes the marker to the label once the field is required', () => {
-    host.showRequiredMarker = true;
+    host.markRequired = true;
     fixture.detectChanges();
 
     const wrapper = fixture.nativeElement.querySelector('.label-wrapper') as HTMLElement;
@@ -135,7 +135,7 @@ describe('required marker', () => {
   });
 
   it('hides the marker from assistive tech', () => {
-    host.showRequiredMarker = true;
+    host.markRequired = true;
     fixture.detectChanges();
 
     expect(marker()?.getAttribute('aria-hidden')).toBe('true');
@@ -157,16 +157,16 @@ describe('required marker', () => {
 
     expect(formFixture.nativeElement.querySelector('.required-marker')).not.toBeNull();
 
-    formFixture.componentInstance.showRequiredMarkers = false;
+    formFixture.componentInstance.hideRequiredMarkers = true;
     formFixture.detectChanges();
 
     expect(formFixture.nativeElement.querySelector('.required-marker')).toBeNull();
-    // Presentational only: the field still tells assistive tech what it is.
+    // The glyph only: the field still tells assistive tech what it is.
     expect(formFixture.nativeElement.querySelector('input')?.getAttribute('aria-required')).toBe('true');
   });
 
   it('shows nothing when the field is required but projects no label', () => {
-    host.showRequiredMarker = true;
+    host.markRequired = true;
     host.hasLabel = false;
     fixture.detectChanges();
 
@@ -175,7 +175,7 @@ describe('required marker', () => {
   });
 
   it('takes its glyph from the theme, and follows an override', () => {
-    host.showRequiredMarker = true;
+    host.markRequired = true;
     fixture.detectChanges();
 
     expect(markerGlyph()).toBe('"*"');
@@ -189,7 +189,7 @@ describe('required marker', () => {
   // The reason the marker is a sibling of the projected label rather than a child of it.
   (['inside-floating', 'border'] as FieldLabelPosition[]).forEach((position) => {
     it(`survives at full width while a ${position} label ellipsizes`, () => {
-      host.showRequiredMarker = true;
+      host.markRequired = true;
       host.position = position;
       host.label = 'A label far too long to ever fit inside this field';
       host.width = 8;

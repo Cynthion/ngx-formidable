@@ -51,11 +51,11 @@
   <select
     id="fs-required-markers"
     class="pc-select"
-    [portalSelectedValue]="stated(options.showRequiredMarkers)"
+    [portalSelectedValue]="stated(options.hideRequiredMarkers)"
     (change)="setRequiredMarkers($any($event.target).value)">
     <option value="">App Default ({{ defaultMarkers() }})</option>
-    <option value="true">Shown</option>
-    <option value="false">Hidden</option>
+    <option value="false">Shown</option>
+    <option value="true">Hidden</option>
   </select>
   <p class="pc-help">A master switch too, but one the app default covers, so the form can also state nothing.</p>
 </div>
