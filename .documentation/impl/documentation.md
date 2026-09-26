@@ -48,7 +48,7 @@ A document belongs to exactly one bucket. When two overlap, one links to the oth
 - **Purpose**: User documentation is the reference for consumers of the library, providing guidance on how to install, configure, theme and extend it.
 - **Audience**: Developers who use the library in their own Angular application.
 - **Content**: A **guide** teaches a topic; a **reference** lists what it accepts. Code examples compile against the published package.
-- **Related Section**: Include a related section with references to other relevant user documents to provide additional context and information.
+- **Related Section**: May end with a `## Related` section that links other relevant user documents.
 - **Rendered By The Portal**: every `user/` document is also rendered by the portal's `Docs` route. How its links resolve there is in [`tech/portal.md`](../tech/portal.md).
 
 ## Link Notation
