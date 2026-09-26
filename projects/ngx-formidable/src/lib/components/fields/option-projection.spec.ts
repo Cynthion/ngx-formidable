@@ -7,6 +7,7 @@ import { FieldOptionComponent } from '../field-option/field-option.component';
 import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
 import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
 import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.component';
+import { SelectFieldComponent } from './select-field/select-field.component';
 
 /**
  * Contract of the option content query: options declared inside a field are collected whatever wraps them.
@@ -121,6 +122,53 @@ class ProjectedContentHostComponent {
   readonly field = viewChild.required(RadioGroupFieldComponent);
 }
 
+// One direct and one looped option, because the looped one is bound later than the field's effect first runs.
+@Component({
+  imports: [FormsModule, RadioGroupFieldComponent, FieldOptionComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    <formidable-radio-group-field
+      name="changing"
+      ngModel>
+      <formidable-field-option
+        value="direct"
+        [label]="directLabel"
+        [disabled]="disabledValue === 'direct'" />
+      @for (value of loopedValues; track value) {
+        <formidable-field-option
+          [value]="value"
+          [disabled]="disabledValue === value" />
+      }
+    </formidable-radio-group-field>
+  `
+})
+class ChangingOptionHostComponent {
+  directLabel = 'Direct';
+  disabledValue = '';
+  loopedValues = ['looped'];
+}
+
+// The select field watches its options with an effect of its own, not the one on `BaseOptionFieldDirective`.
+@Component({
+  imports: [FormsModule, SelectFieldComponent, FieldOptionComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
+  template: `
+    <formidable-select-field
+      name="changing-select"
+      ngModel>
+      @for (value of loopedValues; track value) {
+        <formidable-field-option
+          [value]="value"
+          [disabled]="disabledValue === value" />
+      }
+    </formidable-select-field>
+  `
+})
+class ChangingSelectOptionHostComponent {
+  disabledValue = '';
+  loopedValues = ['a', 'b'];
+}
+
 // An autocomplete, because its filter is what reads the label off the option — a group only displays it,
 // and a displayed label comes from the projected template rather than from the option.
 @Component({
@@ -233,6 +281,63 @@ describe('option projection', () => {
       discardPeriodicTasks();
       filterFixture.destroy();
     }));
+  });
+
+  // A projected option whose inputs change in place stays the same query entry, so the field must follow
+  // the option itself, not only the query.
+  describe('an option changing in place', () => {
+    let fixture: ComponentFixture<ChangingOptionHostComponent>;
+    let host: ChangingOptionHostComponent;
+
+    const disabledValues = () =>
+      Array.from(fixture.nativeElement.querySelectorAll('input[type="radio"][disabled]')).map((el) =>
+        (el as HTMLInputElement).nextElementSibling?.textContent?.trim()
+      );
+
+    beforeEach(async () => {
+      await TestBed.configureTestingModule({ imports: [ChangingOptionHostComponent] }).compileComponents();
+
+      fixture = TestBed.createComponent(ChangingOptionHostComponent);
+      host = fixture.componentInstance;
+      await settle(fixture);
+    });
+
+    it('follows a changed disabled flag, on a direct and on a looped option', async () => {
+      host.disabledValue = 'looped';
+      await settle(fixture);
+      expect(disabledValues()).toEqual(['looped']);
+
+      host.disabledValue = 'direct';
+      await settle(fixture);
+      expect(disabledValues()).toEqual(['Direct']);
+    });
+
+    it('follows a changed label', async () => {
+      host.directLabel = 'Renamed';
+      await settle(fixture);
+
+      expect(renderedOptionValues(fixture)).toEqual(['Renamed', 'looped']);
+    });
+
+    it('collects an option added to the loop later', async () => {
+      host.loopedValues = ['looped', 'added'];
+      await settle(fixture);
+
+      expect(renderedOptionValues(fixture)).toEqual(['Direct', 'looped', 'added']);
+    });
+
+    it('follows a changed disabled flag in a select field', async () => {
+      const selectFixture = TestBed.createComponent(ChangingSelectOptionHostComponent);
+      await settle(selectFixture);
+
+      selectFixture.componentInstance.disabledValue = 'b';
+      await settle(selectFixture);
+
+      const disabled = Array.from(selectFixture.nativeElement.querySelectorAll('option:disabled')).map(
+        (el) => (el as HTMLOptionElement).value
+      );
+      expect(disabled).toEqual(['b']);
+    });
   });
 
   describe('defaultOption', () => {

@@ -1,5 +1,5 @@
 import { contentChildren, Directive, effect, input, signal, Signal, untracked, viewChildren } from '@angular/core';
-import { getNextAvailableOptionIndex } from '../../helpers/option.helpers';
+import { getNextAvailableOptionIndex, trackProjectedOptions } from '../../helpers/option.helpers';
 import { scrollHighlightedOptionIntoView } from '../../helpers/position.helpers';
 import {
   FieldDefaultOptionMode,
@@ -65,12 +65,13 @@ export abstract class BaseOptionFieldDirective<T = string | null> extends BaseFi
   // What the effect above watches. Not the merged list itself: each field merges differently, and the
   // reconcile needs to run for a changed `sortFn` as much as for a changed option.
   //
-  // The projected children are watched by the query's own identity and never by reading `option()` off
-  // them, because that reads a `required` input: the effect's first run can land before the bindings on an
-  // option inside an `@for` have been applied, and the read would throw NG0950 rather than wait.
+  // The projected children are watched both by the query and by each one's `option()` — see
+  // `trackProjectedOptions`.
   //
   // Overridden by a field with option inputs of its own, so those move the list too.
   protected optionSources(): unknown[] {
+    trackProjectedOptions(this.optionComponents());
+
     return [this.options(), this.defaultOption(), this.defaultOptionMode(), this.sortFn(), this.optionComponents()];
   }
 

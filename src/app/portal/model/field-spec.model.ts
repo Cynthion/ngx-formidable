@@ -74,7 +74,7 @@ export const LIBRARY_DEFAULTS = {
   prefixAlign: 'center',
   suffixAlign: 'center',
   revealOn: 'touched',
-  showRequiredMarkers: true,
+  hideRequiredMarkers: false,
   debounceMs: 0
 } as const satisfies Omit<Required<FormidableDefaults>, 'panelPosition'>;
 
@@ -139,7 +139,7 @@ export interface PortalOptionSpec {
 export interface PortalFieldDecoration {
   readonly showLabel: boolean;
   readonly labelPosition?: FieldLabelPosition;
-  readonly showRequiredMarker: boolean;
+  readonly markRequired: boolean;
   readonly labelAdornment: PortalSlotContent;
   readonly prefix: PortalSlotContent;
   readonly prefixAlign?: FieldAdornmentAlignment;
@@ -165,7 +165,7 @@ export interface PortalFieldState {
  */
 export const DEFAULT_DECORATION: PortalFieldDecoration = {
   showLabel: true,
-  showRequiredMarker: false,
+  markRequired: false,
   labelAdornment: 'none',
   prefix: 'none',
   suffix: 'none',
@@ -285,7 +285,7 @@ type PortalValidatorKind = 'vest' | 'angular' | 'none';
  */
 export interface PortalFormOptions {
   readonly showLabels: boolean;
-  readonly showRequiredMarkers?: boolean;
+  readonly hideRequiredMarkers?: boolean;
   readonly showHints: boolean;
   readonly showAdornments: boolean;
   readonly readonly: boolean;

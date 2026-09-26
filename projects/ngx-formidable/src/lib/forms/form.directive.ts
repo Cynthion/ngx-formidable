@@ -58,7 +58,7 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
   // The app defaults, which the three options below fall back to when unset or bound to `undefined`.
   private readonly defaults = inject(FORMIDABLE_DEFAULTS);
   private readonly defaultDebounceMs = this.defaults.debounceMs ?? 0;
-  private readonly defaultShowRequiredMarkers = this.defaults.showRequiredMarkers ?? true;
+  private readonly defaultHideRequiredMarkers = this.defaults.hideRequiredMarkers ?? false;
   private readonly defaultRevealOn = this.defaults.revealOn ?? 'touched';
 
   /**
@@ -82,11 +82,11 @@ export class NgxFormidableFormDirective<T extends Record<string, unknown>> imple
   });
 
   /**
-   * Whether the fields on this form may render their required marker, so one switch hides all of them.
-   * A field still has to ask for its own with `showRequiredMarker`. Presentational only.
+   * Hides the required marker of every field on this form, so one switch withholds all of them. The glyph
+   * only: a field marked with `markRequired` keeps its `aria-required`.
    */
-  public readonly showRequiredMarkers = input(this.defaultShowRequiredMarkers, {
-    transform: (show: boolean | undefined) => show ?? this.defaultShowRequiredMarkers
+  public readonly hideRequiredMarkers = input(this.defaultHideRequiredMarkers, {
+    transform: (hide: boolean | undefined) => hide ?? this.defaultHideRequiredMarkers
   });
 
   /**

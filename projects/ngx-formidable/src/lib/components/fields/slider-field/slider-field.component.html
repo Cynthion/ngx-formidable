@@ -41,7 +41,7 @@
       [attr.disabled]="disabled() ? '' : null"
       [attr.tabindex]="readonly() || disabled() ? -1 : 0"
       [attr.aria-labelledby]="labelledBy"
-      [attr.aria-required]="showRequiredMarker() || null"
+      [attr.aria-required]="markRequired() || null"
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
       [attr.aria-readonly]="readonly() || null"

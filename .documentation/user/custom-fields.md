@@ -15,7 +15,7 @@ Register the component as `FORMIDABLE_FIELD` and it immediately gains:
 | Error messages                               | Adding `formidableFieldErrors`, with or without a decorator                |
 | Label and adornment                          | The surrounding `formidable-field-decorator`                               |
 | Prefix, suffix, hints                        | The same decorator                                                         |
-| Required marker                              | `showRequiredMarker`, inherited from the base                              |
+| Required marker                              | `markRequired`, inherited from the base                                    |
 | Focus and `autoFocus`                        | `focus()`, inherited from the base                                         |
 | Accessible names                             | `labelledBy`, `describedBy` and `isInvalid`, protected getters on the base |
 | Keyboard, outside-click and resize listeners | The base, through RxJS `fromEvent`                                         |
@@ -192,7 +192,7 @@ The template carries the focus handlers and the accessibility attributes. `label
   [attr.aria-valuemax]="max"
   [attr.aria-labelledby]="labelledBy"
   [attr.aria-describedby]="describedBy"
-  [attr.aria-required]="showRequiredMarker || null"
+  [attr.aria-required]="markRequired || null"
   [attr.aria-invalid]="isInvalid || null"
   [attr.aria-readonly]="readonly || null"
   [attr.aria-disabled]="disabled || null"
@@ -256,7 +256,7 @@ Exactly like a built-in field:
     name="pets"
     [min]="0"
     [max]="10"
-    [showRequiredMarker]="true"
+    [markRequired]="true"
     [ngModel]="model.pets" />
   <div formidableFieldLabel>Pets</div>
   <div formidableFieldHint>Arrow keys step it</div>

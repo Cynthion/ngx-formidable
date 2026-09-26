@@ -1,4 +1,9 @@
-import { FieldDefaultOptionMode, IFormidableActionOption, IFormidableOption } from '../models/formidable.model';
+import {
+  FieldDefaultOptionMode,
+  IFormidableActionOption,
+  IFormidableOption,
+  IFormidableOptionSource
+} from '../models/formidable.model';
 
 /** Merges an option field's `options` input with its projected option components, sorted if a `sortFn` is given. */
 export function combineFieldOptions(
@@ -9,6 +14,19 @@ export function combineFieldOptions(
   const combined = [...(inlineOptions ?? []), ...(projectedOptions ?? [])];
 
   return sortFn ? [...combined].sort(sortFn) : combined;
+}
+
+/**
+ * Reads every projected option inside an effect, so one changing in place triggers the effect to re-run.
+ */
+export function trackProjectedOptions(sources: readonly IFormidableOptionSource[]): void {
+  for (const source of sources) {
+    try {
+      source.option();
+    } catch {
+      // not bound yet
+    }
+  }
 }
 
 /** Puts a field's `defaultOption` in front of its options, or in their place — see `FieldDefaultOptionMode`. */

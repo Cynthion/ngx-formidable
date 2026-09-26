@@ -49,7 +49,7 @@ export class FormSettingsComponent {
     () => REVEAL_LABELS[this.store.appDefaults().revealOn ?? LIBRARY_DEFAULTS.revealOn]
   );
   protected readonly defaultMarkers = computed(() =>
-    (this.store.appDefaults().showRequiredMarkers ?? LIBRARY_DEFAULTS.showRequiredMarkers) ? 'Shown' : 'Hidden'
+    (this.store.appDefaults().hideRequiredMarkers ?? LIBRARY_DEFAULTS.hideRequiredMarkers) ? 'Hidden' : 'Shown'
   );
 
   /** A select's value for an optional option, `''` standing for "state nothing". */
@@ -62,7 +62,7 @@ export class FormSettingsComponent {
   }
 
   protected setRequiredMarkers(raw: string): void {
-    this.set('showRequiredMarkers', raw ? raw === 'true' : undefined);
+    this.set('hideRequiredMarkers', raw ? raw === 'true' : undefined);
   }
 
   protected set<K extends keyof PortalFormOptions>(key: K, value: PortalFormOptions[K]): void {

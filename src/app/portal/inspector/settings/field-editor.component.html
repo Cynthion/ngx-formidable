@@ -96,8 +96,8 @@
     <label class="pc-check">
       <input
         type="checkbox"
-        [checked]="f.decoration.showRequiredMarker"
-        (change)="setDecoration('showRequiredMarker', $any($event.target).checked)" />
+        [checked]="f.decoration.markRequired"
+        (change)="setDecoration('markRequired', $any($event.target).checked)" />
       Required Marker
     </label>
   </div>

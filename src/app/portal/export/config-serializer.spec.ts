@@ -26,9 +26,9 @@ describe('app config serializer', () => {
   });
 
   it('writes a boolean and a number as literals, not strings', () => {
-    const config = serializeAppConfig({ showRequiredMarkers: false, debounceMs: 0 });
+    const config = serializeAppConfig({ hideRequiredMarkers: false, debounceMs: 0 });
 
-    expect(config).toContain('showRequiredMarkers: false,');
+    expect(config).toContain('hideRequiredMarkers: false,');
     expect(config).toContain('debounceMs: 0');
   });
 

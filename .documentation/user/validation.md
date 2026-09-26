@@ -80,10 +80,10 @@ The `*` beside a label (configurable with `--formidable-label-required-marker`) 
 
 | Input                 | On       | Does                                              |
 | :-------------------- | :------- | :------------------------------------------------ |
-| `showRequiredMarker`  | a field  | Suffixes the marker to that field's label         |
-| `showRequiredMarkers` | `<form>` | Withholds the marker from every field on the form |
+| `markRequired`        | a field  | Suffixes the marker to that field's label         |
+| `hideRequiredMarkers` | `<form>` | Withholds the marker from every field on the form |
 
-Both are presentational and register no validator. `showRequiredMarker` also sets `aria-required`; the form-level switch hides the glyph only.
+Neither registers a validator. `markRequired` also sets `aria-required`; the form-level switch hides the glyph only.
 
 ---
 

@@ -88,19 +88,19 @@ describe('markup serializer', () => {
     expect(markup).not.toContain('position=');
     expect(markup).not.toContain('[panelPosition]');
     expect(markup).not.toContain('[revealOn]');
-    expect(markup).not.toContain('[showRequiredMarkers]');
+    expect(markup).not.toContain('[hideRequiredMarkers]');
   });
 
   it('states what the field and the form state themselves', () => {
     const definition = only(['cardNumber']);
     const markup = serializeDefinition({
       ...definition,
-      options: { ...definition.options, revealOn: 'dirty', showRequiredMarkers: false }
+      options: { ...definition.options, revealOn: 'dirty', hideRequiredMarkers: true }
     });
 
     expect(markup).toContain('position="outside"');
     expect(markup).toContain(`[revealOn]="'dirty'"`);
-    expect(markup).toContain('[showRequiredMarkers]="false"');
+    expect(markup).toContain('[hideRequiredMarkers]="true"');
   });
 
   it('binds a preset field to the handler the component declares', () => {
@@ -122,7 +122,7 @@ describe('markup import', () => {
     expect(parsed.name).toBe(source.name);
     expect(parsed.label).toBe(source.label);
     expect(parsed.placeholder).toBe(source.placeholder);
-    expect(parsed.decoration.showRequiredMarker).toBe(true);
+    expect(parsed.decoration.markRequired).toBe(true);
     expect(result.notes).toEqual([]);
   });
 

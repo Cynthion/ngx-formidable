@@ -118,8 +118,8 @@ export interface FormidableDefaults {
   panelPosition?: FormidablePanelPosition;
   /** The form's `revealOn`, and a field's without a form. The library's own: `touched`. */
   revealOn?: FormidableReveal;
-  /** The form's `showRequiredMarkers`, and a field's without a form. The library's own: `true`. */
-  showRequiredMarkers?: boolean;
+  /** The form's `hideRequiredMarkers`, and a field's without a form. The library's own: `false`. */
+  hideRequiredMarkers?: boolean;
   /** The form's `debounceMs`. The library's own: `0`. */
   debounceMs?: number;
 }
@@ -144,9 +144,9 @@ export interface IFormidableField<T = string | null> {
   readonly: Signal<boolean>;
   disabled: Signal<boolean>;
   /**
-   * Marks the field's label with the required marker. Presentational only.
+   * Marks the field required: suffixes the marker to its label and sets `aria-required`. Validates nothing.
    */
-  showRequiredMarker: Signal<boolean>;
+  markRequired: Signal<boolean>;
   value: T;
   /** Whether nothing is rendered where the value goes, so a label may rest there like a placeholder. */
   canLabelRest: Signal<boolean>;

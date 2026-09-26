@@ -17,7 +17,7 @@ import { InspectorStore } from '../../state/inspector.store';
 
 /** The defaults a field can state its own value for, and the one the form can. */
 type FieldKey = 'labelPosition' | 'prefixAlign' | 'suffixAlign' | 'panelPosition';
-type FormKey = 'revealOn' | 'showRequiredMarkers';
+type FormKey = 'revealOn' | 'hideRequiredMarkers';
 
 /** One default: what it offers, and what the library falls back to without it. */
 interface DefaultControl<K extends FieldKey | FormKey> {
@@ -66,11 +66,11 @@ const FORM_CONTROLS: readonly DefaultControl<FormKey>[] = [
     help: 'When the messages appear, on every form — and on a field that has no form.'
   },
   {
-    key: 'showRequiredMarkers',
+    key: 'hideRequiredMarkers',
     label: 'Required Markers',
     choices: [
-      ['true', 'Shown'],
-      ['false', 'Hidden']
+      ['false', 'Shown'],
+      ['true', 'Hidden']
     ],
     libraryDefault: 'Shown',
     help: 'A field still has to ask for its own marker.'
@@ -125,7 +125,7 @@ export class AppDefaultsComponent {
   }
 
   protected set(key: FieldKey | FormKey, raw: string): void {
-    const value = raw === '' ? undefined : key === 'showRequiredMarkers' ? raw === 'true' : raw;
+    const value = raw === '' ? undefined : key === 'hideRequiredMarkers' ? raw === 'true' : raw;
 
     this.store.updateAppDefaults({ [key]: value } as FormidableDefaults);
   }

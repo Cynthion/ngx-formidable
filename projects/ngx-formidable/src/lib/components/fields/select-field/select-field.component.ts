@@ -13,7 +13,7 @@ import {
   viewChild
 } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { applyDefaultOption, combineFieldOptions } from '../../../helpers/option.helpers';
+import { applyDefaultOption, combineFieldOptions, trackProjectedOptions } from '../../../helpers/option.helpers';
 import {
   FieldDecoratorLayout,
   FieldDefaultOptionMode,
@@ -76,7 +76,7 @@ export class SelectFieldComponent extends BaseFieldDirective<string | null> impl
       this.defaultOption();
       this.defaultOptionMode();
       this.sortFn();
-      this.optionComponents();
+      trackProjectedOptions(this.optionComponents());
 
       untracked(() => queueMicrotask(() => this.onOptionsChanged()));
     });

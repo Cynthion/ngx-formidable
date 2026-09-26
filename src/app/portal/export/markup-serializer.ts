@@ -21,8 +21,8 @@ export function serializeDefinition(definition: PortalFormDefinition): string {
   // Stated only where the form states them: absent, the app default applies, which is the App Config's.
   if (options.revealOn) lines.push(`  [revealOn]="'${options.revealOn}'"`);
   lines.push(`  [ngFormOptions]="{ updateOn: '${options.updateOn}' }"`);
-  if (options.showRequiredMarkers !== undefined) {
-    lines.push(`  [showRequiredMarkers]="${options.showRequiredMarkers}"`);
+  if (options.hideRequiredMarkers !== undefined) {
+    lines.push(`  [hideRequiredMarkers]="${options.hideRequiredMarkers}"`);
   }
   lines.push('  (formValueChange)="model.set($event)">');
 
@@ -136,7 +136,7 @@ function serializeField(spec: PortalFieldSpec, definition: PortalFormDefinition,
   if (spec.state.readonly) lines.push('    [readonly]="true"');
   if (spec.state.disabled) lines.push('    [disabled]="true"');
   if (spec.state.autoFocus) lines.push('    [autoFocus]="true"');
-  if (spec.decoration.showRequiredMarker) lines.push('    [showRequiredMarker]="true"');
+  if (spec.decoration.markRequired) lines.push('    [markRequired]="true"');
 
   lines.push(`    [ngModel]="${modelAccess(groupName ? `${groupName}.${spec.name}` : spec.name)}"`);
 

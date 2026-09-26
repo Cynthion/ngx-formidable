@@ -317,10 +317,11 @@ export abstract class BaseFieldDirective<T = string | null>
   public readonly disabled = model(false);
 
   /**
-   * Suffixes the required marker to the label. Presentational only — nothing is inferred from a validator,
-   * so this and the rules are the consumer's to keep in step. The form can switch all of them off at once.
+   * Marks the field required: suffixes the marker to the label and sets `aria-required`. Validates nothing —
+   * nothing is inferred from a validator either, so this and the rules are the consumer's to keep in step. The
+   * form can hide every marker at once.
    */
-  public readonly showRequiredMarker = input(false);
+  public readonly markRequired = input(false);
 
   /** Focuses the field once it has rendered. Does not open a panel. */
   public readonly autoFocus = input(false);

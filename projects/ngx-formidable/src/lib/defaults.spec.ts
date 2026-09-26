@@ -71,7 +71,7 @@ class ScopedHostComponent {}
     <form
       formidableForm
       [revealOn]="undefined"
-      [showRequiredMarkers]="undefined"
+      [hideRequiredMarkers]="undefined"
       [debounceMs]="undefined">
       <formidable-field-decorator>
         <formidable-input-field name="a" />
@@ -113,7 +113,7 @@ class UndefinedHostComponent {}
     <form
       formidableForm
       revealOn="always"
-      [showRequiredMarkers]="true"
+      [hideRequiredMarkers]="false"
       [debounceMs]="10">
       <formidable-field-decorator>
         <formidable-input-field name="a" />
@@ -155,7 +155,7 @@ class ExplicitHostComponent {}
     <formidable-field-decorator>
       <formidable-input-field
         name="a"
-        [showRequiredMarker]="true" />
+        [markRequired]="true" />
       <div formidableFieldLabel>A</div>
     </formidable-field-decorator>
   `
@@ -188,7 +188,7 @@ const DEFAULTS: Required<FormidableDefaults> = {
   suffixAlign: 'value',
   panelPosition: 'sheet',
   revealOn: 'dirty',
-  showRequiredMarkers: false,
+  hideRequiredMarkers: true,
   debounceMs: 250
 };
 
@@ -201,7 +201,7 @@ interface Resolved {
   autocompletePanel: string;
   datePanel: string;
   revealOn: string;
-  showRequiredMarkers: boolean;
+  hideRequiredMarkers: boolean;
   debounceMs: number;
 }
 
@@ -238,7 +238,7 @@ describe('app defaults', () => {
       autocompletePanel: get(AutocompleteFieldComponent).panelPosition(),
       datePanel: get(DateFieldComponent).panelPosition(),
       revealOn: form.revealOn(),
-      showRequiredMarkers: form.showRequiredMarkers(),
+      hideRequiredMarkers: form.hideRequiredMarkers(),
       debounceMs: form.debounceMs()
     };
   }
@@ -251,7 +251,7 @@ describe('app defaults', () => {
     autocompletePanel: 'full',
     datePanel: 'right',
     revealOn: 'touched',
-    showRequiredMarkers: true,
+    hideRequiredMarkers: false,
     debounceMs: 0
   };
 
@@ -263,7 +263,7 @@ describe('app defaults', () => {
     autocompletePanel: 'sheet',
     datePanel: 'sheet',
     revealOn: 'dirty',
-    showRequiredMarkers: false,
+    hideRequiredMarkers: true,
     debounceMs: 250
   };
 
@@ -307,7 +307,7 @@ describe('app defaults', () => {
       autocompletePanel: 'left',
       datePanel: 'left',
       revealOn: 'always',
-      showRequiredMarkers: true,
+      hideRequiredMarkers: false,
       debounceMs: 10
     });
   }));
