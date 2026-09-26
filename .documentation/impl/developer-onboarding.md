@@ -70,7 +70,7 @@ gh auth status
 ## Credentials
 
 - **Installing**: needs no credential. The package and all of its dependencies are public on npm.
-- **Publishing**: needs `npm login` as an owner of the `@cynthion` scope. The release steps are in [`impl/definition-of-done.md`](definition-of-done.md).
+- **Publishing**: needs `npm login` as an owner of the `@cynthion` scope. The release steps are in [`impl/releasing.md`](releasing.md).
 - **Context7**: an API key for the `context7` MCP server, see below.
 
 ---

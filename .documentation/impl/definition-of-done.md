@@ -82,6 +82,6 @@ Every command runs from the repository root.
 
 - **Branches**: `main` is production. `feature/*` holds work in progress; its pull request runs the same CI gates and publishes nothing.
 - **Portal**: A push to `main` deploys the portal to GitHub Pages through `deploy.yml`.
-- **Library**: Publishing is manual — `npm run build:lib`, then `npm run publish:lib` — and needs `npm login` as an owner of the `@cynthion` scope. The package layout is in [`tech/architecture.md`](../tech/architecture.md).
+- **Library**: Publishing is manual, from `main`. The steps are in [`impl/releasing.md`](releasing.md). The package layout is in [`tech/architecture.md`](../tech/architecture.md).
 - **Versioning**: The library version lives in `projects/ngx-formidable/package.json`. Nothing bumps it automatically.
 - **Dependencies**: Renovate proposes updates once a month; Angular majors stay an `ng update`. See [`impl/renovate.md`](renovate.md).

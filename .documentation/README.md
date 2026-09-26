@@ -48,6 +48,7 @@ For whoever works the repository. Contains technical documentation of the setup 
 | [`impl/definition-of-done.md`](impl/definition-of-done.md)     | Definition of Done                                      |
 | [`impl/developer-onboarding.md`](impl/developer-onboarding.md) | Toolchain, credentials, install, scripts                |
 | [`impl/documentation.md`](impl/documentation.md)               | Documentation style and authoring guide                 |
+| [`impl/releasing.md`](impl/releasing.md)                       | Publishing the library to npm                           |
 | [`impl/renovate.md`](impl/renovate.md)                         | Dependency updates: groups, Angular majors, peer ranges |
 | [`impl/styling.md`](impl/styling.md)                           | Style layers, theming, where styles live                |
 | [`impl/testing.md`](impl/testing.md)                           | Testing strategy, helpers first                         |
