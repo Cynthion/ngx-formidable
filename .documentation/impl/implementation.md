@@ -17,14 +17,10 @@ The source of truth for outstanding work. [`impl/backlog.md`](backlog.md) is the
 
 ## Library Phases
 
-### Signal Forms
-
 ### Documentation Update
 
 - Check the whole documentation against the updated convention.
 - Update the whole source code comments against the updated convention. (Also, it is outdated in a lot of places. Library is now Angular v22+)
-
-### Architecture Review
 
 ### Phase 17 — Release
 
