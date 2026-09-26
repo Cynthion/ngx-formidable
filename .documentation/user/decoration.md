@@ -16,14 +16,14 @@
 </formidable-field-decorator>
 ```
 
-| Slot                            | Holds                                       | Options                               |
-| :------------------------------ | :------------------------------------------ | :------------------------------------ |
-| `formidableFieldLabel`          | The field's label                           | `position`, six values                |
-| `formidableFieldLabelAdornment` | Anything beside the label                   | —                                     |
-| `formidableFieldPrefix`         | Content at the field's leading edge         | `align`: `center` or `value`          |
-| `formidableFieldSuffix`         | Content at the field's trailing edge        | `align`: `center` or `value`          |
-| `formidableFieldHint`           | Always-visible support text below the field | `align`: `start`, `center` or `end`   |
-| `formidableFieldErrors`         | Validation messages, on the field itself    | `revealOn` — see `user/validation.md` |
+| Slot                            | Holds                                       | Options                                                |
+| :------------------------------ | :------------------------------------------ | :----------------------------------------------------- |
+| `formidableFieldLabel`          | The field's label                           | `position`, six values                                 |
+| `formidableFieldLabelAdornment` | Anything beside the label                   | —                                                      |
+| `formidableFieldPrefix`         | Content at the field's leading edge         | `align`: `center` or `value`                           |
+| `formidableFieldSuffix`         | Content at the field's trailing edge        | `align`: `center` or `value`                           |
+| `formidableFieldHint`           | Always-visible support text below the field | `align`: `start`, `center` or `end`                    |
+| `formidableFieldErrors`         | Validation messages, on the field itself    | `revealOn` — see [`user/validation.md`](validation.md) |
 
 A field works without a decorator. It then has no label, no adornments, no hints and no invalid styling; `formidableFieldErrors` still renders its messages beside the control.
 
@@ -93,7 +93,7 @@ The `vertical` layout stacks its options inside the field's box, which leaves a 
 </div>
 ```
 
-To set one position for every label in an app, see `user/getting-started.md`. The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every position on every field that honours it, empty and filled.
+To set one position for every label in an app, see [`user/getting-started.md`](getting-started.md). The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every position on every field that honours it, empty and filled.
 
 Four rules follow from the table:
 
@@ -132,7 +132,7 @@ An adornment decorates the label, so it lives and dies with the label's row: eve
 - **The Glyph Is A Variable.** `--formidable-label-required-marker` holds it, so a theme swaps `*` for a word — `' (required)'` — without touching markup.
 - **It Inherits The Label's Colour**, and so follows every field state with it.
 - **It Is Never What Gets Cut Off.** The marker is a sibling of the projected label, so a label too long to fit ellipsizes its own text and the marker survives.
-- **It Validates Nothing.** It is presentational, and it sets `aria-required`. Which validator decides the field is invalid stays entirely yours — see `user/validation.md`.
+- **It Validates Nothing.** It is presentational, and it sets `aria-required`. Which validator decides the field is invalid stays entirely yours — see [`user/validation.md`](validation.md).
 
 ---
 
@@ -246,4 +246,13 @@ A hint is always-visible support text on a row below the field and above the err
 
 The decorator mirrors the field's state onto its own host as classes — `is-readonly`, `is-disabled`, `is-focused`, `is-invalid`, `label-resting`, `label-inside`, `has-in-field-toggle`, `has-open-panel`, `has-open-sheet` — so a consumer stylesheet can hang off any of them.
 
-Each state is also a set of colour remaps rather than a set of property declarations, which is why a theme changes the invalid or disabled look by setting colours and not by restating rules. The full variable list is in `user/theme-reference.md`; how the decorator resolves the state is in `tech/decoration.md`.
+Each state is also a set of colour remaps rather than a set of property declarations, which is why a theme changes the invalid or disabled look by setting colours and not by restating rules. The full variable list is in [`user/theme-reference.md`](theme-reference.md); how the decorator resolves the state is in [`tech/decoration.md`](../tech/decoration.md).
+
+---
+
+## Related
+
+- [`user/fields.md`](fields.md) — options, panels, keyboard, dates and times, masking, focus
+- [`user/theming.md`](theming.md) — the default theme, how theming works, and how to find your own
+- [`user/components.md`](components.md) — every public component, directive, token and type
+- [`user/getting-started.md`](getting-started.md) — install, wiring, the stylesheet, a first form

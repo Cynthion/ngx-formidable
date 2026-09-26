@@ -44,6 +44,9 @@ jobs:
       - name: Check Token Descriptions
         run: npm run docs:check
 
+      - name: Lint Markdown
+        run: npm run docs:lint
+
       # The library build is also the type and template check — there is no standalone typecheck script.
       - name: Build Library
         run: npm run build:lib
@@ -51,8 +54,8 @@ jobs:
       - name: Test Library
         run: npm test -- ngx-formidable --watch=false --browsers=ChromeHeadless
 
-      - name: Test Demo
+      - name: Test Portal
         run: npm test -- ngx-formidable-portal --watch=false --browsers=ChromeHeadless
 
-      - name: Build Demo
+      - name: Build Portal
         run: npm run build

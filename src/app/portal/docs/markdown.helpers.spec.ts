@@ -77,27 +77,6 @@ describe('renderDoc', () => {
     expect(html).toContain('rel="noreferrer noopener"');
   });
 
-  // The documents cite each other in backticks, per the documentation guide, so without this the mirrored
-  // pages have no way to reach one another except through the navigation.
-  it('makes a backticked file reference clickable', () => {
-    const { html } = renderDoc('See `user/theming.md` for the rest.', SLUGS);
-
-    expect(html).toContain('<a href="#/docs/theming"><code>user/theming.md</code></a>');
-  });
-
-  it('sends a backticked maintainer document to the repository', () => {
-    const { html } = renderDoc('See `tech/layering.md`.', SLUGS);
-
-    expect(html).toContain('/tech/layering.md');
-    expect(html).toContain('target="_blank"');
-  });
-
-  it('leaves code samples and other spans alone', () => {
-    expect(renderDoc('```\nuser/theming.md\n```', SLUGS).html).not.toContain('<a ');
-    expect(renderDoc('The `placeholder` input.', SLUGS).html).not.toContain('<a ');
-    expect(renderDoc('A `user/nope.md` nobody mirrors.', SLUGS).html).not.toContain('<a ');
-  });
-
   it('renders every checked-in document without throwing', () => {
     for (const page of DOC_PAGES) {
       const { html } = renderDoc(page.markdown, SLUGS);

@@ -45,6 +45,16 @@
   "less.validate": true,
   "scss.validate": false,
 
+  /* Markdown Validation */
+  "markdown.validate.enabled": true,
+  "markdown.validate.fileLinks.enabled": "error",
+  "markdown.validate.fragmentLinks.enabled": "error",
+  "markdown.validate.referenceLinks.enabled": "error",
+
+  /* Markdown Lint */
+  /* Rules in .markdownlint.json, exclusions in .markdownlint-cli2.jsonc */
+  "markdownlint.lintWorkspaceGlobs": ["**/*.md", "!**/node_modules/**", "!.plan/**", "!.research/**"],
+
   // Peacock
   "peacock.color": "#dd0531",
   "peacock.affectActivityBar": false,

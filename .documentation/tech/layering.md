@@ -13,12 +13,12 @@ Two words, two scopes, no overlap. A consumer only ever meets a `z-index`; the l
 
 A field is an **atom**: one stacking context holding everything it renders. Whatever the consumer stacks around it, the atom's contents stay ordered relative to each other and none of them can escape.
 
-| Case             | Atom root                                             | Set by                                 |
+| Case             | Atom Root                                             | Set By                                 |
 | :--------------- | :---------------------------------------------------- | :------------------------------------- |
 | With a decorator | `formidable-field-decorator` host                     | `field-atom` in the decorator's SCSS   |
 | Without one      | the field component's own host, via `.is-undecorated` | `field-atom-undecorated`, panel fields |
 
-`BaseFieldDirective` sets `is-undecorated` from the optional `FieldDecoratorComponent` injection it already had. Only the fields with a panel apply the undecorated rules — nothing else a bare field renders leaves its own box.
+`BaseFieldDirective` sets `is-undecorated` from its optional `FieldDecoratorComponent` injection. Only the fields with a panel apply the undecorated rules — nothing else a bare field renders leaves its own box.
 
 **`isolation: isolate`, never `transform`.** Both open a stacking context, but `transform` also makes the element the containing block for `position: fixed` — which would pin a sheet to the field instead of to the viewport.
 
@@ -26,7 +26,7 @@ A field is an **atom**: one stacking context holding everything it renders. What
 
 Private ordinals, inside the atom. Small on purpose: they order four things against each other and mean nothing outside.
 
-| Layer                            | Value | Must out-paint                                                                           |
+| Layer                            | Value | Must Out-paint                                                                           |
 | :------------------------------- | ----: | :--------------------------------------------------------------------------------------- |
 | `$formidable-layer-label`        |   `1` | the field's own box — resting/floating labels and prefix/suffix adornments sit over it   |
 | `$formidable-layer-panel`        |   `2` | the labels and adornments an open panel covers                                           |
@@ -37,7 +37,7 @@ Private ordinals, inside the atom. Small on purpose: they order four things agai
 
 The atom itself carries no `z-index` while closed — that is what keeps a resting field out of the consumer's stack entirely. While a panel is open it has to cover what surrounds it, so the whole atom rises, and only then.
 
-| State class      | Layer rises to               | When                                        |
+| State Class      | Layer Rises To               | When                                        |
 | :--------------- | :--------------------------- | :------------------------------------------ |
 | `has-open-panel` | `--formidable-panel-z-index` | `isPanelOpen`, any anchored `panelPosition` |
 | `has-open-sheet` | `--formidable-sheet-z-index` | `isPanelOpen` and `panelPosition="sheet"`   |

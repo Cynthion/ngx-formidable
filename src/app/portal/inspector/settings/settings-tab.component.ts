@@ -35,7 +35,7 @@ const SCOPES: readonly { id: FieldScope; label: string; lede: string }[] = [
  * puts the answer to "how much does this change?" on screen rather than in prose.
  *
  * The three positions are the three kinds of state there are, so nothing is filed under a scope it does not
- * belong to. `impl/portal.md` carries the reasoning.
+ * belong to. `tech/portal.md` carries the reasoning.
  */
 @Component({
   selector: 'portal-settings-tab',

@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "angular-cli": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["ng", "mcp", "--read-only"]
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@1.0.31"],
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless", "--isolated", "--browser=chromium"]
+    },
+    "ux-patterns": {
+      "type": "http",
+      "url": "https://mcp.uxpatterns.dev"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  // Rule configuration lives in .markdownlint.json. This file only excludes files that
+  // must not be linted, and is read by both markdownlint-cli2 and the VS Code extension.
+  // Relative links and heading anchors are checked by markdownlint-rule-relative-links.
+  "globs": ["**/*.md"],
+  "customRules": ["markdownlint-rule-relative-links"],
+  "ignores": [
+    "**/node_modules/**",
+    ".angular/**",
+    ".plan/**",
+    ".research/**",
+    "dist/**",
+    "projects/ngx-formidable/README.md"
+  ]
+}

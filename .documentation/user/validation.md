@@ -1,7 +1,6 @@
 # Validation
 
-The main `@cynthion/ngx-formidable` package has no validation library in it. It renders fields, themes them, and shows whatever errors it finds on Angular's own `AbstractControl.errors`.
-So any validator works, including none:
+The main `@cynthion/ngx-formidable` package has no validation library in it. It renders fields, themes them, and shows whatever errors it finds on Angular's own `AbstractControl.errors`. So any validator works, including none:
 
 - Vest (use `@cynthion/ngx-formidable/vest`)
 - zod
@@ -14,21 +13,21 @@ So any validator works, including none:
 
 The library prescribes no model type. `formValue` takes any object, and a validator reads whatever it is handed. The one contract is Angular's: `NgForm` builds its value from the control tree, so the model follows that tree.
 
-| In The Model    | Comes From                                                       |
-| :-------------- | :--------------------------------------------------------------- |
-| A key           | A control's `name`                                               |
-| A nested object | An `ngModelGroup` around its controls                            |
-| A value's type  | The field that writes it — its **Value** in `user/components.md` |
+| In The Model    | Comes From                                                                        |
+| :-------------- | :-------------------------------------------------------------------------------- |
+| A key           | A control's `name`                                                                |
+| A nested object | An `ngModelGroup` around its controls                                             |
+| A value's type  | The field that writes it — its **Value** in [`user/components.md`](components.md) |
 
 A target is a path into the same tree, so a rule whose target names no control never runs.
 
-Everything beyond that is convention — `DeepPartial`, the shape, one `*.form.ts` per form — see [The Convention](#the-convention). The Studio's `Copy Component` generates it for the form on its stage, see `user/studio.md`.
+Everything beyond that is convention — `DeepPartial`, the shape, one `*.form.ts` per form — see [The Convention](#the-convention). The Studio's `Copy Component` generates it for the form on its stage, see [`user/studio.md`](studio.md).
 
 ## Rule Targets
 
 Every rule has a **target** it reports on.
 
-| Target           | Written as                            | Called a            | Reports on |
+| Target           | Written As                            | Called A            | Reports On |
 | :--------------- | :------------------------------------ | :------------------ | :--------- |
 | A single control | `'firstName'`, `'passwords.password'` | **field rule**      | that field |
 | A nested object  | `'passwords'`                         | **group rule**      | that group |
@@ -40,7 +39,7 @@ A target is what your validator receives as its second argument, and what `error
 
 ## The Ways In
 
-| Approach                        | What you write                                             | When to use                                |
+| Approach                        | What You Write                                             | When To Use                                |
 | :------------------------------ | :--------------------------------------------------------- | :----------------------------------------- |
 | Angular validators              | Nothing — `required`, `minlength` and friends already work | Simple field rules                         |
 | A validator                     | One class implementing `IFormidableValidator`              | Group rules, whole-form rules, schemas     |
@@ -84,8 +83,7 @@ The `*` beside a label (configurable with `--formidable-label-required-marker`) 
 | `showRequiredMarker`  | a field  | Suffixes the marker to that field's label         |
 | `showRequiredMarkers` | `<form>` | Withholds the marker from every field on the form |
 
-Both are presentational and register no validator.
-`showRequiredMarker` also sets `aria-required`; the form-level switch hides the glyph only.
+Both are presentational and register no validator. `showRequiredMarker` also sets `aria-required`; the form-level switch hides the glyph only.
 
 ---
 
@@ -93,7 +91,7 @@ Both are presentational and register no validator.
 
 Two independent settings, and most forms want a mismatch between them.
 
-| Axis         | Question                     | Set with                                     | Default   |
+| Axis         | Question                     | Set With                                     | Default   |
 | :----------- | :--------------------------- | :------------------------------------------- | :-------- |
 | **Run**      | When does the validator run? | Angular's `ngFormOptions` / `ngModelOptions` | `change`  |
 | **Reveal**   | When do the messages appear? | `revealOn`                                   | `touched` |
@@ -132,7 +130,7 @@ Angular owns this one, so there is no library input for it. `ngFormOptions` on t
 
 A validator never runs on a schedule of its own. It runs because the control **committed** its value, which is the same moment the model updates, so `updateOn` moves the value and both the sync and the async validators together.
 
-| Value    | The control commits, and so validates          | Until then                                                               |
+| Value    | The Control Commits, And So Validates          | Until Then                                                               |
 | :------- | :--------------------------------------------- | :----------------------------------------------------------------------- |
 | `change` | On every keystroke, and every other value edit | Nothing waits. This is Angular's default and the library's.              |
 | `blur`   | When the control loses focus                   | What the user typed sits in the DOM only                                 |
@@ -169,7 +167,7 @@ A field takes it on `formidableFieldErrors`, which is the directive that renders
 
 Each value names a state Angular already tracks, so the wording is Angular's:
 
-| Value       | Messages appear once         | Which means                                                          | Scope       | Cleared by                     |
+| Value       | Messages Appear Once         | Which Means                                                          | Scope       | Cleared By                     |
 | :---------- | :--------------------------- | :------------------------------------------------------------------- | :---------- | :----------------------------- |
 | `touched`   | `control.touched` is `true`  | The user has focused the control and left it again, at least once    | Per control | `reset()`, `markAsUntouched()` |
 | `dirty`     | `control.dirty` is `true`    | The control's value has been changed since it was set, at least once | Per control | `reset()`, `markAsPristine()`  |
@@ -273,10 +271,11 @@ import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/ve
 
 ### The Convention
 
-One `*.form.ts` per form holds its model, shape and suite. `user/getting-started.md` builds one in full, and the Studio's `Copy Component` generates one. Notes on the pieces:
+One `*.form.ts` per form holds its model, shape and suite. [`user/getting-started.md`](getting-started.md) builds one in full, and the Studio's `Copy Component` generates one. Notes on the pieces:
 
 - **`only(field)`** is required. The form directive asks the suite about one target at a time, and `only` is what keeps a run from reporting every other target too.
 - **`FIELD_NAMES`** keeps the target, the control `name` and the model key from drifting apart:
+
   ```ts
   export const USER_FORM_FIELD_NAMES = { name: 'name' } as const;
 
@@ -284,12 +283,15 @@ One `*.form.ts` per form holds its model, shape and suite. `user/getting-started
     enforce(model[USER_FORM_FIELD_NAMES.name]).isNotBlank();
   });
   ```
+
 - **`formShape`** is a dev-mode typo check, not a validator. It has no runtime cost in production.
 - **Messages are translation keys**, resolved by `FORMIDABLE_ERROR_TRANSLATOR`.
 - **Group rules** target the group (`test('passwords', …)`), usually inside `omitWhen`. Pair them with `dependentFields` so changing one member re-runs the rule:
+
   ```ts
   dependentFields = { 'passwords.password': ['passwords.confirmPassword'] };
   ```
+
 - **Whole-form rules** use `test(WHOLE_FORM, …)` and need `formidableValidateWholeForm` on the `<form>`.
 - **`debounceMs`** sits on the `<form>` and governs every target on it.
 
@@ -412,3 +414,12 @@ Two tokens sit between `control.errors` and the text on screen.
 ```
 
 When the messages appear is a separate setting from when the validator runs: see [Validation Timing](#validation-timing).
+
+---
+
+## Related
+
+- [`user/getting-started.md`](getting-started.md) — install, wiring, the stylesheet, a first form
+- [`user/decoration.md`](decoration.md) — labels, adornments, prefixes, suffixes, hints, required marker
+- [`user/custom-fields.md`](custom-fields.md) — building a field, an option or a validator of your own
+- [`user/components.md`](components.md) — every public component, directive, token and type

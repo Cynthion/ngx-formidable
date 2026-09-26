@@ -47,5 +47,12 @@ testem.log
 .DS_Store
 Thumbs.db
 
+# ngx-formidable
 projects/ngx-formidable/LICENSE
 projects/ngx-formidable/README.md
+
+# Claude Code
+.claude/settings.local.json
+.research/
+.plan/
+.playwright-mcp/
