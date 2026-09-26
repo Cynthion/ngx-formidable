@@ -71,9 +71,9 @@ Step 2 is what keeps the target itself current. A field's or a group's own valid
 
 ## The Two Timing Axes
 
-**Run** is when the validator runs, **reveal** is when the messages appear, and they are separate mechanisms with separate owners. Consumer-facing reference: `user/validation.md`.
+**Run** is when the validator runs, **reveal** is when the messages appear, and they are separate mechanisms with separate owners. Consumer-facing reference: [`user/validation.md`](../user/validation.md).
 
-| Axis     | Owner   | Mechanism    | Read by                        |
+| Axis     | Owner   | Mechanism    | Read By                        |
 | :------- | :------ | :----------- | :----------------------------- |
 | Run      | Angular | `updateOn`   | `AbstractControl`              |
 | Reveal   | Library | `revealOn`   | `FieldErrorsComponent.invalid` |
@@ -96,7 +96,7 @@ A touch is not cosmetic. Under `blur` it is the commit, and under `submit` it pr
 
 There are two causes, and they differ in one thing only:
 
-| Cause        | Raised by                                      | Reports the value | Touches | Dirties |
+| Cause        | Raised By                                      | Reports The Value | Touches | Dirties |
 | :----------- | :--------------------------------------------- | :---------------: | :-----: | :-----: |
 | `write`      | `writeValue`                                   |        No         |   No    |   No    |
 | `correction` | A reconcile, a clamped number, a masked string |        Yes        |   No    |   No    |
@@ -107,7 +107,7 @@ Angular raises its pending dirty flag on every change a value accessor reports a
 
 ### Reveal Resolution And Repaint
 
-`FieldErrorsComponent` resolves its own field's `revealOn` first, then the form's, then `touched`. `FieldErrorsDirective` pushes the field's value and drives the repaint, because none of the state the component reads is signal-backed: `AbstractControl.errors`, `touched` and `dirty` are plain properties, `NgForm.submitted` reads through `untracked`, and the form's `revealOn` is a signal on a directive the component does not own. All three join one stream, and each emission calls `refresh()` — which bumps the revision the component's `errors` and `invalid` computeds read. See `tech/decoration.md` for what that one signal then reaches.
+`FieldErrorsComponent` resolves its own field's `revealOn` first, then the form's, then `touched`. `FieldErrorsDirective` pushes the field's value and drives the repaint, because none of the state the component reads is signal-backed: `AbstractControl.errors`, `touched` and `dirty` are plain properties, `NgForm.submitted` reads through `untracked`, and the form's `revealOn` is a signal on a directive the component does not own. All three join one stream, and each emission calls `refresh()` — which bumps the revision the component's `errors` and `invalid` computeds read. See [`tech/decoration.md`](decoration.md) for what that one signal then reaches.
 
 ### Debounce
 
@@ -152,7 +152,7 @@ Plus `zod` in `peerDependencies` marked optional, and a `tsconfig.json` path ali
 
 ## Whole-Form Rules
 
-`WHOLE_FORM` is the target a rule about the form itself reports under — the third of the three targets in `user/validation.md`. It is the library's own convention, so it lives in `validation.model.ts` and `getAllFormErrors` keys the form's own messages by it.
+`WHOLE_FORM` is the target a rule about the form itself reports under — the third of the three targets in [`user/validation.md`](../user/validation.md). It is the library's own convention, so it lives in `validation.model.ts` and `getAllFormErrors` keys the form's own messages by it.
 
 `createAsyncValidator` deliberately skips its `set(model, target, value)` step for `WHOLE_FORM`: that target addresses the whole model rather than a path within it, so writing the form's value under a `wholeForm` key would hand the validator a key the model does not have. It needs no patching anyway — by the time the root form validates, its own value has been recomputed, so the live values in the assembled model are already current. See **The Model A Rule Sees**.
 

@@ -2,20 +2,20 @@
 
 How the library's fields behave: what every field shares, how options are supplied, where a panel opens, what the keyboard does, and how masking is configured.
 
-Which field to pick, and the full input list for each, is in `user/components.md`. What goes _around_ a field — label, prefix, suffix, hint, required marker — is in `user/decoration.md`.
+Which field to pick, and the full input list for each, is in [`user/components.md`](components.md). What goes _around_ a field — label, prefix, suffix, hint, required marker — is in [`user/decoration.md`](decoration.md).
 
 ## What Every Field Shares
 
 Every field is a `ControlValueAccessor`, so it binds with `ngModel` and carries the same base inputs.
 
-| Input                | Does                                                                           |
-| :------------------- | :----------------------------------------------------------------------------- |
-| `name`               | The control name, the model key and the validation target, in one string       |
-| `placeholder`        | Placeholder text. A field with one leaves an `inside` label nothing to rest in |
-| `readonly`           | Blocks edits, stays focusable, keeps its focus ring                            |
-| `disabled`           | Blocks edits and leaves the tab order                                          |
-| `showRequiredMarker` | Marks the label and sets `aria-required` — see `user/decoration.md`            |
-| `autoFocus`          | Focuses the field once its view is ready                                       |
+| Input                | Does                                                                                 |
+| :------------------- | :----------------------------------------------------------------------------------- |
+| `name`               | The control name, the model key and the validation target, in one string             |
+| `placeholder`        | Placeholder text. A field with one leaves an `inside` label nothing to rest in       |
+| `readonly`           | Blocks edits, stays focusable, keeps its focus ring                                  |
+| `disabled`           | Blocks edits and leaves the tab order                                                |
+| `showRequiredMarker` | Marks the label and sets `aria-required` — see [`user/decoration.md`](decoration.md) |
+| `autoFocus`          | Focuses the field once its view is ready                                             |
 
 And the same outputs: `valueChanged` / `focusChanged` as signal outputs, `valueChange$` / `focusChange$` as observables.
 
@@ -134,7 +134,7 @@ Three things that recipe relies on:
 
 `dropdown-field`, `autocomplete-field` and `date-field` render their content in a panel, placed by `panelPosition`.
 
-| Value   | Places the panel                                                               |
+| Value   | Places The Panel                                                               |
 | :------ | :----------------------------------------------------------------------------- |
 | `left`  | Anchored to the field's left edge                                              |
 | `right` | Anchored to the field's right edge                                             |
@@ -205,7 +205,7 @@ Both masked fields parse and format through one `unicodeTokenFormat`, a date-fns
 
 A focused empty field always shows underscore slots, because the mask's caret arithmetic only recognises its own placeholder character.
 
-The date field passes a set of options straight through to Pikaday — `minDate`, `maxDate`, `firstDay`, `i18n`, `yearRange`, `disableWeekends`, `disableDayFn` and the rest, listed in `user/components.md`. Each is applied to the calendar when it changes at runtime.
+The date field passes a set of options straight through to Pikaday — `minDate`, `maxDate`, `firstDay`, `i18n`, `yearRange`, `disableWeekends`, `disableDayFn` and the rest, listed in [`user/components.md`](components.md). Each is applied to the calendar when it changes at runtime.
 
 **The Toggle Icon.** The date field's panel toggle draws a CSS arrow by default. The library ships no icons, so to replace it, project your own:
 
@@ -225,7 +225,7 @@ The toggle centres what is projected; its size, colour and hover feedback are yo
 
 `input-field` and `textarea-field` mask through ngx-mask, and take almost all of its options. Config resolves in three layers: a per-field `maskConfig` overrides the app-wide defaults, which override the library's own.
 
-**Per Field**
+### Per Field
 
 ```html
 <formidable-input-field
@@ -237,7 +237,7 @@ The toggle centres what is projected; its size, colour and hover feedback are yo
 
 Set `mask` when you want masking; `maskConfig` is optional on top of it.
 
-**App-Wide**
+### App-Wide
 
 ```ts
 bootstrapApplication(AppComponent, {
@@ -278,3 +278,12 @@ A mask renders a `_` slot for every character not yet typed. Those slots are not
 So keyboard focus on `12/3_/____` selects `12/3` and stops, and a click anywhere in the empty tail of `079 ___ __ __` puts the caret behind the `9`, not out among the slots.
 
 `Arrow Left` and `Arrow Right` always move the caret. Select all covers the text that has been typed and never the slots, so it selects nothing in a field holding only slots.
+
+---
+
+## Related
+
+- [`user/components.md`](components.md) — every public component, directive, token and type
+- [`user/decoration.md`](decoration.md) — labels, adornments, prefixes, suffixes, hints, required marker
+- [`user/custom-fields.md`](custom-fields.md) — building a field, an option or a validator of your own
+- [`user/getting-started.md`](getting-started.md) — install, wiring, the stylesheet, a first form

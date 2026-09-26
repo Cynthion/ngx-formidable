@@ -58,7 +58,10 @@ CI tests only the newest version, so an older major in a widened range is proven
 
 ## Ceilings
 
-`typescript`, `jasmine-core` and `@types/jasmine` are held below a ceiling by `allowedVersions`. The reasons are under **Version ceilings** in `impl/conventions.md`. Renovate does not warn when a ceiling goes stale: raise it in `renovate.json` once its reason is gone.
+`typescript`, `jasmine-core` and `@types/jasmine` are held below a ceiling by `allowedVersions`. `renovate.json` holds the exact bounds. Renovate does not warn when a ceiling goes stale: raise it in `renovate.json` once its reason is gone.
+
+- **TypeScript**: capped by `@angular/compiler-cli` and `ng-packagr`, which both peer a single TypeScript minor — so the next TypeScript major is unavailable while the current Angular major is the floor.
+- **Jasmine**: `jasmine-core` stays below the major that makes `describe`/`it` read-only on the global, which breaks `zone.js`'s `patchJasmine` and with it every `fakeAsync` spec.
 
 ---
 

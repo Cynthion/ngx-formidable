@@ -2,7 +2,7 @@
 
 Structure of the `ngx-formidable` repository: a publishable Angular library and the portal that showcases it.
 
-For coding conventions see `impl/conventions.md`; for the component/directive catalogue see `user/components.md`.
+For component conventions see [`impl/components.md`](../impl/components.md); for the component/directive catalogue see [`user/components.md`](../user/components.md).
 
 ## Repository Structure
 
@@ -43,20 +43,20 @@ projects/ngx-formidable/
 └── vest/                                 # → @cynthion/ngx-formidable/vest — the Vest adapter, `vest` as an optional peer
 ```
 
-**Composition Model**: field components implement `ControlValueAccessor` and register the `FORMIDABLE_FIELD` token; `FieldDecoratorComponent` projects a field plus its label/adornment/prefix/suffix/errors; option-based fields collect `FieldOptionComponent` children via `@ContentChildren`. The abstract `BaseFieldDirective` is the shared base and the extension point for custom fields; the abstract `BaseOptionFieldDirective` extends it for the four fields that walk an option list with a highlight. See `user/components.md`.
+**Composition Model**: field components implement `ControlValueAccessor` and register the `FORMIDABLE_FIELD` token; `FieldDecoratorComponent` projects a field plus its label/adornment/prefix/suffix/errors; option-based fields collect `FieldOptionComponent` children via `@ContentChildren`. The abstract `BaseFieldDirective` is the shared base and the extension point for custom fields; the abstract `BaseOptionFieldDirective` extends it for the four fields that walk an option list with a highlight. See [`user/components.md`](../user/components.md).
 
 **Validation**:
 
 - `NgxFormidableFormDirective` owns the model, the targets and the debouncing, then delegates the rules to whatever `FORMIDABLE_VALIDATOR` is provided; errors surface through Angular's own `AbstractControl.errors`.
 - The Vest validator is the second entry point, and Angular's built-in validators work with nothing wired at all.
 
-See `tech/validation.md` and `user/validation.md`.
+See [`tech/validation.md`](validation.md) and [`user/validation.md`](../user/validation.md).
 
 ## Portal
 
-The portal (`src/`) is a standalone-bootstrapped application that showcases every field and serves as the dev playground. Its `/` route is the Studio and its `/docs` route mirrors `user/*.md`; `impl/portal.md` is its design and `user/studio.md` the consumer's guide to it. It is deployed to GitHub Pages by `deploy.yml` on push to `main` (builds and publishes `dist/ngx-formidable-portal`). The portal consumes the library, not the other way round.
+The portal (`src/`) is a standalone-bootstrapped application that showcases every field and serves as the dev playground. Its `/` route is the Studio and its `/docs` route mirrors `user/*.md`; [`tech/portal.md`](portal.md) is its design and [`user/studio.md`](../user/studio.md) the consumer's guide to it. It is deployed to GitHub Pages by `deploy.yml` on push to `main` (builds and publishes `dist/ngx-formidable-portal`). The portal consumes the library, not the other way round.
 
-The portal lives in `src/app/portal/` and is routed with hash location, because GitHub Pages serves no SPA fallback. Its design is `impl/portal.md`.
+The portal lives in `src/app/portal/` and is routed with hash location, because GitHub Pages serves no SPA fallback. Its design is [`tech/portal.md`](portal.md).
 
 | Path                  | Holds                                                                           |
 | :-------------------- | :------------------------------------------------------------------------------ |
@@ -75,37 +75,29 @@ The portal lives in `src/app/portal/` and is routed with hash location, because 
 
 ## Build And Publish
 
-| Script         | Purpose                                                                 |
-| :------------- | :---------------------------------------------------------------------- |
-| `start`        | Serve the portal                                                        |
-| `build`        | Build the portal                                                        |
-| `build:lib`    | Build the library with ng-packagr into `dist/ngx-formidable`            |
-| `docs:check`   | Hold the portal's token manifest in step with `user/theme-reference.md` |
-| `prebuild:lib` | Copy `README.md` + `LICENSE` into the library before building           |
-| `publish:lib`  | Publish the built library                                               |
-| `test`         | Run tests (see `impl/testing.md`)                                       |
+The scripts are listed in [`impl/developer-onboarding.md`](../impl/developer-onboarding.md) and the release steps in [`impl/definition-of-done.md`](../impl/definition-of-done.md). `build:lib` builds the library with ng-packagr into `dist/ngx-formidable`; `prebuild:lib` copies `README.md` and `LICENSE` into the library first.
 
 ng-packagr config:
 
 - `ng-package.json` sets the entry file to `public-api.ts`, outputs to `dist/ngx-formidable`, and ships the library SCSS as assets under `dist/ngx-formidable/styles/`.
-- `vest/ng-package.json` declares the secondary entry point; ng-packagr builds it after the primary and it imports the primary by package name (see `tech/validation.md`). The package is published as `@cynthion/ngx-formidable` to npm, public through `publishConfig.access`.
+- `vest/ng-package.json` declares the secondary entry point; ng-packagr builds it after the primary and it imports the primary by package name (see [`tech/validation.md`](validation.md)). The package is published as `@cynthion/ngx-formidable` to npm, public through `publishConfig.access`.
 
 ## Continuous Integration
 
 Two workflows in `.github/workflows/`. Both take the Node version from `.nvmrc` and install with `npm ci`, so a run resolves exactly the committed lockfile.
 
-| Workflow     | Trigger                              | Does                                                                               |
-| :----------- | :----------------------------------- | :--------------------------------------------------------------------------------- |
-| `ci.yml`     | Push to `main`, pull request, manual | `prettier:check`, `lint`, `style-lint`, `build:lib`, both test projects, `build`   |
-| `deploy.yml` | Push to `main`, manual               | Builds the portal and deploys `dist/ngx-formidable-portal/browser` to GitHub Pages |
+| Workflow     | Trigger                              | Does                                                                                                        |
+| :----------- | :----------------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| `ci.yml`     | Push to `main`, pull request, manual | `prettier:check`, `lint`, `style-lint`, `docs:check`, `docs:lint`, `build:lib`, both test projects, `build` |
+| `deploy.yml` | Push to `main`, manual               | Builds the portal and deploys `dist/ngx-formidable-portal/browser` to GitHub Pages                          |
 
-- **Checks Mirror The Scripts**: `ci.yml` runs the same scripts a contributor runs locally, in the order of the Definition of Done in `impl/conventions.md`. `build:lib` is in it because it is also the type and template check — there is no standalone typecheck script.
+- **Checks Mirror The Scripts**: `ci.yml` runs the same scripts a contributor runs locally, in the order of the Verification table in [`impl/definition-of-done.md`](../impl/definition-of-done.md). `build:lib` is in it because it is also the type and template check — there is no standalone typecheck script.
 - **Tests**: the two projects are separate steps, because `ng test` takes one project at a time. Both run in `ChromeHeadless` with `--watch=false`.
-- **Dependency Updates**: Renovate opens the pull requests, and `ci.yml` checks them like any other — see `impl/renovate.md`.
+- **Dependency Updates**: Renovate opens the pull requests, and `ci.yml` checks them like any other — see [`impl/renovate.md`](../impl/renovate.md).
 
 ## Consumer Setup
 
-Two wiring paths, `provideNgxFormidable()` and `NgxFormidableModule.forRoot()`, differing only in how they are registered: both return the same providers, so neither is the primary. Styling is imported separately, because it is a stylesheet and not a provider. The steps a consumer follows are in `user/getting-started.md`; the API is in `user/components.md`.
+Two wiring paths, `provideNgxFormidable()` and `NgxFormidableModule.forRoot()`, differing only in how they are registered: both return the same providers, so neither is the primary. Styling is imported separately, because it is a stylesheet and not a provider. The steps a consumer follows are in [`user/getting-started.md`](../user/getting-started.md); the API is in [`user/components.md`](../user/components.md).
 
 ## Key Paths
 

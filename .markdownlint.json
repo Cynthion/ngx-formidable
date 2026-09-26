@@ -1,0 +1,15 @@
+{
+  "no-duplicate-heading": {
+    "siblings_only": true
+  },
+  "line-length": false,
+  "link-image-style": {
+    "autolink": false
+  },
+  "no-inline-html": {
+    "allowed_elements": ["br", "img"]
+  },
+  "no-hard-tabs": {
+    "code_blocks": false
+  }
+}

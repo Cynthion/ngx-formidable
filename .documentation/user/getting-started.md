@@ -2,7 +2,7 @@
 
 Install the package, wire it once, import the stylesheet, build a form. Every step below is the whole step — there is no further configuration.
 
-The API each symbol carries is in `user/components.md`.
+The API each symbol carries is in [`user/components.md`](components.md).
 
 ## Install
 
@@ -12,14 +12,14 @@ Install the package and its peer dependencies:
 npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday
 ```
 
-| Peer       | Needed for                                          |
+| Peer       | Needed For                                          |
 | :--------- | :-------------------------------------------------- |
 | `date-fns` | Parsing and formatting the date and time fields     |
 | `ngx-mask` | Input masking                                       |
 | `pikaday`  | The date field's calendar                           |
 | `vest`     | Optional — only for `@cynthion/ngx-formidable/vest` |
 
-Angular's `common`, `core` and `forms`, and `rxjs`, are peers you already have. The floor is Angular 22: the library is published in partial compilation mode, so your app's linker has to be at or above the major it was built with.
+Angular's `common`, `core` and `forms`, and `rxjs`, are peers you already have. The floor is the Angular major in the package's `peerDependencies`: the library is published in partial compilation mode, so your app's linker has to be at or above the major it was built with.
 
 `pikaday` ships CommonJS, so a build warns `Module 'pikaday' … is not ESM` until you name it in `angular.json`:
 
@@ -31,7 +31,7 @@ Angular's `common`, `core` and `forms`, and `rxjs`, are peers you already have. 
 
 ## Wire It
 
-**Standalone**
+### Standalone
 
 ```ts
 // main.ts
@@ -44,7 +44,7 @@ bootstrapApplication(AppComponent, {
 }).catch(console.error);
 ```
 
-**NgModule**
+### NgModule
 
 ```ts
 // app.module.ts
@@ -60,7 +60,7 @@ import { AppComponent } from './app.component';
 export class AppModule {}
 ```
 
-Both accept a `NgxFormidableConfig`: `globalMaskConfig` (see `user/fields.md`) and `defaults`, below.
+Both accept a `NgxFormidableConfig`: `globalMaskConfig` (see [`user/fields.md`](fields.md)) and `defaults`, below.
 
 ### App-Wide Defaults
 
@@ -101,17 +101,17 @@ Styling is a stylesheet, not a provider, so it is imported separately:
 @use '@cynthion/ngx-formidable/styles/ngx-formidable';
 ```
 
-That is the whole default theme. To change it, redeclare the variables you want in your own `:root` after the import — see `user/theming.md`.
+That is the whole default theme. To change it, redeclare the variables you want in your own `:root` after the import — see [`user/theming.md`](theming.md).
 
 ---
 
 ## Build A Form
 
-The library holds the model and renders the fields. Rules come from whatever validator you provide, or from none at all — see `user/validation.md`. The example below uses Vest, whose validator ships in the `@cynthion/ngx-formidable/vest` entry point.
+The library holds the model and renders the fields. Rules come from whatever validator you provide, or from none at all — see [`user/validation.md`](validation.md). The example below uses Vest, whose validator ships in the `@cynthion/ngx-formidable/vest` entry point.
 
 ### 1. Declare The Model, The Shape And The Rules
 
-Keep them in one `*.form.ts` per form. The layout is a convention, not a requirement: what the model has to match is **The Model** in `user/validation.md`.
+Keep them in one `*.form.ts` per form. The layout is a convention, not a requirement: what the model has to match is **The Model** in [`user/validation.md`](validation.md).
 
 ```ts
 // user.form.ts
@@ -228,14 +228,14 @@ onSubmit(): void {
 
 ---
 
-## Where To Go Next
+## Related
 
-| To do this                                                | Read                    |
-| :-------------------------------------------------------- | :---------------------- |
-| Pick a field, work its keyboard, mask it, place its panel | `user/fields.md`        |
-| Label it, prefix it, hint it, mark it required            | `user/decoration.md`    |
-| Connect Vest, zod, Angular's validators, or none          | `user/validation.md`    |
-| Repaint and reshape it                                    | `user/theming.md`       |
-| Build a theme in the browser and paste the result back    | `user/studio.md`        |
-| Build a field the library does not have                   | `user/custom-fields.md` |
-| Look up an input, a type or a token                       | `user/components.md`    |
+| To Do This                                                | Read                                        |
+| :-------------------------------------------------------- | :------------------------------------------ |
+| Pick a field, work its keyboard, mask it, place its panel | [`user/fields.md`](fields.md)               |
+| Label it, prefix it, hint it, mark it required            | [`user/decoration.md`](decoration.md)       |
+| Connect Vest, zod, Angular's validators, or none          | [`user/validation.md`](validation.md)       |
+| Repaint and reshape it                                    | [`user/theming.md`](theming.md)             |
+| Build a theme in the browser and paste the result back    | [`user/studio.md`](studio.md)               |
+| Build a field the library does not have                   | [`user/custom-fields.md`](custom-fields.md) |
+| Look up an input, a type or a token                       | [`user/components.md`](components.md)       |

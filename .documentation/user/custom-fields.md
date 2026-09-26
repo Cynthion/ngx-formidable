@@ -8,7 +8,7 @@ The worked example below is `example-counter-field` in the portal, quoted as it 
 
 Register the component as `FORMIDABLE_FIELD` and it immediately gains:
 
-| Capability                                   | Comes from                                                                 |
+| Capability                                   | Comes From                                                                 |
 | :------------------------------------------- | :------------------------------------------------------------------------- |
 | Field rules                                  | `NgxFormidableFieldValidateDirective`, which attaches to every `ngModel`   |
 | Group and whole-form rules                   | Being inside the form the rules report on                                  |
@@ -39,7 +39,7 @@ Then supply the abstract members:
 | :--------------------------- | :-------------------------------------------------------------------------------------- |
 | `value`                      | A getter reading the current value off whatever the field renders                       |
 | `fieldRef`                   | The field's outer element. The decorator measures it and the listeners are scoped to it |
-| `decoratorLayout`            | `'horizontal'`, `'vertical'` or `'inline'` — see `user/decoration.md`                   |
+| `decoratorLayout`            | `'horizontal'`, `'vertical'` or `'inline'` — see [`user/decoration.md`](decoration.md)  |
 | `doWriteValue(value)`        | Put a value the form wrote into whatever the field renders                              |
 | `doOnValueChange()`          | The field's half of a value change, after the base has committed it                     |
 | `doOnFocusChange(isFocused)` | The field's half of a focus change. Guard `readonly` here, not in `onFocusChange`       |
@@ -50,7 +50,7 @@ Then supply the abstract members:
 
 And override these where they apply:
 
-| Member                | Override when                                                                                 |
+| Member                | Override When                                                                                 |
 | :-------------------- | :-------------------------------------------------------------------------------------------- |
 | `showsEmptyValueHint` | The field renders something where the value goes while empty, which a resting label would hit |
 | `focusElement`        | The element that takes focus is not `fieldRef` — a wrapper `div` around an inner `input`      |
@@ -243,7 +243,7 @@ A custom field styles itself; the library's SCSS surface is closed. What is open
 }
 ```
 
-Those four are the ones a custom field is likely to miss. The full list is in `user/theme-reference.md`.
+Those four are the ones a custom field is likely to miss. The full list is in [`user/theme-reference.md`](theme-reference.md).
 
 ### Using It
 
@@ -312,10 +312,19 @@ What `FORMIDABLE_OPTION` provides is `IFormidableOptionSource`: one `option` com
 
 The option's ARIA role is not its own to choose — it comes from the parent field, so an option inside a listbox is an `option` and one inside a radio group is a `radio`. `layout` is a look, not a role.
 
-A field that hosts options of its own implements `IFormidableOptionField` and provides `FORMIDABLE_OPTION_FIELD`; if it walks its list with a highlight, extend `BaseOptionFieldDirective` instead of `BaseFieldDirective` and the highlight machinery comes with it. Both are catalogued in `user/components.md`.
+A field that hosts options of its own implements `IFormidableOptionField` and provides `FORMIDABLE_OPTION_FIELD`; if it walks its list with a highlight, extend `BaseOptionFieldDirective` instead of `BaseFieldDirective` and the highlight machinery comes with it. Both are catalogued in [`user/components.md`](components.md).
 
 ---
 
 ## Custom Validators
 
-A validator is the same kind of extension point and has its own guide: see `user/validation.md`.
+A validator is the same kind of extension point and has its own guide: see [`user/validation.md`](validation.md).
+
+---
+
+## Related
+
+- [`user/components.md`](components.md) — every public component, directive, token and type
+- [`user/fields.md`](fields.md) — options, panels, keyboard, dates and times, masking, focus
+- [`user/validation.md`](validation.md) — connecting a validator, conditional fields, when messages appear
+- [`user/theming.md`](theming.md) — the default theme, how theming works, and how to find your own

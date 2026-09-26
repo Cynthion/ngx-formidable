@@ -1,3 +1,4 @@
+<!-- markdownlint-disable no-inline-html -- the centred hero and badges are HTML because npm renders nothing else centred -->
 <h1 align="center">ngx-formidable</h1>
 
 <p align="center">
@@ -35,6 +36,7 @@ Angular form fields you can actually theme, configure and customize. Validated b
     <img src="https://raw.githubusercontent.com/Cynthion/ngx-formidable/main/assets/ladder.png" alt="Four ngx-formidable fields, a dropdown open among them, restyled from the library's defaults in eight steps, one CSS variable per step, with the :root block growing beside them">
   </a>
 </p>
+<!-- markdownlint-enable no-inline-html -->
 
 Eleven form fields, one decorator that puts labels, prefixes, hints and errors around them, and around two hundred CSS custom properties to make them look like your product instead of like a component library. It holds the model and renders the fields; the rules come from Vest, zod, Angular's own validators, or nothing at all.
 
@@ -42,7 +44,7 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 - **[Specimen](https://cynthion.github.io/ngx-formidable/#/specimen)** — every field, one change at a time: every state, every label position, every adornment and every panel, under any preset or your own theme.
 - **[Docs](https://cynthion.github.io/ngx-formidable/#/docs)** — the guides and references below, rendered in the browser from the same files. [`.documentation/`](https://github.com/Cynthion/ngx-formidable/blob/main/.documentation/README.md) holds them, plus the design notes for maintainers.
 
-## Table of Contents
+## Table Of Contents
 
 - [Table of Contents](#table-of-contents)
 - [Features](#features)
@@ -71,7 +73,7 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 
 Material is a design system with a form library in it. This is a form library with no design opinion. That is the whole difference, and it cuts both ways.
 
-| You want                                                              | Pick               |
+| You Want                                                              | Pick               |
 | :-------------------------------------------------------------------- | :----------------- |
 | Fields that look like your brand, themed from CSS variables only      | **ngx-formidable** |
 | Vest, zod or a schema validator driving the rules                     | **ngx-formidable** |

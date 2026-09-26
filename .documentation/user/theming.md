@@ -1,6 +1,6 @@
 # Theming
 
-Every visual property of every field is a CSS custom property you can override. This page is how to decide which ones to set; every variable is listed in `user/theme-reference.md`. To wire the stylesheet up, see `user/getting-started.md`.
+Every visual property of every field is a CSS custom property you can override. This page is how to decide which ones to set; every variable is listed in [`user/theme-reference.md`](theme-reference.md). To wire the stylesheet up, see [`user/getting-started.md`](getting-started.md).
 
 ## The Default Theme
 
@@ -26,7 +26,7 @@ The library ships neutral surfaces and text plus a single accent — deliberate 
 
 Everything else in this document derives from those twelve. **To rebrand, set `--formidable-color-field-border-focus`** — it carries the focus border, the focused label, the focused underline and both focus rings. Add `--formidable-color-field-label-floating` if you want the accent on resting labels too.
 
-Alternative colour and geometry schemes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one — are selectable in the Studio, which pairs them into named presets — see `user/studio.md`. The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every field under each preset, and steps through a theme one variable at a time.
+Alternative colour and geometry schemes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one — are selectable in the Studio, which pairs them into named presets — see [`user/studio.md`](studio.md). The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every field under each preset, and steps through a theme one variable at a time.
 
 ---
 
@@ -42,7 +42,7 @@ Alternative colour and geometry schemes — outlined, underlined, soft, compact,
 
 ## Finding Your Theme
 
-There are around two hundred variables in `user/theme-reference.md`, and you need eight to twelve of them. Work in this order and stop as soon as it looks right — each step is independent of the ones after it.
+There are around two hundred variables in [`user/theme-reference.md`](theme-reference.md), and you need eight to twelve of them. Work in this order and stop as soon as it looks right — each step is independent of the ones after it.
 
 ### 1. Decide How Far You Are Going
 
@@ -136,10 +136,18 @@ Set these and the rest of the library follows. Do not set the derived variables 
 
 ### 5. Start From A Scheme Instead
 
-Ten palettes and eleven field shapes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed — are selectable in the Studio, on two independent axes and as named presets pairing the two. Picking one and adjusting it is usually faster than starting from this page, and the Studio copies the result out as the `:root` block to paste. `user/studio.md` is the guide to it.
+Ten palettes and eleven field shapes — outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed — are selectable in the Studio, on two independent axes and as named presets pairing the two. Picking one and adjusting it is usually faster than starting from this page, and the Studio copies the result out as the `:root` block to paste. [`user/studio.md`](studio.md) is the guide to it.
 
 ---
 
 ## The Full List
 
-Every overridable variable, grouped by what it paints, is in `user/theme-reference.md`. The four families that need explaining rather than listing — the variables the library writes itself, the per-corner radius, the underline, and the Pikaday class names — are documented there too.
+Every overridable variable, grouped by what it paints, is in [`user/theme-reference.md`](theme-reference.md). The four families that need explaining rather than listing — the variables the library writes itself, the per-corner radius, the underline, and the Pikaday class names — are documented there too.
+
+---
+
+## Related
+
+- [`user/theme-reference.md`](theme-reference.md) — every overridable `--formidable-*` custom property
+- [`user/studio.md`](studio.md) — build a theme and a form in the browser, and take both away
+- [`user/getting-started.md`](getting-started.md) — install, wiring, the stylesheet, a first form

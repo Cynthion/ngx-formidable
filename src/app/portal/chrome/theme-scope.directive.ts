@@ -5,7 +5,7 @@ import { Directive, effect, ElementRef, inject, input } from '@angular/core';
  *
  * The host carries `.portal-theme-scope`, which re-emits the library's whole default block under that
  * selector; the variables set here then recompute the derived ones against these bases instead of against
- * `:root`. Setting them any other way would half-apply, for the reason `impl/portal.md` gives.
+ * `:root`. Setting them any other way would half-apply, for the reason `tech/portal.md` gives.
  */
 @Directive({
   selector: '[portalThemeScope]',

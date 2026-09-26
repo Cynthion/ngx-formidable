@@ -1,6 +1,6 @@
 # Theme Reference
 
-Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these you actually need, is in `user/theming.md`; complete schemes to start from are in the Studio, which `user/studio.md` covers.
+Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these you actually need, is in [`user/theming.md`](theming.md); complete schemes to start from are in the Studio, which [`user/studio.md`](studio.md) covers.
 
 ---
 
@@ -28,7 +28,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-length-indicator-font-weight`       | Font weight for the textarea length indicator.                                |
 | `--formidable-length-indicator-line-height`       | Line height for the textarea length indicator.                                |
 
-#### Slider
+### Slider
 
 | Variable                                | Description                                           |
 | :-------------------------------------- | :---------------------------------------------------- |
@@ -136,7 +136,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-color-field-group-focus-box-shadow`        | Box shadow for field groups that are focused.                                                                               |
 | `--formidable-color-field-focus-box-shadow-invalid`      | Replaces both focus box shadows while the field is invalid.                                                                 |
 
-#### Toggle
+### Toggle
 
 | Variable                                             | Description                                                 |
 | :--------------------------------------------------- | :---------------------------------------------------------- |
@@ -148,7 +148,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-color-toggle-track-readonly`           | Overrides the track fill when the toggle is readonly.       |
 | `--formidable-color-toggle-track-disabled`           | Overrides the track fill when the toggle is disabled.       |
 
-#### Slider
+### Slider
 
 | Variable                                           | Description                                                                     |
 | :------------------------------------------------- | :------------------------------------------------------------------------------ |
@@ -168,7 +168,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-color-slider-track-filled-readonly`  | Overrides the filled track when the slider is readonly.                         |
 | `--formidable-color-slider-track-filled-disabled`  | Overrides the filled track when the slider is disabled.                         |
 
-#### Date Field Panel
+### Date Field Panel
 
 | Variable                                                    | Description                                                |
 | :---------------------------------------------------------- | :--------------------------------------------------------- |
@@ -181,7 +181,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-color-date-field-panel-date-out-of-range`     | Color for dates outside the min/max range.                 |
 | `--formidable-color-date-field-panel-day-label`             | Color for weekday labels in the calendar header.           |
 
-#### Option Prefix
+### Option Prefix
 
 | Variable                                             | Description                                                                         |
 | :--------------------------------------------------- | :---------------------------------------------------------------------------------- |
@@ -197,13 +197,13 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-color-option-prefix-inner-highlighted` | Overrides `--formidable-color-option-prefix-inner` when the option is highlighted.  |
 | `--formidable-color-option-prefix-background`        | Background color behind option prefix elements.                                     |
 
-#### Hint
+### Hint
 
 | Variable                        | Description                                                               |
 | :------------------------------ | :------------------------------------------------------------------------ |
 | `--formidable-color-field-hint` | Text color for hint text. Follows the field placeholder color by default. |
 
-#### Length Indicator
+### Length Indicator
 
 | Variable                              | Description                                   |
 | :------------------------------------ | :-------------------------------------------- |
@@ -382,3 +382,10 @@ The date field's calendar is rendered by Pikaday, which brings its own class nam
   background-color: #8a2b75ff;
 }
 ```
+
+---
+
+## Related
+
+- [`user/theming.md`](theming.md) — the default theme, how theming works, and how to find your own
+- [`user/studio.md`](studio.md) — build a theme and a form in the browser, and take both away

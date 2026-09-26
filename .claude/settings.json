@@ -1,7 +1,3 @@
 {
-  "permissions": {
-    "allow": [],
-    "deny": []
-  },
-  "enabledMcpjsonServers": ["context7", "playwright", "ux-patterns"]
+  "enabledMcpjsonServers": ["angular-cli", "context7", "playwright", "ux-patterns"]
 }

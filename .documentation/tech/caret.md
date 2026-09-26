@@ -1,6 +1,6 @@
 # Caret
 
-How the editable fields place the caret on focus entry, and what they are working against. The rules themselves, as a consumer reads them, are in `user/fields.md`.
+How the editable fields place the caret on focus entry, and what they are working against. The rules themselves, as a consumer reads them, are in [`user/fields.md`](../user/fields.md).
 
 The library does two things and leaves the rest to the browser. Everything else a field could do here is either already native or actively worse.
 

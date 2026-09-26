@@ -1,10 +1,8 @@
 # Decoration
 
-How a field, the decorator around it and its error messages are wired together. What a consumer does with the slots is in `user/decoration.md`, which this file does not restate.
+How a field, the decorator around it and its error messages are wired together. What a consumer does with the slots is in [`user/decoration.md`](../user/decoration.md), which this file does not restate.
 
-`FieldDecoratorComponent` renders everything around a field and nothing inside it. The field is projected, so the decorator reads it rather than configuring it. Every value below is pulled off `IFormidableField`, never pushed in.
-It does not itself implement that contract: the interface is signal-typed, while the decorator's mirrors are plain getters. They are reactive all the same — every one bottoms out in a `contentChild()` query or a signal on the field, and a signal read inside a getter is tracked by whichever view calls it, which is what lets the decorator be `OnPush`.
-What paints over what is a separate concern; see `tech/layering.md`.
+`FieldDecoratorComponent` renders everything around a field and nothing inside it. The field is projected, so the decorator reads it rather than configuring it. Every value below is pulled off `IFormidableField`, never pushed in. It does not itself implement that contract: the interface is signal-typed, while the decorator's mirrors are plain getters. They are reactive all the same — every one bottoms out in a `contentChild()` query or a signal on the field, and a signal read inside a getter is tracked by whichever view calls it, which is what lets the decorator be `OnPush`. What paints over what is a separate concern; see [`tech/layering.md`](layering.md).
 
 ## The Three Parties
 
@@ -46,7 +44,7 @@ flowchart LR
 
 Every id in the library derives from one `fieldId`, minted per field instance from a module-level counter in `base-field.directive.ts`.
 
-| Id                     | Minted by                  | Named by                            |
+| Id                     | Minted By                  | Named By                            |
 | :--------------------- | :------------------------- | :---------------------------------- |
 | `{fieldId}-label`      | Decorator                  | The field's `aria-labelledby`       |
 | `{fieldId}-hint`       | Decorator                  | The field's `aria-describedby`      |
@@ -66,7 +64,7 @@ Fields read the decorator's ids back by injecting it **optionally**, so a field 
 
 Angular's own form state is not signal-backed: `AbstractControl.errors`, `touched` and `dirty`, and `NgForm.submitted`, are plain properties, and nothing about reading them tells a view when they moved. `FieldErrorsComponent` derives everything it renders from them, so something has to tell it. `FieldErrorsDirective` merges three sources and calls `refresh()` on any of them.
 
-| Source                 | Why it cannot be inferred                                                                       |
+| Source                 | Why It Cannot Be Inferred                                                                       |
 | :--------------------- | :---------------------------------------------------------------------------------------------- |
 | The control's `events` | Gated behind the form's `idle$` when there is a form directive — see below                      |
 | `NgForm.ngSubmit`      | `NgForm.submitted` is untracked, and `revealOn: 'submitted'` gates the messages on it           |
@@ -78,19 +76,19 @@ Angular's own form state is not signal-backed: `AbstractControl.errors`, `touche
 
 **The group's control is resolved lazily.** An `ngModelGroup` registers its control a microtask after `ngAfterViewInit`, so the event stream is wrapped in `defer` — resolving it eagerly would leave a group's errors component with nothing to repaint on.
 
-## `OnPush`, And What It Took
+## `OnPush`
 
-The decorator renders nothing of its own. `labelState` is a getter over the projected field's `readonly`, `disabled`, `placeholder` and mask configuration — none of them the decorator's inputs, so nothing about the decorator changes when they do. It was therefore the one component in the library checked every cycle, and under `OnPush` the label silently kept a stale state whenever a consumer changed one of them at runtime.
+The decorator renders nothing of its own. `labelState` is a getter over the projected field's `readonly`, `disabled`, `placeholder` and mask configuration — none of them the decorator's inputs, so nothing about the decorator changes when they do. A plain read of any of them would leave the label stale under `OnPush` whenever a consumer changes one at runtime.
 
-What makes `OnPush` work now is that every value it reads is a signal, and the read itself is what marks this view. Three things had to move for that to be true of all of them:
+`OnPush` works because every value the decorator reads is a signal, and the read itself is what marks this view:
 
-| Read                                              | Was                                | Is                                    |
-| :------------------------------------------------ | :--------------------------------- | :------------------------------------ |
-| The projected field, label, adornments            | `@ContentChild`                    | `contentChild()`                      |
-| `canLabelRest`, `isPanelOpen`, `hasInFieldToggle` | plain getters on the field         | signals on `IFormidableField`         |
-| `invalid`                                         | a getter over Angular's form state | a `computed` over the pump's revision |
+| Read                                              | Source                                |
+| :------------------------------------------------ | :------------------------------------ |
+| The projected field, label, adornments            | `contentChild()`                      |
+| `canLabelRest`, `isPanelOpen`, `hasInFieldToggle` | signals on `IFormidableField`         |
+| `invalid`                                         | a `computed` over the pump's revision |
 
-A getter is still a getter — `hasLabel`, `labelState`, `valueAlignment` — and still the right shape: a signal read inside one is tracked by the caller, and unlike the field contract these are internal to one file. The projected decorations stay getters for the original reason too: a consumer adds and removes one at runtime with `@if`, and a value latched in `ngAfterContentInit` would leave its wrapper shown — or hidden — forever.
+A getter — `hasLabel`, `labelState`, `valueAlignment` — is still the right shape: a signal read inside one is tracked by the caller, and unlike the field contract these are internal to one file. The projected decorations are read through getters too: a consumer adds and removes one at runtime with `@if`, and a value latched in `ngAfterContentInit` would leave its wrapper shown — or hidden — forever.
 
 Proven by `on-push.spec.ts`, which asserts against the decorator's **template** and never its host classes — host bindings are evaluated in the parent's view, which a `detectChanges()` re-runs whatever the strategy, so a host class would pass either way and prove nothing.
 

@@ -6,7 +6,7 @@ Every component is `standalone` and uses `ChangeDetectionStrategy.OnPush`, with 
 
 **Signal Surface**: every input is a signal `input()` and every output an `output()`. A template binds both exactly as a decorated one (`[readonly]="…"`, `(valueChanged)="…"`), so the tables below name the value a binding accepts rather than the signal wrapping it. Reaching one from code is Angular's own API in every case:
 
-| From code           | What applies                                                                                                                                                                                                                                                                     |
+| From Code           | What Applies                                                                                                                                                                                                                                                                     |
 | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Read an input       | Call it: `field.readonly()`                                                                                                                                                                                                                                                      |
 | Write an input      | `componentRef.setInput('readonly', true)` — a signal input is read-only from outside. `disabled` is the exception: a `model()` is a `WritableSignal`, so `field.disabled.set(true)` works                                                                                        |
@@ -25,13 +25,13 @@ Wire the library once, then import the standalone components where they are used
 | `NgxFormidableConfig`                  | interface | `{ globalMaskConfig?, defaults?: FormidableDefaults }`, the argument to both |
 | `FormidableDefaults`                   | interface | App-wide defaults for the inputs every template would repeat                 |
 
-Both register ngx-mask, set `FORMIDABLE_MASK_DEFAULTS` from `globalMaskConfig` and `FORMIDABLE_DEFAULTS` from `defaults`. The defaults below are the library's own; which inputs `FormidableDefaults` overrides, and how, is in `user/getting-started.md`. Styling is a separate stylesheet import — see `user/getting-started.md`.
+Both register ngx-mask, set `FORMIDABLE_MASK_DEFAULTS` from `globalMaskConfig` and `FORMIDABLE_DEFAULTS` from `defaults`. The defaults below are the library's own; which inputs `FormidableDefaults` overrides, and how, is in [`user/getting-started.md`](getting-started.md). Styling is a separate stylesheet import — see [`user/getting-started.md`](getting-started.md).
 
 ---
 
 ## Base Field Directive
 
-`BaseFieldDirective<T = string | null>` — exported abstract `@Directive()` (no selector). The base class for every field and the extension point for custom fields (reference implementation: `example-counter-field` in the portal, walked through in `user/custom-fields.md`). Implements `ControlValueAccessor` + `IFormidableField<T>`.
+`BaseFieldDirective<T = string | null>` — exported abstract `@Directive()` (no selector). The base class for every field and the extension point for custom fields (reference implementation: `example-counter-field` in the portal, walked through in [`user/custom-fields.md`](custom-fields.md)). Implements `ControlValueAccessor` + `IFormidableField<T>`.
 
 Inherited by every field:
 
@@ -98,7 +98,8 @@ Inherited by those four:
 All extend `BaseFieldDirective<T>` (inherited API above); the four option fields extend `BaseOptionFieldDirective<T>`. Tables list each field's OWN inputs only.
 
 **Panel Control**: the three fields with a panel — `dropdown-field`, `autocomplete-field` and `date-field` — expose `isPanelOpen` as a signal to read and `togglePanel(isOpen)` as the way to open or close it from outside. There is no `isPanelOpen` input: a panel is state the field owns and closes by itself (on a selection, an outside click, `Escape`), so a one-way binding would go stale the moment it did. Reach the method through a template reference (`#field`) or a `viewChild()`, exactly as `focus()` is reached.
-**Action Option**: the two panel fields take an `actionOption` — an entry pinned to the end of the list that runs an action instead of becoming a value, which is what an "Add A New Address…" row is. It renders as an option and the keyboard walks it as one, because `aria-activedescendant` may only name an option the `listbox` owns; what separates it is every value path, none of which it takes. Picking it closes the panel, runs its `action` and commits nothing; a model written to its value finds no option; the autocomplete never auto-selects it off an exact label and the dropdown's type-ahead walks past it. It never stands in for a result either — an otherwise empty list still renders `noOptionsText`, because that is a status and the action is a control. What happens next is the consumer's: see **An Action Row Is Not A Value** in `user/fields.md` for the round trip.
+
+**Action Option**: the two panel fields take an `actionOption` — an entry pinned to the end of the list that runs an action instead of becoming a value, which is what an "Add A New Address…" row is. It renders as an option and the keyboard walks it as one, because `aria-activedescendant` may only name an option the `listbox` owns; what separates it is every value path, none of which it takes. Picking it closes the panel, runs its `action` and commits nothing; a model written to its value finds no option; the autocomplete never auto-selects it off an exact label and the dropdown's type-ahead walks past it. It never stands in for a result either — an otherwise empty list still renders `noOptionsText`, because that is a status and the action is a control. What happens next is the consumer's: see **An Action Row Is Not A Value** in [`user/fields.md`](fields.md) for the round trip.
 
 ### Input Field
 
@@ -176,7 +177,7 @@ Dropdown panel plus a filter input. Emits filter text; the consumer supplies fil
 | `actionOption`     | `IFormidableActionOption` | `undefined` | An entry that runs an action instead of becoming a value     |
 | `actionOptionMode` | `FieldDefaultOptionMode`  | `'always'`  | When it renders: always last, or only when the list is empty |
 
-The default option and the action entry are both applied after filtering, so an `always` default and the action entry stay visible even when the filter matches nothing — which is the moment the action entry exists for. **Output** `filterChanged: string` (+ `filterChange$`), which reports the filter the field moves itself as well as the text typed into it — see **`filterChanged` Reports More Than Typing** in `user/fields.md`. The panel is opened and closed from outside through `togglePanel(isOpen)` — see **Panel Control**. **Use when** the option set is large or fetched/filtered dynamically.
+The default option and the action entry are both applied after filtering, so an `always` default and the action entry stay visible even when the filter matches nothing — which is the moment the action entry exists for. **Output** `filterChanged: string` (+ `filterChange$`), which reports the filter the field moves itself as well as the text typed into it — see **`filterChanged` Reports More Than Typing** in [`user/fields.md`](fields.md). The panel is opened and closed from outside through `togglePanel(isOpen)` — see **Panel Control**. **Use when** the option set is large or fetched/filtered dynamically.
 
 ### Date Field
 
@@ -196,7 +197,7 @@ The calendar is opened and closed from outside through `togglePanel(isOpen)` —
 
 **Pikaday passthrough** inputs, each applied to the calendar when it changes at runtime: `ariaLabel`, `defaultDate`, `setDefaultDate`, `firstDay`, `minDate`, `maxDate`, `disableWeekends`, `disableDayFn`, `yearRange`, `i18n`, `yearSuffix`, `showMonthAfterYear`, `showDaysInNextAndPreviousMonths`, `enableSelectionDaysInNextAndPreviousMonths`, `numberOfMonths`.
 
-**Keyboard**: `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret — year, month or day — and leave it selected; a step outside `minDate`/`maxDate` is refused. `Alt` + those keys work the panel, and while it is open the arrows move the calendar instead. Plain arrows never open it. Full table in `user/fields.md`.
+**Keyboard**: `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret — year, month or day — and leave it selected; a step outside `minDate`/`maxDate` is refused. `Alt` + those keys work the panel, and while it is open the arrows move the calendar instead. Plain arrows never open it. Full table in [`user/fields.md`](fields.md).
 
 **Use when** you need calendar date selection.
 
@@ -211,7 +212,7 @@ Masked time input.
 | `unicodeTokenFormat` | `string`              | `'HH.mm'`       | date-fns parse/format token |
 | `emptyHint`          | `FormidableEmptyHint` | `'underscores'` | Resting empty display       |
 
-**Keyboard**: `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret — hour, minute, second or AM/PM — and leave it selected. Full table in `user/fields.md`.
+**Keyboard**: `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret — hour, minute, second or AM/PM — and leave it selected. Full table in [`user/fields.md`](fields.md).
 
 **Use when** you need time-of-day entry.
 
@@ -292,7 +293,7 @@ Wraps a field and its label, label adornment, prefix, suffix, hints and errors i
 
 **In-Field Toggle**: `dropdown-field` and `date-field` draw a panel toggle inside their own box, at the field's inner right edge, and `select-field` draws its dropdown arrow in the same place. It is not projected content, so instead of measuring it the field declares `hasInFieldToggle` and the decorator turns that into a `has-in-field-toggle` host class, which raises `--formidable-field-toggle-inset` to `--formidable-field-toggle-size`. All three report it as `!readonly && !disabled` rather than as a constant, because none renders the toggle in those states: the class and the inset go away with it, and the value reclaims the space. Only the value inset adds it: in the two panel fields the toggle is a flex item inside the field's `padding-right`, so a projected suffix — measured into that padding — already pushes the toggle left of itself. `select-field` cannot put anything in flow beside its value, since the value area is a native `<select>`, so its host is a one-cell grid that stacks the arrow over the control; the arrow takes no pointer events and the select reserves the room with its own `padding-right`, which is what keeps the whole box clickable.
 
-**Field State**: the decorator is where all of the field's state is reachable at once, so it mirrors it onto its own host as `is-readonly`, `is-disabled`, `is-focused`, `is-invalid`, `label-resting`, `label-inside`, `has-in-field-toggle`, `has-open-panel` and `has-open-sheet`. The last two lift the decorator into the consumer's stack for as long as a panel is open, and only then — see `tech/layering.md`. A field used **without** a decorator carries `is-undecorated`, `has-open-panel` and `has-open-sheet` on its own host instead, so its panel still paints correctly. `is-invalid` comes from the `FieldErrorsComponent` that `FieldErrorsDirective` registers with the decorator — nothing else in the library knows a control's validity, so a field used without a decorator has no invalid styling.
+**Field State**: the decorator is where all of the field's state is reachable at once, so it mirrors it onto its own host as `is-readonly`, `is-disabled`, `is-focused`, `is-invalid`, `label-resting`, `label-inside`, `has-in-field-toggle`, `has-open-panel` and `has-open-sheet`. The last two lift the decorator into the consumer's stack for as long as a panel is open, and only then — see [`tech/layering.md`](../tech/layering.md). A field used **without** a decorator carries `is-undecorated`, `has-open-panel` and `has-open-sheet` on its own host instead, so its panel still paints correctly. `is-invalid` comes from the `FieldErrorsComponent` that `FieldErrorsDirective` registers with the decorator — nothing else in the library knows a control's validity, so a field used without a decorator has no invalid styling.
 
 Each state is a set of `--formidable-color-field-*` remaps rather than a set of property declarations, so a field picks up whichever set applies without every rule restating `background`, `color` and `border-color`. Four of the five are applied on the field element itself, where their order in the `field` and `group-field` mixins is their precedence: `hovered` < `focused` < `readonly` < `disabled`. `invalid` is the exception — it is applied on the decorator's host and inherited, which makes its precedence a matter of _which_ variables it remaps: it points the base, hover and focus colours at the invalid ones and leaves the readonly and disabled ones alone, so it survives hover and focus but yields to readonly and disabled. The group fields reuse the field's state colours; the toggle's track and the slider's track follow the same variables.
 
@@ -300,7 +301,7 @@ Each state is a set of `--formidable-color-field-*` remaps rather than a set of 
 
 `aria-labelledby` is what the `vertical` layout has instead of a `<label for>`, which its `div` label cannot be. It is also the toggle's only name: the toggle's `[id]` is on its hidden checkbox while the focusable element is the `role="switch"` `div`, and its own `onLabel` / `offLabel` is state text rather than a name. For the same reason the `vertical` layout renders no `legend` — the field inside carries the group role and is named from the projected label, so a legend would only add a second announcement of the raw control name.
 
-| Field                                                | Element carrying the state                  | Attributes beyond `aria-required` / `aria-invalid` / `aria-describedby`           |
+| Field                                                | Element Carrying The State                  | Attributes Beyond `aria-required` / `aria-invalid` / `aria-describedby`           |
 | :--------------------------------------------------- | :------------------------------------------ | :-------------------------------------------------------------------------------- |
 | `input-field`, `textarea-field`                      | the `input` / `textarea`                    | — native `readonly` and `disabled` already speak                                  |
 | `select-field`                                       | the `select`                                | `aria-readonly` (native `readonly` is inert on a `select`)                        |
@@ -314,7 +315,7 @@ Each state is a set of `--formidable-color-field-*` remaps rather than a set of 
 
 **Combobox And Options**: the ids for everything inside a field's own box are the field's to mint — see **Accessibility** under **Base Field Directive**. `time-field` and `select-field` take none of this: one has no panel, the other is a native `select` the platform already speaks for.
 
-| Field                                       | Popup                                      | On the control                                                                |
+| Field                                       | Popup                                      | On The Control                                                                |
 | :------------------------------------------ | :----------------------------------------- | :---------------------------------------------------------------------------- |
 | `dropdown-field`                            | `.panel-scrollcontainer[role=listbox]`     | `role="combobox"`, `aria-expanded`, `aria-controls`, `aria-activedescendant`  |
 | `autocomplete-field`                        | `.panel-scrollcontainer[role=listbox]`     | as above, plus `aria-autocomplete="list"`                                     |
@@ -357,7 +358,7 @@ A floating label's value clears it because the `label-inside` host hands the fie
 
 **Required Marker**: a field's `showRequiredMarker` input suffixes a marker to its label, in every label position and in the group layout's `div` label alike. `showRequiredMarkers` on `NgxFormidableFormDirective` withholds the marker from every field on that form, so one switch answers whether this form marks its required fields at all; it hides the glyph only, and `aria-required` keeps following the field's own input. The glyph is `--formidable-label-required-marker`, a `content` string, so a theme can swap `*` for a word without touching markup. It carries no colour of its own — it inherits the label, and so follows every state with it — and it is `aria-hidden`, because a glyph is no way to say "required"; the accessible form of the same fact is `aria-required` on the field. `.label-wrapper` is a flex row for it, and the marker is a sibling of the projected label rather than part of it: when a label runs out of room, the consumer's own text is what ellipsizes and the marker survives. A field with no label projected has nothing to suffix, and the wrapper collapses with it.
 
-`showRequiredMarker` is **presentational only**. It validates nothing, so a field marked with it and a validator without a matching rule can drift apart, and keeping the two in step is the consumer's job. The field sets no native `required` attribute and registers no validator of its own — which validator decides the field is invalid is entirely the consumer's choice. It is not called `required` because Angular's own `RequiredValidator` matches `[required][ngModel]` on any element, so that name would attach a validator alongside the marker. See `user/validation.md`.
+`showRequiredMarker` is **presentational only**. It validates nothing, so a field marked with it and a validator without a matching rule can drift apart, and keeping the two in step is the consumer's job. The field sets no native `required` attribute and registers no validator of its own — which validator decides the field is invalid is entirely the consumer's choice. It is not called `required` because Angular's own `RequiredValidator` matches `[required][ngModel]` on any element, so that name would attach a validator alongside the marker. See [`user/validation.md`](validation.md).
 
 ### Field Option
 
@@ -410,7 +411,7 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 | `NgxFormidableFieldValidateDirective`     | `[ngModel]`                         | Registers as `NG_ASYNC_VALIDATORS` and validates the control as a **field rule**, resolving its dotted target and delegating to the host form directive. No inputs. No-op outside a formidable form, and again with no `FORMIDABLE_VALIDATOR` provided.                                                                                                                                                                                                                                                                                                                 |
 | `NgxFormidableGroupValidateDirective`     | `[ngModelGroup]`                    | As above, as a **group rule** on the group's own target. No inputs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `NgxFormidableWholeFormValidateDirective` | `form[formidableValidateWholeForm]` | Validates the form as a **whole-form rule** under the `WHOLE_FORM` target, delegating to the host form directive. Input `formidableValidateWholeForm` (boolean attribute, default `true`).                                                                                                                                                                                                                                                                                                                                                                              |
-| `NgxFormidableVestValidatorDirective<T>`  | `form[formSuite]`                   | **From `@cynthion/ngx-formidable/vest`.** Provides `FORMIDABLE_VALIDATOR` from a Vest suite. Input `formSuite: Suite`. The library's only Vest-aware code — see `user/validation.md`.                                                                                                                                                                                                                                                                                                                                                                                   |
+| `NgxFormidableVestValidatorDirective<T>`  | `form[formSuite]`                   | **From `@cynthion/ngx-formidable/vest`.** Provides `FORMIDABLE_VALIDATOR` from a Vest suite. Input `formSuite: Suite`. The library's only Vest-aware code — see [`user/validation.md`](validation.md).                                                                                                                                                                                                                                                                                                                                                                  |
 
 ### Field-Decoration
 
@@ -476,20 +477,20 @@ Usually created by `FieldErrorsDirective` rather than written by hand. Inside a 
 
 The contracts a custom field, option or validator implements. Every field component already satisfies its own through `BaseFieldDirective`; these matter when writing one from scratch. Every member that is an input is typed as the `Signal` the component declares for it — `IFormidableOption` is the exception, because it is data a consumer also writes by hand.
 
-| Interface                 | Implemented by                  | Contract                                                                           |
-| :------------------------ | :------------------------------ | :--------------------------------------------------------------------------------- |
-| `IFormidableField<T>`     | every field, and the decorator  | What the decorator reads off a field: refs, id, state, value and both streams      |
-| `IFormidableOptionField`  | the five option fields          | `options`, `defaultOption`, `defaultOptionMode`, `selectOption`, `optionRole`      |
-| `IFormidableOption<T>`    | plain data, written by hand     | One option: `value`, `label`, `template`, its flags and `match`                    |
-| `IFormidableActionOption` | plain data, written by hand     | An option plus the `action` that replaces committing it — see **Action Option**    |
-| `IFormidableOptionSource` | `FieldOptionComponent`          | `option` — the plain option a component hands to the field that owns it            |
-| `IFormidablePanelField`   | dropdown, autocomplete, date    | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                          |
-| `IFormidableMaskField`    | input, textarea                 | `mask`, `maskConfig`                                                               |
-| `IFormidableValidator<T>` | the Vest validator, or your own | `validate(model, target): Observable<string[] \| null>` — see `user/validation.md` |
+| Interface                 | Implemented By                  | Contract                                                                                            |
+| :------------------------ | :------------------------------ | :-------------------------------------------------------------------------------------------------- |
+| `IFormidableField<T>`     | every field, and the decorator  | What the decorator reads off a field: refs, id, state, value and both streams                       |
+| `IFormidableOptionField`  | the five option fields          | `options`, `defaultOption`, `defaultOptionMode`, `selectOption`, `optionRole`                       |
+| `IFormidableOption<T>`    | plain data, written by hand     | One option: `value`, `label`, `template`, its flags and `match`                                     |
+| `IFormidableActionOption` | plain data, written by hand     | An option plus the `action` that replaces committing it — see **Action Option**                     |
+| `IFormidableOptionSource` | `FieldOptionComponent`          | `option` — the plain option a component hands to the field that owns it                             |
+| `IFormidablePanelField`   | dropdown, autocomplete, date    | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                                           |
+| `IFormidableMaskField`    | input, textarea                 | `mask`, `maskConfig`                                                                                |
+| `IFormidableValidator<T>` | the Vest validator, or your own | `validate(model, target): Observable<string[] \| null>` — see [`user/validation.md`](validation.md) |
 
 Per-field interfaces name the exact surface of one component: `IFormidableInputField`, `IFormidableTextareaField`, `IFormidableSelectField`, `IFormidableDropdownField`, `IFormidableAutocompleteField`, `IFormidableRadioGroupField`, `IFormidableCheckboxGroupField`, `IFormidableDateField`, `IFormidableTimeField`, `IFormidableToggleField`, `IFormidableSliderField`, and `IFormidablePikadayOptions` for the calendar passthrough set.
 
-| Validation type               | Definition                                                                         |
+| Validation Type               | Definition                                                                         |
 | :---------------------------- | :--------------------------------------------------------------------------------- |
 | `FormidableFormErrors`        | `Record<string, string[]>`, every message keyed by the target that reported it     |
 | `FormidableErrorExtractorFn`  | `(errors: ValidationErrors \| null) => string[]`, for `FORMIDABLE_ERROR_EXTRACTOR` |
@@ -527,3 +528,13 @@ Per-field interfaces name the exact surface of one component: `IFormidableInputF
 | `FieldPrefixDirective`                    | `[formidableFieldPrefix]`           | Directive  | —                 |
 | `FieldSuffixDirective`                    | `[formidableFieldSuffix]`           | Directive  | —                 |
 | `FieldToggleIconDirective`                | `[formidableFieldToggleIcon]`       | Directive  | —                 |
+
+---
+
+## Related
+
+- [`user/getting-started.md`](getting-started.md) — install, wiring, the stylesheet, a first form
+- [`user/fields.md`](fields.md) — options, panels, keyboard, dates and times, masking, focus
+- [`user/decoration.md`](decoration.md) — labels, adornments, prefixes, suffixes, hints, required marker
+- [`user/validation.md`](validation.md) — connecting a validator, conditional fields, when messages appear
+- [`user/custom-fields.md`](custom-fields.md) — building a field, an option or a validator of your own

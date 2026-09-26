@@ -18,8 +18,7 @@ interface RenderedDoc {
 /**
  * Where a link in the documentation should point once it is rendered inside the portal.
  *
- * The documents reference each other by path relative to `.documentation/`, which is right on GitHub and
- * meaningless here. A `user/` document is a route; a `tech/` or `impl/` one is not mirrored at all, so it
+ * The documents link each other by relative path, which is right on GitHub and meaningless here. A `user/` document is a route; a `tech/` or `impl/` one is not mirrored at all, so it
  * goes to the repository rather than nowhere.
  */
 export function rewriteDocHref(href: string, knownSlugs: ReadonlySet<string>): { href: string; external: boolean } {
@@ -39,42 +38,8 @@ export function rewriteDocHref(href: string, knownSlugs: ReadonlySet<string>): {
   if (bucket !== 'user') return { href: `${REPOSITORY_DOCS}/${bucket}/${slug}.md`, external: true };
 
   // A fragment is dropped rather than carried: the portal routes on the hash, so a second `#` in the URL
-  // would be ambiguous. `impl/portal.md` states the rule.
+  // would be ambiguous. `tech/portal.md` states the rule.
   return knownSlugs.has(slug) ? { href: `#/docs/${slug}`, external: false } : { href: trimmed, external: false };
-}
-
-/**
- * Makes the documents' file references clickable.
- *
- * They cite each other as code spans — `user/theming.md` — because the documentation guide asks for file
- * references in backticks rather than links. On GitHub that reads fine, since the reader is already in the
- * file tree. Here it is a dead end, so a span naming a document becomes a link to wherever that document
- * lives, while keeping its monospace look.
- */
-function linkFileReferences(parsed: Document, knownSlugs: ReadonlySet<string>): void {
-  for (const code of Array.from(parsed.querySelectorAll('code'))) {
-    // A code block is a code sample, not a reference, and a span already inside a link needs nothing.
-    if (code.closest('pre') || code.closest('a')) continue;
-
-    const text = (code.textContent ?? '').trim();
-
-    if (!/^[a-z0-9/-]+\.md$/i.test(text)) continue;
-
-    const { href, external } = rewriteDocHref(text, knownSlugs);
-
-    if (href === text) continue;
-
-    const anchor = parsed.createElement('a');
-
-    anchor.setAttribute('href', href);
-    if (external) {
-      anchor.setAttribute('target', '_blank');
-      anchor.setAttribute('rel', 'noreferrer noopener');
-    }
-
-    code.replaceWith(anchor);
-    anchor.append(code);
-  }
 }
 
 /**
@@ -100,8 +65,6 @@ export function renderDoc(markdown: string, knownSlugs: ReadonlySet<string>): Re
       anchor.setAttribute('rel', 'noreferrer noopener');
     }
   }
-
-  linkFileReferences(parsed, knownSlugs);
 
   const claim = (element: Element, text: string): string => {
     let id = slugify(text);
