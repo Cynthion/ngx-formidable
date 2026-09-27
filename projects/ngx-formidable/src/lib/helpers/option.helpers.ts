@@ -1,16 +1,16 @@
 import {
   FieldDefaultOptionMode,
-  IFormidableActionOption,
-  IFormidableOption,
-  IFormidableOptionSource
+  FormidableActionOption,
+  FormidableOption,
+  FormidableOptionSource
 } from '../models/formidable.model';
 
 /** Merges an option field's `options` input with its projected option components, sorted if a `sortFn` is given. */
 export function combineFieldOptions(
-  inlineOptions: IFormidableOption[] | undefined,
-  projectedOptions: IFormidableOption[] | undefined,
-  sortFn?: (a: IFormidableOption, b: IFormidableOption) => number
-): IFormidableOption[] {
+  inlineOptions: FormidableOption[] | undefined,
+  projectedOptions: FormidableOption[] | undefined,
+  sortFn?: (a: FormidableOption, b: FormidableOption) => number
+): FormidableOption[] {
   const combined = [...(inlineOptions ?? []), ...(projectedOptions ?? [])];
 
   return sortFn ? [...combined].sort(sortFn) : combined;
@@ -19,7 +19,7 @@ export function combineFieldOptions(
 /**
  * Reads every projected option inside an effect, so one changing in place triggers the effect to re-run.
  */
-export function trackProjectedOptions(sources: readonly IFormidableOptionSource[]): void {
+export function trackProjectedOptions(sources: readonly FormidableOptionSource[]): void {
   for (const source of sources) {
     try {
       source.option();
@@ -31,10 +31,10 @@ export function trackProjectedOptions(sources: readonly IFormidableOptionSource[
 
 /** Puts a field's `defaultOption` in front of its options, or in their place — see `FieldDefaultOptionMode`. */
 export function applyDefaultOption(
-  options: IFormidableOption[],
-  defaultOption?: IFormidableOption,
+  options: FormidableOption[],
+  defaultOption?: FormidableOption,
   mode: FieldDefaultOptionMode = 'always'
-): IFormidableOption[] {
+): FormidableOption[] {
   if (!defaultOption) return options;
 
   if (mode === 'fallback') {
@@ -50,10 +50,10 @@ export function applyDefaultOption(
  * the list from being empty.
  */
 export function applyActionOption(
-  options: IFormidableOption[],
-  actionOption?: IFormidableActionOption,
+  options: FormidableOption[],
+  actionOption?: FormidableActionOption,
   mode: FieldDefaultOptionMode = 'always'
-): IFormidableOption[] {
+): FormidableOption[] {
   if (!actionOption) return options;
 
   if (mode === 'fallback' && options.length) return options;
@@ -67,13 +67,13 @@ export function applyActionOption(
  */
 export function getNextAvailableOptionIndex(
   currentIndex: number,
-  options: IFormidableOption[],
+  options: FormidableOption[],
   direction: 'up' | 'down'
 ): number {
   const n = options.length;
   if (!n) return -1;
 
-  const isAvailable = (o?: IFormidableOption) => !!o && !o.disabled && !o.readonly;
+  const isAvailable = (o?: FormidableOption) => !!o && !o.disabled && !o.readonly;
 
   if (options.every((o) => !isAvailable(o))) return -1;
 

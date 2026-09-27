@@ -7,8 +7,8 @@ Why the library carries no validation library, and where the seam sits.
 ```mermaid
 flowchart TB
   subgraph Core["@cynthion/ngx-formidable"]
-    L1["L1<br/>UI And Theming<br/><br/>Field Components, BaseFieldDirective,<br/>FieldDecoratorComponent, SCSS Tokens<br/>No Validation Concept"]
-    L2a["L2a<br/>Error Rendering<br/><br/>FieldErrorsDirective, FieldErrorsComponent<br/>FORMIDABLE_ERROR_EXTRACTOR<br/>FORMIDABLE_ERROR_TRANSLATOR"]
+    L1["L1<br/>UI And Theming<br/><br/>Field Components, BaseField,<br/>FieldDecorator, SCSS Tokens<br/>No Validation Concept"]
+    L2a["L2a<br/>Error Rendering<br/><br/>FieldErrorsRenderer, FieldErrors<br/>FORMIDABLE_ERROR_EXTRACTOR<br/>FORMIDABLE_ERROR_TRANSLATOR"]
     L2b["L2b<br/>Form Harness<br/><br/>formidableForm, ngModel, ngModelGroup,<br/>formidableValidateWholeForm<br/>Model, Targets, Debouncing"]
     Seam["FORMIDABLE_VALIDATOR<br/>validate(model, target)"]
   end
@@ -38,12 +38,12 @@ flowchart TB
 
 Nothing in L1 or L2a is coupled to a validator because both rest on things Angular already guarantees:
 
-- **`AbstractControl.errors`** — every validator writes here. `FieldErrorsComponent` reads it and nothing else, through `FORMIDABLE_ERROR_EXTRACTOR`; `getAllFormErrors` runs every entry through the same extractor, so `errorsChange` is one homogeneous `FormidableFormErrors` map however many validators wrote into it.
-- **`.is-invalid`** — one class on `FieldDecoratorComponent`'s host, computed from the messages and the reveal setting that gates them. The whole SCSS state layer hangs off it, and it means nothing about who decided the field was invalid.
+- **`AbstractControl.errors`** — every validator writes here. `FieldErrors` reads it and nothing else, through `FORMIDABLE_ERROR_EXTRACTOR`; `getAllFormErrors` runs every entry through the same extractor, so `errorsChange` is one homogeneous `FormidableFormErrors` map however many validators wrote into it.
+- **`.is-invalid`** — one class on `FieldDecorator`'s host, computed from the messages and the reveal setting that gates them. The whole SCSS state layer hangs off it, and it means nothing about who decided the field was invalid.
 
 `FORMIDABLE_ERROR_EXTRACTOR` is what makes `AbstractControl.errors` genuinely universal. The harness writes `{ error, errors }`; Angular's validators write `{ required: true }`; a schema library writes something else. The extractor's default handles the first two and an override handles the third, so the same UI serves all of them.
 
-One naming trap worth knowing: `IFormidableValidator.validate(model, target)` and Angular's `AsyncValidator.validate(control)` share a method name. No class in the library implements both — the three validator directives are `AsyncValidator`s, the Vest directive is an `IFormidableValidator` — and TypeScript rejects it loudly if one ever tries.
+One naming trap worth knowing: `FormidableValidator.validate(model, target)` and Angular's `AsyncValidator.validate(control)` share a method name. No class in the library implements both — the three validator directives are `AsyncValidator`s, the Vest directive is an `FormidableValidator` — and TypeScript rejects it loudly if one ever tries.
 
 ## Why The Seam Is Where It Is
 
@@ -73,11 +73,11 @@ Step 2 is what keeps the target itself current. A field's or a group's own valid
 
 **Run** is when the validator runs, **reveal** is when the messages appear, and they are separate mechanisms with separate owners. Consumer-facing reference: [`user/validation.md`](../user/validation.md).
 
-| Axis     | Owner   | Mechanism    | Read By                        |
-| :------- | :------ | :----------- | :----------------------------- |
-| Run      | Angular | `updateOn`   | `AbstractControl`              |
-| Reveal   | Library | `revealOn`   | `FieldErrorsComponent.invalid` |
-| Debounce | Library | `debounceMs` | `createAsyncValidator`         |
+| Axis     | Owner   | Mechanism    | Read By                |
+| :------- | :------ | :----------- | :--------------------- |
+| Run      | Angular | `updateOn`   | `AbstractControl`      |
+| Reveal   | Library | `revealOn`   | `FieldErrors.invalid`  |
+| Debounce | Library | `debounceMs` | `createAsyncValidator` |
 
 ### Why Run Gets No Input
 
@@ -87,7 +87,7 @@ Step 2 is what keeps the target itself current. A field's or a group's own valid
 
 The run axis only works because every field keeps to two rules. Angular commits a `blur` control's value from inside `onTouched`, and only when a change is already pending, so:
 
-- **Touch Last**: `onTouched()` is the last act of a blur. `BaseFieldDirective.onFocusChange` calls `doOnFocusChange` first, so a field that commits on blur, as `date-field` and `time-field` do, has written its value before the touch that commits it.
+- **Touch Last**: `onTouched()` is the last act of a blur. `BaseField.onFocusChange` calls `doOnFocusChange` first, so a field that commits on blur, as `date-field` and `time-field` do, has written its value before the touch that commits it.
 - **Programmatic Paths Are Silent**: `runSilently(cause, work)` marks work the user did not cause, and both `touch()` and `commit()` respect it. Nothing on such a path touches the control or leaves it dirty.
 - **A Write Does Not Take The Caret**: a text field writes through `replaceText`, which leaves the element alone when it already shows that text and collapses the caret behind the text only when it replaced something. A consumer that echoes its model back writes the displayed value on every keystroke, and the caret and selection stay the user's.
 - **A Field May Disown A Blur**: `ignoresBlur()` suppresses both the commit and the touch, for a field that moved focus onto something it owns. `date-field` does this so a control inside its panel stays clickable.
@@ -107,7 +107,7 @@ Angular raises its pending dirty flag on every change a value accessor reports a
 
 ### Reveal Resolution And Repaint
 
-`FieldErrorsComponent` resolves its own field's `revealOn` first, then the form's, then `touched`. `FieldErrorsDirective` pushes the field's value and drives the repaint, because none of the state the component reads is signal-backed: `AbstractControl.errors`, `touched` and `dirty` are plain properties, `NgForm.submitted` reads through `untracked`, and the form's `revealOn` is a signal on a directive the component does not own. All three join one stream, and each emission calls `refresh()` — which bumps the revision the component's `errors` and `invalid` computeds read. See [`tech/decoration.md`](decoration.md) for what that one signal then reaches.
+`FieldErrors` resolves its own field's `revealOn` first, then the form's, then `touched`. `FieldErrorsRenderer` pushes the field's value and drives the repaint, because none of the state the component reads is signal-backed: `AbstractControl.errors`, `touched` and `dirty` are plain properties, `NgForm.submitted` reads through `untracked`, and the form's `revealOn` is a signal on a directive the component does not own. All three join one stream, and each emission calls `refresh()` — which bumps the revision the component's `errors` and `invalid` computeds read. See [`tech/decoration.md`](decoration.md) for what that one signal then reaches.
 
 ### Debounce
 
@@ -156,6 +156,6 @@ Plus `zod` in `peerDependencies` marked optional, and a `tsconfig.json` path ali
 
 `createAsyncValidator` deliberately skips its `set(model, target, value)` step for `WHOLE_FORM`: that target addresses the whole model rather than a path within it, so writing the form's value under a `wholeForm` key would hand the validator a key the model does not have. It needs no patching anyway — by the time the root form validates, its own value has been recomputed, so the live values in the assembled model are already current. See **The Model A Rule Sees**.
 
-`NgxFormidableWholeFormValidateDirective` delegates to `formDirective.createAsyncValidator(WHOLE_FORM)`.
+`NgxFormidableWholeFormValidate` delegates to `formDirective.createAsyncValidator(WHOLE_FORM)`.
 
 It resolves the form directive in `ngOnInit` rather than injecting it. `NgForm` builds its `FormGroup` inside its own constructor, and a new `FormGroup` runs its async validators immediately, so `validate()` is first called while `NgForm` is still being constructed; asking for the form directive there would close the loop `NgForm` → `NG_ASYNC_VALIDATORS` → this directive → `NgForm` and throw NG0200.

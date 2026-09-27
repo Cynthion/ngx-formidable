@@ -14,7 +14,7 @@ import {
 import { THEME_TOKENS_BY_NAME } from '../model/token-manifest';
 import { PORTAL_ROUTES } from '../portal.routes';
 import { ThemeStore } from '../state/theme.store';
-import { SpecimenPageComponent } from './specimen-page.component';
+import { SpecimenPage } from './specimen-page';
 
 const SLUGS = new Set(DOC_PAGES.map((page) => page.slug));
 
@@ -25,7 +25,7 @@ const SLUGS = new Set(DOC_PAGES.map((page) => page.slug));
  * actually renders, so none of them drifts into something that names or opens nothing.
  */
 describe('specimen', () => {
-  let fixture: ComponentFixture<SpecimenPageComponent>;
+  let fixture: ComponentFixture<SpecimenPage>;
   let root: HTMLElement;
 
   function settle(): void {
@@ -46,7 +46,7 @@ describe('specimen', () => {
     TestBed.configureTestingModule({ providers: [provideNgxMask(), provideRouter(PORTAL_ROUTES)] });
     TestBed.inject(ThemeStore).reset();
 
-    fixture = TestBed.createComponent(SpecimenPageComponent);
+    fixture = TestBed.createComponent(SpecimenPage);
     root = fixture.nativeElement as HTMLElement;
     document.body.append(root);
   });

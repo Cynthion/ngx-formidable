@@ -2,17 +2,17 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import {
-  FieldDecoratorComponent,
-  FieldErrorsDirective,
+  FieldDecorator,
+  FieldErrorsRenderer,
   FormidableFormErrors,
-  InputFieldComponent,
-  NgxFormidableFieldValidateDirective,
-  NgxFormidableFormDirective,
-  NgxFormidableGroupValidateDirective,
-  NgxFormidableWholeFormValidateDirective,
+  InputField,
+  NgxFormidableFieldValidate,
+  NgxFormidableForm,
+  NgxFormidableGroupValidate,
+  NgxFormidableWholeFormValidate,
   WHOLE_FORM
 } from '@cynthion/ngx-formidable';
-import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/vest';
+import { NgxFormidableVestValidator } from '@cynthion/ngx-formidable/vest';
 import { provideNgxMask } from 'ngx-mask';
 import { VestWiringModel, vestWiringSuite } from './vest-wiring.model';
 
@@ -28,13 +28,13 @@ import { VestWiringModel, vestWiringSuite } from './vest-wiring.model';
 @Component({
   imports: [
     FormsModule,
-    NgxFormidableFormDirective,
-    NgxFormidableFieldValidateDirective,
-    NgxFormidableWholeFormValidateDirective,
-    NgxFormidableVestValidatorDirective,
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    FieldErrorsDirective
+    NgxFormidableForm,
+    NgxFormidableFieldValidate,
+    NgxFormidableWholeFormValidate,
+    NgxFormidableVestValidator,
+    FieldDecorator,
+    InputField,
+    FieldErrorsRenderer
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -55,7 +55,7 @@ import { VestWiringModel, vestWiringSuite } from './vest-wiring.model';
     </form>
   `
 })
-class DemoWiringHostComponent {
+class DemoWiringHost {
   formValue: VestWiringModel = { firstName: '', lastName: '', passwords: { password: '' } };
   formSuite = vestWiringSuite;
   isValid: boolean | null = null;
@@ -66,13 +66,13 @@ class DemoWiringHostComponent {
 @Component({
   imports: [
     FormsModule,
-    NgxFormidableFormDirective,
-    NgxFormidableFieldValidateDirective,
-    NgxFormidableGroupValidateDirective,
-    NgxFormidableVestValidatorDirective,
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    FieldErrorsDirective
+    NgxFormidableForm,
+    NgxFormidableFieldValidate,
+    NgxFormidableGroupValidate,
+    NgxFormidableVestValidator,
+    FieldDecorator,
+    InputField,
+    FieldErrorsRenderer
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -102,7 +102,7 @@ class DemoWiringHostComponent {
     </form>
   `
 })
-class GroupWiringHostComponent {
+class GroupWiringHost {
   formValue: VestWiringModel = { passwords: { password: '', confirmPassword: '' } };
   formSuite = vestWiringSuite;
   dependentFields = { 'passwords.password': ['passwords.confirmPassword'] };
@@ -116,12 +116,12 @@ class GroupWiringHostComponent {
 @Component({
   imports: [
     FormsModule,
-    NgxFormidableFormDirective,
-    NgxFormidableFieldValidateDirective,
-    NgxFormidableGroupValidateDirective,
-    NgxFormidableWholeFormValidateDirective,
-    NgxFormidableVestValidatorDirective,
-    InputFieldComponent
+    NgxFormidableForm,
+    NgxFormidableFieldValidate,
+    NgxFormidableGroupValidate,
+    NgxFormidableWholeFormValidate,
+    NgxFormidableVestValidator,
+    InputField
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -143,15 +143,15 @@ class GroupWiringHostComponent {
     </form>
   `
 })
-class WholeFormTypingHostComponent {
+class WholeFormTypingHost {
   formValue: VestWiringModel = { firstName: '', passwords: { password: '' } };
   formSuite = vestWiringSuite;
   errors: FormidableFormErrors = {};
 }
 
 describe('demo wiring: @cynthion/ngx-formidable + @cynthion/ngx-formidable/vest', () => {
-  let fixture: ComponentFixture<DemoWiringHostComponent>;
-  let host: DemoWiringHostComponent;
+  let fixture: ComponentFixture<DemoWiringHost>;
+  let host: DemoWiringHost;
   let root: HTMLElement;
 
   function settle(): void {
@@ -173,7 +173,7 @@ describe('demo wiring: @cynthion/ngx-formidable + @cynthion/ngx-formidable/vest'
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(DemoWiringHostComponent);
+    fixture = TestBed.createComponent(DemoWiringHost);
     host = fixture.componentInstance;
     root = fixture.nativeElement as HTMLElement;
   });
@@ -214,8 +214,8 @@ describe('demo wiring: @cynthion/ngx-formidable + @cynthion/ngx-formidable/vest'
 });
 
 describe('demo wiring: the whole-form rule while typing', () => {
-  let fixture: ComponentFixture<WholeFormTypingHostComponent>;
-  let host: WholeFormTypingHostComponent;
+  let fixture: ComponentFixture<WholeFormTypingHost>;
+  let host: WholeFormTypingHost;
   let root: HTMLElement;
 
   function settle(): void {
@@ -238,7 +238,7 @@ describe('demo wiring: the whole-form rule while typing', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(WholeFormTypingHostComponent);
+    fixture = TestBed.createComponent(WholeFormTypingHost);
     host = fixture.componentInstance;
     root = fixture.nativeElement as HTMLElement;
   });
@@ -282,8 +282,8 @@ describe('demo wiring: the whole-form rule while typing', () => {
 });
 
 describe('demo wiring: the passwords group', () => {
-  let fixture: ComponentFixture<GroupWiringHostComponent>;
-  let host: GroupWiringHostComponent;
+  let fixture: ComponentFixture<GroupWiringHost>;
+  let host: GroupWiringHost;
   let root: HTMLElement;
 
   function settle(): void {
@@ -297,7 +297,7 @@ describe('demo wiring: the passwords group', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(GroupWiringHostComponent);
+    fixture = TestBed.createComponent(GroupWiringHost);
     host = fixture.componentInstance;
     root = fixture.nativeElement as HTMLElement;
   });

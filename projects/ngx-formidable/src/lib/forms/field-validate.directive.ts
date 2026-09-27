@@ -1,12 +1,12 @@
 import { Directive, inject } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
 import { Observable, of } from 'rxjs';
-import { NgxFormidableFormDirective } from './form.directive';
+import { NgxFormidableForm } from './form.directive';
 import { getFieldTarget } from './form.helpers';
 
 /**
  * Validates every `ngModel` control on a formidable form as a **field rule**: it resolves the control's
- * dotted target and hands it to `NgxFormidableFormDirective`, which debounces it and runs the provided
+ * dotted target and hands it to `NgxFormidableForm`, which debounces it and runs the provided
  * validator.
  *
  * The `[ngModel]` selector matches every model-bound control in the app, so this no-ops twice over — once
@@ -17,17 +17,16 @@ import { getFieldTarget } from './form.helpers';
   // Deliberately hijacks Angular's own selector so it attaches to every model-bound control.
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[ngModel]',
-  standalone: true,
   providers: [
     {
       provide: NG_ASYNC_VALIDATORS,
-      useExisting: NgxFormidableFieldValidateDirective,
+      useExisting: NgxFormidableFieldValidate,
       multi: true
     }
   ]
 })
-export class NgxFormidableFieldValidateDirective implements AsyncValidator {
-  private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true, skipSelf: true });
+export class NgxFormidableFieldValidate implements AsyncValidator {
+  private readonly formDirective = inject(NgxFormidableForm, { optional: true, skipSelf: true });
 
   public validate(control: AbstractControl): Observable<ValidationErrors | null> {
     if (!this.formDirective) {

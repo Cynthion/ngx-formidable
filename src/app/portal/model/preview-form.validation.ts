@@ -162,7 +162,7 @@ export const ANGULAR_MIN_LENGTHS: ReadonlyMap<string, number> = new Map([['phone
  *
  * Each entry is a field whose value gates an `omitWhen`: without it, flipping the switch leaves the message
  * from the field that just disappeared standing on a form that no longer has it. A group needs no entry —
- * `NgxFormidableGroupValidateDirective` validates on the group's own value, which every member changes.
+ * `NgxFormidableGroupValidate` validates on the group's own value, which every member changes.
  */
 export const PREVIEW_DEPENDENT_FIELDS: Readonly<Record<string, string[]>> = {
   'pickup': ['address', 'branch'],

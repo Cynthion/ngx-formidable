@@ -1,6 +1,6 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed } from '@angular/core/testing';
-import { ExampleTooltipComponent } from './example-tooltip.component';
+import { ExampleTooltip } from './example-tooltip';
 
 /**
  * The tooltip closes itself from capture-phase `document` listeners it registers in `ngOnInit`, so nothing
@@ -12,13 +12,13 @@ import { ExampleTooltipComponent } from './example-tooltip.component';
  * suite is not, and why the NG0914 warning is expected.
  */
 describe('example-tooltip outside dismissal', () => {
-  let fixture: ComponentFixture<ExampleTooltipComponent>;
+  let fixture: ComponentFixture<ExampleTooltip>;
   let root: HTMLElement;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
 
-    fixture = TestBed.createComponent(ExampleTooltipComponent);
+    fixture = TestBed.createComponent(ExampleTooltip);
     fixture.componentRef.setInput('text', 'Help');
     fixture.componentRef.setInput('trigger', 'click');
     fixture.detectChanges();

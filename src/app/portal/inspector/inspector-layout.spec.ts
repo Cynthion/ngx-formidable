@@ -3,7 +3,7 @@ import { provideNgxMask } from 'ngx-mask';
 import { FormDefinitionStore } from '../state/form-definition.store';
 import { FieldScope, InspectorStore } from '../state/inspector.store';
 import { INSPECTOR_WIDTH_DEFAULT, INSPECTOR_WIDTH_MIN, LayoutStore } from '../state/layout.store';
-import { InspectorComponent } from './inspector.component';
+import { Inspector } from './inspector';
 
 /**
  * Nothing in the panel is painted outside its own gutter, at either end of the width the divider allows.
@@ -14,7 +14,7 @@ import { InspectorComponent } from './inspector.component';
  * the panel the more of it there is to see.
  */
 describe('inspector layout', () => {
-  let fixture: ComponentFixture<InspectorComponent>;
+  let fixture: ComponentFixture<Inspector>;
   let host: HTMLElement;
   let inspector: InspectorStore;
   let store: FormDefinitionStore;
@@ -30,7 +30,7 @@ describe('inspector layout', () => {
     store.reset();
     TestBed.inject(LayoutStore).inspectorCollapsed.set(false);
 
-    fixture = TestBed.createComponent(InspectorComponent);
+    fixture = TestBed.createComponent(Inspector);
     host = fixture.nativeElement as HTMLElement;
   });
 

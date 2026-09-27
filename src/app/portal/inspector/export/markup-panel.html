@@ -1,0 +1,79 @@
+@let shown = current();
+
+<portal-accordion
+  heading="Export"
+  lede="Three files, generated from the form on the stage. Read-only: change the form in the Studio, then copy again."
+  [hint]="fieldCount() + ' Fields'"
+  [open]="isOpen('export')"
+  (toggled)="toggle('export')">
+  <div
+    role="tablist"
+    class="outputs"
+    aria-label="Generated files">
+    @for (entry of outputs; track entry.id) {
+    <button
+      type="button"
+      role="tab"
+      class="output"
+      [class.active]="shown.id === entry.id"
+      [attr.aria-selected]="shown.id === entry.id"
+      (click)="output.set(entry.id)">
+      {{ entry.label }}
+    </button>
+    }
+  </div>
+
+  <p class="pc-help">{{ shown.help }}</p>
+  <pre class="markup">{{ text() }}</pre>
+
+  <div class="pc-buttons">
+    <button
+      type="button"
+      class="pc-button is-primary"
+      (click)="copy()">
+      {{ justCopied() ? 'Copied' : 'Copy ' + shown.label }}
+    </button>
+  </div>
+</portal-accordion>
+
+<portal-accordion
+  heading="Import"
+  lede="A template exported here, read back in. It replaces the form on the stage, sections included. What the Studio cannot read — bindings to expressions, control flow — is listed, not silently dropped."
+  hint="Paste A Template"
+  [open]="isOpen('import')"
+  (toggled)="toggle('import')">
+  <textarea
+    rows="4"
+    spellcheck="false"
+    placeholder="<form formidableForm> … </form>"
+    class="pc-textarea"
+    [value]="importText()"
+    (input)="importText.set($any($event.target).value)"></textarea>
+
+  <div class="pc-buttons">
+    <button
+      type="button"
+      class="pc-button is-primary"
+      [disabled]="!importText().trim()"
+      (click)="runImport()">
+      Replace The Form
+    </button>
+  </div>
+
+  @if (importResult(); as result) {
+  <div class="report">
+    <p class="applied">Read {{ result.fields.length }} fields in {{ result.sections.length }} sections.</p>
+    @if (result.notes.length) {
+    <p class="notes-head">Ignored:</p>
+    <ul class="notes">
+      @for (note of result.notes; track $index) {
+      <li>
+        <code class="pc-code">{{ note.text }}</code>
+        <span class="reason">{{ noteLabels[note.reason] }}</span>
+      </li>
+      }
+    </ul>
+    }
+  </div>
+  }
+</portal-accordion>

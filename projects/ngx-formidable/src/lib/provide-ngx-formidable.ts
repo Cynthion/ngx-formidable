@@ -15,7 +15,7 @@ export interface NgxFormidableConfig {
  * `NgxFormidableModule.forRoot()` in an NgModule app.
  *
  * It provides no validator. Fields and forms work without one; to validate, provide `FORMIDABLE_VALIDATOR`
- * on the form — the Vest adapter from the `vest` entry point, or an `IFormidableValidator` of your own.
+ * on the form — the Vest adapter from the `vest` entry point, or an `FormidableValidator` of your own.
  */
 export function provideNgxFormidable(config: NgxFormidableConfig = {}): Provider[] {
   return [

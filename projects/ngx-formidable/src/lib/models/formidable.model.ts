@@ -9,13 +9,13 @@ import { FormidableReveal } from './validation.model';
  * Provide this from a custom field, as `{ provide: FORMIDABLE_FIELD, useExisting: forwardRef(() => MyField) }`,
  * and `formidable-field-decorator` will decorate it like any built-in field. Without it, nothing happens.
  */
-export const FORMIDABLE_FIELD = new InjectionToken<IFormidableField>('FORMIDABLE_FIELD');
+export const FORMIDABLE_FIELD = new InjectionToken<FormidableField>('FORMIDABLE_FIELD');
 
-/** What an option field provides so a projected `FieldOptionComponent` can reach the field that owns it. */
-export const FORMIDABLE_OPTION_FIELD = new InjectionToken<IFormidableOptionField>('FORMIDABLE_OPTION_FIELD');
+/** What an option field provides so a projected `FieldOption` can reach the field that owns it. */
+export const FORMIDABLE_OPTION_FIELD = new InjectionToken<FormidableOptionField>('FORMIDABLE_OPTION_FIELD');
 
 /** What an option provides so its field's `contentChildren` query finds it, whatever component it is. */
-export const FORMIDABLE_OPTION = new InjectionToken<IFormidableOptionSource>('FORMIDABLE_OPTION');
+export const FORMIDABLE_OPTION = new InjectionToken<FormidableOptionSource>('FORMIDABLE_OPTION');
 
 /** App-wide ngx-mask defaults, which a field's own `maskConfig` overrides. Set via `provideNgxFormidable`. */
 export const FORMIDABLE_MASK_DEFAULTS = new InjectionToken<Partial<NgxMaskConfig>>('FORMIDABLE_MASK_DEFAULTS');
@@ -108,11 +108,11 @@ export type FormidableEmptyHint = 'underscores' | 'format';
  * created, so changing one afterwards reaches only what is created afterwards.
  */
 export interface FormidableDefaults {
-  /** `FieldLabelDirective.position`. The library's own: `inside`. */
+  /** `FieldLabel.position`. The library's own: `inside`. */
   labelPosition?: FieldLabelPosition;
-  /** `FieldPrefixDirective.align`. The library's own: `center`. */
+  /** `FieldPrefix.align`. The library's own: `center`. */
   prefixAlign?: FieldAdornmentAlignment;
-  /** `FieldSuffixDirective.align`. The library's own: `center`. */
+  /** `FieldSuffix.align`. The library's own: `center`. */
   suffixAlign?: FieldAdornmentAlignment;
   /** `panelPosition` on the dropdown, autocomplete and date fields, which otherwise each keep their own. */
   panelPosition?: FormidablePanelPosition;
@@ -131,10 +131,10 @@ export const FORMIDABLE_DEFAULTS = new InjectionToken<FormidableDefaults>('FORMI
 });
 
 /**
- * What every field exposes to its decorator, and the contract a custom field satisfies. `BaseFieldDirective`
+ * What every field exposes to its decorator, and the contract a custom field satisfies. `BaseField`
  * implements all of it; a field is only discovered once it also provides `FORMIDABLE_FIELD`.
  */
-export interface IFormidableField<T = string | null> {
+export interface FormidableField<T = string | null> {
   /** The field's outer element, which the decorator measures and the global listeners are scoped to. */
   fieldRef: ElementRef<HTMLElement>;
   /** Unique per instance, and the stem every ARIA id around and inside the field is derived from. */
@@ -162,23 +162,23 @@ export interface IFormidableField<T = string | null> {
 }
 
 /** What a field walking a list of options adds to the contract. Provided as `FORMIDABLE_OPTION_FIELD`. */
-export interface IFormidableOptionField {
-  options: Signal<IFormidableOption[] | undefined>;
+export interface FormidableOptionField {
+  options: Signal<FormidableOption[] | undefined>;
   /** An option pinned to the top of the list — see `defaultOptionMode` for when it renders. */
-  defaultOption: Signal<IFormidableOption | undefined>;
+  defaultOption: Signal<FormidableOption | undefined>;
   defaultOptionMode: Signal<FieldDefaultOptionMode>;
   /** Called by an option that was activated, so the field commits it and closes any panel. */
-  selectOption(option: IFormidableOption): void;
-  sortFn: Signal<((a: IFormidableOption, b: IFormidableOption) => number) | undefined>;
+  selectOption(option: FormidableOption): void;
+  sortFn: Signal<((a: FormidableOption, b: FormidableOption) => number) | undefined>;
   /** The ARIA role its options take. Optional — an option falls back to `option` when its parent says nothing. */
   optionRole?: FieldOptionRole;
 }
 
 /**
  * One option as plain data. This is what a consumer writes into an option field's `options` input, and what
- * every field works with internally — an option **component** hands one over as `IFormidableOptionSource`.
+ * every field works with internally — an option **component** hands one over as `FormidableOptionSource`.
  */
-export interface IFormidableOption<T = unknown> {
+export interface FormidableOption<T = unknown> {
   /** What reaches the model, and the identity the field compares selection against. */
   value: string;
   /** Display text. Falls back to `value` when absent. */
@@ -195,22 +195,22 @@ export interface IFormidableOption<T = unknown> {
  * An entry that runs an action instead of becoming a value. The two panel fields take one as `actionOption`:
  * it renders last, the keyboard walks it like any option, and picking it closes the panel and commits nothing.
  */
-export interface IFormidableActionOption<T = unknown> extends IFormidableOption<T> {
+export interface FormidableActionOption<T = unknown> extends FormidableOption<T> {
   /** Runs when the entry is picked. */
   action: () => void;
 }
 
 /**
  * What a component that **is** an option exposes, so the field that owns it can read one option out of it.
- * Provided as `FORMIDABLE_OPTION`; `FieldOptionComponent` implements it, and so does anything extending it.
+ * Provided as `FORMIDABLE_OPTION`; `FieldOption` implements it, and so does anything extending it.
  */
-export interface IFormidableOptionSource {
+export interface FormidableOptionSource {
   /** The plain option this component stands for, folded out of its inputs and its projected content. */
-  readonly option: Signal<IFormidableOption>;
+  readonly option: Signal<FormidableOption>;
 }
 
 /** What a field that opens a panel adds to the contract, and what the panel positioning helpers read. */
-export interface IFormidablePanelField {
+export interface FormidablePanelField {
   panelRef: Signal<ElementRef<HTMLElement> | undefined>;
   isPanelOpen: Signal<boolean>;
   togglePanel(isOpen: boolean): void;
@@ -218,7 +218,7 @@ export interface IFormidablePanelField {
 }
 
 /** What a field that masks its text input adds to the contract. */
-export interface IFormidableMaskField {
+export interface FormidableMaskField {
   /** Must be a valid ngx-mask (see https://github.com/JsDaddy/ngx-mask). */
   mask: Signal<string | undefined>;
   /** Per-field overrides for ngx-mask. */
@@ -232,25 +232,25 @@ type FormidableTextareaFieldsKeys = FormidableInputFieldsKeys;
 type FormidableSelectFieldsKeys = 'name' | 'disabled';
 
 /** The subset of `<input/>` properties that are supported. */
-export interface IFormidableInputField
-  extends SignalsOf<Pick<HTMLInputElement, FormidableInputFieldsKeys>>, IFormidableField, IFormidableMaskField {}
+export interface FormidableInputField
+  extends SignalsOf<Pick<HTMLInputElement, FormidableInputFieldsKeys>>, FormidableField, FormidableMaskField {}
 
 type FormidableGroupFieldsKeys = 'name' | 'disabled';
 
 /** The subset of `<input type="radio"/> properties that are supported.` */
-export interface IFormidableRadioGroupField
-  extends SignalsOf<Pick<HTMLInputElement, FormidableGroupFieldsKeys>>, IFormidableField, IFormidableOptionField {}
+export interface FormidableRadioGroupField
+  extends SignalsOf<Pick<HTMLInputElement, FormidableGroupFieldsKeys>>, FormidableField, FormidableOptionField {}
 
 /** The subset of `<input type="checkbox"/> properties that are supported.` */
-export interface IFormidableCheckboxGroupField
+export interface FormidableCheckboxGroupField
   extends
     SignalsOf<Pick<HTMLInputElement, FormidableGroupFieldsKeys>>,
-    IFormidableField<string[]>,
-    IFormidableOptionField {}
+    FormidableField<string[]>,
+    FormidableOptionField {}
 
 /** The subset of `<textarea/>` properties that are supported. */
-export interface IFormidableTextareaField
-  extends SignalsOf<Pick<HTMLTextAreaElement, FormidableTextareaFieldsKeys>>, IFormidableField, IFormidableMaskField {
+export interface FormidableTextareaField
+  extends SignalsOf<Pick<HTMLTextAreaElement, FormidableTextareaFieldsKeys>>, FormidableField, FormidableMaskField {
   /**
    * Enable or disable autosizing of the textarea.
    * If true, the textarea will automatically adjust its height based on the content.
@@ -260,21 +260,21 @@ export interface IFormidableTextareaField
 }
 
 /** The subset of `<select/>` properties that are supported. */
-export interface IFormidableSelectField
-  extends SignalsOf<Pick<HTMLSelectElement, FormidableSelectFieldsKeys>>, IFormidableField, IFormidableOptionField {}
+export interface FormidableSelectField
+  extends SignalsOf<Pick<HTMLSelectElement, FormidableSelectFieldsKeys>>, FormidableField, FormidableOptionField {}
 
 /** A dropdown adds nothing of its own: it is an option field whose list lives in a panel. */
-export interface IFormidableDropdownField extends IFormidableField, IFormidableOptionField {}
+export interface FormidableDropdownField extends FormidableField, FormidableOptionField {}
 
 /** A dropdown whose panel is filtered by what is typed into the field. */
-export interface IFormidableAutocompleteField extends IFormidableDropdownField {
+export interface FormidableAutocompleteField extends FormidableDropdownField {
   /** The filter text, so a consumer can fetch options for it rather than filtering a list it already has. */
   filterChange$: Observable<string>;
   filterChanged: OutputEmitterRef<string>;
 }
 
 /** The subset of `PikadayOptions` that are supported, each as the input the date field declares for it. */
-export type IFormidablePikadayOptions = SignalsOf<
+export type FormidablePikadayOptions = SignalsOf<
   Pick<
     PikadayOptions,
     | 'ariaLabel'
@@ -297,7 +297,7 @@ export type IFormidablePikadayOptions = SignalsOf<
 >;
 
 /** A date value entered through a mask, a calendar panel, or the arrow keys. */
-export interface IFormidableDateField extends IFormidableField<Date | null>, IFormidablePikadayOptions {
+export interface FormidableDateField extends FormidableField<Date | null>, FormidablePikadayOptions {
   /** Must be a valid Unicode format (e.g. yyyy-MM-dd). Supported tokens: y, yy, yyy, yyyy, M, MM, MMM, MMMM, d, dd */
   unicodeTokenFormat: Signal<string>;
   /** What an empty field displays in its mask slots. Defaults to `'underscores'`. */
@@ -307,7 +307,7 @@ export interface IFormidableDateField extends IFormidableField<Date | null>, IFo
 }
 
 /** A time of day entered through a mask or the arrow keys. Carries a full `Date` whose date part is fixed. */
-export interface IFormidableTimeField extends IFormidableField<Date | null> {
+export interface FormidableTimeField extends FormidableField<Date | null> {
   /** Must be a valid Unicode format (e.g. HH:mm:ss). Supported tokens: H, HH, h, hh, m, mm, s, ss, a, aa */
   unicodeTokenFormat: Signal<string>;
   /** What an empty field displays in its mask slots. Defaults to `'underscores'`. */
@@ -317,7 +317,7 @@ export interface IFormidableTimeField extends IFormidableField<Date | null> {
 }
 
 /** A boolean rendered as a switch. `inline` is the only decorator layout it fits. */
-export interface IFormidableToggleField extends IFormidableField<boolean | null> {
+export interface FormidableToggleField extends FormidableField<boolean | null> {
   labelPosition: Signal<FormidableToggleFieldLabelPosition | undefined>;
   /** Text shown beside the switch while on. The field's own label, not a projected one. */
   onLabel: Signal<string | undefined>;
@@ -328,7 +328,7 @@ export interface IFormidableToggleField extends IFormidableField<boolean | null>
 }
 
 /** A number picked from a bounded range, over a native range input. */
-export interface IFormidableSliderField extends IFormidableField<number | null> {
+export interface FormidableSliderField extends FormidableField<number | null> {
   /** Minimum numeric value of the slider (inclusive). */
   min: Signal<number>;
   /** Maximum numeric value of the slider (inclusive). */

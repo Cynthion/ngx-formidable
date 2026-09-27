@@ -21,7 +21,7 @@ export type FormidableReveal = 'touched' | 'dirty' | 'submitted' | 'always';
  * What a validator is asked, and what the form directive does with the answer.
  * The form directive owns the model, the targets and the debouncing; an implementation owns the rules.
  */
-export interface IFormidableValidator<T = Record<string, unknown>> {
+export interface FormidableValidator<T = Record<string, unknown>> {
   /**
    * Runs the rules for one target against the whole model. `null` means valid.
    *
@@ -31,7 +31,7 @@ export interface IFormidableValidator<T = Record<string, unknown>> {
 }
 
 /** InjectionToken for the validator the form directive delegates to. Without it, nothing is validated. */
-export const FORMIDABLE_VALIDATOR = new InjectionToken<IFormidableValidator>('FORMIDABLE_VALIDATOR');
+export const FORMIDABLE_VALIDATOR = new InjectionToken<FormidableValidator>('FORMIDABLE_VALIDATOR');
 
 /** Reads the messages a field should display out of Angular's raw error bag. */
 export type FormidableErrorExtractorFn = (errors: ValidationErrors | null) => string[];

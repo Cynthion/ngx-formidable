@@ -345,7 +345,7 @@
 }
 
 // The decorator is normally the atom. A field used without one has nothing above it to be one, so its own
-// host takes the job — same three rules, keyed off the class `BaseFieldDirective` sets in that case. Only
+// host takes the job — same three rules, keyed off the class `BaseField` sets in that case. Only
 // the fields with a panel need it: nothing else a bare field renders leaves its box.
 @mixin field-atom-undecorated {
   :host(.is-undecorated) {

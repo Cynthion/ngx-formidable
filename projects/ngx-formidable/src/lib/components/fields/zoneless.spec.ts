@@ -9,13 +9,13 @@ import {
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { IFormidableOption } from '../../models/formidable.model';
-import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
-import { DateFieldComponent } from './date-field/date-field.component';
-import { DropdownFieldComponent } from './dropdown-field/dropdown-field.component';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { TextareaFieldComponent } from './textarea-field/textarea-field.component';
+import { FieldLabel } from '../../directives/field-label';
+import { FormidableOption } from '../../models/formidable.model';
+import { FieldDecorator } from '../field-decorator/field-decorator';
+import { DateField } from './date-field/date-field';
+import { DropdownField } from './dropdown-field/dropdown-field';
+import { InputField } from './input-field/input-field';
+import { TextareaField } from './textarea-field/textarea-field';
 
 /**
  * Contract of the paths that repaint with no Angular listener anywhere in the callstack: a third party's
@@ -33,20 +33,20 @@ import { TextareaFieldComponent } from './textarea-field/textarea-field.componen
  * would be reporting the harness rather than the contract. Mount, act, then `flush()`.
  */
 
-const options: IFormidableOption[] = [
+const options: FormidableOption[] = [
   { value: 'red', label: 'Red' },
   { value: 'blue', label: 'Blue' }
 ];
 
 @Component({
-  imports: [FormsModule, DateFieldComponent],
+  imports: [FormsModule, DateField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `<formidable-date-field name="date" />`
 })
-class DateHostComponent {}
+class DateHost {}
 
 @Component({
-  imports: [FormsModule, DropdownFieldComponent],
+  imports: [FormsModule, DropdownField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-dropdown-field
@@ -54,15 +54,15 @@ class DateHostComponent {}
       [options]="options()" />
   `
 })
-class DropdownHostComponent {
+class DropdownHost {
   // A signal, so a changed list marks this host too. Zonelessly `detectChanges()` refreshes only what
   // something marked, and a plain field on an `Eager` host is not that.
   readonly options = signal(options);
-  readonly dropdown = viewChild.required(DropdownFieldComponent);
+  readonly dropdown = viewChild.required(DropdownField);
 }
 
 @Component({
-  imports: [FormsModule, FieldDecoratorComponent, FieldLabelDirective, InputFieldComponent],
+  imports: [FormsModule, FieldDecorator, FieldLabel, InputField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -75,12 +75,12 @@ class DropdownHostComponent {
     </form>
   `
 })
-class LabelHostComponent {
+class LabelHost {
   readonly value = 'written in';
 }
 
 @Component({
-  imports: [TextareaFieldComponent],
+  imports: [TextareaField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-textarea-field
@@ -89,8 +89,8 @@ class LabelHostComponent {
       [showLengthIndicator]="true" />
   `
 })
-class TextareaHostComponent {
-  readonly textarea = viewChild.required(TextareaFieldComponent);
+class TextareaHost {
+  readonly textarea = viewChild.required(TextareaField);
 }
 
 describe('zoneless change detection', () => {
@@ -129,7 +129,7 @@ describe('zoneless change detection', () => {
    * covered the pick itself, which is what this is here for.
    */
   it('renders a calendar pick and closes the panel, from Pikaday’s own callback', fakeAsync(() => {
-    mount(DateHostComponent);
+    mount(DateHost);
 
     element('.toggle').dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     flush();
@@ -151,7 +151,7 @@ describe('zoneless change detection', () => {
    * close is carried by the `isPanelOpen` signal and by nothing else.
    */
   it('closes a dropdown panel from a bare document click listener', fakeAsync(() => {
-    const host = mount(DropdownHostComponent);
+    const host = mount(DropdownHost);
 
     host.dropdown().togglePanel(true);
     flush();
@@ -172,7 +172,7 @@ describe('zoneless change detection', () => {
    * signal write is what repaints, with nothing else marking the decorator.
    */
   it('releases the label gate after the correction, from a bare requestAnimationFrame', fakeAsync(() => {
-    fixture = TestBed.createComponent(LabelHostComponent);
+    fixture = TestBed.createComponent(LabelHost);
     fixture.detectChanges();
     root = fixture.nativeElement as HTMLElement;
 
@@ -200,7 +200,7 @@ describe('zoneless change detection', () => {
    * nothing else moving, `activeOptions` is the only thing that can carry a changed list onto the screen.
    */
   it('renders options that resolved in a bare microtask', fakeAsync(() => {
-    const host = mount(DropdownHostComponent);
+    const host = mount(DropdownHost);
 
     host.dropdown().togglePanel(true);
     flush();
@@ -220,7 +220,7 @@ describe('zoneless change detection', () => {
    * but the count's own signal can carry the new length onto the screen.
    */
   it('counts a programmatic masked write', fakeAsync(() => {
-    const host = mount(TextareaHostComponent);
+    const host = mount(TextareaHost);
 
     host.textarea().writeValue('123456');
     flush();

@@ -2,13 +2,13 @@ import { Component, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
-import { BaseFieldDirective } from './base-field.directive';
-import { DateFieldComponent } from './date-field/date-field.component';
-import { DropdownFieldComponent } from './dropdown-field/dropdown-field.component';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { SliderFieldComponent } from './slider-field/slider-field.component';
-import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
+import { AutocompleteField } from './autocomplete-field/autocomplete-field';
+import { BaseField } from './base-field';
+import { DateField } from './date-field/date-field';
+import { DropdownField } from './dropdown-field/dropdown-field';
+import { InputField } from './input-field/input-field';
+import { SliderField } from './slider-field/slider-field';
+import { ToggleField } from './toggle-field/toggle-field';
 
 /**
  * Contract of `autoFocus` / `focus()`: the field takes focus without its panel opening.
@@ -20,15 +20,7 @@ import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
  */
 
 @Component({
-  imports: [
-    FormsModule,
-    InputFieldComponent,
-    DropdownFieldComponent,
-    AutocompleteFieldComponent,
-    DateFieldComponent,
-    SliderFieldComponent,
-    ToggleFieldComponent
-  ],
+  imports: [FormsModule, InputField, DropdownField, AutocompleteField, DateField, SliderField, ToggleField],
   // Inside a `<form>`, like real usage.
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -64,13 +56,13 @@ import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
     </form>
   `
 })
-class FocusHostComponent {
-  readonly input = viewChild.required(InputFieldComponent);
-  readonly dropdown = viewChild.required(DropdownFieldComponent);
-  readonly autocomplete = viewChild.required(AutocompleteFieldComponent);
-  readonly date = viewChild.required(DateFieldComponent);
-  readonly slider = viewChild.required(SliderFieldComponent);
-  readonly toggle = viewChild.required(ToggleFieldComponent);
+class FocusHost {
+  readonly input = viewChild.required(InputField);
+  readonly dropdown = viewChild.required(DropdownField);
+  readonly autocomplete = viewChild.required(AutocompleteField);
+  readonly date = viewChild.required(DateField);
+  readonly slider = viewChild.required(SliderField);
+  readonly toggle = viewChild.required(ToggleField);
 
   focused: string | null = null;
   toggleDisabled = false;
@@ -78,7 +70,7 @@ class FocusHostComponent {
 }
 
 /** The element `[autoFocus]` is expected to land on, per field. */
-function expectedElement(fixture: ComponentFixture<FocusHostComponent>, field: string): HTMLElement {
+function expectedElement(fixture: ComponentFixture<FocusHost>, field: string): HTMLElement {
   const host = fixture.nativeElement as HTMLElement;
 
   switch (field) {
@@ -98,15 +90,15 @@ function expectedElement(fixture: ComponentFixture<FocusHostComponent>, field: s
 }
 
 describe('field focus', () => {
-  let fixture: ComponentFixture<FocusHostComponent>;
-  let host: FocusHostComponent;
+  let fixture: ComponentFixture<FocusHost>;
+  let host: FocusHost;
 
   /**
    * The field is only created once `focused` is set, so `autoFocus` is read on its first
    * `ngAfterViewInit`, exactly as it would be on page load.
    */
   function build(focused: string | null): void {
-    fixture = TestBed.createComponent(FocusHostComponent);
+    fixture = TestBed.createComponent(FocusHost);
     host = fixture.componentInstance;
     host.focused = focused;
     fixture.detectChanges();
@@ -116,7 +108,7 @@ describe('field focus', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FocusHostComponent],
+      imports: [FocusHost],
       providers: [provideNgxMask()]
     }).compileComponents();
 
@@ -151,7 +143,7 @@ describe('field focus', () => {
   }
 
   it('does not focus a disabled field', fakeAsync(() => {
-    fixture = TestBed.createComponent(FocusHostComponent);
+    fixture = TestBed.createComponent(FocusHost);
     host = fixture.componentInstance;
     host.focused = 'toggle';
     host.toggleDisabled = true;
@@ -164,7 +156,7 @@ describe('field focus', () => {
 
   // Unlike a disabled one: readonly guards what the field does with focus, never focus itself.
   it('still focuses a readonly field', fakeAsync(() => {
-    fixture = TestBed.createComponent(FocusHostComponent);
+    fixture = TestBed.createComponent(FocusHost);
     host = fixture.componentInstance;
     host.focused = 'date';
     host.dateReadonly = true;
@@ -178,7 +170,7 @@ describe('field focus', () => {
   it('focus() is callable on the field itself', fakeAsync(() => {
     build(null);
 
-    (host.dropdown() as BaseFieldDirective).focus();
+    (host.dropdown() as BaseField).focus();
 
     expect(document.activeElement).toBe(expectedElement(fixture, 'dropdown'));
   }));

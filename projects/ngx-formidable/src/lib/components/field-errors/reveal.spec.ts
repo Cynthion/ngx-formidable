@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { NgxFormidableFieldValidateDirective } from '../../forms/field-validate.directive';
-import { NgxFormidableFormDirective } from '../../forms/form.directive';
-import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
+import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
+import { NgxFormidableFieldValidate } from '../../forms/field-validate.directive';
+import { NgxFormidableForm } from '../../forms/form.directive';
+import { StubValidator } from '../../forms/testing/stub-validator.directive';
 import { FormidableReveal } from '../../models/validation.model';
 
 /**
@@ -17,13 +17,7 @@ interface Model extends Record<string, unknown> {
   name?: string;
 }
 
-const IMPORTS = [
-  FormsModule,
-  NgxFormidableFormDirective,
-  NgxFormidableFieldValidateDirective,
-  StubValidatorDirective,
-  FieldErrorsDirective
-];
+const IMPORTS = [FormsModule, NgxFormidableForm, NgxFormidableFieldValidate, StubValidator, FieldErrorsRenderer];
 
 /** Asks for nothing, so it gets the default. */
 @Component({
@@ -41,7 +35,7 @@ const IMPORTS = [
     </form>
   `
 })
-class DefaultHostComponent {
+class DefaultHost {
   value: Model = { name: '' };
   rules: Record<string, string> = { name: 'Required' };
 }
@@ -62,7 +56,7 @@ class DefaultHostComponent {
     </form>
   `
 })
-class RevealHostComponent {
+class RevealHost {
   revealOn: FormidableReveal = 'touched';
   value: Model = { name: '' };
   rules: Record<string, string> = { name: 'Required' };
@@ -86,13 +80,13 @@ class RevealHostComponent {
     </form>
   `
 })
-class OverrideHostComponent {
+class OverrideHost {
   value: Model = { name: '' };
   rules: Record<string, string> = { name: 'Required' };
 }
 
 describe('validation reveal axis', () => {
-  let fixture: ComponentFixture<DefaultHostComponent | RevealHostComponent | OverrideHostComponent>;
+  let fixture: ComponentFixture<DefaultHost | RevealHost | OverrideHost>;
   let root: HTMLElement;
 
   function messages(): string[] {
@@ -127,7 +121,7 @@ describe('validation reveal axis', () => {
     fixture.detectChanges();
   }
 
-  function mount(host: typeof DefaultHostComponent | typeof RevealHostComponent | typeof OverrideHostComponent): void {
+  function mount(host: typeof DefaultHost | typeof RevealHost | typeof OverrideHost): void {
     fixture = TestBed.createComponent(host);
     root = fixture.nativeElement as HTMLElement;
 
@@ -142,7 +136,7 @@ describe('validation reveal axis', () => {
   afterEach(fakeAsync(() => flush()));
 
   it('defaults to touched, so an invalid untouched field stays quiet', fakeAsync(() => {
-    mount(DefaultHostComponent);
+    mount(DefaultHost);
 
     expect(messages()).toEqual([]);
 
@@ -152,9 +146,9 @@ describe('validation reveal axis', () => {
   }));
 
   it('reveals on dirty before any blur', fakeAsync(() => {
-    mount(RevealHostComponent);
-    (fixture.componentInstance as RevealHostComponent).revealOn = 'dirty';
-    (fixture.componentInstance as RevealHostComponent).value = { name: 'filled' };
+    mount(RevealHost);
+    (fixture.componentInstance as RevealHost).revealOn = 'dirty';
+    (fixture.componentInstance as RevealHost).value = { name: 'filled' };
     settle();
 
     type('');
@@ -164,8 +158,8 @@ describe('validation reveal axis', () => {
   }));
 
   it('holds everything back until submit under submitted', fakeAsync(() => {
-    mount(RevealHostComponent);
-    (fixture.componentInstance as RevealHostComponent).revealOn = 'submitted';
+    mount(RevealHost);
+    (fixture.componentInstance as RevealHost).revealOn = 'submitted';
     settle();
 
     touch();
@@ -179,15 +173,15 @@ describe('validation reveal axis', () => {
   }));
 
   it('reveals with neither a touch nor a change under always', fakeAsync(() => {
-    mount(RevealHostComponent);
-    (fixture.componentInstance as RevealHostComponent).revealOn = 'always';
+    mount(RevealHost);
+    (fixture.componentInstance as RevealHost).revealOn = 'always';
     settle();
 
     expect(messages()).toEqual(['Required']);
   }));
 
   it('lets a field’s revealOn beat the form’s', fakeAsync(() => {
-    mount(OverrideHostComponent);
+    mount(OverrideHost);
 
     // The form said submitted; this field said always.
     expect(messages()).toEqual(['Required']);

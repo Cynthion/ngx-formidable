@@ -18,7 +18,7 @@ A field is an **atom**: one stacking context holding everything it renders. What
 | With a decorator | `formidable-field-decorator` host                     | `field-atom` in the decorator's SCSS   |
 | Without one      | the field component's own host, via `.is-undecorated` | `field-atom-undecorated`, panel fields |
 
-`BaseFieldDirective` sets `is-undecorated` from its optional `FieldDecoratorComponent` injection. Only the fields with a panel apply the undecorated rules — nothing else a bare field renders leaves its own box.
+`BaseField` sets `is-undecorated` from its optional `FieldDecorator` injection. Only the fields with a panel apply the undecorated rules — nothing else a bare field renders leaves its own box.
 
 **`isolation: isolate`, never `transform`.** Both open a stacking context, but `transform` also makes the element the containing block for `position: fixed` — which would pin a sheet to the field instead of to the viewport.
 
@@ -42,7 +42,7 @@ The atom itself carries no `z-index` while closed — that is what keeps a resti
 | `has-open-panel` | `--formidable-panel-z-index` | `isPanelOpen`, any anchored `panelPosition` |
 | `has-open-sheet` | `--formidable-sheet-z-index` | `isPanelOpen` and `panelPosition="sheet"`   |
 
-Both classes come from `openPanelPosition()` in `formidable.model.ts` — the decorator reads its projected field, `BaseFieldDirective` reads itself when undecorated. A sheet ranks above an anchored panel because it spans the viewport and covers more, including any other field's open panel it crosses.
+Both classes come from `openPanelPosition()` in `formidable.model.ts` — the decorator reads its projected field, `BaseField` reads itself when undecorated. A sheet ranks above an anchored panel because it spans the viewport and covers more, including any other field's open panel it crosses.
 
 The atom rising as a whole is what lets the ladder stay small. Cross-field ordering is settled between atoms before any ordinal is consulted, so a sheet covers a neighbouring field's `border` label without either number knowing about the other.
 

@@ -3,17 +3,17 @@ import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testin
 import { FormsModule, NgForm } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
 import { Observable, of } from 'rxjs';
-import { InputFieldComponent } from '../components/fields/input-field/input-field.component';
+import { InputField } from '../components/fields/input-field/input-field';
 import {
   FORMIDABLE_VALIDATOR,
   FormidableFormErrors,
-  IFormidableValidator,
+  FormidableValidator,
   WHOLE_FORM
 } from '../models/validation.model';
-import { NgxFormidableFieldValidateDirective } from './field-validate.directive';
-import { NgxFormidableWholeFormValidateDirective } from './whole-form-validate.directive';
-import { NgxFormidableFormDirective } from './form.directive';
-import { StubValidatorDirective } from './testing/stub-validator.directive';
+import { NgxFormidableFieldValidate } from './field-validate.directive';
+import { NgxFormidableWholeFormValidate } from './whole-form-validate.directive';
+import { NgxFormidableForm } from './form.directive';
+import { StubValidator } from './testing/stub-validator.directive';
 
 /**
  * Contract of root-level validation: `formidableValidateWholeForm` runs the same `FORMIDABLE_VALIDATOR` as every
@@ -30,11 +30,11 @@ interface Model extends Record<string, unknown> {
 @Component({
   imports: [
     FormsModule,
-    NgxFormidableFormDirective,
-    NgxFormidableFieldValidateDirective,
-    NgxFormidableWholeFormValidateDirective,
-    StubValidatorDirective,
-    InputFieldComponent
+    NgxFormidableForm,
+    NgxFormidableFieldValidate,
+    NgxFormidableWholeFormValidate,
+    StubValidator,
+    InputField
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -49,7 +49,7 @@ interface Model extends Record<string, unknown> {
     </form>
   `
 })
-class BareAttributeHostComponent {
+class BareAttributeHost {
   value: Model = {};
   rules: Record<string, string> = { [WHOLE_FORM]: 'The form as a whole is wrong.', name: 'Required' };
 }
@@ -57,11 +57,11 @@ class BareAttributeHostComponent {
 @Component({
   imports: [
     FormsModule,
-    NgxFormidableFormDirective,
-    NgxFormidableFieldValidateDirective,
-    NgxFormidableWholeFormValidateDirective,
-    StubValidatorDirective,
-    InputFieldComponent
+    NgxFormidableForm,
+    NgxFormidableFieldValidate,
+    NgxFormidableWholeFormValidate,
+    StubValidator,
+    InputField
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -76,14 +76,14 @@ class BareAttributeHostComponent {
     </form>
   `
 })
-class SwitchedOffHostComponent {
+class SwitchedOffHost {
   value: Model = {};
   rules = { [WHOLE_FORM]: 'The form as a whole is wrong.' };
 }
 
 /** A form whose only rule is Angular's own `required`, so `errorsChange$` has a non-message shape to fold. */
 @Component({
-  imports: [FormsModule, NgxFormidableFormDirective, InputFieldComponent],
+  imports: [FormsModule, NgxFormidableForm, InputField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
@@ -97,7 +97,7 @@ class SwitchedOffHostComponent {
     </form>
   `
 })
-class AngularValidatorHostComponent {
+class AngularValidatorHost {
   value: Model = {};
   errors: FormidableFormErrors = {};
 }
@@ -105,10 +105,9 @@ class AngularValidatorHostComponent {
 /** Reports on `WHOLE_FORM` while `name` is `Test`, so the rule depends on a field it does not report on. */
 @Directive({
   selector: 'form[crossFieldValidator]',
-  standalone: true,
-  providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: CrossFieldValidatorDirective }]
+  providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: CrossFieldValidator }]
 })
-class CrossFieldValidatorDirective implements IFormidableValidator {
+class CrossFieldValidator implements FormidableValidator {
   public validate(model: Record<string, unknown>, target: string): Observable<string[] | null> {
     return of(target === WHOLE_FORM && model['name'] === 'Test' ? ['Not that name.'] : null);
   }
@@ -121,10 +120,10 @@ class CrossFieldValidatorDirective implements IFormidableValidator {
 @Component({
   imports: [
     FormsModule,
-    NgxFormidableFormDirective,
-    NgxFormidableFieldValidateDirective,
-    NgxFormidableWholeFormValidateDirective,
-    CrossFieldValidatorDirective
+    NgxFormidableForm,
+    NgxFormidableFieldValidate,
+    NgxFormidableWholeFormValidate,
+    CrossFieldValidator
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -140,11 +139,11 @@ class CrossFieldValidatorDirective implements IFormidableValidator {
     </form>
   `
 })
-class RoundTripHostComponent {
+class RoundTripHost {
   value: Model = { name: '' };
 }
 
-describe('NgxFormidableWholeFormValidateDirective', () => {
+describe('NgxFormidableWholeFormValidate', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function formErrorsOf(fixture: ComponentFixture<any>): Record<string, unknown> | null {
     return fixture.debugElement.children[0]!.injector.get(NgForm).form.errors;
@@ -171,14 +170,14 @@ describe('NgxFormidableWholeFormValidateDirective', () => {
   // The regression this spec exists for: as a plain attribute the input receives `''`, and a directive
   // that took it as a raw boolean would both fail the consumer's build and read it as falsy.
   it('runs from the bare attribute and reports under WHOLE_FORM', fakeAsync(() => {
-    const fixture = TestBed.createComponent(BareAttributeHostComponent);
+    const fixture = TestBed.createComponent(BareAttributeHost);
     settle(fixture);
 
     expect(formErrorsOf(fixture)?.['errors']).toEqual(['The form as a whole is wrong.']);
   }));
 
   it('clears the root error once the model satisfies the rule', fakeAsync(() => {
-    const fixture = TestBed.createComponent(BareAttributeHostComponent);
+    const fixture = TestBed.createComponent(BareAttributeHost);
     settle(fixture);
 
     expect(formErrorsOf(fixture)?.['errors']).toEqual(['The form as a whole is wrong.']);
@@ -194,14 +193,14 @@ describe('NgxFormidableWholeFormValidateDirective', () => {
   // objects. Every entry now goes through FORMIDABLE_ERROR_EXTRACTOR, so the map is one homogeneous shape
   // whichever validator wrote it — Angular's `required` included.
   it('folds Angular’s own error keys into the same message map', fakeAsync(() => {
-    const fixture = TestBed.createComponent(AngularValidatorHostComponent);
+    const fixture = TestBed.createComponent(AngularValidatorHost);
     settle(fixture);
 
     expect(fixture.componentInstance.errors['name']).toEqual(['required']);
   }));
 
   it('does not run when switched off', fakeAsync(() => {
-    const fixture = TestBed.createComponent(SwitchedOffHostComponent);
+    const fixture = TestBed.createComponent(SwitchedOffHost);
     settle(fixture);
 
     expect(formErrorsOf(fixture)).toBeNull();
@@ -211,7 +210,7 @@ describe('NgxFormidableWholeFormValidateDirective', () => {
   // `formValueChange$` turns into the next `formValue`, so the bound model is a change behind at that
   // moment. The rule has to see the form's live values instead.
   it('sees the change that triggered it, not the one before', fakeAsync(() => {
-    const fixture = TestBed.createComponent(RoundTripHostComponent);
+    const fixture = TestBed.createComponent(RoundTripHost);
     settle(fixture);
 
     expect(formErrorsOf(fixture)).toBeNull();

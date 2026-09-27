@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
 import { FormidablePanelPosition } from '../../models/formidable.model';
-import { DateFieldComponent } from './date-field/date-field.component';
+import { DateField } from './date-field/date-field';
 
 /**
  * Contract of the date panel's responsiveness.
@@ -20,7 +20,7 @@ import { DateFieldComponent } from './date-field/date-field.component';
  */
 
 @Component({
-  imports: [DateFieldComponent],
+  imports: [DateField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div [style.width.px]="narrowWidth">
@@ -35,20 +35,20 @@ import { DateFieldComponent } from './date-field/date-field.component';
     </div>
   `
 })
-class HostComponent {
+class TestHost {
   narrowWidth = 250;
   roomyPosition: FormidablePanelPosition = 'right';
 }
 
 describe('date panel responsiveness', () => {
-  let fixture: ComponentFixture<HostComponent>;
+  let fixture: ComponentFixture<TestHost>;
   let root: HTMLElement;
   const themed = new Set<string>();
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(HostComponent);
+    fixture = TestBed.createComponent(TestHost);
     root = fixture.nativeElement;
     fixture.detectChanges(); // ngAfterViewInit builds the calendar
   });

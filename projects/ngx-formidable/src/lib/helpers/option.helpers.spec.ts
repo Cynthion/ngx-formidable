@@ -1,13 +1,13 @@
-import { IFormidableOption } from '../models/formidable.model';
+import { FormidableOption } from '../models/formidable.model';
 import { applyDefaultOption, combineFieldOptions, getNextAvailableOptionIndex } from './option.helpers';
 
-const option = (value: string, extra: Partial<IFormidableOption> = {}): IFormidableOption => ({
+const option = (value: string, extra: Partial<FormidableOption> = {}): FormidableOption => ({
   value,
   label: value.toUpperCase(),
   ...extra
 });
 
-const byValue = (a: IFormidableOption, b: IFormidableOption) => a.value.localeCompare(b.value);
+const byValue = (a: FormidableOption, b: FormidableOption) => a.value.localeCompare(b.value);
 
 describe('option.helpers', () => {
   describe('combineFieldOptions', () => {

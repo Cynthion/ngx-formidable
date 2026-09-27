@@ -2,20 +2,20 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { NgxMaskConfig, provideNgxMask } from 'ngx-mask';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
-import { FieldLabelAdornmentDirective } from '../../directives/field-label-adornment.directive';
+import { FieldLabel } from '../../directives/field-label';
+import { FieldPrefix } from '../../directives/field-prefix';
+import { FieldLabelAdornment } from '../../directives/field-label-adornment';
 import { FieldLabelPosition } from '../../models/formidable.model';
-import { AutocompleteFieldComponent } from '../fields/autocomplete-field/autocomplete-field.component';
-import { DateFieldComponent } from '../fields/date-field/date-field.component';
-import { DropdownFieldComponent } from '../fields/dropdown-field/dropdown-field.component';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { FieldOptionComponent } from '../field-option/field-option.component';
-import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
-import { SelectFieldComponent } from '../fields/select-field/select-field.component';
-import { TextareaFieldComponent } from '../fields/textarea-field/textarea-field.component';
-import { TimeFieldComponent } from '../fields/time-field/time-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { AutocompleteField } from '../fields/autocomplete-field/autocomplete-field';
+import { DateField } from '../fields/date-field/date-field';
+import { DropdownField } from '../fields/dropdown-field/dropdown-field';
+import { InputField } from '../fields/input-field/input-field';
+import { FieldOption } from '../field-option/field-option';
+import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
+import { SelectField } from '../fields/select-field/select-field';
+import { TextareaField } from '../fields/textarea-field/textarea-field';
+import { TimeField } from '../fields/time-field/time-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
  * Contract of `formidableFieldLabel [position]`.
@@ -61,7 +61,7 @@ function valueLeft(field: HTMLElement): number {
 }
 
 @Component({
-  imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective],
+  imports: [FieldDecorator, InputField, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -80,7 +80,7 @@ function valueLeft(field: HTMLElement): number {
     </formidable-field-decorator>
   `
 })
-class InputHostComponent {
+class InputHost {
   position: FieldLabelPosition = 'inside';
   placeholder = '';
   mask?: string;
@@ -91,7 +91,7 @@ class InputHostComponent {
 
 /** Same field, but with a prefix wide enough to push the value inwards. */
 @Component({
-  imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective, FieldPrefixDirective],
+  imports: [FieldDecorator, InputField, FieldLabel, FieldPrefix],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -109,13 +109,13 @@ class InputHostComponent {
     </formidable-field-decorator>
   `
 })
-class PrefixHostComponent {
+class PrefixHost {
   position: FieldLabelPosition = 'inside';
 }
 
 /** Same field, but with an adornment sharing the label's row. */
 @Component({
-  imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective, FieldLabelAdornmentDirective],
+  imports: [FieldDecorator, InputField, FieldLabel, FieldLabelAdornment],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -129,13 +129,13 @@ class PrefixHostComponent {
     </formidable-field-decorator>
   `
 })
-class LabelAdornmentHostComponent {
+class LabelAdornmentHost {
   position: FieldLabelPosition = 'inside';
 }
 
 /** A textarea top-aligns its value, so it clears an inside label with an offset rather than the padding. */
 @Component({
-  imports: [FieldDecoratorComponent, TextareaFieldComponent, FieldLabelDirective],
+  imports: [FieldDecorator, TextareaField, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -148,7 +148,7 @@ class LabelAdornmentHostComponent {
     </formidable-field-decorator>
   `
 })
-class TextareaHostComponent {
+class TextareaHost {
   position: FieldLabelPosition = 'inside';
 }
 
@@ -158,14 +158,7 @@ class TextareaHostComponent {
  * every one of them floats, whatever it shows while empty.
  */
 @Component({
-  imports: [
-    FieldDecoratorComponent,
-    DateFieldComponent,
-    TimeFieldComponent,
-    AutocompleteFieldComponent,
-    DropdownFieldComponent,
-    FieldLabelDirective
-  ],
+  imports: [FieldDecorator, DateField, TimeField, AutocompleteField, DropdownField, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -202,10 +195,10 @@ class TextareaHostComponent {
     </formidable-field-decorator>
   `
 })
-class WrappedInputHostComponent {}
+class WrappedInputHost {}
 
 @Component({
-  imports: [FieldDecoratorComponent, RadioGroupFieldComponent, FieldLabelDirective],
+  imports: [FieldDecorator, RadioGroupField, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -218,7 +211,7 @@ class WrappedInputHostComponent {}
     </formidable-field-decorator>
   `
 })
-class RadioGroupHostComponent {}
+class RadioGroupHost {}
 
 /**
  * The demo's `Nationality` field, reduced: a dropdown with an initial `ngModel` value that only a projected
@@ -226,7 +219,7 @@ class RadioGroupHostComponent {}
  * has a value at all and the label is rendered resting — then corrected to floating a microtask later.
  */
 @Component({
-  imports: [FormsModule, FieldDecoratorComponent, DropdownFieldComponent, FieldOptionComponent, FieldLabelDirective],
+  imports: [FormsModule, FieldDecorator, DropdownField, FieldOption, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -243,17 +236,17 @@ class RadioGroupHostComponent {}
     </formidable-field-decorator>
   `
 })
-class ProjectedOptionHostComponent {}
+class ProjectedOptionHost {}
 
 describe('formidableFieldLabel [position]', () => {
-  let fixture: ComponentFixture<InputHostComponent>;
-  let host: InputHostComponent;
+  let fixture: ComponentFixture<InputHost>;
+  let host: InputHost;
   const themed = new Set<string>();
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(InputHostComponent);
+    fixture = TestBed.createComponent(InputHost);
     host = fixture.componentInstance;
 
     // The label animates its `top`, so a rect read straight after a state change would return the
@@ -736,7 +729,7 @@ describe('formidableFieldLabel [position]', () => {
 
   /** Renders a prefixed field and waits out the `ResizeObserver` the decorator measures the prefix in. */
   async function renderWithPrefix(position: FieldLabelPosition): Promise<HTMLElement> {
-    const prefixFixture = TestBed.createComponent(PrefixHostComponent);
+    const prefixFixture = TestBed.createComponent(PrefixHost);
     prefixFixture.componentInstance.position = position;
     prefixFixture.detectChanges();
 
@@ -821,7 +814,7 @@ describe('formidableFieldLabel [position]', () => {
     // An adornment decorates the label, so on its own it would be stranded above a field it no longer
     // belongs to — and its height would stretch the wrapper the overlay label measures its offset from.
     it('takes a projected adornment with the label when the label moves over the field', () => {
-      const adornmentFixture = TestBed.createComponent(LabelAdornmentHostComponent);
+      const adornmentFixture = TestBed.createComponent(LabelAdornmentHost);
       const before = () => adornmentFixture.nativeElement.querySelector('.before-wrapper') as HTMLElement;
 
       adornmentFixture.componentInstance.position = 'outside';
@@ -846,7 +839,7 @@ describe('formidableFieldLabel [position]', () => {
   // A textarea top-aligns its value, so `--formidable-field-value-top` clears the label instead of the
   // padding the centered fields use. It is the one field where the two differ.
   it('clears an inside label on a textarea, whose value is top-aligned', () => {
-    const textareaFixture = TestBed.createComponent(TextareaHostComponent);
+    const textareaFixture = TestBed.createComponent(TextareaHost);
     textareaFixture.detectChanges();
 
     const textarea = textareaFixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
@@ -874,7 +867,7 @@ describe('formidableFieldLabel [position]', () => {
 
   // The layout gate runs before the position is resolved, so it covers `border` the same way.
   it('falls back to outside for a field with no room for a label over it', () => {
-    const radioFixture = TestBed.createComponent(RadioGroupHostComponent);
+    const radioFixture = TestBed.createComponent(RadioGroupHost);
     radioFixture.detectChanges();
 
     const wrapper = radioFixture.nativeElement.querySelector('.label-wrapper') as HTMLElement;
@@ -890,12 +883,12 @@ describe('formidableFieldLabel [position]', () => {
  * offsets it from the inset the label is anchored to. Only the label's clearance may remain on it.
  */
 describe('a value rendered in a wrapped input', () => {
-  let fixture: ComponentFixture<WrappedInputHostComponent>;
+  let fixture: ComponentFixture<WrappedInputHost>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(WrappedInputHostComponent);
+    fixture = TestBed.createComponent(WrappedInputHost);
     fixture.detectChanges();
   });
 
@@ -956,32 +949,32 @@ describe('a value rendered in a wrapped input', () => {
   }
 });
 
-describe('IFormidableField.canLabelRest', () => {
+describe('FormidableField.canLabelRest', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideNgxMask()] }));
 
   it('is false for a date field, which always shows its mask slots', () => {
-    const fixture = TestBed.createComponent(DateFieldComponent);
+    const fixture = TestBed.createComponent(DateField);
     fixture.detectChanges();
 
     expect(fixture.componentInstance.canLabelRest()).toBe(false);
   });
 
   it('is false for a time field, which always shows its mask slots', () => {
-    const fixture = TestBed.createComponent(TimeFieldComponent);
+    const fixture = TestBed.createComponent(TimeField);
     fixture.detectChanges();
 
     expect(fixture.componentInstance.canLabelRest()).toBe(false);
   });
 
   it('is false for a select field, which always shows an option', () => {
-    const fixture = TestBed.createComponent(SelectFieldComponent);
+    const fixture = TestBed.createComponent(SelectField);
     fixture.detectChanges();
 
     expect(fixture.componentInstance.canLabelRest()).toBe(false);
   });
 
   it('is false while readonly or disabled', () => {
-    const fixture = TestBed.createComponent(InputFieldComponent);
+    const fixture = TestBed.createComponent(InputField);
     fixture.detectChanges();
 
     fixture.componentRef.setInput('readonly', true);
@@ -1003,12 +996,12 @@ describe('IFormidableField.canLabelRest', () => {
  * the whole thing.
  */
 describe('a label never animates itself into place on load', () => {
-  let fixture: ComponentFixture<ProjectedOptionHostComponent>;
+  let fixture: ComponentFixture<ProjectedOptionHost>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(ProjectedOptionHostComponent);
+    fixture = TestBed.createComponent(ProjectedOptionHost);
   });
 
   function labelWrapper(): HTMLElement {

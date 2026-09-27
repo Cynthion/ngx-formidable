@@ -85,7 +85,7 @@ describe('component serializer', () => {
     const angular = serializeComponent(only(['orderName'], 'angular'));
 
     expect(vest).toContain("from 'vest'");
-    expect(vest).toContain('NgxFormidableVestValidatorDirective');
+    expect(vest).toContain('NgxFormidableVestValidator');
     expect(vest).toContain("    // test('orderName', 'Required.', () => {");
     expect(vest).not.toMatch(/^\s*test\(/m);
 

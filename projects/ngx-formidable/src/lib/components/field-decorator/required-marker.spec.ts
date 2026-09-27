@@ -2,12 +2,12 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { NgxFormidableFormDirective } from '../../forms/form.directive';
+import { FieldLabel } from '../../directives/field-label';
+import { NgxFormidableForm } from '../../forms/form.directive';
 import { FieldLabelPosition } from '../../models/formidable.model';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { InputField } from '../fields/input-field/input-field';
+import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
  * Contract of the label's required marker.
@@ -27,7 +27,7 @@ import { FieldDecoratorComponent } from './field-decorator.component';
  */
 
 @Component({
-  imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective],
+  imports: [FieldDecorator, InputField, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator [style.width.rem]="width">
@@ -44,7 +44,7 @@ import { FieldDecoratorComponent } from './field-decorator.component';
     </formidable-field-decorator>
   `
 })
-class InputHostComponent {
+class InputHost {
   markRequired = false;
   hasLabel = true;
   label = 'Label';
@@ -54,7 +54,7 @@ class InputHostComponent {
 
 /** A group renders its label as a plain `div` instead of a `label`, so the marker has to reach both. */
 @Component({
-  imports: [FieldDecoratorComponent, RadioGroupFieldComponent, FieldLabelDirective],
+  imports: [FieldDecorator, RadioGroupField, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -69,11 +69,11 @@ class InputHostComponent {
     </formidable-field-decorator>
   `
 })
-class RadioGroupHostComponent {}
+class RadioGroupHost {}
 
 /** The form-wide switch: one flag hides every marker on the form, whatever its fields asked for. */
 @Component({
-  imports: [FormsModule, NgxFormidableFormDirective, FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective],
+  imports: [FormsModule, NgxFormidableForm, FieldDecorator, InputField, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
@@ -93,18 +93,18 @@ class RadioGroupHostComponent {}
     </form>
   `
 })
-class FormHostComponent {
+class FormHost {
   hideRequiredMarkers = false;
 }
 
 describe('required marker', () => {
-  let fixture: ReturnType<typeof TestBed.createComponent<InputHostComponent>>;
-  let host: InputHostComponent;
+  let fixture: ReturnType<typeof TestBed.createComponent<InputHost>>;
+  let host: InputHost;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(InputHostComponent);
+    fixture = TestBed.createComponent(InputHost);
     host = fixture.componentInstance;
   });
 
@@ -142,7 +142,7 @@ describe('required marker', () => {
   });
 
   it('renders the marker in a group label too, which is a div rather than a label', () => {
-    const radioFixture = TestBed.createComponent(RadioGroupHostComponent);
+    const radioFixture = TestBed.createComponent(RadioGroupHost);
     radioFixture.detectChanges();
 
     const wrapper = radioFixture.nativeElement.querySelector('.label-wrapper') as HTMLElement;
@@ -152,7 +152,7 @@ describe('required marker', () => {
   });
 
   it('lets the form hide every marker on it, and give them back', () => {
-    const formFixture = TestBed.createComponent(FormHostComponent);
+    const formFixture = TestBed.createComponent(FormHost);
     formFixture.detectChanges();
 
     expect(formFixture.nativeElement.querySelector('.required-marker')).not.toBeNull();

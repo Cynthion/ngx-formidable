@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { IFormidableOption } from '../../models/formidable.model';
-import { FieldOptionComponent } from '../field-option/field-option.component';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { SelectFieldComponent } from './select-field/select-field.component';
-import { TextareaFieldComponent } from './textarea-field/textarea-field.component';
+import { FormidableOption } from '../../models/formidable.model';
+import { FieldOption } from '../field-option/field-option';
+import { InputField } from './input-field/input-field';
+import { SelectField } from './select-field/select-field';
+import { TextareaField } from './textarea-field/textarea-field';
 
 /**
  * A value written before the field can hold it survives.
@@ -18,8 +18,7 @@ import { TextareaFieldComponent } from './textarea-field/textarea-field.componen
  */
 
 @Component({
-  imports: [FormsModule, SelectFieldComponent, FieldOptionComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, SelectField, FieldOption],
   template: `
     <form>
       <formidable-select-field
@@ -36,16 +35,15 @@ import { TextareaFieldComponent } from './textarea-field/textarea-field.componen
     </form>
   `
 })
-class ProjectedSelectHostComponent {
+class ProjectedSelectHost {
   // Deliberately not the first option: a native `<select>` selects that one on its own, so a value that
   // happened to match it would pass whether or not the field ever applied what it was given.
   value: string | null = 'renaissance';
-  options: IFormidableOption[] = [];
+  options: FormidableOption[] = [];
 }
 
 @Component({
-  imports: [FormsModule, InputFieldComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, InputField],
   template: `
     <form>
       <formidable-input-field
@@ -56,13 +54,12 @@ class ProjectedSelectHostComponent {
     </form>
   `
 })
-class MaskedInputHostComponent {
+class MaskedInputHost {
   value: string | null = 'TTA4417';
 }
 
 @Component({
-  imports: [FormsModule, TextareaFieldComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, TextareaField],
   template: `
     <form>
       <formidable-textarea-field
@@ -73,7 +70,7 @@ class MaskedInputHostComponent {
     </form>
   `
 })
-class MaskedTextareaHostComponent {
+class MaskedTextareaHost {
   value: string | null = 'abcdef';
 }
 
@@ -91,7 +88,7 @@ describe('a value written before the field can hold it', () => {
   });
 
   it('survives on a select whose options are projected', fakeAsync(() => {
-    const fixture = TestBed.createComponent(ProjectedSelectHostComponent);
+    const fixture = TestBed.createComponent(ProjectedSelectHost);
     settle(fixture);
 
     const select = (fixture.nativeElement as HTMLElement).querySelector('select') as HTMLSelectElement;
@@ -102,7 +99,7 @@ describe('a value written before the field can hold it', () => {
   // The risk the fallback carries: it must never outrank what the element already holds, or a later pick
   // would be reverted to the value the form wrote at startup the next time the option list moves.
   it('does not revert a later pick when the option list changes', fakeAsync(() => {
-    const fixture = TestBed.createComponent(ProjectedSelectHostComponent);
+    const fixture = TestBed.createComponent(ProjectedSelectHost);
     settle(fixture);
 
     const select = (fixture.nativeElement as HTMLElement).querySelector('select') as HTMLSelectElement;
@@ -118,7 +115,7 @@ describe('a value written before the field can hold it', () => {
   }));
 
   it('survives on a masked input, formatted by its mask', fakeAsync(() => {
-    const fixture = TestBed.createComponent(MaskedInputHostComponent);
+    const fixture = TestBed.createComponent(MaskedInputHost);
     settle(fixture);
 
     const input = (fixture.nativeElement as HTMLElement).querySelector('input') as HTMLInputElement;
@@ -127,7 +124,7 @@ describe('a value written before the field can hold it', () => {
   }));
 
   it('survives on a masked textarea, formatted by its mask', fakeAsync(() => {
-    const fixture = TestBed.createComponent(MaskedTextareaHostComponent);
+    const fixture = TestBed.createComponent(MaskedTextareaHost);
     settle(fixture);
 
     const textarea = (fixture.nativeElement as HTMLElement).querySelector('textarea') as HTMLTextAreaElement;
@@ -136,7 +133,7 @@ describe('a value written before the field can hold it', () => {
   }));
 
   it('does not resurrect a value the user has since cleared', fakeAsync(() => {
-    const fixture = TestBed.createComponent(MaskedInputHostComponent);
+    const fixture = TestBed.createComponent(MaskedInputHost);
     settle(fixture);
 
     const input = (fixture.nativeElement as HTMLElement).querySelector('input') as HTMLInputElement;

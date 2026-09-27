@@ -1,12 +1,12 @@
 import { Component, Type, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { IFormidableOption } from '../../models/formidable.model';
-import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
-import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.component';
+import { FormidableOption } from '../../models/formidable.model';
+import { CheckboxGroupField } from './checkbox-group-field/checkbox-group-field';
+import { RadioGroupField } from './radio-group-field/radio-group-field';
 
 /**
- * Contract of the highlight `BaseOptionFieldDirective` owns for the four fields that walk an option list.
+ * Contract of the highlight `BaseOptionField` owns for the four fields that walk an option list.
  *
  * Reconciling the highlight against a changed list has a fixed order: an empty list clears it, a
  * selection reclaims it, otherwise the previously highlighted **value** is followed to wherever it moved,
@@ -20,14 +20,14 @@ import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.
  * so while their panel is open, and reach the same base code by the same route.
  */
 
-const options: IFormidableOption[] = [
+const options: FormidableOption[] = [
   { value: 'red', label: 'Red' },
   { value: 'blue', label: 'Blue' },
   { value: 'green', label: 'Green' }
 ];
 
 @Component({
-  imports: [FormsModule, RadioGroupFieldComponent, CheckboxGroupFieldComponent],
+  imports: [FormsModule, RadioGroupField, CheckboxGroupField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-radio-group-field
@@ -38,8 +38,8 @@ const options: IFormidableOption[] = [
       [options]="options" />
   `
 })
-class GroupHostComponent {
-  options: IFormidableOption[] = options;
+class GroupHost {
+  options: FormidableOption[] = options;
 }
 
 describe('option field highlight', () => {
@@ -69,7 +69,7 @@ describe('option field highlight', () => {
   }
 
   /** A new array reference is what `ngOnChanges` reacts to; the reconcile then runs in a microtask. */
-  function setOptions(host: { options: IFormidableOption[] }, next: IFormidableOption[]): void {
+  function setOptions(host: { options: FormidableOption[] }, next: FormidableOption[]): void {
     host.options = next;
     fixture.detectChanges();
     tick();
@@ -92,7 +92,7 @@ describe('option field highlight', () => {
   }
 
   it('follows the highlighted option to its new place in a reordered list', fakeAsync(() => {
-    const host = build(GroupHostComponent);
+    const host = build(GroupHost);
     const radiogroup = focused('[role="radiogroup"]');
 
     press(radiogroup, 'ArrowDown'); // 'red' -> 'blue', index 1
@@ -106,7 +106,7 @@ describe('option field highlight', () => {
   }));
 
   it('lets the selection reclaim the highlight from the remembered value', fakeAsync(() => {
-    const host = build(GroupHostComponent);
+    const host = build(GroupHost);
     const radiogroup = focused('[role="radiogroup"]');
 
     press(radiogroup, 'Enter'); // selects 'red'
@@ -120,7 +120,7 @@ describe('option field highlight', () => {
   }));
 
   it('gives a checked checkbox no such claim — it is one of many, not the selection', fakeAsync(() => {
-    const host = build(GroupHostComponent);
+    const host = build(GroupHost);
     const checkboxgroup = focused('[role="group"]');
 
     press(checkboxgroup, 'Enter'); // checks 'red', at index 0
@@ -134,7 +134,7 @@ describe('option field highlight', () => {
   }));
 
   it('pushes the clamped highlight off a disabled option', fakeAsync(() => {
-    const host = build(GroupHostComponent);
+    const host = build(GroupHost);
     const radiogroup = focused('[role="radiogroup"]');
 
     press(radiogroup, 'ArrowDown');

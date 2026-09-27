@@ -1,13 +1,13 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
+import { FieldLabel } from '../../directives/field-label';
 import { FormidablePanelPosition } from '../../models/formidable.model';
-import { DropdownFieldComponent } from '../fields/dropdown-field/dropdown-field.component';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
-import { ToggleFieldComponent } from '../fields/toggle-field/toggle-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { DropdownField } from '../fields/dropdown-field/dropdown-field';
+import { InputField } from '../fields/input-field/input-field';
+import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
+import { ToggleField } from '../fields/toggle-field/toggle-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
  * Contract of the field's border geometry.
@@ -79,14 +79,7 @@ function underline(element: HTMLElement): number {
 }
 
 @Component({
-  imports: [
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    ToggleFieldComponent,
-    DropdownFieldComponent,
-    RadioGroupFieldComponent,
-    FieldLabelDirective
-  ],
+  imports: [FieldDecorator, InputField, ToggleField, DropdownField, RadioGroupField, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -117,21 +110,21 @@ function underline(element: HTMLElement): number {
     </formidable-field-decorator>
   `
 })
-class HostComponent {
+class TestHost {
   readonly = false;
   panelPosition: FormidablePanelPosition = 'full';
 }
 
 describe('border geometry', () => {
-  let fixture: ComponentFixture<HostComponent>;
-  let host: HostComponent;
+  let fixture: ComponentFixture<TestHost>;
+  let host: TestHost;
   let root: HTMLElement;
   const themed = new Set<string>();
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(HostComponent);
+    fixture = TestBed.createComponent(TestHost);
     host = fixture.componentInstance;
     root = fixture.nativeElement;
     fixture.detectChanges();

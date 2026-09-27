@@ -1,12 +1,12 @@
 import { Directive, input } from '@angular/core';
-import { FORMIDABLE_VALIDATOR, IFormidableValidator } from '@cynthion/ngx-formidable';
+import { FORMIDABLE_VALIDATOR, FormidableValidator } from '@cynthion/ngx-formidable';
 import { from, map, Observable, of } from 'rxjs';
 import { Suite } from 'vest';
 
 /**
  * Validates a `formidableForm` with a Vest static suite.
  *
- * Provides `FORMIDABLE_VALIDATOR`, which is what `NgxFormidableFormDirective` delegates to. Put it on the
+ * Provides `FORMIDABLE_VALIDATOR`, which is what `NgxFormidableForm` delegates to. Put it on the
  * same `<form>` and the form directive handles the rest — the targets, the debounce, and reporting the
  * messages to the field that owns them.
  *
@@ -14,15 +14,14 @@ import { Suite } from 'vest';
  */
 @Directive({
   selector: 'form[formSuite]',
-  standalone: true,
   providers: [
     {
       provide: FORMIDABLE_VALIDATOR,
-      useExisting: NgxFormidableVestValidatorDirective
+      useExisting: NgxFormidableVestValidator
     }
   ]
 })
-export class NgxFormidableVestValidatorDirective<T extends Record<string, unknown>> implements IFormidableValidator<T> {
+export class NgxFormidableVestValidator<T extends Record<string, unknown>> implements FormidableValidator<T> {
   /**
    * A Vest suite, from `create`, holding the rules for every target on this form. A whole-form rule is
    * written against the `WHOLE_FORM` target.

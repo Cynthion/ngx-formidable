@@ -16,7 +16,7 @@ Mirror the nearest sibling rather than starting from nothing: copy its folder, r
 ## 2. Wire A Library Component
 
 1. Export it from `projects/ngx-formidable/src/public-api.ts` and add it to `NgxFormidableModule`.
-2. For a field: extend `BaseFieldDirective<T>` (or `BaseOptionFieldDirective` for a highlighted option list) and register the `NG_VALUE_ACCESSOR` and `FORMIDABLE_FIELD` providers per the field contract. Implement the abstract members — `fieldRef`, `decoratorLayout`, `value`, `doWriteValue` / `doOnValueChange` / `doOnFocusChange`, the keyboard, click and resize callbacks and `registeredKeys`. `example-counter-field` is the reference implementation.
+2. For a field: extend `BaseField<T>` (or `BaseOptionField` for a highlighted option list) and register the `NG_VALUE_ACCESSOR` and `FORMIDABLE_FIELD` providers per the field contract. Implement the abstract members — `fieldRef`, `decoratorLayout`, `value`, `doWriteValue` / `doOnValueChange` / `doOnFocusChange`, the keyboard, click and resize callbacks and `registeredKeys`. `example-counter-field` is the reference implementation.
 3. Add or update its entry in [`user/components.md`](../../../.documentation/user/components.md).
 4. A new `--formidable-*` variable goes into `src/app/portal/model/token-manifest.ts` and [`user/theme-reference.md`](../../../.documentation/user/theme-reference.md) with the same description.
 
@@ -25,7 +25,7 @@ Mirror the nearest sibling rather than starting from nothing: copy its folder, r
 A new field kind is not done until it renders in the Studio:
 
 1. Add a `PortalFieldKind`, a row to `FIELD_CAPABILITIES` and to `FIELD_KIND_SELECTORS` in `src/app/portal/model/field-capabilities.ts`.
-2. Add a `@case` in `src/app/portal/stage/preview-form/preview-field.component.html`.
+2. Add a `@case` in `src/app/portal/stage/preview-form/preview-field.html`.
 3. Add at least two specifications in `src/app/portal/model/preview-form.definition.ts`.
 
 A portal example under `src/app/example-<name>/` is not exported and not catalogued, but must be reachable from `src/main.ts`.

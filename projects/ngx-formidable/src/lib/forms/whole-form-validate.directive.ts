@@ -2,7 +2,7 @@ import { booleanAttribute, Directive, inject, Injector, input, OnInit } from '@a
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 import { WHOLE_FORM } from '../models/validation.model';
-import { NgxFormidableFormDirective } from './form.directive';
+import { NgxFormidableForm } from './form.directive';
 
 /**
  * Validates the form as a whole, so a rule that is about no single field has somewhere to live.
@@ -13,22 +13,21 @@ import { NgxFormidableFormDirective } from './form.directive';
  */
 @Directive({
   selector: 'form[formidableValidateWholeForm]',
-  standalone: true,
   providers: [
     {
       provide: NG_ASYNC_VALIDATORS,
-      useExisting: NgxFormidableWholeFormValidateDirective,
+      useExisting: NgxFormidableWholeFormValidate,
       multi: true
     }
   ]
 })
-export class NgxFormidableWholeFormValidateDirective implements AsyncValidator, OnInit {
+export class NgxFormidableWholeFormValidate implements AsyncValidator, OnInit {
   /** Switches the whole-form rule off without removing the attribute. The bare attribute means `true`. */
   public readonly formidableValidateWholeForm = input(true, { transform: booleanAttribute });
 
   private readonly injector = inject(Injector);
 
-  private formDirective: NgxFormidableFormDirective<Record<string, unknown>> | null = null;
+  private formDirective: NgxFormidableForm<Record<string, unknown>> | null = null;
 
   /**
    * Resolved here rather than injected. `NgForm` builds its `FormGroup` inside its own constructor, and a
@@ -37,11 +36,10 @@ export class NgxFormidableWholeFormValidateDirective implements AsyncValidator, 
    * for the half-built `NgForm`, and DI would throw NG0200. `ngOnInit` runs well after both exist.
    */
   public ngOnInit(): void {
-    this.formDirective = this.injector.get<NgxFormidableFormDirective<Record<string, unknown>> | null>(
-      NgxFormidableFormDirective,
-      null,
-      { self: true, optional: true }
-    );
+    this.formDirective = this.injector.get<NgxFormidableForm<Record<string, unknown>> | null>(NgxFormidableForm, null, {
+      self: true,
+      optional: true
+    });
   }
 
   public validate(control: AbstractControl): Observable<ValidationErrors | null> {

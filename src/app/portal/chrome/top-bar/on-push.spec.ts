@@ -3,7 +3,7 @@ import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testin
 import { provideRouter, Router } from '@angular/router';
 import { PORTAL_ROUTES } from '../../portal.routes';
 import { ThemeStore } from '../../state/theme.store';
-import { TopBarComponent } from './top-bar.component';
+import { TopBar } from './top-bar';
 
 /**
  * Every component in the repo is `OnPush`, and almost all of the portal's state moves through template event
@@ -15,7 +15,7 @@ import { TopBarComponent } from './top-bar.component';
  * and nothing else would notice.
  */
 describe('top bar OnPush contract', () => {
-  let fixture: ComponentFixture<TopBarComponent>;
+  let fixture: ComponentFixture<TopBar>;
   let root: HTMLElement;
   let theme: ThemeStore;
 
@@ -41,7 +41,7 @@ describe('top bar OnPush contract', () => {
     theme = TestBed.inject(ThemeStore);
     theme.reset();
 
-    fixture = TestBed.createComponent(TopBarComponent);
+    fixture = TestBed.createComponent(TopBar);
     root = fixture.nativeElement as HTMLElement;
   });
 

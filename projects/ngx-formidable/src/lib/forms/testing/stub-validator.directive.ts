@@ -1,6 +1,6 @@
 import { Directive, input } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { FORMIDABLE_VALIDATOR, IFormidableValidator } from '../../models/validation.model';
+import { FORMIDABLE_VALIDATOR, FormidableValidator } from '../../models/validation.model';
 
 /**
  * Test-only stand-in for a validator adapter, so the specs that prove UI state travels from validity do not
@@ -11,15 +11,14 @@ import { FORMIDABLE_VALIDATOR, IFormidableValidator } from '../../models/validat
   // Test-only, unreachable from `public-api.ts`, so it carries no public prefix.
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: 'form[stubValidator]',
-  standalone: true,
   providers: [
     {
       provide: FORMIDABLE_VALIDATOR,
-      useExisting: StubValidatorDirective
+      useExisting: StubValidator
     }
   ]
 })
-export class StubValidatorDirective implements IFormidableValidator {
+export class StubValidator implements FormidableValidator {
   /** Target → message. A target absent from the map never reports anything. */
   public readonly stubValidator = input<Record<string, string>>({});
 

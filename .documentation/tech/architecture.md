@@ -43,11 +43,11 @@ projects/ngx-formidable/
 └── vest/                                 # → @cynthion/ngx-formidable/vest — the Vest adapter, `vest` as an optional peer
 ```
 
-**Composition Model**: field components implement `ControlValueAccessor` and register the `FORMIDABLE_FIELD` token; `FieldDecoratorComponent` projects a field plus its label/adornment/prefix/suffix/errors; option-based fields collect `FieldOptionComponent` children via `@ContentChildren`. The abstract `BaseFieldDirective` is the shared base and the extension point for custom fields; the abstract `BaseOptionFieldDirective` extends it for the four fields that walk an option list with a highlight. See [`user/components.md`](../user/components.md).
+**Composition Model**: field components implement `ControlValueAccessor` and register the `FORMIDABLE_FIELD` token; `FieldDecorator` projects a field plus its label/adornment/prefix/suffix/errors; option-based fields collect `FieldOption` children via `@ContentChildren`. The abstract `BaseField` is the shared base and the extension point for custom fields; the abstract `BaseOptionField` extends it for the four fields that walk an option list with a highlight. See [`user/components.md`](../user/components.md).
 
 **Validation**:
 
-- `NgxFormidableFormDirective` owns the model, the targets and the debouncing, then delegates the rules to whatever `FORMIDABLE_VALIDATOR` is provided; errors surface through Angular's own `AbstractControl.errors`.
+- `NgxFormidableForm` owns the model, the targets and the debouncing, then delegates the rules to whatever `FORMIDABLE_VALIDATOR` is provided; errors surface through Angular's own `AbstractControl.errors`.
 - The Vest validator is the second entry point, and Angular's built-in validators work with nothing wired at all.
 
 See [`tech/validation.md`](validation.md) and [`user/validation.md`](../user/validation.md).

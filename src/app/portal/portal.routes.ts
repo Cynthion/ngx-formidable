@@ -8,30 +8,30 @@ import { Routes } from '@angular/router';
 export const PORTAL_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () => import('./portal.component').then((m) => m.PortalComponent),
+    loadComponent: () => import('./portal').then((m) => m.Portal),
     title: 'ngx-formidable — Studio'
   },
   {
     path: 'specimen',
-    loadComponent: () => import('./specimen/specimen-page.component').then((m) => m.SpecimenPageComponent),
+    loadComponent: () => import('./specimen/specimen-page').then((m) => m.SpecimenPage),
     title: 'ngx-formidable — Specimen'
   },
   {
     path: 'docs',
-    loadComponent: () => import('./docs/docs-page.component').then((m) => m.DocsPageComponent),
+    loadComponent: () => import('./docs/docs-page').then((m) => m.DocsPage),
     title: 'ngx-formidable — Docs'
   },
   {
     // A per-token deep link uses a route parameter and scrolls programmatically: a fragment on top of a hash
     // route is ambiguous.
     path: 'docs/:topic',
-    loadComponent: () => import('./docs/docs-page.component').then((m) => m.DocsPageComponent),
+    loadComponent: () => import('./docs/docs-page').then((m) => m.DocsPage),
     title: 'ngx-formidable — Docs'
   },
   {
     // A heading, or a variable's row in the Theme Reference: what the Specimen links to.
     path: 'docs/:topic/:anchor',
-    loadComponent: () => import('./docs/docs-page.component').then((m) => m.DocsPageComponent),
+    loadComponent: () => import('./docs/docs-page').then((m) => m.DocsPage),
     title: 'ngx-formidable — Docs'
   },
   { path: '**', redirectTo: '' }

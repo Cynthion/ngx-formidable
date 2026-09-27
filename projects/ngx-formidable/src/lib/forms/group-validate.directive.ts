@@ -1,32 +1,31 @@
 import { Directive, inject } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
 import { Observable, of } from 'rxjs';
-import { NgxFormidableFormDirective } from './form.directive';
+import { NgxFormidableForm } from './form.directive';
 import { getGroupTarget } from './form.helpers';
 
 /**
  * Validates every `ngModelGroup` on a formidable form as a **group rule**: it resolves the group's dotted
- * target and hands it to `NgxFormidableFormDirective`, which debounces it and runs the provided validator.
+ * target and hands it to `NgxFormidableForm`, which debounces it and runs the provided validator.
  *
  * This is where a rule that reads several fields at once belongs when its result is about the group rather
  * than about one of them — a password and its confirmation, for instance. A rule about the form as a whole
- * uses `WHOLE_FORM` instead; see `NgxFormidableWholeFormValidateDirective`.
+ * uses `WHOLE_FORM` instead; see `NgxFormidableWholeFormValidate`.
  */
 @Directive({
   // Deliberately hijacks Angular's own selector so it attaches to every model-bound group.
   // eslint-disable-next-line @angular-eslint/directive-selector
   selector: '[ngModelGroup]',
-  standalone: true,
   providers: [
     {
       provide: NG_ASYNC_VALIDATORS,
-      useExisting: NgxFormidableGroupValidateDirective,
+      useExisting: NgxFormidableGroupValidate,
       multi: true
     }
   ]
 })
-export class NgxFormidableGroupValidateDirective implements AsyncValidator {
-  private readonly formDirective = inject(NgxFormidableFormDirective, { optional: true, skipSelf: true });
+export class NgxFormidableGroupValidate implements AsyncValidator {
+  private readonly formDirective = inject(NgxFormidableForm, { optional: true, skipSelf: true });
 
   public validate(control: AbstractControl): Observable<ValidationErrors | null> {
     if (!this.formDirective) {

@@ -45,8 +45,8 @@ The `helpers/` modules are pure functions and the highest-value, lowest-cost tar
 Behavior that carries real risk, tested through a minimal host — not the framework around it:
 
 - **ControlValueAccessor**: a field writes an external value and emits on user change.
-- **NgxFormidableFormDirective ↔ the validator**: `createAsyncValidator` debounces per the form's `debounceMs` and maps a validator's messages to Angular errors for one target. Specs drive it through a stub validator, so the library's own tests need no validation library.
-- **Directive attach behavior**: `NgxFormidableFieldValidateDirective`/`NgxFormidableGroupValidateDirective` attach to `[ngModel]`/`[ngModelGroup]` and **no-op outside a formidable form** (they inject `NgxFormidableFormDirective` optionally) — a regression here breaks any consuming app.
+- **NgxFormidableForm ↔ the validator**: `createAsyncValidator` debounces per the form's `debounceMs` and maps a validator's messages to Angular errors for one target. Specs drive it through a stub validator, so the library's own tests need no validation library.
+- **Directive attach behavior**: `NgxFormidableFieldValidate`/`NgxFormidableGroupValidate` attach to `[ngModel]`/`[ngModelGroup]` and **no-op outside a formidable form** (they inject `NgxFormidableForm` optionally) — a regression here breaks any consuming app.
 - **Keyboard navigation**: option/panel fields respond to the registered keys.
 
 ---

@@ -170,7 +170,7 @@ export function serializeComponent(definition: PortalFormDefinition): string {
     "import { DeepPartial, DeepRequired, NgxFormidableModule } from '@cynthion/ngx-formidable';",
     ...(vest
       ? [
-          "import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/vest';",
+          "import { NgxFormidableVestValidator } from '@cynthion/ngx-formidable/vest';",
           "import { create, mode, Modes, only, Suite } from 'vest';"
         ]
       : []),
@@ -212,7 +212,7 @@ export function serializeComponent(definition: PortalFormDefinition): string {
     ...(counter
       ? ["  // <example-counter-field> is the Studio's own custom field: import yours, see user/custom-fields.md"]
       : []),
-    `  imports: [NgxFormidableModule${vest ? ', NgxFormidableVestValidatorDirective' : ''}]`,
+    `  imports: [NgxFormidableModule${vest ? ', NgxFormidableVestValidator' : ''}]`,
     '})',
     'export class MyFormComponent {',
     '  readonly model = signal<MyFormModel>({});',

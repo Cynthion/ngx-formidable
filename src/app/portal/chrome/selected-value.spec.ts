@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SelectedValueDirective } from './selected-value.directive';
+import { SelectedValue } from './selected-value';
 
 /**
  * Contract of `portalSelectedValue`, which exists because `[value]` on a `<select>` cannot state the
@@ -11,8 +11,7 @@ import { SelectedValueDirective } from './selected-value.directive';
  * NG0914 warning the provider logs is expected, exactly as in the library's own `zoneless.spec.ts`.
  */
 @Component({
-  imports: [SelectedValueDirective],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SelectedValue],
   template: `
     <select
       id="dynamic"
@@ -39,13 +38,13 @@ import { SelectedValueDirective } from './selected-value.directive';
     </select>
   `
 })
-class HostComponent {
+class TestHost {
   readonly options = ['outside', 'inside', 'border'];
   readonly value = signal('inside');
 }
 
 describe('portalSelectedValue', () => {
-  let fixture: ComponentFixture<HostComponent>;
+  let fixture: ComponentFixture<TestHost>;
 
   function select(id: string): HTMLSelectElement {
     return (fixture.nativeElement as HTMLElement).querySelector(`#${id}`) as HTMLSelectElement;
@@ -54,7 +53,7 @@ describe('portalSelectedValue', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
 
-    fixture = TestBed.createComponent(HostComponent);
+    fixture = TestBed.createComponent(TestHost);
     fixture.detectChanges();
   });
 

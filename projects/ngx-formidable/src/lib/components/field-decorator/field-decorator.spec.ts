@@ -3,22 +3,22 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
-import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
-import { NgxFormidableFormDirective } from '../../forms/form.directive';
+import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
+import { StubValidator } from '../../forms/testing/stub-validator.directive';
+import { FieldLabel } from '../../directives/field-label';
+import { FieldPrefix } from '../../directives/field-prefix';
+import { FieldSuffix } from '../../directives/field-suffix';
+import { NgxFormidableForm } from '../../forms/form.directive';
 import { FieldAdornmentAlignment, FieldLabelPosition } from '../../models/formidable.model';
-import { FieldErrorsComponent } from '../field-errors/field-errors.component';
-import { AutocompleteFieldComponent } from '../fields/autocomplete-field/autocomplete-field.component';
-import { DateFieldComponent } from '../fields/date-field/date-field.component';
-import { DropdownFieldComponent } from '../fields/dropdown-field/dropdown-field.component';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
-import { TextareaFieldComponent } from '../fields/textarea-field/textarea-field.component';
-import { TimeFieldComponent } from '../fields/time-field/time-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { FieldErrors } from '../field-errors/field-errors';
+import { AutocompleteField } from '../fields/autocomplete-field/autocomplete-field';
+import { DateField } from '../fields/date-field/date-field';
+import { DropdownField } from '../fields/dropdown-field/dropdown-field';
+import { InputField } from '../fields/input-field/input-field';
+import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
+import { TextareaField } from '../fields/textarea-field/textarea-field';
+import { TimeField } from '../fields/time-field/time-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
  * Contract of the decorator's own layout: where a projected prefix/suffix sits, and where the validation
@@ -26,7 +26,7 @@ import { FieldDecoratorComponent } from './field-decorator.component';
  *
  * These two are coupled, which is the whole reason this file exists. `.container-horizontal` is the
  * positioning context for the label and for the prefix/suffix, so it has to be exactly the field's box.
- * `FieldErrorsDirective` used to insert its component beside the field — which content projection put
+ * `FieldErrorsRenderer` used to insert its component beside the field — which content projection put
  * *inside* that container — inflating it by a reserved error line and dragging the prefix down with it.
  *
  * The prefix is centered in the field's own box and is deliberately independent of the label: an inside
@@ -43,13 +43,13 @@ const shape = { field: '' };
 @Component({
   imports: [
     FormsModule,
-    NgxFormidableFormDirective,
-    StubValidatorDirective,
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    FieldErrorsDirective,
-    FieldPrefixDirective,
-    FieldSuffixDirective
+    NgxFormidableForm,
+    StubValidator,
+    FieldDecorator,
+    InputField,
+    FieldErrorsRenderer,
+    FieldPrefix,
+    FieldSuffix
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -69,7 +69,7 @@ const shape = { field: '' };
     </form>
   `
 })
-class PrefixWithErrorsHostComponent {
+class PrefixWithErrorsHost {
   value: Model = {};
   shape = shape;
   required = { field: 'Required.' };
@@ -77,7 +77,7 @@ class PrefixWithErrorsHostComponent {
 
 /** The same field with no decorator around it — the shape a consumer's custom field uses. */
 @Component({
-  imports: [FormsModule, NgxFormidableFormDirective, StubValidatorDirective, InputFieldComponent, FieldErrorsDirective],
+  imports: [FormsModule, NgxFormidableForm, StubValidator, InputField, FieldErrorsRenderer],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
@@ -92,14 +92,14 @@ class PrefixWithErrorsHostComponent {
     </form>
   `
 })
-class NoDecoratorHostComponent {
+class NoDecoratorHost {
   value: Model = {};
   shape = shape;
   required = { field: 'Required.' };
 }
 
 @Component({
-  imports: [FormsModule, TextareaFieldComponent, FieldDecoratorComponent, FieldPrefixDirective],
+  imports: [FormsModule, TextareaField, FieldDecorator, FieldPrefix],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -114,20 +114,14 @@ class NoDecoratorHostComponent {
     </formidable-field-decorator>
   `
 })
-class TextareaPrefixHostComponent {
+class TextareaPrefixHost {
   value = '';
   align: FieldAdornmentAlignment = 'center';
 }
 
 /** An adornment over a label that pushes the value down, so the two alignments visibly disagree. */
 @Component({
-  imports: [
-    InputFieldComponent,
-    FieldDecoratorComponent,
-    FieldLabelDirective,
-    FieldPrefixDirective,
-    FieldSuffixDirective
-  ],
+  imports: [InputField, FieldDecorator, FieldLabel, FieldPrefix, FieldSuffix],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -150,14 +144,14 @@ class TextareaPrefixHostComponent {
     </formidable-field-decorator>
   `
 })
-class AdornmentAlignmentHostComponent {
+class AdornmentAlignmentHost {
   align: FieldAdornmentAlignment = 'center';
   labelPosition: FieldLabelPosition = 'inside';
 }
 
 /** An action in one slot and plain text in the other — the two have to answer a click differently. */
 @Component({
-  imports: [InputFieldComponent, FieldDecoratorComponent, FieldPrefixDirective, FieldSuffixDirective],
+  imports: [InputField, FieldDecorator, FieldPrefix, FieldSuffix],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -173,13 +167,13 @@ class AdornmentAlignmentHostComponent {
     </formidable-field-decorator>
   `
 })
-class AdornmentActionHostComponent {
+class AdornmentActionHost {
   clicks = 0;
 }
 
 /** A prefix and a suffix that come and go, the way a consumer's own `*ngIf` moves them. */
 @Component({
-  imports: [InputFieldComponent, FieldDecoratorComponent, FieldPrefixDirective],
+  imports: [InputField, FieldDecorator, FieldPrefix],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -194,13 +188,13 @@ class AdornmentActionHostComponent {
     </formidable-field-decorator>
   `
 })
-class TogglablePrefixHostComponent {
+class TogglablePrefixHost {
   showPrefix = true;
 }
 
 /** A group field, whose decorator lays out vertically. */
 @Component({
-  imports: [RadioGroupFieldComponent, FieldDecoratorComponent, FieldPrefixDirective, FieldSuffixDirective],
+  imports: [RadioGroupField, FieldDecorator, FieldPrefix, FieldSuffix],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -210,11 +204,11 @@ class TogglablePrefixHostComponent {
     </formidable-field-decorator>
   `
 })
-class VerticalPrefixHostComponent {}
+class VerticalPrefixHost {}
 
 /** A field that renders its own panel toggle, with an inside label and an optional suffix beside it. */
 @Component({
-  imports: [DropdownFieldComponent, FieldDecoratorComponent, FieldLabelDirective, FieldSuffixDirective],
+  imports: [DropdownField, FieldDecorator, FieldLabel, FieldSuffix],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -232,20 +226,14 @@ class VerticalPrefixHostComponent {}
     </formidable-field-decorator>
   `
 })
-class ToggleFieldHostComponent {
+class ToggleFieldHost {
   readonly = false;
   showSuffix = false;
 }
 
 /** The four panel-ish fields: only two of them draw a toggle inside the field. */
 @Component({
-  imports: [
-    FieldDecoratorComponent,
-    DropdownFieldComponent,
-    DateFieldComponent,
-    AutocompleteFieldComponent,
-    TimeFieldComponent
-  ],
+  imports: [FieldDecorator, DropdownField, DateField, AutocompleteField, TimeField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator><formidable-dropdown-field name="a" /></formidable-field-decorator>
@@ -254,7 +242,7 @@ class ToggleFieldHostComponent {
     <formidable-field-decorator><formidable-time-field name="d" /></formidable-field-decorator>
   `
 })
-class EveryPanelFieldHostComponent {}
+class EveryPanelFieldHost {}
 
 /** px per rem, so the expectations stay written in the tokens' own unit. */
 function rem(value: number): number {
@@ -283,11 +271,11 @@ describe('formidable-field-decorator layout', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideNgxMask()] }));
 
   describe('with projected validation errors', () => {
-    let fixture: ComponentFixture<PrefixWithErrorsHostComponent>;
+    let fixture: ComponentFixture<PrefixWithErrorsHost>;
     let root: HTMLElement;
 
     beforeEach(() => {
-      fixture = TestBed.createComponent(PrefixWithErrorsHostComponent);
+      fixture = TestBed.createComponent(PrefixWithErrorsHost);
       fixture.detectChanges();
       root = fixture.nativeElement as HTMLElement;
     });
@@ -332,15 +320,15 @@ describe('formidable-field-decorator layout', () => {
     // directive pumps `refresh()`. Rendering it from the decorator's view rather than beside the field must
     // leave both halves working: it still reads the field's control, and a pump still repaints it.
     it('shows the messages once the control is touched and invalid', () => {
-      const errors = fixture.debugElement.query(By.directive(FieldErrorsComponent));
+      const errors = fixture.debugElement.query(By.directive(FieldErrors));
       const control = fixture.debugElement.query(By.css('formidable-input-field')).injector.get(NgModel).control;
 
       expect(errors).toBeTruthy();
-      expect((errors.componentInstance as FieldErrorsComponent).control).toBe(control);
+      expect((errors.componentInstance as FieldErrors).control).toBe(control);
 
       control.markAsTouched();
       control.setErrors({ errors: ['Required.'] });
-      (errors.componentInstance as FieldErrorsComponent).refresh();
+      (errors.componentInstance as FieldErrors).refresh();
       fixture.detectChanges();
 
       const messages = Array.from(root.querySelectorAll('.error')).map((e) => e.textContent?.trim());
@@ -352,7 +340,7 @@ describe('formidable-field-decorator layout', () => {
   // A field can carry `formidableFieldErrors` with no decorator at all — consumers do this for custom
   // fields, so the directive has to keep rendering the component itself in that case.
   it('renders the errors beside the control when there is no decorator', () => {
-    const fixture = TestBed.createComponent(NoDecoratorHostComponent);
+    const fixture = TestBed.createComponent(NoDecoratorHost);
     fixture.detectChanges();
 
     const root = fixture.nativeElement as HTMLElement;
@@ -365,7 +353,7 @@ describe('formidable-field-decorator layout', () => {
   // A textarea grows as you type, so centering would drift the prefix downwards. It sits on the first
   // line instead, like the label.
   it('top-aligns a textarea prefix with its first line and keeps it there as the field grows', () => {
-    const fixture = TestBed.createComponent(TextareaPrefixHostComponent);
+    const fixture = TestBed.createComponent(TextareaPrefixHost);
     fixture.detectChanges();
 
     const root = fixture.nativeElement as HTMLElement;
@@ -391,11 +379,11 @@ describe('formidable-field-decorator layout', () => {
    * below the box's middle — and an adornment given the same padding lands on it.
    */
   describe('adornment alignment', () => {
-    let fixture: ComponentFixture<AdornmentAlignmentHostComponent>;
+    let fixture: ComponentFixture<AdornmentAlignmentHost>;
     let root: HTMLElement;
 
     beforeEach(() => {
-      fixture = TestBed.createComponent(AdornmentAlignmentHostComponent);
+      fixture = TestBed.createComponent(AdornmentAlignmentHost);
       fixture.detectChanges();
       root = fixture.nativeElement as HTMLElement;
     });
@@ -451,11 +439,11 @@ describe('formidable-field-decorator layout', () => {
    * and `a` inside one are excepted — a hit test is the assertion, not the computed property.
    */
   describe('with a projected action', () => {
-    let fixture: ComponentFixture<AdornmentActionHostComponent>;
+    let fixture: ComponentFixture<AdornmentActionHost>;
     let root: HTMLElement;
 
     beforeEach(async () => {
-      fixture = TestBed.createComponent(AdornmentActionHostComponent);
+      fixture = TestBed.createComponent(AdornmentActionHost);
       root = await settle(fixture);
     });
 
@@ -487,7 +475,7 @@ describe('formidable-field-decorator layout', () => {
   // A field that top-aligns its value already aligns with it, so it owns the decision — otherwise the
   // value's padding would be added on top of the first-line offset and push the prefix past the text.
   it('lets a value-top field keep its own alignment whatever the adornment asks for', () => {
-    const fixture = TestBed.createComponent(TextareaPrefixHostComponent);
+    const fixture = TestBed.createComponent(TextareaPrefixHost);
     fixture.detectChanges();
 
     const root = fixture.nativeElement as HTMLElement;
@@ -503,7 +491,7 @@ describe('formidable-field-decorator layout', () => {
   // The bug this replaced: the measurement ran once and wrote inline padding only when it found a
   // non-zero width, so a prefix that went away later left its inset on the field forever.
   it('gives the field back its own padding once the prefix goes away', async () => {
-    const fixture = TestBed.createComponent(TogglablePrefixHostComponent);
+    const fixture = TestBed.createComponent(TogglablePrefixHost);
     const root = await settle(fixture);
     const field = root.querySelector('input') as HTMLInputElement;
     const host = root.querySelector('formidable-field-decorator') as HTMLElement;
@@ -521,7 +509,7 @@ describe('formidable-field-decorator layout', () => {
   // A prefix/suffix insets the field's value, which a vertical layout has no value to inset — it stacks a
   // group inside a fieldset. The slots are not rendered there at all, rather than rendered and ignored.
   it('drops a projected prefix and suffix in the vertical layout', () => {
-    const fixture = TestBed.createComponent(VerticalPrefixHostComponent);
+    const fixture = TestBed.createComponent(VerticalPrefixHost);
     fixture.detectChanges();
 
     const root = fixture.nativeElement as HTMLElement;
@@ -539,14 +527,14 @@ describe('formidable-field-decorator layout', () => {
    * right up to the border and disappears behind the toggle, and a projected suffix lands on top of it.
    */
   describe('with an in-field panel toggle', () => {
-    let fixture: ComponentFixture<ToggleFieldHostComponent>;
+    let fixture: ComponentFixture<ToggleFieldHost>;
     let root: HTMLElement;
 
     /** The distance the toggle and the field's own padding together claim: `2rem` plus `1rem`. */
     const insetWithToggle = rem(3);
 
     beforeEach(async () => {
-      fixture = TestBed.createComponent(ToggleFieldHostComponent);
+      fixture = TestBed.createComponent(ToggleFieldHost);
       root = await settle(fixture);
     });
 
@@ -604,7 +592,7 @@ describe('formidable-field-decorator layout', () => {
     // `autocomplete-field` and `time-field` have a panel and a mask but draw nothing in the field, so
     // reserving the width for them would leave a visible gap at the right edge.
     it('is claimed by the two fields that draw one and by no others', async () => {
-      const every = await settle(TestBed.createComponent(EveryPanelFieldHostComponent));
+      const every = await settle(TestBed.createComponent(EveryPanelFieldHost));
       const claims = Array.from(every.querySelectorAll('formidable-field-decorator')).map((host) =>
         host.classList.contains('has-in-field-toggle')
       );

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SliderFieldComponent } from './slider-field.component';
+import { SliderField } from './slider-field';
 
 /**
  * Contract of the slider's label row: the labels along the track are placed absolutely, so the row itself
@@ -8,7 +8,7 @@ import { SliderFieldComponent } from './slider-field.component';
  * and over whatever the consumer puts below it — and only their own line height says how tall they are.
  */
 @Component({
-  imports: [SliderFieldComponent],
+  imports: [SliderField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-slider-field
@@ -19,14 +19,14 @@ import { SliderFieldComponent } from './slider-field.component';
       maxLabel="Volcanic" />
   `
 })
-class SliderHostComponent {}
+class SliderHost {}
 
-describe('SliderFieldComponent geometry', () => {
-  let fixture: ComponentFixture<SliderHostComponent>;
+describe('SliderField geometry', () => {
+  let fixture: ComponentFixture<SliderHost>;
   let root: HTMLElement;
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SliderHostComponent);
+    fixture = TestBed.createComponent(SliderHost);
     fixture.detectChanges();
     root = fixture.nativeElement as HTMLElement;
   });

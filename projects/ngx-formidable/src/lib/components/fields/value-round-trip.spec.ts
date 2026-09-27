@@ -2,20 +2,20 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { TextareaFieldComponent } from './textarea-field/textarea-field.component';
+import { InputField } from './input-field/input-field';
+import { TextareaField } from './textarea-field/textarea-field';
 
 /**
  * Contract of the value round trip: what a field is written stays comparable with what a user then types.
  *
- * `BaseFieldDirective.onValueChange` drops a change equal to the last one it saw, so a field does not
+ * `BaseField.onValueChange` drops a change equal to the last one it saw, so a field does not
  * report the same value twice. `writeValue` therefore has to record what it wrote — otherwise the field
  * displays a value the base has never seen, and clearing it reads as "still empty" and never reaches the
  * model. A required rule on such a field would never fire.
  */
 
 @Component({
-  imports: [FormsModule, InputFieldComponent, TextareaFieldComponent],
+  imports: [FormsModule, InputField, TextareaField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -30,19 +30,19 @@ import { TextareaFieldComponent } from './textarea-field/textarea-field.componen
     </form>
   `
 })
-class HostComponent {
+class TestHost {
   text: string | null = 'Cynthion';
   notes: string | null = 'Some notes';
 }
 
 describe('value round trip', () => {
-  let fixture: ReturnType<typeof TestBed.createComponent<HostComponent>>;
-  let host: HostComponent;
+  let fixture: ReturnType<typeof TestBed.createComponent<TestHost>>;
+  let host: TestHost;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(HostComponent);
+    fixture = TestBed.createComponent(TestHost);
     host = fixture.componentInstance;
   });
 

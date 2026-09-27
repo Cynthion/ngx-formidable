@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FORMIDABLE_VALIDATOR, IFormidableValidator, WHOLE_FORM } from '@cynthion/ngx-formidable';
+import { FORMIDABLE_VALIDATOR, FormidableValidator, WHOLE_FORM } from '@cynthion/ngx-formidable';
 import { firstValueFrom } from 'rxjs';
 import { create, enforce, mode, Modes, only, test } from 'vest';
-import { NgxFormidableVestValidatorDirective } from './vest-validator.directive';
+import { NgxFormidableVestValidator } from './vest-validator.directive';
 
 /**
  * Contract of the Vest adapter: it is the whole of the library's Vest knowledge. It provides
@@ -48,28 +48,28 @@ const suite = create((model: Model, field?: string) => {
 });
 
 @Component({
-  imports: [NgxFormidableVestValidatorDirective],
+  imports: [NgxFormidableVestValidator],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formSuite]="suite"></form>`
 })
-class HostComponent {
+class TestHost {
   suite = suite;
 }
 
-describe('NgxFormidableVestValidatorDirective', () => {
-  let validator: IFormidableValidator<Model>;
+describe('NgxFormidableVestValidator', () => {
+  let validator: FormidableValidator<Model>;
 
   beforeEach(() => {
-    const fixture = TestBed.createComponent(HostComponent);
+    const fixture = TestBed.createComponent(TestHost);
     fixture.detectChanges();
 
     validator = fixture.debugElement
       .query((node) => node.name === 'form')
-      .injector.get(FORMIDABLE_VALIDATOR) as IFormidableValidator<Model>;
+      .injector.get(FORMIDABLE_VALIDATOR) as FormidableValidator<Model>;
   });
 
   it('provides itself as the FORMIDABLE_VALIDATOR of its form', () => {
-    expect(validator).toBeInstanceOf(NgxFormidableVestValidatorDirective);
+    expect(validator).toBeInstanceOf(NgxFormidableVestValidator);
   });
 
   it('reports every failing message for the requested field path', async () => {
@@ -112,20 +112,20 @@ describe('NgxFormidableVestValidatorDirective', () => {
   });
 
   it('reports null when no suite is bound', async () => {
-    const bare = TestBed.createComponent(BareHostComponent);
+    const bare = TestBed.createComponent(BareHost);
     bare.detectChanges();
 
     const bareValidator = bare.debugElement
       .query((node) => node.name === 'form')
-      .injector.get(FORMIDABLE_VALIDATOR) as IFormidableValidator<Model>;
+      .injector.get(FORMIDABLE_VALIDATOR) as FormidableValidator<Model>;
 
     await expectAsync(firstValueFrom(bareValidator.validate({}, 'name'))).toBeResolvedTo(null);
   });
 });
 
 @Component({
-  imports: [NgxFormidableVestValidatorDirective],
+  imports: [NgxFormidableVestValidator],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formSuite]="null"></form>`
 })
-class BareHostComponent {}
+class BareHost {}

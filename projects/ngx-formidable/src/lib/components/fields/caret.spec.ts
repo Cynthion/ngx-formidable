@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { TextareaFieldComponent } from './textarea-field/textarea-field.component';
+import { InputField } from './input-field/input-field';
+import { TextareaField } from './textarea-field/textarea-field';
 
 /**
  * The caret belongs to the user. A write from the form puts it at the end, because the text it just
@@ -14,7 +14,7 @@ import { TextareaFieldComponent } from './textarea-field/textarea-field.componen
  */
 
 @Component({
-  imports: [FormsModule, InputFieldComponent, TextareaFieldComponent],
+  imports: [FormsModule, InputField, TextareaField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -31,18 +31,18 @@ import { TextareaFieldComponent } from './textarea-field/textarea-field.componen
     </form>
   `
 })
-class HostComponent {
+class TestHost {
   text = 'ABCDEFGH';
   masked = '0791234567';
   notes = 'ABCDEFGH';
 }
 
 describe('caret', () => {
-  let fixture: ReturnType<typeof TestBed.createComponent<HostComponent>>;
+  let fixture: ReturnType<typeof TestBed.createComponent<TestHost>>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
-    fixture = TestBed.createComponent(HostComponent);
+    fixture = TestBed.createComponent(TestHost);
   });
 
   /** `NgModel` inside a `<form>` registers across a microtask, and a masked write waits a task beyond it. */

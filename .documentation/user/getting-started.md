@@ -37,9 +37,9 @@ Angular's `common`, `core` and `forms`, and `rxjs`, are peers you already have. 
 // main.ts
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideNgxFormidable } from '@cynthion/ngx-formidable';
-import { AppComponent } from './app/app.component';
+import { App } from './app/app';
 
-bootstrapApplication(AppComponent, {
+bootstrapApplication(App, {
   providers: [...provideNgxFormidable()]
 }).catch(console.error);
 ```
@@ -51,11 +51,11 @@ bootstrapApplication(AppComponent, {
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgxFormidableModule } from '@cynthion/ngx-formidable';
-import { AppComponent } from './app.component';
+import { App } from './app';
 
 @NgModule({
   imports: [BrowserModule, NgxFormidableModule.forRoot()],
-  bootstrap: [AppComponent]
+  bootstrap: [App]
 })
 export class AppModule {}
 ```
@@ -212,7 +212,7 @@ readonly formValue$ = new BehaviorSubject<UserFormModel>(initialUserFormModel);
 readonly isValid$ = new BehaviorSubject<boolean | null>(null);
 readonly errors$ = new BehaviorSubject<FormidableFormErrors>({});
 
-readonly hobbyOptions: IFormidableOption[] = [
+readonly hobbyOptions: FormidableOption[] = [
   { value: 'reading', label: 'Reading' },
   { value: 'gaming', label: 'Gaming' },
   { value: 'swimming', label: 'Swimming' }

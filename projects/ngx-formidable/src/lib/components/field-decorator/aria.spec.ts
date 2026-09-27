@@ -3,18 +3,18 @@ import { fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
-import { FieldHintDirective } from '../../directives/field-hint.directive';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { NgxFormidableFormDirective } from '../../forms/form.directive';
-import { IFormidableOption } from '../../models/formidable.model';
-import { CheckboxGroupFieldComponent } from '../fields/checkbox-group-field/checkbox-group-field.component';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
-import { SliderFieldComponent } from '../fields/slider-field/slider-field.component';
-import { ToggleFieldComponent } from '../fields/toggle-field/toggle-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
+import { StubValidator } from '../../forms/testing/stub-validator.directive';
+import { FieldHint } from '../../directives/field-hint';
+import { FieldLabel } from '../../directives/field-label';
+import { NgxFormidableForm } from '../../forms/form.directive';
+import { FormidableOption } from '../../models/formidable.model';
+import { CheckboxGroupField } from '../fields/checkbox-group-field/checkbox-group-field';
+import { InputField } from '../fields/input-field/input-field';
+import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
+import { SliderField } from '../fields/slider-field/slider-field';
+import { ToggleField } from '../fields/toggle-field/toggle-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
  * Contract of the fields' ARIA wiring.
@@ -33,7 +33,7 @@ import { FieldDecoratorComponent } from './field-decorator.component';
  * accessible name at all before this.
  *
  * `aria-invalid` is the one attribute that needs a repaint: validity lives in the errors component,
- * whose `markForCheck` reaches its own ancestors and never the sibling field. `FieldErrorsDirective`
+ * whose `markForCheck` reaches its own ancestors and never the sibling field. `FieldErrorsRenderer`
  * therefore pumps the field as well — the end-to-end spec at the bottom is what pins that hop.
  */
 
@@ -43,7 +43,7 @@ interface Model {
 
 const shape = { field: '' };
 
-const options: IFormidableOption[] = [
+const options: FormidableOption[] = [
   { value: 'red', label: 'Red' },
   { value: 'blue', label: 'Blue' }
 ];
@@ -51,13 +51,13 @@ const options: IFormidableOption[] = [
 @Component({
   imports: [
     FormsModule,
-    FieldDecoratorComponent,
-    RadioGroupFieldComponent,
-    CheckboxGroupFieldComponent,
-    ToggleFieldComponent,
-    SliderFieldComponent,
-    FieldLabelDirective,
-    FieldHintDirective
+    FieldDecorator,
+    RadioGroupField,
+    CheckboxGroupField,
+    ToggleField,
+    SliderField,
+    FieldLabel,
+    FieldHint
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -96,7 +96,7 @@ const options: IFormidableOption[] = [
     </formidable-field-decorator>
   `
 })
-class NamedFieldsHostComponent {
+class NamedFieldsHost {
   options = options;
   markRequired = false;
   readonly = false;
@@ -107,7 +107,7 @@ class NamedFieldsHostComponent {
 
 /** The same group with nothing projected to name it. */
 @Component({
-  imports: [FieldDecoratorComponent, RadioGroupFieldComponent],
+  imports: [FieldDecorator, RadioGroupField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -115,19 +115,19 @@ class NamedFieldsHostComponent {
     </formidable-field-decorator>
   `
 })
-class UnlabelledHostComponent {}
+class UnlabelledHost {}
 
 /** An input with real validation behind it — the only way to reach the invalid state honestly. */
 @Component({
   imports: [
     FormsModule,
-    NgxFormidableFormDirective,
-    StubValidatorDirective,
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    FieldErrorsDirective,
-    FieldLabelDirective,
-    FieldHintDirective
+    NgxFormidableForm,
+    StubValidator,
+    FieldDecorator,
+    InputField,
+    FieldErrorsRenderer,
+    FieldLabel,
+    FieldHint
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -147,7 +147,7 @@ class UnlabelledHostComponent {}
     </form>
   `
 })
-class ErrorsHostComponent {
+class ErrorsHost {
   value: Model = {};
   shape = shape;
   required = { field: 'Required.' };
@@ -155,11 +155,11 @@ class ErrorsHostComponent {
 
 /** The shape a consumer uses for a bare field: no decorator, so nothing to point at. */
 @Component({
-  imports: [FormsModule, InputFieldComponent],
+  imports: [FormsModule, InputField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `<formidable-input-field name="field" />`
 })
-class NoDecoratorHostComponent {}
+class NoDecoratorHost {}
 
 describe('field ARIA', () => {
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideNgxMask()] }));
@@ -180,11 +180,11 @@ describe('field ARIA', () => {
   }
 
   describe('naming the fields a <label for> cannot reach', () => {
-    let fixture: ReturnType<typeof TestBed.createComponent<NamedFieldsHostComponent>>;
+    let fixture: ReturnType<typeof TestBed.createComponent<NamedFieldsHost>>;
     let root: HTMLElement;
 
     beforeEach(() => {
-      fixture = TestBed.createComponent(NamedFieldsHostComponent);
+      fixture = TestBed.createComponent(NamedFieldsHost);
       fixture.detectChanges();
       root = fixture.nativeElement as HTMLElement;
     });
@@ -211,7 +211,7 @@ describe('field ARIA', () => {
     });
 
     it('emits no aria-labelledby when no label is projected', () => {
-      const unlabelled = TestBed.createComponent(UnlabelledHostComponent);
+      const unlabelled = TestBed.createComponent(UnlabelledHost);
       unlabelled.detectChanges();
 
       const group = unlabelled.nativeElement.querySelector('[role="radiogroup"]') as HTMLElement;
@@ -227,11 +227,11 @@ describe('field ARIA', () => {
   });
 
   describe('state', () => {
-    let fixture: ReturnType<typeof TestBed.createComponent<NamedFieldsHostComponent>>;
+    let fixture: ReturnType<typeof TestBed.createComponent<NamedFieldsHost>>;
     let root: HTMLElement;
 
     beforeEach(() => {
-      fixture = TestBed.createComponent(NamedFieldsHostComponent);
+      fixture = TestBed.createComponent(NamedFieldsHost);
       fixture.detectChanges();
       root = fixture.nativeElement as HTMLElement;
     });
@@ -273,8 +273,7 @@ describe('field ARIA', () => {
     // A native range already reports its number; only a transformed value is something it cannot infer.
     it('gives the slider a valuetext only once the value is transformed', () => {
       const range = root.querySelector('input[type="range"]') as HTMLElement;
-      const slider = fixture.debugElement.query(By.directive(SliderFieldComponent))
-        .componentInstance as SliderFieldComponent;
+      const slider = fixture.debugElement.query(By.directive(SliderField)).componentInstance as SliderField;
 
       slider.selectValue(50);
       fixture.detectChanges();
@@ -290,7 +289,7 @@ describe('field ARIA', () => {
 
   describe('descriptions', () => {
     it('describes the field with its hint', () => {
-      const fixture = TestBed.createComponent(NamedFieldsHostComponent);
+      const fixture = TestBed.createComponent(NamedFieldsHost);
       fixture.detectChanges();
 
       const root = fixture.nativeElement as HTMLElement;
@@ -300,7 +299,7 @@ describe('field ARIA', () => {
     });
 
     it('describes nothing while the hint and the errors are empty', () => {
-      const fixture = TestBed.createComponent(NamedFieldsHostComponent);
+      const fixture = TestBed.createComponent(NamedFieldsHost);
       fixture.componentInstance.hasHint = false;
       fixture.detectChanges();
 
@@ -313,7 +312,7 @@ describe('field ARIA', () => {
     });
 
     it('emits neither aria-labelledby nor aria-describedby without a decorator', () => {
-      const fixture = TestBed.createComponent(NoDecoratorHostComponent);
+      const fixture = TestBed.createComponent(NoDecoratorHost);
       fixture.detectChanges();
 
       const input = fixture.nativeElement.querySelector('input') as HTMLElement;
@@ -323,11 +322,11 @@ describe('field ARIA', () => {
     });
 
     // The end-to-end one: nothing here calls `markForCheck` by hand. The input field is `OnPush` and the
-    // errors are its sibling, so without the pump in `FieldErrorsDirective` both assertions fail.
+    // errors are its sibling, so without the pump in `FieldErrorsRenderer` both assertions fail.
     // `fakeAsync` is what lets the debounced Vest validator settle — until it does the form stays
     // `PENDING`, `idle$` never emits, and the directive is not yet listening to the control.
     it('picks up the error message and reports invalid once the control is touched and invalid', fakeAsync(() => {
-      const fixture = TestBed.createComponent(ErrorsHostComponent);
+      const fixture = TestBed.createComponent(ErrorsHost);
       fixture.detectChanges();
       tick(1000);
       fixture.detectChanges();

@@ -2,14 +2,14 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { NgxFormidableFieldValidateDirective } from '../../forms/field-validate.directive';
-import { NgxFormidableFormDirective } from '../../forms/form.directive';
-import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
+import { FieldLabel } from '../../directives/field-label';
+import { NgxFormidableFieldValidate } from '../../forms/field-validate.directive';
+import { NgxFormidableForm } from '../../forms/form.directive';
+import { StubValidator } from '../../forms/testing/stub-validator.directive';
+import { InputField } from '../fields/input-field/input-field';
+import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
  * Contract of the field's state colours.
@@ -37,7 +37,7 @@ function token(name: string): string {
 }
 
 @Component({
-  imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective],
+  imports: [FieldDecorator, InputField, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -53,13 +53,13 @@ function token(name: string): string {
     </formidable-field-decorator>
   `
 })
-class InputHostComponent {
+class InputHost {
   readonly = false;
   disabled = false;
 }
 
 @Component({
-  imports: [FieldDecoratorComponent, RadioGroupFieldComponent, FieldLabelDirective],
+  imports: [FieldDecorator, RadioGroupField, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -68,7 +68,7 @@ class InputHostComponent {
     </formidable-field-decorator>
   `
 })
-class RadioGroupHostComponent {}
+class RadioGroupHost {}
 
 interface NameModel {
   name?: string;
@@ -78,13 +78,13 @@ interface NameModel {
 @Component({
   imports: [
     FormsModule,
-    NgxFormidableFormDirective,
-    StubValidatorDirective,
-    NgxFormidableFieldValidateDirective,
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    FieldErrorsDirective,
-    FieldLabelDirective
+    NgxFormidableForm,
+    StubValidator,
+    NgxFormidableFieldValidate,
+    FieldDecorator,
+    InputField,
+    FieldErrorsRenderer,
+    FieldLabel
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -104,20 +104,20 @@ interface NameModel {
     </form>
   `
 })
-class ValidatedHostComponent {
+class ValidatedHost {
   formValue: NameModel = {};
   shape: Required<NameModel> = { name: '' };
   required = { name: 'Required' };
 }
 
 describe('field state colors', () => {
-  let fixture: ComponentFixture<InputHostComponent>;
-  let host: InputHostComponent;
+  let fixture: ComponentFixture<InputHost>;
+  let host: InputHost;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(InputHostComponent);
+    fixture = TestBed.createComponent(InputHost);
     host = fixture.componentInstance;
 
     // The label transitions its colour, so a read straight after a state change would return a point
@@ -234,7 +234,7 @@ describe('field state colors', () => {
   // errors component computes validity, the directive hands it to the decorator, and the decorator —
   // deliberately not `OnPush` — turns it into the class the styling hangs off.
   it('raises the class from the control’s own validity', fakeAsync(() => {
-    const formFixture = TestBed.createComponent(ValidatedHostComponent);
+    const formFixture = TestBed.createComponent(ValidatedHost);
     const decoratorEl = () => formFixture.nativeElement.querySelector('formidable-field-decorator') as HTMLElement;
     const inputEl = () => formFixture.nativeElement.querySelector('input') as HTMLInputElement;
 
@@ -267,7 +267,7 @@ describe('field state colors', () => {
 
   // A group's box is styled by `group-field`, a separate mixin — so its states are a separate claim.
   it('applies the same invalid colour to a group field', () => {
-    const groupFixture = TestBed.createComponent(RadioGroupHostComponent);
+    const groupFixture = TestBed.createComponent(RadioGroupHost);
     groupFixture.detectChanges();
 
     const box = groupFixture.nativeElement.querySelector('.field') as HTMLElement;

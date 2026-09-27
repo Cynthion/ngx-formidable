@@ -2,13 +2,13 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
-import { FieldHintDirective } from '../../directives/field-hint.directive';
-import { NgxFormidableFormDirective } from '../../forms/form.directive';
+import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
+import { StubValidator } from '../../forms/testing/stub-validator.directive';
+import { FieldHint } from '../../directives/field-hint';
+import { NgxFormidableForm } from '../../forms/form.directive';
 import { FieldHintAlignment } from '../../models/formidable.model';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { InputField } from '../fields/input-field/input-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
  * Contract of the decorator's hint slot: hints render below the field and above the errors, they share one
@@ -27,15 +27,7 @@ const shape = { field: '' };
 
 /** Two hints that come and go, the way a consumer's own `*ngIf` moves them. */
 @Component({
-  imports: [
-    FormsModule,
-    NgxFormidableFormDirective,
-    StubValidatorDirective,
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    FieldErrorsDirective,
-    FieldHintDirective
-  ],
+  imports: [FormsModule, NgxFormidableForm, StubValidator, FieldDecorator, InputField, FieldErrorsRenderer, FieldHint],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
@@ -62,7 +54,7 @@ const shape = { field: '' };
     </form>
   `
 })
-class HintHostComponent {
+class HintHost {
   value: Model = {};
   shape = shape;
   required = { field: 'Required.' };
@@ -71,15 +63,15 @@ class HintHostComponent {
   counterAlign: FieldHintAlignment = 'end';
 }
 
-describe('FieldDecoratorComponent hint slot', () => {
-  let fixture: ComponentFixture<HintHostComponent>;
-  let host: HintHostComponent;
+describe('FieldDecorator hint slot', () => {
+  let fixture: ComponentFixture<HintHost>;
+  let host: HintHost;
   let root: HTMLElement;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(HintHostComponent);
+    fixture = TestBed.createComponent(HintHost);
     host = fixture.componentInstance;
     fixture.detectChanges();
     root = fixture.nativeElement as HTMLElement;

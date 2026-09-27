@@ -2,9 +2,9 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
 import { FORMIDABLE_VALIDATOR } from '../models/validation.model';
-import { NgxFormidableFieldValidateDirective } from './field-validate.directive';
-import { NgxFormidableFormDirective } from './form.directive';
-import { StubValidatorDirective } from './testing/stub-validator.directive';
+import { NgxFormidableFieldValidate } from './field-validate.directive';
+import { NgxFormidableForm } from './form.directive';
+import { StubValidator } from './testing/stub-validator.directive';
 
 /**
  * Contract of the run axis: when the validator runs is Angular's `updateOn`, set with `ngFormOptions` on the
@@ -21,7 +21,7 @@ interface Model extends Record<string, unknown> {
 }
 
 @Component({
-  imports: [FormsModule, NgxFormidableFormDirective, NgxFormidableFieldValidateDirective, StubValidatorDirective],
+  imports: [FormsModule, NgxFormidableForm, NgxFormidableFieldValidate, StubValidator],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
@@ -35,7 +35,7 @@ interface Model extends Record<string, unknown> {
     </form>
   `
 })
-class RunHostComponent {
+class RunHost {
   updateOn: 'change' | 'blur' | 'submit' = 'change';
   value: Model = { name: 'filled' };
   rules: Record<string, string> = { name: 'Required' };
@@ -43,7 +43,7 @@ class RunHostComponent {
 
 /** The form asks for `blur`, this one field asks for `change`. The field wins — that is Angular's rule. */
 @Component({
-  imports: [FormsModule, NgxFormidableFormDirective, NgxFormidableFieldValidateDirective, StubValidatorDirective],
+  imports: [FormsModule, NgxFormidableForm, NgxFormidableFieldValidate, StubValidator],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
@@ -58,13 +58,13 @@ class RunHostComponent {
     </form>
   `
 })
-class OverrideHostComponent {
+class OverrideHost {
   value: Model = { name: 'filled' };
   rules: Record<string, string> = { name: 'Required' };
 }
 
 describe('validation run axis', () => {
-  let fixture: ComponentFixture<RunHostComponent | OverrideHostComponent>;
+  let fixture: ComponentFixture<RunHost | OverrideHost>;
   let runs: jasmine.Spy;
 
   function control() {
@@ -95,14 +95,11 @@ describe('validation run axis', () => {
    * spec caused. The spy sits on the `FORMIDABLE_VALIDATOR` the form provides, which is the seam every target
    * goes through.
    */
-  function mount(
-    host: typeof RunHostComponent | typeof OverrideHostComponent,
-    updateOn?: 'change' | 'blur' | 'submit'
-  ): void {
+  function mount(host: typeof RunHost | typeof OverrideHost, updateOn?: 'change' | 'blur' | 'submit'): void {
     fixture = TestBed.createComponent(host);
 
     // Set before the first pass: `NgForm` reads its options once, in `ngAfterViewInit`.
-    if (updateOn) (fixture.componentInstance as RunHostComponent).updateOn = updateOn;
+    if (updateOn) (fixture.componentInstance as RunHost).updateOn = updateOn;
 
     fixture.detectChanges();
     tick(500);
@@ -121,7 +118,7 @@ describe('validation run axis', () => {
   // Settled between keystrokes on purpose: the commit is immediate, but the run is debounced, and three
   // keystrokes inside one window are one run by design. That is the debounce axis, not this one.
   it('commits on every keystroke under change, and runs with each', fakeAsync(() => {
-    mount(RunHostComponent, 'change');
+    mount(RunHost, 'change');
 
     type('a');
     expect(control()?.value).toBe('a');
@@ -139,7 +136,7 @@ describe('validation run axis', () => {
   }));
 
   it('commits and runs once per blur under blur, and not while typing', fakeAsync(() => {
-    mount(RunHostComponent, 'blur');
+    mount(RunHost, 'blur');
 
     type('a');
     type('ab');
@@ -158,7 +155,7 @@ describe('validation run axis', () => {
   }));
 
   it('commits and runs once per submit under submit, and not on blur', fakeAsync(() => {
-    mount(RunHostComponent, 'submit');
+    mount(RunHost, 'submit');
 
     type('abc');
     blur();
@@ -175,7 +172,7 @@ describe('validation run axis', () => {
   }));
 
   it('lets a field’s ngModelOptions beat the form’s ngFormOptions', fakeAsync(() => {
-    mount(OverrideHostComponent);
+    mount(OverrideHost);
 
     type('abc');
     tick(500);

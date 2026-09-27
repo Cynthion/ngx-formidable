@@ -1,6 +1,6 @@
 # Custom Fields
 
-The library's eleven fields do not cover everything, so `BaseFieldDirective` is the extension point. A field built on it is decorated, validated, themed and made accessible exactly like a built-in one — nothing in the library knows the difference.
+The library's eleven fields do not cover everything, so `BaseField` is the extension point. A field built on it is decorated, validated, themed and made accessible exactly like a built-in one — nothing in the library knows the difference.
 
 The worked example below is `example-counter-field` in the portal, quoted as it ships.
 
@@ -10,7 +10,7 @@ Register the component as `FORMIDABLE_FIELD` and it immediately gains:
 
 | Capability                                   | Comes From                                                                 |
 | :------------------------------------------- | :------------------------------------------------------------------------- |
-| Field rules                                  | `NgxFormidableFieldValidateDirective`, which attaches to every `ngModel`   |
+| Field rules                                  | `NgxFormidableFieldValidate`, which attaches to every `ngModel`            |
 | Group and whole-form rules                   | Being inside the form the rules report on                                  |
 | Error messages                               | Adding `formidableFieldErrors`, with or without a decorator                |
 | Label and adornment                          | The surrounding `formidable-field-decorator`                               |
@@ -24,7 +24,7 @@ Register the component as `FORMIDABLE_FIELD` and it immediately gains:
 
 ## The Contract
 
-Extend `BaseFieldDirective<T>` — `T` is the field's value type — and register two providers. Extending alone is not enough: `NG_VALUE_ACCESSOR` is what lets `ngModel` bind the field, and `FORMIDABLE_FIELD` is what lets the decorator find it.
+Extend `BaseField<T>` — `T` is the field's value type — and register two providers. Extending alone is not enough: `NG_VALUE_ACCESSOR` is what lets `ngModel` bind the field, and `FORMIDABLE_FIELD` is what lets the decorator find it.
 
 ```ts
 providers: [
@@ -67,31 +67,29 @@ Call the protected `onValueChange()` whenever the user changes the value: it emi
 A counter: it holds a number rather than a string, steps with the arrow keys, and always renders something where the value goes. Those are the three things a plain text field does not have to deal with.
 
 ```ts
-import { ChangeDetectionStrategy, Component, ElementRef, forwardRef, input, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, forwardRef, input, signal, viewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { BaseFieldDirective, FieldDecoratorLayout, FORMIDABLE_FIELD, IFormidableField } from '@cynthion/ngx-formidable';
+import { BaseField, FieldDecoratorLayout, FORMIDABLE_FIELD, FormidableField } from '@cynthion/ngx-formidable';
 
 @Component({
   selector: 'example-counter-field',
-  templateUrl: './example-counter-field.component.html',
-  styleUrls: ['./example-counter-field.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
+  templateUrl: './example-counter-field.html',
+  styleUrls: ['./example-counter-field.scss'],
   providers: [
     // required for ControlValueAccessor to work with Angular forms
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => ExampleCounterFieldComponent),
+      useExisting: forwardRef(() => ExampleCounterField),
       multi: true
     },
-    // required to provide this component as IFormidableField
+    // required to provide this component as FormidableField
     {
       provide: FORMIDABLE_FIELD,
-      useExisting: ExampleCounterFieldComponent
+      useExisting: ExampleCounterField
     }
   ]
 })
-export class ExampleCounterFieldComponent extends BaseFieldDirective<number> implements IFormidableField<number> {
+export class ExampleCounterField extends BaseField<number> implements FormidableField<number> {
   readonly counterRef = viewChild.required<ElementRef<HTMLDivElement>>('counterRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
@@ -133,7 +131,7 @@ export class ExampleCounterFieldComponent extends BaseFieldDirective<number> imp
 
   // #endregion
 
-  // #region IFormidableField
+  // #region FormidableField
 
   get value(): number {
     return this._value();
@@ -269,23 +267,21 @@ A rule naming `pets` reports on it like any other target — nothing about the r
 
 ## Custom Options
 
-An option is a component too. Extend `FieldOptionComponent`, register `FORMIDABLE_OPTION`, and project whatever content the option should render:
+An option is a component too. Extend `FieldOption`, register `FORMIDABLE_OPTION`, and project whatever content the option should render:
 
 ```ts
 @Component({
   selector: 'example-fuzzy-option',
-  templateUrl: './example-fuzzy-option.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
+  templateUrl: './example-fuzzy-option.html',
   providers: [
-    // required to provide this component as IFormidableOption
+    // required to provide this component as FormidableOption
     {
       provide: FORMIDABLE_OPTION,
-      useExisting: forwardRef(() => ExampleFuzzyOptionComponent)
+      useExisting: forwardRef(() => ExampleFuzzyOption)
     }
   ]
 })
-export class ExampleFuzzyOptionComponent extends FieldOptionComponent {
+export class ExampleFuzzyOption extends FieldOption {
   readonly subtitle = input<string | undefined>('sub');
 
   readonly highlightedEntries = input<HighlightedEntries>({
@@ -308,11 +304,11 @@ The projected content goes in an `ng-template`, which is what the parent field r
 
 Only the `ng-template` is rendered, in the option's place inside the field — the component's own host element never reaches the DOM, so nothing outside that template is drawn or clickable.
 
-What `FORMIDABLE_OPTION` provides is `IFormidableOptionSource`: one `option` computed holding the plain `IFormidableOption` the owning field reads off the component. `FieldOptionComponent` implements it, so extending it is all that is needed and a subclass's own inputs are for its template. Writing an option component from scratch means providing `option` yourself. Either way what a field receives is plain data — the same shape its `options` input takes.
+What `FORMIDABLE_OPTION` provides is `FormidableOptionSource`: one `option` computed holding the plain `FormidableOption` the owning field reads off the component. `FieldOption` implements it, so extending it is all that is needed and a subclass's own inputs are for its template. Writing an option component from scratch means providing `option` yourself. Either way what a field receives is plain data — the same shape its `options` input takes.
 
 The option's ARIA role is not its own to choose — it comes from the parent field, so an option inside a listbox is an `option` and one inside a radio group is a `radio`. `layout` is a look, not a role.
 
-A field that hosts options of its own implements `IFormidableOptionField` and provides `FORMIDABLE_OPTION_FIELD`; if it walks its list with a highlight, extend `BaseOptionFieldDirective` instead of `BaseFieldDirective` and the highlight machinery comes with it. Both are catalogued in [`user/components.md`](components.md).
+A field that hosts options of its own implements `FormidableOptionField` and provides `FORMIDABLE_OPTION_FIELD`; if it walks its list with a highlight, extend `BaseOptionField` instead of `BaseField` and the highlight machinery comes with it. Both are catalogued in [`user/components.md`](components.md).
 
 ---
 

@@ -2,8 +2,8 @@ import { Type } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
 import { FormidableEmptyHint } from '../../models/formidable.model';
-import { DateFieldComponent } from './date-field/date-field.component';
-import { TimeFieldComponent } from './time-field/time-field.component';
+import { DateField } from './date-field/date-field';
+import { TimeField } from './time-field/time-field';
 
 /**
  * Contract of the masked date/time fields: caret, value rendering and calendar options.
@@ -18,7 +18,7 @@ import { TimeFieldComponent } from './time-field/time-field.component';
  * rebuilt — its `config()` merges options without redrawing.
  */
 
-type MaskedField = DateFieldComponent | TimeFieldComponent;
+type MaskedField = DateField | TimeField;
 
 /** Types a single character the way a browser does: keydown, then insert at the *live* caret. */
 function press(input: HTMLInputElement, key: string): void {
@@ -93,14 +93,14 @@ function setInput(fixture: ComponentFixture<MaskedField>, name: string, value: u
 describe('masked date/time field', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [DateFieldComponent, TimeFieldComponent],
+      imports: [DateField, TimeField],
       providers: [provideNgxMask()]
     });
   });
 
   describe('date field, emptyHint "format"', () => {
     it('shows the format hint at rest and ngxMask slots while focused', fakeAsync(() => {
-      const { input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+      const { input } = setup(DateField, 'dd . MM . yyyy', 'format');
 
       expect(input.value).toBe('dd . MM . yyyy');
 
@@ -112,7 +112,7 @@ describe('masked date/time field', () => {
     }));
 
     it('fills left-to-right from a caret at 0 (the "21" bug)', fakeAsync(() => {
-      const { input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+      const { input } = setup(DateField, 'dd . MM . yyyy', 'format');
 
       input.focus();
       expect(input.selectionStart).toBe(0); // no pre-positioning
@@ -125,7 +125,7 @@ describe('masked date/time field', () => {
     }));
 
     it('jumps separators and commits the parsed date on blur', fakeAsync(() => {
-      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+      const { fixture, input } = setup(DateField, 'dd . MM . yyyy', 'format');
       const emitted: (Date | null)[] = [];
       fixture.componentInstance.valueChanged.subscribe((value) => emitted.push(value));
 
@@ -143,7 +143,7 @@ describe('masked date/time field', () => {
     }));
 
     it('restores the hint on blur when the value is incomplete', fakeAsync(() => {
-      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+      const { fixture, input } = setup(DateField, 'dd . MM . yyyy', 'format');
 
       input.focus();
       press(input, '1');
@@ -155,7 +155,7 @@ describe('masked date/time field', () => {
     }));
 
     it('keeps the hint out of a focused input when cleared while focused', fakeAsync(() => {
-      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+      const { fixture, input } = setup(DateField, 'dd . MM . yyyy', 'format');
 
       input.focus();
       fixture.componentInstance.writeValue(null);
@@ -172,7 +172,7 @@ describe('masked date/time field', () => {
     // Where focus leaves the caret is `focus-caret.spec.ts`; what matters here is that it leaves the
     // value alone, and that a selection the user makes afterwards is still theirs to type over.
     it('does not rewrite a filled field when focus lands on it', fakeAsync(() => {
-      const { input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+      const { input } = setup(DateField, 'dd . MM . yyyy', 'format');
 
       input.focus();
       '12052024'.split('').forEach((key) => press(input, key));
@@ -193,7 +193,7 @@ describe('masked date/time field', () => {
 
   describe('date field, emptyHint "underscores"', () => {
     it('shows ngxMask slots at rest and types identically', fakeAsync(() => {
-      const { input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'underscores');
+      const { input } = setup(DateField, 'dd . MM . yyyy', 'underscores');
 
       expect(input.value).toBe('__ . __ . ____');
 
@@ -212,7 +212,7 @@ describe('masked date/time field', () => {
 
   describe('time field', () => {
     it('fills left-to-right from a caret at 0 with the format hint', fakeAsync(() => {
-      const { input } = setup(TimeFieldComponent, 'HH : mm', 'format');
+      const { input } = setup(TimeField, 'HH : mm', 'format');
 
       expect(input.value).toBe('HH : mm');
 
@@ -229,7 +229,7 @@ describe('masked date/time field', () => {
     }));
 
     it('commits the parsed time on blur and restores the hint when incomplete', fakeAsync(() => {
-      const { fixture, input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+      const { fixture, input } = setup(TimeField, 'HH : mm', 'underscores');
       const emitted: (Date | null)[] = [];
       fixture.componentInstance.valueChanged.subscribe((value) => emitted.push(value));
 
@@ -258,7 +258,7 @@ describe('masked date/time field', () => {
 
   describe('value rendering', () => {
     it('shows a time written programmatically', fakeAsync(() => {
-      const { fixture, input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+      const { fixture, input } = setup(TimeField, 'HH : mm', 'underscores');
 
       fixture.componentInstance.writeValue(new Date(2024, 0, 1, 9, 5));
       tick();
@@ -267,7 +267,7 @@ describe('masked date/time field', () => {
     }));
 
     it('re-renders the time in the new format when it changes after init', fakeAsync(() => {
-      const { fixture, input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+      const { fixture, input } = setup(TimeField, 'HH : mm', 'underscores');
 
       fixture.componentInstance.writeValue(new Date(2024, 0, 1, 9, 5));
       tick();
@@ -279,7 +279,7 @@ describe('masked date/time field', () => {
     }));
 
     it('re-renders the date in the new format when it changes after init', fakeAsync(() => {
-      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+      const { fixture, input } = setup(DateField, 'dd . MM . yyyy', 'format');
 
       fixture.componentInstance.writeValue(new Date(2024, 4, 12));
       tick();
@@ -293,7 +293,7 @@ describe('masked date/time field', () => {
     }));
 
     it('blur-commits again after a panel interaction skipped one', fakeAsync(() => {
-      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+      const { fixture, input } = setup(DateField, 'dd . MM . yyyy', 'format');
       const panel = fixture.nativeElement.querySelector('.panel') as HTMLElement;
 
       input.focus();
@@ -317,7 +317,7 @@ describe('masked date/time field', () => {
 
   describe('clearing the text', () => {
     it('commits null as soon as a date is wiped, without waiting for the blur', fakeAsync(() => {
-      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+      const { fixture, input } = setup(DateField, 'dd . MM . yyyy', 'format');
 
       fixture.componentInstance.writeValue(new Date(2024, 4, 12));
       tick();
@@ -334,7 +334,7 @@ describe('masked date/time field', () => {
     }));
 
     it('steps from the default date once the text is wiped, not from the date that was there', fakeAsync(() => {
-      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+      const { fixture, input } = setup(DateField, 'dd . MM . yyyy', 'format');
 
       setInput(fixture, 'defaultDate', new Date(2020, 0, 15));
       fixture.componentInstance.writeValue(new Date(2024, 4, 12));
@@ -352,7 +352,7 @@ describe('masked date/time field', () => {
     }));
 
     it('commits null as soon as a time is wiped', fakeAsync(() => {
-      const { fixture, input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+      const { fixture, input } = setup(TimeField, 'HH : mm', 'underscores');
 
       fixture.componentInstance.writeValue(new Date(2024, 0, 1, 14, 30));
       tick();
@@ -369,7 +369,7 @@ describe('masked date/time field', () => {
     }));
 
     it('steps from midnight once the time is wiped', fakeAsync(() => {
-      const { fixture, input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+      const { fixture, input } = setup(TimeField, 'HH : mm', 'underscores');
 
       fixture.componentInstance.writeValue(new Date(2024, 0, 1, 14, 30));
       tick();
@@ -389,8 +389,8 @@ describe('masked date/time field', () => {
   describe('readonly', () => {
     // A readonly input blocks typing, not pointer focus — `tabindex="-1"` only keeps it out of the tab order.
     for (const { name, component, format, hint } of [
-      { name: 'date', component: DateFieldComponent, format: 'dd . MM . yyyy', hint: 'dd . MM . yyyy' },
-      { name: 'time', component: TimeFieldComponent, format: 'HH : mm', hint: 'HH : mm' }
+      { name: 'date', component: DateField, format: 'dd . MM . yyyy', hint: 'dd . MM . yyyy' },
+      { name: 'time', component: TimeField, format: 'HH : mm', hint: 'HH : mm' }
     ] as const) {
       it(`keeps the ${name} hint in place when the field is clicked into and out of`, fakeAsync(() => {
         const { fixture, input } = setup(component as Type<MaskedField>, format, 'format');
@@ -415,8 +415,8 @@ describe('masked date/time field', () => {
 
   describe('arrow keys', () => {
     /** May 2024, focused, with the caret parked where the test wants it. */
-    function focusedAt(caret: number): { fixture: ComponentFixture<DateFieldComponent>; input: HTMLInputElement } {
-      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+    function focusedAt(caret: number): { fixture: ComponentFixture<DateField>; input: HTMLInputElement } {
+      const { fixture, input } = setup(DateField, 'dd . MM . yyyy', 'format');
 
       fixture.componentInstance.writeValue(new Date(2024, 4, 12));
       tick();
@@ -502,7 +502,7 @@ describe('masked date/time field', () => {
     }));
 
     it('seeds an empty date field before stepping it', fakeAsync(() => {
-      const { fixture, input } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+      const { fixture, input } = setup(DateField, 'dd . MM . yyyy', 'format');
 
       input.focus();
       input.setSelectionRange(10, 10); // year
@@ -527,7 +527,7 @@ describe('masked date/time field', () => {
     }));
 
     it('steps the hour and the minute of a time field', fakeAsync(() => {
-      const { fixture, input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+      const { fixture, input } = setup(TimeField, 'HH : mm', 'underscores');
 
       fixture.componentInstance.writeValue(new Date(2024, 0, 1, 14, 30));
       tick();
@@ -549,7 +549,7 @@ describe('masked date/time field', () => {
     }));
 
     it('carries a minute step over midnight', fakeAsync(() => {
-      const { fixture, input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+      const { fixture, input } = setup(TimeField, 'HH : mm', 'underscores');
 
       fixture.componentInstance.writeValue(new Date(2024, 0, 1, 23, 59));
       tick();
@@ -563,7 +563,7 @@ describe('masked date/time field', () => {
     }));
 
     it('seeds an empty time field with midnight before stepping it', fakeAsync(() => {
-      const { input } = setup(TimeFieldComponent, 'HH : mm', 'underscores');
+      const { input } = setup(TimeField, 'HH : mm', 'underscores');
 
       input.focus();
       arrow(input, 'ArrowUp'); // caret sits at 0, the hour
@@ -575,8 +575,8 @@ describe('masked date/time field', () => {
 
   describe('calendar options', () => {
     /** May 2024 on screen, so the assertions below have a known month to look at. */
-    function setupCalendar(): { fixture: ComponentFixture<DateFieldComponent>; picker: HTMLElement } {
-      const { fixture } = setup(DateFieldComponent, 'dd . MM . yyyy', 'format');
+    function setupCalendar(): { fixture: ComponentFixture<DateField>; picker: HTMLElement } {
+      const { fixture } = setup(DateField, 'dd . MM . yyyy', 'format');
 
       fixture.componentInstance.writeValue(new Date(2024, 4, 12));
       tick();

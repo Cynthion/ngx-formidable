@@ -7,7 +7,7 @@ type BuiltinLeaf = Date | RegExp;
  * The same members, each as the signal a component declares for it. Lets an interface describe a component's
  * input surface without restating the member list — `Signal` is covariant, so a narrower `InputSignal` fits.
  */
-// Not `readonly`: an interface extending both this and `IFormidableField` needs the two declarations of a
+// Not `readonly`: an interface extending both this and `FormidableField` needs the two declarations of a
 // shared member (`name`, `disabled`) to be *identical*, and a modifier is enough to make them differ.
 export type SignalsOf<T> = { [K in keyof T]: Signal<T[K]> };
 

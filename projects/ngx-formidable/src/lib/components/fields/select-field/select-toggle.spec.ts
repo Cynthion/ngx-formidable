@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SelectFieldComponent } from './select-field.component';
+import { SelectField } from './select-field';
 
 /**
  * Contract of the select field's dropdown arrow.
@@ -9,8 +9,8 @@ import { SelectFieldComponent } from './select-field.component';
  * picture stacked over the control, never a target that swallows the click, and the room it takes is the
  * select's own `padding-right` — reserved only while an arrow is actually rendered.
  */
-describe('SelectFieldComponent in-field arrow', () => {
-  let fixture: ComponentFixture<SelectFieldComponent>;
+describe('SelectField in-field arrow', () => {
+  let fixture: ComponentFixture<SelectField>;
   let host: HTMLElement;
 
   function select(): HTMLSelectElement {
@@ -26,7 +26,7 @@ describe('SelectFieldComponent in-field arrow', () => {
   }
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SelectFieldComponent);
+    fixture = TestBed.createComponent(SelectField);
     fixture.componentRef.setInput('options', [
       { value: 'a', label: 'A' },
       { value: 'b', label: 'B' }
