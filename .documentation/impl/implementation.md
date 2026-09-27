@@ -15,34 +15,277 @@ The source of truth for outstanding work. [`impl/backlog.md`](backlog.md) is the
 
 ---
 
+## Forms-Agnostic Rewrite
+
+The fields work with Signal Forms, reactive forms and template-driven forms alike, validation belongs to whichever forms API the consumer chose, and the library renders, edits, decorates and themes. Phases 17 to 31 get there.
+
+### Decisions
+
+| Topic          | Decision                                                                                                                                                                                  |
+| :------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Field Contract | Every field implements Angular's `FormValueControl<T>`. No field is a `ControlValueAccessor`                                                                                              |
+| Validation     | None in the library: the template-driven harness and the Vest entry point go. Rules are Signal Forms rules, a Standard Schema such as Vest, Zod or Valibot, or the classic validators     |
+| Messages       | The decorator renders its field's messages. `formidable-field-errors` is presentational, placed by hand for a group, the form or a custom spot                                            |
+| Model          | The model is the only source of truth. A field writes only on user interaction and corrects nothing it is given                                                                           |
+| Reveal         | `touched` (default), `dirty` or `always`. `submitted` goes: Signal Forms keeps no submitted state, and `submit()` touches every field anyway                                              |
+| Value Types    | `string` for input and textarea, `boolean` for toggle, `number` for slider, `string[]` for checkbox-group, `string \| null` for the other option fields, `Date \| null` for date and time |
+| Naming         | Angular's current style guide: `input-field.ts`, `InputField`, `FormidableField` — no `Component` or `Directive` suffix, no `I` prefix                                                    |
+| Setup          | `provideNgxFormidable()` only. `NgxFormidableModule` goes                                                                                                                                 |
+| Studio Export  | Signal Forms only                                                                                                                                                                         |
+| Diagrams       | Mermaid, which the portal's `Docs` route renders as well                                                                                                                                  |
+| Test Runner    | Karma stays. A Vitest spike is in [`impl/backlog.md`](backlog.md)                                                                                                                         |
+
+### Target Architecture
+
+```mermaid
+flowchart LR
+  subgraph Api["Consumer's Forms API"]
+    SF["Signal Forms<br/>[formField]"]
+    RF["Reactive Forms<br/>[formControl]"]
+    TD["Template-Driven Forms<br/>ngModel"]
+  end
+  subgraph Lib["ngx-formidable"]
+    Field["Field<br/>FormValueControl"]
+    Decorator["Decorator<br/>Label, Marker, Hints, Messages"]
+  end
+  SF -- "Value, State" --> Field
+  RF -- "Value, State" --> Field
+  TD -- "Value, State" --> Field
+  Field -- "Value, Touch" --> Api
+  Field --> Decorator
+```
+
+| Concern                                                                  | Owner                                                                              |
+| :----------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
+| The model, the value flow, the rules, when they run, submission          | The forms API and the consumer's validator                                         |
+| Touched, dirty, errors, pending, disabled, readonly, required            | The forms API, pushed into the field's `FormUiControl` inputs                      |
+| Editing, keyboard, masking, panels, ARIA                                 | The field                                                                          |
+| Label, required marker, hints, prefix, suffix, messages and their reveal | The decorator, reading its field                                                   |
+| Message text                                                             | `FORMIDABLE_ERROR_MESSAGE`, an `(error) => string` defaulting to `message ?? kind` |
+
+- **Field**: `BaseField<T>` — `value` is a `model()`; the `FormUiControl` inputs, each accepting `undefined` and falling back to the field's default; a `touch` output as the last act of a blur; `focus(options?)`; the library's own `placeholder`, `autoFocus` and `revealOn`; and `showErrors`, derived from the state and the reveal.
+- **Decorator**: reads the projected field, and nothing of any forms API.
+- **Consumer Convention**: one `*.form.ts` per form holds the model interface, an initial model defining every key — Signal Forms drops an `undefined` one — and the `schema()`. The component holds `form()` over a `signal` of the initial model; the template is `<form [formRoot]>` with decorated fields bound by `[formField]`. The Studio exports exactly this.
+
+### Angular Behaviour Relied On
+
+Read off the installed `@angular/forms` and the Angular documentation. The phase named proves each with a spec before any guide states it.
+
+| Behaviour                                                                                                                                                                   | Proven In |
+| :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------: |
+| `[formField]` prefers a value accessor over a custom control, and the `NgControl` it provides has no `markAs*`, `events` or `valueChanges`                                  |    19     |
+| `[formField]` writes the schema's state into same-named inputs: `name`, `readonly`, `disabled`, `required`, `min`, `max`, `minLength`, `maxLength`                          |    19     |
+| `ngModel`, `[formControl]` and `formControlName` bind a custom control with no value accessor and forward `touched`, `dirty`, `invalid`, `pending`, `disabled` and `errors` |    19     |
+| The classic APIs ignore `updateOn` for a custom control, forward `required` everywhere but under `ngModel`, and never forward `readonly` or `name`                          |  19, 20   |
+| A classic error reaches a custom control as `{ kind, context }`, with no `message`                                                                                          |    20     |
+| `transformedValue` reports parse errors to all three APIs                                                                                                                   |    24     |
+| A Vest suite is a Standard Schema, and an async Vest test does not surface through it                                                                                       |    26     |
+
+### Accepted Compromises
+
+- **`updateOn` In The Classic APIs**: `blur` and `submit` no longer hold back a library field's value. Signal Forms' `debounce(path, 'blur')` does, through `touch`.
+- **Required Marker In Template-Driven Forms**: it comes from the `required` attribute, which also attaches Angular's `RequiredValidator`.
+- **Required Checkbox Group**: Signal Forms' `required()` does not count `[]` as empty, so the guide pairs it with `minLength(path, 1)`.
+
+### Integration Branch
+
+- **One Branch**: `feature/signal-forms-support` collects Phases 17 to 31. `main`, the deployed portal and the published package stay on the last beta until Phase 31.
+- **Phase Branches**: each phase branches off it and returns through a pull request with every CI gate of [`impl/definition-of-done.md`](definition-of-done.md) green.
+- **Test First**: each phase opens with behaviour specs that fail — DOM, ARIA and model assertions through a host that binds the field with a forms API.
+- **Interim Portal**: it builds and passes its tests at every phase. Visual regressions are tolerated until Phase 26 rebuilds it.
+- **Interim Guides**: [`user/components.md`](../user/components.md) follows every public change in the same phase; the guides are rewritten once, in Phase 30.
+- **This Section**: deleted with Phase 31, once Phases 29 and 30 have moved what holds into `tech/` and `user/`.
+
+### Defects
+
+Found by the architecture review. Each is fixed in the phase that rewrites its code and proven by a behaviour spec there, rather than patched in code that is about to go.
+
+| Id  | Defect                                                                                                                                            | Phase |
+| :-- | :------------------------------------------------------------------------------------------------------------------------------------------------ | :---: |
+| D1  | `dropdown-field` reverts a user's pick when its option list changes                                                                               |  21   |
+| D2  | Option fields disagree about a value with no option: `select-field` blanks only its display, the others correct the model                         |  21   |
+| D3  | Binding a field with `[formField]` throws: `runSilently` calls `markAsPristine`, which the Signal Forms `NgControl` does not have                 |  19   |
+| D4  | `toggle-field`'s `offLabel` does not fall back to `onLabel` as documented                                                                         |  25   |
+| D5  | A field's `revealOn` changed after the first render has no effect                                                                                 |  20   |
+| D6  | A readonly `slider-field` still moves its thumb on the arrow keys                                                                                 |  25   |
+| D7  | An invalid `unicodeTokenFormat` is caught on init only, and changing it later drops the fallback                                                  |  24   |
+| D8  | Pikaday commits typed text through its own `change` listener, bypassing `ignoresBlur` — not yet confirmed in a browser                            |  24   |
+| D9  | Every registered key is `preventDefault`ed, including an `Enter` or `Escape` the field ignores, which blocks implicit submit and closing a dialog |  21   |
+| D10 | Clicking an `autocomplete-field` option reports a blur twice, the second simulated, and leaves focus on the hidden panel                          |  22   |
+| D11 | The simulated blur leaves the field's focus state set, so the field and its decorator disagree                                                    |  22   |
+| D12 | Picking the already selected option reports it again and dirties the control                                                                      |  19   |
+| D13 | `slider-field` commits a clamped value without emitting it                                                                                        |  19   |
+| D14 | Every scroll or resize re-measures every panel field, open or not                                                                                 |  22   |
+
+---
+
 ## Library Phases
 
-### Documentation Update
+### Phase 17 — Current Angular Conventions
 
-- Check the whole documentation against the updated convention.
-- Update the whole source code comments against the updated convention. (Also, it is outdated in a lot of places. Library is now Angular v22+)
+**Depends On**: nothing.
 
-### Phase 17 — Release
+- **Naming**: a scripted rename across the library, the portal and the specs to Angular's current style guide. Files drop `.component` and `.directive` (`input-field.ts`), classes drop `Component` and `Directive` (`InputField`, `FieldDecorator`), interfaces drop the `I` prefix (`FormidableField`). Files that Phase 28 deletes keep their names.
+- **Framework Defaults**: drop the explicit `standalone: true` and `ChangeDetectionStrategy.OnPush`, both defaults now.
+- **Template And Host**: `@HostBinding` and `@HostListener` move to `host` metadata, `ngClass` to `[class]`, `*ngTemplateOutlet` to `[ngTemplateOutlet]`, and `CommonModule` to the directives a template uses.
+- **Lint**: add the angular-eslint rules the installed version has of `prefer-signals`, `prefer-signal-model`, `prefer-output-emitter-ref`, `prefer-output-readonly`, `no-uncalled-signals`, `reactive-context-must-read-signal`, `prefer-host-metadata-property`, `prefer-self-closing-tags`, `prefer-class-binding` and `prefer-style-binding`.
+- **Conventions**: rewrite naming and selectors in [`impl/components.md`](components.md), and replace its signal API bullets with the table from EnerQi's `impl/components.md`, enforced by those rules. Keep the library-only entries — `onSignalChange()`, the two-writers `linkedSignal` rule, `$` naming — and leave out EnerQi's app-only parts: containers and store, compositions and leaves, Storybook.
+- **Proof**: no behaviour change, so every existing spec passes after the rename alone; all CI gates green; a portal screenshot.
 
+### Phase 18 — Test Harness
+
+**Depends On**: Phase 17.
+
+- **Harness**: `lib/testing/`, unreachable from `public-api.ts`. It holds `configureFormidableTestBed()` with zoneless change detection and ngx-mask, one `settle()`, the DOM helpers the specs copy between them today (`type`, `press`, id-reference resolution, `theme()`, `rem()`, `corners()`), and `bindField(kind, api)`, a host that binds any field through template-driven or reactive forms.
+- **Every Spec Uses It**: all specs run zoneless, as a default application does, so `zoneless.spec.ts` goes and `on-push.spec.ts` becomes repaint behaviour specs.
+- **No Reaching In**: a spec writes a value through its host's forms API and asserts on the DOM, ARIA and the model — never `writeValue`, `componentInstance.value`, a protected member or a test subclass of the field base. `blur-commit.spec.ts`, `caret.spec.ts`, `date-time-field.spec.ts`, `standalone-model.spec.ts`, `option-projection.spec.ts` and `panel-scroll.spec.ts` are the ones that do today.
+- **Named For Behaviour**: a test named after a bug, and a file named after a framework mechanism, are renamed for what they prove.
+- **Conventions**: [`impl/testing.md`](testing.md) states the rules above and corrects its claim that the unit-test builder is experimental.
+- **Proof**: no spec contains `writeValue(`, `componentInstance.value` or a class extending the field base; every deleted case names its replacement in the pull request; all CI gates green.
+
+### Phase 19 — Signal-Native Field Contract
+
+**Depends On**: Phase 18.
+
+- **Contract**: `BaseField<T>` implements `FormValueControl<T>` for all eleven fields, as **Target Architecture** describes, with the inputs `disabled`, `readonly`, `required` and `name`, and `min`, `max`, `minLength` and `maxLength` where a field has them.
+- **Value Types**: as **Decisions** lists them. The toggle is a `FormValueControl<boolean>`, not a `FormCheckboxControl`, so every field exposes `value`.
+- **One Source Of Truth**: every field renders from `value()`, and `isFieldFilled` becomes a `computed` over it.
+- **Deleted**: `ControlValueAccessor` and the `NG_VALUE_ACCESSOR` providers; `runSilently`, `commit` and every correction — clamping, reconciling, re-masking what the model holds; `valueChanged`, `focusChanged`, `valueChange$` and `focusChange$`; the decorator's forwarded outputs; the per-field interfaces such as `FormidableInputField`, and `SignalsOf`.
+- **Renamed**: `markRequired` to `required` and `filterChanged` to `filterChange`. The `-1` that means unset for `minLength` and `maxLength` becomes `undefined`.
+- **Forms Matrix**: `bindField` gains Signal Forms, and one contract spec runs every field through all three APIs: model to display, edit to model and dirty, blur to touched with the touch last, a programmatic write staying pristine, `disabled`, `readonly` and `required` as each API forwards them, and `updateOn` having no effect in the classic APIs.
+- **Portal**: `example-counter-field` is rebuilt on the new base; the preview form stays template-driven, with the fewest binding changes that keep it compiling.
+- **Catalogue**: every changed member in [`user/components.md`](../user/components.md).
+- **Closes**: D3, D12, D13.
+
+### Phase 20 — Error Display From Field State
+
+**Depends On**: Phase 19.
+
+- **Field State**: the `FormUiControl` inputs `errors`, `invalid`, `pending`, `touched` and `dirty`, and a `revealOn` input defaulting through `FORMIDABLE_DEFAULTS`. `showErrors` also drives the field's own `aria-invalid`, and the last messages stay on screen while `pending`.
+- **Decorator**: renders the projected field's messages in its slot and carries `.is-invalid`. The required marker follows the field's `required`; `hideRequiredMarkers` stays a default.
+- **Field Errors**: presentational. It takes `errors` and renders each through `FORMIDABLE_ERROR_MESSAGE` in its `aria-live` region.
+- **Deleted**: `FieldErrorsDirective`, `registerErrors`, the repaint pump, `FORMIDABLE_ERROR_EXTRACTOR`, `FORMIDABLE_ERROR_TRANSLATOR`, `revealOn: 'submitted'` and the `debounceMs` default.
+- **Interim**: the template-driven harness still serves the portal, so it writes one error per message, and the portal renders its group errors with `formidable-field-errors`.
+- **Proof**: a reveal spec over the three modes and the three APIs, a message-token spec, and the marker in each API — Signal Forms' `required()`, reactive `Validators.required`, the template-driven `required` attribute.
+- **Closes**: D5.
+
+### Phase 21 — Option Fields
+
+**Depends On**: Phase 20.
+
+- **Two Layers**: the option base splits into a list layer — the option inputs, the projected options, one `computeAllOptions` — and a highlight layer. `select-field` takes the list layer only.
+- **One Rule For An Unknown Value**: all five option fields render it as no selection, leave the model alone, and show it again once its option arrives.
+- **Keyboard**: one list-navigation handler for the groups and one for the two panel fields. A key callback reports whether it handled the key, and only a handled key is `preventDefault`ed. The groups take `Space`.
+- **Field Option**: a projected option is a data source only; review its temporary-view content detection.
+- **Closes**: D1, D2, D9.
+
+### Phase 22 — Panel Fields
+
+**Depends On**: Phase 21.
+
+- **One Panel Behaviour**: `dropdown-field`, `autocomplete-field` and `date-field` share one implementation of the panel — its mousedown, its outside click, and repositioning on scroll and resize while it is open only.
+- **No Simulated Focus**: the simulated blurs go, and the field's focus state is the only one.
+- **Render Hooks**: `afterNextRender` replaces the timers that measure, scroll and place the panel.
+- **Closes**: D10, D11, D14.
+
+### Phase 23 — Text Fields
+
+**Depends On**: Phase 20.
+
+- **One Masked Editor**: `input-field` and `textarea-field` share their mask handling — a `computed` mask configuration, one template reference, no first-pass bookkeeping.
+- **Render Hooks**: the textarea's autosize and length-indicator timers move to `afterNextRender`.
+- **Specs**: the caret specs assert through a host.
+
+### Phase 24 — Date And Time Fields
+
+**Depends On**: Phase 22.
+
+- **One Base**: `date-field` and `time-field` share token format validation, masking, segment stepping and parsing.
+- **Transformed Value**: typed text goes through `transformedValue`. Unparseable text reports a `parse` error and leaves the model alone, empty text is `null`, and the error reaches every forms API.
+- **Pikaday**: no longer handed the input as its `field`, destroyed with the component, and without the `MutationObserver` that repeats `onDraw`.
+- **Specs**: `date-time-field.spec.ts` asserts through a host.
+- **Closes**: D7, and D8 once a browser confirms it.
+
+### Phase 25 — Field Symmetry Sweep
+
+**Depends On**: Phases 21, 23 and 24.
+
+- **Side By Side**: all eleven fields compared for input order, provider block, template attribute order and `tabindex`, and brought in line with [`impl/components.md`](components.md).
+- **One Edit Guard**: a `canEdit` computed on the base guards every public mutator — `toggle()`, `selectValue()`, `selectDate()`, `selectTime()`, `selectOption()` — and the keyboard and pointer guards.
+- **Timers**: the remaining `setTimeout` and `queueMicrotask` calls move to render hooks or go.
+- **Closes**: D4, D6.
+
+### Phase 26 — Portal Preview On Signal Forms
+
+**Depends On**: Phase 25.
+
+- **Preview Form**: built with `form()` — `[formRoot]` and a submission, `[formField]` on every field, groups as nested model objects, conditional fields through `hidden()` and `@if`. The `ControlContainer` workaround goes.
+- **Validation Modes**: Vest through `validateStandardSchema`, with one suite per form build; Signal Forms' built-in rules; none. The run setting becomes `debounce`.
+- **State**: the stores hold the model `signal`, and the model drawer reads errors, validity, dirty and submitting off the field tree.
+- **Specimen**: cells without a `<form>`.
+- **Verify First**: how a Vest whole-form test and an async Vest test surface through Standard Schema. The fallback is `validate`, `validateTree` or `validateAsync`.
+- **Proof**: no `ngModel` and no `formidableForm` left in `src/app` outside the export text; portal specs green; screenshots of the served Studio in each validation mode.
+
+### Phase 27 — Studio Export On Signal Forms
+
+**Depends On**: Phase 26.
+
+- **The Convention**: the export is the **Consumer Convention** of **Target Architecture**.
+- **What It Carries**: conditions as `hidden()` rules, presets through `(valueChange)`, and the rules of the built-in validation mode, which the export drops today.
+- **Import**: the parser reads `[formField]`.
+- **Proof**: a golden export of the sample form is compiled and rendered by a portal spec, and the serializer's output must equal it.
+
+### Phase 28 — Delete The Template-Driven Harness
+
+**Depends On**: Phase 27.
+
+- **Deleted**: `lib/forms/` with its specs and its stub validator; the `vest/` entry point with its peer dependency and its path alias; `FORMIDABLE_VALIDATOR` and its interface; `WHOLE_FORM`, `FormidableFormErrors`, `DeepPartial`, `DeepRequired` and `cloneDeep`; `NgxFormidableModule` with its `FormsModule` re-export.
+- **Public Surface**: `public-api.ts` and [`user/components.md`](../user/components.md). [`impl/ubiquitous-language.md`](ubiquitous-language.md) drops target, whole form, run and shape.
+- **Proof**: the library's only forms import is `@angular/forms/signals`, and the packed package has no `vest` entry point.
+
+### Phase 29 — Maintainer Documentation
+
+**Depends On**: Phase 28.
+
+- **Forms Integration**: a new `tech/forms-integration.md` replaces [`tech/validation.md`](../tech/validation.md) — the field contract against each API's custom-control integration, the value and state flow as diagrams, the accepted compromises, and why there is no value accessor and no harness.
+- **Updated**: [`tech/architecture.md`](../tech/architecture.md), [`tech/decoration.md`](../tech/decoration.md), [`tech/portal.md`](../tech/portal.md), the `impl/` conventions and the index in [`README.md`](../README.md).
+- **Code Comments**: every doc comment checked against [`impl/typescript.md`](typescript.md).
+
+### Phase 30 — User Documentation
+
+**Depends On**: Phase 29.
+
+- **Forms Guide**: a new `user/forms.md`, `ngx-formidable And Angular Forms` — who owns what and how value and state flow, as diagrams; one field bound through all three APIs; compatibility by feature; model rules, conditional fields and submission per API.
+- **Rewritten**: [`user/getting-started.md`](../user/getting-started.md) with Signal Forms first; [`user/validation.md`](../user/validation.md) for messages, reveal, Standard Schema with Vest and Zod, and the classic validators; [`user/custom-fields.md`](../user/custom-fields.md) on the new base.
+- **Updated**: [`user/fields.md`](../user/fields.md), [`user/decoration.md`](../user/decoration.md), [`user/studio.md`](../user/studio.md), [`user/components.md`](../user/components.md) and the root `README.md`.
+- **Diagrams In The Portal**: the `Docs` route renders Mermaid, lazy-loaded and inside the bundle budget.
+
+### Phase 31 — Release
+
+**Depends On**: Phase 30.
+
+- **Merge**: the integration branch into `main`, through a pull request with every CI gate green.
+- **Version**: `1.0.0` in `projects/ngx-formidable/package.json`. The Angular peer floor is the minor CI tests, per [`impl/renovate.md`](renovate.md).
+- **Publish**: `npm run screenshots` for the README hero, then [`impl/releasing.md`](releasing.md).
 - **Tag**: tag the release commit. Final step.
 
-### Phase 18 — Storybook
+### Phase 32 — Storybook
 
 - **Set It Up**: Storybook is not installed. Take conventions from the sibling project's `storybook.md` and its `.storybook` configuration first. Copy it into this repo from EnerQi repository.
 - **Stories**: all components, including the layout options.
 - demonstrate all fields, directives and decorator, including their properties.
 
-### Phase 19 — Date Range Field
+### Phase 33 — Date Range Field
 
 - **The Calendar Is Not The Problem**: Pikaday renders ranges — `startRange` / `endRange` options and `is-inrange` / `is-startrange` / `is-endrange` classes. What it does not do is manage range _selection_; that is driven from `onSelect`, or with two instances.
 - **The Value Contract Is**: `date-field` is single-valued end to end — `Date | null`, one picker, one masked input with one `unicodeTokenFormat`, arrow-stepping over that one date, and `isFilled`. A range mode means a tuple value, a two-segment mask, parse and format path, per-segment arrow-stepping and clear semantics, and range styling that `_pikaday.scss` does not have.
 - **Size It Honestly**: the largest single item on this roadmap. Split it before starting.
 
-### Phase 20 — AI Support
+### Phase 34 — AI Support
 
 I want to support developers to use AI to use this library. How can I do that? Should that be done with an MCP? What are other ways?
 
-### Phase 21 — Blog Post
+### Phase 35 — Blog Post
 
 - **Where**: `https://thedevexchange.com/`, the company dev blog.
 - **What**: the library, its features, and how it is used to build beautiful, functional Angular forms. Code examples, screenshots, links to the portal and the GitHub repository. Why it beats other form libraries, and a call to action to try it.
