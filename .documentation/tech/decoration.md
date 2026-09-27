@@ -90,7 +90,7 @@ The decorator renders nothing of its own. `labelState` is a getter over the proj
 
 A getter — `hasLabel`, `labelState`, `valueAlignment` — is still the right shape: a signal read inside one is tracked by the caller, and unlike the field contract these are internal to one file. The projected decorations are read through getters too: a consumer adds and removes one at runtime with `@if`, and a value latched in `ngAfterContentInit` would leave its wrapper shown — or hidden — forever.
 
-Proven by `on-push.spec.ts`, which asserts against the decorator's **template** and never its host classes — host bindings are evaluated in the parent's view, which a `detectChanges()` re-runs whatever the strategy, so a host class would pass either way and prove nothing.
+Proven by the decorator's `repaint.spec.ts`, which asserts against the decorator's **template** and never its host classes — host bindings are evaluated in the parent's view, which the host's own signal write refreshes anyway, so a host class would pass either way and prove nothing.
 
 ## The Label State
 

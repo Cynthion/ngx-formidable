@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, signal, viewChild } from '@angular/core';
-import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { Component, computed, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { FormidableOption } from '../../models/formidable.model';
+import { fill } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { AutocompleteField } from './autocomplete-field/autocomplete-field';
 
 /**
@@ -25,7 +27,6 @@ const ADDRESSES: FormidableOption[] = [
 
 @Component({
   imports: [FormsModule, AutocompleteField],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-autocomplete-field
@@ -37,8 +38,6 @@ const ADDRESSES: FormidableOption[] = [
   `
 })
 class FilteringHost {
-  readonly field = viewChild.required(AutocompleteField);
-
   /** The consumer's own filtering, exactly as `user/fields.md` documents it. */
   readonly filter = signal('');
   readonly all = signal<FormidableOption[]>([...ADDRESSES]);
@@ -55,8 +54,8 @@ describe('autocomplete filter sync', () => {
   let fixture: ComponentFixture<FilteringHost>;
   let host: FilteringHost;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [FilteringHost] }).compileComponents();
+  beforeEach(() => {
+    configureFormidableTestBed({ imports: [FilteringHost] });
 
     fixture = TestBed.createComponent(FilteringHost);
     host = fixture.componentInstance;
@@ -64,84 +63,72 @@ describe('autocomplete filter sync', () => {
 
   afterEach(() => fixture.destroy());
 
-  function settle(): void {
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-  }
-
   function input(): HTMLInputElement {
     return fixture.nativeElement.querySelector('input') as HTMLInputElement;
   }
 
-  function type(text: string): void {
-    const element = input();
+  async function search(text: string): Promise<void> {
+    input().dispatchEvent(new Event('focus'));
+    fill(input(), text);
 
-    element.dispatchEvent(new Event('focus'));
-    element.value = text;
-    element.dispatchEvent(new Event('input'));
+    await settle(fixture, 200);
+  }
 
-    tick(200);
-    fixture.detectChanges();
+  /** The option the field marks as holding its value. */
+  function selectedOption(): Element | null {
+    return fixture.nativeElement.querySelector('formidable-field-option[aria-selected="true"]');
   }
 
   /** A write from outside lands while the field is not the user's — a dialog has the focus, or nothing has. */
   function blur(): void {
     input().dispatchEvent(new Event('blur'));
-    fixture.detectChanges();
   }
 
-  it('reports the filter it narrows to when a value is written from outside', fakeAsync(() => {
-    settle();
-    type('Lang');
+  it('reports the filter it narrows to when a value is written from outside', async () => {
+    await settle(fixture);
+    await search('Lang');
     expect(host.filter()).toBe('Lang');
     blur();
 
     // A value written from outside, naming an option the current filter excludes.
     host.address.set('seefeld');
-    settle();
-    tick(200);
-    settle();
+    await settle(fixture);
+    await settle(fixture, 200);
 
     expect(host.filter()).toBe('Seefeldstrasse 40');
     expect(input().value).toBe('Seefeldstrasse 40');
-    expect(host.field().value).toBe('seefeld');
-    flush();
-  }));
+    expect(selectedOption()?.textContent?.trim()).toBe('Seefeldstrasse 40');
+  });
 
-  it('displays an option created for a value the typed filter does not match', fakeAsync(() => {
-    settle();
+  it('displays an option created for a value the typed filter does not match', async () => {
+    await settle(fixture);
 
     // The action-option round trip: type something nothing matches, then create an option under a
     // different label and point the model at it.
-    type('Qxzv 99');
+    await search('Qxzv 99');
     expect(host.filter()).toBe('Qxzv 99');
     blur(); // the dialog the action opened has the focus now
 
     host.all.update((options) => [...options, { value: 'bellevueplatz-1', label: 'Bellevueplatz 1' }]);
     host.address.set('bellevueplatz-1');
-    settle();
-    tick(200);
-    settle();
+    await settle(fixture);
+    await settle(fixture, 200);
 
     expect(input().value).toBe('Bellevueplatz 1');
-    expect(host.field().value).toBe('bellevueplatz-1');
-    flush();
-  }));
+    expect(selectedOption()?.textContent?.trim()).toBe('Bellevueplatz 1');
+  });
 
   // The other half of the rule: while the field is the user's, the typed text is the filter and the field
   // keeps its own narrowing to itself. Reporting it here would pull the list out from under them.
-  it('leaves the consumer filtering by what was typed while the field is focused', fakeAsync(() => {
-    settle();
-    type('Seefeld');
+  it('leaves the consumer filtering by what was typed while the field is focused', async () => {
+    await settle(fixture);
+    await search('Seefeld');
 
     // A list change lands mid-typing, which re-applies the written value inside the field.
     host.all.update((options) => [...options]);
-    settle();
-    tick(200);
-    settle();
+    await settle(fixture);
+    await settle(fixture, 200);
 
     expect(host.filter()).toBe('Seefeld');
-    flush();
-  }));
+  });
 });

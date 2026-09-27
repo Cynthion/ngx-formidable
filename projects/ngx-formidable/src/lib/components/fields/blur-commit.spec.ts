@@ -1,10 +1,5 @@
-import { Component, ElementRef, forwardRef, ChangeDetectionStrategy, viewChild } from '@angular/core';
-import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
-import { FormsModule, NG_VALUE_ACCESSOR, NgForm } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
-import { FieldDecoratorLayout } from '../../models/formidable.model';
-import { BaseField } from './base-field';
-import { DateField } from './date-field/date-field';
+import { BindFieldOptions, bindField, BoundField } from '../../testing/bind-field';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
  * Contract of a blur: `onTouched()` is its last act. Under `updateOn: 'blur'` Angular commits the value from
@@ -15,165 +10,65 @@ import { DateField } from './date-field/date-field';
  * nested control stays clickable, which must leave the control neither committed nor touched.
  */
 
-/** Defers its value to the blur, the way `date-field` and `time-field` do. */
-@Component({
-  selector: 'formidable-blur-commit-field',
-  template: `<input
-    #inputRef
-    (blur)="onFocusChange(false)"
-    (focus)="onFocusChange(true)" />`,
-  changeDetection: ChangeDetectionStrategy.Eager,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => BlurCommitField),
-      multi: true
-    }
-  ]
-})
-class BlurCommitField extends BaseField<string> {
-  protected keyboardCallback = null;
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
-  protected registeredKeys: string[] = [];
+/** A `date-field` inside a `<form>`, which defers its value to the blur: it parses what was typed there. */
+async function setup(updateOn?: BindFieldOptions['updateOn']): Promise<BoundField & { input: HTMLInputElement }> {
+  const field = await bindField('date', 'template-driven', {
+    updateOn,
+    inputs: { unicodeTokenFormat: 'dd . MM . yyyy' }
+  });
 
-  readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
-
-  decoratorLayout: FieldDecoratorLayout = 'horizontal';
-
-  private committed = '';
-
-  get value(): string {
-    return this.committed;
-  }
-
-  get fieldRef(): ElementRef<HTMLElement> {
-    return this.inputRef() as ElementRef<HTMLElement>;
-  }
-
-  protected doOnValueChange(): void {
-    // Nothing: this field commits on blur, not on input.
-  }
-
-  protected doWriteValue(value: string): void {
-    this.committed = value ?? '';
-    this.inputRef().nativeElement.value = this.committed;
-  }
-
-  protected doOnFocusChange(isFocused: boolean): void {
-    if (isFocused) return;
-
-    this.committed = this.inputRef().nativeElement.value;
-    this.onChange(this.committed);
-  }
-}
-
-@Component({
-  imports: [FormsModule, BlurCommitField],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <form [ngFormOptions]="{ updateOn: 'blur' }">
-      <formidable-blur-commit-field
-        name="name"
-        [ngModel]="value" />
-    </form>
-  `
-})
-class BlurCommitHost {
-  value = '';
-}
-
-@Component({
-  imports: [FormsModule, DateField],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <form>
-      <formidable-date-field
-        name="date"
-        unicodeTokenFormat="dd . MM . yyyy"
-        [ngModel]="value" />
-    </form>
-  `
-})
-class DateHost {
-  value: Date | null = null;
+  return { ...field, input: field.element.querySelector('input') as HTMLInputElement };
 }
 
 describe('blur contract', () => {
-  let fixture: ComponentFixture<BlurCommitHost | DateHost>;
+  beforeEach(() => configureFormidableTestBed());
 
-  function control() {
-    return fixture.debugElement.children[0]!.injector.get(NgForm).form.get(
-      fixture.componentInstance instanceof DateHost ? 'date' : 'name'
-    );
-  }
+  // The typed text only becomes a date inside the blur, so the commit that blur carries is the one that
+  // has to see it.
+  it('commits a value written during the blur, under updateOn blur', async () => {
+    const { fixture, input, control } = await setup('blur');
 
-  function input(): HTMLInputElement {
-    return fixture.nativeElement.querySelector('input') as HTMLInputElement;
-  }
+    input.focus();
+    input.value = '12 . 05 . 2024';
+    input.dispatchEvent(new FocusEvent('blur'));
+    await settle(fixture);
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+    expect(control.value).toEqual(new Date(2024, 4, 12));
+    expect(control.touched).toBe(true);
   });
 
-  afterEach(fakeAsync(() => flush()));
+  it('leaves the control untouched and uncommitted when the field takes its own blur', async () => {
+    const { fixture, element, input, control } = await setup();
+    const panel = element.querySelector('.panel') as HTMLElement;
 
-  // Fails while `onTouched()` runs before `doOnFocusChange()`: the commit inside the touch finds no pending
-  // change, and the value the field wrote a moment later never reaches the model.
-  it('commits a value written during the blur, under updateOn blur', fakeAsync(() => {
-    fixture = TestBed.createComponent(BlurCommitHost);
-    fixture.detectChanges();
-    tick();
-
-    input().focus();
-    input().value = 'written on blur';
-    input().dispatchEvent(new FocusEvent('blur'));
-    tick();
-
-    expect(control()?.value).toBe('written on blur');
-    expect(control()?.touched).toBe(true);
-  }));
-
-  it('leaves the control untouched and uncommitted when the field takes its own blur', fakeAsync(() => {
-    fixture = TestBed.createComponent(DateHost);
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-
-    const panel = fixture.nativeElement.querySelector('.panel') as HTMLElement;
-
-    input().focus();
-    input().value = '12 . 05 . 2024';
+    input.focus();
+    input.value = '12 . 05 . 2024';
 
     // Focus moves onto the panel, so a nested control stays clickable. That is not the user leaving.
     panel.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    input().dispatchEvent(new FocusEvent('blur'));
-    tick();
+    input.dispatchEvent(new FocusEvent('blur'));
+    await settle(fixture);
 
-    expect(control()?.touched).toBe(false);
-    expect(control()?.value).toBeNull();
-  }));
+    expect(control.touched).toBe(false);
+    expect(control.value).toBeNull();
+  });
 
-  it('commits and touches on the blur after the one it took', fakeAsync(() => {
-    fixture = TestBed.createComponent(DateHost);
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
+  it('commits and touches on the blur after the one it took', async () => {
+    const { fixture, element, input, control } = await setup();
+    const panel = element.querySelector('.panel') as HTMLElement;
 
-    const panel = fixture.nativeElement.querySelector('.panel') as HTMLElement;
-
-    input().focus();
+    input.focus();
     panel.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    input().dispatchEvent(new FocusEvent('blur'));
-    tick();
+    input.dispatchEvent(new FocusEvent('blur'));
+    await settle(fixture);
 
     // The flag is one-shot, so this blur counts.
-    input().focus();
-    input().value = '12 . 05 . 2024';
-    input().dispatchEvent(new FocusEvent('blur'));
-    tick();
+    input.focus();
+    input.value = '12 . 05 . 2024';
+    input.dispatchEvent(new FocusEvent('blur'));
+    await settle(fixture);
 
-    expect(control()?.touched).toBe(true);
-    expect(control()?.value).toEqual(new Date(2024, 4, 12));
-  }));
+    expect(control.touched).toBe(true);
+    expect(control.value).toEqual(new Date(2024, 4, 12));
+  });
 });

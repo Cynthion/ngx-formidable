@@ -1,7 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { Component } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
 import { FORMIDABLE_VALIDATOR } from '../models/validation.model';
+import { fill } from '../testing/dom';
+import { configureFormidableTestBed, settle } from '../testing/test-bed';
 import { NgxFormidableFieldValidate } from './field-validate.directive';
 import { NgxFormidableForm } from './form.directive';
 import { StubValidator } from './testing/stub-validator.directive';
@@ -22,44 +24,42 @@ interface Model extends Record<string, unknown> {
 
 @Component({
   imports: [FormsModule, NgxFormidableForm, NgxFormidableFieldValidate, StubValidator],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
-      [formValue]="value"
+      [formValue]="model"
       [ngFormOptions]="{ updateOn: updateOn }"
       [stubValidator]="rules">
       <input
         name="name"
-        [ngModel]="value.name" />
+        [ngModel]="model.name" />
     </form>
   `
 })
 class RunHost {
   updateOn: 'change' | 'blur' | 'submit' = 'change';
-  value: Model = { name: 'filled' };
+  model: Model = { name: 'filled' };
   rules: Record<string, string> = { name: 'Required' };
 }
 
 /** The form asks for `blur`, this one field asks for `change`. The field wins — that is Angular's rule. */
 @Component({
   imports: [FormsModule, NgxFormidableForm, NgxFormidableFieldValidate, StubValidator],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
-      [formValue]="value"
+      [formValue]="model"
       [ngFormOptions]="{ updateOn: 'blur' }"
       [stubValidator]="rules">
       <input
         name="name"
-        [ngModel]="value.name"
+        [ngModel]="model.name"
         [ngModelOptions]="{ updateOn: 'change' }" />
     </form>
   `
 })
 class OverrideHost {
-  value: Model = { name: 'filled' };
+  model: Model = { name: 'filled' };
   rules: Record<string, string> = { name: 'Required' };
 }
 
@@ -75,11 +75,6 @@ describe('validation run axis', () => {
     return fixture.nativeElement.querySelector('input') as HTMLInputElement;
   }
 
-  function type(value: string): void {
-    input().value = value;
-    input().dispatchEvent(new Event('input'));
-  }
-
   function blur(): void {
     input().dispatchEvent(new FocusEvent('blur'));
   }
@@ -93,92 +88,91 @@ describe('validation run axis', () => {
   /**
    * Mounts, settles the initial validation, then spies on the validator so every run counted below is one the
    * spec caused. The spy sits on the `FORMIDABLE_VALIDATOR` the form provides, which is the seam every target
-   * goes through.
+   * goes through. Two passes: the first registers the control, which starts the initial run, and the second
+   * lets that run land.
    */
-  function mount(host: typeof RunHost | typeof OverrideHost, updateOn?: 'change' | 'blur' | 'submit'): void {
+  async function mount(
+    host: typeof RunHost | typeof OverrideHost,
+    updateOn?: 'change' | 'blur' | 'submit'
+  ): Promise<void> {
     fixture = TestBed.createComponent(host);
 
     // Set before the first pass: `NgForm` reads its options once, in `ngAfterViewInit`.
     if (updateOn) (fixture.componentInstance as RunHost).updateOn = updateOn;
 
-    fixture.detectChanges();
-    tick(500);
-    fixture.detectChanges();
+    await settle(fixture);
+    await settle(fixture);
 
     const validator = fixture.debugElement.children[0]!.injector.get(FORMIDABLE_VALIDATOR);
     runs = spyOn(validator, 'validate').and.callThrough();
   }
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-  });
-
-  afterEach(fakeAsync(() => flush()));
+  beforeEach(() => configureFormidableTestBed());
 
   // Settled between keystrokes on purpose: the commit is immediate, but the run is debounced, and three
   // keystrokes inside one window are one run by design. That is the debounce axis, not this one.
-  it('commits on every keystroke under change, and runs with each', fakeAsync(() => {
-    mount(RunHost, 'change');
+  it('commits on every keystroke under change, and runs with each', async () => {
+    await mount(RunHost, 'change');
 
-    type('a');
+    fill(input(), 'a');
     expect(control()?.value).toBe('a');
-    tick(500);
+    await settle(fixture);
 
-    type('ab');
+    fill(input(), 'ab');
     expect(control()?.value).toBe('ab');
-    tick(500);
+    await settle(fixture);
 
-    type('abc');
+    fill(input(), 'abc');
     expect(control()?.value).toBe('abc');
-    tick(500);
+    await settle(fixture);
 
     expect(runs.calls.count()).toBe(3);
-  }));
+  });
 
-  it('commits and runs once per blur under blur, and not while typing', fakeAsync(() => {
-    mount(RunHost, 'blur');
+  it('commits and runs once per blur under blur, and not while typing', async () => {
+    await mount(RunHost, 'blur');
 
-    type('a');
-    type('ab');
-    type('abc');
-    tick(500);
+    fill(input(), 'a');
+    fill(input(), 'ab');
+    fill(input(), 'abc');
+    await settle(fixture);
 
     // The value is still what the form was given: typing has committed nothing.
     expect(control()?.value).toBe('filled');
     expect(runs.calls.count()).toBe(0);
 
     blur();
-    tick(500);
+    await settle(fixture);
 
     expect(control()?.value).toBe('abc');
     expect(runs.calls.count()).toBe(1);
-  }));
+  });
 
-  it('commits and runs once per submit under submit, and not on blur', fakeAsync(() => {
-    mount(RunHost, 'submit');
+  it('commits and runs once per submit under submit, and not on blur', async () => {
+    await mount(RunHost, 'submit');
 
-    type('abc');
+    fill(input(), 'abc');
     blur();
-    tick(500);
+    await settle(fixture);
 
     expect(control()?.value).toBe('filled');
     expect(runs.calls.count()).toBe(0);
 
     submit();
-    tick(500);
+    await settle(fixture);
 
     expect(control()?.value).toBe('abc');
     expect(runs.calls.count()).toBe(1);
-  }));
+  });
 
-  it('lets a field’s ngModelOptions beat the form’s ngFormOptions', fakeAsync(() => {
-    mount(OverrideHost);
+  it('lets a field’s ngModelOptions beat the form’s ngFormOptions', async () => {
+    await mount(OverrideHost);
 
-    type('abc');
-    tick(500);
+    fill(input(), 'abc');
+    await settle(fixture);
 
     // The form said blur; this field said change, and change is what it got.
     expect(control()?.value).toBe('abc');
     expect(runs.calls.count()).toBe(1);
-  }));
+  });
 });

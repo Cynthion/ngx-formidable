@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNgxMask } from 'ngx-mask';
 import { FieldLabel } from '../../directives/field-label';
 import { FormidablePanelPosition } from '../../models/formidable.model';
+import { corners, theme } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { DropdownField } from '../fields/dropdown-field/dropdown-field';
 import { InputField } from '../fields/input-field/input-field';
 import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
@@ -53,17 +54,6 @@ function radiusOf(host: HTMLElement, property: string): string[] {
   return corners;
 }
 
-function corners(element: HTMLElement): string[] {
-  const style = getComputedStyle(element);
-
-  return [
-    style.borderTopLeftRadius,
-    style.borderTopRightRadius,
-    style.borderBottomRightRadius,
-    style.borderBottomLeftRadius
-  ];
-}
-
 /**
  * The painted thickness of the underline: the vertical offset of the element's inset shadow layer. Split
  * on commas outside parentheses, because a serialized colour carries commas of its own.
@@ -80,12 +70,11 @@ function underline(element: HTMLElement): number {
 
 @Component({
   imports: [FieldDecorator, InputField, ToggleField, DropdownField, RadioGroupField, FieldLabel],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field
         name="input"
-        [readonly]="readonly" />
+        [readonly]="readonly()" />
       <div
         formidableFieldLabel
         position="inside-floating">
@@ -98,7 +87,7 @@ function underline(element: HTMLElement): number {
     <formidable-field-decorator>
       <formidable-dropdown-field
         name="dropdown"
-        [panelPosition]="panelPosition" />
+        [panelPosition]="panelPosition()" />
       <div
         formidableFieldLabel
         position="border">
@@ -111,28 +100,22 @@ function underline(element: HTMLElement): number {
   `
 })
 class TestHost {
-  readonly = false;
-  panelPosition: FormidablePanelPosition = 'full';
+  readonly readonly = signal(false);
+  readonly panelPosition = signal<FormidablePanelPosition>('full');
 }
 
 describe('border geometry', () => {
   let fixture: ComponentFixture<TestHost>;
   let host: TestHost;
   let root: HTMLElement;
-  const themed = new Set<string>();
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+    configureFormidableTestBed();
 
     fixture = TestBed.createComponent(TestHost);
     host = fixture.componentInstance;
     root = fixture.nativeElement;
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    themed.forEach((property) => document.documentElement.style.removeProperty(property));
-    themed.clear();
   });
 
   function input(): HTMLInputElement {
@@ -168,11 +151,11 @@ describe('border geometry', () => {
     return dropdown().closest('formidable-field-decorator')!.querySelector('.label-border') as HTMLElement;
   }
 
-  function openPanel(): void {
+  async function openPanel(): Promise<void> {
     (dropdown().querySelector('.input-wrapper') as HTMLElement).dispatchEvent(
       new MouseEvent('mousedown', { bubbles: true })
     );
-    fixture.detectChanges();
+    await settle(fixture);
   }
 
   /** The panel flips by class; which way it flips is `updatePanelPosition`'s call, pinned in its spec. */
@@ -190,17 +173,6 @@ describe('border geometry', () => {
    */
   function set(property: string, value: string): void {
     root.style.setProperty(property, value);
-    fixture.detectChanges();
-  }
-
-  /**
-   * Overrides a variable other variables are *derived* from. Substitution happens where the derived
-   * property is declared — `:root` — so a base has to be overridden there, which is also the only place a
-   * consumer is asked to theme from.
-   */
-  function theme(property: string, value: string): void {
-    document.documentElement.style.setProperty(property, value);
-    themed.add(property);
     fixture.detectChanges();
   }
 
@@ -339,7 +311,7 @@ describe('border geometry', () => {
       set('--formidable-field-underline-thickness', '2px');
       set('--formidable-color-field-border-readonly', 'rgb(9, 8, 7)');
 
-      host.readonly = true;
+      host.readonly.set(true);
       fixture.detectChanges();
 
       expect(getComputedStyle(input()).boxShadow).toContain('rgb(9, 8, 7)');
@@ -452,16 +424,16 @@ describe('border geometry', () => {
       expect(corners(panel())).toEqual(['2px', '2px', '2px', '2px']);
     });
 
-    it('adopts the field bottom corners onto its top ones when it opens below', () => {
-      openPanel();
+    it('adopts the field bottom corners onto its top ones when it opens below', async () => {
+      await openPanel();
 
       expect(corners(panel())).toEqual(['8px', '8px', '2px', '2px']);
     });
 
-    it('adopts the field top corners onto its bottom ones when it flips above', () => {
+    it('adopts the field top corners onto its bottom ones when it flips above', async () => {
       set('--formidable-field-border-start-start-radius', '4px');
       set('--formidable-field-border-start-end-radius', '4px');
-      openPanel();
+      await openPanel();
       flipAbove();
 
       // The top pair goes back to the panel's own radius, and the bottom pair takes the field's *top*
@@ -469,17 +441,17 @@ describe('border geometry', () => {
       expect(corners(panel())).toEqual(['2px', '2px', '4px', '4px']);
     });
 
-    it('mirrors a single corner the field shapes on its own', () => {
+    it('mirrors a single corner the field shapes on its own', async () => {
       set('--formidable-field-border-end-start-radius', '10px');
-      openPanel();
+      await openPanel();
 
       expect(corners(panel())).toEqual(['10px', '8px', '2px', '2px']);
     });
 
     // The panel is a child of the field, so the cascade reaches it wherever the radius was set.
-    it('follows a radius set on the field element itself', () => {
+    it('follows a radius set on the field element itself', async () => {
       dropdown().style.setProperty('--formidable-field-border-radius', '9px');
-      openPanel();
+      await openPanel();
 
       expect(corners(panel())).toEqual(['9px', '9px', '2px', '2px']);
     });
@@ -487,10 +459,10 @@ describe('border geometry', () => {
     // The point of the rework: mirroring runs one way. A field that squared its own corners for a panel
     // put a squared corner wherever the panel's far edge happened to fall — which, under a shrink-wrapped
     // `panel-left`, was most of a field's width away from anything.
-    it('never reshapes the field', () => {
+    it('never reshapes the field', async () => {
       const before = corners(dropdown());
 
-      openPanel();
+      await openPanel();
 
       expect(corners(dropdown())).toEqual(before);
       expect(corners(dropdown())).toEqual(['8px', '8px', '8px', '8px']);
@@ -547,9 +519,9 @@ describe('border geometry', () => {
     // The alignments size the panel's box to the field's border box, so a panel border of its own has to
     // paint inside that box. Without `box-sizing: border-box` it was added on top, and every panel sat two
     // of its own borders wider than the field it belonged to.
-    it('paints inside the width the alignment gave it', () => {
+    it('paints inside the width the alignment gave it', async () => {
       theme('--formidable-panel-border-thickness', '5px');
-      openPanel();
+      await openPanel();
 
       expect(panel().getBoundingClientRect().width).toBeCloseTo(dropdown().getBoundingClientRect().width, 1);
     });
@@ -561,16 +533,16 @@ describe('border geometry', () => {
    * ordinals alone decide, and they are the same ordinals whatever the consumer's page is doing.
    */
   describe('a border label against a flipped panel', () => {
-    it('really is overlapped by the panel it has to beat', () => {
-      openPanel();
+    it('really is overlapped by the panel it has to beat', async () => {
+      await openPanel();
       flipAbove();
 
       // The panel's rect covers everything the label has above the field's top edge — its band included.
       expect(panel().getBoundingClientRect().bottom).toBeGreaterThan(borderLabel().getBoundingClientRect().top);
     });
 
-    it('paints over it', () => {
-      openPanel();
+    it('paints over it', async () => {
+      await openPanel();
       flipAbove();
 
       expect(layer(borderLabel())).toBeGreaterThan(layer(panel()));
@@ -589,7 +561,7 @@ describe('border geometry', () => {
 
     // A sheet spans the viewport and covers whatever is behind it, its own field's border label included.
     it('still yields to a sheet', () => {
-      host.panelPosition = 'sheet';
+      host.panelPosition.set('sheet');
       fixture.detectChanges();
 
       expect(layer(panel())).toBeGreaterThan(layer(borderLabel()));
@@ -617,39 +589,39 @@ describe('border geometry', () => {
       expect(layer(borderLabel())).toBeLessThan(10);
     });
 
-    it('rises to the panel layer while an anchored panel is open', () => {
-      openPanel();
+    it('rises to the panel layer while an anchored panel is open', async () => {
+      await openPanel();
 
       expect(dropdownDecorator().classList.contains('has-open-panel')).toBe(true);
       expect(layer(dropdownDecorator())).toBe(999);
     });
 
-    it('rises to the sheet layer instead when the panel is a sheet', () => {
-      host.panelPosition = 'sheet';
+    it('rises to the sheet layer instead when the panel is a sheet', async () => {
+      host.panelPosition.set('sheet');
       fixture.detectChanges();
-      openPanel();
+      await openPanel();
 
       expect(dropdownDecorator().classList.contains('has-open-sheet')).toBe(true);
       expect(dropdownDecorator().classList.contains('has-open-panel')).toBe(false);
       expect(layer(dropdownDecorator())).toBe(1000);
     });
 
-    it('drops back to no z-index once the panel closes', () => {
-      openPanel();
-      openPanel();
+    it('drops back to no z-index once the panel closes', async () => {
+      await openPanel();
+      await openPanel();
 
       expect(dropdownDecorator().classList.contains('has-open-panel')).toBe(false);
       expect(getComputedStyle(dropdownDecorator()).zIndex).toBe('auto');
     });
 
-    it('takes both layers from the theme', () => {
+    it('takes both layers from the theme', async () => {
       theme('--formidable-panel-z-index', '40');
       theme('--formidable-sheet-z-index', '60');
-      openPanel();
+      await openPanel();
 
       expect(layer(dropdownDecorator())).toBe(40);
 
-      host.panelPosition = 'sheet';
+      host.panelPosition.set('sheet');
       fixture.detectChanges();
 
       expect(layer(dropdownDecorator())).toBe(60);

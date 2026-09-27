@@ -1,7 +1,7 @@
-import { Component, ChangeDetectionStrategy, viewChild } from '@angular/core';
-import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { Component, viewChild } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { AutocompleteField } from './autocomplete-field/autocomplete-field';
 import { BaseField } from './base-field';
 import { DateField } from './date-field/date-field';
@@ -22,7 +22,6 @@ import { ToggleField } from './toggle-field/toggle-field';
 @Component({
   imports: [FormsModule, InputField, DropdownField, AutocompleteField, DateField, SliderField, ToggleField],
   // Inside a `<form>`, like real usage.
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-input-field
@@ -97,20 +96,15 @@ describe('field focus', () => {
    * The field is only created once `focused` is set, so `autoFocus` is read on its first
    * `ngAfterViewInit`, exactly as it would be on page load.
    */
-  function build(focused: string | null): void {
+  async function build(focused: string | null): Promise<void> {
     fixture = TestBed.createComponent(FocusHost);
     host = fixture.componentInstance;
     host.focused = focused;
-    fixture.detectChanges();
-    tick(); // the microtask the base queues, plus the fields' own mask timers
-    discardPeriodicTasks(); // ngxMask keeps an interval running for as long as a field is alive
+    await settle(fixture); // the microtask the base queues, plus the fields' own mask timers
   }
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [FocusHost],
-      providers: [provideNgxMask()]
-    }).compileComponents();
+  beforeEach(() => {
+    configureFormidableTestBed({ imports: [FocusHost] });
 
     // A focused element left over from a previous spec would make every assertion pass.
     (document.activeElement as HTMLElement | null)?.blur();
@@ -121,74 +115,68 @@ describe('field focus', () => {
   });
 
   for (const field of ['text', 'dropdown', 'autocomplete', 'date', 'slider', 'toggle']) {
-    it(`focuses ${field} on load`, fakeAsync(() => {
-      build(field);
+    it(`focuses ${field} on load`, async () => {
+      await build(field);
 
       expect(document.activeElement).toBe(expectedElement(fixture, field));
-    }));
+    });
   }
 
-  it('leaves every field alone when autoFocus is not set', fakeAsync(() => {
-    build(null);
+  it('leaves every field alone when autoFocus is not set', async () => {
+    await build(null);
 
     expect(document.activeElement).toBe(document.body);
-  }));
+  });
 
   for (const field of ['dropdown', 'autocomplete', 'date'] as const) {
-    it(`does not open the ${field} panel`, fakeAsync(() => {
-      build(field);
+    it(`does not open the ${field} panel`, async () => {
+      await build(field);
 
-      expect(host[field]().isPanelOpen()).toBeFalse();
-    }));
+      expect(expectedElement(fixture, field).getAttribute('aria-expanded')).toBe('false');
+    });
   }
 
-  it('does not focus a disabled field', fakeAsync(() => {
+  it('does not focus a disabled field', async () => {
     fixture = TestBed.createComponent(FocusHost);
     host = fixture.componentInstance;
     host.focused = 'toggle';
     host.toggleDisabled = true;
-    fixture.detectChanges();
-    tick();
-    discardPeriodicTasks();
+    await settle(fixture);
 
     expect(document.activeElement).toBe(document.body);
-  }));
+  });
 
   // Unlike a disabled one: readonly guards what the field does with focus, never focus itself.
-  it('still focuses a readonly field', fakeAsync(() => {
+  it('still focuses a readonly field', async () => {
     fixture = TestBed.createComponent(FocusHost);
     host = fixture.componentInstance;
     host.focused = 'date';
     host.dateReadonly = true;
-    fixture.detectChanges();
-    tick();
-    discardPeriodicTasks();
+    await settle(fixture);
 
     expect(document.activeElement).toBe(expectedElement(fixture, 'date'));
-  }));
+  });
 
-  it('focus() is callable on the field itself', fakeAsync(() => {
-    build(null);
+  it('focus() is callable on the field itself', async () => {
+    await build(null);
 
     (host.dropdown() as BaseField).focus();
 
     expect(document.activeElement).toBe(expectedElement(fixture, 'dropdown'));
-  }));
+  });
 
   /**
    * Pins the removal of the dead `panelRef.focus()` in `date-field`'s `togglePanel`: the panel is still
    * `visibility: hidden` at that point, so it never took focus. Deferring the call until it could is
    * what this rules out — it would pull focus off the input and run its commit-on-blur path.
    */
-  it('keeps focus on the date input while its panel opens', fakeAsync(() => {
-    build('date');
+  it('keeps focus on the date input while its panel opens', async () => {
+    await build('date');
 
     host.date().togglePanel(true);
-    fixture.detectChanges();
-    tick();
-    discardPeriodicTasks();
+    await settle(fixture);
 
-    expect(host.date().isPanelOpen()).toBeTrue();
+    expect(expectedElement(fixture, 'date').getAttribute('aria-expanded')).toBe('true');
     expect(document.activeElement).toBe(expectedElement(fixture, 'date'));
-  }));
+  });
 });

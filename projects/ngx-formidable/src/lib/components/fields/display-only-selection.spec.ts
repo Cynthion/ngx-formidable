@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { Component } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { FormidableOption } from '../../models/formidable.model';
+import { press } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { DropdownField } from './dropdown-field/dropdown-field';
 
 /**
@@ -19,7 +21,6 @@ const options: FormidableOption[] = [
 
 @Component({
   imports: [FormsModule, DropdownField],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-dropdown-field
       name="colour"
@@ -36,42 +37,33 @@ describe('display-only value selection', () => {
 
   afterEach(() => fixture?.destroy());
 
-  beforeEach(fakeAsync(() => {
+  beforeEach(async () => {
+    configureFormidableTestBed();
+
     fixture = TestBed.createComponent(TestHost);
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
+    await settle(fixture);
 
     input = (fixture.nativeElement as HTMLElement).querySelector('.wrapped-input') as HTMLInputElement;
-  }));
-
-  /** `cancelable` is what makes `preventDefault()` observable; a synthetic event defaults to `false`. */
-  function press(init: KeyboardEventInit): KeyboardEvent {
-    const event = new KeyboardEvent('keydown', { cancelable: true, ...init });
-    input.dispatchEvent(event);
-    fixture.detectChanges();
-
-    return event;
-  }
+  });
 
   it('prevents a select-all with the meta key', () => {
-    expect(press({ key: 'a', metaKey: true }).defaultPrevented).toBeTrue();
+    expect(press(input, 'a', { metaKey: true }).defaultPrevented).toBeTrue();
   });
 
   it('prevents a select-all with the control key', () => {
-    expect(press({ key: 'a', ctrlKey: true }).defaultPrevented).toBeTrue();
+    expect(press(input, 'a', { ctrlKey: true }).defaultPrevented).toBeTrue();
   });
 
   it('prevents it regardless of the reported case', () => {
-    expect(press({ key: 'A', metaKey: true }).defaultPrevented).toBeTrue();
+    expect(press(input, 'A', { metaKey: true }).defaultPrevented).toBeTrue();
   });
 
   it('leaves a bare "a" to the typeahead', () => {
-    expect(press({ key: 'a' }).defaultPrevented).toBeFalse();
+    expect(press(input, 'a').defaultPrevented).toBeFalse();
   });
 
   it('leaves other modifier combos alone, so a copy or a reload still reaches the browser', () => {
-    expect(press({ key: 'c', metaKey: true }).defaultPrevented).toBeFalse();
-    expect(press({ key: 'r', metaKey: true }).defaultPrevented).toBeFalse();
+    expect(press(input, 'c', { metaKey: true }).defaultPrevented).toBeFalse();
+    expect(press(input, 'r', { metaKey: true }).defaultPrevented).toBeFalse();
   });
 });

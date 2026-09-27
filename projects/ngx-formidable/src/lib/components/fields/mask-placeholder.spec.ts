@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { Component, Provider } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { DateField } from './date-field/date-field';
 import { InputField } from './input-field/input-field';
 
@@ -15,7 +16,6 @@ import { InputField } from './input-field/input-field';
 
 @Component({
   imports: [FormsModule, InputField, DateField],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-input-field
@@ -43,15 +43,12 @@ describe('mask placeholder character', () => {
 
   afterEach(() => fixture?.destroy());
 
-  function build(providers: unknown[]): void {
+  async function build(providers: Provider[]): Promise<void> {
     TestBed.resetTestingModule();
-    TestBed.configureTestingModule({ providers: providers as never[] });
+    configureFormidableTestBed({ providers });
     fixture = TestBed.createComponent(PlaceholderHost);
 
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-    tick();
+    await settle(fixture);
   }
 
   function inputOf(name: string): HTMLInputElement {
@@ -62,14 +59,6 @@ describe('mask placeholder character', () => {
     return fixture.nativeElement.querySelector('formidable-date-field input');
   }
 
-  function scenario(body: () => void): jasmine.ImplementationCallback {
-    return fakeAsync(() => {
-      body();
-      flush();
-      discardPeriodicTasks();
-    });
-  }
-
   /** Tab, which is what makes the field select what it holds. */
   function tabTo(element: HTMLInputElement): void {
     element.focus();
@@ -77,135 +66,109 @@ describe('mask placeholder character', () => {
 
   describe('a global setting does not reach the fields', () => {
     for (const [label, providers] of [
-      ['ngx-mask defaults', [provideNgxMask()]],
+      ['ngx-mask defaults', []],
       ['a global placeHolderCharacter', [provideNgxMask({ placeHolderCharacter: '*' })]]
     ] as const) {
-      it(
-        `renders its own slots with ${label}`,
-        scenario(() => {
-          build([...providers]);
+      it(`renders its own slots with ${label}`, async () => {
+        await build([...providers]);
 
-          expect(inputOf('inherited').value).toBe('079 123 __ __');
-        })
-      );
+        expect(inputOf('inherited').value).toBe('079 123 __ __');
+      });
 
-      it(
-        `still finds the end of the value with ${label}`,
-        scenario(() => {
-          build([...providers]);
-          const element = inputOf('inherited');
+      it(`still finds the end of the value with ${label}`, async () => {
+        await build([...providers]);
+        const element = inputOf('inherited');
 
-          tabTo(element);
-          tick();
+        tabTo(element);
+        await settle(fixture);
 
-          expect([element.selectionStart, element.selectionEnd]).toEqual([0, 7]);
-        })
-      );
+        expect([element.selectionStart, element.selectionEnd]).toEqual([0, 7]);
+      });
 
       // The initial display comes from the mask pipe; this is ngx-mask's own directive re-rendering, which
       // is what the explicit binding protects.
-      it(
-        `keeps its own slots when the mask re-renders on typing, with ${label}`,
-        scenario(() => {
-          build([...providers]);
-          const element = inputOf('inherited');
+      it(`keeps its own slots when the mask re-renders on typing, with ${label}`, async () => {
+        await build([...providers]);
+        const element = inputOf('inherited');
 
-          element.focus();
-          element.setSelectionRange(7, 7);
-          document.execCommand('insertText', false, '4');
-          tick();
+        element.focus();
+        element.setSelectionRange(7, 7);
+        document.execCommand('insertText', false, '4');
+        await settle(fixture);
 
-          expect(element.value).toBe('079 123 4_ __');
-        })
-      );
+        expect(element.value).toBe('079 123 4_ __');
+      });
 
-      it(
-        `leaves a date field's empty display alone with ${label}`,
-        scenario(() => {
-          build([...providers]);
-          const element = dateInput();
+      it(`leaves a date field's empty display alone with ${label}`, async () => {
+        await build([...providers]);
+        const element = dateInput();
 
-          expect(element.value).toBe('__/__/____');
+        expect(element.value).toBe('__/__/____');
 
-          tabTo(element);
-          tick();
+        tabTo(element);
+        await settle(fixture);
 
-          // An empty date reads as empty, so the caret collapses at the front rather than selecting slots.
-          expect(element.value).toBe('__/__/____');
-          expect([element.selectionStart, element.selectionEnd]).toEqual([0, 0]);
-        })
-      );
+        // An empty date reads as empty, so the caret collapses at the front rather than selecting slots.
+        expect(element.value).toBe('__/__/____');
+        expect([element.selectionStart, element.selectionEnd]).toEqual([0, 0]);
+      });
     }
   });
 
   describe('a per-field setting moves the display and the rules together', () => {
-    it(
-      'renders the character the field asked for',
-      scenario(() => {
-        build([provideNgxMask()]);
+    it('renders the character the field asked for', async () => {
+      await build([]);
 
-        expect(inputOf('own').value).toBe('079 123 ** **');
-      })
-    );
+      expect(inputOf('own').value).toBe('079 123 ** **');
+    });
 
-    it(
-      'and reads the value back out against it',
-      scenario(() => {
-        build([provideNgxMask()]);
-        const element = inputOf('own');
+    it('and reads the value back out against it', async () => {
+      await build([]);
+      const element = inputOf('own');
 
-        tabTo(element);
-        tick();
+      tabTo(element);
+      await settle(fixture);
 
-        expect([element.selectionStart, element.selectionEnd]).toEqual([0, 7]);
-      })
-    );
+      expect([element.selectionStart, element.selectionEnd]).toEqual([0, 7]);
+    });
 
-    it(
-      'and clamps a click to it',
-      scenario(() => {
-        build([provideNgxMask()]);
-        const element = inputOf('own');
+    it('and clamps a click to it', async () => {
+      await build([]);
+      const element = inputOf('own');
 
-        element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-        element.focus();
-        element.setSelectionRange(11, 11);
-        element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-        element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        tick();
+      element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      element.focus();
+      element.setSelectionRange(11, 11);
+      element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await settle(fixture);
 
-        expect([element.selectionStart, element.selectionEnd]).toEqual([7, 7]);
-      })
-    );
+      expect([element.selectionStart, element.selectionEnd]).toEqual([7, 7]);
+    });
   });
 
-  it(
-    'warns when the mask could draw the placeholder as content',
-    scenario(() => {
-      const warn = spyOn(console, 'warn');
+  it('warns when the mask could draw the placeholder as content', async () => {
+    const warn = spyOn(console, 'warn');
 
-      TestBed.resetTestingModule();
-      TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+    TestBed.resetTestingModule();
+    configureFormidableTestBed();
 
-      @Component({
-        imports: [FormsModule, InputField],
-        changeDetection: ChangeDetectionStrategy.Eager,
-        // `_` is both the placeholder and a literal this mask draws, so the two cannot be told apart.
-        template: `<formidable-input-field
-          name="ambiguous"
-          mask="000_000"
-          ngModel />`
-      })
-      class AmbiguousHost {}
-
-      const ambiguous = TestBed.createComponent(AmbiguousHost);
-      ambiguous.detectChanges();
-      tick();
-
-      expect(warn).toHaveBeenCalled();
-      expect(warn.calls.mostRecent().args[0]).toContain('placeHolderCharacter');
-
-      ambiguous.destroy();
+    @Component({
+      imports: [FormsModule, InputField],
+      // `_` is both the placeholder and a literal this mask draws, so the two cannot be told apart.
+      template: `<formidable-input-field
+        name="ambiguous"
+        mask="000_000"
+        ngModel />`
     })
-  );
+    class AmbiguousHost {}
+
+    const ambiguous = TestBed.createComponent(AmbiguousHost);
+    await settle(ambiguous);
+
+    expect(warn).toHaveBeenCalled();
+    expect(warn.calls.mostRecent().args[0]).toContain('placeHolderCharacter');
+
+    ambiguous.destroy();
+  });
 });

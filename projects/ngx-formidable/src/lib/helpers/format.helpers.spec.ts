@@ -52,7 +52,7 @@ describe('format.helpers', () => {
       expect(parseUnicodeDateTime('   ', 'yyyy-MM-dd')).toBeNull();
     });
 
-    it('returns null for separator-less digits (the 20200202 bug)', () => {
+    it('returns null for digits missing the separators the format asks for', () => {
       expect(parseUnicodeDateTime('20200202', 'yyyy-MM-dd')).toBeNull();
     });
 

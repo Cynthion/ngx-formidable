@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { configureFormidableTestBed } from '../../../testing/test-bed';
 import { SelectField } from './select-field';
 
 /**
@@ -26,6 +27,8 @@ describe('SelectField in-field arrow', () => {
   }
 
   beforeEach(() => {
+    configureFormidableTestBed();
+
     fixture = TestBed.createComponent(SelectField);
     fixture.componentRef.setInput('options', [
       { value: 'a', label: 'A' },

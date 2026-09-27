@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { configureFormidableTestBed } from '../../../testing/test-bed';
 import { SliderField } from './slider-field';
 
 /**
@@ -9,7 +10,6 @@ import { SliderField } from './slider-field';
  */
 @Component({
   imports: [SliderField],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-slider-field
       [min]="0"
@@ -26,6 +26,8 @@ describe('SliderField geometry', () => {
   let root: HTMLElement;
 
   beforeEach(() => {
+    configureFormidableTestBed();
+
     fixture = TestBed.createComponent(SliderHost);
     fixture.detectChanges();
     root = fixture.nativeElement as HTMLElement;
