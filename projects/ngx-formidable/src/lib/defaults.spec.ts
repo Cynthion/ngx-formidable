@@ -3,16 +3,16 @@ import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testin
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldDecoratorComponent } from './components/field-decorator/field-decorator.component';
-import { AutocompleteFieldComponent } from './components/fields/autocomplete-field/autocomplete-field.component';
-import { DateFieldComponent } from './components/fields/date-field/date-field.component';
-import { DropdownFieldComponent } from './components/fields/dropdown-field/dropdown-field.component';
-import { InputFieldComponent } from './components/fields/input-field/input-field.component';
-import { FieldErrorsDirective } from './directives/field-errors.directive';
-import { FieldLabelDirective } from './directives/field-label.directive';
-import { FieldPrefixDirective } from './directives/field-prefix.directive';
-import { FieldSuffixDirective } from './directives/field-suffix.directive';
-import { NgxFormidableFormDirective } from './forms/form.directive';
+import { FieldDecorator } from './components/field-decorator/field-decorator';
+import { AutocompleteField } from './components/fields/autocomplete-field/autocomplete-field';
+import { DateField } from './components/fields/date-field/date-field';
+import { DropdownField } from './components/fields/dropdown-field/dropdown-field';
+import { InputField } from './components/fields/input-field/input-field';
+import { FieldErrorsRenderer } from './directives/field-errors-renderer';
+import { FieldLabel } from './directives/field-label';
+import { FieldPrefix } from './directives/field-prefix';
+import { FieldSuffix } from './directives/field-suffix';
+import { NgxFormidableForm } from './forms/form.directive';
 import { FORMIDABLE_DEFAULTS, FormidableDefaults } from './models/formidable.model';
 import { provideNgxFormidable } from './provide-ngx-formidable';
 
@@ -24,16 +24,16 @@ import { provideNgxFormidable } from './provide-ngx-formidable';
 
 const IMPORTS = [
   FormsModule,
-  NgxFormidableFormDirective,
-  FieldDecoratorComponent,
-  InputFieldComponent,
-  DropdownFieldComponent,
-  AutocompleteFieldComponent,
-  DateFieldComponent,
-  FieldLabelDirective,
-  FieldPrefixDirective,
-  FieldSuffixDirective,
-  FieldErrorsDirective
+  NgxFormidableForm,
+  FieldDecorator,
+  InputField,
+  DropdownField,
+  AutocompleteField,
+  DateField,
+  FieldLabel,
+  FieldPrefix,
+  FieldSuffix,
+  FieldErrorsRenderer
 ];
 
 /** Every defaulted input, none of them bound. */
@@ -52,7 +52,7 @@ const UNSET = `
 `;
 
 @Component({ imports: IMPORTS, changeDetection: ChangeDetectionStrategy.Eager, template: UNSET })
-class UnsetHostComponent {}
+class UnsetHost {}
 
 /** The same subtree, under a provider of its own. */
 @Component({
@@ -61,7 +61,7 @@ class UnsetHostComponent {}
   providers: [{ provide: FORMIDABLE_DEFAULTS, useValue: { labelPosition: 'outside' } }],
   template: UNSET
 })
-class ScopedHostComponent {}
+class ScopedHost {}
 
 /** Every defaulted input, bound to `undefined` — what a dynamic template binds to mean "inherit". */
 @Component({
@@ -103,7 +103,7 @@ class ScopedHostComponent {}
     </form>
   `
 })
-class UndefinedHostComponent {}
+class UndefinedHost {}
 
 /** Every defaulted input, bound to a value that is neither the app default nor the library's own. */
 @Component({
@@ -145,7 +145,7 @@ class UndefinedHostComponent {}
     </form>
   `
 })
-class ExplicitHostComponent {}
+class ExplicitHost {}
 
 /** A decorated field asking for its required marker, with no form directive above it. */
 @Component({
@@ -160,7 +160,7 @@ class ExplicitHostComponent {}
     </formidable-field-decorator>
   `
 })
-class MarkerWithoutFormHostComponent {}
+class MarkerWithoutFormHost {}
 
 /** A field validated by Angular alone, with no formidable form to say when its messages appear. */
 @Component({
@@ -178,7 +178,7 @@ class MarkerWithoutFormHostComponent {}
     </form>
   `
 })
-class RevealWithoutFormHostComponent {
+class RevealWithoutFormHost {
   name = '';
 }
 
@@ -228,15 +228,15 @@ describe('app defaults', () => {
   }
 
   function resolved(): Resolved {
-    const form = get(NgxFormidableFormDirective);
+    const form = get(NgxFormidableForm);
 
     return {
-      labelPosition: get(FieldLabelDirective).position(),
-      prefixAlign: get(FieldPrefixDirective).align(),
-      suffixAlign: get(FieldSuffixDirective).align(),
-      dropdownPanel: get(DropdownFieldComponent).panelPosition(),
-      autocompletePanel: get(AutocompleteFieldComponent).panelPosition(),
-      datePanel: get(DateFieldComponent).panelPosition(),
+      labelPosition: get(FieldLabel).position(),
+      prefixAlign: get(FieldPrefix).align(),
+      suffixAlign: get(FieldSuffix).align(),
+      dropdownPanel: get(DropdownField).panelPosition(),
+      autocompletePanel: get(AutocompleteField).panelPosition(),
+      datePanel: get(DateField).panelPosition(),
       revealOn: form.revealOn(),
       hideRequiredMarkers: form.hideRequiredMarkers(),
       debounceMs: form.debounceMs()
@@ -269,35 +269,35 @@ describe('app defaults', () => {
 
   it('keeps the library’s own without a provider, each panel field its own', fakeAsync(() => {
     configure();
-    mount(UnsetHostComponent);
+    mount(UnsetHost);
 
     expect(resolved()).toEqual(LIBRARY_OWN);
   }));
 
   it('applies the app default to every unset input', fakeAsync(() => {
     configure(DEFAULTS);
-    mount(UnsetHostComponent);
+    mount(UnsetHost);
 
     expect(resolved()).toEqual(APP_DEFAULTS);
   }));
 
   it('applies the app default to an input bound to undefined', fakeAsync(() => {
     configure(DEFAULTS);
-    mount(UndefinedHostComponent);
+    mount(UndefinedHost);
 
     expect(resolved()).toEqual(APP_DEFAULTS);
   }));
 
   it('falls back to the library’s own for an input bound to undefined without a provider', fakeAsync(() => {
     configure();
-    mount(UndefinedHostComponent);
+    mount(UndefinedHost);
 
     expect(resolved()).toEqual(LIBRARY_OWN);
   }));
 
   it('lets a binding win over the app default', fakeAsync(() => {
     configure(DEFAULTS);
-    mount(ExplicitHostComponent);
+    mount(ExplicitHost);
 
     expect(resolved()).toEqual({
       labelPosition: 'inside-floating',
@@ -315,7 +315,7 @@ describe('app defaults', () => {
   // What the portal does to keep its own chrome on the library's defaults. It replaces, not merges.
   it('lets a component provider replace the app defaults for its subtree', fakeAsync(() => {
     configure(DEFAULTS);
-    mount(ScopedHostComponent);
+    mount(ScopedHost);
 
     expect(resolved()).toEqual({ ...LIBRARY_OWN, labelPosition: 'outside' });
   }));
@@ -327,14 +327,14 @@ describe('app defaults', () => {
 
     it('shows the required marker by the library’s own default', fakeAsync(() => {
       configure();
-      mount(MarkerWithoutFormHostComponent);
+      mount(MarkerWithoutFormHost);
 
       expect(marker()).not.toBeNull();
     }));
 
     it('hides the required marker when the app default says so', fakeAsync(() => {
       configure(DEFAULTS);
-      mount(MarkerWithoutFormHostComponent);
+      mount(MarkerWithoutFormHost);
 
       expect(marker()).toBeNull();
     }));
@@ -354,14 +354,14 @@ describe('app defaults', () => {
 
     it('reveals on touch by the library’s own default', fakeAsync(() => {
       configure();
-      mount(RevealWithoutFormHostComponent);
+      mount(RevealWithoutFormHost);
 
       expect(typeWithoutTouching()).toEqual([]);
     }));
 
     it('reveals on the app default', fakeAsync(() => {
       configure(DEFAULTS);
-      mount(RevealWithoutFormHostComponent);
+      mount(RevealWithoutFormHost);
 
       expect(typeWithoutTouching()).toEqual(['minlength']);
     }));

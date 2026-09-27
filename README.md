@@ -66,7 +66,7 @@ Eleven form fields, one decorator that puts labels, prefixes, hints and errors a
 - 🧠 **Typed end to end** — a `DeepPartial` model and a `DeepRequired` shape, so a typo in a model key or a rule target [fails the build](https://cynthion.github.io/ngx-formidable/#/docs/getting-started).
 - ⌨️ **Accessible by default** — [full keyboard handling](https://cynthion.github.io/ngx-formidable/#/docs/fields), managed focus, combobox, listbox, switch and group roles, and errors in an `aria-live` region.
 - 🛡️ **Masking, dates and panels** — [ngx-mask on text fields](https://cynthion.github.io/ngx-formidable/#/docs/fields), one token string for parsing and formatting a date or time, and panels that flip when there is no room and become a sheet on phones.
-- 🛠️ **Extensible** — [`BaseFieldDirective`](https://cynthion.github.io/ngx-formidable/#/docs/custom-fields) makes a field of your own decorated, validated and themed like a built-in one.
+- 🛠️ **Extensible** — [`BaseField`](https://cynthion.github.io/ngx-formidable/#/docs/custom-fields) makes a field of your own decorated, validated and themed like a built-in one.
 - 🎛️ **[Studio](https://cynthion.github.io/ngx-formidable/)** — build the theme and the form against the real components in the browser, then copy out the CSS and the Angular template.
 
 ## When To Pick This Over Angular Material
@@ -102,7 +102,7 @@ Two paths, registering the same providers.
 // main.ts — standalone
 import { provideNgxFormidable } from '@cynthion/ngx-formidable';
 
-bootstrapApplication(AppComponent, {
+bootstrapApplication(App, {
   providers: [...provideNgxFormidable()]
 }).catch(console.error);
 ```
@@ -113,7 +113,7 @@ import { NgxFormidableModule } from '@cynthion/ngx-formidable';
 
 @NgModule({
   imports: [BrowserModule, NgxFormidableModule.forRoot()],
-  bootstrap: [AppComponent]
+  bootstrap: [App]
 })
 export class AppModule {}
 ```

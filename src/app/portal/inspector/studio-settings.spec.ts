@@ -1,16 +1,16 @@
 import { Type } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { DateFieldComponent, DropdownFieldComponent, NgxFormidableFormDirective } from '@cynthion/ngx-formidable';
+import { DateField, DropdownField, NgxFormidableForm } from '@cynthion/ngx-formidable';
 import { provideNgxMask } from 'ngx-mask';
 import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../model/field-capabilities';
 import { PortalFieldKind } from '../model/field-spec.model';
 import { PREVIEW_FORM_DEFINITION } from '../model/preview-form.definition';
-import { PreviewFormComponent } from '../stage/preview-form/preview-form.component';
+import { PreviewForm } from '../stage/preview-form/preview-form';
 import { FormDefinitionStore } from '../state/form-definition.store';
-import { AppDefaultsComponent } from './settings/app-defaults.component';
-import { FieldEditorComponent } from './settings/field-editor.component';
-import { FormSettingsComponent } from './settings/form-settings.component';
+import { AppDefaults } from './settings/app-defaults';
+import { FieldEditor } from './settings/field-editor';
+import { FormSettings } from './settings/form-settings';
 
 /**
  * Every control in the Studio writes something, and the app defaults reach the preview through the library.
@@ -109,15 +109,15 @@ describe('studio settings', () => {
   }
 
   it('writes something from every control of the form scope', () => {
-    sweep(TestBed.createComponent(FormSettingsComponent), 'The Form');
+    sweep(TestBed.createComponent(FormSettings), 'The Form');
   });
 
   it('writes something from every control of the app-defaults scope', () => {
-    sweep(TestBed.createComponent(AppDefaultsComponent), 'App Defaults');
+    sweep(TestBed.createComponent(AppDefaults), 'App Defaults');
   });
 
   it('writes something from every control of the field editor, for every kind of field', () => {
-    const fixture = TestBed.createComponent(FieldEditorComponent);
+    const fixture = TestBed.createComponent(FieldEditor);
 
     for (const kind of KINDS) {
       const field = store.fields().find((candidate) => candidate.kind === kind);
@@ -133,8 +133,8 @@ describe('studio settings', () => {
   // #region The app-defaults scope
 
   describe('app defaults', () => {
-    let panel: ComponentFixture<AppDefaultsComponent>;
-    let preview: ComponentFixture<PreviewFormComponent>;
+    let panel: ComponentFixture<AppDefaults>;
+    let preview: ComponentFixture<PreviewForm>;
     let stage: HTMLElement;
 
     function settle(): void {
@@ -197,8 +197,8 @@ describe('studio settings', () => {
     }
 
     beforeEach(() => {
-      panel = TestBed.createComponent(AppDefaultsComponent);
-      preview = TestBed.createComponent(PreviewFormComponent);
+      panel = TestBed.createComponent(AppDefaults);
+      preview = TestBed.createComponent(PreviewForm);
       stage = preview.nativeElement as HTMLElement;
     });
 
@@ -247,13 +247,13 @@ describe('studio settings', () => {
       choose('revealOn', 'always');
 
       // The date states nothing; the pizza picker states `right`.
-      expect(instance(DateFieldComponent).map((field) => field.panelPosition())).toEqual(['sheet']);
-      expect(instance(DropdownFieldComponent).map((field) => field.panelPosition())).toContain('right');
-      expect(instance(NgxFormidableFormDirective)[0]!.revealOn()).toBe('always');
+      expect(instance(DateField).map((field) => field.panelPosition())).toEqual(['sheet']);
+      expect(instance(DropdownField).map((field) => field.panelPosition())).toContain('right');
+      expect(instance(NgxFormidableForm)[0]!.revealOn()).toBe('always');
 
       choose('panelPosition', '');
 
-      expect(instance(DateFieldComponent).map((field) => field.panelPosition())).toEqual(['right']);
+      expect(instance(DateField).map((field) => field.panelPosition())).toEqual(['right']);
     }));
 
     it('counts the fields that state their own, and clears them back to inheriting', fakeAsync(() => {
@@ -296,7 +296,7 @@ describe('studio settings', () => {
   // #region The adornment examples, on the form scope
 
   describe('adornment examples', () => {
-    let panel: ComponentFixture<FormSettingsComponent>;
+    let panel: ComponentFixture<FormSettings>;
 
     function control(id: string): HTMLSelectElement {
       return (panel.nativeElement as HTMLElement).querySelector(`#ae-${id}`) as HTMLSelectElement;
@@ -309,7 +309,7 @@ describe('studio settings', () => {
     }
 
     beforeEach(() => {
-      panel = TestBed.createComponent(FormSettingsComponent);
+      panel = TestBed.createComponent(FormSettings);
       panel.detectChanges();
     });
 

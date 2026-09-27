@@ -2,12 +2,12 @@ import { Component, Type, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { NgxFormidableFieldValidateDirective } from '../../forms/field-validate.directive';
+import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
+import { FieldLabel } from '../../directives/field-label';
+import { NgxFormidableFieldValidate } from '../../forms/field-validate.directive';
 import { FORMIDABLE_ERROR_EXTRACTOR } from '../../models/validation.model';
-import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
+import { FieldDecorator } from '../field-decorator/field-decorator';
+import { InputField } from '../fields/input-field/input-field';
 
 /**
  * Contract of the library's independence from any one validation library.
@@ -21,7 +21,7 @@ import { InputFieldComponent } from '../fields/input-field/input-field.component
  */
 
 @Component({
-  imports: [FormsModule, FieldDecoratorComponent, InputFieldComponent, FieldErrorsDirective, FieldLabelDirective],
+  imports: [FormsModule, FieldDecorator, InputField, FieldErrorsRenderer, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -37,19 +37,13 @@ import { InputFieldComponent } from '../fields/input-field/input-field.component
     </form>
   `
 })
-class AngularValidatorsHostComponent {
+class AngularValidatorsHost {
   name = '';
 }
 
 /** The same field with the `[ngModel]` hijack directive imported and no harness above it. */
 @Component({
-  imports: [
-    FormsModule,
-    NgxFormidableFieldValidateDirective,
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    FieldErrorsDirective
-  ],
+  imports: [FormsModule, NgxFormidableFieldValidate, FieldDecorator, InputField, FieldErrorsRenderer],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -63,7 +57,7 @@ class AngularValidatorsHostComponent {
     </form>
   `
 })
-class HijackWithoutHarnessHostComponent {
+class HijackWithoutHarnessHost {
   name = '';
 }
 
@@ -120,7 +114,7 @@ describe('validator-agnostic error rendering', () => {
     });
 
     it('mounts the errors component without a harness in the injector chain', fakeAsync(() => {
-      mount(AngularValidatorsHostComponent);
+      mount(AngularValidatorsHost);
 
       expect(root.querySelector('formidable-field-errors')).toBeTruthy();
     }));
@@ -128,7 +122,7 @@ describe('validator-agnostic error rendering', () => {
     // The claim the whole phase rests on: `required` writes `{ required: true }`, not the harness's
     // `{ errors: [...] }`, and the default extractor renders it anyway.
     it('renders Angular’s error keys as messages once touched', fakeAsync(() => {
-      mount(AngularValidatorsHostComponent);
+      mount(AngularValidatorsHost);
 
       expect(messages()).toEqual([]);
 
@@ -139,7 +133,7 @@ describe('validator-agnostic error rendering', () => {
     }));
 
     it('raises .is-invalid on the decorator and aria-invalid on the field', fakeAsync(() => {
-      mount(AngularValidatorsHostComponent);
+      mount(AngularValidatorsHost);
 
       expect(decorator().classList.contains('is-invalid')).toBe(false);
       expect(input().getAttribute('aria-invalid')).toBeNull();
@@ -152,7 +146,7 @@ describe('validator-agnostic error rendering', () => {
     }));
 
     it('follows the failing validator, and clears as the value satisfies them all', fakeAsync(() => {
-      mount(AngularValidatorsHostComponent);
+      mount(AngularValidatorsHost);
 
       touch();
       type('ab');
@@ -171,7 +165,7 @@ describe('validator-agnostic error rendering', () => {
     // `[ngModel]` is hijacked by the harness's async-validator directive. A consumer who imports
     // NgxFormidableModule gets it on every control, so it must not swallow Angular's own errors.
     it('leaves Angular’s validators alone when the ngModel hijack has no harness', fakeAsync(() => {
-      mount(HijackWithoutHarnessHostComponent);
+      mount(HijackWithoutHarnessHost);
 
       touch();
       flush();
@@ -193,7 +187,7 @@ describe('validator-agnostic error rendering', () => {
       ]
     });
 
-    mount(AngularValidatorsHostComponent);
+    mount(AngularValidatorsHost);
 
     touch();
     flush();

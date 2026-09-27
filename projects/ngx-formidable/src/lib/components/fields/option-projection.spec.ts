@@ -2,12 +2,12 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Component, ChangeDetectionStrategy, viewChild } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { IFormidableOption } from '../../models/formidable.model';
-import { FieldOptionComponent } from '../field-option/field-option.component';
-import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
-import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
-import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.component';
-import { SelectFieldComponent } from './select-field/select-field.component';
+import { FormidableOption } from '../../models/formidable.model';
+import { FieldOption } from '../field-option/field-option';
+import { AutocompleteField } from './autocomplete-field/autocomplete-field';
+import { CheckboxGroupField } from './checkbox-group-field/checkbox-group-field';
+import { RadioGroupField } from './radio-group-field/radio-group-field';
+import { SelectField } from './select-field/select-field';
 
 /**
  * Contract of the option content query: options declared inside a field are collected whatever wraps them.
@@ -22,7 +22,7 @@ import { SelectFieldComponent } from './select-field/select-field.component';
  */
 
 @Component({
-  imports: [FormsModule, NgTemplateOutlet, RadioGroupFieldComponent, FieldOptionComponent],
+  imports: [FormsModule, NgTemplateOutlet, RadioGroupField, FieldOption],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-radio-group-field
@@ -41,7 +41,7 @@ import { SelectFieldComponent } from './select-field/select-field.component';
         <formidable-field-option [value]="value" />
       }
 
-      <ng-container *ngTemplateOutlet="templated"></ng-container>
+      <ng-container [ngTemplateOutlet]="templated" />
       <ng-template #templated>
         <formidable-field-option value="templated" />
       </ng-template>
@@ -52,18 +52,18 @@ import { SelectFieldComponent } from './select-field/select-field.component';
     </formidable-radio-group-field>
   `
 })
-class WrappedOptionsHostComponent {
-  readonly field = viewChild.required(RadioGroupFieldComponent);
+class WrappedOptionsHost {
+  readonly field = viewChild.required(RadioGroupField);
 
   showConditional = true;
   loopedValues = ['looped-a', 'looped-b'];
-  defaultOption?: IFormidableOption;
+  defaultOption?: FormidableOption;
   defaultOptionMode: 'always' | 'fallback' = 'always';
-  sortFn?: (a: IFormidableOption, b: IFormidableOption) => number;
+  sortFn?: (a: FormidableOption, b: FormidableOption) => number;
 }
 
 @Component({
-  imports: [FormsModule, CheckboxGroupFieldComponent, FieldOptionComponent],
+  imports: [FormsModule, CheckboxGroupField, FieldOption],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-checkbox-group-field
@@ -76,8 +76,8 @@ class WrappedOptionsHostComponent {
     </formidable-checkbox-group-field>
   `
 })
-class LoopedCheckboxHostComponent {
-  readonly field = viewChild.required(CheckboxGroupFieldComponent);
+class LoopedCheckboxHost {
+  readonly field = viewChild.required(CheckboxGroupField);
 
   loopedValues: string[] = ['a', 'b'];
   noOptionsText = 'Nothing here.';
@@ -86,7 +86,7 @@ class LoopedCheckboxHostComponent {
 // deliberately without ngModel: NgModel writes its own (empty) model back on every change detection,
 // which would clear the selection this suite is about
 @Component({
-  imports: [AutocompleteFieldComponent],
+  imports: [AutocompleteField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-autocomplete-field
@@ -96,16 +96,16 @@ class LoopedCheckboxHostComponent {
       [defaultOptionMode]="defaultOptionMode" />
   `
 })
-class FilteredAutocompleteHostComponent {
-  readonly field = viewChild.required(AutocompleteFieldComponent);
+class FilteredAutocompleteHost {
+  readonly field = viewChild.required(AutocompleteField);
 
-  options: IFormidableOption[] = [{ value: 'cat', label: 'Cat' }];
-  defaultOption: IFormidableOption = { value: 'add-new', label: 'Add a new one…' };
+  options: FormidableOption[] = [{ value: 'cat', label: 'Cat' }];
+  defaultOption: FormidableOption = { value: 'add-new', label: 'Add a new one…' };
   defaultOptionMode: 'always' | 'fallback' = 'fallback';
 }
 
 @Component({
-  imports: [FormsModule, RadioGroupFieldComponent, FieldOptionComponent],
+  imports: [FormsModule, RadioGroupField, FieldOption],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-radio-group-field
@@ -118,13 +118,13 @@ class FilteredAutocompleteHostComponent {
     </formidable-radio-group-field>
   `
 })
-class ProjectedContentHostComponent {
-  readonly field = viewChild.required(RadioGroupFieldComponent);
+class ProjectedContentHost {
+  readonly field = viewChild.required(RadioGroupField);
 }
 
 // One direct and one looped option, because the looped one is bound later than the field's effect first runs.
 @Component({
-  imports: [FormsModule, RadioGroupFieldComponent, FieldOptionComponent],
+  imports: [FormsModule, RadioGroupField, FieldOption],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-radio-group-field
@@ -142,15 +142,15 @@ class ProjectedContentHostComponent {
     </formidable-radio-group-field>
   `
 })
-class ChangingOptionHostComponent {
+class ChangingOptionHost {
   directLabel = 'Direct';
   disabledValue = '';
   loopedValues = ['looped'];
 }
 
-// The select field watches its options with an effect of its own, not the one on `BaseOptionFieldDirective`.
+// The select field watches its options with an effect of its own, not the one on `BaseOptionField`.
 @Component({
-  imports: [FormsModule, SelectFieldComponent, FieldOptionComponent],
+  imports: [FormsModule, SelectField, FieldOption],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-select-field
@@ -164,7 +164,7 @@ class ChangingOptionHostComponent {
     </formidable-select-field>
   `
 })
-class ChangingSelectOptionHostComponent {
+class ChangingSelectOptionHost {
   disabledValue = '';
   loopedValues = ['a', 'b'];
 }
@@ -172,7 +172,7 @@ class ChangingSelectOptionHostComponent {
 // An autocomplete, because its filter is what reads the label off the option — a group only displays it,
 // and a displayed label comes from the projected template rather than from the option.
 @Component({
-  imports: [AutocompleteFieldComponent, FieldOptionComponent],
+  imports: [AutocompleteField, FieldOption],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-autocomplete-field name="projected-filter">
@@ -181,7 +181,7 @@ class ChangingSelectOptionHostComponent {
     </formidable-autocomplete-field>
   `
 })
-class ProjectedFilterHostComponent {}
+class ProjectedFilterHost {}
 
 // The options are collected in a microtask, so a plain detectChanges() is not enough to see them.
 async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
@@ -198,13 +198,13 @@ function renderedOptionValues(fixture: ComponentFixture<unknown>): string[] {
 
 describe('option projection', () => {
   describe('content query', () => {
-    let fixture: ComponentFixture<WrappedOptionsHostComponent>;
-    let host: WrappedOptionsHostComponent;
+    let fixture: ComponentFixture<WrappedOptionsHost>;
+    let host: WrappedOptionsHost;
 
     beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [WrappedOptionsHostComponent] }).compileComponents();
+      await TestBed.configureTestingModule({ imports: [WrappedOptionsHost] }).compileComponents();
 
-      fixture = TestBed.createComponent(WrappedOptionsHostComponent);
+      fixture = TestBed.createComponent(WrappedOptionsHost);
       host = fixture.componentInstance;
       await settle(fixture);
     });
@@ -230,19 +230,19 @@ describe('option projection', () => {
   });
 
   /**
-   * The option a field reads off a projected component is `FieldOptionComponent.option` — one plain
-   * `IFormidableOption` folded out of its signal inputs and its projected content. These two claims are the
+   * The option a field reads off a projected component is `FieldOption.option` — one plain
+   * `FormidableOption` folded out of its signal inputs and its projected content. These two claims are the
    * whole boundary: the label falls back to the projected text, and clicking the rendered option commits
    * that plain option to the field that owns it.
    */
   describe('the option a component hands over', () => {
-    let fixture: ComponentFixture<ProjectedContentHostComponent>;
-    let host: ProjectedContentHostComponent;
+    let fixture: ComponentFixture<ProjectedContentHost>;
+    let host: ProjectedContentHost;
 
     beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [ProjectedContentHostComponent] }).compileComponents();
+      await TestBed.configureTestingModule({ imports: [ProjectedContentHost] }).compileComponents();
 
-      fixture = TestBed.createComponent(ProjectedContentHostComponent);
+      fixture = TestBed.createComponent(ProjectedContentHost);
       host = fixture.componentInstance;
       await settle(fixture);
     });
@@ -264,7 +264,7 @@ describe('option projection', () => {
     // The default `match` reads the option's own label, which for a projected option is the text taken
     // off its content. Lose that and every content-only option stops matching its own name.
     it('filters on the label taken from the projected content', fakeAsync(() => {
-      const filterFixture = TestBed.createComponent(ProjectedFilterHostComponent);
+      const filterFixture = TestBed.createComponent(ProjectedFilterHost);
       filterFixture.detectChanges();
       tick();
       filterFixture.detectChanges();
@@ -286,8 +286,8 @@ describe('option projection', () => {
   // A projected option whose inputs change in place stays the same query entry, so the field must follow
   // the option itself, not only the query.
   describe('an option changing in place', () => {
-    let fixture: ComponentFixture<ChangingOptionHostComponent>;
-    let host: ChangingOptionHostComponent;
+    let fixture: ComponentFixture<ChangingOptionHost>;
+    let host: ChangingOptionHost;
 
     const disabledValues = () =>
       Array.from(fixture.nativeElement.querySelectorAll('input[type="radio"][disabled]')).map((el) =>
@@ -295,9 +295,9 @@ describe('option projection', () => {
       );
 
     beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [ChangingOptionHostComponent] }).compileComponents();
+      await TestBed.configureTestingModule({ imports: [ChangingOptionHost] }).compileComponents();
 
-      fixture = TestBed.createComponent(ChangingOptionHostComponent);
+      fixture = TestBed.createComponent(ChangingOptionHost);
       host = fixture.componentInstance;
       await settle(fixture);
     });
@@ -327,7 +327,7 @@ describe('option projection', () => {
     });
 
     it('follows a changed disabled flag in a select field', async () => {
-      const selectFixture = TestBed.createComponent(ChangingSelectOptionHostComponent);
+      const selectFixture = TestBed.createComponent(ChangingSelectOptionHost);
       await settle(selectFixture);
 
       selectFixture.componentInstance.disabledValue = 'b';
@@ -341,13 +341,13 @@ describe('option projection', () => {
   });
 
   describe('defaultOption', () => {
-    let fixture: ComponentFixture<WrappedOptionsHostComponent>;
-    let host: WrappedOptionsHostComponent;
+    let fixture: ComponentFixture<WrappedOptionsHost>;
+    let host: WrappedOptionsHost;
 
     beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [WrappedOptionsHostComponent] }).compileComponents();
+      await TestBed.configureTestingModule({ imports: [WrappedOptionsHost] }).compileComponents();
 
-      fixture = TestBed.createComponent(WrappedOptionsHostComponent);
+      fixture = TestBed.createComponent(WrappedOptionsHost);
       host = fixture.componentInstance;
     });
 
@@ -380,8 +380,8 @@ describe('option projection', () => {
 
   // the autocomplete pins its default after filtering, so it has its own path worth covering
   describe('defaultOption on the autocomplete', () => {
-    let fixture: ComponentFixture<FilteredAutocompleteHostComponent>;
-    let host: FilteredAutocompleteHostComponent;
+    let fixture: ComponentFixture<FilteredAutocompleteHost>;
+    let host: FilteredAutocompleteHost;
 
     const type = (text: string) => {
       const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
@@ -393,9 +393,9 @@ describe('option projection', () => {
     };
 
     beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [FilteredAutocompleteHostComponent] }).compileComponents();
+      await TestBed.configureTestingModule({ imports: [FilteredAutocompleteHost] }).compileComponents();
 
-      fixture = TestBed.createComponent(FilteredAutocompleteHostComponent);
+      fixture = TestBed.createComponent(FilteredAutocompleteHost);
       host = fixture.componentInstance;
       await settle(fixture);
     });
@@ -449,13 +449,13 @@ describe('option projection', () => {
   });
 
   describe('empty group', () => {
-    let fixture: ComponentFixture<LoopedCheckboxHostComponent>;
-    let host: LoopedCheckboxHostComponent;
+    let fixture: ComponentFixture<LoopedCheckboxHost>;
+    let host: LoopedCheckboxHost;
 
     beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [LoopedCheckboxHostComponent] }).compileComponents();
+      await TestBed.configureTestingModule({ imports: [LoopedCheckboxHost] }).compileComponents();
 
-      fixture = TestBed.createComponent(LoopedCheckboxHostComponent);
+      fixture = TestBed.createComponent(LoopedCheckboxHost);
       host = fixture.componentInstance;
       await settle(fixture);
     });

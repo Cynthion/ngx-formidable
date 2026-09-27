@@ -2,10 +2,10 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { DropdownFieldComponent } from '../fields/dropdown-field/dropdown-field.component';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { FieldLabel } from '../../directives/field-label';
+import { DropdownField } from '../fields/dropdown-field/dropdown-field';
+import { InputField } from '../fields/input-field/input-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
  * The decorator is `OnPush`, which it could not be until its queries and the field's state became signals.
@@ -26,7 +26,7 @@ import { FieldDecoratorComponent } from './field-decorator.component';
  */
 
 @Component({
-  imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective],
+  imports: [FieldDecorator, InputField, FieldLabel],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -43,14 +43,14 @@ import { FieldDecoratorComponent } from './field-decorator.component';
     </formidable-field-decorator>
   `
 })
-class LabelStateHostComponent {
+class LabelStateHost {
   placeholder = '';
   readonly = false;
   disabled = false;
 }
 
 @Component({
-  imports: [FieldDecoratorComponent, DropdownFieldComponent],
+  imports: [FieldDecorator, DropdownField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
@@ -60,10 +60,10 @@ class LabelStateHostComponent {
     </formidable-field-decorator>
   `
 })
-class PanelHostComponent {}
+class PanelHost {}
 
 describe('decorator OnPush contract', () => {
-  let fixture: ComponentFixture<LabelStateHostComponent>;
+  let fixture: ComponentFixture<LabelStateHost>;
 
   /** The class the decorator's template writes out of `labelState`. */
   function labelState(): string {
@@ -73,13 +73,13 @@ describe('decorator OnPush contract', () => {
   }
 
   function mount(): void {
-    fixture = TestBed.createComponent(LabelStateHostComponent);
+    fixture = TestBed.createComponent(LabelStateHost);
     fixture.detectChanges();
   }
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LabelStateHostComponent, PanelHostComponent],
+      imports: [LabelStateHost, PanelHost],
       providers: [provideNgxMask()]
     }).compileComponents();
   });
@@ -121,13 +121,12 @@ describe('decorator OnPush contract', () => {
    * `.open` class is written by the field's `OnPush` template, so the signal is now what repaints it.
    */
   it('repaints an OnPush field when its panel opens, with nothing marking it', () => {
-    const panelFixture = TestBed.createComponent(PanelHostComponent);
+    const panelFixture = TestBed.createComponent(PanelHost);
     const panel = () => panelFixture.nativeElement.querySelector('.panel') as HTMLElement;
 
     panelFixture.detectChanges();
 
-    const field = panelFixture.debugElement.query(By.directive(DropdownFieldComponent))
-      .componentInstance as DropdownFieldComponent;
+    const field = panelFixture.debugElement.query(By.directive(DropdownField)).componentInstance as DropdownField;
 
     expect(panel().classList.contains('open')).toBe(false);
 

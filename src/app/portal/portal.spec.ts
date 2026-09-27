@@ -6,7 +6,7 @@ import { importTheme } from './export/theme-import';
 import { FIELD_KIND_LABELS } from './model/field-capabilities';
 import { PREVIEW_FIELDS } from './model/preview-form.definition';
 import { THEME_PRESETS } from './model/presets';
-import { PortalComponent } from './portal.component';
+import { Portal } from './portal';
 import { PORTAL_ROUTES } from './portal.routes';
 import { FormDefinitionStore } from './state/form-definition.store';
 import { FormValueStore } from './state/form-value.store';
@@ -22,7 +22,7 @@ import { ThemeStore } from './state/theme.store';
  * that the chrome's re-emitted block really does recompute the derived values against its own bases.
  */
 describe('portal', () => {
-  let fixture: ComponentFixture<PortalComponent>;
+  let fixture: ComponentFixture<Portal>;
   let root: HTMLElement;
   let theme: ThemeStore;
 
@@ -44,7 +44,7 @@ describe('portal', () => {
     theme = TestBed.inject(ThemeStore);
     theme.reset();
 
-    fixture = TestBed.createComponent(PortalComponent);
+    fixture = TestBed.createComponent(Portal);
     root = fixture.nativeElement as HTMLElement;
   });
 

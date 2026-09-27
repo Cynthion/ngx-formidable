@@ -1,24 +1,18 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldHintDirective } from '../../directives/field-hint.directive';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { TextareaFieldComponent } from '../fields/textarea-field/textarea-field.component';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { FieldHint } from '../../directives/field-hint';
+import { FieldLabel } from '../../directives/field-label';
+import { TextareaField } from '../fields/textarea-field/textarea-field';
+import { InputField } from '../fields/input-field/input-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
  * Contract of `--formidable-font-family`: set, it reaches every text the library renders, decorated or not;
  * unset, the library takes the page's family exactly as before.
  */
 @Component({
-  imports: [
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    TextareaFieldComponent,
-    FieldLabelDirective,
-    FieldHintDirective
-  ],
+  imports: [FieldDecorator, InputField, TextareaField, FieldLabel, FieldHint],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
@@ -33,18 +27,18 @@ import { FieldDecoratorComponent } from './field-decorator.component';
     </div>
   `
 })
-class FontHostComponent {
+class FontHost {
   family: string | null = 'monospace';
 }
 
 describe('--formidable-font-family', () => {
-  let fixture: ComponentFixture<FontHostComponent>;
+  let fixture: ComponentFixture<FontHost>;
   let root: HTMLElement;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(FontHostComponent);
+    fixture = TestBed.createComponent(FontHost);
     fixture.detectChanges();
     root = fixture.nativeElement as HTMLElement;
   });

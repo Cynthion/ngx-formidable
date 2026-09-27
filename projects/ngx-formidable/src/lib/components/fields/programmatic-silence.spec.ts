@@ -2,12 +2,12 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { IFormidableOption } from '../../models/formidable.model';
-import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
-import { DateFieldComponent } from './date-field/date-field.component';
-import { DropdownFieldComponent } from './dropdown-field/dropdown-field.component';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { SliderFieldComponent } from './slider-field/slider-field.component';
+import { FormidableOption } from '../../models/formidable.model';
+import { CheckboxGroupField } from './checkbox-group-field/checkbox-group-field';
+import { DateField } from './date-field/date-field';
+import { DropdownField } from './dropdown-field/dropdown-field';
+import { InputField } from './input-field/input-field';
+import { SliderField } from './slider-field/slider-field';
 
 /**
  * Contract of the paths no user walked: the form writing a value, and an options list arriving late, both
@@ -19,7 +19,7 @@ import { SliderFieldComponent } from './slider-field/slider-field.component';
  */
 
 @Component({
-  imports: [FormsModule, CheckboxGroupFieldComponent],
+  imports: [FormsModule, CheckboxGroupField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -30,16 +30,16 @@ import { SliderFieldComponent } from './slider-field/slider-field.component';
     </form>
   `
 })
-class CheckboxHostComponent {
+class CheckboxHost {
   value: string[] = ['a', 'b'];
-  options: IFormidableOption[] = [
+  options: FormidableOption[] = [
     { value: 'a', label: 'A' },
     { value: 'b', label: 'B' }
   ];
 }
 
 @Component({
-  imports: [FormsModule, DateFieldComponent],
+  imports: [FormsModule, DateField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -50,13 +50,13 @@ class CheckboxHostComponent {
     </form>
   `
 })
-class DateHostComponent {
+class DateHost {
   value: Date | null = null;
 }
 
 /** 47 is neither on the step grid nor what the user asked for: the field corrects it to 50. */
 @Component({
-  imports: [FormsModule, SliderFieldComponent],
+  imports: [FormsModule, SliderField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -69,12 +69,12 @@ class DateHostComponent {
     </form>
   `
 })
-class SliderHostComponent {
+class SliderHost {
   value = 47;
 }
 
 @Component({
-  imports: [FormsModule, InputFieldComponent],
+  imports: [FormsModule, InputField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -85,12 +85,12 @@ class SliderHostComponent {
     </form>
   `
 })
-class MaskedHostComponent {
+class MaskedHost {
   value = '123456';
 }
 
 @Component({
-  imports: [FormsModule, DropdownFieldComponent],
+  imports: [FormsModule, DropdownField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -101,15 +101,13 @@ class MaskedHostComponent {
     </form>
   `
 })
-class DropdownHostComponent {
+class DropdownHost {
   value: string | null = 'a';
-  options: IFormidableOption[] = [{ value: 'a', label: 'A' }];
+  options: FormidableOption[] = [{ value: 'a', label: 'A' }];
 }
 
 describe('programmatic paths stay silent', () => {
-  let fixture: ComponentFixture<
-    CheckboxHostComponent | DateHostComponent | SliderHostComponent | MaskedHostComponent | DropdownHostComponent
-  >;
+  let fixture: ComponentFixture<CheckboxHost | DateHost | SliderHost | MaskedHost | DropdownHost>;
 
   function control(name: string) {
     return fixture.debugElement.children[0]!.injector.get(NgForm).form.get(name);
@@ -125,7 +123,7 @@ describe('programmatic paths stay silent', () => {
   }));
 
   it('does not touch the control when an options list drops a selected value', fakeAsync(() => {
-    fixture = TestBed.createComponent(CheckboxHostComponent) as ComponentFixture<CheckboxHostComponent>;
+    fixture = TestBed.createComponent(CheckboxHost) as ComponentFixture<CheckboxHost>;
     fixture.detectChanges();
     tick();
     fixture.detectChanges();
@@ -133,7 +131,7 @@ describe('programmatic paths stay silent', () => {
     expect(control('choices')?.value).toEqual(['a', 'b']);
 
     // The list refreshes and no longer offers one of the values the model holds.
-    (fixture.componentInstance as CheckboxHostComponent).options = [{ value: 'a', label: 'A' }];
+    (fixture.componentInstance as CheckboxHost).options = [{ value: 'a', label: 'A' }];
     fixture.detectChanges();
     tick();
     fixture.detectChanges();
@@ -146,12 +144,12 @@ describe('programmatic paths stay silent', () => {
   }));
 
   it('does not touch the control when the form writes a value into a date field', fakeAsync(() => {
-    fixture = TestBed.createComponent(DateHostComponent) as ComponentFixture<DateHostComponent>;
+    fixture = TestBed.createComponent(DateHost) as ComponentFixture<DateHost>;
     fixture.detectChanges();
     tick();
     fixture.detectChanges();
 
-    (fixture.componentInstance as DateHostComponent).value = new Date(2024, 4, 12);
+    (fixture.componentInstance as DateHost).value = new Date(2024, 4, 12);
     fixture.detectChanges();
     tick();
     fixture.detectChanges();
@@ -164,7 +162,7 @@ describe('programmatic paths stay silent', () => {
   // The slider corrects a value the form gave it, so the model has to move. What must not move is `dirty`:
   // the user never touched the thumb.
   it('corrects an out-of-step value without dirtying the control', fakeAsync(() => {
-    fixture = TestBed.createComponent(SliderHostComponent) as ComponentFixture<SliderHostComponent>;
+    fixture = TestBed.createComponent(SliderHost) as ComponentFixture<SliderHost>;
     fixture.detectChanges();
     tick();
     fixture.detectChanges();
@@ -175,7 +173,7 @@ describe('programmatic paths stay silent', () => {
   }));
 
   it('applies a mask to a written value without dirtying the control', fakeAsync(() => {
-    fixture = TestBed.createComponent(MaskedHostComponent) as ComponentFixture<MaskedHostComponent>;
+    fixture = TestBed.createComponent(MaskedHost) as ComponentFixture<MaskedHost>;
     fixture.detectChanges();
     tick();
     fixture.detectChanges();
@@ -188,14 +186,14 @@ describe('programmatic paths stay silent', () => {
   // The reconcile used to be unreachable here: `updateOptions` re-applied the written value and cleared the
   // selection before the reconcile could read it, so the model kept a value the list no longer offered.
   it('drops a selected value the options no longer offer', fakeAsync(() => {
-    fixture = TestBed.createComponent(DropdownHostComponent) as ComponentFixture<DropdownHostComponent>;
+    fixture = TestBed.createComponent(DropdownHost) as ComponentFixture<DropdownHost>;
     fixture.detectChanges();
     tick();
     fixture.detectChanges();
 
     expect(control('choice')?.value).toBe('a');
 
-    (fixture.componentInstance as DropdownHostComponent).options = [{ value: 'b', label: 'B' }];
+    (fixture.componentInstance as DropdownHost).options = [{ value: 'b', label: 'B' }];
     fixture.detectChanges();
     tick();
     fixture.detectChanges();

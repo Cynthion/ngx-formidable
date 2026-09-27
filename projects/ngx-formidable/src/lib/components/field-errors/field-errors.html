@@ -1,0 +1,9 @@
+@if (invalid()) {
+<div class="errors">
+  <ul>
+    @for (error of errors(); track error) {
+    <li class="error">{{ translateError(error) }}</li>
+    }
+  </ul>
+</div>
+}

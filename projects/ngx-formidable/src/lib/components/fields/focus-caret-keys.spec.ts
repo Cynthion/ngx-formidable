@@ -2,10 +2,10 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { IFormidableOption } from '../../models/formidable.model';
-import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { TextareaFieldComponent } from './textarea-field/textarea-field.component';
+import { FormidableOption } from '../../models/formidable.model';
+import { AutocompleteField } from './autocomplete-field/autocomplete-field';
+import { InputField } from './input-field/input-field';
+import { TextareaField } from './textarea-field/textarea-field';
 
 /**
  * What the caret rules owe the keystroke that comes next. Focus entry is a one-off, and nothing the field
@@ -17,7 +17,7 @@ import { TextareaFieldComponent } from './textarea-field/textarea-field.componen
  */
 
 @Component({
-  imports: [FormsModule, InputFieldComponent, TextareaFieldComponent, AutocompleteFieldComponent],
+  imports: [FormsModule, InputField, TextareaField, AutocompleteField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -41,13 +41,13 @@ import { TextareaFieldComponent } from './textarea-field/textarea-field.componen
     </form>
   `
 })
-class KeyHostComponent {
-  private readonly all: IFormidableOption[] = [
+class KeyHost {
+  private readonly all: FormidableOption[] = [
     { value: 'ch', label: 'Langstrasse 84' },
     { value: 'de', label: 'Wiesenstrasse 5' }
   ];
 
-  readonly visible = signal<IFormidableOption[]>(this.all);
+  readonly visible = signal<FormidableOption[]>(this.all);
 
   text: string | null = null;
   masked: string | null = null;
@@ -65,11 +65,11 @@ class KeyHostComponent {
 type Editor = HTMLInputElement | HTMLTextAreaElement;
 
 describe('caret from the first keystroke', () => {
-  let fixture: ComponentFixture<KeyHostComponent>;
+  let fixture: ComponentFixture<KeyHost>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [KeyHostComponent],
+      imports: [KeyHost],
       providers: [provideNgxMask()]
     }).compileComponents();
 
@@ -78,8 +78,8 @@ describe('caret from the first keystroke', () => {
 
   afterEach(() => fixture?.destroy());
 
-  function build(model: Partial<KeyHostComponent> = {}): void {
-    fixture = TestBed.createComponent(KeyHostComponent);
+  function build(model: Partial<KeyHost> = {}): void {
+    fixture = TestBed.createComponent(KeyHost);
     Object.assign(fixture.componentInstance, model);
 
     fixture.detectChanges();
@@ -587,7 +587,7 @@ describe('caret from the first keystroke', () => {
     it(
       'still places a value whose option arrives late',
       scenario(() => {
-        fixture = TestBed.createComponent(KeyHostComponent);
+        fixture = TestBed.createComponent(KeyHost);
         fixture.componentInstance.follows = false;
         fixture.componentInstance.visible.set([]);
         fixture.componentInstance.auto = 'de';

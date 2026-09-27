@@ -42,7 +42,7 @@ A target is what your validator receives as its second argument, and what `error
 | Approach                        | What You Write                                             | When To Use                                |
 | :------------------------------ | :--------------------------------------------------------- | :----------------------------------------- |
 | Angular validators              | Nothing — `required`, `minlength` and friends already work | Simple field rules                         |
-| A validator                     | One class implementing `IFormidableValidator`              | Group rules, whole-form rules, schemas     |
+| A validator                     | One class implementing `FormidableValidator`               | Group rules, whole-form rules, schemas     |
 | `@cynthion/ngx-formidable/vest` | An import — the Vest validator ships with the library      | Vest suites                                |
 | Nothing                         | Nothing                                                    | Display-only or externally validated forms |
 
@@ -202,10 +202,10 @@ onSubmit(): void {
 
 ## The Validator Contract
 
-Everything else goes through one interface. `NgxFormidableFormDirective` owns the model, the targets and the debouncing; your validator owns the rules.
+Everything else goes through one interface. `NgxFormidableForm` owns the model, the targets and the debouncing; your validator owns the rules.
 
 ```ts
-export interface IFormidableValidator<T = Record<string, unknown>> {
+export interface FormidableValidator<T = Record<string, unknown>> {
   /** Runs the rules for one target against the whole model. `null` means valid. */
   validate(model: T, target: string): Observable<string[] | null>;
 }
@@ -218,10 +218,9 @@ A directive on the form is the idiomatic way to supply one, because it can take 
 ```ts
 @Directive({
   selector: 'form[mySchema]',
-  standalone: true,
   providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: MySchemaValidatorDirective }]
 })
-export class MySchemaValidatorDirective<T extends Record<string, unknown>> implements IFormidableValidator<T> {
+export class MySchemaValidatorDirective<T extends Record<string, unknown>> implements FormidableValidator<T> {
   public readonly mySchema = input.required<MySchema<T>>();
 
   public validate(model: T, target: string): Observable<string[] | null> {
@@ -245,10 +244,10 @@ npm i vest
 The entry point itself ships inside `@cynthion/ngx-formidable` — there is nothing extra to install, only to import.
 
 ```ts
-import { NgxFormidableVestValidatorDirective } from '@cynthion/ngx-formidable/vest';
+import { NgxFormidableVestValidator } from '@cynthion/ngx-formidable/vest';
 
 @Component({
-  imports: [/* … */ NgxFormidableFormDirective, NgxFormidableVestValidatorDirective]
+  imports: [/* … */ NgxFormidableForm, NgxFormidableVestValidator]
 })
 ```
 
@@ -352,10 +351,9 @@ Not shipped. But it is the same shape, and the library is built so this is all i
 ```ts
 @Directive({
   selector: 'form[formSchema]',
-  standalone: true,
   providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: ZodValidatorDirective }]
 })
-export class ZodValidatorDirective<T extends Record<string, unknown>> implements IFormidableValidator<T> {
+export class ZodValidatorDirective<T extends Record<string, unknown>> implements FormidableValidator<T> {
   public readonly formSchema = input<ZodType<T> | null>(null);
 
   public validate(model: T, target: string): Observable<string[] | null> {

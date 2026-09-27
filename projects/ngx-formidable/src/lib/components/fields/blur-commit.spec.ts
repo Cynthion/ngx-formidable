@@ -3,8 +3,8 @@ import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core
 import { FormsModule, NG_VALUE_ACCESSOR, NgForm } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
 import { FieldDecoratorLayout } from '../../models/formidable.model';
-import { BaseFieldDirective } from './base-field.directive';
-import { DateFieldComponent } from './date-field/date-field.component';
+import { BaseField } from './base-field';
+import { DateField } from './date-field/date-field';
 
 /**
  * Contract of a blur: `onTouched()` is its last act. Under `updateOn: 'blur'` Angular commits the value from
@@ -18,7 +18,6 @@ import { DateFieldComponent } from './date-field/date-field.component';
 /** Defers its value to the blur, the way `date-field` and `time-field` do. */
 @Component({
   selector: 'formidable-blur-commit-field',
-  standalone: true,
   template: `<input
     #inputRef
     (blur)="onFocusChange(false)"
@@ -27,12 +26,12 @@ import { DateFieldComponent } from './date-field/date-field.component';
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => BlurCommitFieldComponent),
+      useExisting: forwardRef(() => BlurCommitField),
       multi: true
     }
   ]
 })
-class BlurCommitFieldComponent extends BaseFieldDirective<string> {
+class BlurCommitField extends BaseField<string> {
   protected keyboardCallback = null;
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
@@ -70,7 +69,7 @@ class BlurCommitFieldComponent extends BaseFieldDirective<string> {
 }
 
 @Component({
-  imports: [FormsModule, BlurCommitFieldComponent],
+  imports: [FormsModule, BlurCommitField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form [ngFormOptions]="{ updateOn: 'blur' }">
@@ -80,12 +79,12 @@ class BlurCommitFieldComponent extends BaseFieldDirective<string> {
     </form>
   `
 })
-class BlurCommitHostComponent {
+class BlurCommitHost {
   value = '';
 }
 
 @Component({
-  imports: [FormsModule, DateFieldComponent],
+  imports: [FormsModule, DateField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -96,16 +95,16 @@ class BlurCommitHostComponent {
     </form>
   `
 })
-class DateHostComponent {
+class DateHost {
   value: Date | null = null;
 }
 
 describe('blur contract', () => {
-  let fixture: ComponentFixture<BlurCommitHostComponent | DateHostComponent>;
+  let fixture: ComponentFixture<BlurCommitHost | DateHost>;
 
   function control() {
     return fixture.debugElement.children[0]!.injector.get(NgForm).form.get(
-      fixture.componentInstance instanceof DateHostComponent ? 'date' : 'name'
+      fixture.componentInstance instanceof DateHost ? 'date' : 'name'
     );
   }
 
@@ -122,7 +121,7 @@ describe('blur contract', () => {
   // Fails while `onTouched()` runs before `doOnFocusChange()`: the commit inside the touch finds no pending
   // change, and the value the field wrote a moment later never reaches the model.
   it('commits a value written during the blur, under updateOn blur', fakeAsync(() => {
-    fixture = TestBed.createComponent(BlurCommitHostComponent);
+    fixture = TestBed.createComponent(BlurCommitHost);
     fixture.detectChanges();
     tick();
 
@@ -136,7 +135,7 @@ describe('blur contract', () => {
   }));
 
   it('leaves the control untouched and uncommitted when the field takes its own blur', fakeAsync(() => {
-    fixture = TestBed.createComponent(DateHostComponent);
+    fixture = TestBed.createComponent(DateHost);
     fixture.detectChanges();
     tick();
     fixture.detectChanges();
@@ -156,7 +155,7 @@ describe('blur contract', () => {
   }));
 
   it('commits and touches on the blur after the one it took', fakeAsync(() => {
-    fixture = TestBed.createComponent(DateHostComponent);
+    fixture = TestBed.createComponent(DateHost);
     fixture.detectChanges();
     tick();
     fixture.detectChanges();

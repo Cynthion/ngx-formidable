@@ -1,10 +1,10 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldOptionComponent } from '../field-option/field-option.component';
-import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.component';
+import { FieldOption } from '../field-option/field-option';
+import { CheckboxGroupField } from './checkbox-group-field/checkbox-group-field';
+import { InputField } from './input-field/input-field';
+import { RadioGroupField } from './radio-group-field/radio-group-field';
 
 /**
  * Contract of a group option's horizontal inset.
@@ -26,7 +26,7 @@ import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.
  */
 
 @Component({
-  imports: [InputFieldComponent, RadioGroupFieldComponent, CheckboxGroupFieldComponent, FieldOptionComponent],
+  imports: [InputField, RadioGroupField, CheckboxGroupField, FieldOption],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-input-field name="text" />
@@ -39,10 +39,10 @@ import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.
     <formidable-checkbox-group-field name="empty" />
   `
 })
-class HostComponent {}
+class TestHost {}
 
 describe('group option alignment', () => {
-  let fixture: ComponentFixture<HostComponent>;
+  let fixture: ComponentFixture<TestHost>;
   let root: HTMLElement;
   const themed = new Set<string>();
 
@@ -50,7 +50,7 @@ describe('group option alignment', () => {
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(HostComponent);
+    fixture = TestBed.createComponent(TestHost);
     root = fixture.nativeElement;
     fixture.detectChanges();
     tick();

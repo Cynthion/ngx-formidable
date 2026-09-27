@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { DateFieldComponent } from './date-field/date-field.component';
-import { InputFieldComponent } from './input-field/input-field.component';
+import { DateField } from './date-field/date-field';
+import { InputField } from './input-field/input-field';
 
 /**
  * `placeHolderCharacter` is the character a mask draws for a position nobody has filled, and the library
@@ -14,7 +14,7 @@ import { InputFieldComponent } from './input-field/input-field.component';
  */
 
 @Component({
-  imports: [FormsModule, InputFieldComponent, DateFieldComponent],
+  imports: [FormsModule, InputField, DateField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -188,7 +188,7 @@ describe('mask placeholder character', () => {
       TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
       @Component({
-        imports: [FormsModule, InputFieldComponent],
+        imports: [FormsModule, InputField],
         changeDetection: ChangeDetectionStrategy.Eager,
         // `_` is both the placeholder and a literal this mask draws, so the two cannot be told apart.
         template: `<formidable-input-field

@@ -78,7 +78,7 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 | Input               | Does                                                                                           |
 | :------------------ | :--------------------------------------------------------------------------------------------- |
-| `options`           | The option list, as `IFormidableOption[]`                                                      |
+| `options`           | The option list, as `FormidableOption[]`                                                       |
 | `defaultOption`     | One option pinned to the top, exempt from `sortFn` and from filtering                          |
 | `defaultOptionMode` | `'always'` (pinned whatever else is there) or `'fallback'` (only when the list would be empty) |
 | `sortFn`            | Comparator applied to the combined list                                                        |
@@ -96,9 +96,9 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 ```ts
 readonly filter = signal('');
-readonly addresses = signal<IFormidableOption[]>([...ADDRESSES]);
+readonly addresses = signal<FormidableOption[]>([...ADDRESSES]);
 
-readonly addAddress: IFormidableActionOption = {
+readonly addAddress: FormidableActionOption = {
   value: 'add-address',
   label: 'Add A New Address…',
   action: () => this.createAddress()
@@ -240,7 +240,7 @@ Set `mask` when you want masking; `maskConfig` is optional on top of it.
 ### App-Wide
 
 ```ts
-bootstrapApplication(AppComponent, {
+bootstrapApplication(App, {
   providers: [
     ...provideNgxFormidable({
       globalMaskConfig: { validation: true, dropSpecialCharacters: true }

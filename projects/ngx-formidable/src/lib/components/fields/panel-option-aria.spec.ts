@@ -2,13 +2,13 @@ import { Component, Type, ChangeDetectionStrategy, viewChild } from '@angular/co
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { IFormidableOption } from '../../models/formidable.model';
-import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
-import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
-import { DateFieldComponent } from './date-field/date-field.component';
-import { DropdownFieldComponent } from './dropdown-field/dropdown-field.component';
-import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.component';
-import { SelectFieldComponent } from './select-field/select-field.component';
+import { FormidableOption } from '../../models/formidable.model';
+import { AutocompleteField } from './autocomplete-field/autocomplete-field';
+import { CheckboxGroupField } from './checkbox-group-field/checkbox-group-field';
+import { DateField } from './date-field/date-field';
+import { DropdownField } from './dropdown-field/dropdown-field';
+import { RadioGroupField } from './radio-group-field/radio-group-field';
+import { SelectField } from './select-field/select-field';
 
 /**
  * Contract of the ARIA wiring a field owns inside its own box — the mirror of the decorator's.
@@ -29,14 +29,14 @@ import { SelectFieldComponent } from './select-field/select-field.component';
  * cells are third-party markup with no ids of ours, so it is a `dialog` and names no active descendant.
  */
 
-const options: IFormidableOption[] = [
+const options: FormidableOption[] = [
   { value: 'red', label: 'Red' },
   { value: 'blue', label: 'Blue' },
   { value: 'green', label: 'Green', disabled: true }
 ];
 
 @Component({
-  imports: [FormsModule, DropdownFieldComponent, AutocompleteFieldComponent],
+  imports: [FormsModule, DropdownField, AutocompleteField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-dropdown-field
@@ -47,22 +47,22 @@ const options: IFormidableOption[] = [
       [options]="autocompleteOptions" />
   `
 })
-class PanelHostComponent {
+class PanelHost {
   options = options;
-  autocompleteOptions: IFormidableOption[] = options;
+  autocompleteOptions: FormidableOption[] = options;
 }
 
 @Component({
-  imports: [FormsModule, DateFieldComponent],
+  imports: [FormsModule, DateField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `<formidable-date-field name="date" />`
 })
-class DateHostComponent {
-  readonly date = viewChild.required(DateFieldComponent);
+class DateHost {
+  readonly date = viewChild.required(DateField);
 }
 
 @Component({
-  imports: [FormsModule, RadioGroupFieldComponent, CheckboxGroupFieldComponent],
+  imports: [FormsModule, RadioGroupField, CheckboxGroupField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-radio-group-field
@@ -73,13 +73,13 @@ class DateHostComponent {
       [options]="options" />
   `
 })
-class GroupHostComponent {
+class GroupHost {
   options = options;
 }
 
 /** The native control, which the platform already speaks for — a guard against the pattern spreading. */
 @Component({
-  imports: [FormsModule, SelectFieldComponent],
+  imports: [FormsModule, SelectField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-select-field
@@ -87,7 +87,7 @@ class GroupHostComponent {
       [options]="options" />
   `
 })
-class SelectHostComponent {
+class SelectHost {
   options = options;
 }
 
@@ -148,7 +148,7 @@ describe('panel and option field ARIA', () => {
     let field: HTMLElement;
 
     function open(): void {
-      build(PanelHostComponent);
+      build(PanelHost);
 
       input = element('formidable-dropdown-field input');
       field = element('formidable-dropdown-field .field');
@@ -229,7 +229,7 @@ describe('panel and option field ARIA', () => {
 
   describe('autocomplete as a combobox', () => {
     it('says its list is what completes the typing', fakeAsync(() => {
-      build(PanelHostComponent);
+      build(PanelHost);
 
       const input = element('formidable-autocomplete-field input');
 
@@ -240,7 +240,7 @@ describe('panel and option field ARIA', () => {
 
     // The empty state used to be an option component, which announced itself as something to pick.
     it('offers no option at all when there is nothing to offer', fakeAsync(() => {
-      const host = build(PanelHostComponent);
+      const host = build(PanelHost);
 
       expect(elements('formidable-autocomplete-field [role="option"]').length).toBe(3);
 
@@ -257,7 +257,7 @@ describe('panel and option field ARIA', () => {
 
     // Losing the option wrapper lost the row's padding with it, which left the text on the panel edge.
     it('insets its empty text exactly as an option row is inset', fakeAsync(() => {
-      const host = build(PanelHostComponent);
+      const host = build(PanelHost);
       const optionRow = element('formidable-dropdown-field .field-option-inline');
 
       host.autocompleteOptions = [];
@@ -271,7 +271,7 @@ describe('panel and option field ARIA', () => {
 
   describe('date field as a combobox over a dialog', () => {
     it('points at a dialog rather than at a listbox', fakeAsync(() => {
-      build(DateHostComponent);
+      build(DateHost);
 
       const input = element('formidable-date-field input');
 
@@ -281,7 +281,7 @@ describe('panel and option field ARIA', () => {
     }));
 
     it('reports whether its panel is open', fakeAsync(() => {
-      const host = build(DateHostComponent);
+      const host = build(DateHost);
       const input = element('formidable-date-field input');
 
       expect(input.getAttribute('aria-expanded')).toBe('false');
@@ -296,7 +296,7 @@ describe('panel and option field ARIA', () => {
 
     // Pikaday owns the cells, so there is no option of ours to name.
     it('names no active descendant', fakeAsync(() => {
-      build(DateHostComponent);
+      build(DateHost);
 
       expect(element('formidable-date-field input').getAttribute('aria-activedescendant')).toBeNull();
     }));
@@ -304,7 +304,7 @@ describe('panel and option field ARIA', () => {
 
   describe('the group fields', () => {
     it('gives a radio group radios and a checkbox group checkboxes', fakeAsync(() => {
-      build(GroupHostComponent);
+      build(GroupHost);
 
       expect(elements('[role="radio"]').length).toBe(3);
       expect(elements('[role="checkbox"]').length).toBe(3);
@@ -317,7 +317,7 @@ describe('panel and option field ARIA', () => {
 
     // `aria-selected` belongs to a listbox; a radio and a checkbox report `aria-checked`.
     it('reports option state as checked rather than selected', fakeAsync(() => {
-      build(GroupHostComponent);
+      build(GroupHost);
 
       expect(elements('[role="radio"]')[0]?.getAttribute('aria-selected')).toBeNull();
       expect(elements('[role="checkbox"]')[0]?.getAttribute('aria-selected')).toBeNull();
@@ -326,7 +326,7 @@ describe('panel and option field ARIA', () => {
     // A group has no open state, so it highlights its first option straight away — the arrows need
     // somewhere to start from. The panels are the ones that begin with nothing highlighted.
     it('names an active radio from the start, and moves it with the arrows', fakeAsync(() => {
-      build(GroupHostComponent);
+      build(GroupHost);
 
       const radiogroup = element('[role="radiogroup"]');
       radiogroup.focus();
@@ -343,7 +343,7 @@ describe('panel and option field ARIA', () => {
     }));
 
     it('checks the radio it selects, and only that one', fakeAsync(() => {
-      build(GroupHostComponent);
+      build(GroupHost);
 
       const radiogroup = element('[role="radiogroup"]');
       radiogroup.focus();
@@ -359,7 +359,7 @@ describe('panel and option field ARIA', () => {
     }));
 
     it('lets a checkbox group check more than one', fakeAsync(() => {
-      build(GroupHostComponent);
+      build(GroupHost);
 
       const checkboxgroup = element('[role="group"]');
       checkboxgroup.focus();
@@ -379,7 +379,7 @@ describe('panel and option field ARIA', () => {
   });
 
   it('leaves the native select alone', fakeAsync(() => {
-    build(SelectHostComponent);
+    build(SelectHost);
 
     const select = element('select');
 

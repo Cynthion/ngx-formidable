@@ -44,10 +44,9 @@ import { fillMissing, getAllFormErrors, mergeValuesAndRawValues, set } from './f
  */
 // The validation seam and its three layers: `tech/validation.md`.
 @Directive({
-  selector: 'form[formidableForm]',
-  standalone: true
+  selector: 'form[formidableForm]'
 })
-export class NgxFormidableFormDirective<T extends Record<string, unknown>> implements OnDestroy {
+export class NgxFormidableForm<T extends Record<string, unknown>> implements OnDestroy {
   public readonly ngForm = inject(NgForm, { self: true, optional: false });
 
   // Optional: without a validator the form is observable but nothing validates.

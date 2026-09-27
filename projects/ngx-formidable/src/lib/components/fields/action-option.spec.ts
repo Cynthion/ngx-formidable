@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, viewChild } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { FieldDefaultOptionMode, IFormidableActionOption, IFormidableOption } from '../../models/formidable.model';
-import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
-import { DropdownFieldComponent } from './dropdown-field/dropdown-field.component';
+import { FieldDefaultOptionMode, FormidableActionOption, FormidableOption } from '../../models/formidable.model';
+import { AutocompleteField } from './autocomplete-field/autocomplete-field';
+import { DropdownField } from './dropdown-field/dropdown-field';
 
 /**
  * Contract of the `actionOption` the two panel fields take: an entry that runs an action instead of becoming
@@ -20,13 +20,13 @@ import { DropdownFieldComponent } from './dropdown-field/dropdown-field.componen
  * the selectable options rather than off `@empty`.
  */
 
-const OPTIONS: IFormidableOption[] = [
+const OPTIONS: FormidableOption[] = [
   { value: 'red', label: 'Red' },
   { value: 'blue', label: 'Blue' }
 ];
 
 @Component({
-  imports: [FormsModule, DropdownFieldComponent, AutocompleteFieldComponent],
+  imports: [FormsModule, DropdownField, AutocompleteField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -45,17 +45,17 @@ const OPTIONS: IFormidableOption[] = [
     </form>
   `
 })
-class HostComponent {
-  readonly dropdown = viewChild.required(DropdownFieldComponent);
-  readonly autocomplete = viewChild.required(AutocompleteFieldComponent);
+class TestHost {
+  readonly dropdown = viewChild.required(DropdownField);
+  readonly autocomplete = viewChild.required(AutocompleteField);
 
-  options: IFormidableOption[] = [...OPTIONS];
+  options: FormidableOption[] = [...OPTIONS];
   mode: FieldDefaultOptionMode = 'always';
   branch: string | null = null;
   address: string | null = null;
 
   runs = 0;
-  readonly actionOption: IFormidableActionOption = {
+  readonly actionOption: FormidableActionOption = {
     value: '__add__',
     label: 'Add A New One…',
     action: () => this.runs++
@@ -63,13 +63,13 @@ class HostComponent {
 }
 
 describe('action option', () => {
-  let fixture: ComponentFixture<HostComponent>;
-  let host: HostComponent;
+  let fixture: ComponentFixture<TestHost>;
+  let host: TestHost;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [TestHost] }).compileComponents();
 
-    fixture = TestBed.createComponent(HostComponent);
+    fixture = TestBed.createComponent(TestHost);
     host = fixture.componentInstance;
   });
 

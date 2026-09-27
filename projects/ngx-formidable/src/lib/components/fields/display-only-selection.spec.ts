@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { IFormidableOption } from '../../models/formidable.model';
-import { DropdownFieldComponent } from './dropdown-field/dropdown-field.component';
+import { FormidableOption } from '../../models/formidable.model';
+import { DropdownField } from './dropdown-field/dropdown-field';
 
 /**
  * A dropdown's value is a label the field draws, not text the user owns. The input showing it is
@@ -12,13 +12,13 @@ import { DropdownFieldComponent } from './dropdown-field/dropdown-field.componen
  * field prevents the key instead. A native `<select>` has no selectable text either.
  */
 
-const options: IFormidableOption[] = [
+const options: FormidableOption[] = [
   { value: 'red', label: 'Red' },
   { value: 'blue', label: 'Blue' }
 ];
 
 @Component({
-  imports: [FormsModule, DropdownFieldComponent],
+  imports: [FormsModule, DropdownField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-dropdown-field
@@ -26,18 +26,18 @@ const options: IFormidableOption[] = [
       [options]="options" />
   `
 })
-class HostComponent {
-  options: IFormidableOption[] = options;
+class TestHost {
+  options: FormidableOption[] = options;
 }
 
 describe('display-only value selection', () => {
-  let fixture: ComponentFixture<HostComponent>;
+  let fixture: ComponentFixture<TestHost>;
   let input: HTMLInputElement;
 
   afterEach(() => fixture?.destroy());
 
   beforeEach(fakeAsync(() => {
-    fixture = TestBed.createComponent(HostComponent);
+    fixture = TestBed.createComponent(TestHost);
     fixture.detectChanges();
     tick();
     fixture.detectChanges();

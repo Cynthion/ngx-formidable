@@ -3,19 +3,19 @@ import { discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/te
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { provideNgxMask } from 'ngx-mask';
-import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
-import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
-import { BaseFieldDirective } from './base-field.directive';
-import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
-import { DateFieldComponent } from './date-field/date-field.component';
-import { DropdownFieldComponent } from './dropdown-field/dropdown-field.component';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.component';
-import { SelectFieldComponent } from './select-field/select-field.component';
-import { SliderFieldComponent } from './slider-field/slider-field.component';
-import { TextareaFieldComponent } from './textarea-field/textarea-field.component';
-import { TimeFieldComponent } from './time-field/time-field.component';
-import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
+import { FieldDecorator } from '../field-decorator/field-decorator';
+import { AutocompleteField } from './autocomplete-field/autocomplete-field';
+import { BaseField } from './base-field';
+import { CheckboxGroupField } from './checkbox-group-field/checkbox-group-field';
+import { DateField } from './date-field/date-field';
+import { DropdownField } from './dropdown-field/dropdown-field';
+import { InputField } from './input-field/input-field';
+import { RadioGroupField } from './radio-group-field/radio-group-field';
+import { SelectField } from './select-field/select-field';
+import { SliderField } from './slider-field/slider-field';
+import { TextareaField } from './textarea-field/textarea-field';
+import { TimeField } from './time-field/time-field';
+import { ToggleField } from './toggle-field/toggle-field';
 
 /**
  * Contract of a standalone `ngModel`, one outside a `<form>`: every field renders and shows its value.
@@ -28,25 +28,25 @@ import { ToggleFieldComponent } from './toggle-field/toggle-field.component';
 // Set per spec, with the template that uses them.
 const imports = [
   FormsModule,
-  FieldDecoratorComponent,
-  AutocompleteFieldComponent,
-  CheckboxGroupFieldComponent,
-  DateFieldComponent,
-  DropdownFieldComponent,
-  InputFieldComponent,
-  RadioGroupFieldComponent,
-  SelectFieldComponent,
-  SliderFieldComponent,
-  TextareaFieldComponent,
-  TimeFieldComponent,
-  ToggleFieldComponent
+  FieldDecorator,
+  AutocompleteField,
+  CheckboxGroupField,
+  DateField,
+  DropdownField,
+  InputField,
+  RadioGroupField,
+  SelectField,
+  SliderField,
+  TextareaField,
+  TimeField,
+  ToggleField
 ];
 
 @Component({
   changeDetection: ChangeDetectionStrategy.Eager,
   template: ''
 })
-class HostComponent {
+class TestHost {
   value: unknown = null;
   options = [{ value: 'a' }, { value: 'b' }];
 }
@@ -75,16 +75,16 @@ describe('standalone ngModel', () => {
       it(`shows the value of ${decorated ? 'a decorated' : 'an undecorated'} ${key}`, fakeAsync(() => {
         const field = `<${tag} name="f" [ngModel]="value" ${extra}></${tag}>`;
         const template = decorated ? `<formidable-field-decorator>${field}</formidable-field-decorator>` : field;
-        TestBed.overrideComponent(HostComponent, { set: { imports, template } });
+        TestBed.overrideComponent(TestHost, { set: { imports, template } });
 
-        const fixture = TestBed.createComponent(HostComponent);
+        const fixture = TestBed.createComponent(TestHost);
         fixture.componentInstance.value = value;
         fixture.detectChanges();
         tick(); // the model's microtask and the mask's own setTimeout
         fixture.detectChanges();
         discardPeriodicTasks(); // ngxMask keeps an interval running for as long as a field is alive
 
-        const instance = fixture.debugElement.query(By.css(tag)).componentInstance as BaseFieldDirective<unknown>;
+        const instance = fixture.debugElement.query(By.css(tag)).componentInstance as BaseField<unknown>;
         expect(instance.value).toEqual(shown);
       }));
     }

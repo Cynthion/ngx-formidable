@@ -2,15 +2,15 @@
 
 How a field, the decorator around it and its error messages are wired together. What a consumer does with the slots is in [`user/decoration.md`](../user/decoration.md), which this file does not restate.
 
-`FieldDecoratorComponent` renders everything around a field and nothing inside it. The field is projected, so the decorator reads it rather than configuring it. Every value below is pulled off `IFormidableField`, never pushed in. It does not itself implement that contract: the interface is signal-typed, while the decorator's mirrors are plain getters. They are reactive all the same — every one bottoms out in a `contentChild()` query or a signal on the field, and a signal read inside a getter is tracked by whichever view calls it, which is what lets the decorator be `OnPush`. What paints over what is a separate concern; see [`tech/layering.md`](layering.md).
+`FieldDecorator` renders everything around a field and nothing inside it. The field is projected, so the decorator reads it rather than configuring it. Every value below is pulled off `FormidableField`, never pushed in. It does not itself implement that contract: the interface is signal-typed, while the decorator's mirrors are plain getters. They are reactive all the same — every one bottoms out in a `contentChild()` query or a signal on the field, and a signal read inside a getter is tracked by whichever view calls it, which is what lets the decorator be `OnPush`. What paints over what is a separate concern; see [`tech/layering.md`](layering.md).
 
 ## The Three Parties
 
-| Party                     | Owns                                                                                    |
-| :------------------------ | :-------------------------------------------------------------------------------------- |
-| `FieldDecoratorComponent` | The label, its adornment, the prefix and suffix wrappers, the hint row, the errors slot |
-| The field                 | Its own box, its value, its panel, and the ARIA ids for what lives inside that box      |
-| `FieldErrorsDirective`    | Creating the errors component, registering it, and pumping both repaints                |
+| Party                 | Owns                                                                                    |
+| :-------------------- | :-------------------------------------------------------------------------------------- |
+| `FieldDecorator`      | The label, its adornment, the prefix and suffix wrappers, the hint row, the errors slot |
+| The field             | Its own box, its value, its panel, and the ARIA ids for what lives inside that box      |
+| `FieldErrorsRenderer` | Creating the errors component, registering it, and pumping both repaints                |
 
 None of them injects the others as a hard dependency. A field used without a decorator works; the decorator without a field renders empty; the errors directive without either renders beside its host control.
 
@@ -18,7 +18,7 @@ None of them injects the others as a hard dependency. A field used without a dec
 
 ## The Slot
 
-`errorsSlot` is a `ViewContainerRef` inside the decorator's template, below the container that positions the label and the adornments. `FieldErrorsDirective` creates its component into that slot, so the messages land below the field rather than inside the box whose geometry the label depends on. Without a decorator it falls back to its own `ViewContainerRef`, rendering beside the host control.
+`errorsSlot` is a `ViewContainerRef` inside the decorator's template, below the container that positions the label and the adornments. `FieldErrorsRenderer` creates its component into that slot, so the messages land below the field rather than inside the box whose geometry the label depends on. Without a decorator it falls back to its own `ViewContainerRef`, rendering beside the host control.
 
 **The query is readable whatever the hook order.** The directive reads `errorsSlot` from its own `ngAfterViewInit`, which may run before or after the decorator's. A signal query is a `computed` over the view's own query data, materialized on read and bound during the view's **creation** pass — so it resolves from `ngOnInit` onward, exactly as the `static: true` query it replaced did, and needs no flag to say so.
 
@@ -28,12 +28,12 @@ The slot is an `aria-live="polite"` region, so a message appearing is announced 
 
 ## The Registration
 
-Validity is computed in `FieldErrorsComponent`, which weighs the control's errors against `revealOn`. It is needed as a **host class** on the decorator, because that is the one element every stylesheet can reach: the decorator owns the label, and a projected field reads the same class with `:host-context(.is-invalid)`.
+Validity is computed in `FieldErrors`, which weighs the control's errors against `revealOn`. It is needed as a **host class** on the decorator, because that is the one element every stylesheet can reach: the decorator owns the label, and a projected field reads the same class with `:host-context(.is-invalid)`.
 
 ```mermaid
 flowchart LR
-  Control[AbstractControl<br/>errors] --> Errors[FieldErrorsComponent<br/>invalid]
-  Errors -->|registerErrors| Decorator[FieldDecoratorComponent<br/>.is-invalid]
+  Control[AbstractControl<br/>errors] --> Errors[FieldErrors<br/>invalid]
+  Errors -->|registerErrors| Decorator[FieldDecorator<br/>.is-invalid]
   Decorator -->|host-context| Field[Field Stylesheet]
   Decorator --> Label[Label Colours]
 ```
@@ -42,15 +42,15 @@ flowchart LR
 
 ## The Ids
 
-Every id in the library derives from one `fieldId`, minted per field instance from a module-level counter in `base-field.directive.ts`.
+Every id in the library derives from one `fieldId`, minted per field instance from a module-level counter in `base-field.ts`.
 
-| Id                     | Minted By                  | Named By                            |
-| :--------------------- | :------------------------- | :---------------------------------- |
-| `{fieldId}-label`      | Decorator                  | The field's `aria-labelledby`       |
-| `{fieldId}-hint`       | Decorator                  | The field's `aria-describedby`      |
-| `{fieldId}-errors`     | Decorator                  | The field's `aria-describedby`      |
-| `{fieldId}-panel`      | `BaseFieldDirective`       | A panel field's `aria-controls`     |
-| `{fieldId}-option-{i}` | `BaseOptionFieldDirective` | The field's `aria-activedescendant` |
+| Id                     | Minted By         | Named By                            |
+| :--------------------- | :---------------- | :---------------------------------- |
+| `{fieldId}-label`      | Decorator         | The field's `aria-labelledby`       |
+| `{fieldId}-hint`       | Decorator         | The field's `aria-describedby`      |
+| `{fieldId}-errors`     | Decorator         | The field's `aria-describedby`      |
+| `{fieldId}-panel`      | `BaseField`       | A panel field's `aria-controls`     |
+| `{fieldId}-option-{i}` | `BaseOptionField` | The field's `aria-activedescendant` |
 
 Fields read the decorator's ids back by injecting it **optionally**, so a field used on its own emits no attribute rather than a dangling reference.
 
@@ -62,7 +62,7 @@ Fields read the decorator's ids back by injecting it **optionally**, so a field 
 
 ## The Repaint Pump
 
-Angular's own form state is not signal-backed: `AbstractControl.errors`, `touched` and `dirty`, and `NgForm.submitted`, are plain properties, and nothing about reading them tells a view when they moved. `FieldErrorsComponent` derives everything it renders from them, so something has to tell it. `FieldErrorsDirective` merges three sources and calls `refresh()` on any of them.
+Angular's own form state is not signal-backed: `AbstractControl.errors`, `touched` and `dirty`, and `NgForm.submitted`, are plain properties, and nothing about reading them tells a view when they moved. `FieldErrors` derives everything it renders from them, so something has to tell it. `FieldErrorsRenderer` merges three sources and calls `refresh()` on any of them.
 
 | Source                 | Why It Cannot Be Inferred                                                                       |
 | :--------------------- | :---------------------------------------------------------------------------------------------- |
@@ -85,7 +85,7 @@ The decorator renders nothing of its own. `labelState` is a getter over the proj
 | Read                                              | Source                                |
 | :------------------------------------------------ | :------------------------------------ |
 | The projected field, label, adornments            | `contentChild()`                      |
-| `canLabelRest`, `isPanelOpen`, `hasInFieldToggle` | signals on `IFormidableField`         |
+| `canLabelRest`, `isPanelOpen`, `hasInFieldToggle` | signals on `FormidableField`          |
 | `invalid`                                         | a `computed` over the pump's revision |
 
 A getter — `hasLabel`, `labelState`, `valueAlignment` — is still the right shape: a signal read inside one is tracked by the caller, and unlike the field contract these are internal to one file. The projected decorations are read through getters too: a consumer adds and removes one at runtime with `@if`, and a value latched in `ngAfterContentInit` would leave its wrapper shown — or hidden — forever.
@@ -152,7 +152,7 @@ The measurement is the wrapper, not the content. Each wrapper shrink-wraps what 
 
 ## Invariants
 
-- **The decorator never writes to the field.** Every value it renders is read off `IFormidableField`. A field that must behave differently decides that itself, through `decoratorLayout`.
+- **The decorator never writes to the field.** Every value it renders is read off `FormidableField`. A field that must behave differently decides that itself, through `decoratorLayout`.
 - **Both directions of the injection are optional.** The field injects the decorator optionally and the decorator queries the field as content. Either alone renders.
 - **The ids have one stem.** Everything derives from `fieldId`. An id minted any other way cannot be resolved by the party that has to name it.
 - **The pump ends at a signal.** Any new state derived from Angular's form state belongs in a `computed` over the revision `refresh()` bumps. Reading the control from a plain getter leaves it unable to repaint anything.

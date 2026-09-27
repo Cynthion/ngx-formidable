@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, viewChild } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
-import { DateFieldComponent } from './date-field/date-field.component';
+import { DateField } from './date-field/date-field';
 
 /**
  * Contract of the scroll a panel field performs: it brings a field its opening panel would overflow back
@@ -15,20 +15,20 @@ import { DateFieldComponent } from './date-field/date-field.component';
  */
 
 @Component({
-  imports: [DateFieldComponent],
+  imports: [DateField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div style="height: 200vh"></div>
     <formidable-date-field name="when" />
   `
 })
-class HostComponent {
-  public readonly field = viewChild.required(DateFieldComponent);
+class TestHost {
+  public readonly field = viewChild.required(DateField);
 }
 
 describe('panel field scrolling', () => {
-  let fixture: ComponentFixture<HostComponent>;
-  let field: DateFieldComponent;
+  let fixture: ComponentFixture<TestHost>;
+  let field: DateField;
   let scrolled: jasmine.Spy;
 
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe('panel field scrolling', () => {
     // that hit-test after this one.
     scrolled = spyOn(Element.prototype, 'scrollIntoView');
 
-    fixture = TestBed.createComponent(HostComponent);
+    fixture = TestBed.createComponent(TestHost);
     fixture.detectChanges(); // ngAfterViewInit builds the calendar
     field = fixture.componentInstance.field();
   });

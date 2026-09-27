@@ -1,9 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
-import { NgxFormidableFieldValidateDirective } from './field-validate.directive';
-import { NgxFormidableFormDirective } from './form.directive';
-import { StubValidatorDirective } from './testing/stub-validator.directive';
+import { NgxFormidableFieldValidate } from './field-validate.directive';
+import { NgxFormidableForm } from './form.directive';
+import { StubValidator } from './testing/stub-validator.directive';
 
 /**
  * Contract of a form whose model has not arrived, or never does: it still validates. The live control values
@@ -19,7 +19,7 @@ interface Model extends Record<string, unknown> {
 }
 
 @Component({
-  imports: [FormsModule, NgxFormidableFormDirective, NgxFormidableFieldValidateDirective, StubValidatorDirective],
+  imports: [FormsModule, NgxFormidableForm, NgxFormidableFieldValidate, StubValidator],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
@@ -32,7 +32,7 @@ interface Model extends Record<string, unknown> {
     </form>
   `
 })
-class AsyncModelHostComponent {
+class AsyncModelHost {
   /** Null until the stream emits. */
   value: Model | null = null;
   name = '';
@@ -41,7 +41,7 @@ class AsyncModelHostComponent {
 
 /** No `[formValue]` at all. The controls are the whole truth. */
 @Component({
-  imports: [FormsModule, NgxFormidableFormDirective, NgxFormidableFieldValidateDirective, StubValidatorDirective],
+  imports: [FormsModule, NgxFormidableForm, NgxFormidableFieldValidate, StubValidator],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
@@ -53,19 +53,19 @@ class AsyncModelHostComponent {
     </form>
   `
 })
-class NoModelHostComponent {
+class NoModelHost {
   name = '';
   rules: Record<string, string> = { name: 'Required' };
 }
 
 describe('validation without a bound model', () => {
-  let fixture: ComponentFixture<AsyncModelHostComponent | NoModelHostComponent>;
+  let fixture: ComponentFixture<AsyncModelHost | NoModelHost>;
 
   function control() {
     return fixture.debugElement.children[0]!.injector.get(NgForm).form.get('name');
   }
 
-  function mount(host: typeof AsyncModelHostComponent | typeof NoModelHostComponent): void {
+  function mount(host: typeof AsyncModelHost | typeof NoModelHost): void {
     fixture = TestBed.createComponent(host);
     fixture.detectChanges();
     tick(500);
@@ -79,16 +79,16 @@ describe('validation without a bound model', () => {
   afterEach(fakeAsync(() => flush()));
 
   it('validates while the model is still null', fakeAsync(() => {
-    mount(AsyncModelHostComponent);
+    mount(AsyncModelHost);
 
     expect(control()?.errors?.['errors']).toEqual(['Required']);
     expect(control()?.valid).toBe(false);
   }));
 
   it('keeps validating once the model arrives', fakeAsync(() => {
-    mount(AsyncModelHostComponent);
+    mount(AsyncModelHost);
 
-    (fixture.componentInstance as AsyncModelHostComponent).value = { name: '' };
+    (fixture.componentInstance as AsyncModelHost).value = { name: '' };
     fixture.detectChanges();
     tick(500);
     fixture.detectChanges();
@@ -97,11 +97,11 @@ describe('validation without a bound model', () => {
   }));
 
   it('validates a form that never binds a model, against its control values', fakeAsync(() => {
-    mount(NoModelHostComponent);
+    mount(NoModelHost);
 
     expect(control()?.errors?.['errors']).toEqual(['Required']);
 
-    (fixture.componentInstance as NoModelHostComponent).name = 'filled';
+    (fixture.componentInstance as NoModelHost).name = 'filled';
     fixture.detectChanges();
     tick(500);
     fixture.detectChanges();

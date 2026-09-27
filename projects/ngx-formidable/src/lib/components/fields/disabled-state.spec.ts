@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component, viewChild } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { NgxFormidableFormDirective } from '../../forms/form.directive';
-import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
-import { InputFieldComponent } from './input-field/input-field.component';
+import { NgxFormidableForm } from '../../forms/form.directive';
+import { FieldDecorator } from '../field-decorator/field-decorator';
+import { InputField } from './input-field/input-field';
 
 /**
  * Contract of the field's `disabled`: it has **two** writers, and the field has to report whichever wrote
@@ -17,7 +17,7 @@ import { InputFieldComponent } from './input-field/input-field.component';
  */
 
 @Component({
-  imports: [FormsModule, NgxFormidableFormDirective, FieldDecoratorComponent, InputFieldComponent],
+  imports: [FormsModule, NgxFormidableForm, FieldDecorator, InputField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form formidableForm>
@@ -30,7 +30,7 @@ import { InputFieldComponent } from './input-field/input-field.component';
     </form>
   `
 })
-class DisabledHostComponent {
+class DisabledHost {
   readonly ngForm = viewChild.required(NgForm);
 
   value = '';
@@ -38,13 +38,13 @@ class DisabledHostComponent {
 }
 
 describe('field disabled state', () => {
-  let fixture: ComponentFixture<DisabledHostComponent>;
-  let host: DisabledHostComponent;
+  let fixture: ComponentFixture<DisabledHost>;
+  let host: DisabledHost;
 
   beforeEach(fakeAsync(() => {
     TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
-    fixture = TestBed.createComponent(DisabledHostComponent);
+    fixture = TestBed.createComponent(DisabledHost);
     host = fixture.componentInstance;
     fixture.detectChanges();
     tick();

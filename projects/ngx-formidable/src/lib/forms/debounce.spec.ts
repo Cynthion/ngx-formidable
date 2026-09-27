@@ -1,9 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
-import { NgxFormidableFieldValidateDirective } from './field-validate.directive';
-import { NgxFormidableFormDirective } from './form.directive';
-import { StubValidatorDirective } from './testing/stub-validator.directive';
+import { NgxFormidableFieldValidate } from './field-validate.directive';
+import { NgxFormidableForm } from './form.directive';
+import { StubValidator } from './testing/stub-validator.directive';
 
 /**
  * Contract of the debounce window: the setting a consumer puts on the `<form>` governs how long the harness
@@ -18,7 +18,7 @@ interface Model extends Record<string, unknown> {
 }
 
 @Component({
-  imports: [FormsModule, NgxFormidableFormDirective, NgxFormidableFieldValidateDirective, StubValidatorDirective],
+  imports: [FormsModule, NgxFormidableForm, NgxFormidableFieldValidate, StubValidator],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
@@ -32,14 +32,14 @@ interface Model extends Record<string, unknown> {
     </form>
   `
 })
-class DebouncedHostComponent {
+class DebouncedHost {
   debounceMs = 200;
   value: Model = { name: 'filled' };
   rules: Record<string, string> = { name: 'Required' };
 }
 
 describe('validation debounce', () => {
-  let fixture: ComponentFixture<DebouncedHostComponent>;
+  let fixture: ComponentFixture<DebouncedHost>;
 
   function control() {
     return fixture.debugElement.children[0]!.injector.get(NgForm).form.get('name');
@@ -60,7 +60,7 @@ describe('validation debounce', () => {
   // replaced the per-directive `validationOptions`: nothing on the `<form>` fed the `[ngModel]` directive, so
   // a field validated immediately no matter what the consumer bound.
   it('waits the form’s debounce window before a field reports', fakeAsync(() => {
-    fixture = TestBed.createComponent(DebouncedHostComponent);
+    fixture = TestBed.createComponent(DebouncedHost);
     fixture.detectChanges();
     tick(500);
     fixture.detectChanges();
@@ -80,7 +80,7 @@ describe('validation debounce', () => {
   // The window used to be read once per target and cached for the life of the form, so a consumer could
   // widen it and every field already seen kept the old one.
   it('takes a new debounce window after a target has already validated', fakeAsync(() => {
-    fixture = TestBed.createComponent(DebouncedHostComponent);
+    fixture = TestBed.createComponent(DebouncedHost);
     fixture.detectChanges();
     tick(500);
     fixture.detectChanges();

@@ -1,0 +1,68 @@
+<div
+  class="textarea-wrapper"
+  [class.length-indicator-enabled]="showLengthIndicator()">
+  @if (mask()) {
+  <!-- NgxMaskDirective only when mask exists -->
+  <textarea
+    #maskedTextareaRef
+    class="field"
+    [id]="fieldId"
+    [placeholder]="placeholder()"
+    [attr.name]="name()"
+    [attr.autocomplete]="autocomplete()"
+    [attr.minlength]="minLength() > -1 ? minLength() : null"
+    [attr.maxlength]="maxLength() > -1 ? maxLength() : null"
+    [attr.readonly]="readonly() ? '' : null"
+    [attr.disabled]="disabled() ? '' : null"
+    [attr.tabindex]="readonly() || disabled() ? -1 : null"
+    [attr.aria-required]="markRequired() || null"
+    [attr.aria-invalid]="isInvalid || null"
+    [attr.aria-describedby]="describedBy"
+    [mask]="mask()"
+    [validation]="!!mask() && mergedMaskConfig.validation && !readonly() && !disabled()"
+    [showMaskTyped]="mergedMaskConfig.showMaskTyped"
+    [placeHolderCharacter]="mergedMaskConfig.placeHolderCharacter"
+    [dropSpecialCharacters]="mergedMaskConfig.dropSpecialCharacters"
+    [specialCharacters]="mergedMaskConfig.specialCharacters"
+    [thousandSeparator]="mergedMaskConfig.thousandSeparator"
+    [decimalMarker]="mergedMaskConfig.decimalMarker"
+    [prefix]="mergedMaskConfig.prefix"
+    [suffix]="mergedMaskConfig.suffix"
+    [allowNegativeNumbers]="mergedMaskConfig.allowNegativeNumbers"
+    [leadZeroDateTime]="mergedMaskConfig.leadZeroDateTime"
+    [patterns]="mergedMaskConfig.patterns"
+    [clearIfNotMatch]="mergedMaskConfig.clearIfNotMatch"
+    (mouseup)="rememberClickedCaret(maskedTextareaRef)"
+    (click)="restoreClickedCaret(maskedTextareaRef)"
+    (input)="onValueChange()"
+    (focus)="onFocusChange(true)"
+    (blur)="onFocusChange(false)">
+  </textarea>
+  } @else {
+  <textarea
+    #plainTextareaRef
+    class="field"
+    [id]="fieldId"
+    [placeholder]="placeholder()"
+    [attr.name]="name()"
+    [attr.autocomplete]="autocomplete()"
+    [attr.minlength]="minLength() > -1 ? minLength() : null"
+    [attr.maxlength]="maxLength() > -1 ? maxLength() : null"
+    [attr.readonly]="readonly() ? '' : null"
+    [attr.disabled]="disabled() ? '' : null"
+    [attr.tabindex]="readonly() || disabled() ? -1 : null"
+    [attr.aria-required]="markRequired() || null"
+    [attr.aria-invalid]="isInvalid || null"
+    [attr.aria-describedby]="describedBy"
+    (input)="onValueChange()"
+    (focus)="onFocusChange(true)"
+    (blur)="onFocusChange(false)">
+  </textarea>
+  } @if (showLengthIndicator() && !readonly() && !disabled()) {
+  <div
+    #lengthIndicatorRef
+    class="length-indicator">
+    {{ valueLength() }} @if (maxLength() > -1) { / {{ maxLength() }} }
+  </div>
+  }
+</div>

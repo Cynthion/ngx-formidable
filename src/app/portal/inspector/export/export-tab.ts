@@ -1,0 +1,44 @@
+import { Component, inject } from '@angular/core';
+import { ExportSection, InspectorStore } from '../../state/inspector.store';
+import { SubTab, SubTabs } from '../sub-tabs/sub-tabs';
+import { MarkupPanel } from './markup-panel';
+import { ThemePanel } from './theme-panel';
+
+/** The two things there are to take away, named after the inspector tabs that make them. */
+const SUB_TABS: readonly SubTab[] = [
+  { id: 'theme', label: 'Theme' },
+  { id: 'form', label: 'Form' }
+];
+
+// Short, because each half's two accordions carry the explanation of what goes out and what comes back in.
+const STRAPLINES: Readonly<Record<ExportSection, string>> = {
+  theme: 'The CSS your theme is, out and back in.',
+  form: 'The code your form is, out and back in.'
+};
+
+/**
+ * What you leave with, and the way back in.
+ *
+ * Two halves rather than two accordions, so the area is navigated the way its siblings are: the sub-tab
+ * strip is the same control in the same place on all three, and each half is a whole panel rather than a
+ * body that has to be opened before it can be read.
+ *
+ * Which half is showing lives in the inspector store rather than here: App Defaults' export link and
+ * Structure's third way to start both open the form half, and neither is in a position to reach into this
+ * component.
+ */
+@Component({
+  selector: 'portal-export-tab',
+  templateUrl: './export-tab.html',
+  styleUrl: './export-tab.scss',
+  imports: [SubTabs, ThemePanel, MarkupPanel]
+})
+export class ExportTab {
+  protected readonly inspector = inject(InspectorStore);
+  protected readonly subTabs = SUB_TABS;
+  protected readonly straplines = STRAPLINES;
+
+  protected select(id: string): void {
+    this.inspector.exportSection.set(id as ExportSection);
+  }
+}

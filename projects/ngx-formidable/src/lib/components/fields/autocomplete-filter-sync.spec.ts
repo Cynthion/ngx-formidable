@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, signal, viewChild } from '@angular/core';
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { IFormidableOption } from '../../models/formidable.model';
-import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
+import { FormidableOption } from '../../models/formidable.model';
+import { AutocompleteField } from './autocomplete-field/autocomplete-field';
 
 /**
  * `filterChanged` reports every move of the filter text, not only the ones the user typed.
@@ -18,13 +18,13 @@ import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-fi
  * so it breaks on the second lap where a created label does not match what was typed to find it.
  */
 
-const ADDRESSES: IFormidableOption[] = [
+const ADDRESSES: FormidableOption[] = [
   { value: 'langstrasse', label: 'Langstrasse 84' },
   { value: 'seefeld', label: 'Seefeldstrasse 40' }
 ];
 
 @Component({
-  imports: [FormsModule, AutocompleteFieldComponent],
+  imports: [FormsModule, AutocompleteField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -36,12 +36,12 @@ const ADDRESSES: IFormidableOption[] = [
     </form>
   `
 })
-class FilteringHostComponent {
-  readonly field = viewChild.required(AutocompleteFieldComponent);
+class FilteringHost {
+  readonly field = viewChild.required(AutocompleteField);
 
   /** The consumer's own filtering, exactly as `user/fields.md` documents it. */
   readonly filter = signal('');
-  readonly all = signal<IFormidableOption[]>([...ADDRESSES]);
+  readonly all = signal<FormidableOption[]>([...ADDRESSES]);
   readonly address = signal<string | null>(null);
 
   readonly visibleOptions = computed(() => {
@@ -52,13 +52,13 @@ class FilteringHostComponent {
 }
 
 describe('autocomplete filter sync', () => {
-  let fixture: ComponentFixture<FilteringHostComponent>;
-  let host: FilteringHostComponent;
+  let fixture: ComponentFixture<FilteringHost>;
+  let host: FilteringHost;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [FilteringHostComponent] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [FilteringHost] }).compileComponents();
 
-    fixture = TestBed.createComponent(FilteringHostComponent);
+    fixture = TestBed.createComponent(FilteringHost);
     host = fixture.componentInstance;
   });
 

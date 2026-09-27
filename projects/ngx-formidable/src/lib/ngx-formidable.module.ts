@@ -1,61 +1,61 @@
 import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { FieldDecoratorComponent } from './components/field-decorator/field-decorator.component';
-import { FieldErrorsComponent } from './components/field-errors/field-errors.component';
-import { FieldOptionComponent } from './components/field-option/field-option.component';
-import { AutocompleteFieldComponent } from './components/fields/autocomplete-field/autocomplete-field.component';
-import { CheckboxGroupFieldComponent } from './components/fields/checkbox-group-field/checkbox-group-field.component';
-import { DateFieldComponent } from './components/fields/date-field/date-field.component';
-import { DropdownFieldComponent } from './components/fields/dropdown-field/dropdown-field.component';
-import { InputFieldComponent } from './components/fields/input-field/input-field.component';
-import { RadioGroupFieldComponent } from './components/fields/radio-group-field/radio-group-field.component';
-import { SelectFieldComponent } from './components/fields/select-field/select-field.component';
-import { SliderFieldComponent } from './components/fields/slider-field/slider-field.component';
-import { TextareaFieldComponent } from './components/fields/textarea-field/textarea-field.component';
-import { TimeFieldComponent } from './components/fields/time-field/time-field.component';
-import { ToggleFieldComponent } from './components/fields/toggle-field/toggle-field.component';
-import { FieldErrorsDirective } from './directives/field-errors.directive';
-import { FieldHintDirective } from './directives/field-hint.directive';
-import { FieldLabelAdornmentDirective } from './directives/field-label-adornment.directive';
-import { FieldLabelDirective } from './directives/field-label.directive';
-import { FieldPrefixDirective } from './directives/field-prefix.directive';
-import { FieldSuffixDirective } from './directives/field-suffix.directive';
-import { FieldToggleIconDirective } from './directives/field-toggle-icon.directive';
-import { NgxFormidableGroupValidateDirective } from './forms/group-validate.directive';
-import { NgxFormidableFieldValidateDirective } from './forms/field-validate.directive';
-import { NgxFormidableWholeFormValidateDirective } from './forms/whole-form-validate.directive';
-import { NgxFormidableFormDirective } from './forms/form.directive';
+import { FieldDecorator } from './components/field-decorator/field-decorator';
+import { FieldErrors } from './components/field-errors/field-errors';
+import { FieldOption } from './components/field-option/field-option';
+import { AutocompleteField } from './components/fields/autocomplete-field/autocomplete-field';
+import { CheckboxGroupField } from './components/fields/checkbox-group-field/checkbox-group-field';
+import { DateField } from './components/fields/date-field/date-field';
+import { DropdownField } from './components/fields/dropdown-field/dropdown-field';
+import { InputField } from './components/fields/input-field/input-field';
+import { RadioGroupField } from './components/fields/radio-group-field/radio-group-field';
+import { SelectField } from './components/fields/select-field/select-field';
+import { SliderField } from './components/fields/slider-field/slider-field';
+import { TextareaField } from './components/fields/textarea-field/textarea-field';
+import { TimeField } from './components/fields/time-field/time-field';
+import { ToggleField } from './components/fields/toggle-field/toggle-field';
+import { FieldErrorsRenderer } from './directives/field-errors-renderer';
+import { FieldHint } from './directives/field-hint';
+import { FieldLabelAdornment } from './directives/field-label-adornment';
+import { FieldLabel } from './directives/field-label';
+import { FieldPrefix } from './directives/field-prefix';
+import { FieldSuffix } from './directives/field-suffix';
+import { FieldToggleIcon } from './directives/field-toggle-icon';
+import { NgxFormidableGroupValidate } from './forms/group-validate.directive';
+import { NgxFormidableFieldValidate } from './forms/field-validate.directive';
+import { NgxFormidableWholeFormValidate } from './forms/whole-form-validate.directive';
+import { NgxFormidableForm } from './forms/form.directive';
 import { NgxFormidableConfig, provideNgxFormidable } from './provide-ngx-formidable';
 
 const components = [
   // Form Directives
-  NgxFormidableFormDirective,
-  NgxFormidableFieldValidateDirective,
-  NgxFormidableGroupValidateDirective,
-  NgxFormidableWholeFormValidateDirective,
+  NgxFormidableForm,
+  NgxFormidableFieldValidate,
+  NgxFormidableGroupValidate,
+  NgxFormidableWholeFormValidate,
   // Field Directives
-  FieldLabelAdornmentDirective,
-  FieldLabelDirective,
-  FieldPrefixDirective,
-  FieldSuffixDirective,
-  FieldToggleIconDirective,
-  FieldErrorsDirective,
-  FieldHintDirective,
+  FieldLabelAdornment,
+  FieldLabel,
+  FieldPrefix,
+  FieldSuffix,
+  FieldToggleIcon,
+  FieldErrorsRenderer,
+  FieldHint,
   // Field Components
-  FieldErrorsComponent,
-  FieldDecoratorComponent,
-  InputFieldComponent,
-  DropdownFieldComponent,
-  AutocompleteFieldComponent,
-  DateFieldComponent,
-  FieldOptionComponent,
-  SelectFieldComponent,
-  TextareaFieldComponent,
-  RadioGroupFieldComponent,
-  CheckboxGroupFieldComponent,
-  TimeFieldComponent,
-  ToggleFieldComponent,
-  SliderFieldComponent
+  FieldErrors,
+  FieldDecorator,
+  InputField,
+  DropdownField,
+  AutocompleteField,
+  DateField,
+  FieldOption,
+  SelectField,
+  TextareaField,
+  RadioGroupField,
+  CheckboxGroupField,
+  TimeField,
+  ToggleField,
+  SliderField
 ];
 
 /**

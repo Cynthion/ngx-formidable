@@ -1,16 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import {
-  FieldDecoratorComponent,
-  FieldLabelDirective,
-  NgxFormidableFieldValidateDirective,
-  NgxFormidableFormDirective
-} from '@cynthion/ngx-formidable';
-import { ExampleCounterFieldComponent } from './example-counter-field.component';
+import { FieldDecorator, FieldLabel, NgxFormidableFieldValidate, NgxFormidableForm } from '@cynthion/ngx-formidable';
+import { ExampleCounterField } from './example-counter-field';
 
 /**
- * The contract a custom field on `BaseFieldDirective` must hold, proven on the demo's own reference
+ * The contract a custom field on `BaseField` must hold, proven on the demo's own reference
  * implementation — which is what `user/custom-fields.md` quotes. It is decorated, bound and stepped exactly
  * like a library field, so if any of this breaks, that guide is wrong.
  */
@@ -18,11 +13,11 @@ import { ExampleCounterFieldComponent } from './example-counter-field.component'
 @Component({
   imports: [
     FormsModule,
-    NgxFormidableFormDirective,
-    NgxFormidableFieldValidateDirective,
-    FieldDecoratorComponent,
-    FieldLabelDirective,
-    ExampleCounterFieldComponent
+    NgxFormidableForm,
+    NgxFormidableFieldValidate,
+    FieldDecorator,
+    FieldLabel,
+    ExampleCounterField
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -42,14 +37,14 @@ import { ExampleCounterFieldComponent } from './example-counter-field.component'
     </form>
   `
 })
-class CounterHostComponent {
+class CounterHost {
   formValue: { pets?: number } = { pets: 1 };
   readonly = false;
 }
 
 describe('custom field contract: example-counter-field', () => {
-  let fixture: ComponentFixture<CounterHostComponent>;
-  let host: CounterHostComponent;
+  let fixture: ComponentFixture<CounterHost>;
+  let host: CounterHost;
   let root: HTMLElement;
 
   function settle(): void {
@@ -72,8 +67,8 @@ describe('custom field contract: example-counter-field', () => {
   }
 
   beforeEach(fakeAsync(() => {
-    TestBed.configureTestingModule({ imports: [CounterHostComponent] });
-    fixture = TestBed.createComponent(CounterHostComponent);
+    TestBed.configureTestingModule({ imports: [CounterHost] });
+    fixture = TestBed.createComponent(CounterHost);
     host = fixture.componentInstance;
     root = fixture.nativeElement as HTMLElement;
     settle();

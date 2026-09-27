@@ -2,11 +2,11 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
-import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
-import { DateFieldComponent } from './date-field/date-field.component';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { TextareaFieldComponent } from './textarea-field/textarea-field.component';
-import { TimeFieldComponent } from './time-field/time-field.component';
+import { AutocompleteField } from './autocomplete-field/autocomplete-field';
+import { DateField } from './date-field/date-field';
+import { InputField } from './input-field/input-field';
+import { TextareaField } from './textarea-field/textarea-field';
+import { TimeField } from './time-field/time-field';
 
 /**
  * What a field does with the caret on the way in, per `user/fields.md`. The browser owns most of it — it
@@ -20,14 +20,7 @@ import { TimeFieldComponent } from './time-field/time-field.component';
  */
 
 @Component({
-  imports: [
-    FormsModule,
-    InputFieldComponent,
-    TextareaFieldComponent,
-    AutocompleteFieldComponent,
-    DateFieldComponent,
-    TimeFieldComponent
-  ],
+  imports: [FormsModule, InputField, TextareaField, AutocompleteField, DateField, TimeField],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
@@ -66,7 +59,7 @@ import { TimeFieldComponent } from './time-field/time-field.component';
     </form>
   `
 })
-class CaretHostComponent {
+class CaretHost {
   readonly options = [
     { value: 'ch', label: 'Switzerland' },
     { value: 'de', label: 'Germany' }
@@ -99,11 +92,11 @@ const DATED = { date: new Date(2024, 0, 15) };
 const TIMED = { time: new Date(2024, 0, 15, 7, 45) };
 
 describe('caret on focus entry', () => {
-  let fixture: ComponentFixture<CaretHostComponent>;
+  let fixture: ComponentFixture<CaretHost>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CaretHostComponent],
+      imports: [CaretHost],
       providers: [provideNgxMask()]
     }).compileComponents();
 
@@ -112,8 +105,8 @@ describe('caret on focus entry', () => {
 
   afterEach(() => fixture?.destroy());
 
-  function build(model: Partial<CaretHostComponent> = {}): void {
-    fixture = TestBed.createComponent(CaretHostComponent);
+  function build(model: Partial<CaretHost> = {}): void {
+    fixture = TestBed.createComponent(CaretHost);
     Object.assign(fixture.componentInstance, model);
 
     fixture.detectChanges();
@@ -159,7 +152,7 @@ describe('caret on focus entry', () => {
   }
 
   describe('the editors render the states these specs assume', () => {
-    const renders: Array<[EditorName, Partial<CaretHostComponent>, string]> = [
+    const renders: Array<[EditorName, Partial<CaretHost>, string]> = [
       ['text', { text: 'ABCDEFGH' }, 'ABCDEFGH'],
       ['masked', PARTIAL, '079 123'],
       ['masked', FULL, '079 123 45 67'],
@@ -188,7 +181,7 @@ describe('caret on focus entry', () => {
 
   describe('keyboard focus selects the value', () => {
     // Each row: the editor, what it holds, and where the selection has to stop.
-    const rows: Array<[EditorName, Partial<CaretHostComponent>, number, string]> = [
+    const rows: Array<[EditorName, Partial<CaretHost>, number, string]> = [
       ['slots', PARTIAL, 7, 'stops at the last filled slot, not at the end of the empty ones'],
       ['slots', FULL, 13, 'covers a full mask whole, trailing literals and all'],
       ['slots', {}, 0, 'collapses at the front when the mask holds nothing'],
@@ -299,7 +292,7 @@ describe('caret on focus entry', () => {
 
   describe('a click lands where it aimed, and never behind the value', () => {
     // Each row: the editor, what it holds, `E`, and where three clicks have to end up.
-    const rows: Array<[EditorName, Partial<CaretHostComponent>, number, number[]]> = [
+    const rows: Array<[EditorName, Partial<CaretHost>, number, number[]]> = [
       ['slots', PARTIAL, 7, [0, 4, 7, 9, 13]],
       ['slots', FULL, 13, [0, 4, 7, 9, 13]],
       ['slots', {}, 0, [0, 4, 7, 9, 13]],
@@ -445,7 +438,7 @@ describe('caret on focus entry', () => {
     scenario(() => {
       build();
       const field = fixture.debugElement.query((node) => node.nativeElement?.matches?.('formidable-date-field'))
-        .componentInstance as DateFieldComponent;
+        .componentInstance as DateField;
       const element = editorOf('date');
       const panel = fixture.nativeElement.querySelector('formidable-date-field .panel') as HTMLElement;
 

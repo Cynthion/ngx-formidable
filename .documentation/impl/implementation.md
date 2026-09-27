@@ -121,20 +121,9 @@ Found by the architecture review. Each is fixed in the phase that rewrites its c
 
 ## Library Phases
 
-### Phase 17 — Current Angular Conventions
-
-**Depends On**: nothing.
-
-- **Naming**: a scripted rename across the library, the portal and the specs to Angular's current style guide. Files drop `.component` and `.directive` (`input-field.ts`), classes drop `Component` and `Directive` (`InputField`, `FieldDecorator`), interfaces drop the `I` prefix (`FormidableField`). Files that Phase 28 deletes keep their names.
-- **Framework Defaults**: drop the explicit `standalone: true` and `ChangeDetectionStrategy.OnPush`, both defaults now.
-- **Template And Host**: `@HostBinding` and `@HostListener` move to `host` metadata, `ngClass` to `[class]`, `*ngTemplateOutlet` to `[ngTemplateOutlet]`, and `CommonModule` to the directives a template uses.
-- **Lint**: add the angular-eslint rules the installed version has of `prefer-signals`, `prefer-signal-model`, `prefer-output-emitter-ref`, `prefer-output-readonly`, `no-uncalled-signals`, `reactive-context-must-read-signal`, `prefer-host-metadata-property`, `prefer-self-closing-tags`, `prefer-class-binding` and `prefer-style-binding`.
-- **Conventions**: rewrite naming and selectors in [`impl/components.md`](components.md), and replace its signal API bullets with the table from EnerQi's `impl/components.md`, enforced by those rules. Keep the library-only entries — `onSignalChange()`, the two-writers `linkedSignal` rule, `$` naming — and leave out EnerQi's app-only parts: containers and store, compositions and leaves, Storybook.
-- **Proof**: no behaviour change, so every existing spec passes after the rename alone; all CI gates green; a portal screenshot.
-
 ### Phase 18 — Test Harness
 
-**Depends On**: Phase 17.
+**Depends On**: nothing.
 
 - **Harness**: `lib/testing/`, unreachable from `public-api.ts`. It holds `configureFormidableTestBed()` with zoneless change detection and ngx-mask, one `settle()`, the DOM helpers the specs copy between them today (`type`, `press`, id-reference resolution, `theme()`, `rem()`, `corners()`), and `bindField(kind, api)`, a host that binds any field through template-driven or reactive forms.
 - **Every Spec Uses It**: all specs run zoneless, as a default application does, so `zoneless.spec.ts` goes and `on-push.spec.ts` becomes repaint behaviour specs.
@@ -164,7 +153,7 @@ Found by the architecture review. Each is fixed in the phase that rewrites its c
 - **Field State**: the `FormUiControl` inputs `errors`, `invalid`, `pending`, `touched` and `dirty`, and a `revealOn` input defaulting through `FORMIDABLE_DEFAULTS`. `showErrors` also drives the field's own `aria-invalid`, and the last messages stay on screen while `pending`.
 - **Decorator**: renders the projected field's messages in its slot and carries `.is-invalid`. The required marker follows the field's `required`; `hideRequiredMarkers` stays a default.
 - **Field Errors**: presentational. It takes `errors` and renders each through `FORMIDABLE_ERROR_MESSAGE` in its `aria-live` region.
-- **Deleted**: `FieldErrorsDirective`, `registerErrors`, the repaint pump, `FORMIDABLE_ERROR_EXTRACTOR`, `FORMIDABLE_ERROR_TRANSLATOR`, `revealOn: 'submitted'` and the `debounceMs` default.
+- **Deleted**: `FieldErrorsRenderer`, `registerErrors`, the repaint pump, `FORMIDABLE_ERROR_EXTRACTOR`, `FORMIDABLE_ERROR_TRANSLATOR`, `revealOn: 'submitted'` and the `debounceMs` default.
 - **Interim**: the template-driven harness still serves the portal, so it writes one error per message, and the portal renders its group errors with `formidable-field-errors`.
 - **Proof**: a reveal spec over the three modes and the three APIs, a message-token spec, and the marker in each API — Signal Forms' `required()`, reactive `Validators.required`, the template-driven `required` attribute.
 - **Closes**: D5.
