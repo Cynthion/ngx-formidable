@@ -25,7 +25,7 @@ describe('field repaint', () => {
    * template listener marks the view on the way past. Nothing else covers the pick itself.
    */
   it('renders a calendar pick and closes the panel, from Pikaday’s own callback', async () => {
-    const { fixture, element, control } = await bindField('date', 'reactive');
+    const { fixture, element, value } = await bindField('date', 'reactive');
 
     element.querySelector('.toggle')!.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
     await settle(fixture);
@@ -37,7 +37,7 @@ describe('field repaint', () => {
 
     expect(element.querySelector('.panel')!.classList).not.toContain('open');
     expect(element.querySelector('input')!.value).not.toBe('');
-    expect(control.value).toEqual(jasmine.any(Date));
+    expect(value()).toEqual(jasmine.any(Date));
   });
 
   // The panel's `.open` is written by the field's own template, so the signal is what repaints it.

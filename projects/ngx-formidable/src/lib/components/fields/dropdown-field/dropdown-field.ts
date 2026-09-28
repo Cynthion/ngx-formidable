@@ -3,15 +3,14 @@ import {
   Component,
   computed,
   ElementRef,
-  forwardRef,
   inject,
   input,
+  model,
   OnDestroy,
   OnInit,
   signal,
   viewChild
 } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { isPrintableCharacter } from '../../../helpers/input.helpers';
 import {
@@ -28,10 +27,9 @@ import {
   FORMIDABLE_DEFAULTS,
   FORMIDABLE_FIELD,
   FORMIDABLE_OPTION_FIELD,
-  FormidablePanelPosition,
   FormidableActionOption,
-  FormidableDropdownField,
-  FormidableOption
+  FormidableOption,
+  FormidablePanelPosition
 } from '../../../models/formidable.model';
 import { FieldOption } from '../../field-option/field-option';
 import { BaseOptionField } from '../base-option-field';
@@ -47,12 +45,6 @@ import { BaseOptionField } from '../base-option-field';
   styleUrls: ['./dropdown-field.scss'],
   imports: [NgTemplateOutlet, FieldOption],
   providers: [
-    // required for ControlValueAccessor to work with Angular forms
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => DropdownField),
-      multi: true
-    },
     // required to provide this component as FormidableField
     {
       provide: FORMIDABLE_FIELD,
@@ -65,7 +57,7 @@ import { BaseOptionField } from '../base-option-field';
     }
   ]
 })
-export class DropdownField extends BaseOptionField implements FormidableDropdownField, OnInit, OnDestroy {
+export class DropdownField extends BaseOptionField implements OnInit, OnDestroy {
   readonly dropdownRef = viewChild.required<ElementRef<HTMLDivElement>>('dropdownRef');
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
@@ -74,16 +66,11 @@ export class DropdownField extends BaseOptionField implements FormidableDropdown
   protected windowResizeScrollCallback = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
-  private _writtenValue: string | null = null;
   private _typedBuffer = '';
 
   override ngOnInit(): void {
     super.ngOnInit();
     this.registerTypeahead();
-  }
-
-  protected doOnValueChange(): void {
-    // No additional actions needed
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
@@ -129,29 +116,10 @@ export class DropdownField extends BaseOptionField implements FormidableDropdown
     this.togglePanel(false);
   }
 
-  // #region ControlValueAccessor
-
-  protected doWriteValue(value: string | null): void {
-    this._writtenValue = value ?? null;
-
-    const found = this.computeAllOptions().find((opt) => opt.value === this._writtenValue);
-    this.selectedOption.set(found ? { ...found } : undefined);
-
-    // write to wrapped input element — if the option isn't found yet (options may not be
-    // loaded), the input stays empty; _writtenValue is kept so updateOptions re-applies it
-    const selected = this.selectedOption();
-    this.inputRef().nativeElement.value = selected ? selected.label || selected.value : '';
-
-    this.isFieldFilled.set(this.inputRef().nativeElement.value.length > 0);
-  }
-
-  // #endregion
-
   // #region FormidableField
 
-  get value(): string | null {
-    return this.selectedOption()?.value || null;
-  }
+  /** The picked option's value, or `null` for none. */
+  public readonly value = model<string | null>(null);
 
   get fieldRef(): ElementRef<HTMLElement> {
     return this.dropdownRef() as ElementRef<HTMLElement>;
@@ -165,12 +133,6 @@ export class DropdownField extends BaseOptionField implements FormidableDropdown
   readonly hasInFieldToggle = computed(() => !this.readonly() && !this.disabled());
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
-
-  // #endregion
-
-  // #region FormidableDropdownField
-
-  // empty
 
   // #endregion
 
@@ -201,7 +163,10 @@ export class DropdownField extends BaseOptionField implements FormidableDropdown
     return !!actionOption && option.value === actionOption.value;
   }
 
-  protected readonly selectedOption = signal<FormidableOption | undefined>(undefined);
+  // The option the model names, if it has arrived. The action entry is never one.
+  protected readonly selectedOption = computed(() =>
+    this.activeOptions().find((option) => option.value === this.value() && !this.isActionOption(option))
+  );
 
   protected override get selectedOptionValue(): string | null {
     return this.selectedOption()?.value ?? null;
@@ -219,58 +184,14 @@ export class DropdownField extends BaseOptionField implements FormidableDropdown
       return;
     }
 
-    const newOption: FormidableOption = {
-      value: option.value,
-      label: option.label || option.value, // value as fallback for optional label
-      disabled: option.disabled
-    };
+    this.setValue(option.value);
+    this.touch.emit();
 
-    // commit selection + update displayed label
-    this.selectedOption.set(newOption);
-    this.inputRef().nativeElement.value = newOption.label!; // update input value with selected option label
-
-    // emit value change
-    this.valueChangeSubject$.next(newOption.value);
-    this.valueChanged.emit(newOption.value);
-    this.isFieldFilled.set(newOption.value.length > 0);
-    this.commit(newOption.value); // notify ControlValueAccessor of the change
-    this.touch();
-
-    // simulate blur (field-state blur, not necessarily native blur)
-    this.focusChangeSubject$.next(false); // simulate blur on selection
-    this.focusChanged.emit(false);
-
-    // close panel
     this.togglePanel(false);
   }
 
-  private deselectOption(opts: { clearInput?: boolean } = {}): void {
-    // only do work if there actually was a selection
-    if (!this.selectedOption()) return;
-
-    this.setHighlightedIndex(-1);
-    this.selectedOption.set(undefined);
-    this._writtenValue = null;
-
-    if (opts.clearInput) {
-      this.inputRef().nativeElement.value = '';
-    }
-
-    this.valueChangeSubject$.next(null);
-    this.valueChanged.emit(null);
-    this.isFieldFilled.set(this.inputRef().nativeElement.value.length > 0);
-    this.commit(null);
-    this.touch();
-  }
-
   protected onOptionsChanged(): void {
-    const allOptions = this.computeAllOptions();
-
-    // Reconciled before the options are applied: `updateOptions` re-applies the written value, which
-    // clears `selectedOption` and would leave the reconcile nothing to find.
-    // A changed options list is not the user, so the reconcile may correct the model but not touch.
-    this.runSilently('correction', () => this.reconcileSelectionAgainstOptions(allOptions));
-    this.updateOptions(allOptions);
+    this.updateOptions(this.computeAllOptions());
 
     // keep highlight consistent if panel is open
     if (this.isPanelOpen()) {
@@ -291,19 +212,6 @@ export class DropdownField extends BaseOptionField implements FormidableDropdown
 
   private updateOptions(allOptions: FormidableOption[]): void {
     this.activeOptions.set(applyActionOption(allOptions, this.actionOption(), this.actionOptionMode()));
-
-    // keep current value in sync with newly combined options
-    this.writeValue(this._writtenValue);
-  }
-
-  private reconcileSelectionAgainstOptions(allOptions: FormidableOption[]): void {
-    if (!this.selectedOption()) return;
-
-    const stillExists = allOptions.some((o) => o.value === this.selectedOption()!.value);
-    if (!stillExists) {
-      // selection is no longer valid
-      this.deselectOption({ clearInput: true });
-    }
   }
 
   // #endregion
@@ -325,7 +233,7 @@ export class DropdownField extends BaseOptionField implements FormidableDropdown
     transform: (position: FormidablePanelPosition | undefined) => position ?? this.defaultPanelPosition
   });
 
-  // Mousedown is used to prevent sending focusChanged events.
+  // Mousedown, so the click keeps focus in the input rather than blurring it.
   protected toggleMouseDown(event: MouseEvent): void {
     event.preventDefault();
     this.inputRef().nativeElement.focus(); // ensure input remains focused, so keyboard events work

@@ -7,7 +7,7 @@ import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { AutocompleteField } from './autocomplete-field/autocomplete-field';
 
 /**
- * `filterChanged` reports every move of the filter text, not only the ones the user typed.
+ * `filterChange` reports every move of the filter text, not only the ones the user typed.
  *
  * The field narrows its own filter whenever the value moves — to the selected label, or to nothing where it
  * cannot place the value yet. A consumer who supplies the options back (the documented pattern, and the only
@@ -33,7 +33,7 @@ const ADDRESSES: FormidableOption[] = [
         name="address"
         [options]="visibleOptions()"
         [ngModel]="address()"
-        (filterChanged)="filter.set($event)" />
+        (filterChange)="filter.set($event)" />
     </form>
   `
 })

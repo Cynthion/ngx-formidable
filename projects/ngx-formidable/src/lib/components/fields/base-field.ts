@@ -1,19 +1,19 @@
 import {
   AfterViewInit,
+  booleanAttribute,
   computed,
   Directive,
   ElementRef,
   inject,
-  Injector,
   input,
-  model,
+  ModelSignal,
   OnDestroy,
   OnInit,
   output,
   signal,
   Signal
 } from '@angular/core';
-import { AbstractControl, ControlValueAccessor, NgControl } from '@angular/forms';
+import { FormValueControl } from '@angular/forms/signals';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
 import { endOfMaskedValue } from '../../helpers/input.helpers';
 import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../helpers/mask.helpers';
@@ -25,12 +25,12 @@ import { FieldDecorator } from '../field-decorator/field-decorator';
 let nextFieldId = 0;
 
 /**
- * The base class a custom field extends. It supplies the value and focus channels, the `ControlValueAccessor`
- * plumbing, the accessible names, and the keyboard, outside-click and resize listeners; a subclass supplies
- * the control it renders and fills in the `do*` hooks.
+ * The base class a custom field extends. It supplies the `FormValueControl` contract — the state inputs and
+ * the `touch` output — the accessible names, and the keyboard, outside-click and resize listeners; a subclass
+ * declares its `value` model, renders from it, and fills in the `do*` hook.
  *
- * Extending it is not enough on its own — a custom field must also register itself as `NG_VALUE_ACCESSOR`, so
- * `ngModel` can bind it, and as `FORMIDABLE_FIELD`, so `formidable-field-decorator` can find it.
+ * `[formField]`, `ngModel` and `[formControl]` all bind such a field through its `value` model. A custom field
+ * also registers itself as `FORMIDABLE_FIELD`, so `formidable-field-decorator` can find it.
  */
 @Directive({
   host: {
@@ -40,8 +40,14 @@ let nextFieldId = 0;
   }
 })
 export abstract class BaseField<T = string | null>
-  implements ControlValueAccessor, FormidableField<T>, OnInit, AfterViewInit, OnDestroy
+  implements FormValueControl<T>, FormidableField<T>, OnInit, AfterViewInit, OnDestroy
 {
+  /**
+   * What the field holds — the model. The forms API writes it and the field renders it; the field writes it
+   * back only for an edit of the user's, and never corrects what it was given.
+   */
+  abstract readonly value: ModelSignal<T>;
+
   /** Handles the keys named in `registeredKeys`. `null` for a field with no keyboard behaviour of its own. */
   protected abstract keyboardCallback: ((event: KeyboardEvent) => void) | null;
 
@@ -58,26 +64,17 @@ export abstract class BaseField<T = string | null>
   protected abstract registeredKeys: string[];
 
   protected id = `formidable-field-${nextFieldId++}`;
-  protected readonly isFieldFocused = signal(false);
-  protected readonly isFieldFilled = signal(false);
-  protected valueChangeSubject$ = new Subject<T>();
-  protected focusChangeSubject$ = new Subject<boolean>();
+
+  /** Whether focus is inside the field, which the decorator's own focus state follows. */
+  public readonly isFieldFocused = signal(false);
+
+  protected readonly isFieldFilled = computed(() => BaseField.isFilled(this.value()));
 
   // Element injectors follow the declaring template, so a projected field really does see its decorator.
   // Optional: a field used on its own has no label, hint or errors to point at.
   private readonly decorator = inject(FieldDecorator, { optional: true });
-  private readonly injector = inject(Injector);
-
-  private ngControl?: NgControl | null;
-
-  /** The control this field is bound to, if it is bound to one at all. */
-  private get control(): AbstractControl | null {
-    return this.ngControl?.control ?? null;
-  }
 
   protected readonly destroy$ = new Subject<void>();
-
-  private _valuePrevious: T | null = null;
 
   // The decorator is normally the atom that owns the field's stacking context and rises while a panel is
   // open. Without one there is nothing above the field to be it, so the field's own host takes the job —
@@ -97,10 +94,6 @@ export abstract class BaseField<T = string | null>
   }
 
   ngOnInit(): void {
-    // Resolved here rather than injected: `NgModel` picks its value accessor inside its own constructor, so
-    // asking for it from this field's would close the loop and throw NG0200. By this hook it is built.
-    this.ngControl = this.injector.get(NgControl, null, { optional: true, self: true });
-
     this.registerGlobalListeners();
   }
 
@@ -177,19 +170,17 @@ export abstract class BaseField<T = string | null>
 
   // #endregion
 
-  protected onValueChange(): void {
-    const value = this.value;
+  /**
+   * Hands the user's edit to the model. An edit equal to what the model holds is no edit at all, so it
+   * reports nothing and dirties nothing.
+   */
+  protected setValue(value: T): void {
+    if (!this.isSameValue(this.value(), value)) this.value.set(value);
+  }
 
-    if (value == this._valuePrevious) return;
-    this._valuePrevious = value;
-
-    this.isFieldFilled.set(BaseField.isFilled(value));
-
-    this.valueChangeSubject$.next(value);
-    this.valueChanged.emit(value);
-    this.commit(value); // notify ControlValueAccessor of the change
-
-    this.doOnValueChange();
+  /** Whether two values are the same one. Overridden by a field whose value is a `Date` or an array. */
+  protected isSameValue(a: T, b: T): boolean {
+    return Object.is(a, b);
   }
 
   protected onFocusChange(isFocused: boolean): void {
@@ -197,18 +188,15 @@ export abstract class BaseField<T = string | null>
 
     this.isFieldFocused.set(isFocused);
 
-    this.focusChangeSubject$.next(isFocused);
-    this.focusChanged.emit(isFocused);
-
     // A blur the field caused itself — focus moved onto its own panel — is not the user leaving it, so it
     // neither commits nor touches.
     if (!isFocused && this.ignoresBlur()) return;
 
     this.doOnFocusChange(isFocused);
 
-    // The last act of a blur: under `updateOn: 'blur'` this is what commits the value, so whatever the
-    // field writes above has to be written by now.
-    if (!isFocused) this.touch();
+    // The last act of a blur: Signal Forms' `debounce(path, 'blur')` releases the value on the touch, so
+    // whatever the field writes above has to be written by now.
+    if (!isFocused) this.touch.emit();
   }
 
   /**
@@ -219,126 +207,38 @@ export abstract class BaseField<T = string | null>
     return false;
   }
 
-  /** The subclass's half of a value change, after the base has committed it and told everyone. */
-  protected abstract doOnValueChange(): void;
-
   /**
    * The subclass's half of a focus change. A field that must not respond while `readonly` guards it here and
    * not in `onFocusChange`, which all eleven fields share and which owns the focus ring and the touch.
    */
   protected abstract doOnFocusChange(isFocused: boolean): void;
 
-  // #region ControlValueAccessor
-
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  protected onChange: (value: T) => void = () => {};
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  protected onTouched: () => void = () => {};
-
-  // What is driving the work now running, when it is not the user.
-  private silence: 'write' | 'correction' | null = null;
-
-  /** Marks the control touched. Ignored while `runSilently` is in effect, because that is not the user. */
-  protected touch(): void {
-    // Under `updateOn: 'blur'` a touch is also the commit and under `updateOn: 'submit'` it pre-sets the
-    // pending touch, so a touch the user did not cause would commit and reveal a field nobody has visited.
-    if (this.silence === null) this.onTouched();
-  }
-
-  /** Reports a value to the bound control. Ignored while a write is in effect, since the form sent that one. */
-  protected commit(value: T): void {
-    if (this.silence !== 'write') this.onChange(value);
-  }
-
-  /**
-   * Runs work the user did not cause: the form writing a value, or the field correcting one it was given.
-   * Neither may touch the control or leave it dirty, and a write reports nothing back besides.
-   */
-  protected runSilently(cause: 'write' | 'correction', work: () => void): void {
-    // Angular raises its pending dirty flag on every change a value accessor reports and offers no way to
-    // opt out, so a control that was pristine on the way in is put back on the way out.
-    const previous = this.silence;
-    const wasPristine = this.control?.pristine ?? false;
-
-    this.silence = cause;
-
-    try {
-      work();
-    } finally {
-      this.silence = previous;
-      if (wasPristine) this.control?.markAsPristine();
-    }
-  }
-
-  writeValue(value: T): void {
-    this.isFieldFilled.set(BaseField.isFilled(value));
-    // What the field now displays, so `onValueChange` compares against it and not against the last value a
-    // user typed. Without this a written-in value cleared by a user reads as no change, and never reaches
-    // the model.
-    this._valuePrevious = value;
-
-    // The form wrote this, so nothing on the way down may touch the control or report the value back.
-    this.runSilently('write', () => this.doWriteValue(value));
-  }
-
-  registerOnChange(fn: (value: T) => void): void {
-    this.onChange = fn;
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled.set(isDisabled);
-  }
-
-  /**
-   * Puts a value the form wrote into whatever the subclass renders. Runs inside `runSilently`, so it may not
-   * report anything back and must not leave the control dirty or touched.
-   */
-  protected abstract doWriteValue(value: T): void;
-
-  // #endregion
-
   // #region FormidableField
 
-  /** The control's name, which is also the key it takes in the model and its validation target. */
+  /** The field's name, the native `name` of its control. `[formField]` writes the field's own. */
   public readonly name = input('');
 
   /** Placeholder text. A field with one has nothing for an `inside` label to rest in, so that label floats. */
   public readonly placeholder = input('');
 
   /** Blocks edits but stays focusable and keeps its focus ring, unlike `disabled`. */
-  public readonly readonly = input(false);
+  public readonly readonly = input(false, { transform: booleanAttribute });
+
+  /** Blocks edits and takes the field out of the tab order. Every forms API writes it from its own state. */
+  public readonly disabled = input(false, { transform: booleanAttribute });
 
   /**
-   * Blocks edits and takes the field out of the tab order. A `model` and not an `input`, because Angular's
-   * own `setDisabledState` writes it as well — so `disabledChange` also reports a `control.disable()`.
+   * Marks the field required: suffixes the marker to the label and sets `aria-required`. Validates nothing.
+   * `[formField]` and `[formControl]` write it from their rules; under `ngModel` it is the `required`
+   * attribute, which also attaches Angular's own validator. The form can hide every marker at once.
    */
-  public readonly disabled = model(false);
-
-  /**
-   * Marks the field required: suffixes the marker to the label and sets `aria-required`. Validates nothing —
-   * nothing is inferred from a validator either, so this and the rules are the consumer's to keep in step. The
-   * form can hide every marker at once.
-   */
-  public readonly markRequired = input(false);
+  public readonly required = input(false, { transform: booleanAttribute });
 
   /** Focuses the field once it has rendered. Does not open a panel. */
   public readonly autoFocus = input(false);
 
-  /** For the decorator, which subscribes on the way in. `valueChanged` is the same signal for a consumer. */
-  public valueChange$ = this.valueChangeSubject$.asObservable();
-
-  /** For the decorator, which subscribes on the way in. `focusChanged` is the same signal for a consumer. */
-  public focusChange$ = this.focusChangeSubject$.asObservable();
-
-  /** Emits the committed value on every change. Distinct-checked, so writing the same value twice is silent. */
-  public readonly valueChanged = output<T>();
-
-  /** Emits `true` on focus and `false` on blur — including a blur the field caused itself. */
-  public readonly focusChanged = output<boolean>();
+  /** Emits as the last act of a blur — the user leaving the field — which marks it touched. */
+  public readonly touch = output<void>();
 
   get fieldId(): string {
     return this.id;
@@ -372,9 +272,6 @@ export abstract class BaseField<T = string | null>
   }
 
   // #endregion
-
-  /** What the field currently holds, read straight off whatever it renders rather than cached. */
-  abstract get value(): T;
 
   private static isFilled(value: unknown): boolean {
     return typeof value === 'string' || Array.isArray(value) ? value.length > 0 : !!value;
@@ -413,10 +310,10 @@ export abstract class BaseField<T = string | null>
   }
 
   /** Focuses the field without opening its panel — no panel field opens on focus. */
-  public focus(): void {
+  public focus(options?: FocusOptions): void {
     if (this.disabled()) return;
 
-    this.focusElement?.focus();
+    this.focusElement?.focus(options);
   }
 
   /** Keeps a readonly or disabled field from being edited by pointer, while leaving it focusable. */

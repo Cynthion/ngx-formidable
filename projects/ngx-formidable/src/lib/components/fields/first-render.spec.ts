@@ -1,9 +1,9 @@
-import { bindField, FieldKind, FormsApi } from '../../testing/bind-field';
+import { bindField, FieldKind, FORMS_APIS } from '../../testing/bind-field';
 import { configureFormidableTestBed } from '../../testing/test-bed';
 
 /**
  * Contract of a field's first render: every field shows the value it is bound to, decorated or not, through
- * either forms API.
+ * every forms API.
  *
  * `[formControl]` writes from its own `ngOnChanges`, before the field's view exists. A standalone `ngModel`,
  * one outside a `<form>`, writes at the same point, and it is where `input-field` once read its `@if`-held
@@ -50,14 +50,13 @@ const fields: Record<
 
 /** Defects the reactive run exposes, each pending until the roadmap phase that rewrites its field. */
 const reactiveDefects: Record<string, string> = {
-  textarea: 'D15, Phase 19: a textarea drops a value written before its view exists',
   select: 'D16, Phase 21: a select shows its first option for a value written before its options exist'
 };
 
 describe('first render', () => {
   beforeEach(() => configureFormidableTestBed());
 
-  for (const api of ['template-driven', 'reactive'] as FormsApi[]) {
+  for (const api of FORMS_APIS) {
     for (const [key, { kind, value, inputs, shows, shown }] of Object.entries(fields)) {
       for (const decorated of [false, true]) {
         it(`shows the value of ${decorated ? 'a decorated' : 'an undecorated'} ${key}, bound ${api}`, async () => {

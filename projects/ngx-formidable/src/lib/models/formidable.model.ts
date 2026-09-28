@@ -1,8 +1,5 @@
-import { ElementRef, InjectionToken, OutputEmitterRef, Signal, TemplateRef } from '@angular/core';
+import { ElementRef, InjectionToken, Signal, TemplateRef } from '@angular/core';
 import { NgxMaskConfig } from 'ngx-mask';
-import { PikadayOptions } from 'pikaday';
-import { Observable } from 'rxjs';
-import { SignalsOf } from './utility-types';
 import { FormidableReveal } from './validation.model';
 
 /**
@@ -139,25 +136,21 @@ export interface FormidableField<T = string | null> {
   fieldRef: ElementRef<HTMLElement>;
   /** Unique per instance, and the stem every ARIA id around and inside the field is derived from. */
   fieldId: string;
+  /** What the field holds — the model, which the forms API binds two-way. */
+  value: Signal<T>;
   name: Signal<string>;
   placeholder: Signal<string>;
   readonly: Signal<boolean>;
   disabled: Signal<boolean>;
-  /**
-   * Marks the field required: suffixes the marker to its label and sets `aria-required`. Validates nothing.
-   */
-  markRequired: Signal<boolean>;
-  value: T;
+  /** Suffixes the marker to its label and sets `aria-required`. Validates nothing. */
+  required: Signal<boolean>;
+  /** Whether focus is inside the field, which the decorator's own focus state follows. */
+  isFieldFocused: Signal<boolean>;
   /** Whether nothing is rendered where the value goes, so a label may rest there like a placeholder. */
   canLabelRest: Signal<boolean>;
   /** Whether the field renders a panel toggle inside its own box, which the value and a label must clear. */
   hasInFieldToggle?: Signal<boolean>;
   valueAlignment?: FieldValueAlignment;
-  /** For the decorator, which subscribes on the way in. `valueChanged` is the same signal for a consumer. */
-  valueChange$: Observable<T>;
-  focusChange$: Observable<boolean>;
-  valueChanged: OutputEmitterRef<T>;
-  focusChanged: OutputEmitterRef<boolean>;
   decoratorLayout: FieldDecoratorLayout;
 }
 
@@ -215,165 +208,4 @@ export interface FormidablePanelField {
   isPanelOpen: Signal<boolean>;
   togglePanel(isOpen: boolean): void;
   panelPosition: Signal<FormidablePanelPosition>;
-}
-
-/** What a field that masks its text input adds to the contract. */
-export interface FormidableMaskField {
-  /** Must be a valid ngx-mask (see https://github.com/JsDaddy/ngx-mask). */
-  mask: Signal<string | undefined>;
-  /** Per-field overrides for ngx-mask. */
-  maskConfig: Signal<Partial<NgxMaskConfig> | undefined>;
-}
-
-type FormidableInputFieldsKeys = 'name' | 'placeholder' | 'autocomplete' | 'minLength' | 'maxLength';
-
-type FormidableTextareaFieldsKeys = FormidableInputFieldsKeys;
-
-type FormidableSelectFieldsKeys = 'name' | 'disabled';
-
-/** The subset of `<input/>` properties that are supported. */
-export interface FormidableInputField
-  extends SignalsOf<Pick<HTMLInputElement, FormidableInputFieldsKeys>>, FormidableField, FormidableMaskField {}
-
-type FormidableGroupFieldsKeys = 'name' | 'disabled';
-
-/** The subset of `<input type="radio"/> properties that are supported.` */
-export interface FormidableRadioGroupField
-  extends SignalsOf<Pick<HTMLInputElement, FormidableGroupFieldsKeys>>, FormidableField, FormidableOptionField {}
-
-/** The subset of `<input type="checkbox"/> properties that are supported.` */
-export interface FormidableCheckboxGroupField
-  extends
-    SignalsOf<Pick<HTMLInputElement, FormidableGroupFieldsKeys>>,
-    FormidableField<string[]>,
-    FormidableOptionField {}
-
-/** The subset of `<textarea/>` properties that are supported. */
-export interface FormidableTextareaField
-  extends SignalsOf<Pick<HTMLTextAreaElement, FormidableTextareaFieldsKeys>>, FormidableField, FormidableMaskField {
-  /**
-   * Enable or disable autosizing of the textarea.
-   * If true, the textarea will automatically adjust its height based on the content.
-   */
-  enableAutosize: Signal<boolean>;
-  showLengthIndicator: Signal<boolean>;
-}
-
-/** The subset of `<select/>` properties that are supported. */
-export interface FormidableSelectField
-  extends SignalsOf<Pick<HTMLSelectElement, FormidableSelectFieldsKeys>>, FormidableField, FormidableOptionField {}
-
-/** A dropdown adds nothing of its own: it is an option field whose list lives in a panel. */
-export interface FormidableDropdownField extends FormidableField, FormidableOptionField {}
-
-/** A dropdown whose panel is filtered by what is typed into the field. */
-export interface FormidableAutocompleteField extends FormidableDropdownField {
-  /** The filter text, so a consumer can fetch options for it rather than filtering a list it already has. */
-  filterChange$: Observable<string>;
-  filterChanged: OutputEmitterRef<string>;
-}
-
-/** The subset of `PikadayOptions` that are supported, each as the input the date field declares for it. */
-export type FormidablePikadayOptions = SignalsOf<
-  Pick<
-    PikadayOptions,
-    | 'ariaLabel'
-    | 'format'
-    | 'defaultDate'
-    | 'setDefaultDate'
-    | 'firstDay'
-    | 'minDate'
-    | 'maxDate'
-    | 'disableWeekends'
-    | 'disableDayFn'
-    | 'yearRange'
-    | 'i18n'
-    | 'yearSuffix'
-    | 'showMonthAfterYear'
-    | 'showDaysInNextAndPreviousMonths'
-    | 'enableSelectionDaysInNextAndPreviousMonths'
-    | 'numberOfMonths'
-  >
->;
-
-/** A date value entered through a mask, a calendar panel, or the arrow keys. */
-export interface FormidableDateField extends FormidableField<Date | null>, FormidablePikadayOptions {
-  /** Must be a valid Unicode format (e.g. yyyy-MM-dd). Supported tokens: y, yy, yyy, yyyy, M, MM, MMM, MMMM, d, dd */
-  unicodeTokenFormat: Signal<string>;
-  /** What an empty field displays in its mask slots. Defaults to `'underscores'`. */
-  emptyHint: Signal<FormidableEmptyHint>;
-  /** Commits a date from outside the field, as the calendar and the arrow keys do. */
-  selectDate(date: Date | null): void;
-}
-
-/** A time of day entered through a mask or the arrow keys. Carries a full `Date` whose date part is fixed. */
-export interface FormidableTimeField extends FormidableField<Date | null> {
-  /** Must be a valid Unicode format (e.g. HH:mm:ss). Supported tokens: H, HH, h, hh, m, mm, s, ss, a, aa */
-  unicodeTokenFormat: Signal<string>;
-  /** What an empty field displays in its mask slots. Defaults to `'underscores'`. */
-  emptyHint: Signal<FormidableEmptyHint>;
-  /** Commits a time from outside the field, as the arrow keys do. */
-  selectTime(time: Date | null): void;
-}
-
-/** A boolean rendered as a switch. `inline` is the only decorator layout it fits. */
-export interface FormidableToggleField extends FormidableField<boolean | null> {
-  labelPosition: Signal<FormidableToggleFieldLabelPosition | undefined>;
-  /** Text shown beside the switch while on. The field's own label, not a projected one. */
-  onLabel: Signal<string | undefined>;
-  /** Text shown beside the switch while off. Falls back to `onLabel` when absent. */
-  offLabel: Signal<string | undefined>;
-  /** Flips the value, as clicking the switch does. */
-  toggle(): void;
-}
-
-/** A number picked from a bounded range, over a native range input. */
-export interface FormidableSliderField extends FormidableField<number | null> {
-  /** Minimum numeric value of the slider (inclusive). */
-  min: Signal<number>;
-  /** Maximum numeric value of the slider (inclusive). */
-  max: Signal<number>;
-  /** Step between slider values. */
-  step: Signal<number>;
-
-  /** Optional label for the minimum value (fallback: min as string). */
-  minLabel: Signal<string | undefined>;
-  /** Optional label for the maximum value (fallback: max as string). */
-  maxLabel: Signal<string | undefined>;
-
-  /** Whether to display the thumb label. */
-  showThumbLabel: Signal<boolean>;
-
-  /** Whether to show tick marks with labels along the track. */
-  showTickMarks: Signal<boolean>;
-
-  /** Whether to display the min/max labels below the track. */
-  showMinMaxLabels: Signal<boolean>;
-
-  /** Whether to display labels for tick marks along the track. */
-  showTickLabels: Signal<boolean>;
-
-  /**
-   * Interval between tick marks. If omitted, `step` is used.
-   * Only relevant if `showTickMarks === true`.
-   */
-  tickInterval: Signal<number | undefined>;
-
-  /**
-   * Imperatively select a value from outside (e.g. via template reference).
-   * Should clamp & snap to min/max/step.
-   */
-  selectValue(value: number): void;
-
-  /**
-   * Optional value → thumb label transform for value labels.
-   * E.g., `value => value + ' %'` or map to named categories.
-   */
-  transformValueToThumbLabel: Signal<((value: number) => string) | undefined>;
-
-  /**
-   * Optional tick → tick label transform for tick labels.
-   * E.g., `value => value + ' %'` or map to named categories.
-   */
-  transformTickToTickLabel: Signal<((value: number) => string) | undefined>;
 }

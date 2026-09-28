@@ -258,7 +258,7 @@ function parseDecorator(
       continue;
     }
 
-    if (key === 'markrequired') {
+    if (key === 'required') {
       decoration = { ...decoration, markRequired: attribute.value.trim() === 'true' };
       continue;
     }

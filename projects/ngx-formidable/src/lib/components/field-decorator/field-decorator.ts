@@ -6,15 +6,13 @@ import {
   ElementRef,
   inject,
   OnDestroy,
-  output,
   signal,
   viewChild,
   ViewContainerRef
 } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
 import { FieldHint } from '../../directives/field-hint';
-import { FieldLabelAdornment } from '../../directives/field-label-adornment';
 import { FieldLabel } from '../../directives/field-label';
+import { FieldLabelAdornment } from '../../directives/field-label-adornment';
 import { FieldPrefix } from '../../directives/field-prefix';
 import { FieldSuffix } from '../../directives/field-suffix';
 import { NgxFormidableForm } from '../../forms/form.directive';
@@ -112,12 +110,8 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
 
   private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
 
-  private valueChangeSubject$ = new Subject<unknown>();
-  private focusChangeSubject$ = new Subject<boolean>();
-  private destroy$ = new Subject<void>();
   private resizeObserver?: ResizeObserver;
   private readonly errors = signal<FieldErrors | undefined>(undefined);
-  private readonly isFocused = signal(false);
 
   // Whether the label may transition yet. False until the field has settled on its first state, so the
   // initial resting-to-floating correction is not animated.
@@ -130,28 +124,15 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    // interact with the projected field content
-    this.forwardEvents();
     this.observeInsets();
     this.allowLabelAnimation();
   }
 
   ngOnDestroy() {
     this.resizeObserver?.disconnect();
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
   // #region FormidableField Mirroring
-
-  valueChange$ = this.valueChangeSubject$.asObservable();
-  focusChange$ = this.focusChangeSubject$.asObservable();
-
-  /** The projected field's own value stream, re-emitted so a consumer can bind it on the decorator instead. */
-  public readonly valueChanged = output<unknown>();
-
-  /** The projected field's own focus stream, re-emitted so a consumer can bind it on the decorator instead. */
-  public readonly focusChanged = output<boolean>();
 
   get fieldId(): string {
     return this.projectedField()?.fieldId ?? '';
@@ -201,18 +182,14 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Drives the label's required marker. The field asks for it with `markRequired`, and the form — or, without
+   * Drives the label's required marker. The field asks for it with `required`, and the form — or, without
    * one, the app default — may hide it for all fields.
    */
   get showRequiredMarker(): boolean {
     return (
       !(this.formDirective?.hideRequiredMarkers() ?? this.defaultHideRequiredMarkers) &&
-      (this.projectedField()?.markRequired() ?? false)
+      (this.projectedField()?.required() ?? false)
     );
-  }
-
-  get value(): unknown {
-    return this.projectedField()?.value ?? null;
   }
 
   get canLabelRest(): boolean {
@@ -273,7 +250,7 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
   }
 
   get isFieldFocused(): boolean {
-    return this.isFocused();
+    return this.projectedField()?.isFieldFocused() ?? false;
   }
 
   // Only ever true with a `formidableFieldErrors` field inside: nothing else computes validity.
@@ -317,23 +294,6 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
 
   get decoratorLayout(): FieldDecoratorLayout {
     return this.projectedField()?.decoratorLayout ?? 'horizontal';
-  }
-
-  // As a decorator, the wrapped field events are forwarded.
-  private forwardEvents(): void {
-    const projectedField = this.projectedField();
-    if (projectedField) {
-      projectedField.focusChange$.pipe(takeUntil(this.destroy$)).subscribe((focused) => {
-        this.isFocused.set(focused);
-        this.focusChangeSubject$.next(focused);
-        this.focusChanged.emit(focused);
-      });
-
-      projectedField.valueChange$.pipe(takeUntil(this.destroy$)).subscribe((value) => {
-        this.valueChangeSubject$.next(value);
-        this.valueChanged.emit(value);
-      });
-    }
   }
 
   // #endregion

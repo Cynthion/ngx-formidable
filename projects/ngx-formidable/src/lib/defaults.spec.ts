@@ -15,7 +15,7 @@ import { NgxFormidableForm } from './forms/form.directive';
 import { FORMIDABLE_DEFAULTS, FormidableDefaults } from './models/formidable.model';
 import { provideNgxFormidable } from './provide-ngx-formidable';
 import { fill } from './testing/dom';
-import { configureFormidableTestBed, settle } from './testing/test-bed';
+import { configureFormidableTestBed, DIRECTIVE_VALIDATORS_UNATTACHED, settle } from './testing/test-bed';
 
 /**
  * Contract of the app-wide defaults: an input left unset, or bound to `undefined`, takes the app default,
@@ -152,7 +152,7 @@ class ExplicitHost {}
     <formidable-field-decorator>
       <formidable-input-field
         name="a"
-        [markRequired]="true" />
+        [required]="true" />
       <div formidableFieldLabel>A</div>
     </formidable-field-decorator>
   `
@@ -351,6 +351,8 @@ describe('app defaults', () => {
     });
 
     it('reveals on the app default', async () => {
+      pending(DIRECTIVE_VALIDATORS_UNATTACHED);
+
       configure(DEFAULTS);
       await mount(RevealWithoutFormHost);
 

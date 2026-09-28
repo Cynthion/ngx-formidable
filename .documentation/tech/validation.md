@@ -83,27 +83,18 @@ Step 2 is what keeps the target itself current. A field's or a group's own valid
 
 `updateOn` resolves by walking to the parent when a control sets nothing of its own, so `ngFormOptions` already cascades and `ngModelOptions` already overrides. A library input would restate that and could drift from it, and it could not see a per-field `ngModelOptions` a consumer set directly. So no library code sits in that path.
 
+A library field is outside it: the classic APIs bind a field through its `value` model and commit every edit at once, whatever `updateOn` says. Only native controls in the same form still run on `blur` or `submit`.
+
 ### The Field Contract
 
-The run axis only works because every field keeps to two rules. Angular commits a `blur` control's value from inside `onTouched`, and only when a change is already pending, so:
+Every field keeps to four rules, and the run axis relies on each:
 
-- **Touch Last**: `onTouched()` is the last act of a blur. `BaseField.onFocusChange` calls `doOnFocusChange` first, so a field that commits on blur, as `date-field` and `time-field` do, has written its value before the touch that commits it.
-- **Programmatic Paths Are Silent**: `runSilently(cause, work)` marks work the user did not cause, and both `touch()` and `commit()` respect it. Nothing on such a path touches the control or leaves it dirty.
+- **Touch Last**: `touch` is the last act of a blur. `BaseField.onFocusChange` calls `doOnFocusChange` first, so a field that commits on blur, as `date-field` and `time-field` do, has written its value before the touch — which is what Signal Forms' `debounce(path, 'blur')` releases it on.
+- **Only The User Writes The Model**: a field writes its `value` model only for a user's edit, through `setValue`, which writes nothing for an edit equal to the model. A programmatic write is an input write, so it reports nothing, touches nothing and dirties nothing, and the field corrects nothing it is given — no clamp, no re-mask, no reconcile against the options.
 - **A Write Does Not Take The Caret**: a text field writes through `replaceText`, which leaves the element alone when it already shows that text and collapses the caret behind the text only when it replaced something. A consumer that echoes its model back writes the displayed value on every keystroke, and the caret and selection stay the user's.
 - **A Field May Disown A Blur**: `ignoresBlur()` suppresses both the commit and the touch, for a field that moved focus onto something it owns. `date-field` does this so a control inside its panel stays clickable.
 
-A touch is not cosmetic. Under `blur` it is the commit, and under `submit` it pre-sets the pending touch, so a touch nobody made would commit and reveal a field nobody has visited. Dirty is not cosmetic either: it is what `revealOn="dirty"` reads.
-
-There are two causes, and they differ in one thing only:
-
-| Cause        | Raised By                                      | Reports The Value | Touches | Dirties |
-| :----------- | :--------------------------------------------- | :---------------: | :-----: | :-----: |
-| `write`      | `writeValue`                                   |        No         |   No    |   No    |
-| `correction` | A reconcile, a clamped number, a masked string |        Yes        |   No    |   No    |
-
-A write reports nothing because the form is where the value came from. A correction has to report, because the model holds a value the field cannot render: an option that no longer exists, a number off the step grid, an unmasked string.
-
-Angular raises its pending dirty flag on every change a value accessor reports and offers no way to opt out, so `runSilently` puts a pristine control back. The two deferred corrections, `slider-field`'s clamp and the masked `doWriteValue`, run inside their own scope from the `queueMicrotask` or `setTimeout` that carries them, since the write scope has closed by then.
+A touch is not cosmetic: it is what `revealOn="touched"` reads, so a touch nobody made would reveal a field nobody has visited. Dirty is not cosmetic either: it is what `revealOn="dirty"` reads.
 
 ### Reveal Resolution And Repaint
 

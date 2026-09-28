@@ -1,17 +1,18 @@
 import { NgTemplateOutlet } from '@angular/common';
 import {
+  afterRenderEffect,
   Component,
   computed,
   ElementRef,
-  forwardRef,
   inject,
   input,
+  model,
   OnInit,
   output,
   signal,
+  untracked,
   viewChild
 } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { replaceText } from '../../../helpers/input.helpers';
 import {
@@ -28,17 +29,16 @@ import {
   FORMIDABLE_DEFAULTS,
   FORMIDABLE_FIELD,
   FORMIDABLE_OPTION_FIELD,
-  FormidablePanelPosition,
   FormidableActionOption,
-  FormidableAutocompleteField,
-  FormidableOption
+  FormidableOption,
+  FormidablePanelPosition
 } from '../../../models/formidable.model';
 import { FieldOption } from '../../field-option/field-option';
 import { BaseOptionField } from '../base-option-field';
 
 /**
  * A dropdown filtered by a text input inside its panel. The filter narrows the list by each option's `match`,
- * and `filterChanged` also carries it out, so a consumer can fetch options for it instead of filtering a list
+ * and `filterChange` also carries it out, so a consumer can fetch options for it instead of filtering a list
  * it already holds. Only a projected or bound option can be committed. Free text is not a value.
  */
 @Component({
@@ -47,12 +47,6 @@ import { BaseOptionField } from '../base-option-field';
   styleUrls: ['./autocomplete-field.scss'],
   imports: [NgTemplateOutlet, FieldOption],
   providers: [
-    // required for ControlValueAccessor to work with Angular forms
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => AutocompleteField),
-      multi: true
-    },
     // required to provide this component as FormidableField
     {
       provide: FORMIDABLE_FIELD,
@@ -65,7 +59,7 @@ import { BaseOptionField } from '../base-option-field';
     }
   ]
 })
-export class AutocompleteField extends BaseOptionField<string | null> implements FormidableAutocompleteField, OnInit {
+export class AutocompleteField extends BaseOptionField<string | null> implements OnInit {
   readonly autocompleteRef = viewChild.required<ElementRef<HTMLDivElement>>('autocompleteRef');
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
@@ -76,7 +70,28 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
 
   protected filterChangeSubject$ = new BehaviorSubject<string>('');
 
-  private _writtenValue: string | null = null;
+  constructor() {
+    super();
+
+    // Renders a model the user did not type: the option's label, or nothing while no option carries it —
+    // which clears the filter, so a consumer who supplies the options can put that option back. Never while
+    // focused: there the typed text is the filter, and the options a consumer fetches for it on every
+    // keystroke would otherwise put the old label back over it. A pick renders its own label.
+    afterRenderEffect(() => {
+      this.value();
+      const selected = this.selectedOption();
+
+      untracked(() => {
+        const input = this.inputRef().nativeElement;
+        const text = selected ? selected.label || selected.value : '';
+
+        if (this.isFieldFocused() || input.value === text) return;
+
+        input.value = text;
+        this.setFilterText(text);
+      });
+    });
+  }
 
   override ngOnInit(): void {
     super.ngOnInit();
@@ -88,13 +103,8 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
 
     // The user's own typing, which always reports — it is the filter.
     this.filterChangeSubject$.next(value);
-    this.filterChanged.emit(value);
-
-    this.isFieldFilled.set(value.length > 0);
-  }
-
-  protected doOnValueChange(): void {
-    // No additional actions needed
+    this.filterText.set(value);
+    this.filterChange.emit(value);
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
@@ -143,34 +153,13 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     this.togglePanel(false);
   }
 
-  // #region ControlValueAccessor
-
-  protected doWriteValue(value: string | null): void {
-    this._writtenValue = value ?? null;
-
-    const found = this.computeSelectableOptions(this.computeAllOptions()).find(
-      (opt) => opt.value === this._writtenValue
-    );
-    this.selectedOption.set(found ? { ...found } : undefined);
-
-    // write to wrapped input element — if the option isn't found yet (options may not be
-    // loaded), the input stays empty; _writtenValue is kept so onOptionsChanged re-applies it
-    const selected = this.selectedOption();
-    this.inputRef().nativeElement.value = selected ? selected.label || selected.value : '';
-
-    this.isFieldFilled.set(this.inputRef().nativeElement.value.length > 0);
-
-    // keep filter/list consistent with displayed value
-    this.setFilterText(this.inputRef().nativeElement.value);
-  }
-
-  // #endregion
-
   // #region FormidableField
 
-  get value(): string | null {
-    return this.selectedOption()?.value || null;
-  }
+  /** The picked option's value, or `null` for none. Free text is not a value. */
+  public readonly value = model<string | null>(null);
+
+  // Whatever the input shows counts — the filter being typed as much as a picked label.
+  protected override readonly isFieldFilled = computed(() => this.filterText().length > 0);
 
   get fieldRef(): ElementRef<HTMLElement> {
     return this.autocompleteRef() as ElementRef<HTMLElement>;
@@ -184,12 +173,12 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
 
   // #endregion
 
-  // #region FormidableAutocompleteField
-
-  public filterChange$ = this.filterChangeSubject$.asObservable();
+  // #region Autocomplete
 
   /** The filter text, so options can be fetched for it rather than filtered out of a list already bound. */
-  public readonly filterChanged = output<string>();
+  public readonly filterChange = output<string>();
+
+  private readonly filterText = signal('');
 
   /**
    * The filter text the field moved on its own, rather than the user typing it.
@@ -207,8 +196,9 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
    */
   private setFilterText(value: string): void {
     this.filterChangeSubject$.next(value);
+    this.filterText.set(value);
 
-    if (!this.isFieldFocused()) this.filterChanged.emit(value);
+    if (!this.isFieldFocused()) this.filterChange.emit(value);
   }
 
   // #endregion
@@ -225,7 +215,13 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
 
   protected readonly activeOptions = signal<FormidableOption[]>([]);
 
-  protected readonly selectedOption = signal<FormidableOption | undefined>(undefined);
+  // Every option the model could name, filtered or not, which the selection is looked up in.
+  private readonly allOptions = signal<FormidableOption[]>([]);
+
+  // The option the model names, if it has arrived.
+  protected readonly selectedOption = computed(() =>
+    this.computeSelectableOptions(this.allOptions()).find((option) => option.value === this.value())
+  );
 
   protected readonly hasSelectableOptions = computed(() =>
     this.activeOptions().some((option) => !this.isActionOption(option))
@@ -265,61 +261,28 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     };
 
     // commit selection + update displayed label, with the caret behind it
-    this.selectedOption.set(newOption);
     replaceText(this.inputRef().nativeElement, newOption.label!);
 
-    // emit value change
-    this.valueChangeSubject$.next(newOption.value);
-    this.valueChanged.emit(newOption.value);
-    this.isFieldFilled.set(newOption.value.length > 0);
-    this.commit(newOption.value); // notify ControlValueAccessor of the change
-    this.touch();
+    this.setValue(newOption.value);
+    this.touch.emit();
 
-    // simulate blur (field-state blur, not necessarily native blur)
-    this.focusChangeSubject$.next(false); // simulate blur on selection
-    this.focusChanged.emit(false);
-
-    // close panel
     this.togglePanel(false);
   }
 
-  private deselectOption(opts: { clearInput?: boolean } = {}): void {
+  private deselectOption(): void {
     // only do work if there actually was a selection
     if (!this.selectedOption()) return;
 
     this.setHighlightedIndex(-1);
-    this.selectedOption.set(undefined);
-    this._writtenValue = null; // clear pending value so it isn't re-applied when options change
-
-    if (opts.clearInput) {
-      this.inputRef().nativeElement.value = '';
-      this.setFilterText(''); // keeps filter + list consistent
-    }
-
-    this.valueChangeSubject$.next(null);
-    this.valueChanged.emit(null);
-    this.isFieldFilled.set(this.inputRef().nativeElement.value.length > 0);
-    this.commit(null);
-    this.touch();
+    this.setValue(null);
+    this.touch.emit();
   }
 
   protected onOptionsChanged(): void {
     const allOptions = this.computeAllOptions();
 
+    this.allOptions.set(allOptions);
     this.updateFilteredOptions(allOptions);
-
-    // Re-apply the written value only while the field has not managed to place it, which is the whole
-    // point of keeping it: the option it names had not arrived yet. Re-applying one already placed — or
-    // a `null` — rewrites the input from the model on every options refresh, and a fuzzy search refreshes
-    // on each keystroke, so what the user is typing is overwritten as they type it.
-    if (this._writtenValue !== null && !this.selectedOption()) {
-      this.writeValue(this._writtenValue);
-    }
-
-    // A changed options list is not the user, so the reconcile may correct the model but not touch.
-    this.runSilently('correction', () =>
-      this.reconcileSelectionAgainstOptions(this.computeSelectableOptions(allOptions))
-    );
 
     // keep highlight consistent if panel is open
     if (this.isPanelOpen()) {
@@ -362,16 +325,6 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
         this.actionOptionMode()
       )
     );
-  }
-
-  private reconcileSelectionAgainstOptions(allOptions: FormidableOption[]): void {
-    if (!this.selectedOption()) return;
-
-    const stillExists = allOptions.some((o) => o.value === this.selectedOption()!.value);
-    if (!stillExists) {
-      // selection is no longer valid
-      this.deselectOption({ clearInput: true });
-    }
   }
 
   // #endregion

@@ -85,6 +85,12 @@ export class FieldEditor {
     if (Number.isFinite(value)) this.set(key, value as PortalFieldSpec[typeof key]);
   }
 
+  // Blank is unset, which is what a field's own `undefined` means.
+  protected setLength(key: 'minLength' | 'maxLength', raw: string): void {
+    if (raw === '') this.set(key, undefined);
+    else this.setNumber(key, raw);
+  }
+
   protected setDecoration<K extends keyof PortalFieldDecoration>(key: K, value: PortalFieldDecoration[K]): void {
     const field = this.field();
     if (field) this.store.updateDecoration(field.id, { [key]: value } as Partial<PortalFieldDecoration>);

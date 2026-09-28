@@ -1,6 +1,6 @@
 import { Component, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { AutocompleteField } from './autocomplete-field/autocomplete-field';
 import { BaseField } from './base-field';
@@ -20,7 +20,16 @@ import { ToggleField } from './toggle-field/toggle-field';
  */
 
 @Component({
-  imports: [FormsModule, InputField, DropdownField, AutocompleteField, DateField, SliderField, ToggleField],
+  imports: [
+    FormsModule,
+    ReactiveFormsModule,
+    InputField,
+    DropdownField,
+    AutocompleteField,
+    DateField,
+    SliderField,
+    ToggleField
+  ],
   // Inside a `<form>`, like real usage.
   template: `
     <form>
@@ -47,11 +56,10 @@ import { ToggleField } from './toggle-field/toggle-field';
         name="slider"
         ngModel
         [autoFocus]="focused === 'slider'" />
+      <!-- A control disabled from the start reaches the field on its first pass, before it would focus. -->
       <formidable-toggle-field
-        name="toggle"
-        ngModel
-        [autoFocus]="focused === 'toggle'"
-        [disabled]="toggleDisabled" />
+        [formControl]="toggle"
+        [autoFocus]="focused === 'toggle'" />
     </form>
   `
 })
@@ -61,10 +69,9 @@ class FocusHost {
   readonly autocomplete = viewChild.required(AutocompleteField);
   readonly date = viewChild.required(DateField);
   readonly slider = viewChild.required(SliderField);
-  readonly toggle = viewChild.required(ToggleField);
 
   focused: string | null = null;
-  toggleDisabled = false;
+  readonly toggle = new FormControl(false);
   dateReadonly = false;
 }
 
@@ -140,7 +147,7 @@ describe('field focus', () => {
     fixture = TestBed.createComponent(FocusHost);
     host = fixture.componentInstance;
     host.focused = 'toggle';
-    host.toggleDisabled = true;
+    host.toggle.disable();
     await settle(fixture);
 
     expect(document.activeElement).toBe(document.body);

@@ -32,7 +32,7 @@ Every library spec is built on the harness in `lib/testing/`. `public-api.ts` do
 | :------------------------------ | :-------------------------------------------------------------------------------------------------------------------- |
 | `configureFormidableTestBed()`  | Zoneless change detection and ngx-mask, plus the spec's own metadata. Clears `theme()` overrides and the scroll first |
 | `settle(fixture, ms)`           | Awaits timers of up to `ms`, one frame, and the change detection they scheduled. Never calls `detectChanges()`        |
-| `bindField(kind, api)`          | A host binding one field through template-driven or reactive forms: its element, its control, `write()` and `set()`   |
+| `bindField(kind, api)`          | A host binding one field through any forms API: its model, touched, dirty and events; `write()`, `set()`, `state()`   |
 | `fill()`, `type()`, `press()`   | A whole value as a paste sets it, keystrokes at the live caret, a bubbling cancelable `keydown`                       |
 | `referenced()`                  | What an id-reference attribute such as `aria-describedby` resolves to                                                 |
 | `theme()`, `rem()`, `corners()` | A `:root` override, a rem length in px, the four resolved corner radii                                                |
@@ -64,7 +64,7 @@ The `helpers/` modules are pure functions and the highest-value, lowest-cost tar
 
 Behavior that carries real risk, tested through a minimal host — not the framework around it:
 
-- **ControlValueAccessor**: a field writes an external value and emits on user change.
+- **The Field Contract**: `field-contract.spec.ts` runs every field through all three forms APIs — model to display, edit to model, the touch, a pristine programmatic write, the forwarded state. A field-wide change proves itself there.
 - **NgxFormidableForm ↔ the validator**: `createAsyncValidator` debounces per the form's `debounceMs` and maps a validator's messages to Angular errors for one target. Specs drive it through a stub validator, so the library's own tests need no validation library.
 - **Directive attach behavior**: `NgxFormidableFieldValidate`/`NgxFormidableGroupValidate` attach to `[ngModel]`/`[ngModelGroup]` and **no-op outside a formidable form** (they inject `NgxFormidableForm` optionally) — a regression here breaks any consuming app.
 - **Keyboard navigation**: option/panel fields respond to the registered keys.

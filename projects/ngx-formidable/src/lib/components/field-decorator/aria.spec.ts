@@ -65,7 +65,7 @@ const options: FormidableOption[] = [
       <formidable-radio-group-field
         name="colour"
         [options]="options"
-        [markRequired]="markRequired()"
+        [required]="required()"
         [readonly]="readonly()"
         [disabled]="disabled()" />
       <div formidableFieldLabel>Favourite colour</div>
@@ -98,7 +98,7 @@ const options: FormidableOption[] = [
 })
 class NamedFieldsHost {
   options = options;
-  readonly markRequired = signal(false);
+  readonly required = signal(false);
   readonly readonly = signal(false);
   readonly disabled = signal(false);
   hasHint = true;
@@ -233,7 +233,7 @@ describe('field ARIA', () => {
     it('reports required only while the field is required', () => {
       expect(group().getAttribute('aria-required')).toBeNull();
 
-      fixture.componentInstance.markRequired.set(true);
+      fixture.componentInstance.required.set(true);
       fixture.detectChanges();
 
       expect(group().getAttribute('aria-required')).toBe('true');

@@ -1,16 +1,17 @@
 import {
+  afterRenderEffect,
   Component,
   computed,
   ElementRef,
-  forwardRef,
   input,
   linkedSignal,
+  model,
   OnDestroy,
   OnInit,
   signal,
+  untracked,
   viewChild
 } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { format, isEqual } from 'date-fns';
 import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import {
@@ -25,13 +26,7 @@ import {
 } from '../../../helpers/format.helpers';
 import { renderEmptyMask } from '../../../helpers/input.helpers';
 import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../../helpers/mask.helpers';
-import { onSignalChange } from '../../../helpers/utility.helpers';
-import {
-  FieldDecoratorLayout,
-  FORMIDABLE_FIELD,
-  FormidableEmptyHint,
-  FormidableTimeField
-} from '../../../models/formidable.model';
+import { FieldDecoratorLayout, FORMIDABLE_FIELD, FormidableEmptyHint } from '../../../models/formidable.model';
 import { BaseField } from '../base-field';
 
 /**
@@ -48,12 +43,6 @@ import { BaseField } from '../base-field';
   styleUrls: ['./time-field.scss'],
   imports: [NgxMaskDirective],
   providers: [
-    // required for ControlValueAccessor to work with Angular forms
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => TimeField),
-      multi: true
-    },
     // required to provide this component as FormidableField
     {
       provide: FORMIDABLE_FIELD,
@@ -61,7 +50,7 @@ import { BaseField } from '../base-field';
     }
   ]
 })
-export class TimeField extends BaseField<Date | null> implements FormidableTimeField, OnInit, OnDestroy {
+export class TimeField extends BaseField<Date | null> implements OnInit, OnDestroy {
   readonly timeRef = viewChild.required<ElementRef<HTMLDivElement>>('timeRef');
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
@@ -89,27 +78,20 @@ export class TimeField extends BaseField<Date | null> implements FormidableTimeF
   constructor() {
     super();
 
-    // Re-renders the current value in the new format.
-    onSignalChange(
-      () => this.unicodeTokenFormat(),
-      () => this.setTime(this.selectedTime)
-    );
+    // Renders the model, and renders it again in a changed format.
+    afterRenderEffect(() => {
+      const time = this.value();
+
+      this.tokenFormat();
+      untracked(() => this.render(time));
+    });
   }
 
-  // Typing commits on blur — a half-typed time is not a time — so value changes are handled in the
-  // selectTime method. Wiping the text is the exception: it commits at once, or the cleared time would stay
-  // the model's and `stepSegment` would keep stepping from it.
-  protected override onValueChange(): void {
-    if (this.selectedTime && this.isInputCleared) {
-      this.setTime(null);
-      return;
-    }
-
-    this.isFieldFilled.set(!!this.value);
-  }
-
-  protected doOnValueChange(): void {
-    // No additional actions needed
+  // Typing commits on blur — a half-typed time is not a time — so the value is committed through
+  // `selectTime`. Wiping the text is the exception: it commits at once, or the cleared time would stay the
+  // model's and `stepSegment` would keep stepping from it.
+  protected onInput(): void {
+    if (this.value() && this.isInputCleared) this.setTime(null);
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
@@ -118,7 +100,7 @@ export class TimeField extends BaseField<Date | null> implements FormidableTimeF
 
     // hand the empty display over to ngxMask while focused (see renderEmpty)
     if (isFocused) {
-      if (this.selectedTime == null) this.renderEmpty();
+      if (this.value() == null) this.renderEmpty();
       this.selectOnKeyboardFocus(this.inputRef().nativeElement, true);
       return;
     }
@@ -144,14 +126,14 @@ export class TimeField extends BaseField<Date | null> implements FormidableTimeF
   // Steps the time part under the caret by one, and leaves that part selected so repeated arrows keep to
   // it — and so the next digit typed replaces it.
   //
-  // The input text is what gets stepped, not `selectedTime`: it also carries what was typed but not yet
+  // The input text is what gets stepped, not the model: it also carries what was typed but not yet
   // committed. An empty field is seeded with midnight, so arrows alone can fill it.
   private stepSegment(direction: 1 | -1): void {
     const input = this.inputRef().nativeElement;
     const segment = findSegmentAtCaret(this.tokenFormat(), input.selectionStart ?? 0);
     if (!segment) return;
 
-    const base = this.onParse(input.value, this.tokenFormat()) ?? this.selectedTime ?? new Date(1970, 0, 1);
+    const base = this.onParse(input.value, this.tokenFormat()) ?? this.value() ?? new Date(1970, 0, 1);
 
     this.setTime(normalizeDatePart(stepDateTimeUnit(base, segment.unit, direction)));
 
@@ -159,18 +141,14 @@ export class TimeField extends BaseField<Date | null> implements FormidableTimeF
     setTimeout(() => input.setSelectionRange(segment.start, segment.end));
   }
 
-  // #region ControlValueAccessor
-
-  protected doWriteValue(value: Date | null): void {
-    this.trySetTimeFromInput(value);
-  }
-
-  // #endregion
-
   // #region FormidableField
 
-  get value(): Date | null {
-    return this.selectedTime || null;
+  /** The picked time, on 1970-01-01 once the user picked it, or `null` for none. */
+  public readonly value = model<Date | null>(null);
+
+  // A pick builds a new `Date`, so the same time of day is the same value.
+  protected override isSameValue(a: Date | null, b: Date | null): boolean {
+    return a === b || (!!a && !!b && isEqual(normalizeDatePart(a), normalizeDatePart(b)));
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
@@ -185,7 +163,7 @@ export class TimeField extends BaseField<Date | null> implements FormidableTimeF
 
   // #endregion
 
-  // #region FormidableTimeField
+  // #region Time Field
 
   /**
    * A Unicode time format (`H`, `h`, `m`, `s`, `a` tokens). Decides the mask, the display, and which segment
@@ -239,22 +217,12 @@ export class TimeField extends BaseField<Date | null> implements FormidableTimeF
     renderEmptyMask(this.inputRef().nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused());
   }
 
-  private selectedTime: Date | null = null;
-
+  /** Commits a time as the user's pick, as the arrow keys do. The same time of day is no change. */
   public selectTime(time: Date | null): void {
-    // only trigger value changes if there are changes
-    // (panel could close without date change)
-    if (this.selectedTime === null && time === null) return;
-    if (this.selectedTime === undefined && time === undefined) return;
-    if (this.selectedTime && time && isEqual(normalizeDatePart(this.selectedTime), normalizeDatePart(time))) return;
+    if (this.isSameValue(this.value(), time)) return;
 
-    this.selectedTime = time ? normalizeDatePart(time) : null;
-
-    this.valueChangeSubject$.next(this.selectedTime);
-    this.valueChanged.emit(this.selectedTime);
-    this.isFieldFilled.set(!!this.selectedTime);
-    this.commit(this.selectedTime); // notify ControlValueAccessor of the change
-    this.touch();
+    this.setValue(time ? normalizeDatePart(time) : null);
+    this.touch.emit();
   }
 
   // #endregion
@@ -297,20 +265,25 @@ export class TimeField extends BaseField<Date | null> implements FormidableTimeF
     this.setTime(null);
   }
 
+  // Commits what the user typed or stepped to, and renders the model again even where that is no change:
+  // text that parsed to nothing, or to the time already held, still has to give way to the model.
   private setTime(time: Date | null): void {
     this.selectTime(time);
+    this.render(this.value());
+  }
 
+  private render(time: Date | null): void {
     // Waits for the ngxMask directive to initialize on the input, which it does across a full task —
     // a microtask would land before it. `stepSegment` restores the caret from a timer queued behind
     // this one, so this must stay a macrotask.
     setTimeout(() => {
       // ngxMask leaves an empty input untouched, so render the empty state ourselves
-      if (this.selectedTime == null) {
+      if (time == null) {
         this.renderEmpty();
         return;
       }
 
-      const formatted = format(this.selectedTime, this.tokenFormat());
+      const formatted = format(time, this.tokenFormat());
       const inputRef = this.inputRef();
       if (inputRef.nativeElement.value !== formatted) inputRef.nativeElement.value = formatted;
     });

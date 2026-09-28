@@ -5,12 +5,12 @@
   [tabindex]="disabled() ? -1 : 0"
   [class.is-readonly]="readonly()"
   [class.is-disabled]="disabled()"
-  [attr.aria-valuenow]="value"
+  [attr.aria-valuenow]="value()"
   [attr.aria-valuemin]="min()"
   [attr.aria-valuemax]="max()"
   [attr.aria-labelledby]="labelledBy"
   [attr.aria-describedby]="describedBy"
-  [attr.aria-required]="markRequired() || null"
+  [attr.aria-required]="required() || null"
   [attr.aria-invalid]="isInvalid || null"
   [attr.aria-readonly]="readonly() || null"
   [attr.aria-disabled]="disabled() || null"
@@ -21,20 +21,20 @@
     tabindex="-1"
     class="counter-button"
     aria-hidden="true"
-    [disabled]="readonly() || disabled() || value <= min()"
+    [disabled]="readonly() || disabled() || value() <= min()"
     (pointerdown)="onButtonPointerDown($event)"
     (click)="decrement()">
     &minus;
   </button>
 
-  <span class="counter-value">{{ value }}</span>
+  <span class="counter-value">{{ value() }}</span>
 
   <button
     type="button"
     tabindex="-1"
     class="counter-button"
     aria-hidden="true"
-    [disabled]="readonly() || disabled() || value >= max()"
+    [disabled]="readonly() || disabled() || value() >= max()"
     (pointerdown)="onButtonPointerDown($event)"
     (click)="increment()">
     +

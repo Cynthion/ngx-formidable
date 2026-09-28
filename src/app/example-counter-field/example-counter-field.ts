@@ -1,5 +1,4 @@
-import { Component, ElementRef, forwardRef, input, signal, viewChild } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, ElementRef, input, model, signal, viewChild } from '@angular/core';
 import { BaseField, FieldDecoratorLayout, FORMIDABLE_FIELD, FormidableField } from '@cynthion/ngx-formidable';
 
 /**
@@ -13,12 +12,6 @@ import { BaseField, FieldDecoratorLayout, FORMIDABLE_FIELD, FormidableField } fr
   templateUrl: './example-counter-field.html',
   styleUrls: ['./example-counter-field.scss'],
   providers: [
-    // required for ControlValueAccessor to work with Angular forms
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => ExampleCounterField),
-      multi: true
-    },
     // required to provide this component as FormidableField
     {
       provide: FORMIDABLE_FIELD,
@@ -34,20 +27,17 @@ export class ExampleCounterField extends BaseField<number> implements Formidable
   protected windowResizeScrollCallback = null;
   protected registeredKeys = ['ArrowUp', 'ArrowDown'];
 
-  /** Lowest value the counter steps to. */
-  public readonly min = input(0);
+  /** Lowest value the counter steps to. `[formField]` writes it from a `min()` rule. */
+  public readonly min = input(0, { transform: (min: number | undefined) => min ?? 0 });
 
-  /** Highest value the counter steps to. */
-  public readonly max = input(10);
+  /** Highest value the counter steps to. `[formField]` writes it from a `max()` rule. */
+  public readonly max = input(10, { transform: (max: number | undefined) => max ?? 10 });
 
   /** How much one step moves the value. */
   public readonly step = input(1);
 
-  private readonly _value = signal(0);
-
-  protected doOnValueChange(): void {
-    // No additional actions needed
-  }
+  /** The count. Every forms API binds it two-way; the counter writes it back only for a step of the user's. */
+  public readonly value = model(0);
 
   protected doOnFocusChange(_isFocused: boolean): void {
     // No additional actions needed
@@ -65,19 +55,7 @@ export class ExampleCounterField extends BaseField<number> implements Formidable
     }
   }
 
-  // #region ControlValueAccessor
-
-  protected doWriteValue(value: number): void {
-    this._value.set(this.clamp(typeof value === 'number' && !Number.isNaN(value) ? value : this.min()));
-  }
-
-  // #endregion
-
   // #region FormidableField
-
-  get value(): number {
-    return this._value();
-  }
 
   get fieldRef(): ElementRef<HTMLElement> {
     return this.counterRef() as ElementRef<HTMLElement>;
@@ -92,12 +70,12 @@ export class ExampleCounterField extends BaseField<number> implements Formidable
 
   /** Steps the value up by `step`, stopping at `max`. No-op while readonly or disabled. */
   public increment(): void {
-    this.setValue(this._value() + this.step());
+    this.stepBy(this.step());
   }
 
   /** Steps the value down by `step`, stopping at `min`. No-op while readonly or disabled. */
   public decrement(): void {
-    this.setValue(this._value() - this.step());
+    this.stepBy(-this.step());
   }
 
   protected onButtonPointerDown(event: PointerEvent): void {
@@ -106,11 +84,11 @@ export class ExampleCounterField extends BaseField<number> implements Formidable
     this.focus();
   }
 
-  private setValue(next: number): void {
+  private stepBy(by: number): void {
     if (this.readonly() || this.disabled()) return;
 
-    this._value.set(this.clamp(next));
-    this.onValueChange(); // emits, and reports the value to the bound control
+    // `setValue` reports nothing for a step that changes nothing — one pressed at `min` or `max`.
+    this.setValue(this.clamp(this.value() + by));
   }
 
   private clamp(value: number): number {

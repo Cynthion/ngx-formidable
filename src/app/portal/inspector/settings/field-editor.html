@@ -301,8 +301,8 @@
       type="number"
       class="pc-input"
       [id]="'fe-min-length-' + f.id"
-      [value]="f.minLength ?? -1"
-      (change)="setNumber('minLength', $any($event.target).value)" />
+      [value]="f.minLength ?? ''"
+      (change)="setLength('minLength', $any($event.target).value)" />
   </div>
   <div class="pc-field">
     <label
@@ -314,8 +314,8 @@
       type="number"
       class="pc-input"
       [id]="'fe-max-length-' + f.id"
-      [value]="f.maxLength ?? -1"
-      (change)="setNumber('maxLength', $any($event.target).value)" />
+      [value]="f.maxLength ?? ''"
+      (change)="setLength('maxLength', $any($event.target).value)" />
   </div>
 </div>
 } @if (f.kind === 'textarea') {
