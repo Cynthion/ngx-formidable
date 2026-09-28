@@ -7,8 +7,7 @@ const ORDER: readonly (keyof FormidableDefaults)[] = [
   'suffixAlign',
   'panelPosition',
   'revealOn',
-  'hideRequiredMarkers',
-  'debounceMs'
+  'hideRequiredMarkers'
 ];
 
 /**

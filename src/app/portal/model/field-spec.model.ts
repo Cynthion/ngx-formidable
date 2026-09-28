@@ -61,7 +61,6 @@ export const PANEL_POSITION_LABELS: Readonly<Record<FormidablePanelPosition, str
 export const REVEAL_LABELS: Readonly<Record<FormidableReveal, string>> = {
   touched: 'Touched',
   dirty: 'Dirty',
-  submitted: 'Submitted',
   always: 'Always'
 };
 
@@ -74,8 +73,7 @@ export const LIBRARY_DEFAULTS = {
   prefixAlign: 'center',
   suffixAlign: 'center',
   revealOn: 'touched',
-  hideRequiredMarkers: false,
-  debounceMs: 0
+  hideRequiredMarkers: false
 } as const satisfies Omit<Required<FormidableDefaults>, 'panelPosition'>;
 
 /** Display names for the adornment slots, exhaustive over `PortalSlotContent` for the same reason. */

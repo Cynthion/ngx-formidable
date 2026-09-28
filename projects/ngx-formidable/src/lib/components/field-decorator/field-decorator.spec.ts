@@ -2,7 +2,6 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
-import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
 import { StubValidator } from '../../forms/testing/stub-validator.directive';
 import { FieldLabel } from '../../directives/field-label';
 import { FieldPrefix } from '../../directives/field-prefix';
@@ -11,7 +10,6 @@ import { NgxFormidableForm } from '../../forms/form.directive';
 import { FieldAdornmentAlignment, FieldLabelPosition } from '../../models/formidable.model';
 import { rem } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
-import { FieldErrors } from '../field-errors/field-errors';
 import { AutocompleteField } from '../fields/autocomplete-field/autocomplete-field';
 import { DateField } from '../fields/date-field/date-field';
 import { DropdownField } from '../fields/dropdown-field/dropdown-field';
@@ -27,8 +25,8 @@ import { FieldDecorator } from './field-decorator';
  *
  * These two are coupled, which is the whole reason this file exists. `.container-horizontal` is the
  * positioning context for the label and for the prefix/suffix, so it has to be exactly the field's box.
- * `FieldErrorsRenderer` used to insert its component beside the field — which content projection put
- * *inside* that container — inflating it by a reserved error line and dragging the prefix down with it.
+ * The errors component used to render beside the field — which content projection put *inside* that
+ * container — inflating it by a reserved error line and dragging the prefix down with it.
  *
  * The prefix is centered in the field's own box and is deliberately independent of the label: an inside
  * label pushes the value down while the prefix stays put. A `textarea` is the exception, top-aligning its
@@ -42,16 +40,7 @@ interface Model {
 const shape = { field: '' };
 
 @Component({
-  imports: [
-    FormsModule,
-    NgxFormidableForm,
-    StubValidator,
-    FieldDecorator,
-    InputField,
-    FieldErrorsRenderer,
-    FieldPrefix,
-    FieldSuffix
-  ],
+  imports: [FormsModule, NgxFormidableForm, StubValidator, FieldDecorator, InputField, FieldPrefix, FieldSuffix],
   template: `
     <form
       formidableForm
@@ -60,7 +49,6 @@ const shape = { field: '' };
       [stubValidator]="required">
       <formidable-field-decorator>
         <formidable-input-field
-          formidableFieldErrors
           name="field"
           [ngModel]="model.field" />
         <div formidableFieldPrefix>Prefix</div>
@@ -70,28 +58,6 @@ const shape = { field: '' };
   `
 })
 class PrefixWithErrorsHost {
-  model: Model = {};
-  shape = shape;
-  required = { field: 'Required.' };
-}
-
-/** The same field with no decorator around it — the shape a consumer's custom field uses. */
-@Component({
-  imports: [FormsModule, NgxFormidableForm, StubValidator, InputField, FieldErrorsRenderer],
-  template: `
-    <form
-      formidableForm
-      [formValue]="model"
-      [formShape]="shape"
-      [stubValidator]="required">
-      <formidable-input-field
-        formidableFieldErrors
-        name="field"
-        [ngModel]="model.field" />
-    </form>
-  `
-})
-class NoDecoratorHost {
   model: Model = {};
   shape = shape;
   required = { field: 'Required.' };
@@ -292,41 +258,21 @@ describe('formidable-field-decorator layout', () => {
       expect(errors.getBoundingClientRect().height).toBe(0);
     });
 
-    // Angular's own form state is not signal-backed, so the component only re-reads the control when the
-    // directive pumps `refresh()`. Rendering it from the decorator's view rather than beside the field must
-    // leave both halves working: it still reads the field's control, and a pump still repaints it.
+    // The field's messages render in the decorator's own view, below the container, not inside it.
     it('shows the messages once the control is touched and invalid', async () => {
       // The first render's model write and validation are still queued, and would overwrite the errors below.
       await settle(fixture);
 
-      const errors = fixture.debugElement.query(By.directive(FieldErrors));
       const control = fixture.debugElement.query(By.css('formidable-input-field')).injector.get(NgModel).control;
 
-      expect(errors).toBeTruthy();
-      expect((errors.componentInstance as FieldErrors).control).toBe(control);
-
       control.markAsTouched();
-      control.setErrors({ errors: ['Required.'] });
-      (errors.componentInstance as FieldErrors).refresh();
+      control.setErrors({ 'Required.': true });
       await settle(fixture);
 
       const messages = Array.from(root.querySelectorAll('.error')).map((e) => e.textContent?.trim());
 
       expect(messages).toEqual(['Required.']);
     });
-  });
-
-  // A field can carry `formidableFieldErrors` with no decorator at all — consumers do this for custom
-  // fields, so the directive has to keep rendering the component itself in that case.
-  it('renders the errors beside the control when there is no decorator', () => {
-    const fixture = TestBed.createComponent(NoDecoratorHost);
-    fixture.detectChanges();
-
-    const root = fixture.nativeElement as HTMLElement;
-    const errors = root.querySelector('formidable-field-errors');
-
-    expect(errors).toBeTruthy();
-    expect(errors!.previousElementSibling?.tagName.toLowerCase()).toBe('formidable-input-field');
   });
 
   // A textarea grows as you type, so centering would drift the prefix downwards. It sits on the first

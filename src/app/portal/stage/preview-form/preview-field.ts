@@ -6,7 +6,6 @@ import {
   DateField,
   DropdownField,
   FieldDecorator,
-  FieldErrorsRenderer,
   FieldHint,
   FieldLabelAdornment,
   FieldLabel,
@@ -66,7 +65,6 @@ const FORMATTERS: Readonly<Record<string, (value: number) => string>> = {
   imports: [
     FormsModule,
     FieldDecorator,
-    FieldErrorsRenderer,
     FieldHint,
     FieldLabelAdornment,
     FieldLabel,

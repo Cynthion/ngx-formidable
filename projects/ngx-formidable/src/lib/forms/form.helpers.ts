@@ -1,5 +1,5 @@
-import { AbstractControl, FormArray, FormGroup } from '@angular/forms';
-import { FormidableErrorExtractorFn, FormidableFormErrors, WHOLE_FORM } from '../models/validation.model';
+import { AbstractControl, FormArray, FormGroup, ValidationErrors } from '@angular/forms';
+import { FormidableFormErrors, WHOLE_FORM } from '../models/validation.model';
 
 /**
  * Merges a forms values and raw values.
@@ -39,13 +39,10 @@ export function fillMissing<T>(target: T, source: any): T {
 /**
  * Traverses a form's controls and returns every error message, keyed by the target that reported it.
  *
- * Each entry is normalised through `extractErrors`, so a form mixing the provided validator with Angular's
- * own ends up with one homogeneous map instead of message arrays next to raw `true`s and option objects.
+ * A message is an error's key — the validator's text, which the form directive writes one error per
+ * message under, or Angular's own `required` — so the map holds one shape whichever validator wrote it.
  */
-export function getAllFormErrors(
-  form: AbstractControl | undefined,
-  extractErrors: FormidableErrorExtractorFn
-): FormidableFormErrors {
+export function getAllFormErrors(form: AbstractControl | undefined): FormidableFormErrors {
   const errors: FormidableFormErrors = {};
 
   if (!form) {
@@ -54,7 +51,7 @@ export function getAllFormErrors(
 
   collect(form, '');
 
-  const wholeFormMessages = extractErrors(form.errors);
+  const wholeFormMessages = messagesOf(form.errors);
 
   if (wholeFormMessages.length) {
     errors[WHOLE_FORM] = wholeFormMessages;
@@ -65,7 +62,7 @@ export function getAllFormErrors(
   function collect(control: AbstractControl, path: string): void {
     // The root's own errors are the whole-form ones, added above under `WHOLE_FORM` rather than under `''`.
     if (path && control.errors && control.enabled) {
-      const messages = extractErrors(control.errors);
+      const messages = messagesOf(control.errors);
 
       if (messages.length) {
         errors[path] = messages;
@@ -82,6 +79,10 @@ export function getAllFormErrors(
       });
     }
   }
+}
+
+function messagesOf(errors: ValidationErrors | null): string[] {
+  return errors ? Object.keys(errors) : [];
 }
 
 /**

@@ -80,7 +80,7 @@ describe('validation without a bound model', () => {
   it('validates while the model is still null', async () => {
     await mount(AsyncModelHost);
 
-    expect(control()?.errors?.['errors']).toEqual(['Required']);
+    expect(control()?.errors).toEqual({ Required: true });
     expect(control()?.valid).toBe(false);
   });
 
@@ -90,13 +90,13 @@ describe('validation without a bound model', () => {
     (fixture.componentInstance as AsyncModelHost).model.set({ name: '' });
     await validated();
 
-    expect(control()?.errors?.['errors']).toEqual(['Required']);
+    expect(control()?.errors).toEqual({ Required: true });
   });
 
   it('validates a form that never binds a model, against its control values', async () => {
     await mount(NoModelHost);
 
-    expect(control()?.errors?.['errors']).toEqual(['Required']);
+    expect(control()?.errors).toEqual({ Required: true });
 
     (fixture.componentInstance as NoModelHost).name.set('filled');
     await validated();

@@ -118,7 +118,7 @@ import { NgxFormidableModule } from '@cynthion/ngx-formidable';
 export class AppModule {}
 ```
 
-Both take an optional config, including app-wide `defaults` for what every template would otherwise repeat: the label position, the adornment alignment, the panel position and the form's reveal, required-marker and debounce settings. See [Getting Started](https://cynthion.github.io/ngx-formidable/#/docs/getting-started).
+Both take an optional config, including app-wide `defaults` for what every template would otherwise repeat: the label position, the adornment alignment, the panel position, and the reveal and required-marker settings. See [Getting Started](https://cynthion.github.io/ngx-formidable/#/docs/getting-started).
 
 Then the stylesheet, which is imported separately because it is a stylesheet and not a provider:
 
@@ -175,7 +175,6 @@ Then the template:
   (ngSubmit)="onSubmit()">
   <formidable-field-decorator>
     <formidable-input-field
-      formidableFieldErrors
       name="name"
       required
       [ngModel]="(formValue$ | async)?.name" />
@@ -185,7 +184,6 @@ Then the template:
 
   <formidable-field-decorator>
     <formidable-date-field
-      formidableFieldErrors
       name="birthdate"
       [unicodeTokenFormat]="'dd.MM.yyyy'"
       [ngModel]="(formValue$ | async)?.birthdate" />
@@ -225,11 +223,11 @@ Full API — every input, output, type and token — in the [Component Catalogue
 |                   | `<formidable-field-option>`         | —                 |
 |                   | `<formidable-field-errors>`         | —                 |
 
-| Category             | Directive                                                                                                                                                                              |
-| :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Form-Level**       | `formidableForm`, `formidableValidateWholeForm`, plus the two that attach themselves to `ngModel` and `ngModelGroup`                                                                   |
-| **Decoration**       | `formidableFieldLabel`, `formidableFieldLabelAdornment`, `formidableFieldPrefix`, `formidableFieldSuffix`, `formidableFieldHint`, `formidableFieldErrors`, `formidableFieldToggleIcon` |
-| **Vest Entry Point** | `formSuite`, from `@cynthion/ngx-formidable/vest`                                                                                                                                      |
+| Category             | Directive                                                                                                                                                     |
+| :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Form-Level**       | `formidableForm`, `formidableValidateWholeForm`, plus the two that attach themselves to `ngModel` and `ngModelGroup`                                          |
+| **Decoration**       | `formidableFieldLabel`, `formidableFieldLabelAdornment`, `formidableFieldPrefix`, `formidableFieldSuffix`, `formidableFieldHint`, `formidableFieldToggleIcon` |
+| **Vest Entry Point** | `formSuite`, from `@cynthion/ngx-formidable/vest`                                                                                                             |
 
 ## Documentation
 

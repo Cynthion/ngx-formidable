@@ -71,24 +71,6 @@
 </div>
 }
 
-<div class="pc-field">
-  <label
-    for="ad-debounceMs"
-    class="pc-label">
-    <span class="pc-label-name">Debounce (ms)</span>
-  </label>
-  <input
-    type="number"
-    min="0"
-    step="50"
-    id="ad-debounceMs"
-    class="pc-input"
-    [placeholder]="'Library Default (' + libraryDebounceMs + ')'"
-    [value]="defaults().debounceMs ?? ''"
-    (change)="setDebounce($any($event.target).value)" />
-  <p class="pc-help">How long a form waits after a change before it validates. Empty is the library's own.</p>
-</div>
-
 <h3 class="pc-group-title">Take It Away</h3>
 
 <div class="pc-buttons">

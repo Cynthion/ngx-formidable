@@ -106,7 +106,6 @@ Found by the architecture review and the test harness. Each is fixed in the phas
 | D1  | `dropdown-field` reverts a user's pick when its option list changes                                                                               |  21   |
 | D2  | Option fields disagree about a value with no option: `select-field` blanks only its display, the others correct the model                         |  21   |
 | D4  | `toggle-field`'s `offLabel` does not fall back to `onLabel` as documented                                                                         |  25   |
-| D5  | A field's `revealOn` changed after the first render has no effect                                                                                 |  20   |
 | D6  | A readonly `slider-field` still moves its thumb on the arrow keys                                                                                 |  25   |
 | D7  | An invalid `unicodeTokenFormat` is caught on init only, and changing it later drops the fallback                                                  |  24   |
 | D8  | Pikaday commits typed text through its own `change` listener, bypassing `ignoresBlur` — not yet confirmed in a browser                            |  24   |
@@ -120,21 +119,9 @@ Found by the architecture review and the test harness. Each is fixed in the phas
 
 ## Library Phases
 
-### Phase 20 — Error Display From Field State
-
-**Depends On**: nothing.
-
-- **Field State**: the `FormUiControl` inputs `errors`, `invalid`, `pending`, `touched` and `dirty`, and a `revealOn` input defaulting through `FORMIDABLE_DEFAULTS`. `showErrors` also drives the field's own `aria-invalid`, and the last messages stay on screen while `pending`.
-- **Decorator**: renders the projected field's messages in its slot and carries `.is-invalid`. The required marker follows the field's `required`; `hideRequiredMarkers` stays a default.
-- **Field Errors**: presentational. It takes `errors` and renders each through `FORMIDABLE_ERROR_MESSAGE` in its `aria-live` region.
-- **Deleted**: `FieldErrorsRenderer`, `registerErrors`, the repaint pump, `FORMIDABLE_ERROR_EXTRACTOR`, `FORMIDABLE_ERROR_TRANSLATOR`, `revealOn: 'submitted'` and the `debounceMs` default.
-- **Interim**: the template-driven harness still serves the portal, so it writes one error per message, and the portal renders its group errors with `formidable-field-errors`.
-- **Proof**: a reveal spec over the three modes and the three APIs, a message-token spec, and the marker in each API — Signal Forms' `required()`, reactive `Validators.required`, the template-driven `required` attribute.
-- **Closes**: D5.
-
 ### Phase 21 — Option Fields
 
-**Depends On**: Phase 20.
+**Depends On**: nothing.
 
 - **Two Layers**: the option base splits into a list layer — the option inputs, the projected options, one `computeAllOptions` — and a highlight layer. `select-field` takes the list layer only.
 - **One Rule For An Unknown Value**: all five option fields render it as no selection, leave the model alone, and show it again once its option arrives.
@@ -153,7 +140,7 @@ Found by the architecture review and the test harness. Each is fixed in the phas
 
 ### Phase 23 — Text Fields
 
-**Depends On**: Phase 20.
+**Depends On**: nothing.
 
 - **One Masked Editor**: `input-field` and `textarea-field` share their mask handling — a `computed` mask configuration, one template reference, no first-pass bookkeeping.
 - **Render Hooks**: the textarea's autosize and length-indicator timers move to `afterNextRender`.

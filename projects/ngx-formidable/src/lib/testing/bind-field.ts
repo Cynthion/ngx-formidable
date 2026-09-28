@@ -1,7 +1,15 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AbstractControl, FormControl, FormsModule, NgModel, ReactiveFormsModule, Validators } from '@angular/forms';
-import { disabled, form, FormField, readonly, required } from '@angular/forms/signals';
+import {
+  AbstractControl,
+  FormControl,
+  FormsModule,
+  NgModel,
+  ReactiveFormsModule,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
+import { disabled, form, FormField, readonly, required, validate } from '@angular/forms/signals';
 import { By } from '@angular/platform-browser';
 import { FieldDecorator } from '../components/field-decorator/field-decorator';
 import { FieldOption } from '../components/field-option/field-option';
@@ -59,6 +67,8 @@ export interface FieldFlags {
   disabled: boolean;
   readonly: boolean;
   required: boolean;
+  /** A rule of the API's reports one error of kind `invalid`, which renders as the message `invalid`. */
+  invalid: boolean;
 }
 
 export interface BoundField {
@@ -75,9 +85,12 @@ export interface BoundField {
   write(value: unknown): Promise<void>;
   /** Changes one of `BindFieldOptions.inputs`, as a parent binding does, then settles. */
   set(input: string, value: unknown): Promise<void>;
+  /** Marks the field touched through the forms API rather than by a blur, as a submit does, then settles. */
+  markAsTouched(): Promise<void>;
   /**
-   * Changes the field's state as each API's consumer does, then settles: a Signal Forms rule; `disable()`
-   * and `Validators.required` on the control; a `[readonly]` binding, and a `[required]` one under `ngModel`.
+   * Changes the field's state as each API's consumer does, then settles: a Signal Forms rule; `disable()`,
+   * `Validators.required` and a validator of its own on the control; a `[readonly]` binding, and a
+   * `[required]` one under `ngModel`.
    */
   state(flags: Partial<FieldFlags>): Promise<void>;
 }
@@ -103,15 +116,19 @@ const FIELDS = [
 class FieldHost {
   readonly model = signal<unknown>(null);
   readonly inputs = signal<Record<string, unknown>>({});
-  readonly flags = signal<FieldFlags>({ disabled: false, readonly: false, required: false });
+  readonly flags = signal<FieldFlags>({ disabled: false, readonly: false, required: false, invalid: false });
   readonly events: FieldEvent[] = [];
   control = new FormControl<unknown>(null);
+
+  /** The classic APIs' rule behind `FieldFlags.invalid`. */
+  readonly invalid: ValidatorFn = () => (this.flags().invalid ? { invalid: true } : null);
 
   readonly signalModel = signal<{ field: ModelValue }>({ field: null });
   readonly form = form(this.signalModel, (path) => {
     disabled(path.field, () => this.flags().disabled);
     readonly(path.field, () => this.flags().readonly);
     required(path.field, { when: () => this.flags().required });
+    validate(path.field, () => (this.flags().invalid ? { kind: 'invalid' } : null));
   });
 }
 
@@ -143,7 +160,7 @@ export async function bindField(kind: FieldKind, api: FormsApi, options: BindFie
   host.model.set(value);
   host.signalModel.set({ field: value as ModelValue });
   host.inputs.set(inputs);
-  host.control = new FormControl<unknown>(value, { updateOn });
+  host.control = new FormControl<unknown>(value, { updateOn, validators: host.invalid });
 
   await settle(fixture);
 
@@ -153,6 +170,9 @@ export async function bindField(kind: FieldKind, api: FormsApi, options: BindFie
       : api === 'reactive'
         ? host.control
         : null;
+
+  // `ngModel` attaches no directive validator to a custom control, so its rule goes on imperatively.
+  if (api === 'template-driven') control!.addValidators(host.invalid);
   const state = () => host.form.field();
 
   return {
@@ -174,6 +194,12 @@ export async function bindField(kind: FieldKind, api: FormsApi, options: BindFie
 
       await settle(fixture);
     },
+    async markAsTouched(): Promise<void> {
+      if (control) control.markAsTouched();
+      else state().markAsTouched();
+
+      await settle(fixture);
+    },
     async state(flags: Partial<FieldFlags>): Promise<void> {
       host.flags.update((current) => ({ ...current, ...flags }));
 
@@ -183,9 +209,11 @@ export async function bindField(kind: FieldKind, api: FormsApi, options: BindFie
       }
 
       if (api === 'reactive' && flags.required !== undefined) {
-        control!.setValidators(flags.required ? Validators.required : null);
-        control!.updateValueAndValidity();
+        if (flags.required) control!.addValidators(Validators.required);
+        else control!.removeValidators(Validators.required);
       }
+
+      if (control && (flags.required !== undefined || flags.invalid !== undefined)) control.updateValueAndValidity();
 
       await settle(fixture);
     }

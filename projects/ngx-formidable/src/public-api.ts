@@ -19,7 +19,6 @@ export * from './lib/components/fields/textarea-field/textarea-field';
 export * from './lib/components/fields/time-field/time-field';
 export * from './lib/components/fields/toggle-field/toggle-field';
 
-export * from './lib/directives/field-errors-renderer';
 export * from './lib/directives/field-hint';
 export * from './lib/directives/field-label-adornment';
 export * from './lib/directives/field-label';

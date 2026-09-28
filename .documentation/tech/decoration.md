@@ -6,39 +6,35 @@ How a field, the decorator around it and its error messages are wired together. 
 
 ## The Three Parties
 
-| Party                 | Owns                                                                                    |
-| :-------------------- | :-------------------------------------------------------------------------------------- |
-| `FieldDecorator`      | The label, its adornment, the prefix and suffix wrappers, the hint row, the errors slot |
-| The field             | Its own box, its value, its panel, and the ARIA ids for what lives inside that box      |
-| `FieldErrorsRenderer` | Creating the errors component, registering it, and pumping both repaints                |
+| Party            | Owns                                                                                    |
+| :--------------- | :-------------------------------------------------------------------------------------- |
+| `FieldDecorator` | The label, its adornment, the prefix and suffix wrappers, the hint row, the errors slot |
+| The field        | Its own box, its value, its panel, and the ARIA ids for what lives inside that box      |
+| `FieldErrors`    | The message list and its live region — what to render, never when                       |
 
-None of them injects the others as a hard dependency. A field used without a decorator works; the decorator without a field renders empty; the errors directive without either renders beside its host control.
+None of them injects the others as a hard dependency. A field used without a decorator works; the decorator without a field renders empty; `FieldErrors` without either renders what it is given.
 
 ---
 
 ## The Slot
 
-`errorsSlot` is a `ViewContainerRef` inside the decorator's template, below the container that positions the label and the adornments. `FieldErrorsRenderer` creates its component into that slot, so the messages land below the field rather than inside the box whose geometry the label depends on. Without a decorator it falls back to its own `ViewContainerRef`, rendering beside the host control.
+The decorator renders a `formidable-field-errors` below the container that positions the label and the adornments, bound to the field's `shownErrors`, so the messages land below the field rather than inside the box whose geometry the label depends on. It renders whether or not there is a message, so its `aria-live="polite"` region exists before the first one arrives and is announced without stealing focus.
 
-**The query is readable whatever the hook order.** The directive reads `errorsSlot` from its own `ngAfterViewInit`, which may run before or after the decorator's. A signal query is a `computed` over the view's own query data, materialized on read and bound during the view's **creation** pass — so it resolves from `ngOnInit` onward, exactly as the `static: true` query it replaced did, and needs no flag to say so.
+## The Invalid State
 
-The component is created with the **directive's** injector, not the slot's. Only the DOM anchor moves; `FORMIDABLE_ERROR_EXTRACTOR` and `FORMIDABLE_ERROR_TRANSLATOR` resolve the same either way.
-
-The slot is an `aria-live="polite"` region, so a message appearing is announced without stealing focus.
-
-## The Registration
-
-Validity is computed in `FieldErrors`, which weighs the control's errors against `revealOn`. It is needed as a **host class** on the decorator, because that is the one element every stylesheet can reach: the decorator owns the label, and a projected field reads the same class with `:host-context(.is-invalid)`.
+The field decides when its errors show. `showErrors` weighs the errors and `invalid` the forms API wrote into it against its reveal, and every consumer of it reads the same signal:
 
 ```mermaid
 flowchart LR
-  Control[AbstractControl<br/>errors] --> Errors[FieldErrors<br/>invalid]
-  Errors -->|registerErrors| Decorator[FieldDecorator<br/>.is-invalid]
-  Decorator -->|host-context| Field[Field Stylesheet]
+  Api[Forms API] -->|errors, invalid, pending,<br/>touched, dirty| Field[BaseField<br/>showErrors]
+  Field --> Aria[aria-invalid]
+  Field --> Decorator[FieldDecorator<br/>.is-invalid]
+  Field -->|shownErrors| Messages[FieldErrors]
+  Decorator -->|host-context| Styles[Field Stylesheet]
   Decorator --> Label[Label Colours]
 ```
 
-`registerErrors()` is the only call in the chain, made once from the directive's `ngAfterViewInit`. A field used without a decorator therefore gets its messages but no invalid styling, because there is no host to carry the class.
+`.is-invalid` sits on the decorator because that is the one element every stylesheet can reach: the decorator owns the label, and a projected field reads the same class with `:host-context(.is-invalid)`. A field used without a decorator therefore reports `aria-invalid` but has no invalid styling and renders no messages.
 
 ## The Ids
 
@@ -60,21 +56,9 @@ Fields read the decorator's ids back by injecting it **optionally**, so a field 
 
 `optionId(index)` returns `null` for a negative index, which is what makes a field with nothing highlighted emit no `aria-activedescendant` at all.
 
-## The Repaint Pump
+## Why Nothing Pumps
 
-Angular's own form state is not signal-backed: `AbstractControl.errors`, `touched` and `dirty`, and `NgForm.submitted`, are plain properties, and nothing about reading them tells a view when they moved. `FieldErrors` derives everything it renders from them, so something has to tell it. `FieldErrorsRenderer` merges three sources and calls `refresh()` on any of them.
-
-| Source                 | Why It Cannot Be Inferred                                                                       |
-| :--------------------- | :---------------------------------------------------------------------------------------------- |
-| The control's `events` | Gated behind the form's `idle$` when there is a form directive — see below                      |
-| `NgForm.ngSubmit`      | `NgForm.submitted` is untracked, and `revealOn: 'submitted'` gates the messages on it           |
-| `revealOn` as a signal | It belongs to the form directive, not to this component, so a change to it reaches nothing here |
-
-**The `idle$` gate.** Async validation leaves the form `PENDING` with the new errors not yet readable, so the control's events alone would repaint too early. With a form directive present, the events are resubscribed per settle, `startWith(null)` so each settle repaints once — under `updateOn: 'submit'` the touches land while the form is still pending and would otherwise never paint. Without a form directive — Angular's own validators, or none — the events are already the signal, because a synchronous validator has no such gap.
-
-**`refresh()` bumps a revision signal**, and `errors` and `invalid` are `computed`s over it. That is what makes one call repaint three views that are not related to each other: the messages here, the decorator's `is-invalid` host class, and the field's `aria-invalid` — which is the errors component's **sibling**, a boundary `markForCheck` could never cross and a signal read does not even see. `invalid` reads the revision itself and not only `errors()`: a control can become touched, dirty or submitted without its errors moving, and `errors()` is reference-equal across such a change.
-
-**The group's control is resolved lazily.** An `ngModelGroup` registers its control a microtask after `ngAfterViewInit`, so the event stream is wrapped in `defer` — resolving it eagerly would leave a group's errors component with nothing to repaint on.
+Every forms API writes the field's state inputs itself, and a signal input read in a `computed` repaints whatever reads `showErrors`. `[formField]` writes them from signals. `ngModel`, `[formControl]` and `formControlName` write them from the field's host view as it refreshes, and Angular marks that view whenever the control moves: its `valueChanges` and `statusChanges` call `markForCheck`, and `NgControlStatus` — the `ng-touched` classes — reads the control's touched, pristine and status signals in its host bindings. A touch the API makes itself, such as a submit's `markAllAsTouched`, therefore reaches a field inside an `OnPush` child with nothing listening for it.
 
 ## `OnPush`
 
@@ -82,11 +66,11 @@ The decorator renders nothing of its own. `labelState` is a getter over the proj
 
 `OnPush` works because every value the decorator reads is a signal, and the read itself is what marks this view:
 
-| Read                                              | Source                                |
-| :------------------------------------------------ | :------------------------------------ |
-| The projected field, label, adornments            | `contentChild()`                      |
-| `canLabelRest`, `isPanelOpen`, `hasInFieldToggle` | signals on `FormidableField`          |
-| `invalid`                                         | a `computed` over the pump's revision |
+| Read                                              | Source                       |
+| :------------------------------------------------ | :--------------------------- |
+| The projected field, label, adornments            | `contentChild()`             |
+| `canLabelRest`, `isPanelOpen`, `hasInFieldToggle` | signals on `FormidableField` |
+| `showErrors`, `shownErrors`                       | signals on `FormidableField` |
 
 A getter — `hasLabel`, `labelState`, `valueAlignment` — is still the right shape: a signal read inside one is tracked by the caller, and unlike the field contract these are internal to one file. The projected decorations are read through getters too: a consumer adds and removes one at runtime with `@if`, and a value latched in `ngAfterContentInit` would leave its wrapper shown — or hidden — forever.
 
@@ -155,4 +139,4 @@ The measurement is the wrapper, not the content. Each wrapper shrink-wraps what 
 - **The decorator never writes to the field.** Every value it renders is read off `FormidableField`. A field that must behave differently decides that itself, through `decoratorLayout`.
 - **Both directions of the injection are optional.** The field injects the decorator optionally and the decorator queries the field as content. Either alone renders.
 - **The ids have one stem.** Everything derives from `fieldId`. An id minted any other way cannot be resolved by the party that has to name it.
-- **The pump ends at a signal.** Any new state derived from Angular's form state belongs in a `computed` over the revision `refresh()` bumps. Reading the control from a plain getter leaves it unable to repaint anything.
+- **Form state comes in through inputs.** A field reads the forms API's state only from the inputs the API writes. Nothing in the library reads a control, so nothing has to be told when one moves.

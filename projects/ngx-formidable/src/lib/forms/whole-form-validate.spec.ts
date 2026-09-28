@@ -165,14 +165,14 @@ describe('NgxFormidableWholeFormValidate', () => {
     const fixture = TestBed.createComponent(BareAttributeHost);
     await validated(fixture);
 
-    expect(formErrorsOf(fixture)?.['errors']).toEqual(['The form as a whole is wrong.']);
+    expect(formErrorsOf(fixture)).toEqual({ 'The form as a whole is wrong.': true });
   });
 
   it('clears the root error once the model satisfies the rule', async () => {
     const fixture = TestBed.createComponent(BareAttributeHost);
     await validated(fixture);
 
-    expect(formErrorsOf(fixture)?.['errors']).toEqual(['The form as a whole is wrong.']);
+    expect(formErrorsOf(fixture)).toEqual({ 'The form as a whole is wrong.': true });
 
     fixture.componentInstance.model.set({ name: 'Chris' });
     fixture.componentInstance.rules.set({ name: 'Required' });
@@ -181,9 +181,8 @@ describe('NgxFormidableWholeFormValidate', () => {
     expect(formErrorsOf(fixture)).toBeNull();
   });
 
-  // `errorsChange$` used to be typed `Record<string, string>` while holding arrays, `true`s and option
-  // objects. Every entry now goes through FORMIDABLE_ERROR_EXTRACTOR, so the map is one homogeneous shape
-  // whichever validator wrote it — Angular's `required` included.
+  // `errorsChange$` holds one shape whichever validator wrote an entry: an error's key is its message, so
+  // Angular's own `required` lands beside the validator's text.
   it('folds Angular’s own error keys into the same message map', async () => {
     pending(DIRECTIVE_VALIDATORS_UNATTACHED);
 
@@ -214,6 +213,6 @@ describe('NgxFormidableWholeFormValidate', () => {
     fill(input, 'Test');
     await validated(fixture);
 
-    expect(formErrorsOf(fixture)?.['errors']).toEqual(['Not that name.']);
+    expect(formErrorsOf(fixture)).toEqual({ 'Not that name.': true });
   });
 });

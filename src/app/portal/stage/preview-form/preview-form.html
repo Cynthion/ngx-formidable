@@ -40,8 +40,8 @@
 
     <!--
           A section carrying a `groupName` renders as an `ngModelGroup`, which nests its fields in the model
-          and gives a rule reading two of them somewhere to report. `formidableFieldErrors` on the group is
-          what draws that rule's messages, under the group rather than under either field.
+          and gives a rule reading two of them somewhere to report. The `formidable-field-errors` after the grid
+          draws that rule's messages, under the group rather than under either field.
 
           The field loop is written out under both branches rather than shared through an `ng-template`: an
           embedded view resolves DI where the template is *declared*, so fields rendered through an outlet
@@ -49,7 +49,6 @@
         -->
     @if (entry.section.groupName; as groupName) {
     <div
-      formidableFieldErrors
       class="form-group"
       [ngModelGroup]="groupName">
       <div class="field-grid">
@@ -66,6 +65,7 @@
           (actionRequested)="onActionRequested($event)" />
         } }
       </div>
+      <formidable-field-errors [errors]="groupErrors(groupName)" />
     </div>
     } @else {
     <div class="field-grid">

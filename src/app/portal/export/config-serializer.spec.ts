@@ -10,7 +10,7 @@ describe('app config serializer', () => {
   });
 
   it('states every default that is set, in the order the panel lists them', () => {
-    const config = serializeAppConfig({ debounceMs: 250, revealOn: 'dirty', labelPosition: 'border' });
+    const config = serializeAppConfig({ hideRequiredMarkers: true, revealOn: 'dirty', labelPosition: 'border' });
 
     expect(config).toContain(
       [
@@ -18,18 +18,18 @@ describe('app config serializer', () => {
         '      defaults: {',
         "        labelPosition: 'border',",
         "        revealOn: 'dirty',",
-        '        debounceMs: 250',
+        '        hideRequiredMarkers: true',
         '      }',
         '    })'
       ].join('\n')
     );
   });
 
-  it('writes a boolean and a number as literals, not strings', () => {
-    const config = serializeAppConfig({ hideRequiredMarkers: false, debounceMs: 0 });
+  it('writes a boolean as a literal, not a string', () => {
+    const config = serializeAppConfig({ hideRequiredMarkers: false });
 
-    expect(config).toContain('hideRequiredMarkers: false,');
-    expect(config).toContain('debounceMs: 0');
+    expect(config).toContain('hideRequiredMarkers: false');
+    expect(config).not.toContain("'false'");
   });
 
   it('is a whole app.config.ts, imports included', () => {

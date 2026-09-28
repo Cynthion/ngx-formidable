@@ -6,6 +6,7 @@ import {
   ElementRef,
   inject,
   input,
+  linkedSignal,
   ModelSignal,
   OnDestroy,
   OnInit,
@@ -13,12 +14,14 @@ import {
   signal,
   Signal
 } from '@angular/core';
-import { FormValueControl } from '@angular/forms/signals';
+import { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
+import { NgxFormidableForm } from '../../forms/form.directive';
 import { endOfMaskedValue } from '../../helpers/input.helpers';
 import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../helpers/mask.helpers';
 import { openPanelPosition } from '../../helpers/position.helpers';
-import { FieldDecoratorLayout, FormidableField } from '../../models/formidable.model';
+import { FieldDecoratorLayout, FORMIDABLE_DEFAULTS, FormidableField } from '../../models/formidable.model';
+import { FormidableReveal } from '../../models/validation.model';
 import { FieldDecorator } from '../field-decorator/field-decorator';
 
 // Seeds every id the library mints.
@@ -26,8 +29,8 @@ let nextFieldId = 0;
 
 /**
  * The base class a custom field extends. It supplies the `FormValueControl` contract — the state inputs and
- * the `touch` output — the accessible names, and the keyboard, outside-click and resize listeners; a subclass
- * declares its `value` model, renders from it, and fills in the `do*` hook.
+ * the `touch` output — the reveal of its errors, the accessible names, and the keyboard, outside-click and
+ * resize listeners; a subclass declares its `value` model, renders from it, and fills in the `do*` hook.
  *
  * `[formField]`, `ngModel` and `[formControl]` all bind such a field through its `value` model. A custom field
  * also registers itself as `FORMIDABLE_FIELD`, so `formidable-field-decorator` can find it.
@@ -237,8 +240,60 @@ export abstract class BaseField<T = string | null>
   /** Focuses the field once it has rendered. Does not open a panel. */
   public readonly autoFocus = input(false);
 
+  /** The forms API's errors for the field, each rendered as a message through `FORMIDABLE_ERROR_MESSAGE`. */
+  // `FormUiControl` requires a transform to take `unknown`; what every forms API writes is an array.
+  public readonly errors = input<readonly ValidationError[], unknown>([], {
+    transform: (errors) => (errors as readonly ValidationError[] | undefined) ?? []
+  });
+
+  /** Whether the forms API holds the field invalid, which shows it invalid once revealed, errors or not. */
+  public readonly invalid = input(false, { transform: booleanAttribute });
+
+  /** Whether a validator is still running. The last errors stay on screen until it settles. */
+  public readonly pending = input(false, { transform: booleanAttribute });
+
+  /** Whether the user has left the field — what `revealOn: 'touched'` waits for. */
+  public readonly touched = input(false, { transform: booleanAttribute });
+
+  /** Whether the user has edited the field — what `revealOn: 'dirty'` waits for. */
+  public readonly dirty = input(false, { transform: booleanAttribute });
+
+  /** When the messages appear. Unset, the form's `revealOn` applies, then the app default, then `touched`. */
+  public readonly revealOn = input<FormidableReveal | undefined>(undefined);
+
   /** Emits as the last act of a blur — the user leaving the field — which marks it touched. */
   public readonly touch = output<void>();
+
+  // Optional: a field reveals by its own setting and the app default alone, with no form around it.
+  private readonly formDirective = inject(NgxFormidableForm, { optional: true });
+  private readonly defaultRevealOn = inject(FORMIDABLE_DEFAULTS).revealOn ?? 'touched';
+
+  // A pending validator has not reported yet, so the forms API holds none of its errors: keeping the last
+  // settled ones stops the messages flickering away and back on every run.
+  private readonly settledErrors = linkedSignal<
+    { errors: readonly ValidationError[]; pending: boolean },
+    readonly ValidationError[]
+  >({
+    source: () => ({ errors: this.errors(), pending: this.pending() }),
+    computation: ({ errors, pending }, previous) => (pending && previous ? previous.value : errors)
+  });
+
+  /** Whether the field shows its errors: it is invalid and its reveal has come. Drives `aria-invalid`. */
+  public readonly showErrors = computed(() => {
+    if (!this.invalid() && !this.settledErrors().length) return false;
+
+    switch (this.revealOn() ?? this.formDirective?.revealOn() ?? this.defaultRevealOn) {
+      case 'always':
+        return true;
+      case 'dirty':
+        return this.dirty();
+      default:
+        return this.touched();
+    }
+  });
+
+  /** The errors the decorator renders as messages: none until `showErrors`, and the last ones while pending. */
+  public readonly shownErrors = computed(() => (this.showErrors() ? this.settledErrors() : []));
 
   get fieldId(): string {
     return this.id;
@@ -257,10 +312,6 @@ export abstract class BaseField<T = string | null>
 
   protected get describedBy(): string | null {
     return this.decorator?.describedByIds ?? null;
-  }
-
-  protected get isInvalid(): boolean {
-    return this.decorator?.isInvalid ?? false;
   }
 
   // The decorator mints the ids for what it renders around the field; the field mints the ids for what

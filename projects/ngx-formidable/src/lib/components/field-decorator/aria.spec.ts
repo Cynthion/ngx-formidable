@@ -2,7 +2,6 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
-import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
 import { StubValidator } from '../../forms/testing/stub-validator.directive';
 import { FieldHint } from '../../directives/field-hint';
 import { FieldLabel } from '../../directives/field-label';
@@ -33,9 +32,8 @@ import { FieldDecorator } from './field-decorator';
  * while the focusable element is the `role="switch"` div). Those are also the fields that had no
  * accessible name at all before this.
  *
- * `aria-invalid` is the one attribute that needs a repaint: validity lives in the errors component,
- * whose `markForCheck` reaches its own ancestors and never the sibling field. `FieldErrorsRenderer`
- * therefore pumps the field as well — the end-to-end spec at the bottom is what pins that hop.
+ * `aria-invalid` follows the field's own `showErrors`, which reads the state the forms API writes into it —
+ * the end-to-end spec at the bottom pins that the state arrives with nothing pumping it.
  */
 
 interface Model {
@@ -118,16 +116,7 @@ class UnlabelledHost {}
 
 /** An input with real validation behind it — the only way to reach the invalid state honestly. */
 @Component({
-  imports: [
-    FormsModule,
-    NgxFormidableForm,
-    StubValidator,
-    FieldDecorator,
-    InputField,
-    FieldErrorsRenderer,
-    FieldLabel,
-    FieldHint
-  ],
+  imports: [FormsModule, NgxFormidableForm, StubValidator, FieldDecorator, InputField, FieldLabel, FieldHint],
   template: `
     <form
       formidableForm
@@ -136,7 +125,6 @@ class UnlabelledHost {}
       [stubValidator]="required">
       <formidable-field-decorator>
         <formidable-input-field
-          formidableFieldErrors
           name="field"
           [ngModel]="formValue.field" />
         <div formidableFieldLabel>Field</div>
@@ -310,10 +298,9 @@ describe('field ARIA', () => {
       expect(input.getAttribute('aria-describedby')).toBeNull();
     });
 
-    // The end-to-end one: nothing here calls `markForCheck` or `detectChanges()` by hand. The input field is
-    // `OnPush` and the errors are its sibling, so without the pump in `FieldErrorsRenderer` both assertions
-    // fail. The first `settle` is what lets the debounced validator run — until it does the form stays
-    // `PENDING`, `idle$` never emits, and the directive is not yet listening to the control.
+    // The end-to-end one: nothing here calls `markForCheck` or `detectChanges()` by hand, so the control's
+    // touched and errors reach the field through `ngModel` alone. The first `settle` is what lets the
+    // debounced validator run, so its own result cannot overwrite the errors set below.
     it('picks up the error message and reports invalid once the control is touched and invalid', async () => {
       const fixture = TestBed.createComponent(ErrorsHost);
       await settle(fixture);
@@ -326,7 +313,7 @@ describe('field ARIA', () => {
       expect(input.getAttribute('aria-invalid')).toBeNull();
 
       control.markAsTouched();
-      control.setErrors({ errors: ['Required.'] });
+      control.setErrors({ 'Required.': true });
       await settle(fixture);
 
       expect(input.getAttribute('aria-invalid')).toBe('true');
