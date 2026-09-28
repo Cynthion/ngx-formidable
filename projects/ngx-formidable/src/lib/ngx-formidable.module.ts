@@ -14,7 +14,6 @@ import { SliderField } from './components/fields/slider-field/slider-field';
 import { TextareaField } from './components/fields/textarea-field/textarea-field';
 import { TimeField } from './components/fields/time-field/time-field';
 import { ToggleField } from './components/fields/toggle-field/toggle-field';
-import { FieldErrorsRenderer } from './directives/field-errors-renderer';
 import { FieldHint } from './directives/field-hint';
 import { FieldLabelAdornment } from './directives/field-label-adornment';
 import { FieldLabel } from './directives/field-label';
@@ -39,7 +38,6 @@ const components = [
   FieldPrefix,
   FieldSuffix,
   FieldToggleIcon,
-  FieldErrorsRenderer,
   FieldHint,
   // Field Components
   FieldErrors,

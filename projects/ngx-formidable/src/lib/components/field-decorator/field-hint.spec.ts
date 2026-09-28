@@ -1,7 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
 import { StubValidator } from '../../forms/testing/stub-validator.directive';
 import { FieldHint } from '../../directives/field-hint';
 import { NgxFormidableForm } from '../../forms/form.directive';
@@ -27,7 +26,7 @@ const shape = { field: '' };
 
 /** Two hints that come and go, the way a consumer's own `*ngIf` moves them. */
 @Component({
-  imports: [FormsModule, NgxFormidableForm, StubValidator, FieldDecorator, InputField, FieldErrorsRenderer, FieldHint],
+  imports: [FormsModule, NgxFormidableForm, StubValidator, FieldDecorator, InputField, FieldHint],
   template: `
     <form
       formidableForm
@@ -36,7 +35,6 @@ const shape = { field: '' };
       [stubValidator]="required">
       <formidable-field-decorator>
         <formidable-input-field
-          formidableFieldErrors
           name="field"
           [ngModel]="formValue.field" />
         @if (showHints()) {

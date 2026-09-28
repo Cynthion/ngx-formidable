@@ -7,15 +7,13 @@ import { AutocompleteField } from './components/fields/autocomplete-field/autoco
 import { DateField } from './components/fields/date-field/date-field';
 import { DropdownField } from './components/fields/dropdown-field/dropdown-field';
 import { InputField } from './components/fields/input-field/input-field';
-import { FieldErrorsRenderer } from './directives/field-errors-renderer';
 import { FieldLabel } from './directives/field-label';
 import { FieldPrefix } from './directives/field-prefix';
 import { FieldSuffix } from './directives/field-suffix';
 import { NgxFormidableForm } from './forms/form.directive';
 import { FORMIDABLE_DEFAULTS, FormidableDefaults } from './models/formidable.model';
 import { provideNgxFormidable } from './provide-ngx-formidable';
-import { fill } from './testing/dom';
-import { configureFormidableTestBed, DIRECTIVE_VALIDATORS_UNATTACHED, settle } from './testing/test-bed';
+import { configureFormidableTestBed, settle } from './testing/test-bed';
 
 /**
  * Contract of the app-wide defaults: an input left unset, or bound to `undefined`, takes the app default,
@@ -33,8 +31,7 @@ const IMPORTS = [
   DateField,
   FieldLabel,
   FieldPrefix,
-  FieldSuffix,
-  FieldErrorsRenderer
+  FieldSuffix
 ];
 
 /** Every defaulted input, none of them bound. */
@@ -70,8 +67,7 @@ class ScopedHost {}
     <form
       formidableForm
       [revealOn]="undefined"
-      [hideRequiredMarkers]="undefined"
-      [debounceMs]="undefined">
+      [hideRequiredMarkers]="undefined">
       <formidable-field-decorator>
         <formidable-input-field name="a" />
         <div
@@ -111,8 +107,7 @@ class UndefinedHost {}
     <form
       formidableForm
       revealOn="always"
-      [hideRequiredMarkers]="false"
-      [debounceMs]="10">
+      [hideRequiredMarkers]="false">
       <formidable-field-decorator>
         <formidable-input-field name="a" />
         <div
@@ -159,23 +154,20 @@ class ExplicitHost {}
 })
 class MarkerWithoutFormHost {}
 
-/** A field validated by Angular alone, with no formidable form to say when its messages appear. */
+/** A dirty, untouched field holding an error, with no formidable form to say when its messages appear. */
 @Component({
   imports: IMPORTS,
   template: `
-    <form>
-      <formidable-field-decorator>
-        <formidable-input-field
-          formidableFieldErrors
-          name="name"
-          [minlength]="3"
-          [(ngModel)]="name" />
-      </formidable-field-decorator>
-    </form>
+    <formidable-field-decorator>
+      <formidable-input-field
+        name="name"
+        [errors]="errors"
+        [dirty]="true" />
+    </formidable-field-decorator>
   `
 })
 class RevealWithoutFormHost {
-  name = '';
+  readonly errors = [{ kind: 'minlength' }];
 }
 
 const DEFAULTS: Required<FormidableDefaults> = {
@@ -184,8 +176,7 @@ const DEFAULTS: Required<FormidableDefaults> = {
   suffixAlign: 'value',
   panelPosition: 'sheet',
   revealOn: 'dirty',
-  hideRequiredMarkers: true,
-  debounceMs: 250
+  hideRequiredMarkers: true
 };
 
 /** What every defaulted input resolved to, keyed as `FormidableDefaults` is. */
@@ -198,7 +189,6 @@ interface Resolved {
   datePanel: string;
   revealOn: string;
   hideRequiredMarkers: boolean;
-  debounceMs: number;
 }
 
 describe('app defaults', () => {
@@ -232,8 +222,7 @@ describe('app defaults', () => {
       autocompletePanel: get(AutocompleteField).panelPosition(),
       datePanel: get(DateField).panelPosition(),
       revealOn: form.revealOn(),
-      hideRequiredMarkers: form.hideRequiredMarkers(),
-      debounceMs: form.debounceMs()
+      hideRequiredMarkers: form.hideRequiredMarkers()
     };
   }
 
@@ -245,8 +234,7 @@ describe('app defaults', () => {
     autocompletePanel: 'full',
     datePanel: 'right',
     revealOn: 'touched',
-    hideRequiredMarkers: false,
-    debounceMs: 0
+    hideRequiredMarkers: false
   };
 
   const APP_DEFAULTS: Resolved = {
@@ -257,8 +245,7 @@ describe('app defaults', () => {
     autocompletePanel: 'sheet',
     datePanel: 'sheet',
     revealOn: 'dirty',
-    hideRequiredMarkers: true,
-    debounceMs: 250
+    hideRequiredMarkers: true
   };
 
   it('keeps the library’s own without a provider, each panel field its own', async () => {
@@ -301,8 +288,7 @@ describe('app defaults', () => {
       autocompletePanel: 'left',
       datePanel: 'left',
       revealOn: 'always',
-      hideRequiredMarkers: false,
-      debounceMs: 10
+      hideRequiredMarkers: false
     });
   });
 
@@ -334,11 +320,8 @@ describe('app defaults', () => {
     });
 
     // Dirty but never touched: only the app default's `dirty` reveals the message.
-    async function typeWithoutTouching(): Promise<string[]> {
+    function messages(): string[] {
       const root = fixture.nativeElement as HTMLElement;
-
-      fill(root.querySelector('input') as HTMLInputElement, 'ab');
-      await settle(fixture);
 
       return Array.from(root.querySelectorAll('.error')).map((error) => error.textContent!.trim());
     }
@@ -347,16 +330,14 @@ describe('app defaults', () => {
       configure();
       await mount(RevealWithoutFormHost);
 
-      expect(await typeWithoutTouching()).toEqual([]);
+      expect(messages()).toEqual([]);
     });
 
     it('reveals on the app default', async () => {
-      pending(DIRECTIVE_VALIDATORS_UNATTACHED);
-
       configure(DEFAULTS);
       await mount(RevealWithoutFormHost);
 
-      expect(await typeWithoutTouching()).toEqual(['minlength']);
+      expect(messages()).toEqual(['minlength']);
     });
   });
 });

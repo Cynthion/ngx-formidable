@@ -1,10 +1,10 @@
 import { Component, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
+import { ValidationError } from '@angular/forms/signals';
 import { FieldLabel } from '../../directives/field-label';
 import { NgxFormidableFieldValidate } from '../../forms/field-validate.directive';
-import { FORMIDABLE_ERROR_EXTRACTOR } from '../../models/validation.model';
+import { FORMIDABLE_ERROR_MESSAGE } from '../../models/validation.model';
 import { fill } from '../../testing/dom';
 import { configureFormidableTestBed, DIRECTIVE_VALIDATORS_UNATTACHED, settle } from '../../testing/test-bed';
 import { FieldDecorator } from '../field-decorator/field-decorator';
@@ -13,21 +13,20 @@ import { InputField } from '../fields/input-field/input-field';
 /**
  * Contract of the library's independence from any one validation library.
  *
- * Errors reach the UI through Angular's own `AbstractControl.errors`, so the decorator's `.is-invalid`
- * state, the field's `aria-invalid` and the message list must all work with no formidable form directive,
- * no `FORMIDABLE_VALIDATOR` and no validation library — driven by Angular's built-in validators alone.
+ * Errors reach the UI through what `ngModel` writes into the field, so the decorator's `.is-invalid` state,
+ * the field's `aria-invalid` and the message list must all work with no formidable form directive, no
+ * `FORMIDABLE_VALIDATOR` and no validation library — driven by Angular's built-in validators alone.
  *
- * `FORMIDABLE_ERROR_EXTRACTOR` is what makes that possible: it turns whatever shape wrote `control.errors`
- * into the messages a field displays. These specs pin down both its default and an override.
+ * An Angular error reaches the field as its key, `{ kind: 'required' }`, which `FORMIDABLE_ERROR_MESSAGE`
+ * renders as it is by default and as a consumer's text once overridden.
  */
 
 @Component({
-  imports: [FormsModule, FieldDecorator, InputField, FieldErrorsRenderer, FieldLabel],
+  imports: [FormsModule, FieldDecorator, InputField, FieldLabel],
   template: `
     <form>
       <formidable-field-decorator>
         <formidable-input-field
-          formidableFieldErrors
           name="name"
           [required]="true"
           [minlength]="3"
@@ -43,12 +42,11 @@ class AngularValidatorsHost {
 
 /** The same field with the `[ngModel]` hijack directive imported and no harness above it. */
 @Component({
-  imports: [FormsModule, NgxFormidableFieldValidate, FieldDecorator, InputField, FieldErrorsRenderer],
+  imports: [FormsModule, NgxFormidableFieldValidate, FieldDecorator, InputField],
   template: `
     <form>
       <formidable-field-decorator>
         <formidable-input-field
-          formidableFieldErrors
           name="name"
           [required]="true"
           [(ngModel)]="name" />
@@ -99,14 +97,13 @@ describe('validator-agnostic error rendering', () => {
       configureFormidableTestBed();
     });
 
-    it('mounts the errors component without a harness in the injector chain', async () => {
+    it('renders the decorator’s errors component without a harness in the injector chain', async () => {
       await mount(AngularValidatorsHost);
 
       expect(root.querySelector('formidable-field-errors')).toBeTruthy();
     });
 
-    // The claim the whole phase rests on: `required` writes `{ required: true }`, not the harness's
-    // `{ errors: [...] }`, and the default extractor renders it anyway.
+    // `required` writes `{ required: true }`, and its key is the message the default renders.
     it('renders Angular’s error keys as messages once touched', async () => {
       pending(DIRECTIVE_VALIDATORS_UNATTACHED);
 
@@ -168,16 +165,15 @@ describe('validator-agnostic error rendering', () => {
     });
   });
 
-  // A schema library reports its own shape. The extractor is the one place a consumer adapts it.
-  it('renders a custom error shape through an overridden extractor', async () => {
+  // An Angular error carries no message of its own, so the token is the one place a consumer gives it one.
+  it('renders an Angular error through an overridden FORMIDABLE_ERROR_MESSAGE', async () => {
     pending(DIRECTIVE_VALIDATORS_UNATTACHED);
 
     configureFormidableTestBed({
       providers: [
         {
-          provide: FORMIDABLE_ERROR_EXTRACTOR,
-          useValue: (errors: Record<string, unknown> | null) =>
-            errors?.['required'] ? ['Please tell us your name.'] : []
+          provide: FORMIDABLE_ERROR_MESSAGE,
+          useValue: (error: ValidationError) => (error.kind === 'required' ? 'Please tell us your name.' : error.kind)
         }
       ]
     });

@@ -111,7 +111,6 @@ export class AppDefaults {
 
   protected readonly fieldControls = FIELD_CONTROLS;
   protected readonly formControls = FORM_CONTROLS;
-  protected readonly libraryDebounceMs = LIBRARY_DEFAULTS.debounceMs;
 
   protected readonly defaults = computed(() => this.store.appDefaults());
   protected readonly setCount = computed(() => Object.keys(this.defaults()).length);
@@ -127,13 +126,6 @@ export class AppDefaults {
     const value = raw === '' ? undefined : key === 'hideRequiredMarkers' ? raw === 'true' : raw;
 
     this.store.updateAppDefaults({ [key]: value } as FormidableDefaults);
-  }
-
-  protected setDebounce(raw: string): void {
-    const value = raw.trim() === '' ? undefined : Number(raw);
-
-    if (value === undefined || (Number.isFinite(value) && value >= 0))
-      this.store.updateAppDefaults({ debounceMs: value });
   }
 
   /** The fields this default reaches, and how many of them state their own value instead. */

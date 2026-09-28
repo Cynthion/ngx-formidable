@@ -28,14 +28,14 @@ The library's `test` target sets `include` explicitly, as `['**/*.spec.ts', '../
 
 Every library spec is built on the harness in `lib/testing/`. `public-api.ts` does not reach it, so ng-packagr never compiles it.
 
-| Helper                          | Does                                                                                                                  |
-| :------------------------------ | :-------------------------------------------------------------------------------------------------------------------- |
-| `configureFormidableTestBed()`  | Zoneless change detection and ngx-mask, plus the spec's own metadata. Clears `theme()` overrides and the scroll first |
-| `settle(fixture, ms)`           | Awaits timers of up to `ms`, one frame, and the change detection they scheduled. Never calls `detectChanges()`        |
-| `bindField(kind, api)`          | A host binding one field through any forms API: its model, touched, dirty and events; `write()`, `set()`, `state()`   |
-| `fill()`, `type()`, `press()`   | A whole value as a paste sets it, keystrokes at the live caret, a bubbling cancelable `keydown`                       |
-| `referenced()`                  | What an id-reference attribute such as `aria-describedby` resolves to                                                 |
-| `theme()`, `rem()`, `corners()` | A `:root` override, a rem length in px, the four resolved corner radii                                                |
+| Helper                          | Does                                                                                                                                   |
+| :------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `configureFormidableTestBed()`  | Zoneless change detection and ngx-mask, plus the spec's own metadata. Clears `theme()` overrides and the scroll first                  |
+| `settle(fixture, ms)`           | Awaits timers of up to `ms`, one frame, and the change detection they scheduled. Never calls `detectChanges()`                         |
+| `bindField(kind, api)`          | A host binding one field through any forms API: its model, touched, dirty and events; `write()`, `set()`, `state()`, `markAsTouched()` |
+| `fill()`, `type()`, `press()`   | A whole value as a paste sets it, keystrokes at the live caret, a bubbling cancelable `keydown`                                        |
+| `referenced()`                  | What an id-reference attribute such as `aria-describedby` resolves to                                                                  |
+| `theme()`, `rem()`, `corners()` | A `:root` override, a rem length in px, the four resolved corner radii                                                                 |
 
 - **Real Timers**: a spec awaits `settle()` after an act, passing the debounce it waits out as `ms`.
 - **Signal Hosts**: a host keeps the `OnPush` default, and the state a spec changes is a signal.

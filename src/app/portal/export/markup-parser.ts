@@ -34,7 +34,7 @@ const STATE: PortalFieldState = DEFAULT_STATE;
 const LABEL_POSITIONS = Object.keys(LABEL_POSITION_LABELS) as readonly FieldLabelPosition[];
 
 /** Attributes the serializer emits that carry no configuration of their own. */
-const STRUCTURAL = new Set(['formidablefielderrors', '[ngmodel]', '#field']);
+const STRUCTURAL = new Set(['[ngmodel]', '#field']);
 
 const FALLBACK_SECTION: PortalSectionSpec = { id: 'imported', title: 'Imported' };
 

@@ -3,7 +3,6 @@ import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testin
 import { FormsModule } from '@angular/forms';
 import {
   FieldDecorator,
-  FieldErrorsRenderer,
   FormidableFormErrors,
   InputField,
   NgxFormidableFieldValidate,
@@ -33,8 +32,7 @@ import { VestWiringModel, vestWiringSuite } from './vest-wiring.model';
     NgxFormidableWholeFormValidate,
     NgxFormidableVestValidator,
     FieldDecorator,
-    InputField,
-    FieldErrorsRenderer
+    InputField
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -48,7 +46,6 @@ import { VestWiringModel, vestWiringSuite } from './vest-wiring.model';
       (errorsChange)="errors = $event">
       <formidable-field-decorator>
         <formidable-input-field
-          formidableFieldErrors
           name="firstName"
           [ngModel]="formValue.firstName" />
       </formidable-field-decorator>
@@ -71,8 +68,7 @@ class DemoWiringHost {
     NgxFormidableGroupValidate,
     NgxFormidableVestValidator,
     FieldDecorator,
-    InputField,
-    FieldErrorsRenderer
+    InputField
   ],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
@@ -83,18 +79,14 @@ class DemoWiringHost {
       [dependentFields]="dependentFields"
       (formValueChange)="formValue = $event"
       (errorsChange)="errors = $event">
-      <div
-        formidableFieldErrors
-        ngModelGroup="passwords">
+      <div ngModelGroup="passwords">
         <formidable-field-decorator>
           <formidable-input-field
-            formidableFieldErrors
             name="password"
             [ngModel]="formValue.passwords?.password ?? null" />
         </formidable-field-decorator>
         <formidable-field-decorator>
           <formidable-input-field
-            formidableFieldErrors
             name="confirmPassword"
             [ngModel]="formValue.passwords?.confirmPassword ?? null" />
         </formidable-field-decorator>
@@ -284,7 +276,6 @@ describe('demo wiring: the whole-form rule while typing', () => {
 describe('demo wiring: the passwords group', () => {
   let fixture: ComponentFixture<GroupWiringHost>;
   let host: GroupWiringHost;
-  let root: HTMLElement;
 
   function settle(): void {
     for (let i = 0; i < 3; i++) {
@@ -299,7 +290,6 @@ describe('demo wiring: the passwords group', () => {
 
     fixture = TestBed.createComponent(GroupWiringHost);
     host = fixture.componentInstance;
-    root = fixture.nativeElement as HTMLElement;
   });
 
   // The rule reads both fields but reports on `passwords`, so that is the target it has to reach.
@@ -309,20 +299,5 @@ describe('demo wiring: the passwords group', () => {
 
     expect(host.errors['passwords']).toEqual(['Passwords do not match!']);
     expect(host.errors['passwords.password']).toBeUndefined();
-  }));
-
-  it('renders the group’s message beneath the group once it is touched', fakeAsync(() => {
-    host.formValue = { firstName: 'Anna', lastName: 'A', passwords: { password: 'a', confirmPassword: 'b' } };
-    settle();
-
-    // Touching a field touches its group, which is what lets the group's errors render.
-    const password = root.querySelector('input') as HTMLInputElement;
-    password.dispatchEvent(new FocusEvent('focus'));
-    password.dispatchEvent(new FocusEvent('blur'));
-    settle();
-
-    const messages = Array.from(root.querySelectorAll('.error')).map((e) => e.textContent?.trim());
-
-    expect(messages).toContain('Passwords do not match!');
   }));
 });

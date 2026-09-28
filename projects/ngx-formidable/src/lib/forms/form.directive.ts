@@ -26,12 +26,7 @@ import {
 import { cloneDeep } from '../helpers/utility.helpers';
 import { FORMIDABLE_DEFAULTS } from '../models/formidable.model';
 import { DeepRequired } from '../models/utility-types';
-import {
-  FORMIDABLE_ERROR_EXTRACTOR,
-  FORMIDABLE_VALIDATOR,
-  FormidableReveal,
-  WHOLE_FORM
-} from '../models/validation.model';
+import { FORMIDABLE_VALIDATOR, FormidableReveal, WHOLE_FORM } from '../models/validation.model';
 import { validateFormShape } from './form-validate.helpers';
 import { fillMissing, getAllFormErrors, mergeValuesAndRawValues, set } from './form.helpers';
 
@@ -52,11 +47,8 @@ export class NgxFormidableForm<T extends Record<string, unknown>> implements OnD
   // Optional: without a validator the form is observable but nothing validates.
   private readonly validator = inject(FORMIDABLE_VALIDATOR, { optional: true });
 
-  private readonly extractErrors = inject(FORMIDABLE_ERROR_EXTRACTOR);
-
-  // The app defaults, which the three options below fall back to when unset or bound to `undefined`.
+  // The app defaults, which the two options below fall back to when unset or bound to `undefined`.
   private readonly defaults = inject(FORMIDABLE_DEFAULTS);
-  private readonly defaultDebounceMs = this.defaults.debounceMs ?? 0;
   private readonly defaultHideRequiredMarkers = this.defaults.hideRequiredMarkers ?? false;
   private readonly defaultRevealOn = this.defaults.revealOn ?? 'touched';
 
@@ -76,9 +68,7 @@ export class NgxFormidableForm<T extends Record<string, unknown>> implements OnD
    * How long to wait after a change before running the validator, for every target on this form.
    * One setting per form: a field, a group and the whole form all debounce together.
    */
-  public readonly debounceMs = input(this.defaultDebounceMs, {
-    transform: (debounceMs: number | undefined) => debounceMs ?? this.defaultDebounceMs
-  });
+  public readonly debounceMs = input(0, { transform: (debounceMs: number | undefined) => debounceMs ?? 0 });
 
   /**
    * Hides the required marker of every field on this form, so one switch withholds all of them. The glyph
@@ -89,8 +79,8 @@ export class NgxFormidableForm<T extends Record<string, unknown>> implements OnD
   });
 
   /**
-   * When the fields on this form reveal their messages. A field overrides it with its own `revealOn` on
-   * `formidableFieldErrors`. Independent of when the validator runs, which is Angular's `updateOn`.
+   * When the fields on this form reveal their messages. A field overrides it with its own `revealOn`.
+   * Independent of when the validator runs, which is Angular's `updateOn`.
    */
   public readonly revealOn = input(this.defaultRevealOn, {
     transform: (revealOn: FormidableReveal | undefined) => revealOn ?? this.defaultRevealOn
@@ -139,14 +129,14 @@ export class NgxFormidableForm<T extends Record<string, unknown>> implements OnD
 
   /**
    * Every message on the form, keyed by the target that reported it — a field or group path, or `WHOLE_FORM`.
-   * Each entry is normalized through `FORMIDABLE_ERROR_EXTRACTOR`, so a form mixing the validator with
-   * Angular's own validators still yields one homogeneous map.
+   * A message is an error's key, so a form mixing the validator with Angular's own validators still yields
+   * one homogeneous map, `required` beside the validator's own text.
    */
   private readonly errorsChange$ = this.ngForm.form.events.pipe(
     filter((v) => v instanceof StatusChangeEvent),
     map((v) => (v as StatusChangeEvent).status),
     filter((v) => v !== 'PENDING'),
-    map(() => getAllFormErrors(this.ngForm.form, this.extractErrors))
+    map(() => getAllFormErrors(this.ngForm.form))
   );
 
   /** `true` once any control has been edited, `false` again on a reset to pristine. */
@@ -265,9 +255,13 @@ export class NgxFormidableForm<T extends Record<string, unknown>> implements OnD
 
       // Angular cancels a control's pending async validator when the next run starts, so a newer change
       // restarts this window. The setting is read per run, so changing it takes effect at once.
+      // One error per message, keyed by it: a classic error reaches a field as `{ kind, context }` with no
+      // `message`, so the key is the text `FORMIDABLE_ERROR_MESSAGE` renders by default.
       return timer(this.debounceMs()).pipe(
         switchMap(() => validator.validate(mod, target)),
-        map((errors): ValidationErrors | null => (errors?.length ? { error: errors[0], errors } : null)),
+        map((errors): ValidationErrors | null =>
+          errors?.length ? Object.fromEntries(errors.map((message) => [message, true])) : null
+        ),
         takeUntil(this.destroy$)
       );
     };

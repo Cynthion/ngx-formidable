@@ -1,7 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
 import { FieldLabel } from '../../directives/field-label';
 import { NgxFormidableFieldValidate } from '../../forms/field-validate.directive';
 import { NgxFormidableForm } from '../../forms/form.directive';
@@ -82,7 +81,6 @@ interface NameModel {
     NgxFormidableFieldValidate,
     FieldDecorator,
     InputField,
-    FieldErrorsRenderer,
     FieldLabel
   ],
   template: `
@@ -94,7 +92,6 @@ interface NameModel {
       (formValueChange)="formValue = $event">
       <formidable-field-decorator>
         <formidable-input-field
-          formidableFieldErrors
           name="name"
           [ngModel]="formValue.name" />
         <div formidableFieldLabel>Name</div>
@@ -229,8 +226,8 @@ describe('field state colors', () => {
   });
 
   // Everything above sets `.is-invalid` by hand. This is the claim that it gets there on its own: the
-  // errors component computes validity, the directive hands it to the decorator, and the decorator turns it
-  // into the class the styling hangs off.
+  // validator's error reaches the field through `ngModel`, the field reveals it, and the decorator turns
+  // that into the class the styling hangs off.
   it('raises the class from the control’s own validity', async () => {
     const formFixture = TestBed.createComponent(ValidatedHost);
     const decoratorEl = () => formFixture.nativeElement.querySelector('formidable-field-decorator') as HTMLElement;

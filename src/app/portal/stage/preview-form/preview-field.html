@@ -3,7 +3,6 @@
 <formidable-field-decorator>
   @switch (field.kind) { @case ('input') {
   <formidable-input-field
-    formidableFieldErrors
     [name]="field.name"
     [placeholder]="field.placeholder"
     [readonly]="isReadonly()"
@@ -21,7 +20,6 @@
     (focusin)="onFocus()" />
   } @case ('textarea') {
   <formidable-textarea-field
-    formidableFieldErrors
     [name]="field.name"
     [placeholder]="field.placeholder"
     [readonly]="isReadonly()"
@@ -40,7 +38,6 @@
     (focusin)="onFocus()" />
   } @case ('select') {
   <formidable-select-field
-    formidableFieldErrors
     [name]="field.name"
     [placeholder]="field.placeholder"
     [readonly]="isReadonly()"
@@ -64,7 +61,6 @@
   </formidable-select-field>
   } @case ('dropdown') {
   <formidable-dropdown-field
-    formidableFieldErrors
     [name]="field.name"
     [placeholder]="field.placeholder"
     [readonly]="isReadonly()"
@@ -91,7 +87,6 @@
   </formidable-dropdown-field>
   } @case ('autocomplete') {
   <formidable-autocomplete-field
-    formidableFieldErrors
     [name]="field.name"
     [placeholder]="field.placeholder"
     [readonly]="isReadonly()"
@@ -122,7 +117,6 @@
   </formidable-autocomplete-field>
   } @case ('date') {
   <formidable-date-field
-    formidableFieldErrors
     [name]="field.name"
     [placeholder]="field.placeholder"
     [readonly]="isReadonly()"
@@ -148,7 +142,6 @@
   </formidable-date-field>
   } @case ('time') {
   <formidable-time-field
-    formidableFieldErrors
     [name]="field.name"
     [placeholder]="field.placeholder"
     [readonly]="isReadonly()"
@@ -162,7 +155,6 @@
     (focusin)="onFocus()" />
   } @case ('toggle') {
   <formidable-toggle-field
-    formidableFieldErrors
     [name]="field.name"
     [readonly]="isReadonly()"
     [disabled]="isDisabled()"
@@ -175,7 +167,6 @@
     (focusin)="onFocus()" />
   } @case ('slider') {
   <formidable-slider-field
-    formidableFieldErrors
     [name]="field.name"
     [readonly]="isReadonly()"
     [disabled]="isDisabled()"
@@ -197,7 +188,6 @@
     (focusin)="onFocus()" />
   } @case ('radio-group') {
   <formidable-radio-group-field
-    formidableFieldErrors
     [name]="field.name"
     [readonly]="isReadonly()"
     [disabled]="isDisabled()"
@@ -221,7 +211,6 @@
   </formidable-radio-group-field>
   } @case ('checkbox-group') {
   <formidable-checkbox-group-field
-    formidableFieldErrors
     [name]="field.name"
     [readonly]="isReadonly()"
     [disabled]="isDisabled()"
@@ -245,7 +234,6 @@
   </formidable-checkbox-group-field>
   } @case ('counter') {
   <example-counter-field
-    formidableFieldErrors
     [name]="field.name"
     [readonly]="isReadonly()"
     [disabled]="isDisabled()"

@@ -1,7 +1,7 @@
 import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
-  FieldErrorsRenderer,
+  FieldErrors,
   FormidableFormErrors,
   NgxFormidableForm,
   NgxFormidableGroupValidate,
@@ -33,7 +33,7 @@ import { PortalActionRequest, PreviewField } from './preview-field';
   styleUrl: './preview-form.scss',
   imports: [
     FormsModule,
-    FieldErrorsRenderer,
+    FieldErrors,
     NgxFormidableForm,
     NgxFormidableGroupValidate,
     NgxFormidableWholeFormValidate,
@@ -101,6 +101,11 @@ export class PreviewForm {
 
   protected onSubmit(): void {
     this.valueStore.submitted.set(true);
+  }
+
+  /** A group rule's messages as errors, keyed by the message as the harness keys them, shown as soon as it reports. */
+  protected groupErrors(groupName: string): { kind: string }[] {
+    return (this.valueStore.errors()[groupName] ?? []).map((message) => ({ kind: message }));
   }
 
   /** By field id, because the model path is `group.name` for a field in an `ngModelGroup` section. */

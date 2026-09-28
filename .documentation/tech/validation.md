@@ -8,7 +8,7 @@ Why the library carries no validation library, and where the seam sits.
 flowchart TB
   subgraph Core["@cynthion/ngx-formidable"]
     L1["L1<br/>UI And Theming<br/><br/>Field Components, BaseField,<br/>FieldDecorator, SCSS Tokens<br/>No Validation Concept"]
-    L2a["L2a<br/>Error Rendering<br/><br/>FieldErrorsRenderer, FieldErrors<br/>FORMIDABLE_ERROR_EXTRACTOR<br/>FORMIDABLE_ERROR_TRANSLATOR"]
+    L2a["L2a<br/>Error Rendering<br/><br/>BaseField Reveal, FieldErrors<br/>FORMIDABLE_ERROR_MESSAGE"]
     L2b["L2b<br/>Form Harness<br/><br/>formidableForm, ngModel, ngModelGroup,<br/>formidableValidateWholeForm<br/>Model, Targets, Debouncing"]
     Seam["FORMIDABLE_VALIDATOR<br/>validate(model, target)"]
   end
@@ -30,7 +30,7 @@ flowchart TB
 | Layer | Owns                                                         | Knows About A Validator |
 | :---- | :----------------------------------------------------------- | :---------------------: |
 | L1    | Rendering, theming, masking, keyboard, ARIA                  |           No            |
-| L2a   | Turning `AbstractControl.errors` into displayed messages     |           No            |
+| L2a   | Revealing the errors a forms API writes, as messages         |           No            |
 | L2b   | The model, targets, debouncing, async validator registration |           No            |
 | L3    | The validation rules                                         |           Yes           |
 
@@ -38,10 +38,8 @@ flowchart TB
 
 Nothing in L1 or L2a is coupled to a validator because both rest on things Angular already guarantees:
 
-- **`AbstractControl.errors`** — every validator writes here. `FieldErrors` reads it and nothing else, through `FORMIDABLE_ERROR_EXTRACTOR`; `getAllFormErrors` runs every entry through the same extractor, so `errorsChange` is one homogeneous `FormidableFormErrors` map however many validators wrote into it.
-- **`.is-invalid`** — one class on `FieldDecorator`'s host, computed from the messages and the reveal setting that gates them. The whole SCSS state layer hangs off it, and it means nothing about who decided the field was invalid.
-
-`FORMIDABLE_ERROR_EXTRACTOR` is what makes `AbstractControl.errors` genuinely universal. The harness writes `{ error, errors }`; Angular's validators write `{ required: true }`; a schema library writes something else. The extractor's default handles the first two and an override handles the third, so the same UI serves all of them.
+- **The field's `errors` input** — every forms API writes a field's errors into it as `ValidationError`s: Signal Forms its rules' own, the classic APIs each key of `AbstractControl.errors` as `{ kind, context }`. The harness writes one error per message, keyed by it, so a message renders as its `kind`; `getAllFormErrors` reads the same keys, so `errorsChange` is one homogeneous `FormidableFormErrors` map however many validators wrote into it. `FORMIDABLE_ERROR_MESSAGE` turns each error into its text.
+- **`.is-invalid`** — one class on `FieldDecorator`'s host, the field's `showErrors`: its errors weighed against its reveal. The whole SCSS state layer hangs off it, and it means nothing about who decided the field was invalid.
 
 One naming trap worth knowing: `FormidableValidator.validate(model, target)` and Angular's `AsyncValidator.validate(control)` share a method name. No class in the library implements both — the three validator directives are `AsyncValidator`s, the Vest directive is an `FormidableValidator` — and TypeScript rejects it loudly if one ever tries.
 
@@ -76,7 +74,7 @@ Step 2 is what keeps the target itself current. A field's or a group's own valid
 | Axis     | Owner   | Mechanism    | Read By                |
 | :------- | :------ | :----------- | :--------------------- |
 | Run      | Angular | `updateOn`   | `AbstractControl`      |
-| Reveal   | Library | `revealOn`   | `FieldErrors.invalid`  |
+| Reveal   | Library | `revealOn`   | `BaseField.showErrors` |
 | Debounce | Library | `debounceMs` | `createAsyncValidator` |
 
 ### Why Run Gets No Input
@@ -98,7 +96,7 @@ A touch is not cosmetic: it is what `revealOn="touched"` reads, so a touch nobod
 
 ### Reveal Resolution And Repaint
 
-`FieldErrors` resolves its own field's `revealOn` first, then the form's, then `touched`. `FieldErrorsRenderer` pushes the field's value and drives the repaint, because none of the state the component reads is signal-backed: `AbstractControl.errors`, `touched` and `dirty` are plain properties, `NgForm.submitted` reads through `untracked`, and the form's `revealOn` is a signal on a directive the component does not own. All three join one stream, and each emission calls `refresh()` — which bumps the revision the component's `errors` and `invalid` computeds read. See [`tech/decoration.md`](decoration.md) for what that one signal then reaches.
+A field resolves its own `revealOn` first, then the form's, then `FORMIDABLE_DEFAULTS.revealOn`, then `touched`. Everything it weighs is a signal — its own inputs, which the forms API writes, and the form's `revealOn` — so `showErrors` is a `computed` and repaints on its own. See [`tech/decoration.md`](decoration.md) for what that one signal reaches, and why no classic API needs pumping.
 
 ### Debounce
 

@@ -68,7 +68,7 @@ describe('validation debounce', () => {
 
     await settle(fixture, 200);
 
-    expect(control()?.errors?.['errors']).toEqual(['Required']);
+    expect(control()?.errors).toEqual({ Required: true });
   });
 
   // The window used to be read once per target and cached for the life of the form, so a consumer could
@@ -89,6 +89,6 @@ describe('validation debounce', () => {
 
     await settle(fixture, 600);
 
-    expect(control()?.errors?.['errors']).toEqual(['Required']);
+    expect(control()?.errors).toEqual({ Required: true });
   });
 });

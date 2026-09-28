@@ -7,9 +7,9 @@ import {
   inject,
   OnDestroy,
   signal,
-  viewChild,
-  ViewContainerRef
+  viewChild
 } from '@angular/core';
+import { ValidationError } from '@angular/forms/signals';
 import { FieldHint } from '../../directives/field-hint';
 import { FieldLabel } from '../../directives/field-label';
 import { FieldLabelAdornment } from '../../directives/field-label-adornment';
@@ -41,7 +41,7 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
   selector: 'formidable-field-decorator',
   templateUrl: './field-decorator.html',
   styleUrls: ['./field-decorator.scss'],
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, FieldErrors],
   host: {
     '[class.label-inside]': 'isLabelInside',
     '[class.is-readonly]': 'isReadonly',
@@ -64,9 +64,6 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
   // View children are used to access the prefix and suffix wrappers
   readonly prefixWrapper = viewChild<ElementRef<HTMLDivElement>>('prefixWrapperRef');
   readonly suffixWrapper = viewChild<ElementRef<HTMLDivElement>>('suffixWrapperRef');
-
-  // Where `FieldErrorsRenderer` renders its component, so the layout container holds only the field.
-  readonly errorsSlot = viewChild('errorsSlot', { read: ViewContainerRef });
 
   // Content children are used to project the field, label, label adornment, prefix, suffix and hint
   readonly projectedField = contentChild(FORMIDABLE_FIELD);
@@ -111,17 +108,10 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
   private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);
 
   private resizeObserver?: ResizeObserver;
-  private readonly errors = signal<FieldErrors | undefined>(undefined);
 
   // Whether the label may transition yet. False until the field has settled on its first state, so the
   // initial resting-to-floating correction is not animated.
   protected readonly isLabelAnimated = signal(false);
-
-  // Called by `FieldErrorsRenderer` with the errors component it renders into this decorator's slot, so
-  // the invalid state it already computes can surface as a host class the stylesheets target.
-  registerErrors(errors: FieldErrors): void {
-    this.errors.set(errors);
-  }
 
   ngAfterViewInit(): void {
     this.observeInsets();
@@ -253,9 +243,12 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
     return this.projectedField()?.isFieldFocused() ?? false;
   }
 
-  // Only ever true with a `formidableFieldErrors` field inside: nothing else computes validity.
   get isInvalid(): boolean {
-    return this.errors()?.invalid() ?? false;
+    return this.projectedField()?.showErrors() ?? false;
+  }
+
+  protected get shownErrors(): readonly ValidationError[] {
+    return this.projectedField()?.shownErrors() ?? [];
   }
 
   // The label stands in for the placeholder, so the field has to stop rendering its own.

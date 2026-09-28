@@ -84,7 +84,6 @@ provideNgxFormidable({
 | `panelPosition`       | `panelPosition` on the dropdown, autocomplete and date fields       | Per field     |
 | `revealOn`            | The form's `revealOn`, and a field's when it has no form            | `'touched'`   |
 | `hideRequiredMarkers` | The form's `hideRequiredMarkers`, and a field's when it has no form | `false`       |
-| `debounceMs`          | The form's `debounceMs`                                             | `0`           |
 
 - **A Binding Wins.** An input left unset, or bound to `undefined`, takes the app default, then the library's own. Binding `undefined` is how a dynamic template states nothing.
 - **Read Once.** A field or form reads its defaults when it is created. A default changed afterwards reaches only what is created afterwards.

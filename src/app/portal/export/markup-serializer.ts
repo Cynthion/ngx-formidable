@@ -37,11 +37,7 @@ export function serializeDefinition(definition: PortalFormDefinition): string {
     // a rule reading two of them a target of its own.
     const indent = section.groupName ? '    ' : '  ';
 
-    if (section.groupName) {
-      lines.push('  <div');
-      lines.push('    formidableFieldErrors');
-      lines.push(`    ngModelGroup="${escape(section.groupName)}">`);
-    }
+    if (section.groupName) lines.push(`  <div ngModelGroup="${escape(section.groupName)}">`);
 
     for (const field of fields) {
       lines.push(...serializeField(field, definition, section.groupName).map((line) => `${indent}${line}`));
@@ -122,7 +118,7 @@ function serializeField(spec: PortalFieldSpec, definition: PortalFormDefinition,
   const capabilities = FIELD_CAPABILITIES[spec.kind];
   const selector = FIELD_KIND_SELECTORS[spec.kind];
   const condition = conditionOf(spec, definition);
-  const lines: string[] = ['<formidable-field-decorator>', `  <${selector}`, '    formidableFieldErrors'];
+  const lines: string[] = ['<formidable-field-decorator>', `  <${selector}`];
 
   for (const attribute of ALL_FIELD_ATTRIBUTES) {
     if (attribute.name === 'placeholder' && !capabilities.placeholder) continue;

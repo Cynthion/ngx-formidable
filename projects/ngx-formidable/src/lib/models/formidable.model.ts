@@ -1,4 +1,5 @@
 import { ElementRef, InjectionToken, Signal, TemplateRef } from '@angular/core';
+import { ValidationError } from '@angular/forms/signals';
 import { NgxMaskConfig } from 'ngx-mask';
 import { FormidableReveal } from './validation.model';
 
@@ -113,12 +114,10 @@ export interface FormidableDefaults {
   suffixAlign?: FieldAdornmentAlignment;
   /** `panelPosition` on the dropdown, autocomplete and date fields, which otherwise each keep their own. */
   panelPosition?: FormidablePanelPosition;
-  /** The form's `revealOn`, and a field's without a form. The library's own: `touched`. */
+  /** A field's `revealOn`, and the form's. The library's own: `touched`. */
   revealOn?: FormidableReveal;
   /** The form's `hideRequiredMarkers`, and a field's without a form. The library's own: `false`. */
   hideRequiredMarkers?: boolean;
-  /** The form's `debounceMs`. The library's own: `0`. */
-  debounceMs?: number;
 }
 
 /** The app-wide defaults. Empty unless `provideNgxFormidable({ defaults })` or a component provides it. */
@@ -144,6 +143,10 @@ export interface FormidableField<T = string | null> {
   disabled: Signal<boolean>;
   /** Suffixes the marker to its label and sets `aria-required`. Validates nothing. */
   required: Signal<boolean>;
+  /** Whether the field shows its errors: it is invalid and its reveal has come. Drives `aria-invalid`. */
+  showErrors: Signal<boolean>;
+  /** The errors the decorator renders as messages: none until `showErrors`, and the last ones while pending. */
+  shownErrors: Signal<readonly ValidationError[]>;
   /** Whether focus is inside the field, which the decorator's own focus state follows. */
   isFieldFocused: Signal<boolean>;
   /** Whether nothing is rendered where the value goes, so a label may rest there like a placeholder. */
