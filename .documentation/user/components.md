@@ -61,9 +61,9 @@ Inherited by every field:
 | `hasInFieldToggle` | optional signal | Whether the field renders a panel toggle inside its own box, which the value and a label must clear          |
 | `valueAlignment`   | optional        | Where the value sits vertically, which a prefix/suffix aligns with: `'center'` (default) or `'top'`          |
 
-**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` **`model()`**, and `doOnFocusChange`. A subclass renders from `value()` and hands a user's edit to the protected `setValue(next)`, which writes nothing for an edit equal to what the model holds; the protected `isSameValue(a, b)` decides that, and a field whose value is a `Date` or an array overrides it. The base handles global keydown / outside-click / resize-scroll listeners, readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly or disabled. A `placeholder` is not part of it — whether that blocks a resting label belongs to the label's position (see **Label As Placeholder** below). A field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` **signal** (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always) — a signal and not a getter, because `canLabelRest` is a `computed` over it and a computed would cache whatever a getter returned first. A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field` with their panel toggle, `select-field` with its dropdown arrow — declares `hasInFieldToggle` as a signal, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it. A field whose `fieldRef` is not the element that takes focus overrides the protected `focusElement` getter (see **Focus**).
+**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` **`model()`**, and `doOnFocusChange`. `keyboardCallback` returns whether it acted on the key, and only such a key is `preventDefault`ed — one the field ignores keeps its native effect, so an `Enter` still submits the form, an `Escape` still closes a dialog and a `Tab` still moves on. A subclass renders from `value()` and hands a user's edit to the protected `setValue(next)`, which writes nothing for an edit equal to what the model holds; the protected `isSameValue(a, b)` decides that, and a field whose value is a `Date` or an array overrides it. The base handles global keydown / outside-click / resize-scroll listeners, readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly or disabled. A `placeholder` is not part of it — whether that blocks a resting label belongs to the label's position (see **Label As Placeholder** below). A field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` **signal** (`input-field` and `textarea-field` when their mask shows its slots, `date-field` and `time-field` always) — a signal and not a getter, because `canLabelRest` is a `computed` over it and a computed would cache whatever a getter returned first. A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field` with their panel toggle, `select-field` with its dropdown arrow — declares `hasInFieldToggle` as a signal, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it. A field whose `fieldRef` is not the element that takes focus overrides the protected `focusElement` getter (see **Focus**).
 
-**Model**: the model is the only source of truth. A field renders `value()` and writes it only for a user's edit — never to correct what it was given — so a programmatic write leaves the control pristine and reports nothing. A `slider-field` shows a value outside `min` / `max` at the nearest end, a masked field shows a value through its mask, and the panel fields and the groups show no selection for a value no option carries; each leaves the model as it is. The classic APIs' `updateOn` holds nothing back: an edit reaches the model at once, and Signal Forms' `debounce(path, 'blur')` is what defers one to the `touch`. A classic control is `null` until something writes it, which a field renders as its empty state.
+**Model**: the model is the only source of truth. A field renders `value()` and writes it only for a user's edit — never to correct what it was given — so a programmatic write leaves the control pristine and reports nothing. A `slider-field` shows a value outside `min` / `max` at the nearest end, a masked field shows a value through its mask, and an option field shows no selection for a value no option carries — `null` included — until its option arrives, at which point it shows it; each leaves the model as it is. The classic APIs' `updateOn` holds nothing back: an edit reaches the model at once, and Signal Forms' `debounce(path, 'blur')` is what defers one to the `touch`. A classic control is `null` until something writes it, which a field renders as its empty state.
 
 **State From The Forms API**: `disabled`, `readonly`, `required`, `name`, `errors`, `invalid`, `pending`, `touched` and `dirty` are plain inputs that each forms API writes from what it holds. `[formField]` writes all of them from its schema, and `min`, `max`, `minLength` and `maxLength` into a field that has them. `ngModel`, `[formControl]` and `formControlName` write `disabled`, `errors`, `invalid`, `pending`, `touched` and `dirty`; `[formControl]` and `formControlName` also write `required`, from `Validators.required`. What an API does not write is bound on the field directly: `readonly` under the classic APIs, and `required` under `ngModel`. Under `ngModel` and `[formControl]`, Angular 22.2 attaches no directive validator — `required`, `minlength` — to a field bound through its `value` model; `NgxFormidableFieldValidate` attaches only its own. Every one of these inputs takes `undefined` as its default, so a consumer binding them by hand can leave any out.
 
@@ -73,39 +73,44 @@ Inherited by every field:
 
 **Accessibility**: the base gives every field two protected getters its template binds onto whichever element actually takes focus — `labelledBy` and `describedBy` — and the element's `aria-invalid` binds `showErrors()`. The two getters come from the surrounding decorator, injected optionally, so a field used on its own emits neither attribute rather than pointing at ids that do not exist. See **Field Accessibility** under **Field Decorator** for the ids and what each field carries.
 
-The base also **mints** an id of its own from `fieldId`, the mirror of the decorator's rule: the decorator owns what it renders around the field, the field owns what lives inside its own box. `panelId` (`{fieldId}-panel`) names the popup a panel field's `aria-controls` points at; it is `protected`, for the field's own template. The matching `optionId(index)` sits one level down, on **Base Option Field Directive**, because only an option field has options to name. See **Combobox And Options** below.
+The base also **mints** an id of its own from `fieldId`, the mirror of the decorator's rule: the decorator owns what it renders around the field, the field owns what lives inside its own box. `panelId` (`{fieldId}-panel`) names the popup a panel field's `aria-controls` points at; it is `protected`, for the field's own template. The matching `optionId(index)` sits one level down, on **Base Option Field Directives**, because only an option field has options to name. See **Combobox And Options** below.
 
 All three repaint on their own. `showErrors` is a signal over the field's own inputs, which the forms API writes, so `aria-invalid` follows it with nothing pumping the field; `labelledBy` reads a `contentChild()` query on the decorator, so a label added or removed at runtime lands on the next pass.
 
 ---
 
-## Base Option Field Directive
+## Base Option Field Directives
 
-`BaseOptionField<T = string | null>` — exported abstract `@Directive()` (no selector), extends `BaseField<T>`. The base for the four fields that render a list of options and walk it with a highlight: `dropdown-field`, `autocomplete-field`, `radio-group-field` and `checkbox-group-field`. `select-field` is an option field too but stays on `BaseField` — a native `<select>` has no highlight of its own, so it would only inherit dead state.
+Two exported abstract `@Directive()`s (no selector), one layered on the other:
 
-Inherited by those four:
+- **`BaseOptionListField<T = string | null>`** extends `BaseField<T>`: the list layer, behind every field that renders a list of options. `select-field` extends it directly — a native `<select>` walks its own list.
+- **`BaseOptionField<T = string | null>`** extends `BaseOptionListField<T>`: the highlight layer, behind the four fields that walk their list with a highlight — `dropdown-field`, `autocomplete-field`, `radio-group-field` and `checkbox-group-field`.
 
-| Member                   | Kind                        | Description                                                                                     |
-| :----------------------- | :-------------------------- | :---------------------------------------------------------------------------------------------- |
-| `options`                | input                       | The option list (`[]`)                                                                          |
-| `defaultOption`          | input                       | An option pinned to the top of the list                                                         |
-| `defaultOptionMode`      | input                       | When the default renders: `'always'` (default) or `'fallback'`                                  |
-| `noOptionsText`          | input                       | Text for the empty list (`NO_OPTIONS_TEXT`)                                                     |
-| `sortFn`                 | input                       | Comparator applied to the combined list                                                         |
-| `optionComponents`       | `contentChildren()`         | The projected option components as `FormidableOptionSource`, `{ descendants: true }`            |
-| `optionRefs`             | `viewChildren()`, protected | The rendered `#optionRef` options, used to scroll the highlight into view                       |
-| `highlightedOptionIndex` | signal, protected           | The highlighted index, `-1` for none — drives both `is-highlighted` and `aria-activedescendant` |
-| `optionId(index)`        | method, protected           | `{fieldId}-option-{index}`, or `null` for a negative index                                      |
+| Member                   | Layer     | Kind                        | Description                                                                                     |
+| :----------------------- | :-------- | :-------------------------- | :---------------------------------------------------------------------------------------------- |
+| `options`                | List      | input                       | The option list (`[]`)                                                                          |
+| `defaultOption`          | List      | input                       | An option pinned to the top of the list                                                         |
+| `defaultOptionMode`      | List      | input                       | When the default renders: `'always'` (default) or `'fallback'`                                  |
+| `noOptionsText`          | List      | input                       | Text for the empty list (`NO_OPTIONS_TEXT`)                                                     |
+| `sortFn`                 | List      | input                       | Comparator applied to the combined list                                                         |
+| `optionComponents`       | List      | `contentChildren()`         | The projected option components as `FormidableOptionSource`, `{ descendants: true }`            |
+| `optionRefs`             | Highlight | `viewChildren()`, protected | The rendered `#optionRef` options, used to scroll the highlight into view                       |
+| `highlightedOptionIndex` | Highlight | signal, protected           | The highlighted index, `-1` for none — drives both `is-highlighted` and `aria-activedescendant` |
+| `optionId(index)`        | Highlight | method, protected           | `{fieldId}-option-{index}`, or `null` for a negative index                                      |
 
-`optionComponents` is the only public member of the four. The other three are `protected`: they exist for a subclass, not for a template or a `viewChild()` handle.
+`optionComponents` is the only public member of the four that are not inputs. The other three are `protected`: they exist for a subclass, not for a template or a `viewChild()` handle.
 
-**Extension Contract**: subclasses supply `onOptionsChanged()` — recombine the options, then reconcile the highlight against them; the model is left alone, since the selection is derived from `value()` — and `activeOptions`, a signal holding the rendered list the highlight walks (`autocomplete-field` holds its filtered list, the other three their full one) — the same signal the field's own template renders from. A single-select field additionally overrides `selectedOptionValue` so the selection can claim the highlight; the multi-select `checkbox-group-field` leaves it `null`, which is what drops the selection-wins step for it. The base owns the rest: one effect calls `onOptionsChanged()` whenever any of the four option inputs or the `optionComponents` query moves, and it implements `setHighlightedIndex`, `highlightSelectedOption` and `reconcileHighlightAfterOptionsChanged`. The last one follows the previously highlighted **value** across a changed list before falling back to a clamped index, and skips disabled options either way; a field that only wants a live highlight while its panel is open guards its own call, as the two panel fields do.
+**Extension Contract**: a subclass of either layer supplies `onOptionsChanged()`, which recombines the options starting from `computeAllOptions()` — the bound and the projected options merged and sorted, with `defaultOption` still to pin, because `autocomplete-field` pins it only after filtering. The model is left alone, since the selection is derived from `value()`. One effect on the list layer calls `onOptionsChanged()` whenever any of the option inputs or the `optionComponents` query moves.
+
+A subclass of the highlight layer also reconciles the highlight there, and supplies `activeOptions` — a signal holding the rendered list the highlight walks (`autocomplete-field` holds its filtered list, the other three their full one), the same signal the field's own template renders from — and `selectOption(option)`. A single-select field additionally overrides `selectedOptionValue` so the selection can claim the highlight; the multi-select `checkbox-group-field` leaves it `null`, which is what drops the selection-wins step for it. The layer owns the rest: `setHighlightedIndex`, `highlightSelectedOption` and `reconcileHighlightAfterOptionsChanged`. The last one follows the previously highlighted **value** across a changed list before falling back to a clamped index, and skips disabled options either way; a field that only wants a live highlight while its panel is open guards its own call, as the two panel fields do.
+
+It owns the keys, too, as two `keyboardCallback`s that each return whether they acted. `navigateOptions(event)` is the groups': the arrows walk the list, and `Enter` or `Space` pick the highlighted option. `navigatePanelOptions(event, panel)` is the panel fields': `ArrowDown` opens the panel, `Escape` and `Tab` close it, and while it is open the list is walked as a group's is — with every key it is walked with kept, so an `Enter` meant for the list never submits the form behind it. Closed, the panel keeps only the `ArrowDown` that opens it.
 
 ---
 
 ## Field Components
 
-All extend `BaseField<T>` (inherited API above); the four option fields extend `BaseOptionField<T>`. Tables list each field's OWN inputs only.
+All extend `BaseField<T>` (inherited API above); `select-field` extends `BaseOptionListField<T>`, and the four other option fields `BaseOptionField<T>`. Tables list each field's OWN inputs only.
 
 **Panel Control**: the three fields with a panel — `dropdown-field`, `autocomplete-field` and `date-field` — expose `isPanelOpen` as a signal to read and `togglePanel(isOpen)` as the way to open or close it from outside. There is no `isPanelOpen` input: a panel is state the field owns and closes by itself (on a selection, an outside click, `Escape`), so a one-way binding would go stale the moment it did. Reach the method through a template reference (`#field`) or a `viewChild()`, exactly as `focus()` is reached.
 
@@ -149,23 +154,15 @@ Multi-line text with optional autosize and a length indicator.
 
 **Selector** `formidable-select-field` · **Value** `string | null`
 
-Native-style single select. Options come from the `options` input or projected `formidable-field-option` children. The field draws its own dropdown arrow, from the same icon and `--formidable-field-toggle-size` box as the panel fields' toggle, because the shared field reset takes the user agent's away with `appearance: none`. The arrow overlays the control and takes no pointer events, so a click anywhere in the field still opens the platform's list; it is not projected content and, unlike the date field's toggle, has no icon slot.
+Native-style single select. Option inputs come from the list layer of **Base Option Field Directives**, with no highlight: a native `<select>` walks its own list. Options come from the `options` input or projected `formidable-field-option` children. The field draws its own dropdown arrow, from the same icon and `--formidable-field-toggle-size` box as the panel fields' toggle, because the shared field reset takes the user agent's away with `appearance: none`. The arrow overlays the control and takes no pointer events, so a click anywhere in the field still opens the platform's list; it is not projected content and, unlike the date field's toggle, has no icon slot.
 
-| Input               | Type                     | Default                   | Description                                                                                  |
-| :------------------ | :----------------------- | :------------------------ | :------------------------------------------------------------------------------------------- |
-| `options`           | `FormidableOption[]`     | `[]`                      | Option list                                                                                  |
-| `defaultOption`     | `FormidableOption`       | —                         | Option pinned first                                                                          |
-| `defaultOptionMode` | `FieldDefaultOptionMode` | `'always'`                | When it renders                                                                              |
-| `noOptionsText`     | `string`                 | `'No options available.'` | Empty-state text, rendered as a disabled `<option>` — the one field that puts it in the list |
-| `sortFn`            | `(a, b) => number`       | —                         | Optional option sorter                                                                       |
-
-These five look like the option inputs above but are declared on the field itself, because `select-field` stays on `BaseField`: a native `<select>` has no highlight, so inheriting the option base would only add dead state. Collects option components via `contentChildren(FORMIDABLE_OPTION, { descendants: true })` and provides `FORMIDABLE_OPTION_FIELD`. **Use when** a compact single-choice control fits.
+A value no option carries, `null` included, selects a disabled option of the field's own showing the `placeholder`, or nothing — never the first option the platform would otherwise put in its place. With no options at all, `noOptionsText` renders as a disabled `<option>`: the one field that puts it in the list. **Use when** a compact single-choice control fits.
 
 ### Dropdown Field
 
 **Selector** `formidable-dropdown-field` · **Value** `string | null`
 
-Custom single-select with a floating panel. Option inputs come from **Base Option Field Directive**.
+Custom single-select with a floating panel. Option inputs come from **Base Option Field Directives**.
 
 | Input              | Type                      | Default     | Description                                                  |
 | :----------------- | :------------------------ | :---------- | :----------------------------------------------------------- |
@@ -179,7 +176,7 @@ Supports projected `formidable-field-option` children. **Use when** you need a s
 
 **Selector** `formidable-autocomplete-field` · **Value** `string | null`
 
-Dropdown panel plus a filter input. Emits filter text; the consumer supplies filtered options (the portal pairs it with fuse.js). Option inputs come from **Base Option Field Directive**.
+Dropdown panel plus a filter input. Emits filter text; the consumer supplies filtered options (the portal pairs it with fuse.js). Option inputs come from **Base Option Field Directives**.
 
 | Input              | Type                      | Default     | Description                                                  |
 | :----------------- | :------------------------ | :---------- | :----------------------------------------------------------- |
@@ -267,7 +264,7 @@ Range slider with optional tick marks and labels. A drag lands inside `min` / `m
 
 **Selector** `formidable-radio-group-field` · **Value** `string | null`
 
-Single choice from projected options. No inputs of its own — everything comes from **Base Option Field Directive**.
+Single choice from projected options. No inputs of its own — everything comes from **Base Option Field Directives**.
 
 Collects `formidable-field-option` children. With no options it renders `noOptionsText` as plain text, not as an option. **Use when** all choices should be visible and mutually exclusive.
 
@@ -275,7 +272,7 @@ Collects `formidable-field-option` children. With no options it renders `noOptio
 
 **Selector** `formidable-checkbox-group-field` · **Value** `string[]`
 
-Multi-select from projected options. No inputs of its own — everything comes from **Base Option Field Directive**.
+Multi-select from projected options. No inputs of its own — everything comes from **Base Option Field Directives**.
 
 Collects `formidable-field-option` children. With no options it renders `noOptionsText` as plain text, not as an option. **Use when** multiple choices may be selected.
 
@@ -376,18 +373,19 @@ A floating label's value clears it because the `label-inside` host hands the fie
 
 A single option inside an option-based field. Provides `FORMIDABLE_OPTION` and throws if used outside a `FORMIDABLE_OPTION_FIELD` parent. Supports projected template content. It may sit anywhere inside the field element — directly, inside a `@for` / `*ngIf` / `<ng-template>`, or nested in a wrapper element — but it must be **written inside** that element: Angular resolves both the parent injection and the content query from where the option is declared, not from where it renders.
 
-| Member        | Type                  | Default                            | Description                                                        |
-| :------------ | :-------------------- | :--------------------------------- | :----------------------------------------------------------------- |
-| `value`       | `string` (required)   | —                                  | Option value                                                       |
-| `label`       | `string`              | The projected content's text       | Display label                                                      |
-| `readonly`    | `boolean`             | `false`                            | Read-only option                                                   |
-| `disabled`    | `boolean`             | `false`                            | Disabled option                                                    |
-| `selected`    | `boolean`             | `false`                            | Selected state                                                     |
-| `highlighted` | `boolean`             | `false`                            | Highlighted state                                                  |
-| `match`       | `(filter) => boolean` | Case-insensitive `label` substring | Overrides how the autocomplete filter matches it                   |
-| `layout`      | `FieldOptionLayout`   | `'inline'`                         | Option layout, a look only. The ARIA role follows the parent field |
-| `template`    | getter                | —                                  | The projected content, or `undefined` when none was projected      |
-| `option`      | computed              | —                                  | The plain `FormidableOption` the owning field reads — see below    |
+| Member        | Type                  | Default                            | Description                                                          |
+| :------------ | :-------------------- | :--------------------------------- | :------------------------------------------------------------------- |
+| `value`       | `string` (required)   | —                                  | Option value                                                         |
+| `label`       | `string`              | The projected content's text       | Display label                                                        |
+| `readonly`    | `boolean`             | `false`                            | Read-only option                                                     |
+| `disabled`    | `boolean`             | `false`                            | Disabled option                                                      |
+| `selected`    | `boolean`             | `false`                            | Selected state                                                       |
+| `highlighted` | `boolean`             | `false`                            | Highlighted state                                                    |
+| `content`     | `TemplateRef`         | —                                  | What a rendered option shows in place of its label. Set by the field |
+| `match`       | `(filter) => boolean` | Case-insensitive `label` substring | Overrides how the autocomplete filter matches it                     |
+| `layout`      | `FieldOptionLayout`   | `'inline'`                         | Option layout, a look only. The ARIA role follows the parent field   |
+| `template`    | getter                | —                                  | The projected content, or `undefined` when none was projected        |
+| `option`      | computed              | —                                  | The plain `FormidableOption` the owning field reads — see below      |
 
 **Component And Data**: `FormidableOption` is plain data — the shape a consumer writes into a field's `options` input, and the shape every field works with internally. A component is a different thing: its members are signals. `option` is the one boundary between them, and it is what `FORMIDABLE_OPTION` provides: the component folds its inputs, its projected content and its `match` default into one plain option, and the owning field reads that. `label` therefore falls back to the text taken off the projected content, and `match` resolves its default there rather than on the input — which is why the plain option a field holds always carries one.
 

@@ -35,18 +35,18 @@ providers: [
 
 Then supply the abstract members:
 
-| Member                       | Supply                                                                                  |
-| :--------------------------- | :-------------------------------------------------------------------------------------- |
-| `value`                      | A getter reading the current value off whatever the field renders                       |
-| `fieldRef`                   | The field's outer element. The decorator measures it and the listeners are scoped to it |
-| `decoratorLayout`            | `'horizontal'`, `'vertical'` or `'inline'` — see [`user/decoration.md`](decoration.md)  |
-| `doWriteValue(value)`        | Put a value the form wrote into whatever the field renders                              |
-| `doOnValueChange()`          | The field's half of a value change, after the base has committed it                     |
-| `doOnFocusChange(isFocused)` | The field's half of a focus change. Guard `readonly` here, not in `onFocusChange`       |
-| `registeredKeys`             | The keys that reach `keyboardCallback`. `[]` for none                                   |
-| `keyboardCallback`           | Handles those keys, or `null`                                                           |
-| `externalClickCallback`      | Runs on a click outside the field — how a panel closes. `null` to not listen            |
-| `windowResizeScrollCallback` | Runs on a debounced resize or scroll — how a panel repositions. `null` to not listen    |
+| Member                       | Supply                                                                                            |
+| :--------------------------- | :------------------------------------------------------------------------------------------------ |
+| `value`                      | A getter reading the current value off whatever the field renders                                 |
+| `fieldRef`                   | The field's outer element. The decorator measures it and the listeners are scoped to it           |
+| `decoratorLayout`            | `'horizontal'`, `'vertical'` or `'inline'` — see [`user/decoration.md`](decoration.md)            |
+| `doWriteValue(value)`        | Put a value the form wrote into whatever the field renders                                        |
+| `doOnValueChange()`          | The field's half of a value change, after the base has committed it                               |
+| `doOnFocusChange(isFocused)` | The field's half of a focus change. Guard `readonly` here, not in `onFocusChange`                 |
+| `registeredKeys`             | The keys that reach `keyboardCallback`. `[]` for none                                             |
+| `keyboardCallback`           | Handles those keys and returns whether it acted; only such a key is `preventDefault`ed. Or `null` |
+| `externalClickCallback`      | Runs on a click outside the field — how a panel closes. `null` to not listen                      |
+| `windowResizeScrollCallback` | Runs on a debounced resize or scroll — how a panel repositions. `null` to not listen              |
 
 And override these where they apply:
 

@@ -38,13 +38,15 @@ export class ToggleField extends BaseField<boolean> {
     // No additional actions needed
   }
 
-  private handleKeydown(event: KeyboardEvent): void {
+  private handleKeydown(event: KeyboardEvent): boolean {
     switch (event.key) {
       case ' ':
       case 'Space':
       case 'Enter':
         this.toggle();
-        break;
+        return true;
+      default:
+        return false;
     }
   }
 

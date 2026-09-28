@@ -109,17 +109,19 @@ export class TimeField extends BaseField<Date | null> implements OnInit, OnDestr
     this.trySetTimeFromInput(this.inputRef().nativeElement.value);
   }
 
-  private handleKeydown(event: KeyboardEvent): void {
+  private handleKeydown(event: KeyboardEvent): boolean {
     switch (event.key) {
       case 'Enter':
         this.trySetTimeFromInput(this.inputRef().nativeElement.value);
-        break;
+        return true;
       case 'ArrowUp':
         this.stepSegment(1);
-        break;
+        return true;
       case 'ArrowDown':
         this.stepSegment(-1);
-        break;
+        return true;
+      default:
+        return false;
     }
   }
 

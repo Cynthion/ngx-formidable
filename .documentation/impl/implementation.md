@@ -101,37 +101,23 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 
 Found by the architecture review and the test harness. Each is fixed in the phase that rewrites its code and proven by a behaviour spec there, rather than patched in code that is about to go.
 
-| Id  | Defect                                                                                                                                            | Phase |
-| :-- | :------------------------------------------------------------------------------------------------------------------------------------------------ | :---: |
-| D1  | `dropdown-field` reverts a user's pick when its option list changes                                                                               |  21   |
-| D2  | Option fields disagree about a value with no option: `select-field` blanks only its display, the others correct the model                         |  21   |
-| D4  | `toggle-field`'s `offLabel` does not fall back to `onLabel` as documented                                                                         |  25   |
-| D6  | A readonly `slider-field` still moves its thumb on the arrow keys                                                                                 |  25   |
-| D7  | An invalid `unicodeTokenFormat` is caught on init only, and changing it later drops the fallback                                                  |  24   |
-| D8  | Pikaday commits typed text through its own `change` listener, bypassing `ignoresBlur` — not yet confirmed in a browser                            |  24   |
-| D9  | Every registered key is `preventDefault`ed, including an `Enter` or `Escape` the field ignores, which blocks implicit submit and closing a dialog |  21   |
-| D10 | Clicking an `autocomplete-field` option reports a blur twice, the second simulated, and leaves focus on the hidden panel                          |  22   |
-| D11 | The simulated blur leaves the field's focus state set, so the field and its decorator disagree                                                    |  22   |
-| D14 | Every scroll or resize re-measures every panel field, open or not                                                                                 |  22   |
-| D16 | `select-field` shows its first option for a value `[formControl]` writes before its options exist, while the model holds another                  |  21   |
+| Id  | Defect                                                                                                                   | Phase |
+| :-- | :----------------------------------------------------------------------------------------------------------------------- | :---: |
+| D4  | `toggle-field`'s `offLabel` does not fall back to `onLabel` as documented                                                |  25   |
+| D6  | A readonly `slider-field` still moves its thumb on the arrow keys                                                        |  25   |
+| D7  | An invalid `unicodeTokenFormat` is caught on init only, and changing it later drops the fallback                         |  24   |
+| D8  | Pikaday commits typed text through its own `change` listener, bypassing `ignoresBlur` — not yet confirmed in a browser   |  24   |
+| D10 | Clicking an `autocomplete-field` option reports a blur twice, the second simulated, and leaves focus on the hidden panel |  22   |
+| D11 | The simulated blur leaves the field's focus state set, so the field and its decorator disagree                           |  22   |
+| D14 | Every scroll or resize re-measures every panel field, open or not                                                        |  22   |
 
 ---
 
 ## Library Phases
 
-### Phase 21 — Option Fields
-
-**Depends On**: nothing.
-
-- **Two Layers**: the option base splits into a list layer — the option inputs, the projected options, one `computeAllOptions` — and a highlight layer. `select-field` takes the list layer only.
-- **One Rule For An Unknown Value**: all five option fields render it as no selection, leave the model alone, and show it again once its option arrives.
-- **Keyboard**: one list-navigation handler for the groups and one for the two panel fields. A key callback reports whether it handled the key, and only a handled key is `preventDefault`ed. The groups take `Space`.
-- **Field Option**: a projected option is a data source only; review its temporary-view content detection.
-- **Closes**: D1, D2, D9, D16.
-
 ### Phase 22 — Panel Fields
 
-**Depends On**: Phase 21.
+**Depends On**: nothing.
 
 - **One Panel Behaviour**: `dropdown-field`, `autocomplete-field` and `date-field` share one implementation of the panel — its mousedown, its outside click, and repositioning on scroll and resize while it is open only.
 - **No Simulated Focus**: the simulated blurs go, and the field's focus state is the only one.
@@ -158,7 +144,7 @@ Found by the architecture review and the test harness. Each is fixed in the phas
 
 ### Phase 25 — Field Symmetry Sweep
 
-**Depends On**: Phases 21, 23 and 24.
+**Depends On**: Phases 23 and 24.
 
 - **Side By Side**: all eleven fields compared for input order, provider block, template attribute order and `tabindex`, and brought in line with [`impl/components.md`](components.md).
 - **One Edit Guard**: a `canEdit` computed on the base guards every public mutator — `toggle()`, `selectValue()`, `selectDate()`, `selectTime()`, `selectOption()` — and the keyboard and pointer guards.

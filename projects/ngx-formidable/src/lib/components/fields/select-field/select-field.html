@@ -15,8 +15,10 @@
   (change)="onSelectChanged()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
-  <!-- Placeholder -->
-  @if (placeholder() && !value()) {
+  <!-- No Selection -->
+  <!-- Selected whenever no option carries the value, so the platform never puts its first option in the
+       value's place. Shows the placeholder, or nothing. -->
+  @if (!selectedOption()) {
   <option
     value=""
     disabled

@@ -31,14 +31,11 @@
     [layout]="'radio-group'"
     [value]="option.value"
     [label]="option.label"
+    [content]="option.template"
     [readonly]="option.readonly || readonly()"
     [disabled]="option.disabled || disabled()"
     [selected]="option.value === value()"
-    [highlighted]="i === highlightedOptionIndex()">
-    @if (option.template) {
-    <ng-container [ngTemplateOutlet]="option.template" />
-    } @else { {{ option.label || option.value }} }
-  </formidable-field-option>
+    [highlighted]="i === highlightedOptionIndex()" />
   } @empty {
   <div class="no-option">{{ noOptionsText() }}</div>
   }

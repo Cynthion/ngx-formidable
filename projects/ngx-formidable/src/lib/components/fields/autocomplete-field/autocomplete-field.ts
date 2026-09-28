@@ -1,4 +1,3 @@
-import { NgTemplateOutlet } from '@angular/common';
 import {
   afterRenderEffect,
   Component,
@@ -15,12 +14,7 @@ import {
 } from '@angular/core';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { replaceText } from '../../../helpers/input.helpers';
-import {
-  applyActionOption,
-  applyDefaultOption,
-  combineFieldOptions,
-  getNextAvailableOptionIndex
-} from '../../../helpers/option.helpers';
+import { applyActionOption, applyDefaultOption } from '../../../helpers/option.helpers';
 import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import {
   FieldDecoratorLayout,
@@ -45,7 +39,7 @@ import { BaseOptionField } from '../base-option-field';
   selector: 'formidable-autocomplete-field',
   templateUrl: './autocomplete-field.html',
   styleUrls: ['./autocomplete-field.scss'],
-  imports: [NgTemplateOutlet, FieldOption],
+  imports: [FieldOption],
   providers: [
     // required to provide this component as FormidableField
     {
@@ -63,7 +57,7 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   readonly autocompleteRef = viewChild.required<ElementRef<HTMLDivElement>>('autocompleteRef');
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
-  protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
+  protected keyboardCallback = (event: KeyboardEvent) => this.navigatePanelOptions(event, this);
   protected externalClickCallback = () => this.handleExternalClick();
   protected windowResizeScrollCallback = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
@@ -114,37 +108,6 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     }
 
     this.selectOnKeyboardFocus(this.inputRef().nativeElement, false);
-  }
-
-  private handleKeydown(event: KeyboardEvent): void {
-    const options = this.activeOptions();
-    const count = options.length;
-
-    switch (event.key) {
-      case 'Escape':
-      case 'Tab':
-        if (this.isPanelOpen()) this.togglePanel(false);
-        break;
-      case 'ArrowDown':
-        if (!this.isPanelOpen()) {
-          this.togglePanel(true);
-        } else if (count > 0) {
-          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex(), options, 'down'));
-        }
-        break;
-      case 'ArrowUp':
-        if (this.isPanelOpen() && count > 0) {
-          this.setHighlightedIndex(getNextAvailableOptionIndex(this.highlightedOptionIndex(), options, 'up'));
-        }
-        break;
-      case 'Enter': {
-        if (!this.isPanelOpen()) return;
-        const idx = this.highlightedOptionIndex();
-        const option = this.activeOptions()[idx];
-        if (option) this.selectOption(option);
-        break;
-      }
-    }
   }
 
   private handleExternalClick(): void {
@@ -289,14 +252,6 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
       this.reconcileHighlightAfterOptionsChanged();
       this.updatePanelPosition();
     }
-  }
-
-  private computeAllOptions(): FormidableOption[] {
-    return combineFieldOptions(
-      this.options(),
-      this.optionComponents().map((source) => source.option()),
-      this.sortFn()
-    );
   }
 
   // A configured default option is always selectable, whatever its mode: in `fallback` mode whether it

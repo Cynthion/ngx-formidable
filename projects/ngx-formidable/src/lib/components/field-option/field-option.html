@@ -29,13 +29,14 @@
 
   <!-- Content -->
   <div class="content">
-    <!-- captures the content projection inside a template reference for later export -->
-    <ng-template #contentTemplate>
-      <ng-content />
-    </ng-template>
-
-    @if (hasContent()) {
-    <ng-container [ngTemplateOutlet]="contentTemplate" />
-    } @else { {{ label() ?? value() }} }
+    @if (content(); as content) {
+    <ng-container [ngTemplateOutlet]="content" />
+    } @else { {{ label() || value() }} }
   </div>
 </div>
+
+<!-- A projected option's content, handed to its field as `option().template` and rendered only where the
+     field renders the option — never here, so the content lives in exactly one place. -->
+<ng-template #contentTemplate>
+  <ng-content />
+</ng-template>

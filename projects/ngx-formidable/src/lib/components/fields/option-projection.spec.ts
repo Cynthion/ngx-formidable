@@ -315,7 +315,8 @@ describe('option projection', () => {
       selectFixture.componentInstance.disabledValue.set('b');
       await settle(selectFixture);
 
-      const disabled = Array.from(selectFixture.nativeElement.querySelectorAll('option:disabled')).map(
+      // `:not([value=""])` leaves out the no-selection option, which is disabled too.
+      const disabled = Array.from(selectFixture.nativeElement.querySelectorAll('option:disabled:not([value=""])')).map(
         (el) => (el as HTMLOptionElement).value
       );
       expect(disabled).toEqual(['b']);

@@ -243,14 +243,9 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
     return ignore;
   }
 
-  private handleKeydown(event: KeyboardEvent): void {
+  private handleKeydown(event: KeyboardEvent): boolean {
     const date = this.picker?.getDate();
-
-    // While the calendar is open, arrow keys navigate it — stop them from also
-    // moving the text caret in the input (base directive lets Left/Right through).
-    if (this.isPanelOpen() && event.key.startsWith('Arrow')) {
-      event.preventDefault();
-    }
+    const isOpen = this.isPanelOpen();
 
     switch (event.key) {
       case 'Escape':
@@ -260,7 +255,8 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
         // Commit what's in the input — it reflects both typing and calendar
         // arrow-navigation — never the picker's default cursor (which is "today").
         this.trySetDateFromInput(this.inputRef().nativeElement.value);
-        break;
+        // `Tab` still moves on, and an `Escape` with no panel to close belongs to whatever holds the field.
+        return event.key === 'Enter' || (event.key === 'Escape' && isOpen);
       case 'ArrowDown':
         // Alt+Arrow works the panel, the way a native <select> and the ARIA combobox pattern do.
         // Plain arrows never open it — they belong to the value.
@@ -272,7 +268,7 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
           const nextDate = addDays(date, 7);
           this.picker?.setDate(nextDate, true); // silent update
         }
-        break;
+        return true;
       case 'ArrowUp':
         if (event.altKey) {
           this.togglePanel(false);
@@ -282,19 +278,22 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
           const nextDate = addDays(date, -7);
           this.picker?.setDate(nextDate, true); // silent update
         }
-        break;
+        return true;
       case 'ArrowLeft':
         if (this.isPanelOpen() && date) {
           const nextDate = addDays(date, -1);
           this.picker?.setDate(nextDate, true); // silent update
         }
-        break;
+        // While the calendar is open, the horizontal arrows move it instead of the caret.
+        return isOpen;
       case 'ArrowRight':
         if (this.isPanelOpen() && date) {
           const nextDate = addDays(date, 1);
           this.picker?.setDate(nextDate, true); // silent update
         }
-        break;
+        return isOpen;
+      default:
+        return false;
     }
   }
 

@@ -8,6 +8,7 @@ export * from './lib/components/field-option/field-option';
 export * from './lib/components/fields/autocomplete-field/autocomplete-field';
 export * from './lib/components/fields/base-field';
 export * from './lib/components/fields/base-option-field';
+export * from './lib/components/fields/base-option-list-field';
 export * from './lib/components/fields/checkbox-group-field/checkbox-group-field';
 export * from './lib/components/fields/date-field/date-field';
 export * from './lib/components/fields/dropdown-field/dropdown-field';

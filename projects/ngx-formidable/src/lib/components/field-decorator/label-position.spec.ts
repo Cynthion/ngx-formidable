@@ -932,11 +932,11 @@ describe('FormidableField.canLabelRest', () => {
     expect(fixture.componentInstance.canLabelRest()).toBe(false);
   });
 
-  it('is false for a select field, which always shows an option', () => {
+  it('is true for a select field with nothing selected, which shows no option in its place', () => {
     const fixture = TestBed.createComponent(SelectField);
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.canLabelRest()).toBe(false);
+    expect(fixture.componentInstance.canLabelRest()).toBe(true);
   });
 
   it('is false while readonly or disabled', () => {

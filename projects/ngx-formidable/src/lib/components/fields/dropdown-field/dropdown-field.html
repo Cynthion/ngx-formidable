@@ -71,14 +71,11 @@
         [attr.id]="optionId(i)"
         [value]="option.value"
         [label]="option.label"
+        [content]="option.template"
         [readonly]="option.readonly || false"
         [disabled]="option.disabled || false"
         [selected]="option.value === selectedOption()?.value"
-        [highlighted]="i === highlightedOptionIndex()">
-        @if (option.template) {
-        <ng-container [ngTemplateOutlet]="option.template" />
-        } @else { {{ option.label || option.value }} }
-      </formidable-field-option>
+        [highlighted]="i === highlightedOptionIndex()" />
       }
     </div>
   </div>

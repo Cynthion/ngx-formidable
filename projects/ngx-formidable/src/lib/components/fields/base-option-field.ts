@@ -1,45 +1,17 @@
-import { contentChildren, Directive, effect, input, signal, Signal, untracked, viewChildren } from '@angular/core';
-import { getNextAvailableOptionIndex, trackProjectedOptions } from '../../helpers/option.helpers';
+import { Directive, signal, Signal, viewChildren } from '@angular/core';
+import { getNextAvailableOptionIndex } from '../../helpers/option.helpers';
 import { scrollHighlightedOptionIntoView } from '../../helpers/position.helpers';
-import {
-  FieldDefaultOptionMode,
-  FORMIDABLE_OPTION,
-  FormidableOption,
-  FormidableOptionSource,
-  NO_OPTIONS_TEXT
-} from '../../models/formidable.model';
+import { FormidableOption, FormidablePanelField } from '../../models/formidable.model';
 import { FieldOption } from '../field-option/field-option';
-import { BaseField } from './base-field';
+import { BaseOptionListField } from './base-option-list-field';
 
 /**
- * The base class behind the fields that render a list of options and walk it with a highlight —
- * `dropdown-field`, `autocomplete-field`, `radio-group-field` and `checkbox-group-field`. It adds the option
- * inputs below to everything `BaseField` already gives a field.
- *
- * Options come from the `options` input, from projected `<formidable-field-option>` children, or from both.
+ * The base class behind the fields that walk their list of options with a highlight — `dropdown-field`,
+ * `autocomplete-field`, `radio-group-field` and `checkbox-group-field`. It adds the highlight and the keys
+ * that move it to everything `BaseOptionListField` already gives a field.
  */
 @Directive()
-export abstract class BaseOptionField<T = string | null> extends BaseField<T> {
-  /** Options bound as data. Merged with any projected `<formidable-field-option>` children, not replaced. */
-  public readonly options = input<FormidableOption[] | undefined>([]);
-
-  /** An option pinned to the top of the list, never sorted and never filtered. See `defaultOptionMode`. */
-  public readonly defaultOption = input<FormidableOption | undefined>(undefined);
-
-  /** Whether the `defaultOption` always renders, or only when there would otherwise be no options. */
-  public readonly defaultOptionMode = input<FieldDefaultOptionMode>('always');
-
-  /** What renders in place of an empty list. Plain text, not an option — there is nothing there to pick. */
-  public readonly noOptionsText = input<string>(NO_OPTIONS_TEXT);
-
-  /** Orders the merged list. Applied after the merge, so bound and projected options interleave. */
-  public readonly sortFn = input<((a: FormidableOption, b: FormidableOption) => number) | undefined>(undefined);
-
-  /** The projected options. One may sit inside a wrapper element rather than directly in the field. */
-  public readonly optionComponents = contentChildren<FormidableOptionSource>(FORMIDABLE_OPTION, {
-    descendants: true
-  });
-
+export abstract class BaseOptionField<T = string | null> extends BaseOptionListField<T> {
   protected readonly optionRefs = viewChildren<FieldOption>('optionRef');
 
   protected readonly highlightedOptionIndex = signal(-1);
@@ -47,39 +19,11 @@ export abstract class BaseOptionField<T = string | null> extends BaseField<T> {
   // The highlighted option's value, so a reconcile can follow it across a changed list.
   protected highlightedOptionValue: string | null = null;
 
-  constructor() {
-    super();
-
-    // One source of truth for "the option list moved".
-    //
-    // The `queueMicrotask` stays, and is the one thing signals do not remove. A projected option resolves
-    // its content — and therefore its label — in its own `ngAfterContentInit`, and an option inside an
-    // `@for` has not had its `required` inputs applied while this effect runs. Reading either now gives a
-    // wrong label or throws NG0950; a microtask lands after both.
-    effect(() => {
-      this.optionSources();
-      untracked(() => queueMicrotask(() => this.onOptionsChanged()));
-    });
-  }
-
-  // What the effect above watches. Not the merged list itself: each field merges differently, and the
-  // reconcile needs to run for a changed `sortFn` as much as for a changed option.
-  //
-  // The projected children are watched both by the query and by each one's `option()` — see
-  // `trackProjectedOptions`.
-  //
-  // Overridden by a field with option inputs of its own, so those move the list too.
-  protected optionSources(): unknown[] {
-    trackProjectedOptions(this.optionComponents());
-
-    return [this.options(), this.defaultOption(), this.defaultOptionMode(), this.sortFn(), this.optionComponents()];
-  }
-
-  // Recombines the options and re-reconciles selection and highlight against them.
-  protected abstract onOptionsChanged(): void;
-
   // The options the highlight walks — the rendered list, which `autocomplete-field` filters.
   protected abstract readonly activeOptions: Signal<FormidableOption[]>;
+
+  /** Commits an option, as a click on it does. */
+  public abstract selectOption(option: FormidableOption): void;
 
   // The value the selection claims the highlight for. `null` for a multi-select field, which has no single
   // selection to claim it.
@@ -91,6 +35,59 @@ export abstract class BaseOptionField<T = string | null> extends BaseField<T> {
   // `null` for a negative index, so a field with nothing highlighted emits no `aria-activedescendant`.
   protected optionId(index: number): string | null {
     return index >= 0 ? `${this.fieldId}-option-${index}` : null;
+  }
+
+  // The groups' keys: the arrows walk the list, and `Enter` or `Space` pick the highlighted option.
+  protected navigateOptions(event: KeyboardEvent): boolean {
+    const options = this.activeOptions();
+
+    switch (event.key) {
+      case 'ArrowDown':
+      case 'ArrowUp': {
+        const index = getNextAvailableOptionIndex(
+          this.highlightedOptionIndex(),
+          options,
+          event.key === 'ArrowDown' ? 'down' : 'up'
+        );
+        if (index < 0) return false;
+
+        this.setHighlightedIndex(index);
+        return true;
+      }
+      case 'Enter':
+      case ' ': {
+        const option = options[this.highlightedOptionIndex()];
+        if (!option) return false;
+
+        this.selectOption(option);
+        return true;
+      }
+      default:
+        return false;
+    }
+  }
+
+  // The panel fields' keys: `ArrowDown` opens the panel, `Escape` and `Tab` close it, and while it is open
+  // the list is walked as a group's is. An open panel keeps every key it is walked with, even one with
+  // nothing to act on, so an `Enter` meant for the list never submits the form behind it.
+  protected navigatePanelOptions(event: KeyboardEvent, panel: FormidablePanelField): boolean {
+    const isOpen = panel.isPanelOpen();
+
+    switch (event.key) {
+      case 'Tab':
+        if (isOpen) panel.togglePanel(false);
+        return false;
+      case 'Escape':
+        if (isOpen) panel.togglePanel(false);
+        return isOpen;
+      case 'ArrowDown':
+        if (isOpen) this.navigateOptions(event);
+        else panel.togglePanel(true);
+        return true;
+      default:
+        if (isOpen) this.navigateOptions(event);
+        return isOpen;
+    }
   }
 
   protected highlightSelectedOption(): void {
