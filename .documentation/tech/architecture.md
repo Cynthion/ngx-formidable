@@ -44,7 +44,7 @@ projects/ngx-formidable/
 └── vest/                                 # → @cynthion/ngx-formidable/vest — the Vest adapter, `vest` as an optional peer
 ```
 
-**Composition Model**: field components implement Angular's `FormValueControl` through a `value` model and register the `FORMIDABLE_FIELD` token; `FieldDecorator` projects a field plus its label/adornment/prefix/suffix/errors; option-based fields collect `FieldOption` children via `@ContentChildren`. The abstract `BaseField` is the shared base and the extension point for custom fields; the abstract `BaseOptionField` extends it for the four fields that walk an option list with a highlight. See [`user/components.md`](../user/components.md).
+**Composition Model**: field components implement Angular's `FormValueControl` through a `value` model and register the `FORMIDABLE_FIELD` token; `FieldDecorator` projects a field plus its label/adornment/prefix/suffix/errors; option-based fields collect `FieldOption` children via `@ContentChildren`. The abstract `BaseField` is the shared base and the extension point for custom fields; the abstract `BaseOptionListField` extends it for every field that renders an option list, and `BaseOptionField` extends that for the four that walk the list with a highlight. See [`user/components.md`](../user/components.md).
 
 **Validation**:
 

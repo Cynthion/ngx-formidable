@@ -1,27 +1,12 @@
-import {
-  Component,
-  computed,
-  contentChildren,
-  effect,
-  ElementRef,
-  input,
-  model,
-  signal,
-  untracked,
-  viewChild
-} from '@angular/core';
-import { applyDefaultOption, combineFieldOptions, trackProjectedOptions } from '../../../helpers/option.helpers';
+import { Component, computed, ElementRef, model, signal, viewChild } from '@angular/core';
+import { applyDefaultOption } from '../../../helpers/option.helpers';
 import {
   FieldDecoratorLayout,
-  FieldDefaultOptionMode,
   FORMIDABLE_FIELD,
-  FORMIDABLE_OPTION,
   FORMIDABLE_OPTION_FIELD,
-  FormidableOption,
-  FormidableOptionSource,
-  NO_OPTIONS_TEXT
+  FormidableOption
 } from '../../../models/formidable.model';
-import { BaseField } from '../base-field';
+import { BaseOptionListField } from '../base-option-list-field';
 
 /**
  * A single choice from a native `<select>`, so its list is the platform's and opens where the platform puts
@@ -45,7 +30,7 @@ import { BaseField } from '../base-field';
     }
   ]
 })
-export class SelectField extends BaseField<string | null> {
+export class SelectField extends BaseOptionListField<string | null> {
   readonly selectRef = viewChild.required<ElementRef<HTMLSelectElement>>('selectRef');
 
   protected keyboardCallback = null;
@@ -53,38 +38,20 @@ export class SelectField extends BaseField<string | null> {
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
-  constructor() {
-    super();
-
-    // `BaseOptionField` has the same effect, including why the read is deferred to a microtask;
-    // this field stays on `BaseField`, because a native `<select>` has no highlight and would
-    // only inherit dead state.
-    effect(() => {
-      this.options();
-      this.defaultOption();
-      this.defaultOptionMode();
-      this.sortFn();
-      trackProjectedOptions(this.optionComponents());
-
-      untracked(() => queueMicrotask(() => this.onOptionsChanged()));
-    });
-  }
-
   protected doOnFocusChange(_isFocused: boolean): void {
     // No additional actions needed
   }
 
   /** The user picked one. */
   protected onSelectChanged(): void {
-    this.setValue(this.selectRef().nativeElement.value || null);
+    this.setValue(this.selectRef().nativeElement.value);
   }
 
   // #region FormidableField
 
   /**
-   * The picked option's value, or `null` for none. The template marks the matching option from it, so the
-   * browser selects that option as the options render — a native `<select>` cannot hold a value before its
-   * `<option>` exists.
+   * The picked option's value, or `null` for none. A value no option carries renders as no selection — the
+   * `placeholder`, or nothing — rather than as whichever option the platform would put in its place.
    */
   public readonly value = model<string | null>(null);
 
@@ -93,10 +60,6 @@ export class SelectField extends BaseField<string | null> {
   }
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
-
-  // A native <select> always renders something in its value area, so a label can never rest there: with
-  // nothing selected it shows its first option, and with no options at all it shows `noOptionsText`.
-  protected override readonly showsEmptyValueHint = signal(true);
 
   // Mirrors the template: the arrow is drawn only while the field can actually open its list. It overlays
   // the select instead of taking a slot beside the value, but the inset it asks the decorator for is the
@@ -107,40 +70,21 @@ export class SelectField extends BaseField<string | null> {
 
   // #region FormidableOptionField
 
-  /** Options bound as data. Merged with any projected `<formidable-field-option>` children, not replaced. */
-  public readonly options = input<FormidableOption[] | undefined>([]);
-
-  /** An option pinned to the top of the list — the usual home for a "please choose" entry. */
-  public readonly defaultOption = input<FormidableOption | undefined>(undefined);
-
-  /** Whether the `defaultOption` always renders, or only when there would otherwise be no options. */
-  public readonly defaultOptionMode = input<FieldDefaultOptionMode>('always');
-
-  /** What renders in place of an empty list. */
-  public readonly noOptionsText = input<string>(NO_OPTIONS_TEXT);
-
-  /** Orders the merged list. Applied after the merge, so bound and projected options interleave. */
-  public readonly sortFn = input<((a: FormidableOption, b: FormidableOption) => number) | undefined>(undefined);
-
-  /** The projected options. One may sit inside a wrapper element rather than directly in the field. */
-  public readonly optionComponents = contentChildren<FormidableOptionSource>(FORMIDABLE_OPTION, {
-    descendants: true
-  });
-
   protected readonly activeOptions = signal<FormidableOption[]>([]);
+
+  // The option the model names, if it has arrived.
+  protected readonly selectedOption = computed(() =>
+    this.activeOptions().find((option) => option.value === this.value())
+  );
 
   public selectOption(_option: FormidableOption): void {
     // Native <select> chooses options; not used.
   }
 
-  private onOptionsChanged(): void {
-    const combined = combineFieldOptions(
-      this.options(),
-      this.optionComponents().map((source) => source.option()),
-      this.sortFn()
+  protected onOptionsChanged(): void {
+    this.activeOptions.set(
+      applyDefaultOption(this.computeAllOptions(), this.defaultOption(), this.defaultOptionMode())
     );
-
-    this.activeOptions.set(applyDefaultOption(combined, this.defaultOption(), this.defaultOptionMode()));
   }
 
   // #endregion

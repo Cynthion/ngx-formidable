@@ -167,18 +167,21 @@ Every control is operable from the keyboard. Disabled and readonly fields ignore
 - **Panel** — the dropdown, autocomplete or date overlay. Panels close on `Esc`, or when focus leaves the field.
 - **Segment** — the part of the `unicodeTokenFormat` under the caret: the year, month or day of a date field, the hour, minute, second or AM/PM of a time field.
 
-| Key                  | Inputs / Textareas | Select / Dropdown / Autocomplete                    | Radio / Checkbox Groups | Date Field                                    | Time Field                |
-| :------------------- | :----------------- | :-------------------------------------------------- | :---------------------- | :-------------------------------------------- | :------------------------ |
-| `Tab`                | Move to next       | Close panel (if open), then move                    | Move to next            | Close panel (if open), then move              | Move to next              |
-| `Shift` + `Tab`      | Move to previous   | Close panel (if open), then move                    | Move to previous        | Close panel (if open), then move              | Move to previous          |
-| `Enter`              | —                  | If panel open: choose highlighted option            | —                       | Parse and accept the date                     | Parse and accept the time |
-| `Esc`                | —                  | Close panel                                         | —                       | Close panel                                   | —                         |
-| `Arrow Up`           | —                  | If open: previous option (wraps)                    | Previous option         | If panel open: previous week; else segment up | Segment up                |
-| `Arrow Down`         | —                  | If closed: open panel; if open: next option (wraps) | Next option             | If panel open: next week; else segment down   | Segment down              |
-| `Alt` + `Arrow Up`   | —                  | —                                                   | —                       | Close panel                                   | —                         |
-| `Alt` + `Arrow Down` | —                  | —                                                   | —                       | Open panel                                    | —                         |
-| `Arrow Left`         | —                  | —                                                   | —                       | If panel open: previous day; else move caret  | Move caret                |
-| `Arrow Right`        | —                  | —                                                   | —                       | If panel open: next day; else move caret      | Move caret                |
+| Key                  | Inputs / Textareas | Select / Dropdown / Autocomplete                    | Radio / Checkbox Groups   | Date Field                                    | Time Field                |
+| :------------------- | :----------------- | :-------------------------------------------------- | :------------------------ | :-------------------------------------------- | :------------------------ |
+| `Tab`                | Move to next       | Close panel (if open), then move                    | Move to next              | Close panel (if open), then move              | Move to next              |
+| `Shift` + `Tab`      | Move to previous   | Close panel (if open), then move                    | Move to previous          | Close panel (if open), then move              | Move to previous          |
+| `Enter`              | —                  | If panel open: choose highlighted option            | Choose highlighted option | Parse and accept the date                     | Parse and accept the time |
+| `Esc`                | —                  | If panel open: close panel                          | —                         | If panel open: close panel                    | —                         |
+| `Space`              | —                  | —                                                   | Choose highlighted option | —                                             | —                         |
+| `Arrow Up`           | —                  | If open: previous option (wraps)                    | Previous option           | If panel open: previous week; else segment up | Segment up                |
+| `Arrow Down`         | —                  | If closed: open panel; if open: next option (wraps) | Next option               | If panel open: next week; else segment down   | Segment down              |
+| `Alt` + `Arrow Up`   | —                  | —                                                   | —                         | Close panel                                   | —                         |
+| `Alt` + `Arrow Down` | —                  | —                                                   | —                         | Open panel                                    | —                         |
+| `Arrow Left`         | —                  | —                                                   | —                         | If panel open: previous day; else move caret  | Move caret                |
+| `Arrow Right`        | —                  | —                                                   | —                         | If panel open: next day; else move caret      | Move caret                |
+
+A key a field does not act on keeps its native effect: `Enter` on a dropdown or autocomplete with its panel closed submits the form, and `Esc` with no panel open reaches the dialog around the field.
 
 ### Type-Ahead
 

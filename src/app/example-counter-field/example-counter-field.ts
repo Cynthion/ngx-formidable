@@ -44,14 +44,16 @@ export class ExampleCounterField extends BaseField<number> implements Formidable
   }
 
   // The base already filters the key stream on focus, readonly and disabled.
-  private handleKeydown(event: KeyboardEvent): void {
+  private handleKeydown(event: KeyboardEvent): boolean {
     switch (event.key) {
       case 'ArrowUp':
         this.increment();
-        break;
+        return true;
       case 'ArrowDown':
         this.decrement();
-        break;
+        return true;
+      default:
+        return false;
     }
   }
 

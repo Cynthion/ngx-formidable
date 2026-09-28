@@ -73,6 +73,12 @@ export class FieldOption implements FormidableOptionSource, OnInit, AfterContent
   /** Whether the keyboard cursor is on this option. Driven by the field — do not bind it yourself. */
   readonly highlighted = input(false);
 
+  /**
+   * What renders in place of the label: the content projected into the option this one renders. Driven by
+   * the field — do not bind it yourself.
+   */
+  readonly content = input<TemplateRef<unknown> | undefined>(undefined);
+
   /** Whether an autocomplete's filter text matches. The default is a case-insensitive substring test. */
   readonly match = input<((filterValue: string) => boolean) | undefined>(undefined);
 
@@ -138,8 +144,9 @@ export class FieldOption implements FormidableOptionSource, OnInit, AfterContent
   }
 
   ngAfterContentInit(): void {
-    // Angular has no API to check whether <ng-content> received content;
-    // instantiating the template temporarily is the standard workaround.
+    // Angular has no API to check whether <ng-content> received content; instantiating the template
+    // temporarily is the standard workaround. The view is thrown away at once, so the content still renders
+    // in one place only: where the field renders the option.
     const view = this.contentTemplate().createEmbeddedView({});
     const hasContent = view.rootNodes.some((n: Node) => n.nodeType !== Node.TEXT_NODE || !!n.textContent?.trim());
 

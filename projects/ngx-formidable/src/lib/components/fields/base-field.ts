@@ -15,7 +15,7 @@ import {
   Signal
 } from '@angular/core';
 import { FormValueControl, ValidationError } from '@angular/forms/signals';
-import { debounceTime, filter, fromEvent, merge, Subject, takeUntil, tap } from 'rxjs';
+import { debounceTime, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
 import { NgxFormidableForm } from '../../forms/form.directive';
 import { endOfMaskedValue } from '../../helpers/input.helpers';
 import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../helpers/mask.helpers';
@@ -51,8 +51,12 @@ export abstract class BaseField<T = string | null>
    */
   abstract readonly value: ModelSignal<T>;
 
-  /** Handles the keys named in `registeredKeys`. `null` for a field with no keyboard behaviour of its own. */
-  protected abstract keyboardCallback: ((event: KeyboardEvent) => void) | null;
+  /**
+   * Handles the keys named in `registeredKeys`, and returns whether it acted on the key. Only a key it acted
+   * on is `preventDefault`ed, so one it ignores keeps its native effect — an `Enter` still submits the form.
+   * `null` for a field with no keyboard behaviour of its own.
+   */
+  protected abstract keyboardCallback: ((event: KeyboardEvent) => boolean) | null;
 
   /** Runs on a click landing outside the field — how a panel field closes. `null` to not listen. */
   protected abstract externalClickCallback: (() => void) | null;
@@ -60,10 +64,7 @@ export abstract class BaseField<T = string | null>
   /** Runs on a debounced window resize or scroll — how an open panel is repositioned. `null` to not listen. */
   protected abstract windowResizeScrollCallback: (() => void) | null;
 
-  /**
-   * Which keys reach `keyboardCallback`. Everything listed is `preventDefault`ed on the way in, except
-   * `Tab` and the horizontal arrows, which must keep their native behaviour.
-   */
+  /** Which keys reach `keyboardCallback`. */
   protected abstract registeredKeys: string[];
 
   protected id = `formidable-field-${nextFieldId++}`;
@@ -411,13 +412,11 @@ export abstract class BaseField<T = string | null>
         .pipe(
           filter(() => this.isFieldFocused() && !this.readonly() && !this.disabled()),
           filter((event) => this.registeredKeys.includes(event.key)),
-          tap((event) => {
-            // immediately prevent default, before debounceTime
-            if (event.key !== 'Tab' && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') event.preventDefault();
-          }),
           takeUntil(this.destroy$)
         )
-        .subscribe((event: KeyboardEvent) => this.keyboardCallback?.(event));
+        .subscribe((event: KeyboardEvent) => {
+          if (this.keyboardCallback?.(event)) event.preventDefault();
+        });
     }
 
     if (this.externalClickCallback) {
