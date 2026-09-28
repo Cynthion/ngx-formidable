@@ -22,14 +22,14 @@
       [attr.readonly]="readonly() ? '' : null"
       [attr.disabled]="disabled() ? '' : null"
       [attr.tabindex]="readonly() || disabled() ? -1 : null"
-      [attr.aria-required]="markRequired() || null"
+      [attr.aria-required]="required() || null"
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
       [attr.aria-readonly]="readonly() || null"
       (mousedown)="onEditorMouseDown()"
       (mouseup)="rememberClickedCaret(inputRef)"
       (click)="restoreClickedCaret(inputRef)"
-      (input)="onValueChange()"
+      (input)="onInput()"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
   </div>

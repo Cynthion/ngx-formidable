@@ -77,6 +77,7 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 | `[formField]` writes the schema's state into same-named inputs: `name`, `readonly`, `disabled`, `required`, `min`, `max`, `minLength`, `maxLength`                          |    19     |
 | `ngModel`, `[formControl]` and `formControlName` bind a custom control with no value accessor and forward `touched`, `dirty`, `invalid`, `pending`, `disabled` and `errors` |    19     |
 | The classic APIs ignore `updateOn` for a custom control, forward `required` everywhere but under `ngModel`, and never forward `readonly` or `name`                          |  19, 20   |
+| `ngModel`, `[formControl]` and `formControlName` attach no directive validator — `required`, `minlength` — to a custom control's control, as of 22.2                        |    19     |
 | A classic error reaches a custom control as `{ kind, context }`, with no `message`                                                                                          |    20     |
 | `transformedValue` reports parse errors to all three APIs                                                                                                                   |    24     |
 | A Vest suite is a Standard Schema, and an async Vest test does not surface through it                                                                                       |    26     |
@@ -84,7 +85,7 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 ### Accepted Compromises
 
 - **`updateOn` In The Classic APIs**: `blur` and `submit` no longer hold back a library field's value. Signal Forms' `debounce(path, 'blur')` does, through `touch`.
-- **Required Marker In Template-Driven Forms**: it comes from the `required` attribute, which also attaches Angular's `RequiredValidator`.
+- **Required Marker In Template-Driven Forms**: it comes from the `required` attribute, which also matches Angular's `RequiredValidator` — a validator Angular 22.2 leaves unattached on a custom control. See [`impl/backlog.md`](backlog.md).
 - **Required Checkbox Group**: Signal Forms' `required()` does not count `[]` as empty, so the guide pairs it with `minLength(path, 1)`.
 
 ### Integration Branch
@@ -104,7 +105,6 @@ Found by the architecture review and the test harness. Each is fixed in the phas
 | :-- | :------------------------------------------------------------------------------------------------------------------------------------------------ | :---: |
 | D1  | `dropdown-field` reverts a user's pick when its option list changes                                                                               |  21   |
 | D2  | Option fields disagree about a value with no option: `select-field` blanks only its display, the others correct the model                         |  21   |
-| D3  | Binding a field with `[formField]` throws: `runSilently` calls `markAsPristine`, which the Signal Forms `NgControl` does not have                 |  19   |
 | D4  | `toggle-field`'s `offLabel` does not fall back to `onLabel` as documented                                                                         |  25   |
 | D5  | A field's `revealOn` changed after the first render has no effect                                                                                 |  20   |
 | D6  | A readonly `slider-field` still moves its thumb on the arrow keys                                                                                 |  25   |
@@ -113,33 +113,16 @@ Found by the architecture review and the test harness. Each is fixed in the phas
 | D9  | Every registered key is `preventDefault`ed, including an `Enter` or `Escape` the field ignores, which blocks implicit submit and closing a dialog |  21   |
 | D10 | Clicking an `autocomplete-field` option reports a blur twice, the second simulated, and leaves focus on the hidden panel                          |  22   |
 | D11 | The simulated blur leaves the field's focus state set, so the field and its decorator disagree                                                    |  22   |
-| D12 | Picking the already selected option reports it again and dirties the control                                                                      |  19   |
-| D13 | `slider-field` commits a clamped value without emitting it                                                                                        |  19   |
 | D14 | Every scroll or resize re-measures every panel field, open or not                                                                                 |  22   |
-| D15 | `textarea-field` shows nothing for a value `[formControl]` writes before the field's view exists                                                  |  19   |
 | D16 | `select-field` shows its first option for a value `[formControl]` writes before its options exist, while the model holds another                  |  21   |
 
 ---
 
 ## Library Phases
 
-### Phase 19 — Signal-Native Field Contract
-
-**Depends On**: nothing.
-
-- **Contract**: `BaseField<T>` implements `FormValueControl<T>` for all eleven fields, as **Target Architecture** describes, with the inputs `disabled`, `readonly`, `required` and `name`, and `min`, `max`, `minLength` and `maxLength` where a field has them.
-- **Value Types**: as **Decisions** lists them. The toggle is a `FormValueControl<boolean>`, not a `FormCheckboxControl`, so every field exposes `value`.
-- **One Source Of Truth**: every field renders from `value()`, and `isFieldFilled` becomes a `computed` over it.
-- **Deleted**: `ControlValueAccessor` and the `NG_VALUE_ACCESSOR` providers; `runSilently`, `commit` and every correction — clamping, reconciling, re-masking what the model holds; `valueChanged`, `focusChanged`, `valueChange$` and `focusChange$`; the decorator's forwarded outputs; the per-field interfaces such as `FormidableInputField`, and `SignalsOf`.
-- **Renamed**: `markRequired` to `required` and `filterChanged` to `filterChange`. The `-1` that means unset for `minLength` and `maxLength` becomes `undefined`.
-- **Forms Matrix**: `bindField` gains Signal Forms, and one contract spec runs every field through all three APIs: model to display, edit to model and dirty, blur to touched with the touch last, a programmatic write staying pristine, `disabled`, `readonly` and `required` as each API forwards them, and `updateOn` having no effect in the classic APIs.
-- **Portal**: `example-counter-field` is rebuilt on the new base; the preview form stays template-driven, with the fewest binding changes that keep it compiling.
-- **Catalogue**: every changed member in [`user/components.md`](../user/components.md).
-- **Closes**: D3, D12, D13, D15.
-
 ### Phase 20 — Error Display From Field State
 
-**Depends On**: Phase 19.
+**Depends On**: nothing.
 
 - **Field State**: the `FormUiControl` inputs `errors`, `invalid`, `pending`, `touched` and `dirty`, and a `revealOn` input defaulting through `FORMIDABLE_DEFAULTS`. `showErrors` also drives the field's own `aria-invalid`, and the last messages stay on screen while `pending`.
 - **Decorator**: renders the projected field's messages in its slot and carries `.is-invalid`. The required marker follows the field's `required`; `hideRequiredMarkers` stays a default.

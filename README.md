@@ -177,7 +177,7 @@ Then the template:
     <formidable-input-field
       formidableFieldErrors
       name="name"
-      [markRequired]="true"
+      required
       [ngModel]="(formValue$ | async)?.name" />
     <div formidableFieldLabel>Name</div>
     <div formidableFieldHint>As it appears on your passport</div>

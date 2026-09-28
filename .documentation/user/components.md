@@ -2,16 +2,16 @@
 
 Catalogue of the library's public API: everything exported from `public-api.ts`, plus `NgxFormidableVestValidator` from the `@cynthion/ngx-formidable/vest` entry point. This is the authoritative detailed reference — the root `README.md` lists components abstractly and links here for the full API, and the `user/` guides teach the topics this file only lists.
 
-Every component is `standalone` and uses `ChangeDetectionStrategy.OnPush`, with no exception. Field components implement `ControlValueAccessor` (usable with `ngModel`) and extend `BaseField`; their shared surface is documented once below and not repeated per entry.
+Every component is `standalone` and uses `ChangeDetectionStrategy.OnPush`, with no exception. Field components implement Angular's `FormValueControl<T>` — so `[formField]`, `ngModel`, `[formControl]` and `formControlName` all bind them through their `value` model, with no value accessor — and extend `BaseField`; their shared surface is documented once below and not repeated per entry.
 
-**Signal Surface**: every input is a signal `input()` and every output an `output()`. A template binds both exactly as a decorated one (`[readonly]="…"`, `(valueChanged)="…"`), so the tables below name the value a binding accepts rather than the signal wrapping it. Reaching one from code is Angular's own API in every case:
+**Signal Surface**: every input is a signal `input()` and every output an `output()`. A template binds both exactly as a decorated one (`[readonly]="…"`, `(touch)="…"`), so the tables below name the value a binding accepts rather than the signal wrapping it. Reaching one from code is Angular's own API in every case:
 
-| From Code           | What Applies                                                                                                                                                                                                                                                                     |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Read an input       | Call it: `field.readonly()`                                                                                                                                                                                                                                                      |
-| Write an input      | `componentRef.setInput('readonly', true)` — a signal input is read-only from outside. `disabled` is the exception: a `model()` is a `WritableSignal`, so `field.disabled.set(true)` works                                                                                        |
-| Listen to an output | `output.subscribe(callback)`, unsubscribed for you when the component is destroyed. `outputToObservable(output)` from `@angular/core/rxjs-interop` returns an `Observable` where the RxJS operators are wanted — a field also publishes `valueChange$` / `focusChange$` directly |
-| Emit from an output | `output.emit(value)`, on an `output()`. `NgxFormidableForm`'s four are `outputFromObservable()`, which is a plain `OutputRef`: subscribe only, nothing to emit                                                                                                                   |
+| From Code           | What Applies                                                                                                                                                                                                   |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Read an input       | Call it: `field.readonly()`                                                                                                                                                                                    |
+| Write an input      | `componentRef.setInput('readonly', true)` — a signal input is read-only from outside. `value` is the exception: a `model()` is a `WritableSignal`, so `field.value.set(…)` works                               |
+| Listen to an output | `output.subscribe(callback)`, unsubscribed for you when the component is destroyed. `outputToObservable(output)` from `@angular/core/rxjs-interop` returns an `Observable` where the RxJS operators are wanted |
+| Emit from an output | `output.emit(value)`, on an `output()`. `NgxFormidableForm`'s four are `outputFromObservable()`, which is a plain `OutputRef`: subscribe only, nothing to emit                                                 |
 
 ## Setup
 
@@ -31,35 +31,35 @@ Both register ngx-mask, set `FORMIDABLE_MASK_DEFAULTS` from `globalMaskConfig` a
 
 ## Base Field Directive
 
-`BaseField<T = string | null>` — exported abstract `@Directive` (no selector). The base class for every field and the extension point for custom fields (reference implementation: `example-counter-field` in the portal, walked through in [`user/custom-fields.md`](custom-fields.md)). Implements `ControlValueAccessor` + `FormidableField<T>`.
+`BaseField<T = string | null>` — exported abstract `@Directive` (no selector). The base class for every field and the extension point for custom fields (reference implementation: `example-counter-field` in the portal, walked through in [`user/custom-fields.md`](custom-fields.md)). Implements `FormValueControl<T>` + `FormidableField<T>`.
 
 Inherited by every field:
 
 | Member             | Kind            | Description                                                                                                  |
 | :----------------- | :-------------- | :----------------------------------------------------------------------------------------------------------- |
+| `value`            | model           | The model, `T` — bound two-way by the forms API, written back only for a user's edit, see **Model**          |
 | `name`             | input           | Field name (`''`)                                                                                            |
 | `placeholder`      | input           | Placeholder text (`''`)                                                                                      |
-| `readonly`         | input           | Blocks input, still focusable (`false`)                                                                      |
-| `disabled`         | model           | Fully disabled (`false`) — see **Disabled**                                                                  |
-| `markRequired`     | input           | Suffixes the required marker and sets `aria-required` (`false`) — validates nothing, see **Required Marker** |
+| `readonly`         | input           | Blocks input, still focusable (`false`) — see **State From The Forms API**                                   |
+| `disabled`         | input           | Fully disabled (`false`) — see **State From The Forms API**                                                  |
+| `required`         | input           | Suffixes the required marker and sets `aria-required` (`false`) — validates nothing, see **Required Marker** |
 | `autoFocus`        | input           | Focuses the field once its view is ready (`false`) — see **Focus**                                           |
-| `valueChanged`     | output          | `T` on value change                                                                                          |
-| `focusChanged`     | output          | `boolean` on focus/blur                                                                                      |
-| `disabledChange`   | output          | `boolean` — the `model`'s own output, see **Disabled**                                                       |
-| `valueChange$`     | Observable      | Value stream                                                                                                 |
-| `focusChange$`     | Observable      | Focus stream                                                                                                 |
+| `valueChange`      | output          | `T` on a user's edit — the `model`'s own output                                                              |
+| `touch`            | output          | `void`, as the last act of a blur — what marks the control touched                                           |
 | `fieldId`          | getter          | Generated unique id                                                                                          |
-| `value`            | getter          | Current value                                                                                                |
+| `isFieldFocused`   | signal          | Whether focus is inside the field, which the decorator's `is-focused` follows                                |
 | `canLabelRest`     | signal          | Whether nothing occupies the value area, so a label may rest there like a placeholder                        |
-| `focus()`          | method          | Focuses the field — see **Focus**                                                                            |
+| `focus(options?)`  | method          | Focuses the field, taking the platform's `FocusOptions` — see **Focus**                                      |
 | `hasInFieldToggle` | optional signal | Whether the field renders a panel toggle inside its own box, which the value and a label must clear          |
 | `valueAlignment`   | optional        | Where the value sits vertically, which a prefix/suffix aligns with: `'center'` (default) or `'top'`          |
 
-**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` getter, and `doWriteValue` / `doOnValueChange` / `doOnFocusChange`. The base handles global keydown / outside-click / resize-scroll listeners, readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly or disabled. A `placeholder` is not part of it — whether that blocks a resting label belongs to the label's position (see **Label As Placeholder** below). A field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` **signal** (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always) — a signal and not a getter, because `canLabelRest` is a `computed` over it and a computed would cache whatever a getter returned first. A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field` with their panel toggle, `select-field` with its dropdown arrow — declares `hasInFieldToggle` as a signal, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it. A field whose `fieldRef` is not the element that takes focus overrides the protected `focusElement` getter (see **Focus**).
+**Extension Contract**: subclasses supply `keyboardCallback`, `externalClickCallback`, `windowResizeScrollCallback`, `registeredKeys`, `fieldRef`, `decoratorLayout`, a `value` **`model()`**, and `doOnFocusChange`. A subclass renders from `value()` and hands a user's edit to the protected `setValue(next)`, which writes nothing for an edit equal to what the model holds; the protected `isSameValue(a, b)` decides that, and a field whose value is a `Date` or an array overrides it. The base handles global keydown / outside-click / resize-scroll listeners, readonly/disabled blocking, and label-rest state. `canLabelRest` is false while the field is focused, filled, readonly or disabled. A `placeholder` is not part of it — whether that blocks a resting label belongs to the label's position (see **Label As Placeholder** below). A field that renders something else in its value area while empty says so by overriding the protected `showsEmptyValueHint` **signal** (`input-field` and `textarea-field` when their mask shows its slots, `select-field`, `date-field` and `time-field` always) — a signal and not a getter, because `canLabelRest` is a `computed` over it and a computed would cache whatever a getter returned first. A field whose value is top-aligned rather than centered — `textarea-field` — declares `valueAlignment: 'top'`, which moves a projected prefix/suffix onto the value's first line instead of centring it in a box that grows. A field that draws something of its own inside its box at the right edge — `dropdown-field` and `date-field` with their panel toggle, `select-field` with its dropdown arrow — declares `hasInFieldToggle` as a signal, which widens the value inset by `--formidable-field-toggle-size` so the value and a label stop short of it. A field whose `fieldRef` is not the element that takes focus overrides the protected `focusElement` getter (see **Focus**).
 
-**Disabled**: `disabled` has two writers, so it is the one member of the surface that is a `model` rather than an `input`. A consumer binds `[disabled]`, and Angular's own forms write the same state through `setDisabledState` when the control is disabled programmatically (`control.disable()`); neither goes through the other, and whichever wrote last is what the field renders. A binding that does not change is not a writer, so a `[disabled]="false"` left in place does not undo a `control.disable()`. The `model` brings a `disabledChange` output with it, which reports either writer — including Angular's.
+**Model**: the model is the only source of truth. A field renders `value()` and writes it only for a user's edit — never to correct what it was given — so a programmatic write leaves the control pristine and reports nothing. A `slider-field` shows a value outside `min` / `max` at the nearest end, a masked field shows a value through its mask, and the panel fields and the groups show no selection for a value no option carries; each leaves the model as it is. The classic APIs' `updateOn` holds nothing back: an edit reaches the model at once, and Signal Forms' `debounce(path, 'blur')` is what defers one to the `touch`. A classic control is `null` until something writes it, which a field renders as its empty state.
 
-**Focus**: `focus()` focuses the field, and `autoFocus` calls it once, from the base's `ngAfterViewInit` — a field can therefore be focused on page load. Neither opens a panel: no panel field opens on focus, they open on click, on `ArrowDown`, or on typing. `focus()` does nothing while the field is `disabled`. The element it focuses is the protected `focusElement` getter, which defaults to `fieldRef.nativeElement`; the five fields that wrap their control in a `div` override it — `dropdown-field`, `autocomplete-field`, `date-field` and `time-field` to their `input`, `slider-field` to its `input[type=range]`. The container-focused fields (`toggle-field`, and the two groups) need no override: their wrapper carries a `tabindex` and is focusable itself. `focus()` is deliberately not on `FormidableField` — the decorator has no use for it, and putting it there would break a field that implements the interface without extending `BaseField`.
+**State From The Forms API**: `disabled`, `readonly`, `required` and `name` are plain inputs that each forms API writes from what it holds. `[formField]` writes all four from its schema, and `min`, `max`, `minLength` and `maxLength` into a field that has them. `[formControl]` and `formControlName` write `disabled` and `required` — the latter from `Validators.required`. `ngModel` writes `disabled`. What an API does not write is bound on the field directly: `readonly` under the classic APIs, and `required` under `ngModel`. Under `ngModel` and `[formControl]`, Angular 22.2 attaches no directive validator — `required`, `minlength` — to a field bound through its `value` model; `NgxFormidableFieldValidate` attaches only its own.
+
+**Focus**: `focus(options?)` focuses the field, and `autoFocus` calls it once, from the base's `ngAfterViewInit` — a field can therefore be focused on page load. Neither opens a panel: no panel field opens on focus, they open on click, on `ArrowDown`, or on typing. `focus()` does nothing while the field is `disabled`. The element it focuses is the protected `focusElement` getter, which defaults to `fieldRef.nativeElement`; the five fields that wrap their control in a `div` override it — `dropdown-field`, `autocomplete-field`, `date-field` and `time-field` to their `input`, `slider-field` to its `input[type=range]`. The container-focused fields (`toggle-field`, and the two groups) need no override: their wrapper carries a `tabindex` and is focusable itself. `focus()` is deliberately not on `FormidableField` — the decorator has no use for it, and putting it there would break a field that implements the interface without extending `BaseField`.
 
 **Accessibility**: the base gives every field three protected getters its template binds onto whichever element actually takes focus — `labelledBy`, `describedBy` and `isInvalid`. All three come from the surrounding decorator, injected optionally, so a field used on its own emits none of the attributes rather than pointing at ids that do not exist. See **Field Accessibility** under **Field Decorator** for the ids and what each field carries.
 
@@ -89,7 +89,7 @@ Inherited by those four:
 
 `optionComponents` is the only public member of the four. The other three are `protected`: they exist for a subclass, not for a template or a `viewChild()` handle.
 
-**Extension Contract**: subclasses supply `onOptionsChanged()` — recombine the options, then reconcile selection and highlight against them — and `activeOptions`, a signal holding the rendered list the highlight walks (`autocomplete-field` holds its filtered list, the other three their full one) — the same signal the field's own template renders from. A single-select field additionally overrides `selectedOptionValue` so the selection can claim the highlight; the multi-select `checkbox-group-field` leaves it `null`, which is what drops the selection-wins step for it. The base owns the rest: one effect calls `onOptionsChanged()` whenever any of the four option inputs or the `optionComponents` query moves, and it implements `setHighlightedIndex`, `highlightSelectedOption` and `reconcileHighlightAfterOptionsChanged`. The last one follows the previously highlighted **value** across a changed list before falling back to a clamped index, and skips disabled options either way; a field that only wants a live highlight while its panel is open guards its own call, as the two panel fields do.
+**Extension Contract**: subclasses supply `onOptionsChanged()` — recombine the options, then reconcile the highlight against them; the model is left alone, since the selection is derived from `value()` — and `activeOptions`, a signal holding the rendered list the highlight walks (`autocomplete-field` holds its filtered list, the other three their full one) — the same signal the field's own template renders from. A single-select field additionally overrides `selectedOptionValue` so the selection can claim the highlight; the multi-select `checkbox-group-field` leaves it `null`, which is what drops the selection-wins step for it. The base owns the rest: one effect calls `onOptionsChanged()` whenever any of the four option inputs or the `optionComponents` query moves, and it implements `setHighlightedIndex`, `highlightSelectedOption` and `reconcileHighlightAfterOptionsChanged`. The last one follows the previously highlighted **value** across a changed list before falling back to a clamped index, and skips disabled options either way; a field that only wants a live highlight while its panel is open guards its own call, as the two panel fields do.
 
 ---
 
@@ -103,15 +103,15 @@ All extend `BaseField<T>` (inherited API above); the four option fields extend `
 
 ### Input Field
 
-**Selector** `formidable-input-field` · **Value** `string | null`
+**Selector** `formidable-input-field` · **Value** `string`
 
 Text input with optional ngx-mask masking.
 
 | Input          | Type                     | Default | Description              |
 | :------------- | :----------------------- | :------ | :----------------------- |
 | `autocomplete` | `AutoFill`               | `'off'` | Native autocomplete hint |
-| `minLength`    | `number`                 | `-1`    | Min length (`-1` = off)  |
-| `maxLength`    | `number`                 | `-1`    | Max length (`-1` = off)  |
+| `minLength`    | `number`                 | —       | Min length, unset = off  |
+| `maxLength`    | `number`                 | —       | Max length, unset = off  |
 | `mask`         | `string`                 | —       | ngx-mask pattern         |
 | `maskConfig`   | `Partial<NgxMaskConfig>` | —       | Per-field mask overrides |
 
@@ -119,15 +119,15 @@ Text input with optional ngx-mask masking.
 
 ### Textarea Field
 
-**Selector** `formidable-textarea-field` · **Value** `string | null`
+**Selector** `formidable-textarea-field` · **Value** `string`
 
 Multi-line text with optional autosize and a length indicator.
 
 | Input                 | Type                     | Default | Description              |
 | :-------------------- | :----------------------- | :------ | :----------------------- |
 | `autocomplete`        | `AutoFill`               | `'off'` | Native autocomplete hint |
-| `minLength`           | `number`                 | `-1`    | Min length (`-1` = off)  |
-| `maxLength`           | `number`                 | `-1`    | Max length (`-1` = off)  |
+| `minLength`           | `number`                 | —       | Min length, unset = off  |
+| `maxLength`           | `number`                 | —       | Max length, unset = off  |
 | `enableAutosize`      | `boolean`                | `true`  | Grow height with content |
 | `showLengthIndicator` | `boolean`                | `false` | Show a character counter |
 | `mask`                | `string`                 | —       | ngx-mask pattern         |
@@ -177,7 +177,7 @@ Dropdown panel plus a filter input. Emits filter text; the consumer supplies fil
 | `actionOption`     | `FormidableActionOption`  | `undefined` | An entry that runs an action instead of becoming a value     |
 | `actionOptionMode` | `FieldDefaultOptionMode`  | `'always'`  | When it renders: always last, or only when the list is empty |
 
-The default option and the action entry are both applied after filtering, so an `always` default and the action entry stay visible even when the filter matches nothing — which is the moment the action entry exists for. **Output** `filterChanged: string` (+ `filterChange$`), which reports the filter the field moves itself as well as the text typed into it — see **`filterChanged` Reports More Than Typing** in [`user/fields.md`](fields.md). The panel is opened and closed from outside through `togglePanel(isOpen)` — see **Panel Control**. **Use when** the option set is large or fetched/filtered dynamically.
+The default option and the action entry are both applied after filtering, so an `always` default and the action entry stay visible even when the filter matches nothing — which is the moment the action entry exists for. **Output** `filterChange: string`, which reports the filter the field moves itself as well as the text typed into it — see **`filterChanged` Reports More Than Typing** in [`user/fields.md`](fields.md). The panel is opened and closed from outside through `togglePanel(isOpen)` — see **Panel Control**. **Use when** the option set is large or fetched/filtered dynamically.
 
 ### Date Field
 
@@ -218,9 +218,9 @@ Masked time input.
 
 ### Toggle Field
 
-**Selector** `formidable-toggle-field` · **Value** `boolean | null`
+**Selector** `formidable-toggle-field` · **Value** `boolean`
 
-On/off switch with keyboard support (Space/Enter).
+On/off switch with keyboard support (Space/Enter). A `FormValueControl<boolean>` rather than a `FormCheckboxControl`, so it binds through `value` like every other field.
 
 | Input           | Type                                 | Default    | Description          |
 | :-------------- | :----------------------------------- | :--------- | :------------------- |
@@ -232,14 +232,14 @@ On/off switch with keyboard support (Space/Enter).
 
 ### Slider Field
 
-**Selector** `formidable-slider-field` · **Value** `number | null`
+**Selector** `formidable-slider-field` · **Value** `number`
 
-Range slider with optional tick marks and labels.
+Range slider with optional tick marks and labels. A drag lands inside `min` / `max` and on the `step` grid; a model value outside them is left as it is — see **Model**.
 
 | Input                        | Type                    | Default | Description                 |
 | :--------------------------- | :---------------------- | :------ | :-------------------------- |
-| `min`                        | `number`                | `0`     | Minimum                     |
-| `max`                        | `number`                | `100`   | Maximum                     |
+| `min`                        | `number`                | `0`     | Minimum a drag reaches      |
+| `max`                        | `number`                | `100`   | Maximum a drag reaches      |
 | `step`                       | `number`                | `1`     | Step increment              |
 | `minLabel`                   | `string`                | —       | Label at the minimum        |
 | `maxLabel`                   | `string`                | —       | Label at the maximum        |
@@ -277,7 +277,7 @@ Collects `formidable-field-option` children. With no options it renders `noOptio
 
 **Selector** `formidable-field-decorator`
 
-Wraps a field and its label, label adornment, prefix, suffix, hints and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `contentChild()`. Forwards the field's `valueChanged` / `focusChanged` as outputs of its own. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and measures a projected prefix/suffix in the `horizontal` layout. No inputs. It mirrors a field's surface as plain getters but does not implement `FormidableField`, which is signal-typed; the getters are reactive all the same, since each reads a signal.
+Wraps a field and its label, label adornment, prefix, suffix, hints and errors into one decorated control. Discovers the field via the `FORMIDABLE_FIELD` token and projects the decoration directives via `contentChild()`. It reads the field's signals — `isFieldFocused`, `readonly`, `disabled`, `required` — and nothing of any forms API. Exposes `decoratorLayout: 'horizontal' | 'vertical' | 'inline'` and measures a projected prefix/suffix in the `horizontal` layout. No inputs. It mirrors a field's surface as plain getters but does not implement `FormidableField`, which is signal-typed; the getters are reactive all the same, since each reads a signal.
 
 **Label Adornment**: a slot beside the label, in the same row, for whatever the consumer wants next to it — the library owns the slot only, never its content. It collapses with that row: a label rendered over the field takes its row with it, and an adornment left above a field it no longer decorates is worse than no adornment, so it hides too.
 
@@ -356,9 +356,9 @@ Whether a placeholder blocks a resting label is therefore the position's call, m
 
 A floating label's value clears it because the `label-inside` host hands the field a `--formidable-field-value-padding-top`; a `textarea`, whose value is top-aligned rather than centered, uses `--formidable-field-value-top` instead. The `border` positions get neither, so their value stays centered exactly as with `outside`. Horizontally, a label is bounded by the same value inset the field's own padding is built from — see **Prefix And Suffix Measurement** and **In-Field Toggle** above — plus one `--formidable-field-border-thickness`, because that padding is measured from the field's content box while the label is positioned from its border-box. The label therefore stays aligned with the value instead of colliding with a prefix or disappearing behind a panel toggle. A panel field renders its value in an inner `.wrapped-input` that the field's own padding cannot reach, so that input carries no padding of its own beyond the label's clearance — a user agent's default input padding is left placing the value otherwise. A `border` label additionally shrink-wraps and is pulled left by `--formidable-label-border-gap`, so it hides only the stretch of border it covers while its text still starts where the value does; `border-prefix` is the same mixin anchored to `--formidable-field-padding-x` instead, which is where a projected prefix's text starts. The border is hidden by a `linear-gradient` band one `--formidable-field-border-thickness` tall, painted in `--formidable-color-label-border-band` — its own variable, because `readonly` / `disabled` remap the field's fill on the field element, out of the label's reach, so the decorator's host remaps the band's colour instead. Any label rendered over the field stays on one line and ellipsizes.
 
-**Required Marker**: a field's `markRequired` input suffixes a marker to its label, in every label position and in the group layout's `div` label alike. `hideRequiredMarkers` on `NgxFormidableForm` withholds the marker from every field on that form, so one switch answers whether this form marks its required fields at all; it hides the glyph only, and `aria-required` keeps following the field's own input. The glyph is `--formidable-label-required-marker`, a `content` string, so a theme can swap `*` for a word without touching markup. It carries no colour of its own — it inherits the label, and so follows every state with it — and it is `aria-hidden`, because a glyph is no way to say "required"; the accessible form of the same fact is `aria-required` on the field. `.label-wrapper` is a flex row for it, and the marker is a sibling of the projected label rather than part of it: when a label runs out of room, the consumer's own text is what ellipsizes and the marker survives. A field with no label projected has nothing to suffix, and the wrapper collapses with it.
+**Required Marker**: a field's `required` input suffixes a marker to its label, in every label position and in the group layout's `div` label alike. `hideRequiredMarkers` on `NgxFormidableForm` withholds the marker from every field on that form, so one switch answers whether this form marks its required fields at all; it hides the glyph only, and `aria-required` keeps following the field's own input. The glyph is `--formidable-label-required-marker`, a `content` string, so a theme can swap `*` for a word without touching markup. It carries no colour of its own — it inherits the label, and so follows every state with it — and it is `aria-hidden`, because a glyph is no way to say "required"; the accessible form of the same fact is `aria-required` on the field. `.label-wrapper` is a flex row for it, and the marker is a sibling of the projected label rather than part of it: when a label runs out of room, the consumer's own text is what ellipsizes and the marker survives. A field with no label projected has nothing to suffix, and the wrapper collapses with it.
 
-`markRequired` **validates nothing**, so a field marked with it and a validator without a matching rule can drift apart, and keeping the two in step is the consumer's job. The field sets no native `required` attribute and registers no validator of its own — which validator decides the field is invalid is entirely the consumer's choice. It is not called `required` because Angular's own `RequiredValidator` matches `[required][ngModel]` on any element, so that name would attach a validator alongside the marker. See [`user/validation.md`](validation.md).
+`required` **validates nothing** on the field's side: the field sets no native `required` attribute and registers no validator of its own. `[formField]` and `[formControl]` write it from their own rules, so marker and rule cannot drift there. Under `ngModel` it is the `required` attribute, which also matches Angular's `RequiredValidator` — that API's rule, not the field's, and one Angular 22.2 leaves unattached, see **State From The Forms API**. See [`user/validation.md`](validation.md).
 
 ### Field Option
 
@@ -408,7 +408,7 @@ Usually created by `FieldErrorsRenderer` rather than written by hand. Inside a d
 | Directive                        | Selector                            | Purpose / API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | :------------------------------- | :---------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NgxFormidableForm<T>`           | `form[formidableForm]`              | Turns `NgForm` into a reactive value/validity surface and delegates the rules to an optional `FORMIDABLE_VALIDATOR`. Inputs `formValue` (`null`), `formShape: DeepRequired<T>` (`null`), `debounceMs` (`0`), `dependentFields` (`null`), `hideRequiredMarkers` (`false`), `revealOn: FormidableReveal` (`'touched'`). Outputs `formValueChange`, `errorsChange: FormidableFormErrors`, `dirtyChange`, `validChange`. Plain observable properties, **not** outputs, so subscribe to them rather than binding: `pending$`, `idle$`. Method `createAsyncValidator(target)`. |
-| `NgxFormidableFieldValidate`     | `[ngModel]`                         | Registers as `NG_ASYNC_VALIDATORS` and validates the control as a **field rule**, resolving its dotted target and delegating to the host form directive. No inputs. No-op outside a formidable form, and again with no `FORMIDABLE_VALIDATOR` provided.                                                                                                                                                                                                                                                                                                                  |
+| `NgxFormidableFieldValidate`     | `[ngModel]`                         | Registers as `NG_ASYNC_VALIDATORS` and validates the control as a **field rule**, resolving its dotted target and delegating to the host form directive. No inputs. No-op outside a formidable form, and again with no `FORMIDABLE_VALIDATOR` provided. On a library field it attaches itself to the control, which Angular 22.2 does not on that path.                                                                                                                                                                                                                  |
 | `NgxFormidableGroupValidate`     | `[ngModelGroup]`                    | As above, as a **group rule** on the group's own target. No inputs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `NgxFormidableWholeFormValidate` | `form[formidableValidateWholeForm]` | Validates the form as a **whole-form rule** under the `WHOLE_FORM` target, delegating to the host form directive. Input `formidableValidateWholeForm` (boolean attribute, default `true`).                                                                                                                                                                                                                                                                                                                                                                               |
 | `NgxFormidableVestValidator<T>`  | `form[formSuite]`                   | **From `@cynthion/ngx-formidable/vest`.** Provides `FORMIDABLE_VALIDATOR` from a Vest suite. Input `formSuite: Suite`. The library's only Vest-aware code — see [`user/validation.md`](validation.md).                                                                                                                                                                                                                                                                                                                                                                   |
@@ -479,16 +479,13 @@ The contracts a custom field, option or validator implements. Every field compon
 
 | Interface                | Implemented By                  | Contract                                                                                            |
 | :----------------------- | :------------------------------ | :-------------------------------------------------------------------------------------------------- |
-| `FormidableField<T>`     | every field, and the decorator  | What the decorator reads off a field: refs, id, state, value and both streams                       |
+| `FormidableField<T>`     | every field                     | What the decorator reads off a field: refs, id, state, value and focus                              |
 | `FormidableOptionField`  | the five option fields          | `options`, `defaultOption`, `defaultOptionMode`, `selectOption`, `optionRole`                       |
 | `FormidableOption<T>`    | plain data, written by hand     | One option: `value`, `label`, `template`, its flags and `match`                                     |
 | `FormidableActionOption` | plain data, written by hand     | An option plus the `action` that replaces committing it — see **Action Option**                     |
 | `FormidableOptionSource` | `FieldOption`                   | `option` — the plain option a component hands to the field that owns it                             |
 | `FormidablePanelField`   | dropdown, autocomplete, date    | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                                           |
-| `FormidableMaskField`    | input, textarea                 | `mask`, `maskConfig`                                                                                |
 | `FormidableValidator<T>` | the Vest validator, or your own | `validate(model, target): Observable<string[] \| null>` — see [`user/validation.md`](validation.md) |
-
-Per-field interfaces name the exact surface of one component: `FormidableInputField`, `FormidableTextareaField`, `FormidableSelectField`, `FormidableDropdownField`, `FormidableAutocompleteField`, `FormidableRadioGroupField`, `FormidableCheckboxGroupField`, `FormidableDateField`, `FormidableTimeField`, `FormidableToggleField`, `FormidableSliderField`, and `FormidablePikadayOptions` for the calendar passthrough set.
 
 | Validation Type               | Definition                                                                         |
 | :---------------------------- | :--------------------------------------------------------------------------------- |
@@ -500,34 +497,34 @@ Per-field interfaces name the exact surface of one component: `FormidableInputFi
 
 ## Catalogue Summary
 
-| Component / Directive            | Selector                            | Kind       | Value `T`         |
-| :------------------------------- | :---------------------------------- | :--------- | :---------------- |
-| `InputField`                     | `formidable-input-field`            | Field      | `string \| null`  |
-| `TextareaField`                  | `formidable-textarea-field`         | Field      | `string \| null`  |
-| `SelectField`                    | `formidable-select-field`           | Field      | `string \| null`  |
-| `DropdownField`                  | `formidable-dropdown-field`         | Field      | `string \| null`  |
-| `AutocompleteField`              | `formidable-autocomplete-field`     | Field      | `string \| null`  |
-| `DateField`                      | `formidable-date-field`             | Field      | `Date \| null`    |
-| `TimeField`                      | `formidable-time-field`             | Field      | `Date \| null`    |
-| `ToggleField`                    | `formidable-toggle-field`           | Field      | `boolean \| null` |
-| `SliderField`                    | `formidable-slider-field`           | Field      | `number \| null`  |
-| `RadioGroupField`                | `formidable-radio-group-field`      | Field      | `string \| null`  |
-| `CheckboxGroupField`             | `formidable-checkbox-group-field`   | Field      | `string[]`        |
-| `FieldDecorator`                 | `formidable-field-decorator`        | Structural | —                 |
-| `FieldOption`                    | `formidable-field-option`           | Structural | —                 |
-| `FieldErrors`                    | `formidable-field-errors`           | Structural | —                 |
-| `NgxFormidableForm`              | `form[formidableForm]`              | Directive  | —                 |
-| `NgxFormidableFieldValidate`     | `[ngModel]`                         | Directive  | —                 |
-| `NgxFormidableGroupValidate`     | `[ngModelGroup]`                    | Directive  | —                 |
-| `NgxFormidableWholeFormValidate` | `form[formidableValidateWholeForm]` | Directive  | —                 |
-| `NgxFormidableVestValidator`     | `form[formSuite]`                   | Directive  | —                 |
-| `FieldErrorsRenderer`            | `[formidableFieldErrors]`           | Directive  | —                 |
-| `FieldHint`                      | `[formidableFieldHint]`             | Directive  | —                 |
-| `FieldLabelAdornment`            | `[formidableFieldLabelAdornment]`   | Directive  | —                 |
-| `FieldLabel`                     | `[formidableFieldLabel]`            | Directive  | —                 |
-| `FieldPrefix`                    | `[formidableFieldPrefix]`           | Directive  | —                 |
-| `FieldSuffix`                    | `[formidableFieldSuffix]`           | Directive  | —                 |
-| `FieldToggleIcon`                | `[formidableFieldToggleIcon]`       | Directive  | —                 |
+| Component / Directive            | Selector                            | Kind       | Value `T`        |
+| :------------------------------- | :---------------------------------- | :--------- | :--------------- |
+| `InputField`                     | `formidable-input-field`            | Field      | `string`         |
+| `TextareaField`                  | `formidable-textarea-field`         | Field      | `string`         |
+| `SelectField`                    | `formidable-select-field`           | Field      | `string \| null` |
+| `DropdownField`                  | `formidable-dropdown-field`         | Field      | `string \| null` |
+| `AutocompleteField`              | `formidable-autocomplete-field`     | Field      | `string \| null` |
+| `DateField`                      | `formidable-date-field`             | Field      | `Date \| null`   |
+| `TimeField`                      | `formidable-time-field`             | Field      | `Date \| null`   |
+| `ToggleField`                    | `formidable-toggle-field`           | Field      | `boolean`        |
+| `SliderField`                    | `formidable-slider-field`           | Field      | `number`         |
+| `RadioGroupField`                | `formidable-radio-group-field`      | Field      | `string \| null` |
+| `CheckboxGroupField`             | `formidable-checkbox-group-field`   | Field      | `string[]`       |
+| `FieldDecorator`                 | `formidable-field-decorator`        | Structural | —                |
+| `FieldOption`                    | `formidable-field-option`           | Structural | —                |
+| `FieldErrors`                    | `formidable-field-errors`           | Structural | —                |
+| `NgxFormidableForm`              | `form[formidableForm]`              | Directive  | —                |
+| `NgxFormidableFieldValidate`     | `[ngModel]`                         | Directive  | —                |
+| `NgxFormidableGroupValidate`     | `[ngModelGroup]`                    | Directive  | —                |
+| `NgxFormidableWholeFormValidate` | `form[formidableValidateWholeForm]` | Directive  | —                |
+| `NgxFormidableVestValidator`     | `form[formSuite]`                   | Directive  | —                |
+| `FieldErrorsRenderer`            | `[formidableFieldErrors]`           | Directive  | —                |
+| `FieldHint`                      | `[formidableFieldHint]`             | Directive  | —                |
+| `FieldLabelAdornment`            | `[formidableFieldLabelAdornment]`   | Directive  | —                |
+| `FieldLabel`                     | `[formidableFieldLabel]`            | Directive  | —                |
+| `FieldPrefix`                    | `[formidableFieldPrefix]`           | Directive  | —                |
+| `FieldSuffix`                    | `[formidableFieldSuffix]`           | Directive  | —                |
+| `FieldToggleIcon`                | `[formidableFieldToggleIcon]`       | Directive  | —                |
 
 ---
 

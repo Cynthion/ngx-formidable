@@ -235,8 +235,8 @@ export class PreviewField {
     filterOptions(this.options(), this.filterText(), this.spec().filterStrategy ?? 'fuzzy')
   );
 
-  protected onFocus(isFocused: boolean): void {
-    if (isFocused) this.focused.emit(this.spec().id);
+  protected onFocus(): void {
+    this.focused.emit(this.spec().id);
   }
 
   protected onChip(): void {

@@ -4,13 +4,12 @@ import {
   contentChildren,
   effect,
   ElementRef,
-  forwardRef,
   input,
+  model,
   signal,
   untracked,
   viewChild
 } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { applyDefaultOption, combineFieldOptions, trackProjectedOptions } from '../../../helpers/option.helpers';
 import {
   FieldDecoratorLayout,
@@ -20,7 +19,6 @@ import {
   FORMIDABLE_OPTION_FIELD,
   FormidableOption,
   FormidableOptionSource,
-  FormidableSelectField,
   NO_OPTIONS_TEXT
 } from '../../../models/formidable.model';
 import { BaseField } from '../base-field';
@@ -35,12 +33,6 @@ import { BaseField } from '../base-field';
   templateUrl: './select-field.html',
   styleUrls: ['./select-field.scss'],
   providers: [
-    // required for ControlValueAccessor to work with Angular forms
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SelectField),
-      multi: true
-    },
     // required to provide this component as FormidableField
     {
       provide: FORMIDABLE_FIELD,
@@ -53,7 +45,7 @@ import { BaseField } from '../base-field';
     }
   ]
 })
-export class SelectField extends BaseField<string | null> implements FormidableSelectField {
+export class SelectField extends BaseField<string | null> {
   readonly selectRef = viewChild.required<ElementRef<HTMLSelectElement>>('selectRef');
 
   protected keyboardCallback = null;
@@ -78,56 +70,23 @@ export class SelectField extends BaseField<string | null> implements FormidableS
     });
   }
 
-  protected doOnValueChange(): void {
-    // No additional actions needed
-  }
-
   protected doOnFocusChange(_isFocused: boolean): void {
     // No additional actions needed
   }
 
-  /** The user picked one, so the element is now the source and the signal follows it. */
+  /** The user picked one. */
   protected onSelectChanged(): void {
-    this.selectedValue.set(this.selectRef().nativeElement.value || null);
-    this.onValueChange();
+    this.setValue(this.selectRef().nativeElement.value || null);
   }
-
-  // #region ControlValueAccessor
-
-  /**
-   * What is selected, as a signal, because the element cannot be asked: a native `<select>` drops a value it
-   * has no `<option>` for, and the options only reach the DOM a change-detection pass after the list moves.
-   * The template marks the matching option from this, so the browser selects it as the options render.
-   */
-  protected readonly selectedValue = signal<string | null>(null);
-
-  /**
-   * What the form last asked for, which is not always what could be selected. Kept so a value written before
-   * its option existed can be applied again once the list arrives.
-   */
-  private lastWrittenValue: string | null = null;
-
-  protected doWriteValue(value: string | null): void {
-    this.lastWrittenValue = value;
-
-    const match = this.computeAllOptions().find((opt) => opt.value === value);
-    const next = match ? match.value : null;
-
-    this.selectedValue.set(next);
-
-    // write to wrapped select element
-    this.selectRef().nativeElement.value = next ?? '';
-
-    this.isFieldFilled.set(next !== null);
-  }
-
-  // #endregion
 
   // #region FormidableField
 
-  get value(): string | null {
-    return this.selectRef().nativeElement.value || null;
-  }
+  /**
+   * The picked option's value, or `null` for none. The template marks the matching option from it, so the
+   * browser selects that option as the options render — a native `<select>` cannot hold a value before its
+   * `<option>` exists.
+   */
+  public readonly value = model<string | null>(null);
 
   get fieldRef(): ElementRef<HTMLElement> {
     return this.selectRef() as ElementRef<HTMLElement>;
@@ -175,44 +134,13 @@ export class SelectField extends BaseField<string | null> implements FormidableS
   }
 
   private onOptionsChanged(): void {
-    const allOptions = this.computeAllOptions();
-
-    this.updateOptions(allOptions);
-    this.reconcileSelectionAgainstOptions(allOptions);
-  }
-
-  private computeAllOptions(): FormidableOption[] {
     const combined = combineFieldOptions(
       this.options(),
       this.optionComponents().map((source) => source.option()),
       this.sortFn()
     );
 
-    return applyDefaultOption(combined, this.defaultOption(), this.defaultOptionMode());
-  }
-
-  private updateOptions(allOptions: FormidableOption[]): void {
-    this.activeOptions.set(allOptions);
-
-    // Keep the current value consistent with the updated options. The element comes first — it is what the
-    // user picked — then what is selected, then what the form last asked for, which is the one that recovers
-    // a value the element had to drop because its `<option>` did not exist yet.
-    const element = this.selectRef()?.nativeElement;
-
-    this.writeValue(element?.value || this.selectedValue() || this.lastWrittenValue || '');
-  }
-
-  private reconcileSelectionAgainstOptions(allOptions: FormidableOption[]): void {
-    const current = this.selectedValue();
-    if (!current) return;
-
-    const stillExists = allOptions.some((o) => o.value === current);
-    if (stillExists) return;
-
-    // clear selection + notify like other fields
-    this.selectedValue.set(null);
-    this.selectRef().nativeElement.value = '';
-    this.onValueChange();
+    this.activeOptions.set(applyDefaultOption(combined, this.defaultOption(), this.defaultOptionMode()));
   }
 
   // #endregion

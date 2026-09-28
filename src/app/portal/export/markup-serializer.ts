@@ -136,7 +136,7 @@ function serializeField(spec: PortalFieldSpec, definition: PortalFormDefinition,
   if (spec.state.readonly) lines.push('    [readonly]="true"');
   if (spec.state.disabled) lines.push('    [disabled]="true"');
   if (spec.state.autoFocus) lines.push('    [autoFocus]="true"');
-  if (spec.decoration.markRequired) lines.push('    [markRequired]="true"');
+  if (spec.decoration.markRequired) lines.push('    [required]="true"');
 
   lines.push(`    [ngModel]="${modelAccess(groupName ? `${groupName}.${spec.name}` : spec.name)}"`);
 

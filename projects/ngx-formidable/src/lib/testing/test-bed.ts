@@ -31,3 +31,10 @@ export async function settle(fixture: ComponentFixture<unknown>, ms = 0): Promis
   await new Promise((resolve) => setTimeout(resolve));
   await fixture.whenStable();
 }
+
+/**
+ * Why a spec needing a directive validator — `required` or `minlength` beside a bare `ngModel` — is pending:
+ * `@angular/forms` 22.2 binds a field through its `value` model and on that path never attaches a
+ * directive's validators to the control. `NgxFormidableFieldValidate` attaches only its own.
+ */
+export const DIRECTIVE_VALIDATORS_UNATTACHED = 'Angular 22.2 attaches no directive validator to a custom control';

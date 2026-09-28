@@ -1,11 +1,9 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, ElementRef, forwardRef, input, signal, viewChild } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, ElementRef, input, model, viewChild } from '@angular/core';
 import {
   FieldDecoratorLayout,
   FORMIDABLE_FIELD,
-  FormidableToggleFieldLabelPosition,
-  FormidableToggleField
+  FormidableToggleFieldLabelPosition
 } from '../../../models/formidable.model';
 import { BaseField } from '../base-field';
 
@@ -21,12 +19,6 @@ import { BaseField } from '../base-field';
   styleUrls: ['./toggle-field.scss'],
   imports: [NgTemplateOutlet],
   providers: [
-    // required for ControlValueAccessor to work with Angular forms
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => ToggleField),
-      multi: true
-    },
     // required to provide this component as FormidableField
     {
       provide: FORMIDABLE_FIELD,
@@ -34,19 +26,13 @@ import { BaseField } from '../base-field';
     }
   ]
 })
-export class ToggleField extends BaseField<boolean | null> implements FormidableToggleField {
+export class ToggleField extends BaseField<boolean> {
   readonly toggleRef = viewChild.required<ElementRef<HTMLDivElement>>('toggleRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected externalClickCallback = null;
   protected windowResizeScrollCallback = null;
   protected registeredKeys = [' ', 'Space', 'Enter'];
-
-  private readonly _value = signal<boolean | null>(null);
-
-  protected doOnValueChange(): void {
-    // No additional actions needed
-  }
 
   protected doOnFocusChange(_isFocused: boolean): void {
     // No additional actions needed
@@ -62,19 +48,10 @@ export class ToggleField extends BaseField<boolean | null> implements Formidable
     }
   }
 
-  // #region ControlValueAccessor
-
-  protected doWriteValue(value: boolean): void {
-    this._value.set(!!value);
-  }
-
-  // #endregion
-
   // #region FormidableField
 
-  get value(): boolean | null {
-    return this._value();
-  }
+  /** Whether the switch is on. */
+  public readonly value = model(false);
 
   get fieldRef(): ElementRef<HTMLElement> {
     return this.toggleRef() as ElementRef<HTMLElement>;
@@ -84,7 +61,7 @@ export class ToggleField extends BaseField<boolean | null> implements Formidable
 
   // #endregion
 
-  // #region FormidableToggleField
+  // #region Toggle
 
   /** Which side of the switch `onLabel` / `offLabel` sits on. Unrelated to a projected label's position. */
   public readonly labelPosition = input<FormidableToggleFieldLabelPosition | undefined>('before');
@@ -99,8 +76,7 @@ export class ToggleField extends BaseField<boolean | null> implements Formidable
   public toggle(): void {
     if (this.readonly() || this.disabled()) return;
 
-    this._value.set(!this._value());
-    this.onValueChange();
+    this.setValue(!this.value());
   }
 
   protected onToggleClick(event: MouseEvent): void {
@@ -109,8 +85,8 @@ export class ToggleField extends BaseField<boolean | null> implements Formidable
   }
 
   get internalLabel(): string | undefined {
-    if (this.value && this.onLabel() != null) return this.onLabel();
-    if (!this.value && this.offLabel() != null) return this.offLabel();
+    if (this.value() && this.onLabel() != null) return this.onLabel();
+    if (!this.value() && this.offLabel() != null) return this.offLabel();
     return undefined;
   }
 

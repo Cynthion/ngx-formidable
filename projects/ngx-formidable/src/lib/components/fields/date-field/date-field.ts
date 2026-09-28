@@ -1,19 +1,20 @@
 import {
+  afterRenderEffect,
   AfterViewInit,
   Component,
   computed,
   contentChild,
   ElementRef,
-  forwardRef,
   inject,
   input,
   linkedSignal,
+  model,
   OnDestroy,
   OnInit,
   signal,
+  untracked,
   viewChild
 } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { addDays, format, isEqual } from 'date-fns';
 import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
@@ -29,16 +30,15 @@ import {
   validateUnicodeDateTokenFormat
 } from '../../../helpers/format.helpers';
 import { renderEmptyMask } from '../../../helpers/input.helpers';
-import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../../helpers/mask.helpers';
+import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
   FORMIDABLE_DEFAULTS,
   FORMIDABLE_FIELD,
   FormidableEmptyHint,
-  FormidablePanelPosition,
-  FormidableDateField
+  FormidablePanelPosition
 } from '../../../models/formidable.model';
 import { BaseField } from '../base-field';
 
@@ -61,12 +61,6 @@ import { BaseField } from '../base-field';
   styleUrls: ['./date-field.scss'],
   imports: [NgxMaskDirective],
   providers: [
-    // required for ControlValueAccessor to work with Angular forms
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => DateField),
-      multi: true
-    },
     // required to provide this component as FormidableField
     {
       provide: FORMIDABLE_FIELD,
@@ -74,7 +68,7 @@ import { BaseField } from '../base-field';
     }
   ]
 })
-export class DateField extends BaseField<Date | null> implements FormidableDateField, OnInit, AfterViewInit, OnDestroy {
+export class DateField extends BaseField<Date | null> implements OnInit, AfterViewInit, OnDestroy {
   readonly dateRef = viewChild.required<ElementRef<HTMLDivElement>>('dateRef');
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
   readonly pickerRef = viewChild<ElementRef<HTMLDivElement>>('pickerRef');
@@ -169,11 +163,13 @@ export class DateField extends BaseField<Date | null> implements FormidableDateF
       }
     );
 
-    // Re-renders the current value, since the format it was rendered with has changed.
-    onSignalChange(
-      () => this.tokenFormat(),
-      () => this.setDate(this.selectedDate)
-    );
+    // Renders the model, and renders it again in a changed format.
+    afterRenderEffect(() => {
+      const date = this.value();
+
+      this.tokenFormat();
+      untracked(() => this.render(date));
+    });
   }
 
   // Read as one list so the effect above depends on all of them.
@@ -217,20 +213,11 @@ export class DateField extends BaseField<Date | null> implements FormidableDateF
     this.updateOptions();
   }
 
-  // Typing commits on blur — a half-typed date is not a date — so value changes are handled in the
-  // selectDate method. Wiping the text is the exception: it commits at once, or the cleared date would stay
-  // the model's and `stepSegment` would keep stepping from it.
-  protected override onValueChange(): void {
-    if (this.selectedDate && this.isInputCleared) {
-      this.setDate(null);
-      return;
-    }
-
-    this.isFieldFilled.set(!!this.value);
-  }
-
-  protected doOnValueChange(): void {
-    // No additional actions needed
+  // Typing commits on blur — a half-typed date is not a date — so the value is committed through
+  // `selectDate`. Wiping the text is the exception: it commits at once, or the cleared date would stay the
+  // model's and `stepSegment` would keep stepping from it.
+  protected onInput(): void {
+    if (this.value() && this.isInputCleared) this.setDate(null);
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
@@ -314,7 +301,7 @@ export class DateField extends BaseField<Date | null> implements FormidableDateF
   // Steps the date part under the caret by one, and leaves that part selected so repeated arrows keep to
   // it — and so the next digit typed replaces it.
   //
-  // The input text is what gets stepped, not `selectedDate`: it also carries what was typed but not yet
+  // The input text is what gets stepped, not the model: it also carries what was typed but not yet
   // committed. An empty field is seeded first, so arrows alone can fill it.
   private stepSegment(direction: 1 | -1): void {
     const input = this.inputRef().nativeElement;
@@ -323,7 +310,7 @@ export class DateField extends BaseField<Date | null> implements FormidableDateF
 
     const base =
       this.onParse(input.value, this.tokenFormat()) ??
-      this.selectedDate ??
+      this.value() ??
       this.getDefaultDate(this.minDate(), this.maxDate(), this.defaultDate());
 
     const nextDate = normalizeTimePart(stepDateTimeUnit(base, segment.unit, direction));
@@ -352,18 +339,14 @@ export class DateField extends BaseField<Date | null> implements FormidableDateF
     this.togglePanel(false);
   }
 
-  // #region ControlValueAccessor
-
-  protected doWriteValue(value: Date | null): void {
-    this.trySetDateFromInput(value);
-  }
-
-  // #endregion
-
   // #region FormidableField
 
-  get value(): Date | null {
-    return this.selectedDate || null;
+  /** The picked date, at midnight once the user picked it, or `null` for none. */
+  public readonly value = model<Date | null>(null);
+
+  // A pick builds a new `Date`, so the same day is the same value.
+  protected override isSameValue(a: Date | null, b: Date | null): boolean {
+    return a === b || (!!a && !!b && isEqual(normalizeTimePart(a), normalizeTimePart(b)));
   }
 
   get fieldRef(): ElementRef<HTMLElement> {
@@ -381,7 +364,7 @@ export class DateField extends BaseField<Date | null> implements FormidableDateF
 
   // #endregion
 
-  // #region FormidableDateField
+  // #region Date
 
   /**
    * A Unicode date format (`y`, `M`, `d` tokens). Decides the mask, the display, and which segment the arrow
@@ -442,28 +425,19 @@ export class DateField extends BaseField<Date | null> implements FormidableDateF
     renderEmptyMask(this.inputRef().nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused());
   }
 
-  private selectedDate: Date | null = null;
-
+  /** Commits a date as the user's pick, as the calendar and the arrow keys do. The same day is no change. */
   public selectDate(date: Date | null): void {
-    // only trigger value changes if there are changes
-    // (panel could close without date change)
-    if (this.selectedDate === null && date === null) return;
-    if (this.selectedDate === undefined && date === undefined) return;
-    if (this.selectedDate && date && isEqual(normalizeTimePart(this.selectedDate), normalizeTimePart(date))) return;
+    // the panel can close without a change of date
+    if (this.isSameValue(this.value(), date)) return;
 
-    this.selectedDate = date ? normalizeTimePart(date) : null;
-
-    this.valueChangeSubject$.next(this.selectedDate);
-    this.valueChanged.emit(this.selectedDate);
-    this.isFieldFilled.set(!!this.selectedDate);
-    this.commit(this.selectedDate); // notify ControlValueAccessor of the change
-    this.touch();
+    this.setValue(date ? normalizeTimePart(date) : null);
+    this.touch.emit();
     this.togglePanel(false);
   }
 
   // #endregion
 
-  // #region FormidablePikadayOptions
+  // #region Pikaday Options
 
   /** Accessible name for the calendar itself, which is a `dialog` and so needs one of its own. */
   public readonly ariaLabel = input<string | undefined>(undefined);
@@ -556,7 +530,7 @@ export class DateField extends BaseField<Date | null> implements FormidableDateF
     this.picker.setMinDate(this.minDate() ?? null);
     this.picker.setMaxDate(this.maxDate() ?? null);
     this.picker.config(updatedOptions);
-    this.picker.gotoDate(this.selectedDate ?? viewDate);
+    this.picker.gotoDate(this.value() ?? viewDate);
   }
 
   // #endregion
@@ -580,7 +554,7 @@ export class DateField extends BaseField<Date | null> implements FormidableDateF
 
   private ignoreNextBlur = false;
 
-  // Mousedown is used to prevent sending focusChanged events.
+  // Mousedown, so the click keeps focus in the input rather than blurring it.
   protected toggleMouseDown(event: MouseEvent): void {
     event.preventDefault();
     this.inputRef().nativeElement.focus(); // ensure input remains focused, so keyboard events work
@@ -687,14 +661,19 @@ export class DateField extends BaseField<Date | null> implements FormidableDateF
     this.setDate(null);
   }
 
+  // Commits what the user typed or stepped to, and renders the model again even where that is no change:
+  // text that parsed to nothing, or to the day already held, still has to give way to the model.
   private setDate(date: Date | null): void {
     this.selectDate(date);
+    this.render(this.value());
+  }
 
+  private render(date: Date | null): void {
     // Waits for the ngxMask directive to initialize on the input, which it does across a full task —
     // a microtask would land before it. `stepSegment` restores the caret from a timer queued behind
     // this one, so this must stay a macrotask.
     setTimeout(() => {
-      this.picker?.setDate(date, false); // don't silent update to achieve valueChanged/focusChanged events
+      this.picker?.setDate(date, true); // silent: the model already holds it
 
       // ngxMask leaves an empty input untouched, so render the empty state ourselves
       if (date == null) {

@@ -37,7 +37,7 @@ import { TextareaField } from './textarea-field/textarea-field';
         name="auto"
         [options]="visible()"
         [ngModel]="auto"
-        (filterChanged)="filter($event)" />
+        (filterChange)="filter($event)" />
     </form>
   `
 })
@@ -422,7 +422,7 @@ describe('caret from the first keystroke', () => {
   /**
    * The autocomplete re-applies a written value when its options change, so a value whose option had not
    * arrived yet can still be placed. It used to do so even once placed — and a consumer filtering on
-   * `filterChanged` refreshes the options on every keystroke, so the first two deletions were overwritten
+   * `filterChange` refreshes the options on every keystroke, so the first two deletions were overwritten
    * as they were made.
    */
   describe('the autocomplete editor', () => {

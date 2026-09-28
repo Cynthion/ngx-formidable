@@ -1,3 +1,10 @@
 // Loads the shipped theme into the Karma run, so specs measure the real `:root` variables and the
 // global rules — not just the SCSS fallbacks baked into each component's stylesheet.
 @use 'ngx-formidable';
+
+// Jasmine's HTML reporter sits above the fixtures and grows with every spec run, so a late spec's fixture
+// ends up below the headless viewport, where no hit test reaches it. The terminal reporter has the results.
+/* stylelint-disable-next-line selector-class-pattern -- Jasmine's own class name */
+.jasmine_html-reporter {
+  display: none;
+}

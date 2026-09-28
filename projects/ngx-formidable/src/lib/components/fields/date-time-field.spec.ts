@@ -82,7 +82,7 @@ describe('masked date/time field', () => {
     });
 
     it('jumps separators and commits the parsed date on blur', async () => {
-      const { fixture, input, control } = await setup('date', 'dd . MM . yyyy', 'format');
+      const { fixture, input, value, dirty } = await setup('date', 'dd . MM . yyyy', 'format');
 
       input.focus();
       type(input, '12052024');
@@ -93,13 +93,13 @@ describe('masked date/time field', () => {
       input.blur();
       await settle(fixture);
 
-      expect(control.value).toEqual(new Date(2024, 4, 12));
-      expect(control.dirty).toBe(true);
+      expect(value()).toEqual(new Date(2024, 4, 12));
+      expect(dirty()).toBe(true);
       expect(input.value).toBe('12 . 05 . 2024');
     });
 
     it('restores the hint on blur when the value is incomplete', async () => {
-      const { fixture, input, control } = await setup('date', 'dd . MM . yyyy', 'format');
+      const { fixture, input, value } = await setup('date', 'dd . MM . yyyy', 'format');
 
       input.focus();
       type(input, '1');
@@ -107,7 +107,7 @@ describe('masked date/time field', () => {
       await settle(fixture);
 
       expect(input.value).toBe('dd . MM . yyyy');
-      expect(control.value).toBeNull();
+      expect(value()).toBeNull();
     });
 
     it('keeps the hint out of a focused input when cleared while focused', async () => {
@@ -183,7 +183,7 @@ describe('masked date/time field', () => {
     });
 
     it('commits the parsed time on blur and restores the hint when incomplete', async () => {
-      const { fixture, input, control } = await setup('time', 'HH : mm', 'underscores');
+      const { fixture, input, value, dirty } = await setup('time', 'HH : mm', 'underscores');
 
       input.focus();
       type(input, '1430');
@@ -193,9 +193,9 @@ describe('masked date/time field', () => {
       input.blur();
       await settle(fixture);
 
-      expect(control.dirty).toBe(true);
-      expect(control.value?.getHours()).toBe(14);
-      expect(control.value?.getMinutes()).toBe(30);
+      expect(dirty()).toBe(true);
+      expect((value() as Date | null)?.getHours()).toBe(14);
+      expect((value() as Date | null)?.getMinutes()).toBe(30);
 
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -204,7 +204,7 @@ describe('masked date/time field', () => {
       await settle(fixture);
 
       expect(input.value).toBe('__ : __');
-      expect(control.value).toBeNull();
+      expect(value()).toBeNull();
     });
   });
 
@@ -239,7 +239,7 @@ describe('masked date/time field', () => {
     });
 
     it('blur-commits again after a panel interaction skipped one', async () => {
-      const { fixture, element, input, control } = await setup('date', 'dd . MM . yyyy', 'format');
+      const { fixture, element, input, value } = await setup('date', 'dd . MM . yyyy', 'format');
       const panel = element.querySelector('.panel') as HTMLElement;
 
       input.focus();
@@ -257,13 +257,13 @@ describe('masked date/time field', () => {
       await settle(fixture);
 
       expect(input.value).toBe('dd . MM . yyyy');
-      expect(control.value).toBeNull();
+      expect(value()).toBeNull();
     });
   });
 
   describe('clearing the text', () => {
     it('commits null as soon as a date is wiped, without waiting for the blur', async () => {
-      const { fixture, input, control, write } = await setup('date', 'dd . MM . yyyy', 'format');
+      const { fixture, input, value, dirty, write } = await setup('date', 'dd . MM . yyyy', 'format');
 
       await write(new Date(2024, 4, 12));
 
@@ -271,8 +271,8 @@ describe('masked date/time field', () => {
       clearText(input);
       await settle(fixture);
 
-      expect(control.value).toBeNull();
-      expect(control.dirty).toBe(true);
+      expect(value()).toBeNull();
+      expect(dirty()).toBe(true);
     });
 
     it('steps from the default date once the text is wiped, not from the date that was there', async () => {
@@ -294,7 +294,7 @@ describe('masked date/time field', () => {
     });
 
     it('commits null as soon as a time is wiped', async () => {
-      const { fixture, input, control, write } = await setup('time', 'HH : mm', 'underscores');
+      const { fixture, input, value, dirty, write } = await setup('time', 'HH : mm', 'underscores');
 
       await write(new Date(2024, 0, 1, 14, 30));
 
@@ -302,8 +302,8 @@ describe('masked date/time field', () => {
       clearText(input);
       await settle(fixture);
 
-      expect(control.value).toBeNull();
-      expect(control.dirty).toBe(true);
+      expect(value()).toBeNull();
+      expect(dirty()).toBe(true);
     });
 
     it('steps from midnight once the time is wiped', async () => {
@@ -330,7 +330,7 @@ describe('masked date/time field', () => {
       { kind: 'time', format: 'HH : mm', hint: 'HH : mm' }
     ] as const) {
       it(`keeps the ${kind} hint in place when the field is clicked into and out of`, async () => {
-        const { fixture, input, control } = await setup(kind, format, 'format', { readonly: true });
+        const { fixture, input, dirty } = await setup(kind, format, 'format', { readonly: true });
 
         input.focus();
 
@@ -340,7 +340,7 @@ describe('masked date/time field', () => {
         await settle(fixture);
 
         expect(input.value).toBe(hint);
-        expect(control.pristine).toBe(true);
+        expect(dirty()).toBe(false);
       });
     }
   });
@@ -414,7 +414,7 @@ describe('masked date/time field', () => {
     });
 
     it('still moves the calendar by a week while the panel is open, committing only on Enter', async () => {
-      const { fixture, input, control } = await focusedAt(0);
+      const { fixture, input, value } = await focusedAt(0);
 
       press(input, 'ArrowDown', { altKey: true });
       await settle(fixture);
@@ -423,24 +423,24 @@ describe('masked date/time field', () => {
       await settle(fixture);
 
       expect(input.value).toBe('19 . 05 . 2024');
-      expect(control.value).toEqual(new Date(2024, 4, 12)); // navigation is not a commit
+      expect(value()).toEqual(new Date(2024, 4, 12)); // navigation is not a commit
 
       press(input, 'Enter');
       await settle(fixture);
 
-      expect(control.value).toEqual(new Date(2024, 4, 19));
+      expect(value()).toEqual(new Date(2024, 4, 19));
       expect(input.getAttribute('aria-expanded')).toBe('false');
     });
 
     it('seeds an empty date field before stepping it', async () => {
-      const { fixture, input, control } = await setup('date', 'dd . MM . yyyy', 'format');
+      const { fixture, input, value } = await setup('date', 'dd . MM . yyyy', 'format');
 
       input.focus();
       input.setSelectionRange(10, 10); // year
       press(input, 'ArrowUp');
       await settle(fixture);
 
-      expect(control.value?.getFullYear()).toBe(new Date().getFullYear() + 1);
+      expect((value() as Date | null)?.getFullYear()).toBe(new Date().getFullYear() + 1);
     });
 
     it('refuses a step that would leave minDate/maxDate', async () => {

@@ -1,6 +1,5 @@
-import { Component, ElementRef, forwardRef, input, signal, viewChild } from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { FieldDecoratorLayout, FORMIDABLE_FIELD, FormidableSliderField } from '../../../models/formidable.model';
+import { afterRenderEffect, Component, ElementRef, input, model, viewChild } from '@angular/core';
+import { FieldDecoratorLayout, FORMIDABLE_FIELD } from '../../../models/formidable.model';
 import { BaseField } from '../base-field';
 
 type SliderLabelAlign = 'start' | 'center' | 'end';
@@ -13,8 +12,8 @@ interface SliderLabelItem {
 
 /**
  * A number from a bounded range, over a native range input — so the arrow keys, Home and End are the
- * platform's. A value outside `min`/`max` or off the `step` grid is corrected, and the correction is written
- * back to the model, so what the slider shows and what the form holds cannot disagree.
+ * platform's. A drag lands inside `min`/`max` and on the `step` grid. A model value outside them is shown at
+ * the nearest end and left as it is: correcting it is the consumer's rule, not the field's.
  *
  * Its decorator renders in the `vertical` layout, so the label always sits outside whatever position is set
  * on it, and a projected prefix or suffix is not rendered.
@@ -25,12 +24,6 @@ interface SliderLabelItem {
   styleUrls: ['./slider-field.scss'],
   imports: [],
   providers: [
-    // required for ControlValueAccessor to work with Angular forms
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => SliderField),
-      multi: true
-    },
     // required to provide this component as FormidableField
     {
       provide: FORMIDABLE_FIELD,
@@ -38,7 +31,7 @@ interface SliderLabelItem {
     }
   ]
 })
-export class SliderField extends BaseField<number | null> implements FormidableSliderField {
+export class SliderField extends BaseField<number> {
   readonly sliderRef = viewChild.required<ElementRef<HTMLDivElement>>('sliderRef');
   readonly rangeRef = viewChild.required<ElementRef<HTMLInputElement>>('rangeRef');
 
@@ -47,40 +40,21 @@ export class SliderField extends BaseField<number | null> implements FormidableS
   protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = []; // arrows are natively supported
 
-  private readonly _value = signal<number | null>(null);
+  constructor() {
+    super();
 
-  protected doOnValueChange(): void {
-    // No additional actions needed
+    // The thumb's offset is a custom property on the range input, which no template binding reaches.
+    afterRenderEffect(() => this.updateThumbTransform());
   }
 
   protected doOnFocusChange(_isFocused: boolean): void {
     // No additional actions needed
   }
 
-  // #region ControlValueAccessor
-
-  protected doWriteValue(value: number | null): void {
-    const normalized = this.normalizeValue(value);
-
-    this._value.set(normalized);
-    this.syncRangeInput();
-    this.updateThumbTransform();
-
-    // If the form gave us an out-of-range / non-step-aligned value,
-    // push the corrected value back so model === UI.
-    // Only correct real numeric values; do not "correct" null/undefined to something else.
-    if (value != null && normalized !== value) {
-      queueMicrotask(() => this.runSilently('correction', () => this.commit(normalized)));
-    }
-  }
-
-  // #endregion
-
   // #region FormidableField
 
-  get value(): number | null {
-    return this._value();
-  }
+  /** The number the slider stands at. */
+  public readonly value = model(0);
 
   get fieldRef(): ElementRef<HTMLElement> {
     return this.sliderRef() as ElementRef<HTMLElement>;
@@ -94,15 +68,15 @@ export class SliderField extends BaseField<number | null> implements FormidableS
 
   // #endregion
 
-  // #region FormidableSliderField
+  // #region Slider
 
-  /** Lower bound, inclusive. A value below it is clamped and the correction is written back to the model. */
-  public readonly min = input(0);
+  /** Lower bound, inclusive, and what a drag can reach. `[formField]` writes it from a `min()` rule. */
+  public readonly min = input(0, { transform: (min: number | undefined) => min ?? 0 });
 
-  /** Upper bound, inclusive. A value above it is clamped and the correction is written back to the model. */
-  public readonly max = input(100);
+  /** Upper bound, inclusive, and what a drag can reach. `[formField]` writes it from a `max()` rule. */
+  public readonly max = input(100, { transform: (max: number | undefined) => max ?? 100 });
 
-  /** Granularity. A value off the step grid is snapped onto it and the correction written back. */
+  /** Granularity. A drag snaps onto the grid it lays from `min`. */
   public readonly step = input(1);
 
   /** Text for the low end of the track. Falls back to `min`. */
@@ -137,14 +111,9 @@ export class SliderField extends BaseField<number | null> implements FormidableS
 
   /** Commits a value from outside the field, clamped and snapped as a drag would be. */
   public selectValue(value: number): void {
-    const normalized = this.normalizeValue(value);
+    if (Number.isNaN(value)) return;
 
-    if (normalized === this._value()) return;
-
-    this._value.set(normalized);
-    this.syncRangeInput();
-    this.updateThumbTransform();
-    this.onValueChange();
+    this.setValue(this.roundToStep(Math.min(this.max(), Math.max(this.min(), value))));
   }
 
   // #endregion
@@ -156,15 +125,13 @@ export class SliderField extends BaseField<number | null> implements FormidableS
   get valueText(): string | null {
     const transform = this.transformValueToThumbLabel();
 
-    return transform && this.value != null ? transform(this.value) : null;
+    return transform ? transform(this.position) : null;
   }
 
   get thumbLabel(): string {
-    if (this.value == null) return '';
-
     const transform = this.transformValueToThumbLabel();
 
-    return transform ? transform(this.value) : String(this.value);
+    return transform ? transform(this.position) : String(this.position);
   }
 
   getTickLabel(tick: number): string {
@@ -173,10 +140,16 @@ export class SliderField extends BaseField<number | null> implements FormidableS
     return transform ? transform(tick) : String(tick);
   }
 
+  // Where the thumb stands for the model. A classic control is `null` until something writes it.
+  protected get position(): number {
+    return this.value() ?? this.min();
+  }
+
+  // Kept on the track, as the native thumb is, whatever the model holds.
   get valuePercent(): number {
     if (this.max() === this.min()) return 0;
-    const v = this.value ?? this.min();
-    return ((v - this.min()) / (this.max() - this.min())) * 100;
+    const percent = ((this.position - this.min()) / (this.max() - this.min())) * 100;
+    return Math.min(100, Math.max(0, percent));
   }
 
   get thumbLabelAlign(): SliderLabelAlign {
@@ -289,13 +262,6 @@ export class SliderField extends BaseField<number | null> implements FormidableS
     this.selectValue(raw);
   }
 
-  private normalizeValue(value: number | null): number | null {
-    if (value == null || Number.isNaN(value)) return null;
-
-    const clamped = Math.min(this.max(), Math.max(this.min(), value));
-    return this.roundToStep(clamped);
-  }
-
   private roundToStep(value: number): number {
     if (!this.step() || this.step() <= 0) return value;
 
@@ -306,20 +272,11 @@ export class SliderField extends BaseField<number | null> implements FormidableS
     return Math.min(this.max(), Math.max(this.min(), rounded));
   }
 
-  private syncRangeInput(): void {
-    const rangeRef = this.rangeRef();
-    if (!rangeRef?.nativeElement) return;
-
-    const val = this.value ?? this.min();
-    rangeRef.nativeElement.value = String(val);
-  }
-
   private updateThumbTransform(): void {
     const el = this.rangeRef()?.nativeElement;
     if (!el) return;
 
-    // Decide what value to use when null: min makes sense for a slider UI
-    const v = this.value ?? this.min();
+    const v = this.position;
 
     // Avoid divide-by-zero when min === max
     const range = this.max() - this.min();

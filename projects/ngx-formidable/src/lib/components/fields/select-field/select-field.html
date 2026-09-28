@@ -6,7 +6,7 @@
   [attr.readonly]="readonly() ? '' : null"
   [attr.disabled]="disabled() ? '' : null"
   [attr.tabindex]="readonly() || disabled() ? -1 : null"
-  [attr.aria-required]="markRequired() || null"
+  [attr.aria-required]="required() || null"
   [attr.aria-invalid]="isInvalid || null"
   [attr.aria-describedby]="describedBy"
   [attr.aria-readonly]="readonly() || null"
@@ -16,7 +16,7 @@
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
   <!-- Placeholder -->
-  @if (placeholder() && !selectedValue()) {
+  @if (placeholder() && !value()) {
   <option
     value=""
     disabled
@@ -31,7 +31,7 @@
   <option
     [value]="option.value"
     [disabled]="option.disabled || false"
-    [selected]="option.value === selectedValue()">
+    [selected]="option.value === value()">
     {{ option.label || option.value }}
   </option>
   } @empty {

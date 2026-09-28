@@ -6,7 +6,7 @@
   [class.is-disabled]="disabled()"
   [tabindex]="readonly() || disabled() ? -1 : null"
   [attr.aria-labelledby]="labelledBy"
-  [attr.aria-required]="markRequired() || null"
+  [attr.aria-required]="required() || null"
   [attr.aria-invalid]="isInvalid || null"
   [attr.aria-describedby]="describedBy"
   [attr.aria-readonly]="readonly() || null"
@@ -24,7 +24,7 @@
     [attr.name]="name()"
     [attr.readonly]="option.readonly || readonly() ? '' : null"
     [attr.disabled]="option.disabled || disabled() ? '' : null"
-    [checked]="option.value === value" />
+    [checked]="option.value === value()" />
   <formidable-field-option
     #optionRef
     [attr.id]="optionId(i)"
@@ -33,7 +33,7 @@
     [label]="option.label"
     [readonly]="option.readonly || readonly()"
     [disabled]="option.disabled || disabled()"
-    [selected]="option.value === value"
+    [selected]="option.value === value()"
     [highlighted]="i === highlightedOptionIndex()">
     @if (option.template) {
     <ng-container [ngTemplateOutlet]="option.template" />

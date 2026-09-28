@@ -12,16 +12,14 @@ import { FieldDecorator } from './field-decorator';
 /**
  * Contract of the label's required marker.
  *
- * `markRequired` is declared on the field and mirrored by the decorator, which suffixes the marker to
+ * `required` is declared on the field and mirrored by the decorator, which suffixes the marker to
  * the label. The marker is a sibling of the projected label rather than part of it, and that is the whole
  * point: the label wrapper is a flex row, so when a label is too long to fit, the consumer's own text is
  * what ellipsizes and the marker survives at full width. Its glyph comes from a theme variable, and it
  * carries no colour of its own, so it follows the label through every state.
  *
- * The flag validates nothing. Nothing here asserts validity — the validation suite remains the only
- * validator, and these specs deliberately do not imply otherwise. It is deliberately not called `required`:
- * Angular's own `RequiredValidator` matches `[required][ngModel]` on any element, so that name would attach
- * a sync validator and, since Angular skips async validators when a sync one fails, silence the suite.
+ * The field validates nothing, and nothing here asserts validity. Under `ngModel` the same `required`
+ * attribute also attaches Angular's own `RequiredValidator`, which is that API's rule and not the field's.
  *
  * A form may hide every marker on it at once with `hideRequiredMarkers`.
  */
@@ -32,7 +30,7 @@ import { FieldDecorator } from './field-decorator';
     <formidable-field-decorator [style.width.rem]="width">
       <formidable-input-field
         name="field"
-        [markRequired]="markRequired" />
+        [required]="required" />
       @if (hasLabel) {
         <div
           formidableFieldLabel
@@ -44,7 +42,7 @@ import { FieldDecorator } from './field-decorator';
   `
 })
 class InputHost {
-  markRequired = false;
+  required = false;
   hasLabel = true;
   label = 'Label';
   position: FieldLabelPosition = 'outside';
@@ -58,7 +56,7 @@ class InputHost {
     <formidable-field-decorator>
       <formidable-radio-group-field
         name="field"
-        [markRequired]="true" />
+        [required]="true" />
       <div
         formidableFieldLabel
         position="outside">
@@ -80,7 +78,7 @@ class RadioGroupHost {}
         <formidable-input-field
           name="field"
           ngModel
-          [markRequired]="true" />
+          [required]="true" />
         <div
           formidableFieldLabel
           position="outside">
@@ -121,7 +119,7 @@ describe('required marker', () => {
   });
 
   it('suffixes the marker to the label once the field is required', () => {
-    host.markRequired = true;
+    host.required = true;
     fixture.detectChanges();
 
     const wrapper = fixture.nativeElement.querySelector('.label-wrapper') as HTMLElement;
@@ -132,7 +130,7 @@ describe('required marker', () => {
   });
 
   it('hides the marker from assistive tech', () => {
-    host.markRequired = true;
+    host.required = true;
     fixture.detectChanges();
 
     expect(marker()?.getAttribute('aria-hidden')).toBe('true');
@@ -163,7 +161,7 @@ describe('required marker', () => {
   });
 
   it('shows nothing when the field is required but projects no label', () => {
-    host.markRequired = true;
+    host.required = true;
     host.hasLabel = false;
     fixture.detectChanges();
 
@@ -172,7 +170,7 @@ describe('required marker', () => {
   });
 
   it('takes its glyph from the theme, and follows an override', () => {
-    host.markRequired = true;
+    host.required = true;
     fixture.detectChanges();
 
     expect(markerGlyph()).toBe('"*"');
@@ -186,7 +184,7 @@ describe('required marker', () => {
   // The reason the marker is a sibling of the projected label rather than a child of it.
   (['inside-floating', 'border'] as FieldLabelPosition[]).forEach((position) => {
     it(`survives at full width while a ${position} label ellipsizes`, () => {
-      host.markRequired = true;
+      host.required = true;
       host.position = position;
       host.label = 'A label far too long to ever fit inside this field';
       host.width = 8;

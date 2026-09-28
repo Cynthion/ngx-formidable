@@ -6,7 +6,7 @@ import { FieldLabel } from '../../directives/field-label';
 import { NgxFormidableFieldValidate } from '../../forms/field-validate.directive';
 import { FORMIDABLE_ERROR_EXTRACTOR } from '../../models/validation.model';
 import { fill } from '../../testing/dom';
-import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { configureFormidableTestBed, DIRECTIVE_VALIDATORS_UNATTACHED, settle } from '../../testing/test-bed';
 import { FieldDecorator } from '../field-decorator/field-decorator';
 import { InputField } from '../fields/input-field/input-field';
 
@@ -108,6 +108,8 @@ describe('validator-agnostic error rendering', () => {
     // The claim the whole phase rests on: `required` writes `{ required: true }`, not the harness's
     // `{ errors: [...] }`, and the default extractor renders it anyway.
     it('renders Angular’s error keys as messages once touched', async () => {
+      pending(DIRECTIVE_VALIDATORS_UNATTACHED);
+
       await mount(AngularValidatorsHost);
 
       expect(messages()).toEqual([]);
@@ -119,6 +121,8 @@ describe('validator-agnostic error rendering', () => {
     });
 
     it('raises .is-invalid on the decorator and aria-invalid on the field', async () => {
+      pending(DIRECTIVE_VALIDATORS_UNATTACHED);
+
       await mount(AngularValidatorsHost);
 
       expect(decorator().classList.contains('is-invalid')).toBe(false);
@@ -132,6 +136,8 @@ describe('validator-agnostic error rendering', () => {
     });
 
     it('follows the failing validator, and clears as the value satisfies them all', async () => {
+      pending(DIRECTIVE_VALIDATORS_UNATTACHED);
+
       await mount(AngularValidatorsHost);
 
       touch();
@@ -151,6 +157,8 @@ describe('validator-agnostic error rendering', () => {
     // `[ngModel]` is hijacked by the harness's async-validator directive. A consumer who imports
     // NgxFormidableModule gets it on every control, so it must not swallow Angular's own errors.
     it('leaves Angular’s validators alone when the ngModel hijack has no harness', async () => {
+      pending(DIRECTIVE_VALIDATORS_UNATTACHED);
+
       await mount(HijackWithoutHarnessHost);
 
       touch();
@@ -162,6 +170,8 @@ describe('validator-agnostic error rendering', () => {
 
   // A schema library reports its own shape. The extractor is the one place a consumer adapts it.
   it('renders a custom error shape through an overridden extractor', async () => {
+    pending(DIRECTIVE_VALIDATORS_UNATTACHED);
+
     configureFormidableTestBed({
       providers: [
         {

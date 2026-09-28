@@ -31,7 +31,8 @@ Placement, naming, selectors, the field contract and the signal API of component
 
 ## Field Contract
 
-- Field components extend `BaseField<T>` and register two providers: `NG_VALUE_ACCESSOR` (via `forwardRef`, `multi: true`) and `FORMIDABLE_FIELD` (`useExisting`) — this is what makes them work with `ngModel` and be discovered by `FieldDecorator`.
+- Field components extend `BaseField<T>`, which implements Angular's `FormValueControl<T>`, declare their `value` as a `model()` and register `FORMIDABLE_FIELD` (`useExisting`). The `value` model is what makes every forms API bind them — none is a `ControlValueAccessor` — and the provider is what lets `FieldDecorator` discover them.
+- A field renders from `value()` and writes it only through `setValue()` on a user's edit. It never corrects what the model holds — no clamping, re-masking or reconciling against the options.
 - Option-based fields additionally collect options with `contentChildren(FORMIDABLE_OPTION, { descendants: true })` and provide `FORMIDABLE_OPTION_FIELD`. `descendants` is what lets an option sit inside a wrapper element; a shallow query already reaches into `@for` / `*ngIf` / `<ng-template>`. The four that walk their list with a highlight take the query — and the option inputs, the option lifecycle and the highlight itself — from `BaseOptionField` instead of declaring it; only `select-field` still declares its own, because a native `<select>` has no highlight.
 - `BaseField` is the extension point for custom fields; `example-counter-field` in the portal is the reference implementation, quoted as the worked example in [`user/custom-fields.md`](../user/custom-fields.md). The full contract is documented in [`user/components.md`](../user/components.md).
 
@@ -56,6 +57,6 @@ Components and directives declare their API with signal functions. The decorator
 
 - **Two Writers**: where an input has a second writer, the input keeps the public name and the effective value is a `linkedSignal` beside it under its own name. Nothing ever writes to an input.
 - **Reacting To A Change Only**: no `ngOnChanges`. `onSignalChange()` from `helpers/utility.helpers.ts` where the work must not run on the first pass — the equivalent of the `!change.firstChange` guard.
-- **Observable Naming**: append `$` (`valueChange$`, `formValueChange$`).
+- **Observable Naming**: append `$` (`pending$`, `idle$`).
 
 Templates use self-closing tags for elements without content, `[class]` or `[style]` bindings instead of `ngClass` or `ngStyle`, and `[ngTemplateOutlet]` rather than `*ngTemplateOutlet`. A component imports the directives its template uses, never `CommonModule`. The lint rules are `prefer-host-metadata-property`, `prefer-self-closing-tags`, `prefer-class-binding` and `prefer-style-binding`.

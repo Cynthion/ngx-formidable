@@ -19,7 +19,7 @@
       [attr.readonly]="readonly() ? '' : null"
       [attr.disabled]="disabled() ? '' : null"
       [attr.tabindex]="readonly() || disabled() ? -1 : null"
-      [attr.aria-required]="markRequired() || null"
+      [attr.aria-required]="required() || null"
       [attr.aria-invalid]="isInvalid || null"
       [attr.aria-describedby]="describedBy"
       [attr.aria-readonly]="readonly() || null"
@@ -59,7 +59,7 @@
         [match]="option.match"
         [readonly]="option.readonly || false"
         [disabled]="option.disabled || false"
-        [selected]="option.value === value"
+        [selected]="option.value === selectedOption()?.value"
         [highlighted]="i === highlightedOptionIndex()">
         @if (option.template) {
         <ng-container [ngTemplateOutlet]="option.template" />

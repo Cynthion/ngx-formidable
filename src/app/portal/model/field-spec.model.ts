@@ -95,7 +95,7 @@ export type PortalLocaleId = 'en-GB' | 'en-US' | 'de-CH' | 'fr-FR' | 'ja-JP';
 /**
  * How an autocomplete's consumer narrows the list.
  *
- * The field does not filter — it emits `filterChanged` and renders whatever it is handed back — so this is a
+ * The field does not filter — it emits `filterChange` and renders whatever it is handed back — so this is a
  * property of the portal's own filtering code, not of the component. Offering it as a setting is what makes
  * that division visible rather than merely stated.
  */
