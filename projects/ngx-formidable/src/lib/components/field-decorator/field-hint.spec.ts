@@ -1,12 +1,12 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
 import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
 import { StubValidator } from '../../forms/testing/stub-validator.directive';
 import { FieldHint } from '../../directives/field-hint';
 import { NgxFormidableForm } from '../../forms/form.directive';
 import { FieldHintAlignment } from '../../models/formidable.model';
+import { configureFormidableTestBed } from '../../testing/test-bed';
 import { InputField } from '../fields/input-field/input-field';
 import { FieldDecorator } from './field-decorator';
 
@@ -28,25 +28,24 @@ const shape = { field: '' };
 /** Two hints that come and go, the way a consumer's own `*ngIf` moves them. */
 @Component({
   imports: [FormsModule, NgxFormidableForm, StubValidator, FieldDecorator, InputField, FieldErrorsRenderer, FieldHint],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
-      [formValue]="value"
+      [formValue]="formValue"
       [formShape]="shape"
       [stubValidator]="required">
       <formidable-field-decorator>
         <formidable-input-field
           formidableFieldErrors
           name="field"
-          [ngModel]="value.field" />
-        @if (showHints) {
+          [ngModel]="formValue.field" />
+        @if (showHints()) {
           <div formidableFieldHint>Note</div>
         }
-        @if (showHints && showCounter) {
+        @if (showHints() && showCounter()) {
           <div
             formidableFieldHint
-            [align]="counterAlign">
+            [align]="counterAlign()">
             3 / 150
           </div>
         }
@@ -55,12 +54,12 @@ const shape = { field: '' };
   `
 })
 class HintHost {
-  value: Model = {};
+  formValue: Model = {};
   shape = shape;
   required = { field: 'Required.' };
-  showHints = true;
-  showCounter = true;
-  counterAlign: FieldHintAlignment = 'end';
+  readonly showHints = signal(true);
+  readonly showCounter = signal(true);
+  readonly counterAlign = signal<FieldHintAlignment>('end');
 }
 
 describe('FieldDecorator hint slot', () => {
@@ -69,7 +68,7 @@ describe('FieldDecorator hint slot', () => {
   let root: HTMLElement;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+    configureFormidableTestBed();
 
     fixture = TestBed.createComponent(HintHost);
     host = fixture.componentInstance;
@@ -105,14 +104,14 @@ describe('FieldDecorator hint slot', () => {
   it('hides the row when no hint is projected, and shows it again when one returns', () => {
     expect(wrapper().classList.contains('hidden')).toBe(false);
 
-    host.showHints = false;
+    host.showHints.set(false);
     fixture.detectChanges();
 
     expect(wrapper().classList.contains('hidden')).toBe(true);
     expect(getComputedStyle(wrapper()).display).toBe('none');
     expect(wrapper().getBoundingClientRect().height).toBe(0);
 
-    host.showHints = true;
+    host.showHints.set(true);
     fixture.detectChanges();
 
     expect(wrapper().classList.contains('hidden')).toBe(false);
@@ -133,7 +132,7 @@ describe('FieldDecorator hint slot', () => {
     // The counter is `end`: its text finishes at its own right edge.
     expect(textRect(counter!).right).toBeCloseTo(counter!.getBoundingClientRect().right, 1);
 
-    host.counterAlign = 'center';
+    host.counterAlign.set('center');
     fixture.detectChanges();
 
     const box = counter!.getBoundingClientRect();
@@ -141,14 +140,14 @@ describe('FieldDecorator hint slot', () => {
 
     expect(text.left - box.left).toBeCloseTo(box.right - text.right, 1);
 
-    host.counterAlign = 'start';
+    host.counterAlign.set('start');
     fixture.detectChanges();
 
     expect(textRect(counter!).left).toBeCloseTo(counter!.getBoundingClientRect().left, 1);
   });
 
   it('sizes the row to the hint and reserves nothing beyond it', () => {
-    host.showCounter = false;
+    host.showCounter.set(false);
     fixture.detectChanges();
 
     const lineHeight = parseFloat(getComputedStyle(wrapper()).lineHeight);

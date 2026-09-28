@@ -98,7 +98,7 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 
 ### Defects
 
-Found by the architecture review. Each is fixed in the phase that rewrites its code and proven by a behaviour spec there, rather than patched in code that is about to go.
+Found by the architecture review and the test harness. Each is fixed in the phase that rewrites its code and proven by a behaviour spec there, rather than patched in code that is about to go.
 
 | Id  | Defect                                                                                                                                            | Phase |
 | :-- | :------------------------------------------------------------------------------------------------------------------------------------------------ | :---: |
@@ -116,25 +116,16 @@ Found by the architecture review. Each is fixed in the phase that rewrites its c
 | D12 | Picking the already selected option reports it again and dirties the control                                                                      |  19   |
 | D13 | `slider-field` commits a clamped value without emitting it                                                                                        |  19   |
 | D14 | Every scroll or resize re-measures every panel field, open or not                                                                                 |  22   |
+| D15 | `textarea-field` shows nothing for a value `[formControl]` writes before the field's view exists                                                  |  19   |
+| D16 | `select-field` shows its first option for a value `[formControl]` writes before its options exist, while the model holds another                  |  21   |
 
 ---
 
 ## Library Phases
 
-### Phase 18 — Test Harness
-
-**Depends On**: nothing.
-
-- **Harness**: `lib/testing/`, unreachable from `public-api.ts`. It holds `configureFormidableTestBed()` with zoneless change detection and ngx-mask, one `settle()`, the DOM helpers the specs copy between them today (`type`, `press`, id-reference resolution, `theme()`, `rem()`, `corners()`), and `bindField(kind, api)`, a host that binds any field through template-driven or reactive forms.
-- **Every Spec Uses It**: all specs run zoneless, as a default application does, so `zoneless.spec.ts` goes and `on-push.spec.ts` becomes repaint behaviour specs.
-- **No Reaching In**: a spec writes a value through its host's forms API and asserts on the DOM, ARIA and the model — never `writeValue`, `componentInstance.value`, a protected member or a test subclass of the field base. `blur-commit.spec.ts`, `caret.spec.ts`, `date-time-field.spec.ts`, `standalone-model.spec.ts`, `option-projection.spec.ts` and `panel-scroll.spec.ts` are the ones that do today.
-- **Named For Behaviour**: a test named after a bug, and a file named after a framework mechanism, are renamed for what they prove.
-- **Conventions**: [`impl/testing.md`](testing.md) states the rules above and corrects its claim that the unit-test builder is experimental.
-- **Proof**: no spec contains `writeValue(`, `componentInstance.value` or a class extending the field base; every deleted case names its replacement in the pull request; all CI gates green.
-
 ### Phase 19 — Signal-Native Field Contract
 
-**Depends On**: Phase 18.
+**Depends On**: nothing.
 
 - **Contract**: `BaseField<T>` implements `FormValueControl<T>` for all eleven fields, as **Target Architecture** describes, with the inputs `disabled`, `readonly`, `required` and `name`, and `min`, `max`, `minLength` and `maxLength` where a field has them.
 - **Value Types**: as **Decisions** lists them. The toggle is a `FormValueControl<boolean>`, not a `FormCheckboxControl`, so every field exposes `value`.
@@ -144,7 +135,7 @@ Found by the architecture review. Each is fixed in the phase that rewrites its c
 - **Forms Matrix**: `bindField` gains Signal Forms, and one contract spec runs every field through all three APIs: model to display, edit to model and dirty, blur to touched with the touch last, a programmatic write staying pristine, `disabled`, `readonly` and `required` as each API forwards them, and `updateOn` having no effect in the classic APIs.
 - **Portal**: `example-counter-field` is rebuilt on the new base; the preview form stays template-driven, with the fewest binding changes that keep it compiling.
 - **Catalogue**: every changed member in [`user/components.md`](../user/components.md).
-- **Closes**: D3, D12, D13.
+- **Closes**: D3, D12, D13, D15.
 
 ### Phase 20 — Error Display From Field State
 
@@ -166,7 +157,7 @@ Found by the architecture review. Each is fixed in the phase that rewrites its c
 - **One Rule For An Unknown Value**: all five option fields render it as no selection, leave the model alone, and show it again once its option arrives.
 - **Keyboard**: one list-navigation handler for the groups and one for the two panel fields. A key callback reports whether it handled the key, and only a handled key is `preventDefault`ed. The groups take `Space`.
 - **Field Option**: a projected option is a data source only; review its temporary-view content detection.
-- **Closes**: D1, D2, D9.
+- **Closes**: D1, D2, D9, D16.
 
 ### Phase 22 — Panel Fields
 

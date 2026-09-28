@@ -38,6 +38,7 @@ projects/ngx-formidable/
 │       ├── helpers/                      # pure functions: mask, input, format, position, option, utility
 │       ├── models/                       # formidable.model.ts (UI), validation.model.ts (the validation seam), utility-types.ts
 │       ├── styles/                       # SCSS tokens, the :root CSS-variable block, field mixins
+│       ├── testing/                      # the spec harness, unreachable from public-api.ts
 │       ├── ngx-formidable.module.ts.     # NgxFormidableModule (NgModule path)
 │       └── provide-ngx-formidable.ts.    # provideNgxFormidable() (standalone path)
 └── vest/                                 # → @cynthion/ngx-formidable/vest — the Vest adapter, `vest` as an optional peer

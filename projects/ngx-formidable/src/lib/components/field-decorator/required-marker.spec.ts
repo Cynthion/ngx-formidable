@@ -1,10 +1,10 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
 import { FieldLabel } from '../../directives/field-label';
 import { NgxFormidableForm } from '../../forms/form.directive';
 import { FieldLabelPosition } from '../../models/formidable.model';
+import { configureFormidableTestBed } from '../../testing/test-bed';
 import { InputField } from '../fields/input-field/input-field';
 import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
 import { FieldDecorator } from './field-decorator';
@@ -28,7 +28,6 @@ import { FieldDecorator } from './field-decorator';
 
 @Component({
   imports: [FieldDecorator, InputField, FieldLabel],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator [style.width.rem]="width">
       <formidable-input-field
@@ -55,7 +54,6 @@ class InputHost {
 /** A group renders its label as a plain `div` instead of a `label`, so the marker has to reach both. */
 @Component({
   imports: [FieldDecorator, RadioGroupField, FieldLabel],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field
@@ -74,11 +72,10 @@ class RadioGroupHost {}
 /** The form-wide switch: one flag hides every marker on the form, whatever its fields asked for. */
 @Component({
   imports: [FormsModule, NgxFormidableForm, FieldDecorator, InputField, FieldLabel],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
-      [hideRequiredMarkers]="hideRequiredMarkers">
+      [hideRequiredMarkers]="hideRequiredMarkers()">
       <formidable-field-decorator>
         <formidable-input-field
           name="field"
@@ -94,7 +91,7 @@ class RadioGroupHost {}
   `
 })
 class FormHost {
-  hideRequiredMarkers = false;
+  readonly hideRequiredMarkers = signal(false);
 }
 
 describe('required marker', () => {
@@ -102,7 +99,7 @@ describe('required marker', () => {
   let host: InputHost;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+    configureFormidableTestBed();
 
     fixture = TestBed.createComponent(InputHost);
     host = fixture.componentInstance;
@@ -157,7 +154,7 @@ describe('required marker', () => {
 
     expect(formFixture.nativeElement.querySelector('.required-marker')).not.toBeNull();
 
-    formFixture.componentInstance.hideRequiredMarkers = true;
+    formFixture.componentInstance.hideRequiredMarkers.set(true);
     formFixture.detectChanges();
 
     expect(formFixture.nativeElement.querySelector('.required-marker')).toBeNull();

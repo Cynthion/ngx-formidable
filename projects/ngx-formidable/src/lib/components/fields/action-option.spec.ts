@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, viewChild } from '@angular/core';
-import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { Component, signal, viewChild } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { FieldDefaultOptionMode, FormidableActionOption, FormidableOption } from '../../models/formidable.model';
+import { fill, press } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { AutocompleteField } from './autocomplete-field/autocomplete-field';
 import { DropdownField } from './dropdown-field/dropdown-field';
 
@@ -27,32 +29,30 @@ const OPTIONS: FormidableOption[] = [
 
 @Component({
   imports: [FormsModule, DropdownField, AutocompleteField],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-dropdown-field
         name="branch"
         [(ngModel)]="branch"
-        [options]="options"
+        [options]="options()"
         [actionOption]="actionOption"
-        [actionOptionMode]="mode" />
+        [actionOptionMode]="mode()" />
       <formidable-autocomplete-field
         name="address"
         [(ngModel)]="address"
-        [options]="options"
+        [options]="options()"
         [actionOption]="actionOption"
-        [actionOptionMode]="mode" />
+        [actionOptionMode]="mode()" />
     </form>
   `
 })
 class TestHost {
   readonly dropdown = viewChild.required(DropdownField);
-  readonly autocomplete = viewChild.required(AutocompleteField);
 
-  options: FormidableOption[] = [...OPTIONS];
-  mode: FieldDefaultOptionMode = 'always';
-  branch: string | null = null;
-  address: string | null = null;
+  readonly options = signal<FormidableOption[]>([...OPTIONS]);
+  readonly mode = signal<FieldDefaultOptionMode>('always');
+  readonly branch = signal<string | null>(null);
+  readonly address = signal<string | null>(null);
 
   runs = 0;
   readonly actionOption: FormidableActionOption = {
@@ -66,21 +66,14 @@ describe('action option', () => {
   let fixture: ComponentFixture<TestHost>;
   let host: TestHost;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [TestHost] }).compileComponents();
+  beforeEach(() => {
+    configureFormidableTestBed({ imports: [TestHost] });
 
     fixture = TestBed.createComponent(TestHost);
     host = fixture.componentInstance;
   });
 
   afterEach(() => fixture.destroy());
-
-  /** Options are collected in a microtask, so one `detectChanges()` is not enough to see them rendered. */
-  function settle(): void {
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-  }
 
   function fieldElement(selector: 'dropdown' | 'autocomplete'): HTMLElement {
     return fixture.nativeElement.querySelector(`formidable-${selector}-field`) as HTMLElement;
@@ -96,6 +89,15 @@ describe('action option', () => {
     return fieldElement(selector).querySelector('.no-option')?.textContent?.trim() ?? null;
   }
 
+  /** The option the field marks as holding its value. */
+  function selectedOption(selector: 'dropdown' | 'autocomplete'): Element | null {
+    return fieldElement(selector).querySelector('formidable-field-option[aria-selected="true"]');
+  }
+
+  function isPanelOpen(selector: 'dropdown' | 'autocomplete'): boolean {
+    return fieldElement(selector).querySelector('.panel')!.classList.contains('open');
+  }
+
   function clickOption(selector: 'dropdown' | 'autocomplete', label: string): void {
     const option = Array.from(fieldElement(selector).querySelectorAll('formidable-field-option')).find(
       (el) => (el as HTMLElement).textContent!.trim() === label
@@ -104,162 +106,142 @@ describe('action option', () => {
     option.querySelector('div')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
   }
 
-  /** Keydowns are listened for on the field wrapper, and only while the field is focused. */
-  function press(selector: 'dropdown' | 'autocomplete', key: string): void {
-    const input = fieldElement(selector).querySelector('input') as HTMLInputElement;
-
-    input.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
-    fixture.detectChanges();
-  }
-
   /** Types into the autocomplete's own input and lets its debounce through. */
-  function type(text: string): void {
+  async function search(text: string): Promise<void> {
     const input = fieldElement('autocomplete').querySelector('input') as HTMLInputElement;
 
     input.dispatchEvent(new Event('focus'));
-    input.value = text;
-    input.dispatchEvent(new Event('input'));
+    fill(input, text);
 
-    tick(200);
-    fixture.detectChanges();
+    await settle(fixture, 200);
   }
 
   describe('dropdown', () => {
-    it('renders last, after the options', fakeAsync(() => {
-      settle();
+    it('renders last, after the options', async () => {
+      await settle(fixture);
       host.dropdown().togglePanel(true);
-      settle();
+      await settle(fixture);
 
       expect(optionLabels('dropdown')).toEqual(['Red', 'Blue', 'Add A New One…']);
-      flush();
-    }));
+    });
 
-    it('stays out of the list in the fallback mode while options exist', fakeAsync(() => {
-      host.mode = 'fallback';
-      settle();
+    it('stays out of the list in the fallback mode while options exist', async () => {
+      host.mode.set('fallback');
+      await settle(fixture);
       host.dropdown().togglePanel(true);
-      settle();
+      await settle(fixture);
 
       expect(optionLabels('dropdown')).toEqual(['Red', 'Blue']);
-      flush();
-    }));
+    });
 
-    it('renders beside the empty-state text, not instead of it', fakeAsync(() => {
-      host.mode = 'fallback';
-      host.options = [];
-      settle();
+    it('renders beside the empty-state text, not instead of it', async () => {
+      host.mode.set('fallback');
+      host.options.set([]);
+      await settle(fixture);
       host.dropdown().togglePanel(true);
-      settle();
+      await settle(fixture);
 
       expect(optionLabels('dropdown')).toEqual(['Add A New One…']);
       expect(emptyStateText('dropdown')).toBe('No options available.');
-      flush();
-    }));
+    });
 
-    it('runs its action on a click, commits nothing and closes the panel', fakeAsync(() => {
-      settle();
+    it('runs its action on a click, commits nothing and closes the panel', async () => {
+      await settle(fixture);
       host.dropdown().togglePanel(true);
-      settle();
+      await settle(fixture);
 
       clickOption('dropdown', 'Add A New One…');
-      settle();
+      await settle(fixture);
 
       expect(host.runs).toBe(1);
-      expect(host.branch).toBeNull();
-      expect(host.dropdown().value).toBeNull();
-      expect(host.dropdown().isPanelOpen()).toBe(false);
-      flush();
-    }));
+      expect(host.branch()).toBeNull();
+      expect(selectedOption('dropdown')).toBeNull();
+      expect(isPanelOpen('dropdown')).toBe(false);
+    });
 
-    it('is reached by the keyboard and runs its action on Enter', fakeAsync(() => {
-      settle();
+    it('is reached by the keyboard and runs its action on Enter', async () => {
+      await settle(fixture);
       const input = fieldElement('dropdown').querySelector('input') as HTMLInputElement;
       input.dispatchEvent(new Event('focus'));
-      settle();
+      await settle(fixture);
 
-      press('dropdown', 'ArrowDown'); // opens the panel
-      press('dropdown', 'ArrowDown'); // Red
-      press('dropdown', 'ArrowDown'); // Blue
-      press('dropdown', 'ArrowDown'); // Add A New One…
+      // Keydowns are listened for on the field wrapper, and only while the field is focused.
+      press(input, 'ArrowDown'); // opens the panel
+      press(input, 'ArrowDown'); // Red
+      press(input, 'ArrowDown'); // Blue
+      press(input, 'ArrowDown'); // Add A New One…
+      await settle(fixture);
 
       expect(fieldElement('dropdown').querySelector('.is-highlighted')!.textContent!.trim()).toBe('Add A New One…');
 
-      press('dropdown', 'Enter');
-      settle();
+      press(input, 'Enter');
+      await settle(fixture);
 
       expect(host.runs).toBe(1);
-      expect(host.branch).toBeNull();
-      flush();
-    }));
+      expect(host.branch()).toBeNull();
+    });
 
-    it('is skipped by the type-ahead', fakeAsync(() => {
-      settle();
+    it('is skipped by the type-ahead', async () => {
+      await settle(fixture);
       const input = fieldElement('dropdown').querySelector('input') as HTMLInputElement;
       input.dispatchEvent(new Event('focus'));
-      settle();
+      await settle(fixture);
 
       // "a" starts no option's label but does start the action entry's.
-      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true }));
-      tick(200);
-      fixture.detectChanges();
+      press(input, 'a');
+      await settle(fixture, 200);
 
       expect(fieldElement('dropdown').querySelector('.is-highlighted')).toBeNull();
-      flush();
-    }));
+    });
 
-    it('is not selected by a model written to its value', fakeAsync(() => {
-      host.branch = '__add__';
-      settle();
+    it('is not selected by a model written to its value', async () => {
+      host.branch.set('__add__');
+      await settle(fixture);
 
-      expect(host.dropdown().value).toBeNull();
+      expect(selectedOption('dropdown')).toBeNull();
       expect((fieldElement('dropdown').querySelector('input') as HTMLInputElement).value).toBe('');
-      flush();
-    }));
+    });
   });
 
   describe('autocomplete', () => {
-    it('survives a filter that matches nothing, beside the empty-state text', fakeAsync(() => {
-      settle();
-      type('zzz');
+    it('survives a filter that matches nothing, beside the empty-state text', async () => {
+      await settle(fixture);
+      await search('zzz');
 
       expect(optionLabels('autocomplete')).toEqual(['Add A New One…']);
       expect(emptyStateText('autocomplete')).toBe('No options available.');
-      flush();
-    }));
+    });
 
-    it('runs its action on a click, commits nothing and closes the panel', fakeAsync(() => {
-      settle();
-      type('zzz');
+    it('runs its action on a click, commits nothing and closes the panel', async () => {
+      await settle(fixture);
+      await search('zzz');
 
       clickOption('autocomplete', 'Add A New One…');
-      settle();
+      await settle(fixture);
 
       expect(host.runs).toBe(1);
-      expect(host.address).toBeNull();
-      expect(host.autocomplete().value).toBeNull();
-      expect(host.autocomplete().isPanelOpen()).toBe(false);
-      flush();
-    }));
+      expect(host.address()).toBeNull();
+      expect(selectedOption('autocomplete')).toBeNull();
+      expect(isPanelOpen('autocomplete')).toBe(false);
+    });
 
-    it('leaves the typed filter alone, so the action can read it', fakeAsync(() => {
-      settle();
-      type('Wiesenstrasse 5');
+    it('leaves the typed filter alone, so the action can read it', async () => {
+      await settle(fixture);
+      await search('Wiesenstrasse 5');
 
       clickOption('autocomplete', 'Add A New One…');
-      settle();
+      await settle(fixture);
 
       expect((fieldElement('autocomplete').querySelector('input') as HTMLInputElement).value).toBe('Wiesenstrasse 5');
-      flush();
-    }));
+    });
 
-    it('is not auto-selected by typing its label exactly', fakeAsync(() => {
-      settle();
-      type('Add A New One…');
+    it('is not auto-selected by typing its label exactly', async () => {
+      await settle(fixture);
+      await search('Add A New One…');
 
       expect(host.runs).toBe(0);
-      expect(host.address).toBeNull();
-      expect(host.autocomplete().value).toBeNull();
-      flush();
-    }));
+      expect(host.address()).toBeNull();
+      expect(selectedOption('autocomplete')).toBeNull();
+    });
   });
 });

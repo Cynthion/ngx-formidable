@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { provideNgxMask } from 'ngx-mask';
+import { Component } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { theme } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldOption } from '../field-option/field-option';
 import { CheckboxGroupField } from './checkbox-group-field/checkbox-group-field';
 import { InputField } from './input-field/input-field';
@@ -27,7 +28,6 @@ import { RadioGroupField } from './radio-group-field/radio-group-field';
 
 @Component({
   imports: [InputField, RadioGroupField, CheckboxGroupField, FieldOption],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-input-field name="text" />
 
@@ -44,28 +44,15 @@ class TestHost {}
 describe('group option alignment', () => {
   let fixture: ComponentFixture<TestHost>;
   let root: HTMLElement;
-  const themed = new Set<string>();
 
-  // A group collects its options in a microtask after content init, so the rows need a second pass.
-  beforeEach(fakeAsync(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+  // A group collects its options in a microtask after content init, so the rows need the render to settle.
+  beforeEach(async () => {
+    configureFormidableTestBed();
 
     fixture = TestBed.createComponent(TestHost);
     root = fixture.nativeElement;
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-  }));
-
-  afterEach(() => {
-    themed.forEach((property) => document.documentElement.style.removeProperty(property));
-    themed.clear();
+    await settle(fixture);
   });
-
-  function set(property: string, value: string): void {
-    document.documentElement.style.setProperty(property, value);
-    themed.add(property);
-  }
 
   function padding(selector: string): { left: string; right: string } {
     const style = getComputedStyle(root.querySelector(selector) as HTMLElement);
@@ -95,8 +82,7 @@ describe('group option alignment', () => {
     // The point of the phase: the two agreed at defaults before this change too, but only because both
     // tokens happened to be 16px. Moving the field's padding is what tells the two apart.
     it('moves the marker with the field padding it derives from', () => {
-      set('--formidable-field-padding-x', '40px');
-      fixture.detectChanges();
+      theme('--formidable-field-padding-x', '40px');
 
       expect(fieldText()).toBe('40px');
       expect(marker().left).toBe('40px');
@@ -107,8 +93,7 @@ describe('group option alignment', () => {
     it('zeroes the inset without collapsing the gap', () => {
       const gap = marker().right;
 
-      set('--formidable-option-prefix-inset', '0px');
-      fixture.detectChanges();
+      theme('--formidable-option-prefix-inset', '0px');
 
       expect(marker().left).toBe('0px');
       expect(marker().right).toBe(gap);
@@ -117,8 +102,7 @@ describe('group option alignment', () => {
     it('leaves a field padding of its own alone', () => {
       const text = fieldText();
 
-      set('--formidable-option-prefix-inset', '0px');
-      fixture.detectChanges();
+      theme('--formidable-option-prefix-inset', '0px');
 
       expect(fieldText()).toBe(text);
     });
@@ -130,8 +114,7 @@ describe('group option alignment', () => {
     });
 
     it('moves out with the options', () => {
-      set('--formidable-option-prefix-inset', '0px');
-      fixture.detectChanges();
+      theme('--formidable-option-prefix-inset', '0px');
 
       expect(emptyState()).toBe('0px');
     });

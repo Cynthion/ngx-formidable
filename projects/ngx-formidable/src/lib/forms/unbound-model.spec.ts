@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { Component, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
+import { configureFormidableTestBed, settle } from '../testing/test-bed';
 import { NgxFormidableFieldValidate } from './field-validate.directive';
 import { NgxFormidableForm } from './form.directive';
 import { StubValidator } from './testing/stub-validator.directive';
@@ -20,11 +21,10 @@ interface Model extends Record<string, unknown> {
 
 @Component({
   imports: [FormsModule, NgxFormidableForm, NgxFormidableFieldValidate, StubValidator],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
-      [formValue]="value"
+      [formValue]="model()"
       [stubValidator]="rules">
       <input
         name="name"
@@ -34,7 +34,7 @@ interface Model extends Record<string, unknown> {
 })
 class AsyncModelHost {
   /** Null until the stream emits. */
-  value: Model | null = null;
+  readonly model = signal<Model | null>(null);
   name = '';
   rules: Record<string, string> = { name: 'Required' };
 }
@@ -42,19 +42,18 @@ class AsyncModelHost {
 /** No `[formValue]` at all. The controls are the whole truth. */
 @Component({
   imports: [FormsModule, NgxFormidableForm, NgxFormidableFieldValidate, StubValidator],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
       [stubValidator]="rules">
       <input
         name="name"
-        [ngModel]="name" />
+        [ngModel]="name()" />
     </form>
   `
 })
 class NoModelHost {
-  name = '';
+  readonly name = signal('');
   rules: Record<string, string> = { name: 'Required' };
 }
 
@@ -65,47 +64,43 @@ describe('validation without a bound model', () => {
     return fixture.debugElement.children[0]!.injector.get(NgForm).form.get('name');
   }
 
-  function mount(host: typeof AsyncModelHost | typeof NoModelHost): void {
-    fixture = TestBed.createComponent(host);
-    fixture.detectChanges();
-    tick(500);
-    fixture.detectChanges();
+  /** Two passes: the first renders and commits what the host bound, which starts a run; the second lets it land. */
+  async function validated(): Promise<void> {
+    await settle(fixture);
+    await settle(fixture);
   }
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({});
-  });
+  async function mount(host: typeof AsyncModelHost | typeof NoModelHost): Promise<void> {
+    fixture = TestBed.createComponent<AsyncModelHost | NoModelHost>(host);
+    await validated();
+  }
 
-  afterEach(fakeAsync(() => flush()));
+  beforeEach(() => configureFormidableTestBed());
 
-  it('validates while the model is still null', fakeAsync(() => {
-    mount(AsyncModelHost);
+  it('validates while the model is still null', async () => {
+    await mount(AsyncModelHost);
 
     expect(control()?.errors?.['errors']).toEqual(['Required']);
     expect(control()?.valid).toBe(false);
-  }));
+  });
 
-  it('keeps validating once the model arrives', fakeAsync(() => {
-    mount(AsyncModelHost);
+  it('keeps validating once the model arrives', async () => {
+    await mount(AsyncModelHost);
 
-    (fixture.componentInstance as AsyncModelHost).value = { name: '' };
-    fixture.detectChanges();
-    tick(500);
-    fixture.detectChanges();
+    (fixture.componentInstance as AsyncModelHost).model.set({ name: '' });
+    await validated();
 
     expect(control()?.errors?.['errors']).toEqual(['Required']);
-  }));
+  });
 
-  it('validates a form that never binds a model, against its control values', fakeAsync(() => {
-    mount(NoModelHost);
+  it('validates a form that never binds a model, against its control values', async () => {
+    await mount(NoModelHost);
 
     expect(control()?.errors?.['errors']).toEqual(['Required']);
 
-    (fixture.componentInstance as NoModelHost).name = 'filled';
-    fixture.detectChanges();
-    tick(500);
-    fixture.detectChanges();
+    (fixture.componentInstance as NoModelHost).name.set('filled');
+    await validated();
 
     expect(control()?.errors).toBeNull();
-  }));
+  });
 });

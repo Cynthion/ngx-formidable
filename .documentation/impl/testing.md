@@ -14,13 +14,33 @@ Prioritize testing **logic** over Angular rendering: fast, reliable tests that c
 
 `@angular/build:karma` is configured for both projects and there is no `test.ts` in either. The library runs on the builder's defaults; the portal names a `karma.conf.cjs`, which raises Karma's inactivity timeouts and, because supplying a config stops the builder contributing its own, redeclares the frameworks and plugins. No current spec needs the raised timeouts — `portal.spec.ts` runs in seconds. The file sets no `browsers` either, so a portal run needs `--browsers=ChromeHeadless`, or Karma starts and idles without launching one. Type errors are caught by `build:lib`, so there is no separate typecheck spec.
 
-Not the newer `@angular/build:unit-test`. It is marked experimental, and its `migrate-karma-to-vitest` migration skips the library — it rewrites only an `application` project whose `build` target is `@angular/build:application`. The builder itself accepts an `@angular/build:ng-packagr` `buildTarget`, so a library is not excluded outright. What the library cannot get that way is `polyfills`, `styles` and `stylePreprocessorOptions`: the builder takes no options of its own for them and reads them from the build target, and an ng-packagr target carries none. The library's specs need all three — `zone.js/testing` for `fakeAsync`, and `test-styles.scss` for the geometry specs that measure computed CSS. Whether `setupFiles` and a `runnerConfig` close that gap is untested.
+Not `@angular/build:unit-test`, Angular's stable Vitest builder: Karma stays, and a Vitest spike is in [`impl/backlog.md`](backlog.md). Its `migrate-karma-to-vitest` migration skips the library — it rewrites only an `application` project whose `build` target is `@angular/build:application`. The builder itself accepts an `@angular/build:ng-packagr` `buildTarget`, so a library is not excluded outright. What the library cannot get that way is `styles` and `stylePreprocessorOptions`: the builder takes no options of its own for them and reads them from the build target, and an ng-packagr target carries none. The library's geometry specs need both, for `test-styles.scss` and the computed CSS they measure. Whether `setupFiles` and a `runnerConfig` close that gap is untested.
 
-**Both test targets run under zone change detection, and the app does not.** `@angular/build:karma` writes the test environment module itself, and it puts `provideZoneChangeDetection()` in it whenever `zone.js` is one of the target's `polyfills`. Removing that entry does not buy zoneless specs, because `zone.js/testing` carries no copy of zone.js and `fakeAsync` needs one. A spec that must run the way the app does provides `provideZonelessChangeDetection()` in its own `TestBed`, which overrides the environment's; `zoneless.spec.ts` is the one that does, and its header says why the NG0914 warning it logs is expected.
+**The library's specs run zoneless, as the app does.** Its test target loads no `zone.js`, so `fakeAsync`, `tick` and `flush` do not exist there. The portal's target still loads `zone.js` and `zone.js/testing`, and `@angular/build:karma` then puts `provideZoneChangeDetection()` into its test environment.
 
-Two things behave differently in a zoneless `TestBed`, and both mislead if they are not known. `fixture.detectChanges()` refreshes only what something marked, so a host holding plain fields is skipped where it would have been checked under zones — a spec host that mutates its own state needs signals. And a spec proving that a repaint arrives on its own must not call `detectChanges()` after the act at all, since it ticks the whole application and would pass either way.
+Two things behave differently in a zoneless `TestBed`, and both mislead if they are not known. `fixture.detectChanges()` refreshes only what something marked, so an `OnPush` host holding plain fields is skipped — a spec host that mutates its own state needs signals. And a spec proving that a repaint arrives on its own must not call `detectChanges()` after the act at all, since it ticks the whole application and would pass either way.
 
 The library's `test` target sets `include` explicitly, as `['**/*.spec.ts', '../vest/**/*.spec.ts']`. The builder resolves those globs against `sourceRoot` and not, as its schema says, the project root — so the default glob covers `src/` only and the `vest/` entry point's spec is silently skipped. The second glob is what runs it.
+
+---
+
+## Library Specs
+
+Every library spec is built on the harness in `lib/testing/`. `public-api.ts` does not reach it, so ng-packagr never compiles it.
+
+| Helper                          | Does                                                                                                                  |
+| :------------------------------ | :-------------------------------------------------------------------------------------------------------------------- |
+| `configureFormidableTestBed()`  | Zoneless change detection and ngx-mask, plus the spec's own metadata. Clears `theme()` overrides and the scroll first |
+| `settle(fixture, ms)`           | Awaits timers of up to `ms`, one frame, and the change detection they scheduled. Never calls `detectChanges()`        |
+| `bindField(kind, api)`          | A host binding one field through template-driven or reactive forms: its element, its control, `write()` and `set()`   |
+| `fill()`, `type()`, `press()`   | A whole value as a paste sets it, keystrokes at the live caret, a bubbling cancelable `keydown`                       |
+| `referenced()`                  | What an id-reference attribute such as `aria-describedby` resolves to                                                 |
+| `theme()`, `rem()`, `corners()` | A `:root` override, a rem length in px, the four resolved corner radii                                                |
+
+- **Real Timers**: a spec awaits `settle()` after an act, passing the debounce it waits out as `ms`.
+- **Signal Hosts**: a host keeps the `OnPush` default, and the state a spec changes is a signal.
+- **No Reaching In**: a spec writes a value through its host's forms API and asserts on the DOM, ARIA and the model — never `writeValue`, `componentInstance.value`, a protected member or a test subclass of the field base.
+- **Named For Behaviour**: a test is named for what it proves, not after the bug that prompted it, and a file is not named after a framework mechanism.
 
 ---
 

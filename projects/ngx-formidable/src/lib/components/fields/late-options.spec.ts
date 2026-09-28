@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { Component, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
 import { FormidableOption } from '../../models/formidable.model';
+import { fill } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldOption } from '../field-option/field-option';
 import { InputField } from './input-field/input-field';
 import { SelectField } from './select-field/select-field';
@@ -23,8 +24,8 @@ import { TextareaField } from './textarea-field/textarea-field';
     <form>
       <formidable-select-field
         name="era"
-        [options]="options"
-        [ngModel]="value">
+        [options]="options()"
+        [ngModel]="era">
         <formidable-field-option
           value="industrial"
           label="Industrial Revolution" />
@@ -38,8 +39,8 @@ import { TextareaField } from './textarea-field/textarea-field';
 class ProjectedSelectHost {
   // Deliberately not the first option: a native `<select>` selects that one on its own, so a value that
   // happened to match it would pass whether or not the field ever applied what it was given.
-  value: string | null = 'renaissance';
-  options: FormidableOption[] = [];
+  era: string | null = 'renaissance';
+  readonly options = signal<FormidableOption[]>([]);
 }
 
 @Component({
@@ -50,12 +51,12 @@ class ProjectedSelectHost {
         name="identifier"
         mask="AAA-0000"
         [maskConfig]="{ showMaskTyped: true }"
-        [ngModel]="value" />
+        [ngModel]="identifier" />
     </form>
   `
 })
 class MaskedInputHost {
-  value: string | null = 'TTA4417';
+  identifier: string | null = 'TTA4417';
 }
 
 @Component({
@@ -66,82 +67,77 @@ class MaskedInputHost {
         name="identifier"
         mask="AAA-AAA"
         [maskConfig]="{ showMaskTyped: true }"
-        [ngModel]="value" />
+        [ngModel]="identifier" />
     </form>
   `
 })
 class MaskedTextareaHost {
-  value: string | null = 'abcdef';
+  identifier: string | null = 'abcdef';
 }
 
 describe('a value written before the field can hold it', () => {
-  function settle(fixture: ComponentFixture<unknown>): void {
-    for (let i = 0; i < 3; i++) {
-      fixture.detectChanges();
-      tick(100);
-    }
-    fixture.detectChanges();
+  /** Two passes: the first renders and writes the model, the second lets the task a masked write defers to land. */
+  async function land(fixture: ComponentFixture<unknown>): Promise<void> {
+    await settle(fixture);
+    await settle(fixture);
   }
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
-  });
+  beforeEach(() => configureFormidableTestBed());
 
-  it('survives on a select whose options are projected', fakeAsync(() => {
+  it('survives on a select whose options are projected', async () => {
     const fixture = TestBed.createComponent(ProjectedSelectHost);
-    settle(fixture);
+    await land(fixture);
 
     const select = (fixture.nativeElement as HTMLElement).querySelector('select') as HTMLSelectElement;
 
     expect(select.value).toBe('renaissance');
-  }));
+  });
 
   // The risk the fallback carries: it must never outrank what the element already holds, or a later pick
   // would be reverted to the value the form wrote at startup the next time the option list moves.
-  it('does not revert a later pick when the option list changes', fakeAsync(() => {
+  it('does not revert a later pick when the option list changes', async () => {
     const fixture = TestBed.createComponent(ProjectedSelectHost);
-    settle(fixture);
+    await land(fixture);
 
     const select = (fixture.nativeElement as HTMLElement).querySelector('select') as HTMLSelectElement;
 
     select.value = 'industrial';
     select.dispatchEvent(new Event('change'));
-    settle(fixture);
+    await land(fixture);
 
-    fixture.componentInstance.options = [{ value: 'bronze', label: 'Bronze Age' }];
-    settle(fixture);
+    fixture.componentInstance.options.set([{ value: 'bronze', label: 'Bronze Age' }]);
+    await land(fixture);
 
     expect(select.value).toBe('industrial');
-  }));
+  });
 
-  it('survives on a masked input, formatted by its mask', fakeAsync(() => {
+  it('survives on a masked input, formatted by its mask', async () => {
     const fixture = TestBed.createComponent(MaskedInputHost);
-    settle(fixture);
+    await land(fixture);
 
     const input = (fixture.nativeElement as HTMLElement).querySelector('input') as HTMLInputElement;
 
     expect(input.value).toBe('TTA-4417');
-  }));
+  });
 
-  it('survives on a masked textarea, formatted by its mask', fakeAsync(() => {
+  it('survives on a masked textarea, formatted by its mask', async () => {
     const fixture = TestBed.createComponent(MaskedTextareaHost);
-    settle(fixture);
+    await land(fixture);
 
     const textarea = (fixture.nativeElement as HTMLElement).querySelector('textarea') as HTMLTextAreaElement;
 
     expect(textarea.value).toBe('abc-def');
-  }));
+  });
 
-  it('does not resurrect a value the user has since cleared', fakeAsync(() => {
+  it('does not resurrect a value the user has since cleared', async () => {
     const fixture = TestBed.createComponent(MaskedInputHost);
-    settle(fixture);
+    await land(fixture);
 
     const input = (fixture.nativeElement as HTMLElement).querySelector('input') as HTMLInputElement;
 
-    input.value = '';
-    input.dispatchEvent(new Event('input'));
-    settle(fixture);
+    fill(input, '');
+    await land(fixture);
 
     expect(input.value).not.toContain('TTA');
-  }));
+  });
 });

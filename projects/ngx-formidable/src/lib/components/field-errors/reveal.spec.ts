@@ -1,11 +1,13 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { Component, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
 import { NgxFormidableFieldValidate } from '../../forms/field-validate.directive';
 import { NgxFormidableForm } from '../../forms/form.directive';
 import { StubValidator } from '../../forms/testing/stub-validator.directive';
 import { FormidableReveal } from '../../models/validation.model';
+import { fill } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
  * Contract of the reveal axis: when a field's messages appear, which is the library's own and separate from
@@ -22,66 +24,63 @@ const IMPORTS = [FormsModule, NgxFormidableForm, NgxFormidableFieldValidate, Stu
 /** Asks for nothing, so it gets the default. */
 @Component({
   imports: IMPORTS,
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
-      [formValue]="value"
+      [formValue]="formValue"
       [stubValidator]="rules">
       <input
         formidableFieldErrors
         name="name"
-        [ngModel]="value.name" />
+        [ngModel]="formValue.name" />
     </form>
   `
 })
 class DefaultHost {
-  value: Model = { name: '' };
+  formValue: Model = { name: '' };
   rules: Record<string, string> = { name: 'Required' };
 }
 
 @Component({
   imports: IMPORTS,
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
-      [formValue]="value"
-      [revealOn]="revealOn"
+      [formValue]="formValue()"
+      [revealOn]="revealOn()"
       [stubValidator]="rules">
       <input
         formidableFieldErrors
         name="name"
-        [ngModel]="value.name" />
+        [ngModel]="formValue().name" />
     </form>
   `
 })
 class RevealHost {
-  revealOn: FormidableReveal = 'touched';
-  value: Model = { name: '' };
+  readonly revealOn = signal<FormidableReveal>('touched');
+  readonly formValue = signal<Model>({ name: '' });
   rules: Record<string, string> = { name: 'Required' };
 }
 
 /** The form says one thing, this field says another. The field wins. */
 @Component({
   imports: IMPORTS,
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
       revealOn="submitted"
-      [formValue]="value"
+      [formValue]="formValue"
       [stubValidator]="rules">
       <input
         formidableFieldErrors
         name="name"
         revealOn="always"
-        [ngModel]="value.name" />
+        [ngModel]="formValue.name" />
     </form>
   `
 })
 class OverrideHost {
-  value: Model = { name: '' };
+  formValue: Model = { name: '' };
   rules: Record<string, string> = { name: 'Required' };
 }
 
@@ -97,93 +96,79 @@ describe('validation reveal axis', () => {
     return root.querySelector('input') as HTMLInputElement;
   }
 
-  function touch(): void {
+  async function touch(): Promise<void> {
     input().dispatchEvent(new FocusEvent('focus'));
     input().dispatchEvent(new FocusEvent('blur'));
-    settle();
+    await settle(fixture);
   }
 
-  function type(value: string): void {
-    input().value = value;
-    input().dispatchEvent(new Event('input'));
-    settle();
-  }
-
-  function submit(): void {
+  async function submit(): Promise<void> {
     (root.querySelector('form') as HTMLFormElement).dispatchEvent(new Event('submit', { cancelable: true }));
-    settle();
+    await settle(fixture);
   }
 
-  /** Binds, lets the debounce window and the async validator run, then paints what they produced. */
-  function settle(): void {
-    fixture.detectChanges();
-    tick(500);
-    fixture.detectChanges();
-  }
-
-  function mount(host: typeof DefaultHost | typeof RevealHost | typeof OverrideHost): void {
-    fixture = TestBed.createComponent(host);
+  /** Binds, then lets the debounce window and the async validator run and paint what they produced. */
+  async function mount(host: typeof DefaultHost | typeof RevealHost | typeof OverrideHost): Promise<void> {
+    fixture = TestBed.createComponent<DefaultHost | RevealHost | OverrideHost>(host);
     root = fixture.nativeElement as HTMLElement;
 
-    fixture.detectChanges();
-    settle();
+    await settle(fixture);
   }
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    configureFormidableTestBed();
   });
 
-  afterEach(fakeAsync(() => flush()));
-
-  it('defaults to touched, so an invalid untouched field stays quiet', fakeAsync(() => {
-    mount(DefaultHost);
+  it('defaults to touched, so an invalid untouched field stays quiet', async () => {
+    await mount(DefaultHost);
 
     expect(messages()).toEqual([]);
 
-    touch();
+    await touch();
 
     expect(messages()).toEqual(['Required']);
-  }));
+  });
 
-  it('reveals on dirty before any blur', fakeAsync(() => {
-    mount(RevealHost);
-    (fixture.componentInstance as RevealHost).revealOn = 'dirty';
-    (fixture.componentInstance as RevealHost).value = { name: 'filled' };
-    settle();
+  it('reveals on dirty before any blur', async () => {
+    await mount(RevealHost);
+    (fixture.componentInstance as RevealHost).revealOn.set('dirty');
+    (fixture.componentInstance as RevealHost).formValue.set({ name: 'filled' });
+    await settle(fixture);
 
-    type('');
+    fill(input(), '');
+    await settle(fixture);
 
     // Dirty, never blurred, and reporting.
     expect(messages()).toEqual(['Required']);
-  }));
+  });
 
-  it('holds everything back until submit under submitted', fakeAsync(() => {
-    mount(RevealHost);
-    (fixture.componentInstance as RevealHost).revealOn = 'submitted';
-    settle();
+  it('holds everything back until submit under submitted', async () => {
+    await mount(RevealHost);
+    (fixture.componentInstance as RevealHost).revealOn.set('submitted');
+    await settle(fixture);
 
-    touch();
+    await touch();
 
     // Touched is not enough here, which is the whole point of the value.
     expect(messages()).toEqual([]);
 
-    submit();
+    await submit();
 
     expect(messages()).toEqual(['Required']);
-  }));
+  });
 
-  it('reveals with neither a touch nor a change under always', fakeAsync(() => {
-    mount(RevealHost);
-    (fixture.componentInstance as RevealHost).revealOn = 'always';
-    settle();
+  it('reveals with neither a touch nor a change under always', async () => {
+    await mount(RevealHost);
+    (fixture.componentInstance as RevealHost).revealOn.set('always');
+    await settle(fixture);
 
     expect(messages()).toEqual(['Required']);
-  }));
+  });
 
-  it('lets a field’s revealOn beat the form’s', fakeAsync(() => {
-    mount(OverrideHost);
+  it('lets a field’s revealOn beat the form’s', async () => {
+    await mount(OverrideHost);
 
     // The form said submitted; this field said always.
     expect(messages()).toEqual(['Required']);
-  }));
+  });
 });

@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FORMIDABLE_VALIDATOR, FormidableValidator, WHOLE_FORM } from '@cynthion/ngx-formidable';
 import { firstValueFrom } from 'rxjs';
 import { create, enforce, mode, Modes, only, test } from 'vest';
+import { configureFormidableTestBed } from '../../../src/lib/testing/test-bed';
 import { NgxFormidableVestValidator } from './vest-validator.directive';
 
 /**
@@ -49,7 +50,6 @@ const suite = create((model: Model, field?: string) => {
 
 @Component({
   imports: [NgxFormidableVestValidator],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formSuite]="suite"></form>`
 })
 class TestHost {
@@ -60,6 +60,8 @@ describe('NgxFormidableVestValidator', () => {
   let validator: FormidableValidator<Model>;
 
   beforeEach(() => {
+    configureFormidableTestBed();
+
     const fixture = TestBed.createComponent(TestHost);
     fixture.detectChanges();
 
@@ -125,7 +127,6 @@ describe('NgxFormidableVestValidator', () => {
 
 @Component({
   imports: [NgxFormidableVestValidator],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<form [formSuite]="null"></form>`
 })
 class BareHost {}

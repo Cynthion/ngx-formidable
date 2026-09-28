@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNgxMask } from 'ngx-mask';
 import { FieldHint } from '../../directives/field-hint';
 import { FieldLabel } from '../../directives/field-label';
+import { configureFormidableTestBed } from '../../testing/test-bed';
 import { TextareaField } from '../fields/textarea-field/textarea-field';
 import { InputField } from '../fields/input-field/input-field';
 import { FieldDecorator } from './field-decorator';
@@ -13,11 +13,10 @@ import { FieldDecorator } from './field-decorator';
  */
 @Component({
   imports: [FieldDecorator, InputField, TextareaField, FieldLabel, FieldHint],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
       style="font-family: serif"
-      [style.--formidable-font-family]="family">
+      [style.--formidable-font-family]="family()">
       <formidable-field-decorator>
         <formidable-input-field name="decorated" />
         <div formidableFieldLabel>Label</div>
@@ -28,7 +27,7 @@ import { FieldDecorator } from './field-decorator';
   `
 })
 class FontHost {
-  family: string | null = 'monospace';
+  readonly family = signal<string | null>('monospace');
 }
 
 describe('--formidable-font-family', () => {
@@ -36,7 +35,7 @@ describe('--formidable-font-family', () => {
   let root: HTMLElement;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+    configureFormidableTestBed();
 
     fixture = TestBed.createComponent(FontHost);
     fixture.detectChanges();
@@ -54,7 +53,7 @@ describe('--formidable-font-family', () => {
   });
 
   it('leaves the page family in force when unset', () => {
-    fixture.componentInstance.family = null;
+    fixture.componentInstance.family.set(null);
     fixture.detectChanges();
 
     expect(families()).toEqual(['serif', 'serif', 'serif', 'serif']);

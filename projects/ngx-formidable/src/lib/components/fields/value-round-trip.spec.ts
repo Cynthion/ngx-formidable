@@ -1,9 +1,6 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
-import { InputField } from './input-field/input-field';
-import { TextareaField } from './textarea-field/textarea-field';
+import { bindField } from '../../testing/bind-field';
+import { fill } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
  * Contract of the value round trip: what a field is written stays comparable with what a user then types.
@@ -14,76 +11,33 @@ import { TextareaField } from './textarea-field/textarea-field';
  * model. A required rule on such a field would never fire.
  */
 
-@Component({
-  imports: [FormsModule, InputField, TextareaField],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <form>
-      <formidable-input-field
-        name="text"
-        [ngModel]="text"
-        (ngModelChange)="text = $event" />
-      <formidable-textarea-field
-        name="notes"
-        [ngModel]="notes"
-        (ngModelChange)="notes = $event" />
-    </form>
-  `
-})
-class TestHost {
-  text: string | null = 'Cynthion';
-  notes: string | null = 'Some notes';
-}
-
 describe('value round trip', () => {
-  let fixture: ReturnType<typeof TestBed.createComponent<TestHost>>;
-  let host: TestHost;
+  beforeEach(() => configureFormidableTestBed());
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+  it('reports a written-in value being cleared', async () => {
+    const { fixture, element, control } = await bindField('input', 'template-driven', { value: 'Cynthion' });
 
-    fixture = TestBed.createComponent(TestHost);
-    host = fixture.componentInstance;
+    fill(element.querySelector('input')!, '');
+    await settle(fixture);
+
+    expect(control.value).toBeNull();
   });
 
-  /** `NgModel` inside a `<form>` registers across a microtask, so the write lands after the view exists. */
-  function settle(): void {
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-  }
+  it('reports it for a textarea too', async () => {
+    const { fixture, element, control } = await bindField('textarea', 'template-driven', { value: 'Some notes' });
 
-  function clear(selector: string): void {
-    const el = fixture.nativeElement.querySelector(selector) as HTMLInputElement | HTMLTextAreaElement;
+    fill(element.querySelector('textarea')!, '');
+    await settle(fixture);
 
-    el.value = '';
-    el.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-  }
+    expect(control.value).toBeNull();
+  });
 
-  it('reports a written-in value being cleared', fakeAsync(() => {
-    settle();
-    clear('input');
+  it('still reports an ordinary edit', async () => {
+    const { fixture, element, control } = await bindField('input', 'template-driven', { value: 'Cynthion' });
 
-    expect(host.text).toBeNull();
-  }));
+    fill(element.querySelector('input')!, 'Anna');
+    await settle(fixture);
 
-  it('reports it for a textarea too', fakeAsync(() => {
-    settle();
-    clear('textarea');
-
-    expect(host.notes).toBeNull();
-  }));
-
-  it('still reports an ordinary edit', fakeAsync(() => {
-    settle();
-
-    const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
-
-    input.value = 'Anna';
-    input.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
-
-    expect(host.text).toBe('Anna');
-  }));
+    expect(control.value).toBe('Anna');
+  });
 });

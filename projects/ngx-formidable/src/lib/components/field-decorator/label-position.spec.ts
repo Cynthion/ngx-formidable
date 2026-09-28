@@ -1,11 +1,13 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { NgxMaskConfig, provideNgxMask } from 'ngx-mask';
+import { NgxMaskConfig } from 'ngx-mask';
 import { FieldLabel } from '../../directives/field-label';
 import { FieldPrefix } from '../../directives/field-prefix';
 import { FieldLabelAdornment } from '../../directives/field-label-adornment';
 import { FieldLabelPosition } from '../../models/formidable.model';
+import { fill, rem, theme } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { AutocompleteField } from '../fields/autocomplete-field/autocomplete-field';
 import { DateField } from '../fields/date-field/date-field';
 import { DropdownField } from '../fields/dropdown-field/dropdown-field';
@@ -30,15 +32,11 @@ import { FieldDecorator } from './field-decorator';
  * one block (equal slack above and below), while an empty field's resting label is centered on its own.
  * With the label on the `border` it straddles the top border and the value stays centered, as `outside`;
  * `border-prefix` is the same but aligned with a projected prefix instead of with the value.
- */
-
-/**
- * px per rem, so the expectations stay written in the tokens' own unit.
  *
- * The three constants below are computed by hand from the default theme rather than read from the tokens,
- * on purpose — see the note above. With a `56px` field, a `1px` border, a `16px` value at `1.6` and a
- * `12px` floating label at `1.6`, the inner height is `54px`, the value's line-box `25.6px` and the
- * floating label's `19.2px`:
+ * The three `rem` constants the expectations use are computed by hand from the default theme rather than
+ * read from the tokens, on purpose — see above. With a `56px` field, a `1px` border, a `16px` value at
+ * `1.6` and a `12px` floating label at `1.6`, the inner height is `54px`, the value's line-box `25.6px`
+ * and the floating label's `19.2px`:
  *
  * - `0.8875rem` (`14.2px`) — the value centered on its own: `(54 - 25.6) / 2`
  * - `0.2875rem` (`4.6px`)  — the slack above a centered label+value block: `(54 - 19.2 - 25.6) / 2`
@@ -46,9 +44,6 @@ import { FieldDecorator } from './field-decorator';
  *
  * Change `--formidable-field-height` and all three move; recompute them, do not read them from the CSS.
  */
-function rem(value: number): number {
-  return value * parseFloat(getComputedStyle(document.documentElement).fontSize);
-}
 
 /**
  * Where the value's text starts, in viewport coordinates: the field's padding is measured from its content
@@ -62,37 +57,35 @@ function valueLeft(field: HTMLElement): number {
 
 @Component({
   imports: [FieldDecorator, InputField, FieldLabel],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field
         name="field"
-        [placeholder]="placeholder"
-        [mask]="mask"
-        [maskConfig]="maskConfig"
-        [readonly]="readonly"
+        [placeholder]="placeholder()"
+        [mask]="mask()"
+        [maskConfig]="maskConfig()"
+        [readonly]="readonly()"
         [disabled]="disabled" />
       <div
         formidableFieldLabel
-        [position]="position">
+        [position]="position()">
         Label
       </div>
     </formidable-field-decorator>
   `
 })
 class InputHost {
-  position: FieldLabelPosition = 'inside';
-  placeholder = '';
-  mask?: string;
-  maskConfig?: Partial<NgxMaskConfig>;
-  readonly = false;
+  readonly position = signal<FieldLabelPosition>('inside');
+  readonly placeholder = signal('');
+  readonly mask = signal<string | undefined>(undefined);
+  readonly maskConfig = signal<Partial<NgxMaskConfig> | undefined>(undefined);
+  readonly readonly = signal(false);
   disabled = false;
 }
 
 /** Same field, but with a prefix wide enough to push the value inwards. */
 @Component({
   imports: [FieldDecorator, InputField, FieldLabel, FieldPrefix],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field name="field" />
@@ -116,13 +109,12 @@ class PrefixHost {
 /** Same field, but with an adornment sharing the label's row. */
 @Component({
   imports: [FieldDecorator, InputField, FieldLabel, FieldLabelAdornment],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field name="field" />
       <div
         formidableFieldLabel
-        [position]="position">
+        [position]="position()">
         Label
       </div>
       <div formidableFieldLabelAdornment>?</div>
@@ -130,26 +122,25 @@ class PrefixHost {
   `
 })
 class LabelAdornmentHost {
-  position: FieldLabelPosition = 'inside';
+  readonly position = signal<FieldLabelPosition>('inside');
 }
 
 /** A textarea top-aligns its value, so it clears an inside label with an offset rather than the padding. */
 @Component({
   imports: [FieldDecorator, TextareaField, FieldLabel],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-textarea-field name="field" />
       <div
         formidableFieldLabel
-        [position]="position">
+        [position]="position()">
         Label
       </div>
     </formidable-field-decorator>
   `
 })
 class TextareaHost {
-  position: FieldLabelPosition = 'inside';
+  readonly position = signal<FieldLabelPosition>('inside');
 }
 
 /**
@@ -159,7 +150,6 @@ class TextareaHost {
  */
 @Component({
   imports: [FieldDecorator, DateField, TimeField, AutocompleteField, DropdownField, FieldLabel],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-date-field name="date" />
@@ -199,7 +189,6 @@ class WrappedInputHost {}
 
 @Component({
   imports: [FieldDecorator, RadioGroupField, FieldLabel],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field name="field" />
@@ -220,7 +209,6 @@ class RadioGroupHost {}
  */
 @Component({
   imports: [FormsModule, FieldDecorator, DropdownField, FieldOption, FieldLabel],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-dropdown-field
@@ -241,10 +229,9 @@ class ProjectedOptionHost {}
 describe('formidableFieldLabel [position]', () => {
   let fixture: ComponentFixture<InputHost>;
   let host: InputHost;
-  const themed = new Set<string>();
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+    configureFormidableTestBed();
 
     fixture = TestBed.createComponent(InputHost);
     host = fixture.componentInstance;
@@ -253,22 +240,6 @@ describe('formidableFieldLabel [position]', () => {
     // start of the transition. These assertions are about where the label lands, not how it gets there.
     fixture.nativeElement.style.setProperty('--formidable-animation-duration', '0s');
   });
-
-  afterEach(() => {
-    themed.forEach((property) => document.documentElement.style.removeProperty(property));
-    themed.clear();
-  });
-
-  /**
-   * Overrides a variable other variables are *derived* from. Substitution happens where the derived
-   * property is declared — `:root` — so a base has to be overridden there, which is also the only place a
-   * consumer is asked to theme from.
-   */
-  function theme(property: string, value: string): void {
-    document.documentElement.style.setProperty(property, value);
-    themed.add(property);
-    fixture.detectChanges();
-  }
 
   /** `placeholder` and `mask` are declarative: configure the field, then render. */
   function render(): void {
@@ -284,19 +255,13 @@ describe('formidableFieldLabel [position]', () => {
   }
 
   function setPosition(position: FieldLabelPosition): void {
-    host.position = position;
+    host.position.set(position);
     fixture.detectChanges();
   }
 
-  function focus(): void {
+  async function focus(): Promise<void> {
     input().dispatchEvent(new FocusEvent('focus'));
-    fixture.detectChanges();
-  }
-
-  function fill(value: string): void {
-    input().value = value;
-    input().dispatchEvent(new Event('input'));
-    fixture.detectChanges();
+    await settle(fixture);
   }
 
   /** How far the `border` label's band reaches above its own centre, in px, resolved on the label. */
@@ -350,11 +315,12 @@ describe('formidableFieldLabel [position]', () => {
       expect(valueTop()).toBeCloseTo(rem(0.8875), 1);
     });
 
-    it('never moves, whatever the field does', () => {
+    it('never moves, whatever the field does', async () => {
       const before = labelWrapper().getBoundingClientRect().top;
 
-      focus();
-      fill('anything');
+      await focus();
+      fill(input(), 'anything');
+      await settle(fixture);
 
       expect(labelWrapper().getBoundingClientRect().top).toBe(before);
       expect(labelWrapper().classList.contains('label-outside')).toBe(true);
@@ -368,9 +334,9 @@ describe('formidableFieldLabel [position]', () => {
       expect(parseFloat(getComputedStyle(input()).paddingTop)).toBeCloseTo(rem(1.2), 1);
     });
 
-    it('centers the floating label and the value as one block', () => {
+    it('centers the floating label and the value as one block', async () => {
       setPosition('inside');
-      focus();
+      await focus();
 
       // equal slack above the label and below the value
       const slackAbove = labelTop();
@@ -381,9 +347,9 @@ describe('formidableFieldLabel [position]', () => {
       expect(slackBelow).toBeCloseTo(slackAbove, 1);
     });
 
-    it('floats clear of the value instead of overlapping it', () => {
+    it('floats clear of the value instead of overlapping it', async () => {
       setPosition('inside');
-      focus();
+      await focus();
 
       const labelBottom = labelTop() + labelWrapper().getBoundingClientRect().height;
 
@@ -412,11 +378,11 @@ describe('formidableFieldLabel [position]', () => {
       expect(labelTop()).toBeCloseTo(centeredValueTop, 1);
     });
 
-    it('rises from centered to the top of the label+value block', () => {
+    it('rises from centered to the top of the label+value block', async () => {
       setPosition('inside');
       const resting = labelTop();
 
-      focus();
+      await focus();
 
       // 1.0125 centered → 0.4125 floating
       expect(resting - labelTop()).toBeCloseTo(rem(0.6), 1);
@@ -454,7 +420,7 @@ describe('formidableFieldLabel [position]', () => {
      * the field it labels. Clamped, such a field simply overflows its box instead. The floor itself stays
      * documentation-only; this is only about how a shorter field degrades.
      */
-    it('never lets the slack go negative below the field height floor', () => {
+    it('never lets the slack go negative below the field height floor', async () => {
       /**
        * Resolved on the field's container as a `top`, not as a `width`: a negative width is invalid and
        * clamps to zero on its own, which would make this pass with or without the clamp.
@@ -474,7 +440,7 @@ describe('formidableFieldLabel [position]', () => {
       };
 
       setPosition('inside');
-      focus();
+      await focus();
 
       // the control: at the default height there is slack to distribute, and the label floats below the top
       expect(slack()).toBeGreaterThan(0);
@@ -495,40 +461,41 @@ describe('formidableFieldLabel [position]', () => {
       expect(labelWrapper().classList.contains('label-resting')).toBe(true);
     });
 
-    it('floats while focused', () => {
+    it('floats while focused', async () => {
       render();
-      focus();
+      await focus();
 
       expect(labelWrapper().classList.contains('label-floating')).toBe(true);
     });
 
-    it('keeps floating once filled and blurred', () => {
+    it('keeps floating once filled and blurred', async () => {
       render();
-      focus();
-      fill('Chris');
+      await focus();
+      fill(input(), 'Chris');
+      await settle(fixture);
       input().dispatchEvent(new FocusEvent('blur'));
-      fixture.detectChanges();
+      await settle(fixture);
 
       expect(labelWrapper().classList.contains('label-floating')).toBe(true);
     });
 
     it('floats instead of resting when a placeholder occupies the value area', () => {
-      host.placeholder = 'Your name';
+      host.placeholder.set('Your name');
       render();
 
       expect(labelWrapper().classList.contains('label-floating')).toBe(true);
     });
 
     it('floats instead of resting when mask slots occupy the value area', () => {
-      host.mask = '000-000';
-      host.maskConfig = { showMaskTyped: true };
+      host.mask.set('000-000');
+      host.maskConfig.set({ showMaskTyped: true });
       render();
 
       expect(labelWrapper().classList.contains('label-floating')).toBe(true);
     });
 
     it('still rests behind a mask that hides its slots while empty', () => {
-      host.mask = '000-000';
+      host.mask.set('000-000');
       render();
 
       expect(labelWrapper().classList.contains('label-resting')).toBe(true);
@@ -539,7 +506,7 @@ describe('formidableFieldLabel [position]', () => {
   // and the field's own placeholder stays hidden behind it until focus floats the label off it.
   describe('inside-placeholder', () => {
     beforeEach(() => {
-      host.placeholder = 'Your name';
+      host.placeholder.set('Your name');
       setPosition('inside-placeholder');
     });
 
@@ -548,8 +515,8 @@ describe('formidableFieldLabel [position]', () => {
       expect(getComputedStyle(input(), '::placeholder').color).toBe('rgba(0, 0, 0, 0)');
     });
 
-    it('reveals the placeholder once focus floats the label', () => {
-      focus();
+    it('reveals the placeholder once focus floats the label', async () => {
+      await focus();
 
       expect(labelWrapper().classList.contains('label-floating')).toBe(true);
       expect(getComputedStyle(input(), '::placeholder').color).not.toBe('rgba(0, 0, 0, 0)');
@@ -558,8 +525,8 @@ describe('formidableFieldLabel [position]', () => {
     // Only the placeholder is the label's to take over. Mask slots are the field's own rendering, so
     // `canLabelRest` still vetoes here exactly as it does for `inside`.
     it('still floats when mask slots occupy the value area', () => {
-      host.mask = '000-000';
-      host.maskConfig = { showMaskTyped: true };
+      host.mask.set('000-000');
+      host.maskConfig.set({ showMaskTyped: true });
       render();
 
       expect(labelWrapper().classList.contains('label-floating')).toBe(true);
@@ -575,11 +542,12 @@ describe('formidableFieldLabel [position]', () => {
       expect(labelTop()).toBeCloseTo(rem(0.2875), 1);
     });
 
-    it('stays put when the field is focused and filled', () => {
+    it('stays put when the field is focused and filled', async () => {
       const top = labelTop();
 
-      focus();
-      fill('Chris');
+      await focus();
+      fill(input(), 'Chris');
+      await settle(fixture);
 
       expect(labelTop()).toBeCloseTo(top, 1);
     });
@@ -635,12 +603,12 @@ describe('formidableFieldLabel [position]', () => {
     // The focus ring is a box-shadow spread *outside* the field's border box, so while focused there is
     // more to hide above the border than below it. Without the extra reach the band stops at its bleed
     // and the ring shows above the label on every theme whose border is thicker than that bleed.
-    it('reaches up over the focus ring while focused', () => {
+    it('reaches up over the focus ring while focused', async () => {
       const resting = getComputedStyle(labelWrapper()).backgroundImage;
 
       expect(bandReach()).toBe(0);
 
-      focus();
+      await focus();
 
       expect(bandReach()).toBeCloseTo(1, 2);
       expect(getComputedStyle(labelWrapper()).backgroundImage).not.toBe(resting);
@@ -648,10 +616,10 @@ describe('formidableFieldLabel [position]', () => {
 
     // It covers the *ring*, so it is sized off the ring's own width rather than off the border. The two are
     // set apart here so the assertion can only pass one way: a reach still reading the border returns 3.
-    it('reaches as far as the ring, not as far as the border', () => {
+    it('reaches as far as the ring, not as far as the border', async () => {
       theme('--formidable-field-border-thickness', '3px');
       theme('--formidable-field-focus-ring-width', '6px');
-      focus();
+      await focus();
 
       expect(bandReach()).toBeCloseTo(6, 2);
     });
@@ -659,13 +627,13 @@ describe('formidableFieldLabel [position]', () => {
     // The reach used to be a length written straight into the decorator's `:host(.is-focused)`, which is
     // (0,2,0) against a consumer's `:root` at (0,1,0): overridable at rest, unreachable focused. The value
     // comes from `:root` now, so a theme can reach it in both states.
-    it('takes a themed focused reach, which the decorator used to outrank', () => {
+    it('takes a themed focused reach, which the decorator used to outrank', async () => {
       theme('--formidable-label-border-band-reach', '4px');
 
       expect(bandReach()).toBeCloseTo(4, 2);
 
       theme('--formidable-label-border-band-reach-focus', '7px');
-      focus();
+      await focus();
 
       expect(bandReach()).toBeCloseTo(7, 2);
     });
@@ -675,7 +643,7 @@ describe('formidableFieldLabel [position]', () => {
     it('repaints its band when the field remaps its fill', () => {
       const fill = getComputedStyle(labelWrapper()).backgroundImage;
 
-      host.readonly = true;
+      host.readonly.set(true);
       fixture.detectChanges();
 
       const readonlyFill = getComputedStyle(labelWrapper()).backgroundImage;
@@ -684,11 +652,12 @@ describe('formidableFieldLabel [position]', () => {
       expect(readonlyFill).not.toBe(fill);
     });
 
-    it('never rests, however empty the field is', () => {
+    it('never rests, however empty the field is', async () => {
       expect(labelWrapper().classList.contains('label-resting')).toBe(false);
 
-      focus();
-      fill('Chris');
+      await focus();
+      fill(input(), 'Chris');
+      await settle(fixture);
 
       expect(labelWrapper().classList.contains('label-border')).toBe(true);
     });
@@ -710,11 +679,12 @@ describe('formidableFieldLabel [position]', () => {
       expect(valueTop()).toBeCloseTo(rem(0.8875), 1);
     });
 
-    it('never rests, however empty the field is', () => {
+    it('never rests, however empty the field is', async () => {
       expect(labelWrapper().classList.contains('label-border-prefix')).toBe(true);
 
-      focus();
-      fill('Chris');
+      await focus();
+      fill(input(), 'Chris');
+      await settle(fixture);
 
       expect(labelWrapper().classList.contains('label-border-prefix')).toBe(true);
     });
@@ -731,11 +701,7 @@ describe('formidableFieldLabel [position]', () => {
   async function renderWithPrefix(position: FieldLabelPosition): Promise<HTMLElement> {
     const prefixFixture = TestBed.createComponent(PrefixHost);
     prefixFixture.componentInstance.position = position;
-    prefixFixture.detectChanges();
-
-    await new Promise(requestAnimationFrame);
-    await new Promise(requestAnimationFrame);
-    prefixFixture.detectChanges();
+    await settle(prefixFixture);
 
     return prefixFixture.nativeElement as HTMLElement;
   }
@@ -817,7 +783,7 @@ describe('formidableFieldLabel [position]', () => {
       const adornmentFixture = TestBed.createComponent(LabelAdornmentHost);
       const before = () => adornmentFixture.nativeElement.querySelector('.before-wrapper') as HTMLElement;
 
-      adornmentFixture.componentInstance.position = 'outside';
+      adornmentFixture.componentInstance.position.set('outside');
       adornmentFixture.detectChanges();
       expect(getComputedStyle(before()).display).not.toBe('none');
 
@@ -828,7 +794,7 @@ describe('formidableFieldLabel [position]', () => {
         'border',
         'border-prefix'
       ] as FieldLabelPosition[]) {
-        adornmentFixture.componentInstance.position = position;
+        adornmentFixture.componentInstance.position.set(position);
         adornmentFixture.detectChanges();
 
         expect(getComputedStyle(before()).display).toBe('none');
@@ -847,20 +813,20 @@ describe('formidableFieldLabel [position]', () => {
     // the value starts where the label+value block puts it, not at the textarea's own padding
     expect(parseFloat(getComputedStyle(textarea).paddingTop)).toBeCloseTo(rem(1.4875), 1);
 
-    textareaFixture.componentInstance.position = 'outside';
+    textareaFixture.componentInstance.position.set('outside');
     textareaFixture.detectChanges();
 
     expect(parseFloat(getComputedStyle(textarea).paddingTop)).toBeCloseTo(rem(1), 1);
   });
 
-  // The decorator resolves the label state from the field's `readonly`/`disabled`, which it cannot observe
-  // — so this only holds because it is not OnPush.
-  it('floats instead of resting once the field is made readonly', () => {
+  // The decorator resolves the label state from the field's `readonly`/`disabled` signals, so the change
+  // repaints it with nothing else marking its view.
+  it('floats instead of resting once the field is made readonly', async () => {
     setPosition('inside');
     expect(labelWrapper().classList.contains('label-resting')).toBe(true);
 
-    host.readonly = true;
-    fixture.detectChanges();
+    host.readonly.set(true);
+    await settle(fixture);
 
     expect(labelWrapper().classList.contains('label-floating')).toBe(true);
   });
@@ -886,7 +852,7 @@ describe('a value rendered in a wrapped input', () => {
   let fixture: ComponentFixture<WrappedInputHost>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+    configureFormidableTestBed();
 
     fixture = TestBed.createComponent(WrappedInputHost);
     fixture.detectChanges();
@@ -950,7 +916,7 @@ describe('a value rendered in a wrapped input', () => {
 });
 
 describe('FormidableField.canLabelRest', () => {
-  beforeEach(() => TestBed.configureTestingModule({ providers: [provideNgxMask()] }));
+  beforeEach(() => configureFormidableTestBed());
 
   it('is false for a date field, which always shows its mask slots', () => {
     const fixture = TestBed.createComponent(DateField);
@@ -999,7 +965,7 @@ describe('a label never animates itself into place on load', () => {
   let fixture: ComponentFixture<ProjectedOptionHost>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+    configureFormidableTestBed();
 
     fixture = TestBed.createComponent(ProjectedOptionHost);
   });

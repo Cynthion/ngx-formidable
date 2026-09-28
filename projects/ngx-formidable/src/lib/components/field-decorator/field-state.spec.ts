@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { Component, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
 import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
 import { FieldLabel } from '../../directives/field-label';
 import { NgxFormidableFieldValidate } from '../../forms/field-validate.directive';
 import { NgxFormidableForm } from '../../forms/form.directive';
 import { StubValidator } from '../../forms/testing/stub-validator.directive';
+import { fill } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { InputField } from '../fields/input-field/input-field';
 import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
 import { FieldDecorator } from './field-decorator';
@@ -38,13 +39,12 @@ function token(name: string): string {
 
 @Component({
   imports: [FieldDecorator, InputField, FieldLabel],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field
         name="field"
-        [readonly]="readonly"
-        [disabled]="disabled" />
+        [readonly]="readonly()"
+        [disabled]="disabled()" />
       <div
         formidableFieldLabel
         position="outside">
@@ -54,13 +54,12 @@ function token(name: string): string {
   `
 })
 class InputHost {
-  readonly = false;
-  disabled = false;
+  readonly readonly = signal(false);
+  readonly disabled = signal(false);
 }
 
 @Component({
   imports: [FieldDecorator, RadioGroupField, FieldLabel],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field name="field" />
@@ -86,7 +85,6 @@ interface NameModel {
     FieldErrorsRenderer,
     FieldLabel
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -115,7 +113,7 @@ describe('field state colors', () => {
   let host: InputHost;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+    configureFormidableTestBed();
 
     fixture = TestBed.createComponent(InputHost);
     host = fixture.componentInstance;
@@ -182,14 +180,14 @@ describe('field state colors', () => {
 
     it('lets readonly and disabled outrank invalid', () => {
       setState('is-invalid');
-      host.readonly = true;
+      host.readonly.set(true);
       fixture.detectChanges();
 
       expect(getComputedStyle(field()).backgroundColor).toBe(token('--formidable-color-field-background-readonly'));
       expect(getComputedStyle(field()).borderTopColor).toBe(token('--formidable-color-field-border-readonly'));
 
-      host.readonly = false;
-      host.disabled = true;
+      host.readonly.set(false);
+      host.disabled.set(true);
       fixture.detectChanges();
 
       expect(getComputedStyle(field()).backgroundColor).toBe(token('--formidable-color-field-background-disabled'));
@@ -219,51 +217,46 @@ describe('field state colors', () => {
     });
 
     it('dims with the field when readonly or disabled', () => {
-      host.readonly = true;
+      host.readonly.set(true);
       fixture.detectChanges();
       expect(getComputedStyle(label()).color).toBe(token('--formidable-color-field-label-readonly'));
 
-      host.readonly = false;
-      host.disabled = true;
+      host.readonly.set(false);
+      host.disabled.set(true);
       fixture.detectChanges();
       expect(getComputedStyle(label()).color).toBe(token('--formidable-color-field-label-disabled'));
     });
   });
 
   // Everything above sets `.is-invalid` by hand. This is the claim that it gets there on its own: the
-  // errors component computes validity, the directive hands it to the decorator, and the decorator —
-  // deliberately not `OnPush` — turns it into the class the styling hangs off.
-  it('raises the class from the control’s own validity', fakeAsync(() => {
+  // errors component computes validity, the directive hands it to the decorator, and the decorator turns it
+  // into the class the styling hangs off.
+  it('raises the class from the control’s own validity', async () => {
     const formFixture = TestBed.createComponent(ValidatedHost);
     const decoratorEl = () => formFixture.nativeElement.querySelector('formidable-field-decorator') as HTMLElement;
     const inputEl = () => formFixture.nativeElement.querySelector('input') as HTMLInputElement;
 
-    formFixture.detectChanges();
-    tick(100);
-    formFixture.detectChanges();
+    await settle(formFixture);
 
     // Invalid, but untouched — nothing to report yet.
     expect(decoratorEl().classList.contains('is-invalid')).toBe(false);
 
     inputEl().dispatchEvent(new FocusEvent('focus'));
     inputEl().dispatchEvent(new FocusEvent('blur'));
-    tick(100);
-    formFixture.detectChanges();
+    await settle(formFixture);
 
     expect(decoratorEl().classList.contains('is-invalid')).toBe(true);
     expect(getComputedStyle(inputEl()).borderTopColor).toBe(token('--formidable-color-field-border-invalid'));
 
     // Satisfying the rule clears it again.
-    inputEl().value = 'Chris';
-    inputEl().dispatchEvent(new Event('input'));
-    tick(100);
-    formFixture.detectChanges();
+    fill(inputEl(), 'Chris');
+    await settle(formFixture);
 
     expect(decoratorEl().classList.contains('is-invalid')).toBe(false);
     expect(getComputedStyle(inputEl()).borderTopColor).toBe(token('--formidable-color-field-border'));
 
     formFixture.destroy();
-  }));
+  });
 
   // A group's box is styled by `group-field`, a separate mixin — so its states are a separate claim.
   it('applies the same invalid colour to a group field', () => {

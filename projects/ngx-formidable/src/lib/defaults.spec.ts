@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, Type } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { Component, Type } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
-import { provideNgxMask } from 'ngx-mask';
 import { FieldDecorator } from './components/field-decorator/field-decorator';
 import { AutocompleteField } from './components/fields/autocomplete-field/autocomplete-field';
 import { DateField } from './components/fields/date-field/date-field';
@@ -15,6 +14,8 @@ import { FieldSuffix } from './directives/field-suffix';
 import { NgxFormidableForm } from './forms/form.directive';
 import { FORMIDABLE_DEFAULTS, FormidableDefaults } from './models/formidable.model';
 import { provideNgxFormidable } from './provide-ngx-formidable';
+import { fill } from './testing/dom';
+import { configureFormidableTestBed, settle } from './testing/test-bed';
 
 /**
  * Contract of the app-wide defaults: an input left unset, or bound to `undefined`, takes the app default,
@@ -51,13 +52,12 @@ const UNSET = `
   </form>
 `;
 
-@Component({ imports: IMPORTS, changeDetection: ChangeDetectionStrategy.Eager, template: UNSET })
+@Component({ imports: IMPORTS, template: UNSET })
 class UnsetHost {}
 
 /** The same subtree, under a provider of its own. */
 @Component({
   imports: IMPORTS,
-  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [{ provide: FORMIDABLE_DEFAULTS, useValue: { labelPosition: 'outside' } }],
   template: UNSET
 })
@@ -66,7 +66,6 @@ class ScopedHost {}
 /** Every defaulted input, bound to `undefined` — what a dynamic template binds to mean "inherit". */
 @Component({
   imports: IMPORTS,
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -108,7 +107,6 @@ class UndefinedHost {}
 /** Every defaulted input, bound to a value that is neither the app default nor the library's own. */
 @Component({
   imports: IMPORTS,
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
@@ -150,7 +148,6 @@ class ExplicitHost {}
 /** A decorated field asking for its required marker, with no form directive above it. */
 @Component({
   imports: IMPORTS,
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-input-field
@@ -165,7 +162,6 @@ class MarkerWithoutFormHost {}
 /** A field validated by Angular alone, with no formidable form to say when its messages appear. */
 @Component({
   imports: IMPORTS,
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-field-decorator>
@@ -210,17 +206,15 @@ describe('app defaults', () => {
   let fixture: ComponentFixture<any>;
 
   function configure(defaults?: FormidableDefaults): void {
-    TestBed.configureTestingModule({
-      providers: defaults ? provideNgxFormidable({ defaults }) : [provideNgxMask()]
+    configureFormidableTestBed({
+      providers: defaults ? provideNgxFormidable({ defaults }) : []
     });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function mount(host: Type<any>): void {
+  async function mount(host: Type<any>): Promise<void> {
     fixture = TestBed.createComponent(host);
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
+    await settle(fixture);
   }
 
   function get<T>(type: Type<T>): T {
@@ -267,37 +261,37 @@ describe('app defaults', () => {
     debounceMs: 250
   };
 
-  it('keeps the library’s own without a provider, each panel field its own', fakeAsync(() => {
+  it('keeps the library’s own without a provider, each panel field its own', async () => {
     configure();
-    mount(UnsetHost);
+    await mount(UnsetHost);
 
     expect(resolved()).toEqual(LIBRARY_OWN);
-  }));
+  });
 
-  it('applies the app default to every unset input', fakeAsync(() => {
+  it('applies the app default to every unset input', async () => {
     configure(DEFAULTS);
-    mount(UnsetHost);
+    await mount(UnsetHost);
 
     expect(resolved()).toEqual(APP_DEFAULTS);
-  }));
+  });
 
-  it('applies the app default to an input bound to undefined', fakeAsync(() => {
+  it('applies the app default to an input bound to undefined', async () => {
     configure(DEFAULTS);
-    mount(UndefinedHost);
+    await mount(UndefinedHost);
 
     expect(resolved()).toEqual(APP_DEFAULTS);
-  }));
+  });
 
-  it('falls back to the library’s own for an input bound to undefined without a provider', fakeAsync(() => {
+  it('falls back to the library’s own for an input bound to undefined without a provider', async () => {
     configure();
-    mount(UndefinedHost);
+    await mount(UndefinedHost);
 
     expect(resolved()).toEqual(LIBRARY_OWN);
-  }));
+  });
 
-  it('lets a binding win over the app default', fakeAsync(() => {
+  it('lets a binding win over the app default', async () => {
     configure(DEFAULTS);
-    mount(ExplicitHost);
+    await mount(ExplicitHost);
 
     expect(resolved()).toEqual({
       labelPosition: 'inside-floating',
@@ -310,60 +304,57 @@ describe('app defaults', () => {
       hideRequiredMarkers: false,
       debounceMs: 10
     });
-  }));
+  });
 
   // What the portal does to keep its own chrome on the library's defaults. It replaces, not merges.
-  it('lets a component provider replace the app defaults for its subtree', fakeAsync(() => {
+  it('lets a component provider replace the app defaults for its subtree', async () => {
     configure(DEFAULTS);
-    mount(ScopedHost);
+    await mount(ScopedHost);
 
     expect(resolved()).toEqual({ ...LIBRARY_OWN, labelPosition: 'outside' });
-  }));
+  });
 
   describe('without a form directive', () => {
     function marker(): Element | null {
       return (fixture.nativeElement as HTMLElement).querySelector('.required-marker');
     }
 
-    it('shows the required marker by the library’s own default', fakeAsync(() => {
+    it('shows the required marker by the library’s own default', async () => {
       configure();
-      mount(MarkerWithoutFormHost);
+      await mount(MarkerWithoutFormHost);
 
       expect(marker()).not.toBeNull();
-    }));
+    });
 
-    it('hides the required marker when the app default says so', fakeAsync(() => {
+    it('hides the required marker when the app default says so', async () => {
       configure(DEFAULTS);
-      mount(MarkerWithoutFormHost);
+      await mount(MarkerWithoutFormHost);
 
       expect(marker()).toBeNull();
-    }));
+    });
 
     // Dirty but never touched: only the app default's `dirty` reveals the message.
-    function typeWithoutTouching(): string[] {
+    async function typeWithoutTouching(): Promise<string[]> {
       const root = fixture.nativeElement as HTMLElement;
-      const input = root.querySelector('input') as HTMLInputElement;
 
-      input.value = 'ab';
-      input.dispatchEvent(new Event('input'));
-      tick();
-      fixture.detectChanges();
+      fill(root.querySelector('input') as HTMLInputElement, 'ab');
+      await settle(fixture);
 
       return Array.from(root.querySelectorAll('.error')).map((error) => error.textContent!.trim());
     }
 
-    it('reveals on touch by the library’s own default', fakeAsync(() => {
+    it('reveals on touch by the library’s own default', async () => {
       configure();
-      mount(RevealWithoutFormHost);
+      await mount(RevealWithoutFormHost);
 
-      expect(typeWithoutTouching()).toEqual([]);
-    }));
+      expect(await typeWithoutTouching()).toEqual([]);
+    });
 
-    it('reveals on the app default', fakeAsync(() => {
+    it('reveals on the app default', async () => {
       configure(DEFAULTS);
-      mount(RevealWithoutFormHost);
+      await mount(RevealWithoutFormHost);
 
-      expect(typeWithoutTouching()).toEqual(['minlength']);
-    }));
+      expect(await typeWithoutTouching()).toEqual(['minlength']);
+    });
   });
 });

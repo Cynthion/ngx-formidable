@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ComponentFixture, discardPeriodicTasks, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { Component } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
+import { Editor, type } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { AutocompleteField } from './autocomplete-field/autocomplete-field';
 import { DateField } from './date-field/date-field';
 import { InputField } from './input-field/input-field';
@@ -21,7 +22,6 @@ import { TimeField } from './time-field/time-field';
 
 @Component({
   imports: [FormsModule, InputField, TextareaField, AutocompleteField, DateField, TimeField],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form>
       <formidable-input-field
@@ -84,7 +84,6 @@ const EDITORS = {
 } as const;
 
 type EditorName = keyof typeof EDITORS;
-type Editor = HTMLInputElement | HTMLTextAreaElement;
 
 const PARTIAL = { masked: '079123' };
 const FULL = { masked: '0791234567' };
@@ -94,25 +93,19 @@ const TIMED = { time: new Date(2024, 0, 15, 7, 45) };
 describe('caret on focus entry', () => {
   let fixture: ComponentFixture<CaretHost>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [CaretHost],
-      providers: [provideNgxMask()]
-    }).compileComponents();
+  beforeEach(() => {
+    configureFormidableTestBed({ imports: [CaretHost] });
 
     (document.activeElement as HTMLElement | null)?.blur();
   });
 
   afterEach(() => fixture?.destroy());
 
-  function build(model: Partial<CaretHost> = {}): void {
+  async function build(model: Partial<CaretHost> = {}): Promise<void> {
     fixture = TestBed.createComponent(CaretHost);
     Object.assign(fixture.componentInstance, model);
 
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-    tick();
+    await settle(fixture);
   }
 
   function editorOf(name: EditorName): Editor {
@@ -143,14 +136,6 @@ describe('caret on focus entry', () => {
     return [element.selectionStart, element.selectionEnd];
   }
 
-  function scenario(body: () => void): jasmine.ImplementationCallback {
-    return fakeAsync(() => {
-      body();
-      flush();
-      discardPeriodicTasks();
-    });
-  }
-
   describe('the editors render the states these specs assume', () => {
     const renders: Array<[EditorName, Partial<CaretHost>, string]> = [
       ['text', { text: 'ABCDEFGH' }, 'ABCDEFGH'],
@@ -168,14 +153,11 @@ describe('caret on focus entry', () => {
     ];
 
     for (const [editor, model, text] of renders) {
-      it(
-        `${editor} renders "${text}"`,
-        scenario(() => {
-          build(model);
+      it(`${editor} renders "${text}"`, async () => {
+        await build(model);
 
-          expect(editorOf(editor).value).toBe(text);
-        })
-      );
+        expect(editorOf(editor).value).toBe(text);
+      });
     }
   });
 
@@ -193,20 +175,17 @@ describe('caret on focus entry', () => {
     ];
 
     for (const [editor, model, end, why] of rows) {
-      it(
-        `${editor}: ${why}`,
-        scenario(() => {
-          build(model);
-          const element = editorOf(editor);
-          const before = element.value;
+      it(`${editor}: ${why}`, async () => {
+        await build(model);
+        const element = editorOf(editor);
+        const before = element.value;
 
-          tabTo(element);
-          tick();
+        tabTo(element);
+        await settle(fixture);
 
-          expect(element.value).toBe(before);
-          expect(selectionOf(element)).toEqual([0, end]);
-        })
-      );
+        expect(element.value).toBe(before);
+        expect(selectionOf(element)).toEqual([0, end]);
+      });
     }
 
     // Filling the mask one position at a time moves the boundary every time.
@@ -217,20 +196,17 @@ describe('caret on focus entry', () => {
       ['079123', '079 123 __ __', 7],
       ['07912345', '079 123 45 __', 10]
     ] as const) {
-      it(
-        `stops at ${end} of "${text}"`,
-        scenario(() => {
-          build({ masked: model });
-          const element = editorOf('slots');
-          expect(element.value).toBe(text);
+      it(`stops at ${end} of "${text}"`, async () => {
+        await build({ masked: model });
+        const element = editorOf('slots');
+        expect(element.value).toBe(text);
 
-          tabTo(element);
-          tick();
+        tabTo(element);
+        await settle(fixture);
 
-          expect(selectionOf(element)).toEqual([0, end]);
-          expect(element.value.slice(end)).toMatch(/^[^a-z0-9]*$/i);
-        })
-      );
+        expect(selectionOf(element)).toEqual([0, end]);
+        expect(element.value.slice(end)).toMatch(/^[^a-z0-9]*$/i);
+      });
     }
   });
 
@@ -239,31 +215,25 @@ describe('caret on focus entry', () => {
       ['text', { text: 'ABCDEFGH' }],
       ['auto', { auto: 'ch' }]
     ] as const) {
-      it(
-        `${editor} selects its content`,
-        scenario(() => {
-          build(model);
-          const element = editorOf(editor);
+      it(`${editor} selects its content`, async () => {
+        await build(model);
+        const element = editorOf(editor);
 
-          tabTo(element);
-          tick();
+        tabTo(element);
+        await settle(fixture);
 
-          expect(selectionOf(element)).toEqual([0, element.value.length]);
-        })
-      );
+        expect(selectionOf(element)).toEqual([0, element.value.length]);
+      });
 
-      it(
-        `${editor} collapses at the front when it holds nothing`,
-        scenario(() => {
-          build();
-          const element = editorOf(editor);
+      it(`${editor} collapses at the front when it holds nothing`, async () => {
+        await build();
+        const element = editorOf(editor);
 
-          tabTo(element);
-          tick();
+        tabTo(element);
+        await settle(fixture);
 
-          expect(selectionOf(element)).toEqual([0, 0]);
-        })
-      );
+        expect(selectionOf(element)).toEqual([0, 0]);
+      });
     }
 
     /**
@@ -274,19 +244,16 @@ describe('caret on focus entry', () => {
       ['notes', { text: 'ABCDEFGH' }],
       ['maskedNotes', PARTIAL]
     ] as const) {
-      it(
-        `${editor} takes a caret and no selection`,
-        scenario(() => {
-          build(model);
-          const element = editorOf(editor);
+      it(`${editor} takes a caret and no selection`, async () => {
+        await build(model);
+        const element = editorOf(editor);
 
-          element.setSelectionRange(3, 3);
-          tabTo(element);
-          tick();
+        element.setSelectionRange(3, 3);
+        tabTo(element);
+        await settle(fixture);
 
-          expect(selectionOf(element)).toEqual([3, 3]);
-        })
-      );
+        expect(selectionOf(element)).toEqual([3, 3]);
+      });
     }
   });
 
@@ -306,126 +273,108 @@ describe('caret on focus entry', () => {
 
     for (const [editor, model, end, clicks] of rows) {
       for (const caret of clicks) {
-        it(
-          `${editor} click at ${caret} lands at ${Math.min(caret, end)}`,
-          scenario(() => {
-            build(model);
-            const element = editorOf(editor);
-            const before = element.value;
+        it(`${editor} click at ${caret} lands at ${Math.min(caret, end)}`, async () => {
+          await build(model);
+          const element = editorOf(editor);
+          const before = element.value;
 
-            clickAt(element, caret);
-            tick();
+          clickAt(element, caret);
+          await settle(fixture);
 
-            expect(element.value).toBe(before);
-            expect(selectionOf(element)).toEqual([Math.min(caret, end), Math.min(caret, end)]);
-          })
-        );
+          expect(element.value).toBe(before);
+          expect(selectionOf(element)).toEqual([Math.min(caret, end), Math.min(caret, end)]);
+        });
       }
     }
 
-    it(
-      'holds a dragged selection, clamped to the value',
-      scenario(() => {
-        build(PARTIAL);
-        const element = editorOf('slots');
+    it('holds a dragged selection, clamped to the value', async () => {
+      await build(PARTIAL);
+      const element = editorOf('slots');
 
-        element.focus();
-        element.setSelectionRange(2, 11);
-        element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-        element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        tick();
+      element.focus();
+      element.setSelectionRange(2, 11);
+      element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await settle(fixture);
 
-        expect(selectionOf(element)).toEqual([2, 7]);
-      })
-    );
+      expect(selectionOf(element)).toEqual([2, 7]);
+    });
 
     for (const [editor, model] of [
       ['text', { text: 'ABCDEFGH' }],
       ['notes', { text: 'ABCDEFGH' }],
       ['auto', { auto: 'ch' }]
     ] as const) {
-      it(
-        `${editor} leaves an unmasked click to the browser`,
-        scenario(() => {
-          build(model);
-          const element = editorOf(editor);
+      it(`${editor} leaves an unmasked click to the browser`, async () => {
+        await build(model);
+        const element = editorOf(editor);
 
-          element.focus();
-          element.setSelectionRange(4, 4);
-          element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-          element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-          tick();
+        element.focus();
+        element.setSelectionRange(4, 4);
+        element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+        element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await settle(fixture);
 
-          expect(selectionOf(element)).toEqual([4, 4]);
-        })
-      );
+        expect(selectionOf(element)).toEqual([4, 4]);
+      });
     }
   });
 
   describe('the rules read the field again on every entry', () => {
-    it(
-      'a click after a keyboard focus repositions rather than re-selecting',
-      scenario(() => {
-        build(FULL);
-        const element = editorOf('slots');
+    it('a click after a keyboard focus repositions rather than re-selecting', async () => {
+      await build(FULL);
+      const element = editorOf('slots');
 
-        tabTo(element);
-        tick();
-        expect(selectionOf(element)).toEqual([0, 13]);
+      tabTo(element);
+      await settle(fixture);
+      expect(selectionOf(element)).toEqual([0, 13]);
 
-        clickAt(element, 4);
-        tick();
+      clickAt(element, 4);
+      await settle(fixture);
 
-        expect(selectionOf(element)).toEqual([4, 4]);
-      })
-    );
+      expect(selectionOf(element)).toEqual([4, 4]);
+    });
 
-    it(
-      'a second click moves the caret again',
-      scenario(() => {
-        build(FULL);
-        const element = editorOf('slots');
+    it('a second click moves the caret again', async () => {
+      await build(FULL);
+      const element = editorOf('slots');
 
-        clickAt(element, 11);
-        tick();
-        clickAt(element, 2);
-        tick();
+      clickAt(element, 11);
+      await settle(fixture);
+      clickAt(element, 2);
+      await settle(fixture);
 
-        expect(selectionOf(element)).toEqual([2, 2]);
-      })
-    );
+      expect(selectionOf(element)).toEqual([2, 2]);
+    });
 
-    it(
-      'refocusing reads the content the field holds by then',
-      scenario(() => {
-        build(FULL);
-        const element = editorOf('slots');
+    it('refocusing reads the content the field holds by then', async () => {
+      await build(FULL);
+      const element = editorOf('slots');
 
-        tabTo(element);
-        tick();
-        expect(selectionOf(element)).toEqual([0, 13]);
+      tabTo(element);
+      await settle(fixture);
+      expect(selectionOf(element)).toEqual([0, 13]);
 
-        // Wipe it, leave, and come back: the boundary follows the value.
-        element.setSelectionRange(0, 13);
-        document.execCommand('delete');
-        element.blur();
-        tick();
-        tabTo(element);
-        tick();
-        expect(element.value).toBe('___ ___ __ __');
-        expect(selectionOf(element)).toEqual([0, 0]);
+      // Wipe it, leave, and come back: the boundary follows the value.
+      element.setSelectionRange(0, 13);
+      document.execCommand('delete');
+      element.blur();
+      await settle(fixture);
+      tabTo(element);
+      await settle(fixture);
+      expect(element.value).toBe('___ ___ __ __');
+      expect(selectionOf(element)).toEqual([0, 0]);
 
-        // Half fill it, and again.
-        for (const digit of '079') document.execCommand('insertText', false, digit);
-        tick();
-        element.blur();
-        tick();
-        tabTo(element);
-        tick();
-        expect(element.value).toBe('079 ___ __ __');
-        expect(selectionOf(element)).toEqual([0, 3]);
-      })
-    );
+      // Half fill it, and again.
+      type(element, '079');
+      await settle(fixture);
+      element.blur();
+      await settle(fixture);
+      tabTo(element);
+      await settle(fixture);
+      expect(element.value).toBe('079 ___ __ __');
+      expect(selectionOf(element)).toEqual([0, 3]);
+    });
   });
 
   /**
@@ -433,33 +382,30 @@ describe('caret on focus entry', () => {
    * which is a blur it does not commit on, so the half-typed text is still there to come back to. It used
    * to be wiped, because focus handed the display back to ngx-mask whatever the input was showing.
    */
-  it(
-    'a half-typed date survives a blur onto its own panel',
-    scenario(() => {
-      build();
-      const field = fixture.debugElement.query((node) => node.nativeElement?.matches?.('formidable-date-field'))
-        .componentInstance as DateField;
-      const element = editorOf('date');
-      const panel = fixture.nativeElement.querySelector('formidable-date-field .panel') as HTMLElement;
+  it('a half-typed date survives a blur onto its own panel', async () => {
+    await build();
+    const field = fixture.debugElement.query((node) => node.nativeElement?.matches?.('formidable-date-field'))
+      .componentInstance as DateField;
+    const element = editorOf('date');
+    const panel = fixture.nativeElement.querySelector('formidable-date-field .panel') as HTMLElement;
 
-      tabTo(element);
-      tick();
-      for (const digit of '1501') document.execCommand('insertText', false, digit);
-      tick();
-      expect(element.value).toBe('15/01/____');
+    tabTo(element);
+    await settle(fixture);
+    type(element, '1501');
+    await settle(fixture);
+    expect(element.value).toBe('15/01/____');
 
-      field.togglePanel(true);
-      panel.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-      element.blur();
-      tick();
+    field.togglePanel(true);
+    panel.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    element.blur();
+    await settle(fixture);
 
-      expect(element.value).toBe('15/01/____');
+    expect(element.value).toBe('15/01/____');
 
-      tabTo(element);
-      tick();
+    tabTo(element);
+    await settle(fixture);
 
-      expect(element.value).toBe('15/01/____');
-      expect(selectionOf(element)).toEqual([0, 5]);
-    })
-  );
+    expect(element.value).toBe('15/01/____');
+    expect(selectionOf(element)).toEqual([0, 5]);
+  });
 });

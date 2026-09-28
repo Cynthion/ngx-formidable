@@ -1,14 +1,15 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { Component, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
-import { provideNgxMask } from 'ngx-mask';
 import { FieldErrorsRenderer } from '../../directives/field-errors-renderer';
 import { StubValidator } from '../../forms/testing/stub-validator.directive';
 import { FieldHint } from '../../directives/field-hint';
 import { FieldLabel } from '../../directives/field-label';
 import { NgxFormidableForm } from '../../forms/form.directive';
 import { FormidableOption } from '../../models/formidable.model';
+import { fill, referenced } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { CheckboxGroupField } from '../fields/checkbox-group-field/checkbox-group-field';
 import { InputField } from '../fields/input-field/input-field';
 import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
@@ -59,15 +60,14 @@ const options: FormidableOption[] = [
     FieldLabel,
     FieldHint
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field
         name="colour"
         [options]="options"
-        [markRequired]="markRequired"
-        [readonly]="readonly"
-        [disabled]="disabled" />
+        [markRequired]="markRequired()"
+        [readonly]="readonly()"
+        [disabled]="disabled()" />
       <div formidableFieldLabel>Favourite colour</div>
       @if (hasHint) {
         <div formidableFieldHint>Pick one.</div>
@@ -91,24 +91,23 @@ const options: FormidableOption[] = [
     <formidable-field-decorator>
       <formidable-slider-field
         name="amount"
-        [transformValueToThumbLabel]="transform" />
+        [transformValueToThumbLabel]="transform()" />
       <div formidableFieldLabel>Amount</div>
     </formidable-field-decorator>
   `
 })
 class NamedFieldsHost {
   options = options;
-  markRequired = false;
-  readonly = false;
-  disabled = false;
+  readonly markRequired = signal(false);
+  readonly readonly = signal(false);
+  readonly disabled = signal(false);
   hasHint = true;
-  transform?: (value: number) => string;
+  readonly transform = signal<((value: number) => string) | undefined>(undefined);
 }
 
 /** The same group with nothing projected to name it. */
 @Component({
   imports: [FieldDecorator, RadioGroupField],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <formidable-field-decorator>
       <formidable-radio-group-field name="colour" />
@@ -129,18 +128,17 @@ class UnlabelledHost {}
     FieldLabel,
     FieldHint
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form
       formidableForm
-      [formValue]="value"
+      [formValue]="formValue"
       [formShape]="shape"
       [stubValidator]="required">
       <formidable-field-decorator>
         <formidable-input-field
           formidableFieldErrors
           name="field"
-          [ngModel]="value.field" />
+          [ngModel]="formValue.field" />
         <div formidableFieldLabel>Field</div>
         <div formidableFieldHint>Some hint.</div>
       </formidable-field-decorator>
@@ -148,7 +146,7 @@ class UnlabelledHost {}
   `
 })
 class ErrorsHost {
-  value: Model = {};
+  formValue: Model = {};
   shape = shape;
   required = { field: 'Required.' };
 }
@@ -156,25 +154,17 @@ class ErrorsHost {
 /** The shape a consumer uses for a bare field: no decorator, so nothing to point at. */
 @Component({
   imports: [FormsModule, InputField],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<formidable-input-field name="field" />`
 })
 class NoDecoratorHost {}
 
 describe('field ARIA', () => {
-  beforeEach(() => TestBed.configureTestingModule({ providers: [provideNgxMask()] }));
-
-  /** An attribute selector, not `#id`: the assertions are about the idref, never the id's spelling. */
-  function byId(root: HTMLElement, id: string): HTMLElement | null {
-    return root.querySelector(`[id="${id}"]`);
-  }
+  beforeEach(() => configureFormidableTestBed());
 
   /** What a screen reader would actually read out of an idref list, empty references dropped. */
-  function textOf(root: HTMLElement, control: HTMLElement, attribute: string): string {
-    const ids = (control.getAttribute(attribute) ?? '').split(' ').filter(Boolean);
-
-    return ids
-      .map((id) => byId(root, id)?.textContent?.trim() ?? '')
+  function textOf(control: HTMLElement, attribute: string): string {
+    return referenced(control, attribute)
+      .map((element) => element?.textContent?.trim() ?? '')
       .filter(Boolean)
       .join(' ');
   }
@@ -194,20 +184,20 @@ describe('field ARIA', () => {
     }
 
     it('names the radio group from the projected label', () => {
-      expect(textOf(root, control('[role="radiogroup"]'), 'aria-labelledby')).toBe('Favourite colour');
+      expect(textOf(control('[role="radiogroup"]'), 'aria-labelledby')).toBe('Favourite colour');
     });
 
     it('names the checkbox group from the projected label', () => {
-      expect(textOf(root, control('[role="group"]'), 'aria-labelledby')).toBe('Colours you like');
+      expect(textOf(control('[role="group"]'), 'aria-labelledby')).toBe('Colours you like');
     });
 
     // The toggle's own `offLabel` is state text, not a name — `aria-checked` is what carries the state.
     it('names the toggle from the projected label rather than from its own state text', () => {
-      expect(textOf(root, control('[role="switch"]'), 'aria-labelledby')).toBe('Notifications');
+      expect(textOf(control('[role="switch"]'), 'aria-labelledby')).toBe('Notifications');
     });
 
     it('names the slider from the projected label', () => {
-      expect(textOf(root, control('input[type="range"]'), 'aria-labelledby')).toBe('Amount');
+      expect(textOf(control('input[type="range"]'), 'aria-labelledby')).toBe('Amount');
     });
 
     it('emits no aria-labelledby when no label is projected', () => {
@@ -243,7 +233,7 @@ describe('field ARIA', () => {
     it('reports required only while the field is required', () => {
       expect(group().getAttribute('aria-required')).toBeNull();
 
-      fixture.componentInstance.markRequired = true;
+      fixture.componentInstance.markRequired.set(true);
       fixture.detectChanges();
 
       expect(group().getAttribute('aria-required')).toBe('true');
@@ -251,36 +241,35 @@ describe('field ARIA', () => {
 
     // A `div` has no native `readonly` / `disabled` to speak for it.
     it('reports readonly and disabled on a div-rooted field', () => {
-      fixture.componentInstance.readonly = true;
-      fixture.componentInstance.disabled = true;
+      fixture.componentInstance.readonly.set(true);
+      fixture.componentInstance.disabled.set(true);
       fixture.detectChanges();
 
       expect(group().getAttribute('aria-readonly')).toBe('true');
       expect(group().getAttribute('aria-disabled')).toBe('true');
     });
 
-    it('tracks the toggle state, which was a CSS class only', () => {
+    it('tracks the toggle state, which was a CSS class only', async () => {
       const toggle = root.querySelector('[role="switch"]') as HTMLElement;
 
       expect(toggle.getAttribute('aria-checked')).toBe('false');
 
       toggle.click();
-      fixture.detectChanges();
+      await settle(fixture);
 
       expect(toggle.getAttribute('aria-checked')).toBe('true');
     });
 
     // A native range already reports its number; only a transformed value is something it cannot infer.
-    it('gives the slider a valuetext only once the value is transformed', () => {
-      const range = root.querySelector('input[type="range"]') as HTMLElement;
-      const slider = fixture.debugElement.query(By.directive(SliderField)).componentInstance as SliderField;
+    it('gives the slider a valuetext only once the value is transformed', async () => {
+      const range = root.querySelector('input[type="range"]') as HTMLInputElement;
 
-      slider.selectValue(50);
-      fixture.detectChanges();
+      fill(range, '50');
+      await settle(fixture);
 
       expect(range.getAttribute('aria-valuetext')).toBeNull();
 
-      fixture.componentInstance.transform = (value: number) => `${value} francs`;
+      fixture.componentInstance.transform.set((value: number) => `${value} francs`);
       fixture.detectChanges();
 
       expect(range.getAttribute('aria-valuetext')).toBe('50 francs');
@@ -295,7 +284,7 @@ describe('field ARIA', () => {
       const root = fixture.nativeElement as HTMLElement;
       const group = root.querySelector('[role="radiogroup"]') as HTMLElement;
 
-      expect(textOf(root, group, 'aria-describedby')).toBe('Pick one.');
+      expect(textOf(group, 'aria-describedby')).toBe('Pick one.');
     });
 
     it('describes nothing while the hint and the errors are empty', () => {
@@ -308,7 +297,7 @@ describe('field ARIA', () => {
 
       // The attribute still points at both wrappers — they simply have nothing to contribute.
       expect(group.getAttribute('aria-describedby')).toBeTruthy();
-      expect(textOf(root, group, 'aria-describedby')).toBe('');
+      expect(textOf(group, 'aria-describedby')).toBe('');
     });
 
     it('emits neither aria-labelledby nor aria-describedby without a decorator', () => {
@@ -321,31 +310,27 @@ describe('field ARIA', () => {
       expect(input.getAttribute('aria-describedby')).toBeNull();
     });
 
-    // The end-to-end one: nothing here calls `markForCheck` by hand. The input field is `OnPush` and the
-    // errors are its sibling, so without the pump in `FieldErrorsRenderer` both assertions fail.
-    // `fakeAsync` is what lets the debounced Vest validator settle — until it does the form stays
+    // The end-to-end one: nothing here calls `markForCheck` or `detectChanges()` by hand. The input field is
+    // `OnPush` and the errors are its sibling, so without the pump in `FieldErrorsRenderer` both assertions
+    // fail. The first `settle` is what lets the debounced validator run — until it does the form stays
     // `PENDING`, `idle$` never emits, and the directive is not yet listening to the control.
-    it('picks up the error message and reports invalid once the control is touched and invalid', fakeAsync(() => {
+    it('picks up the error message and reports invalid once the control is touched and invalid', async () => {
       const fixture = TestBed.createComponent(ErrorsHost);
-      fixture.detectChanges();
-      tick(1000);
-      fixture.detectChanges();
+      await settle(fixture);
 
       const root = fixture.nativeElement as HTMLElement;
       const input = root.querySelector('input') as HTMLElement;
       const control = fixture.debugElement.query(By.css('formidable-input-field')).injector.get(NgModel).control;
 
-      expect(textOf(root, input, 'aria-describedby')).toBe('Some hint.');
+      expect(textOf(input, 'aria-describedby')).toBe('Some hint.');
       expect(input.getAttribute('aria-invalid')).toBeNull();
 
       control.markAsTouched();
       control.setErrors({ errors: ['Required.'] });
-      fixture.detectChanges();
+      await settle(fixture);
 
       expect(input.getAttribute('aria-invalid')).toBe('true');
-      expect(textOf(root, input, 'aria-describedby')).toBe('Some hint. Required.');
-
-      flush();
-    }));
+      expect(textOf(input, 'aria-describedby')).toBe('Some hint. Required.');
+    });
   });
 });
