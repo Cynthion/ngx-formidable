@@ -197,7 +197,7 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   }
 
   public selectOption(option: FormidableOption): void {
-    if (option.disabled) return;
+    if (!this.canEdit() || option.disabled || option.readonly) return;
 
     // An action entry is not a value: the panel closes first, so whatever the action opens takes focus from
     // a field that has already settled, and nothing reaches the model. The typed filter stays put, which is

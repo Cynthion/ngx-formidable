@@ -62,7 +62,7 @@ export class SelectField extends BaseOptionListField<string | null> {
   // Mirrors the template: the arrow is drawn only while the field can actually open its list. It overlays
   // the select instead of taking a slot beside the value, but the inset it asks the decorator for is the
   // same — a label still has to clear it.
-  readonly hasInFieldToggle = computed(() => !this.readonly() && !this.disabled());
+  readonly hasInFieldToggle = this.canEdit;
 
   // #endregion
 

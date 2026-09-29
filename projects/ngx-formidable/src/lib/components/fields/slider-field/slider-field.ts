@@ -22,7 +22,6 @@ interface SliderLabelItem {
   selector: 'formidable-slider-field',
   templateUrl: './slider-field.html',
   styleUrls: ['./slider-field.scss'],
-  imports: [],
   providers: [
     // required to provide this component as FormidableField
     {
@@ -107,9 +106,9 @@ export class SliderField extends BaseField<number> {
   /** Renders a tick's value as something other than the bare number. Independent of the thumb's transform. */
   public readonly transformTickToTickLabel = input<((value: number) => string) | undefined>(undefined);
 
-  /** Commits a value from outside the field, clamped and snapped as a drag would be. */
+  /** Commits a value from outside the field, clamped and snapped as a drag would be. No-op while readonly or disabled. */
   public selectValue(value: number): void {
-    if (Number.isNaN(value)) return;
+    if (!this.canEdit() || Number.isNaN(value)) return;
 
     this.setValue(this.roundToStep(Math.min(this.max(), Math.max(this.min(), value))));
   }
@@ -253,8 +252,6 @@ export class SliderField extends BaseField<number> {
   }
 
   onRangeInput(event: Event): void {
-    if (this.readonly() || this.disabled()) return;
-
     const raw = Number((event.target as HTMLInputElement).value);
 
     this.selectValue(raw);

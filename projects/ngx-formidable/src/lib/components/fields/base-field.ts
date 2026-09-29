@@ -107,8 +107,8 @@ export abstract class BaseField<T = string | null>
 
   ngAfterViewInit(): void {
     // Focusing inside the change detection pass flips `isFieldFocused`, which the decorator reads through
-    // `canLabelRest` — an ExpressionChanged error. A microtask lands after the pass, with the refs resolved.
-    if (this.autoFocus()) queueMicrotask(() => this.focus());
+    // `canLabelRest` — an ExpressionChanged error. The render hook lands after the pass, with the refs resolved.
+    if (this.autoFocus()) afterNextRender(() => this.focus(), { injector: this.injector });
   }
 
   ngOnDestroy(): void {
@@ -293,6 +293,9 @@ export abstract class BaseField<T = string | null>
   /** The errors the decorator renders as messages: none until `showErrors`, and the last ones while pending. */
   public readonly shownErrors = computed(() => (this.showErrors() ? this.settledErrors() : []));
 
+  /** Whether the user can edit the field: neither readonly nor disabled. Every mutator and edit guard reads it. */
+  protected readonly canEdit = computed(() => !this.readonly() && !this.disabled());
+
   get fieldId(): string {
     return this.id;
   }
@@ -329,7 +332,7 @@ export abstract class BaseField<T = string | null>
   public readonly canLabelRest = computed(() => {
     // Readonly/disabled fields never rest — the label stays put instead of
     // dropping over the (often filled) value when the field gains focus.
-    if (this.disabled() || this.readonly()) return false;
+    if (!this.canEdit()) return false;
     // Only what the field renders of its own accord counts here — its value, or mask slots. A
     // `placeholder` is the decorator's to weigh, because whether it blocks a resting label or is hidden
     // behind one depends on the label's position, which this field cannot see.
@@ -367,7 +370,7 @@ export abstract class BaseField<T = string | null>
 
   /** Keeps a readonly or disabled field from being edited by pointer, while leaving it focusable. */
   protected preventPointerDown(event: PointerEvent): void {
-    if (!this.readonly() && !this.disabled()) return;
+    if (this.canEdit()) return;
 
     event.preventDefault();
     // Waits for the browser's default pointerdown handling: `preventDefault` suppresses the native focus,
@@ -377,7 +380,7 @@ export abstract class BaseField<T = string | null>
 
   /** Blocks the keys a native control would act on while readonly or disabled — a `select`, a range input. */
   protected preventKeydown(event: KeyboardEvent): void {
-    if (!this.readonly() && !this.disabled()) return;
+    if (this.canEdit()) return;
 
     const nativeSelectKeys = [
       'ArrowUp',
@@ -407,7 +410,7 @@ export abstract class BaseField<T = string | null>
     if (this.keyboardCallback && this.registeredKeys.length > 0) {
       fromEvent<KeyboardEvent>(this.fieldRef.nativeElement, 'keydown')
         .pipe(
-          filter(() => this.isFieldFocused() && !this.readonly() && !this.disabled()),
+          filter(() => this.isFieldFocused() && this.canEdit()),
           filter((event) => this.registeredKeys.includes(event.key)),
           takeUntil(this.destroy$)
         )

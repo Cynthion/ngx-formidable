@@ -4,7 +4,7 @@
   class="field"
   [class.is-readonly]="readonly()"
   [class.is-disabled]="disabled()"
-  [tabindex]="readonly() || disabled() ? -1 : null"
+  [tabindex]="canEdit() ? null : -1"
   [attr.aria-labelledby]="labelledBy"
   [attr.aria-required]="required() || null"
   [attr.aria-invalid]="showErrors() || null"

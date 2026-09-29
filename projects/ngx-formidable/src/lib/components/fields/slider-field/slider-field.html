@@ -36,7 +36,7 @@
       [attr.name]="name()"
       [attr.readonly]="readonly() ? '' : null"
       [attr.disabled]="disabled() ? '' : null"
-      [attr.tabindex]="readonly() || disabled() ? -1 : 0"
+      [attr.tabindex]="canEdit() ? null : -1"
       [attr.aria-labelledby]="labelledBy"
       [attr.aria-required]="required() || null"
       [attr.aria-invalid]="showErrors() || null"
@@ -44,9 +44,11 @@
       [attr.aria-readonly]="readonly() || null"
       [attr.aria-valuetext]="valueText"
       [value]="position"
+      (pointerdown)="preventPointerDown($event)"
+      (keydown)="preventKeydown($event)"
+      (input)="onRangeInput($event)"
       (focus)="onFocusChange(true)"
-      (blur)="onFocusChange(false)"
-      (input)="onRangeInput($event)" />
+      (blur)="onFocusChange(false)" />
   </div>
 
   @if (showLabelRow) {

@@ -292,8 +292,8 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
   // #endregion
 
   private allowLabelAnimation(): void {
-    // A frame and not a microtask: every option field resolves its projected options in a `queueMicrotask`,
-    // so only a frame is reliably after all of them.
+    // A frame and not a render hook: every option field resolves its projected options in a render hook of
+    // its own, so only a frame is reliably after all of them.
     requestAnimationFrame(() => this.isLabelAnimated.set(true));
   }
 

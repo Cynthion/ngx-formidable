@@ -1,4 +1,4 @@
-import { Component, ElementRef, model, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, model, signal, viewChild } from '@angular/core';
 import { applyDefaultOption } from '../../../helpers/option.helpers';
 import {
   FieldDecoratorLayout,
@@ -35,7 +35,7 @@ import { BaseOptionField } from '../base-option-field';
     }
   ]
 })
-export class RadioGroupField extends BaseOptionField<string | null> implements OnInit, OnDestroy {
+export class RadioGroupField extends BaseOptionField<string | null> {
   readonly radioGroupRef = viewChild.required<ElementRef<HTMLDivElement>>('radioGroupRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.navigateOptions(event);
@@ -58,12 +58,6 @@ export class RadioGroupField extends BaseOptionField<string | null> implements O
 
   // #endregion
 
-  // #region Radio Group
-
-  // empty
-
-  // #endregion
-
   // #region FormidableOptionField
 
   public readonly optionRole: FieldOptionRole = 'radio';
@@ -75,10 +69,9 @@ export class RadioGroupField extends BaseOptionField<string | null> implements O
   }
 
   public selectOption(option: FormidableOption): void {
-    if (option.disabled) return;
+    if (!this.canEdit() || option.disabled || option.readonly) return;
 
     this.setValue(option.value);
-    this.touch.emit();
 
     // immediately highlight the selected option
     this.highlightSelectedOption();

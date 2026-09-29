@@ -1,4 +1,4 @@
-import { Component, ElementRef, model, OnDestroy, OnInit, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, model, signal, viewChild } from '@angular/core';
 import { applyDefaultOption } from '../../../helpers/option.helpers';
 import {
   FieldDecoratorLayout,
@@ -35,7 +35,7 @@ import { BaseOptionField } from '../base-option-field';
     }
   ]
 })
-export class CheckboxGroupField extends BaseOptionField<string[]> implements OnInit, OnDestroy {
+export class CheckboxGroupField extends BaseOptionField<string[]> {
   readonly checkboxGroupRef = viewChild.required<ElementRef<HTMLDivElement>>('checkboxGroupRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.navigateOptions(event);
@@ -63,12 +63,6 @@ export class CheckboxGroupField extends BaseOptionField<string[]> implements OnI
 
   // #endregion
 
-  // #region Checkbox Group
-
-  // empty
-
-  // #endregion
-
   // #region FormidableOptionField
 
   public readonly optionRole: FieldOptionRole = 'checkbox';
@@ -76,7 +70,7 @@ export class CheckboxGroupField extends BaseOptionField<string[]> implements OnI
   protected readonly activeOptions = signal<FormidableOption[]>([]);
 
   public selectOption(option: FormidableOption): void {
-    if (option.disabled) return;
+    if (!this.canEdit() || option.disabled || option.readonly) return;
 
     const current = this.picked;
     const next = current.includes(option.value)
@@ -84,7 +78,6 @@ export class CheckboxGroupField extends BaseOptionField<string[]> implements OnI
       : [...current, option.value];
 
     this.setValue(next);
-    this.touch.emit();
   }
 
   protected onOptionsChanged(): void {

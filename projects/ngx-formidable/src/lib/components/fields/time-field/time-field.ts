@@ -78,12 +78,14 @@ export class TimeField extends BaseDateTimeField {
    */
   public readonly unicodeTokenFormat = input(this.defaultUnicodeTokenFormat);
 
-  /** Commits a time as the user's pick, as the arrow keys do. The same time of day is no change. */
+  /**
+   * Commits a time as the user's pick, as the arrow keys do. The same time of day is no change. No-op while
+   * readonly or disabled.
+   */
   public selectTime(time: Date | null): void {
-    if (this.isSameValue(this.value(), time)) return;
+    if (!this.canEdit() || this.isSameValue(this.value(), time)) return;
 
     this.setValue(time ? this.normalize(time) : null);
-    this.touch.emit();
   }
 
   // #endregion

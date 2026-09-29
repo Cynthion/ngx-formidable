@@ -97,31 +97,13 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 - **Interim Guides**: [`user/components.md`](../user/components.md) follows every public change in the same phase; the guides are rewritten once, in Phase 30.
 - **This Section**: deleted with Phase 31, once Phases 29 and 30 have moved what holds into `tech/` and `user/`.
 
-### Defects
-
-Found by the architecture review and the test harness. Each is fixed in the phase that rewrites its code and proven by a behaviour spec there, rather than patched in code that is about to go.
-
-| Id  | Defect                                                                    | Phase |
-| :-- | :------------------------------------------------------------------------ | :---: |
-| D4  | `toggle-field`'s `offLabel` does not fall back to `onLabel` as documented |  25   |
-| D6  | A readonly `slider-field` still moves its thumb on the arrow keys         |  25   |
-
 ---
 
 ## Library Phases
 
-### Phase 25 — Field Symmetry Sweep
-
-**Depends On**: nothing.
-
-- **Side By Side**: all eleven fields compared for input order, provider block, template attribute order and `tabindex`, and brought in line with [`impl/components.md`](components.md).
-- **One Edit Guard**: a `canEdit` computed on the base guards every public mutator — `toggle()`, `selectValue()`, `selectDate()`, `selectTime()`, `selectOption()` — and the keyboard and pointer guards.
-- **Timers**: the remaining `setTimeout` and `queueMicrotask` calls move to render hooks or go.
-- **Closes**: D4, D6.
-
 ### Phase 26 — Portal Preview On Signal Forms
 
-**Depends On**: Phase 25.
+**Depends On**: nothing.
 
 - **Preview Form**: built with `form()` — `[formRoot]` and a submission, `[formField]` on every field, groups as nested model objects, conditional fields through `hidden()` and `@if`. The `ControlContainer` workaround goes.
 - **Validation Modes**: Vest through `validateStandardSchema`, with one suite per form build; Signal Forms' built-in rules; none. The run setting becomes `debounce`.

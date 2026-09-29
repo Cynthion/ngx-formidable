@@ -72,9 +72,9 @@ export class ToggleField extends BaseField<boolean> {
   /** Text shown beside the switch while off. Leave unset to show `onLabel` in both states. */
   public readonly offLabel = input<string | undefined>(undefined);
 
-  /** Flips the value, as clicking the switch or pressing Space or Enter does. No-op while readonly. */
+  /** Flips the value, as clicking the switch or pressing Space or Enter does. No-op while readonly or disabled. */
   public toggle(): void {
-    if (this.readonly() || this.disabled()) return;
+    if (!this.canEdit()) return;
 
     this.setValue(!this.value());
   }
@@ -85,9 +85,7 @@ export class ToggleField extends BaseField<boolean> {
   }
 
   get internalLabel(): string | undefined {
-    if (this.value() && this.onLabel() != null) return this.onLabel();
-    if (!this.value() && this.offLabel() != null) return this.offLabel();
-    return undefined;
+    return this.value() ? this.onLabel() : (this.offLabel() ?? this.onLabel());
   }
 
   // #endregion

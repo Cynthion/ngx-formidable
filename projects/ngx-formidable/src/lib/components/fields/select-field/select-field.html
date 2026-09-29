@@ -5,13 +5,13 @@
   [attr.name]="name()"
   [attr.readonly]="readonly() ? '' : null"
   [attr.disabled]="disabled() ? '' : null"
-  [attr.tabindex]="readonly() || disabled() ? -1 : null"
+  [attr.tabindex]="canEdit() ? null : -1"
   [attr.aria-required]="required() || null"
   [attr.aria-invalid]="showErrors() || null"
   [attr.aria-describedby]="describedBy"
   [attr.aria-readonly]="readonly() || null"
-  (pointerdown)="readonly() || disabled() ? preventPointerDown($event) : null"
-  (keydown)="readonly() || disabled() ? preventKeydown($event) : null"
+  (pointerdown)="preventPointerDown($event)"
+  (keydown)="preventKeydown($event)"
   (change)="onSelectChanged()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)">
@@ -49,6 +49,6 @@
 <!-- Toggle -->
 <!-- Overlays the select rather than sitting beside it, so a click on the arrow still opens the platform's
      list. Same markup as the wrapper fields' toggle, minus the open state, which a `<select>` never reports. -->
-@if (!readonly() && !disabled()) {
+@if (canEdit()) {
 <span class="toggle arrow-down"></span>
 }

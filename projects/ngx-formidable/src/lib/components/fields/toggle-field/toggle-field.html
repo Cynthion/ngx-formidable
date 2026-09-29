@@ -6,7 +6,7 @@
   [class.is-disabled]="disabled()"
   [class.focused]="isFieldFocused()"
   [class.checked]="value()"
-  [tabindex]="readonly() || disabled() ? -1 : null"
+  [tabindex]="canEdit() ? null : -1"
   [attr.aria-checked]="!!value()"
   [attr.aria-labelledby]="labelledBy"
   [attr.aria-required]="required() || null"
@@ -14,9 +14,9 @@
   [attr.aria-describedby]="describedBy"
   [attr.aria-readonly]="readonly() || null"
   [attr.aria-disabled]="disabled() || null"
+  (click)="onToggleClick($event)"
   (focus)="onFocusChange(true)"
-  (blur)="onFocusChange(false)"
-  (click)="onToggleClick($event)">
+  (blur)="onFocusChange(false)">
   <input
     hidden
     type="checkbox"

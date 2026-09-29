@@ -154,7 +154,7 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
 
   protected doOnFocusChange(isFocused: boolean): void {
     // A readonly field has nothing to type into: it neither hands its display to ngxMask nor commits on blur.
-    if (this.readonly()) return;
+    if (!this.canEdit()) return;
 
     // hand the empty display over to ngxMask while focused (see renderEmpty)
     if (isFocused) {
