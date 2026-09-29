@@ -8,17 +8,17 @@ The worked example below is `example-counter-field` in the portal, quoted as it 
 
 Register the component as `FORMIDABLE_FIELD` and it immediately gains:
 
-| Capability                                   | Comes From                                                                 |
-| :------------------------------------------- | :------------------------------------------------------------------------- |
-| Field rules                                  | `NgxFormidableFieldValidate`, which attaches to every `ngModel`            |
-| Group and whole-form rules                   | Being inside the form the rules report on                                  |
-| Error messages                               | Adding `formidableFieldErrors`, with or without a decorator                |
-| Label and adornment                          | The surrounding `formidable-field-decorator`                               |
-| Prefix, suffix, hints                        | The same decorator                                                         |
-| Required marker                              | `markRequired`, inherited from the base                                    |
-| Focus and `autoFocus`                        | `focus()`, inherited from the base                                         |
-| Accessible names                             | `labelledBy`, `describedBy` and `isInvalid`, protected getters on the base |
-| Keyboard, outside-click and resize listeners | The base, through RxJS `fromEvent`                                         |
+| Capability                 | Comes From                                                                 |
+| :------------------------- | :------------------------------------------------------------------------- |
+| Field Rules                | `NgxFormidableFieldValidate`, which attaches to every `ngModel`            |
+| Group and Whole-Form Rules | Being inside the form the rules report on                                  |
+| Error Messages             | Adding `formidableFieldErrors`, with or without a decorator                |
+| Label and Adornment        | The surrounding `formidable-field-decorator`                               |
+| Prefix, Suffix, Hints      | The same decorator                                                         |
+| Required Marker            | `markRequired`, inherited from the base                                    |
+| Focus and `autoFocus`      | `focus()`, inherited from the base                                         |
+| Accessible Names           | `labelledBy`, `describedBy` and `isInvalid`, protected getters on the base |
+| Keyboard Listener          | The base, through RxJS `fromEvent`                                         |
 
 ---
 
@@ -45,8 +45,6 @@ Then supply the abstract members:
 | `doOnFocusChange(isFocused)` | The field's half of a focus change. Guard `readonly` here, not in `onFocusChange`                 |
 | `registeredKeys`             | The keys that reach `keyboardCallback`. `[]` for none                                             |
 | `keyboardCallback`           | Handles those keys and returns whether it acted; only such a key is `preventDefault`ed. Or `null` |
-| `externalClickCallback`      | Runs on a click outside the field — how a panel closes. `null` to not listen                      |
-| `windowResizeScrollCallback` | Runs on a debounced resize or scroll — how a panel repositions. `null` to not listen              |
 
 And override these where they apply:
 
@@ -56,7 +54,6 @@ And override these where they apply:
 | `focusElement`        | The element that takes focus is not `fieldRef` — a wrapper `div` around an inner `input`      |
 | `valueAlignment`      | The value is top-aligned rather than centred, so a prefix sits on its first line              |
 | `hasInFieldToggle`    | The field draws something of its own at its inner right edge, which the value must clear      |
-| `ignoresBlur()`       | The field moves focus to something it owns, so that blur is not the user leaving              |
 
 Call the protected `onValueChange()` whenever the user changes the value: it emits both outputs and reports the value to the bound control. Call `onFocusChange(true | false)` on focus and blur.
 
@@ -93,8 +90,6 @@ export class ExampleCounterField extends BaseField<number> implements Formidable
   readonly counterRef = viewChild.required<ElementRef<HTMLDivElement>>('counterRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
   protected registeredKeys = ['ArrowUp', 'ArrowDown'];
 
   public readonly min = input(0);

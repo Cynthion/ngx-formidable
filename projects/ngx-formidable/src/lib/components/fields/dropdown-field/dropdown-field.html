@@ -3,10 +3,12 @@
   class="field"
   [class.is-readonly]="readonly()"
   [class.is-disabled]="disabled()"
-  [class.focused]="isFieldFocused()">
+  [class.focused]="isFieldFocused()"
+  (focusin)="onFocusChange(true, $event)"
+  (focusout)="onFocusChange(false, $event)">
   <div
     class="input-wrapper"
-    (mousedown)="!readonly() && !disabled() ? toggleMouseDown($event) : null"
+    (mousedown)="!readonly() && !disabled() ? onPanelToggleMouseDown($event) : null"
     (pointerdown)="readonly() || disabled() ? preventPointerDown($event) : null"
     (keydown)="readonly() || disabled() ? preventKeydown($event) : null">
     <!-- Input Field -->
@@ -30,9 +32,7 @@
       [attr.aria-expanded]="isPanelOpen()"
       [attr.aria-controls]="panelId"
       [attr.aria-activedescendant]="optionId(highlightedOptionIndex())"
-      (keydown)="onTypeaheadKeydown($event)"
-      (focus)="onFocusChange(true)"
-      (blur)="onFocusChange(false)" />
+      (keydown)="onTypeaheadKeydown($event)" />
 
     <!-- Toggle -->
     @if (!readonly() && !disabled()) {
@@ -52,7 +52,7 @@
     tabindex="-1"
     class="panel panel-{{ panelPosition() }}"
     [class.open]="isPanelOpen()"
-    (mousedown)="panelMouseDown($event)">
+    (mousedown)="onPanelMouseDown($event)">
     <!-- The role sits here rather than on the panel, so the options it owns are its direct children. -->
     <div
       role="listbox"

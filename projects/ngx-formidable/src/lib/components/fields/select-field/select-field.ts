@@ -34,8 +34,6 @@ export class SelectField extends BaseOptionListField<string | null> {
   readonly selectRef = viewChild.required<ElementRef<HTMLSelectElement>>('selectRef');
 
   protected keyboardCallback = null;
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
   protected doOnFocusChange(_isFocused: boolean): void {

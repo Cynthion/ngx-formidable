@@ -30,8 +30,6 @@ export class ToggleField extends BaseField<boolean> {
   readonly toggleRef = viewChild.required<ElementRef<HTMLDivElement>>('toggleRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
   protected registeredKeys = [' ', 'Space', 'Enter'];
 
   protected doOnFocusChange(_isFocused: boolean): void {

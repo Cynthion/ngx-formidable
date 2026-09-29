@@ -101,28 +101,16 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 
 Found by the architecture review and the test harness. Each is fixed in the phase that rewrites its code and proven by a behaviour spec there, rather than patched in code that is about to go.
 
-| Id  | Defect                                                                                                                   | Phase |
-| :-- | :----------------------------------------------------------------------------------------------------------------------- | :---: |
-| D4  | `toggle-field`'s `offLabel` does not fall back to `onLabel` as documented                                                |  25   |
-| D6  | A readonly `slider-field` still moves its thumb on the arrow keys                                                        |  25   |
-| D7  | An invalid `unicodeTokenFormat` is caught on init only, and changing it later drops the fallback                         |  24   |
-| D8  | Pikaday commits typed text through its own `change` listener, bypassing `ignoresBlur` — not yet confirmed in a browser   |  24   |
-| D10 | Clicking an `autocomplete-field` option reports a blur twice, the second simulated, and leaves focus on the hidden panel |  22   |
-| D11 | The simulated blur leaves the field's focus state set, so the field and its decorator disagree                           |  22   |
-| D14 | Every scroll or resize re-measures every panel field, open or not                                                        |  22   |
+| Id  | Defect                                                                                                                                      | Phase |
+| :-- | :------------------------------------------------------------------------------------------------------------------------------------------ | :---: |
+| D4  | `toggle-field`'s `offLabel` does not fall back to `onLabel` as documented                                                                   |  25   |
+| D6  | A readonly `slider-field` still moves its thumb on the arrow keys                                                                           |  25   |
+| D7  | An invalid `unicodeTokenFormat` is caught on init only, and changing it later drops the fallback                                            |  24   |
+| D8  | Pikaday commits typed text through its own `change` listener, even when focus only moved onto the calendar — not yet confirmed in a browser |  24   |
 
 ---
 
 ## Library Phases
-
-### Phase 22 — Panel Fields
-
-**Depends On**: nothing.
-
-- **One Panel Behaviour**: `dropdown-field`, `autocomplete-field` and `date-field` share one implementation of the panel — its mousedown, its outside click, and repositioning on scroll and resize while it is open only.
-- **No Simulated Focus**: the simulated blurs go, and the field's focus state is the only one.
-- **Render Hooks**: `afterNextRender` replaces the timers that measure, scroll and place the panel.
-- **Closes**: D10, D11, D14.
 
 ### Phase 23 — Text Fields
 
@@ -134,7 +122,7 @@ Found by the architecture review and the test harness. Each is fixed in the phas
 
 ### Phase 24 — Date And Time Fields
 
-**Depends On**: Phase 22.
+**Depends On**: nothing.
 
 - **One Base**: `date-field` and `time-field` share token format validation, masking, segment stepping and parsing.
 - **Transformed Value**: typed text goes through `transformedValue`. Unparseable text reports a `parse` error and leaves the model alone, empty text is `null`, and the error reaches every forms API.

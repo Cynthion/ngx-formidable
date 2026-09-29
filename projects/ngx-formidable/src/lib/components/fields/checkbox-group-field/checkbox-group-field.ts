@@ -39,8 +39,6 @@ export class CheckboxGroupField extends BaseOptionField<string[]> implements OnI
   readonly checkboxGroupRef = viewChild.required<ElementRef<HTMLDivElement>>('checkboxGroupRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.navigateOptions(event);
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
   protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter', ' '];
 
   protected doOnFocusChange(_isFocused: boolean): void {

@@ -72,5 +72,5 @@ One combination cannot be made to work: a placeholder the mask can also produce 
 
 - The rules run on focus entry and never again. Nothing re-applies them on a repaint, a value change or a second click.
 - A caret never lands behind the value. A click aimed into the unused slots collapses at the end of what is filled.
-- Focusing a field does not change its value. `date-field` hands its display to ngx-mask only while nothing has been typed, because a half-typed date survives a blur onto the field's own panel and is there to come back to.
+- Focusing a field does not change its value. `date-field` hands its display to ngx-mask only while nothing has been typed, because a half-typed date survives focus moving onto the field's own calendar and back.
 - `dropdown-field` and `select-field` are out of scope: their editors are `readonly`, so there is no caret to place.

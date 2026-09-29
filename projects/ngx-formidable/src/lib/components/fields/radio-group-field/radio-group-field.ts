@@ -39,8 +39,6 @@ export class RadioGroupField extends BaseOptionField<string | null> implements O
   readonly radioGroupRef = viewChild.required<ElementRef<HTMLDivElement>>('radioGroupRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.navigateOptions(event);
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
   protected registeredKeys = ['ArrowDown', 'ArrowUp', 'Enter', ' '];
 
   protected doOnFocusChange(_isFocused: boolean): void {

@@ -34,6 +34,7 @@ Every library spec is built on the harness in `lib/testing/`. `public-api.ts` do
 | `settle(fixture, ms)`           | Awaits timers of up to `ms`, one frame, and the change detection they scheduled. Never calls `detectChanges()`                         |
 | `bindField(kind, api)`          | A host binding one field through any forms API: its model, touched, dirty and events; `write()`, `set()`, `state()`, `markAsTouched()` |
 | `fill()`, `type()`, `press()`   | A whole value as a paste sets it, keystrokes at the live caret, a bubbling cancelable `keydown`                                        |
+| `click()`                       | A pointer click, which moves focus as the browser would unless its `mousedown` is cancelled                                            |
 | `referenced()`                  | What an id-reference attribute such as `aria-describedby` resolves to                                                                  |
 | `theme()`, `rem()`, `corners()` | A `:root` override, a rem length in px, the four resolved corner radii                                                                 |
 

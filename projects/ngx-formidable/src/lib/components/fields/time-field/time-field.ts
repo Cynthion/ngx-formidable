@@ -55,8 +55,6 @@ export class TimeField extends BaseField<Date | null> implements OnInit, OnDestr
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
   protected registeredKeys = ['Enter', 'ArrowUp', 'ArrowDown'];
 
   private maskChar = '0';

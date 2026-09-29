@@ -60,8 +60,6 @@ export class TextareaField extends BaseField<string> implements AfterViewInit {
   readonly lengthIndicatorRef = viewChild<ElementRef<HTMLDivElement>>('lengthIndicatorRef');
 
   protected keyboardCallback = null;
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
   override ngAfterViewInit(): void {

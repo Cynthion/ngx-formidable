@@ -52,8 +52,6 @@ export class InputField extends BaseField<string> implements AfterViewInit {
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
   protected keyboardCallback = null;
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = [];
 
   override ngAfterViewInit(): void {

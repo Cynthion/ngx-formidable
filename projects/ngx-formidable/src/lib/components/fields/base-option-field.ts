@@ -1,4 +1,4 @@
-import { Directive, signal, Signal, viewChildren } from '@angular/core';
+import { afterNextRender, Directive, signal, Signal, viewChildren } from '@angular/core';
 import { getNextAvailableOptionIndex } from '../../helpers/option.helpers';
 import { scrollHighlightedOptionIntoView } from '../../helpers/position.helpers';
 import { FormidableOption, FormidablePanelField } from '../../models/formidable.model';
@@ -143,10 +143,8 @@ export abstract class BaseOptionField<T = string | null> extends BaseOptionListF
     if (!this.isFieldFocused()) return;
     if (index < 0) return;
 
-    // `optionRefs` is only repopulated once the new highlight has rendered, so a microtask would
-    // resolve the wrong element. A timer lands after the render even zonelessly: the `set` above notifies
-    // the scheduler, which queues its own timer from inside that call, so ours is behind it in the queue.
-    setTimeout(() => scrollHighlightedOptionIntoView(index, this.optionRefs()));
+    // `optionRefs` is only repopulated once the new highlight has rendered.
+    afterNextRender(() => scrollHighlightedOptionIntoView(index, this.optionRefs()), { injector: this.injector });
   }
 
   private get selectedOptionIndex(): number {
