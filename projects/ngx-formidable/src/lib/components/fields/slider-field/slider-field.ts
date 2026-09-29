@@ -36,8 +36,6 @@ export class SliderField extends BaseField<number> {
   readonly rangeRef = viewChild.required<ElementRef<HTMLInputElement>>('rangeRef');
 
   protected keyboardCallback = null;
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
   protected registeredKeys: string[] = []; // arrows are natively supported
 
   constructor() {

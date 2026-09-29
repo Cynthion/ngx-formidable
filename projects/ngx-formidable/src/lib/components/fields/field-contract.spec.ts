@@ -37,7 +37,7 @@ const typeAndLeave = (text: string) => (element: HTMLElement) => {
 
   input.focus();
   fill(input, text);
-  input.dispatchEvent(new FocusEvent('blur'));
+  input.blur();
 };
 
 interface FieldCase {
@@ -214,7 +214,7 @@ describe('field contract', () => {
 
           target.focus();
           edit(bound.element);
-          target.dispatchEvent(new FocusEvent('blur'));
+          target.blur();
           await settle(bound.fixture);
 
           expect(bound.touched()).toBe(true);

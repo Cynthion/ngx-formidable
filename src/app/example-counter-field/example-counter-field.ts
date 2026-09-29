@@ -23,8 +23,6 @@ export class ExampleCounterField extends BaseField<number> implements Formidable
   readonly counterRef = viewChild.required<ElementRef<HTMLDivElement>>('counterRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
   protected registeredKeys = ['ArrowUp', 'ArrowDown'];
 
   /** Lowest value the counter steps to. `[formField]` writes it from a `min()` rule. */

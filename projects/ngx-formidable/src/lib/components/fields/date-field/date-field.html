@@ -3,7 +3,9 @@
   class="field"
   [class.is-readonly]="readonly()"
   [class.is-disabled]="disabled()"
-  [class.focused]="isFieldFocused()">
+  [class.focused]="isFieldFocused()"
+  (focusin)="onFocusChange(true, $event)"
+  (focusout)="onFocusChange(false, $event)">
   <div class="input-wrapper">
     <!-- Input Field -->
     <input
@@ -33,9 +35,7 @@
       (mousedown)="onEditorMouseDown()"
       (mouseup)="rememberClickedCaret(inputRef)"
       (click)="restoreClickedCaret(inputRef)"
-      (input)="onInput()"
-      (focus)="onFocusChange(true)"
-      (blur)="onFocusChange(false)" />
+      (input)="onInput()" />
 
     <!-- Toggle -->
     @if (!readonly() && !disabled()) {
@@ -45,7 +45,7 @@
       [class.open]="isPanelOpen()"
       [class.arrow-down]="!hasToggleIcon() && !isPanelOpen()"
       [class.arrow-up]="!hasToggleIcon() && isPanelOpen()"
-      (mousedown)="toggleMouseDown($event)">
+      (mousedown)="onPanelToggleMouseDown($event)">
       <ng-content select="[formidableFieldToggleIcon]" />
     </span>
     }
@@ -57,7 +57,7 @@
     tabindex="-1"
     class="panel panel-{{ panelPosition() }}"
     [class.open]="isPanelOpen()"
-    (mousedown)="panelMouseDown($event)">
+    (mousedown)="onPanelMouseDown($event)">
     <!-- A calendar is not a list, so this is a dialog. It is named from the same label as the field, and
          stays unnamed without one — the same rule `labelledBy` follows everywhere else. -->
     <div

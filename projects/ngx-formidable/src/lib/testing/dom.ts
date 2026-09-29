@@ -30,6 +30,25 @@ export function press(target: EventTarget, key: string, init: KeyboardEventInit 
 }
 
 /**
+ * Clicks as a pointer does: a `mousedown`, a `mouseup` and a `click`, all bubbling and cancelable. A dispatched
+ * event has no default action, so this performs the press's own: unless a listener cancelled the `mousedown`,
+ * focus moves to the nearest focusable ancestor, or leaves when there is none.
+ */
+export function click(target: Element): void {
+  const init = { bubbles: true, cancelable: true };
+
+  if (target.dispatchEvent(new MouseEvent('mousedown', init))) {
+    const focusable = target.closest<HTMLElement>('a[href], button, input, select, textarea, [tabindex]');
+
+    if (focusable) focusable.focus();
+    else (document.activeElement as HTMLElement | null)?.blur();
+  }
+
+  target.dispatchEvent(new MouseEvent('mouseup', init));
+  target.dispatchEvent(new MouseEvent('click', init));
+}
+
+/**
  * What an id-reference attribute such as `aria-controls` or `aria-describedby` points at, in the order it
  * names them. An id nothing carries resolves to `null`, so a dangling reference fails the assertion.
  */

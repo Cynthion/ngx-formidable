@@ -18,6 +18,7 @@ import {
 import { addDays, format, isEqual } from 'date-fns';
 import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
+import { filter, fromEvent, merge, takeUntil } from 'rxjs';
 import { FieldToggleIcon } from '../../../directives/field-toggle-icon';
 import {
   findSegmentAtCaret,
@@ -31,13 +32,13 @@ import {
 } from '../../../helpers/format.helpers';
 import { renderEmptyMask } from '../../../helpers/input.helpers';
 import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../../helpers/mask.helpers';
-import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
   FieldDecoratorLayout,
   FORMIDABLE_DEFAULTS,
   FORMIDABLE_FIELD,
   FormidableEmptyHint,
+  FormidablePanelField,
   FormidablePanelPosition
 } from '../../../models/formidable.model';
 import { BaseField } from '../base-field';
@@ -79,9 +80,6 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
   protected readonly hasToggleIcon = computed(() => !!this.projectedToggleIcon());
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
-  protected externalClickCallback = () => this.handleExternalClick();
-  // Synchronous: the base debounces resize/scroll, so the new layout has already settled.
-  protected windowResizeScrollCallback = () => updatePanelPosition(this.dateRef(), this.panelRef());
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'];
 
   private maskChar = '0';
@@ -211,6 +209,23 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
     super.ngAfterViewInit();
 
     this.updateOptions();
+
+    // Pikaday redraws its whole calendar on a pick, a step or a change of month, and a focused element taken
+    // out of the page blurs. So focus on one of its selects goes back to the input first, captured ahead of
+    // Pikaday's own listeners — except on a press on a select, which opens only while it keeps focus.
+    const picker = this.pickerRef()!.nativeElement;
+
+    merge(
+      fromEvent(picker, 'mousedown', { capture: true }),
+      fromEvent(picker, 'keydown', { capture: true }),
+      fromEvent(picker, 'change', { capture: true })
+    )
+      .pipe(
+        filter((event) => !(event.type === 'mousedown' && event.target instanceof HTMLSelectElement)),
+        filter(() => picker.contains(document.activeElement)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => this.focus());
   }
 
   // Typing commits on blur — a half-typed date is not a date — so the value is committed through
@@ -233,14 +248,6 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
 
     // try set date on blur
     this.trySetDateFromInput(this.inputRef().nativeElement.value);
-  }
-
-  // Focus moved onto this field's own panel, so the blur that follows is neither a commit nor a touch.
-  protected override ignoresBlur(): boolean {
-    const ignore = this.ignoreNextBlur;
-    this.ignoreNextBlur = false;
-
-    return ignore;
   }
 
   private handleKeydown(event: KeyboardEvent): boolean {
@@ -332,12 +339,6 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
     return false;
   }
 
-  private handleExternalClick(): void {
-    if (!this.isPanelOpen()) return;
-
-    this.togglePanel(false);
-  }
-
   // #region FormidableField
 
   /** The picked date, at midnight once the user picked it, or `null` for none. */
@@ -412,9 +413,8 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
     return value === '' || value === this.maskPlaceholder;
   }
 
-  // Whether the input is showing one of its two empty displays rather than characters somebody typed.
-  // Focus hands the display to ngxMask, and that must not overwrite a half-typed date — which survives a
-  // blur onto this field's own panel, and is there to come back to when focus returns.
+  // Whether the input is showing one of its two empty displays rather than characters somebody typed, which
+  // is the only display focus may hand over to ngxMask.
   private get showsNothingTyped(): boolean {
     return this.isInputCleared || this.inputRef().nativeElement.value === this.emptyDisplay;
   }
@@ -430,7 +430,6 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
     if (this.isSameValue(this.value(), date)) return;
 
     this.setValue(date ? normalizeTimePart(date) : null);
-    this.touch.emit();
     this.togglePanel(false);
   }
 
@@ -551,54 +550,14 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
     transform: (position: FormidablePanelPosition | undefined) => position ?? this.defaultPanelPosition
   });
 
-  private ignoreNextBlur = false;
-
-  // Mousedown, so the click keeps focus in the input rather than blurring it.
-  protected toggleMouseDown(event: MouseEvent): void {
-    event.preventDefault();
-    this.inputRef().nativeElement.focus(); // ensure input remains focused, so keyboard events work
-    this.togglePanel(!this.isPanelOpen());
+  protected override get panel(): FormidablePanelField {
+    return this;
   }
 
-  // Workaround: Because the <input> element might have regained focus (for keyboard events), the focus
-  // needs to be set to the panel first. Otherwise, clicking the nested <select>, etc. would not work as
-  // expected.
-  protected panelMouseDown(event: MouseEvent): void {
-    const target = event.target as HTMLElement;
-
-    const isFocusable =
-      target instanceof HTMLInputElement ||
-      target instanceof HTMLSelectElement ||
-      target instanceof HTMLTextAreaElement ||
-      target instanceof HTMLButtonElement ||
-      target.hasAttribute('tabindex');
-
-    if (isFocusable) {
-      this.ignoreNextBlur = true;
-      this.panelRef()?.nativeElement.focus();
-    }
-  }
-
-  /**
-   * Opens or closes the calendar.
-   */
+  /** Opens or closes the calendar. */
   public togglePanel(isOpen: boolean): void {
     this.isPanelOpen.set(isOpen);
-
-    if (isOpen) {
-      // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
-      // before change detection. Only while opening: closing reveals nothing, and `selectDate` closes an
-      // already-closed panel on every write, including the one that seeds the field's initial value —
-      // which used to scroll an off-screen field into view on load.
-      setTimeout(() => scrollIntoView(this.dateRef(), this.panelRef()));
-
-      // Synchronous on purpose: a closed panel is `visibility: hidden`, not `display: none`, so it is
-      // already laid out and measurable. Deferring would flip it after paint, which is a visible jump.
-      // The panel is not focused here: it is still `visibility: hidden` at this point and so cannot take
-      // focus, and deferring the call until it can would pull focus off the input and run its
-      // commit-on-blur path. `panelMouseDown` focuses it once it is open and visible.
-      updatePanelPosition(this.dateRef(), this.panelRef());
-    }
+    this.onPanelToggle(isOpen);
   }
 
   // #endregion

@@ -237,28 +237,6 @@ describe('masked date/time field', () => {
 
       expect(input.value).toBe('2024-05-12');
     });
-
-    it('blur-commits again after a panel interaction skipped one', async () => {
-      const { fixture, element, input, value } = await setup('date', 'dd . MM . yyyy', 'format');
-      const panel = element.querySelector('.panel') as HTMLElement;
-
-      input.focus();
-
-      // handing focus to the panel (a nested select, say) must skip exactly one blur-commit
-      panel.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-      input.blur();
-      await settle(fixture);
-
-      // an incomplete value is only cleared by the blur-commit — Pikaday's own change
-      // listener ignores unparseable text — so the hint proves the commit ran
-      input.focus();
-      type(input, '1');
-      input.blur();
-      await settle(fixture);
-
-      expect(input.value).toBe('dd . MM . yyyy');
-      expect(value()).toBeNull();
-    });
   });
 
   describe('clearing the text', () => {

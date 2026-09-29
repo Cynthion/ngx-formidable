@@ -255,7 +255,7 @@ describe('option projection', () => {
       await settle(filterFixture);
 
       const filterInput = filterFixture.nativeElement.querySelector('input') as HTMLInputElement;
-      filterInput.dispatchEvent(new Event('focus'));
+      filterInput.focus();
       fill(filterInput, 'app');
       await settle(filterFixture, 300); // clears the 200ms filter debounce
 
@@ -368,7 +368,7 @@ describe('option projection', () => {
 
     const filterBy = async (text: string) => {
       const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
-      input.dispatchEvent(new Event('focus'));
+      input.focus();
       fill(input, text);
       await settle(fixture, 300); // clears the 200ms filter debounce
     };

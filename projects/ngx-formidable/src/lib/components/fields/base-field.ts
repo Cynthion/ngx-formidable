@@ -1,10 +1,12 @@
 import {
+  afterNextRender,
   AfterViewInit,
   booleanAttribute,
   computed,
   Directive,
   ElementRef,
   inject,
+  Injector,
   input,
   linkedSignal,
   ModelSignal,
@@ -19,8 +21,13 @@ import { debounceTime, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs
 import { NgxFormidableForm } from '../../forms/form.directive';
 import { endOfMaskedValue } from '../../helpers/input.helpers';
 import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../helpers/mask.helpers';
-import { openPanelPosition } from '../../helpers/position.helpers';
-import { FieldDecoratorLayout, FORMIDABLE_DEFAULTS, FormidableField } from '../../models/formidable.model';
+import { openPanelPosition, scrollIntoView, updatePanelPosition } from '../../helpers/position.helpers';
+import {
+  FieldDecoratorLayout,
+  FORMIDABLE_DEFAULTS,
+  FormidableField,
+  FormidablePanelField
+} from '../../models/formidable.model';
 import { FormidableReveal } from '../../models/validation.model';
 import { FieldDecorator } from '../field-decorator/field-decorator';
 
@@ -29,8 +36,8 @@ let nextFieldId = 0;
 
 /**
  * The base class a custom field extends. It supplies the `FormValueControl` contract — the state inputs and
- * the `touch` output — the reveal of its errors, the accessible names, and the keyboard, outside-click and
- * resize listeners; a subclass declares its `value` model, renders from it, and fills in the `do*` hook.
+ * the `touch` output — the reveal of its errors, the accessible names, and the keyboard listener; a subclass
+ * declares its `value` model, renders from it, and fills in the `do*` hook.
  *
  * `[formField]`, `ngModel` and `[formControl]` all bind such a field through its `value` model. A custom field
  * also registers itself as `FORMIDABLE_FIELD`, so `formidable-field-decorator` can find it.
@@ -58,12 +65,6 @@ export abstract class BaseField<T = string | null>
    */
   protected abstract keyboardCallback: ((event: KeyboardEvent) => boolean) | null;
 
-  /** Runs on a click landing outside the field — how a panel field closes. `null` to not listen. */
-  protected abstract externalClickCallback: (() => void) | null;
-
-  /** Runs on a debounced window resize or scroll — how an open panel is repositioned. `null` to not listen. */
-  protected abstract windowResizeScrollCallback: (() => void) | null;
-
   /** Which keys reach `keyboardCallback`. */
   protected abstract registeredKeys: string[];
 
@@ -79,6 +80,9 @@ export abstract class BaseField<T = string | null>
   private readonly decorator = inject(FieldDecorator, { optional: true });
 
   protected readonly destroy$ = new Subject<void>();
+
+  // What a render hook registered outside the constructor runs in.
+  protected readonly injector = inject(Injector);
 
   // The decorator is normally the atom that owns the field's stacking context and rises while a panel is
   // open. Without one there is nothing above the field to be it, so the field's own host takes the job —
@@ -187,28 +191,21 @@ export abstract class BaseField<T = string | null>
     return Object.is(a, b);
   }
 
-  protected onFocusChange(isFocused: boolean): void {
+  /**
+   * Bind to the focus and blur of whatever takes focus in the field. Pass the event where focus can move
+   * between the field's own elements — bound as `focusin` and `focusout` on `fieldRef` — so such a move is
+   * neither an arrival nor a departure.
+   */
+  protected onFocusChange(isFocused: boolean, event?: FocusEvent): void {
     if (this.disabled()) return;
+    if (this.fieldRef.nativeElement.contains((event?.relatedTarget ?? null) as Node | null)) return;
 
     this.isFieldFocused.set(isFocused);
-
-    // A blur the field caused itself — focus moved onto its own panel — is not the user leaving it, so it
-    // neither commits nor touches.
-    if (!isFocused && this.ignoresBlur()) return;
-
     this.doOnFocusChange(isFocused);
 
     // The last act of a blur: Signal Forms' `debounce(path, 'blur')` releases the value on the touch, so
     // whatever the field writes above has to be written by now.
     if (!isFocused) this.touch.emit();
-  }
-
-  /**
-   * Whether this blur is the field's own doing, because focus moved to something the field itself owns — a
-   * panel, say. Override it in a field that moves focus, so such a blur neither commits nor touches.
-   */
-  protected ignoresBlur(): boolean {
-    return false;
   }
 
   /**
@@ -419,31 +416,93 @@ export abstract class BaseField<T = string | null>
         });
     }
 
-    if (this.externalClickCallback) {
-      fromEvent<MouseEvent>(document, 'click')
-        .pipe(
-          filter((event) => {
-            const path = event.composedPath?.() ?? [];
+    const panel = this.panel;
+    if (!panel) return;
 
-            // accept clicks that bubble through any part of the field (like panel)
-            const isInside = path.some((el) => el instanceof Node && this.fieldRef.nativeElement.contains(el));
+    fromEvent<MouseEvent>(document, 'click')
+      .pipe(
+        filter((event) => {
+          const path = event.composedPath?.() ?? [];
 
-            return !isInside;
-          }),
-          takeUntil(this.destroy$)
-        )
-        .subscribe(() => this.externalClickCallback?.());
-    }
+          // accept clicks that bubble through any part of the field (like panel)
+          const isInside = path.some((el) => el instanceof Node && this.fieldRef.nativeElement.contains(el));
 
-    if (this.windowResizeScrollCallback) {
-      const resize$ = fromEvent(window, 'resize');
-      // Captured on the document rather than listened for on `window`: `scroll` does not bubble, so a
-      // field scrolling inside a pane of its own would otherwise never hear that it has moved.
-      const scroll$ = fromEvent(document, 'scroll', { capture: true });
+          return panel.isPanelOpen() && !isInside;
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => panel.togglePanel(false));
 
-      merge(resize$, scroll$)
-        .pipe(debounceTime(50), takeUntil(this.destroy$))
-        .subscribe(() => this.windowResizeScrollCallback?.());
+    const resize$ = fromEvent(window, 'resize');
+    // Captured on the document rather than listened for on `window`: `scroll` does not bubble, so a
+    // field scrolling inside a pane of its own would otherwise never hear that it has moved.
+    const scroll$ = fromEvent(document, 'scroll', { capture: true });
+
+    // Synchronous once debounced: the new layout has already settled.
+    merge(resize$, scroll$)
+      .pipe(
+        filter(() => panel.isPanelOpen()),
+        debounceTime(50),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => this.placePanel());
+  }
+
+  // #region Panel
+
+  // `dropdown-field`, `autocomplete-field` and `date-field` share one panel: the base closes it on a click
+  // outside the field, places it again on a scroll or resize while it is open, and keeps focus in the field
+  // while it is used. Each field adds only what opening and closing does to its own content.
+
+  /** The field's panel, for a field that opens one: the field itself, as a `FormidablePanelField`. */
+  // eslint-disable-next-line @typescript-eslint/class-literal-property-style
+  protected get panel(): FormidablePanelField | null {
+    return null;
+  }
+
+  /** Bind to the `mousedown` of the element that opens and closes the panel. Focus stays in the field. */
+  protected onPanelToggleMouseDown(event: MouseEvent): void {
+    event.preventDefault();
+    this.focus();
+    this.panel?.togglePanel(!this.panel.isPanelOpen());
+  }
+
+  /**
+   * Bind to the panel's `mousedown`. A press inside the panel leaves focus where it is, so picking from it is
+   * not leaving the field. A native `<select>` is the exception: it opens only on a press it keeps, and focus
+   * on it is still inside the field.
+   */
+  protected onPanelMouseDown(event: MouseEvent): void {
+    if (!(event.target instanceof HTMLSelectElement)) event.preventDefault();
+  }
+
+  /**
+   * Call once `isPanelOpen` has changed. An opening panel is placed, and scrolled into view where it or the
+   * field has left the viewport, once it has rendered open; a closing panel hands focus back to the field,
+   * because the element that holds it is about to hide and a hidden element drops its focus.
+   */
+  protected onPanelToggle(isOpen: boolean): void {
+    if (isOpen) {
+      afterNextRender(
+        () => {
+          this.placePanel();
+          if (this.panel?.isPanelOpen()) scrollIntoView(this.fieldRef, this.panel.panelRef());
+        },
+        { injector: this.injector }
+      );
+    } else if (this.panel?.panelRef()?.nativeElement.contains(document.activeElement)) {
+      this.focus();
     }
   }
+
+  /** Places the open panel once the render in flight has landed — after its option list changed, say. */
+  protected placePanelAfterRender(): void {
+    afterNextRender(() => this.placePanel(), { injector: this.injector });
+  }
+
+  private placePanel(): void {
+    if (this.panel?.isPanelOpen()) updatePanelPosition(this.fieldRef, this.panel.panelRef());
+  }
+
+  // #endregion
 }

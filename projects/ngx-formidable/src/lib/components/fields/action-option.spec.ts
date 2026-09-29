@@ -110,7 +110,7 @@ describe('action option', () => {
   async function search(text: string): Promise<void> {
     const input = fieldElement('autocomplete').querySelector('input') as HTMLInputElement;
 
-    input.dispatchEvent(new Event('focus'));
+    input.focus();
     fill(input, text);
 
     await settle(fixture, 200);
@@ -162,7 +162,7 @@ describe('action option', () => {
     it('is reached by the keyboard and runs its action on Enter', async () => {
       await settle(fixture);
       const input = fieldElement('dropdown').querySelector('input') as HTMLInputElement;
-      input.dispatchEvent(new Event('focus'));
+      input.focus();
       await settle(fixture);
 
       // Keydowns are listened for on the field wrapper, and only while the field is focused.
@@ -184,7 +184,7 @@ describe('action option', () => {
     it('is skipped by the type-ahead', async () => {
       await settle(fixture);
       const input = fieldElement('dropdown').querySelector('input') as HTMLInputElement;
-      input.dispatchEvent(new Event('focus'));
+      input.focus();
       await settle(fixture);
 
       // "a" starts no option's label but does start the action entry's.

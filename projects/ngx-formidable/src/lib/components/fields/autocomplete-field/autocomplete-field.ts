@@ -15,7 +15,6 @@ import {
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { replaceText } from '../../../helpers/input.helpers';
 import { applyActionOption, applyDefaultOption } from '../../../helpers/option.helpers';
-import { scrollIntoView, updatePanelPosition } from '../../../helpers/position.helpers';
 import {
   FieldDecoratorLayout,
   FieldDefaultOptionMode,
@@ -25,6 +24,7 @@ import {
   FORMIDABLE_OPTION_FIELD,
   FormidableActionOption,
   FormidableOption,
+  FormidablePanelField,
   FormidablePanelPosition
 } from '../../../models/formidable.model';
 import { FieldOption } from '../../field-option/field-option';
@@ -58,8 +58,6 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.navigatePanelOptions(event, this);
-  protected externalClickCallback = () => this.handleExternalClick();
-  protected windowResizeScrollCallback = () => this.updatePanelPosition();
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
   protected filterChangeSubject$ = new BehaviorSubject<string>('');
@@ -108,12 +106,6 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     }
 
     this.selectOnKeyboardFocus(this.inputRef().nativeElement, false);
-  }
-
-  private handleExternalClick(): void {
-    if (!this.isPanelOpen()) return;
-
-    this.togglePanel(false);
   }
 
   // #region FormidableField
@@ -227,8 +219,6 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     replaceText(this.inputRef().nativeElement, newOption.label!);
 
     this.setValue(newOption.value);
-    this.touch.emit();
-
     this.togglePanel(false);
   }
 
@@ -238,7 +228,6 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
 
     this.setHighlightedIndex(-1);
     this.setValue(null);
-    this.touch.emit();
   }
 
   protected onOptionsChanged(): void {
@@ -250,7 +239,7 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     // keep highlight consistent if panel is open
     if (this.isPanelOpen()) {
       this.reconcileHighlightAfterOptionsChanged();
-      this.updatePanelPosition();
+      this.placePanelAfterRender();
     }
   }
 
@@ -302,30 +291,20 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     transform: (position: FormidablePanelPosition | undefined) => position ?? this.defaultPanelPosition
   });
 
+  protected override get panel(): FormidablePanelField {
+    return this;
+  }
+
   /** Opens or closes the panel. */
   public togglePanel(isOpen: boolean): void {
     this.isPanelOpen.set(isOpen);
+    this.onPanelToggle(isOpen);
 
     if (isOpen) {
-      // Reads the panel's box, so it has to wait for the open state to render — a microtask would run
-      // before change detection. A timer lands after it even zonelessly: the `set` above notifies the
-      // scheduler, which queues its own timer from inside that call, so ours is behind it in the queue.
-      // Only while opening: closing reveals nothing, so scrolling then just moves the page under the user.
-      setTimeout(() => scrollIntoView(this.autocompleteRef(), this.panelRef()));
-
       this.highlightSelectedOption();
-      // Synchronous on purpose: a closed panel is `visibility: hidden`, not `display: none`, so it is
-      // already laid out and measurable. Deferring would flip it after paint, which is a visible jump.
-      updatePanelPosition(this.autocompleteRef(), this.panelRef());
     } else {
       this.setHighlightedIndex(-1);
     }
-  }
-
-  // Deferred, unlike the call in `togglePanel`: the option list changed, so the panel's height is only
-  // correct once change detection has rendered it. Queued behind the scheduler's own timer, as above.
-  private updatePanelPosition(): void {
-    setTimeout(() => updatePanelPosition(this.autocompleteRef(), this.panelRef()));
   }
 
   // #endregion
@@ -355,7 +334,7 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
         if (!this.isPanelOpen()) {
           this.togglePanel(true);
         } else {
-          this.updatePanelPosition();
+          this.placePanelAfterRender();
         }
       });
   }

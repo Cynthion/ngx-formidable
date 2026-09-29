@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { Editor, type } from '../../testing/dom';
+import { click, Editor, type } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { AutocompleteField } from './autocomplete-field/autocomplete-field';
 import { DateField } from './date-field/date-field';
@@ -378,16 +378,14 @@ describe('caret on focus entry', () => {
   });
 
   /**
-   * The one way a date field is re-entered with its mask half filled: focus moved onto its own panel,
-   * which is a blur it does not commit on, so the half-typed text is still there to come back to. It used
-   * to be wiped, because focus handed the display back to ngx-mask whatever the input was showing.
+   * Focus moving onto a date field's own calendar and back neither leaves nor enters the field, so the
+   * half-typed text is still there to come back to. It used to be wiped, because focus handed the display
+   * back to ngx-mask whatever the input was showing.
    */
-  it('a half-typed date survives a blur onto its own panel', async () => {
+  it('a half-typed date survives focus moving onto its own calendar and back', async () => {
     await build();
-    const field = fixture.debugElement.query((node) => node.nativeElement?.matches?.('formidable-date-field'))
-      .componentInstance as DateField;
     const element = editorOf('date');
-    const panel = fixture.nativeElement.querySelector('formidable-date-field .panel') as HTMLElement;
+    const date = fixture.nativeElement.querySelector('formidable-date-field') as HTMLElement;
 
     tabTo(element);
     await settle(fixture);
@@ -395,17 +393,13 @@ describe('caret on focus entry', () => {
     await settle(fixture);
     expect(element.value).toBe('15/01/____');
 
-    field.togglePanel(true);
-    panel.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    element.blur();
+    click(date.querySelector('.toggle')!);
+    await settle(fixture);
+    click(date.querySelector('.pika-select-month')!);
+    await settle(fixture);
+    element.focus();
     await settle(fixture);
 
     expect(element.value).toBe('15/01/____');
-
-    tabTo(element);
-    await settle(fixture);
-
-    expect(element.value).toBe('15/01/____');
-    expect(selectionOf(element)).toEqual([0, 5]);
   });
 });
