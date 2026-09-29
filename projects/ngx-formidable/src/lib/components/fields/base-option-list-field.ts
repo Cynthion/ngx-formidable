@@ -1,4 +1,4 @@
-import { contentChildren, Directive, effect, input, untracked } from '@angular/core';
+import { afterNextRender, contentChildren, Directive, effect, input, untracked } from '@angular/core';
 import { combineFieldOptions, trackProjectedOptions } from '../../helpers/option.helpers';
 import {
   FieldDefaultOptionMode,
@@ -43,13 +43,12 @@ export abstract class BaseOptionListField<T = string | null> extends BaseField<T
 
     // One source of truth for "the option list moved".
     //
-    // The `queueMicrotask` stays, and is the one thing signals do not remove. A projected option resolves
-    // its content — and therefore its label — in its own `ngAfterContentInit`, and an option inside an
-    // `@for` has not had its `required` inputs applied while this effect runs. Reading either now gives a
-    // wrong label or throws NG0950; a microtask lands after both.
+    // A projected option resolves its content — and therefore its label — in its own `ngAfterContentInit`,
+    // and an option inside an `@for` has not had its `required` inputs applied while this effect runs.
+    // Reading either now gives a wrong label or throws NG0950; the render hook lands after both.
     effect(() => {
       this.optionSources();
-      untracked(() => queueMicrotask(() => this.onOptionsChanged()));
+      untracked(() => afterNextRender(() => this.onOptionsChanged(), { injector: this.injector }));
     });
   }
 

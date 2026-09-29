@@ -1,15 +1,4 @@
-import {
-  Component,
-  computed,
-  ElementRef,
-  inject,
-  input,
-  model,
-  OnDestroy,
-  OnInit,
-  signal,
-  viewChild
-} from '@angular/core';
+import { Component, computed, ElementRef, inject, input, model, OnInit, signal, viewChild } from '@angular/core';
 import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
 import { isPrintableCharacter } from '../../../helpers/input.helpers';
 import { applyActionOption, applyDefaultOption } from '../../../helpers/option.helpers';
@@ -51,7 +40,7 @@ import { BaseOptionField } from '../base-option-field';
     }
   ]
 })
-export class DropdownField extends BaseOptionField implements OnInit, OnDestroy {
+export class DropdownField extends BaseOptionField<string | null> implements OnInit {
   readonly dropdownRef = viewChild.required<ElementRef<HTMLDivElement>>('dropdownRef');
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
@@ -85,7 +74,7 @@ export class DropdownField extends BaseOptionField implements OnInit, OnDestroy 
   }
 
   // Mirrors the template: there is nothing to open once the field is readonly or disabled.
-  readonly hasInFieldToggle = computed(() => !this.readonly() && !this.disabled());
+  readonly hasInFieldToggle = this.canEdit;
 
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
@@ -128,7 +117,7 @@ export class DropdownField extends BaseOptionField implements OnInit, OnDestroy 
   }
 
   public selectOption(option: FormidableOption): void {
-    if (option.disabled) return;
+    if (!this.canEdit() || option.disabled || option.readonly) return;
 
     // An action entry is not a value: the panel closes first, so whatever the action opens takes focus from
     // a field that has already settled, and nothing reaches the model.
@@ -230,7 +219,7 @@ export class DropdownField extends BaseOptionField implements OnInit, OnDestroy 
       return;
     }
 
-    if (isPrintableCharacter(event) && !this.readonly() && !this.disabled()) {
+    if (isPrintableCharacter(event) && this.canEdit()) {
       this._typedBuffer += event.key;
       this.typeahead$.next(this._typedBuffer);
 

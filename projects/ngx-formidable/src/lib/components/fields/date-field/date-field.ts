@@ -283,7 +283,7 @@ export class DateField extends BaseDateTimeField implements AfterViewInit, OnDes
   }
 
   // Mirrors the template: there is nothing to open once the field is readonly or disabled.
-  readonly hasInFieldToggle = computed(() => !this.readonly() && !this.disabled());
+  readonly hasInFieldToggle = this.canEdit;
 
   // #endregion
 
@@ -295,10 +295,13 @@ export class DateField extends BaseDateTimeField implements AfterViewInit, OnDes
    */
   public readonly unicodeTokenFormat = input(this.defaultUnicodeTokenFormat);
 
-  /** Commits a date as the user's pick, as the calendar and the arrow keys do. The same day is no change. */
+  /**
+   * Commits a date as the user's pick, as the calendar and the arrow keys do. The same day is no change. No-op
+   * while readonly or disabled.
+   */
   public selectDate(date: Date | null): void {
     // the panel can close without a change of date
-    if (this.isSameValue(this.value(), date)) return;
+    if (!this.canEdit() || this.isSameValue(this.value(), date)) return;
 
     this.setValue(date ? this.normalize(date) : null);
     this.togglePanel(false);

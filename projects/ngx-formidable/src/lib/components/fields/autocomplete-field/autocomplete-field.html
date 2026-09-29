@@ -20,7 +20,7 @@
       [attr.name]="name()"
       [attr.readonly]="readonly() ? '' : null"
       [attr.disabled]="disabled() ? '' : null"
-      [attr.tabindex]="readonly() || disabled() ? -1 : null"
+      [attr.tabindex]="canEdit() ? null : -1"
       [attr.aria-required]="required() || null"
       [attr.aria-invalid]="showErrors() || null"
       [attr.aria-describedby]="describedBy"

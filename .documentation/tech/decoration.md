@@ -111,7 +111,7 @@ The derived host classes and flags:
 
 **The adornment collapses with the label.** An adornment decorates the label, so once the label has moved over the field an adornment left in the row above would be stranded next to a field it no longer belongs to.
 
-**`isLabelAnimated` gates the transition** the shared `field-label` mixin declares, and is released one `requestAnimationFrame` after the first render. `NgModel` writes through a microtask, so the first render of **any** field with an initial value happens before it has one: the label renders resting and is corrected to floating a moment later, and that correction is nobody's state change. A frame and not a microtask, because every option field resolves its projected options in a `queueMicrotask` and only a frame is reliably after all of them.
+**`isLabelAnimated` gates the transition** the shared `field-label` mixin declares, and is released one `requestAnimationFrame` after the first render. `NgModel` writes through a microtask, so the first render of **any** field with an initial value happens before it has one: the label renders resting and is corrected to floating a moment later, and that correction is nobody's state change. A frame and not a render hook, because every option field resolves its projected options in a render hook of its own and only a frame is reliably after all of them.
 
 ## The Inset Measure
 

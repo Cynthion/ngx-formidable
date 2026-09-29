@@ -15,30 +15,30 @@
       role="combobox"
       class="wrapped-input"
       aria-haspopup="dialog"
-      [mask]="ngxMask()"
-      [showMaskTyped]="ngxMaskConfig.showMaskTyped"
-      [placeHolderCharacter]="ngxMaskConfig.placeHolderCharacter"
-      [leadZeroDateTime]="ngxMaskConfig.leadZeroDateTime"
-      [dropSpecialCharacters]="ngxMaskConfig.dropSpecialCharacters"
       [id]="fieldId"
       [placeholder]="placeholder()"
       [attr.name]="name()"
       [attr.readonly]="readonly() ? '' : null"
       [attr.disabled]="disabled() ? '' : null"
-      [attr.tabindex]="readonly() || disabled() ? -1 : null"
+      [attr.tabindex]="canEdit() ? null : -1"
       [attr.aria-required]="required() || null"
       [attr.aria-invalid]="showErrors() || null"
       [attr.aria-describedby]="describedBy"
       [attr.aria-readonly]="readonly() || null"
       [attr.aria-expanded]="isPanelOpen()"
       [attr.aria-controls]="panelId"
+      [mask]="ngxMask()"
+      [showMaskTyped]="ngxMaskConfig.showMaskTyped"
+      [placeHolderCharacter]="ngxMaskConfig.placeHolderCharacter"
+      [leadZeroDateTime]="ngxMaskConfig.leadZeroDateTime"
+      [dropSpecialCharacters]="ngxMaskConfig.dropSpecialCharacters"
       (mousedown)="onEditorMouseDown()"
       (mouseup)="rememberClickedCaret(inputRef)"
       (click)="restoreClickedCaret(inputRef)"
       (input)="onInput()" />
 
     <!-- Toggle -->
-    @if (!readonly() && !disabled()) {
+    @if (canEdit()) {
     <span
       #toggleRef
       class="toggle"

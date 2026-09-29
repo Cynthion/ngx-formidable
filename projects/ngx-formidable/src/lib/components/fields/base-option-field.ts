@@ -22,7 +22,7 @@ export abstract class BaseOptionField<T = string | null> extends BaseOptionListF
   // The options the highlight walks — the rendered list, which `autocomplete-field` filters.
   protected abstract readonly activeOptions: Signal<FormidableOption[]>;
 
-  /** Commits an option, as a click on it does. */
+  /** Commits an option, as a click on it does. No-op for a readonly or disabled option, or field. */
   public abstract selectOption(option: FormidableOption): void;
 
   // The value the selection claims the highlight for. `null` for a multi-select field, which has no single
@@ -125,8 +125,8 @@ export abstract class BaseOptionField<T = string | null> extends BaseOptionListF
     if (nextIndex < 0) nextIndex = 0;
     if (nextIndex >= count) nextIndex = count - 1;
 
-    // skip disabled
-    if (options[nextIndex]?.disabled) {
+    // skip what cannot be picked
+    if (options[nextIndex]?.disabled || options[nextIndex]?.readonly) {
       const fixed = getNextAvailableOptionIndex(nextIndex, options, 'down');
       nextIndex = fixed >= 0 ? fixed : getNextAvailableOptionIndex(nextIndex, options, 'up');
     }
