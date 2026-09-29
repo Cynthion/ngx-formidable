@@ -1,5 +1,5 @@
 import { bindField, BoundField } from '../../testing/bind-field';
-import { click } from '../../testing/dom';
+import { click, type } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
@@ -10,14 +10,15 @@ import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
  * A `date-field` inside a `<form>` with a date typed but not yet committed, which happens on the blur, and
- * focus on its calendar's month select.
+ * focus on its calendar's month select. Typed rather than written, because only an edit of the user's fires
+ * the native `change` as the input loses focus.
  */
 async function setup(): Promise<BoundField & { select: HTMLSelectElement }> {
   const field = await bindField('date', 'template-driven', { inputs: { unicodeTokenFormat: 'dd . MM . yyyy' } });
   const input = field.element.querySelector('input')!;
 
   input.focus();
-  input.value = '12 . 05 . 2024';
+  type(input, '12052024');
   click(field.element.querySelector('.toggle')!);
   await settle(field.fixture);
 

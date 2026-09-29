@@ -79,7 +79,7 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 | The classic APIs ignore `updateOn` for a custom control, forward `required` everywhere but under `ngModel`, and never forward `readonly` or `name`                          |  19, 20   |
 | `ngModel`, `[formControl]` and `formControlName` attach no directive validator — `required`, `minlength` — to a custom control's control, as of 22.2                        |    19     |
 | A classic error reaches a custom control as `{ kind, context }`, with no `message`                                                                                          |    20     |
-| `transformedValue` reports parse errors to all three APIs                                                                                                                   |    24     |
+| `transformedValue` reports parse errors to all three APIs. `ngModel` and `[formControl]` hand one to the field only on the host's next check                                |    24     |
 | A Vest suite is a Standard Schema, and an async Vest test does not surface through it                                                                                       |    26     |
 
 ### Accepted Compromises
@@ -101,30 +101,18 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 
 Found by the architecture review and the test harness. Each is fixed in the phase that rewrites its code and proven by a behaviour spec there, rather than patched in code that is about to go.
 
-| Id  | Defect                                                                                                                                      | Phase |
-| :-- | :------------------------------------------------------------------------------------------------------------------------------------------ | :---: |
-| D4  | `toggle-field`'s `offLabel` does not fall back to `onLabel` as documented                                                                   |  25   |
-| D6  | A readonly `slider-field` still moves its thumb on the arrow keys                                                                           |  25   |
-| D7  | An invalid `unicodeTokenFormat` is caught on init only, and changing it later drops the fallback                                            |  24   |
-| D8  | Pikaday commits typed text through its own `change` listener, even when focus only moved onto the calendar — not yet confirmed in a browser |  24   |
+| Id  | Defect                                                                    | Phase |
+| :-- | :------------------------------------------------------------------------ | :---: |
+| D4  | `toggle-field`'s `offLabel` does not fall back to `onLabel` as documented |  25   |
+| D6  | A readonly `slider-field` still moves its thumb on the arrow keys         |  25   |
 
 ---
 
 ## Library Phases
 
-### Phase 24 — Date And Time Fields
-
-**Depends On**: nothing.
-
-- **One Base**: `date-field` and `time-field` share token format validation, masking, segment stepping and parsing.
-- **Transformed Value**: typed text goes through `transformedValue`. Unparseable text reports a `parse` error and leaves the model alone, empty text is `null`, and the error reaches every forms API.
-- **Pikaday**: no longer handed the input as its `field`, destroyed with the component, and without the `MutationObserver` that repeats `onDraw`.
-- **Specs**: `date-time-field.spec.ts` asserts through a host.
-- **Closes**: D7, and D8 once a browser confirms it.
-
 ### Phase 25 — Field Symmetry Sweep
 
-**Depends On**: Phase 24.
+**Depends On**: nothing.
 
 - **Side By Side**: all eleven fields compared for input order, provider block, template attribute order and `tabindex`, and brought in line with [`impl/components.md`](components.md).
 - **One Edit Guard**: a `canEdit` computed on the base guards every public mutator — `toggle()`, `selectValue()`, `selectDate()`, `selectTime()`, `selectOption()` — and the keyboard and pointer guards.

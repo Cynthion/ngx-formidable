@@ -32,13 +32,13 @@ import { getFieldTarget } from './form.helpers';
 export class NgxFormidableFieldValidate implements AsyncValidator, OnInit {
   private readonly formDirective = inject(NgxFormidableForm, { optional: true, skipSelf: true });
   private readonly injector = inject(Injector);
-  private readonly isLibraryField = !!inject(FORMIDABLE_FIELD, { self: true, optional: true });
 
   ngOnInit(): void {
-    if (!this.isLibraryField) return;
+    // Both resolved here rather than injected: `NgModel` collects this directive as one of its validators in its
+    // own constructor, so asking for it from this one's would close the loop and throw NG0200 — and a date or
+    // time field asks for `NgModel` from its own constructor, to hand it parse errors.
+    if (!this.injector.get(FORMIDABLE_FIELD, null, { self: true })) return;
 
-    // Resolved here rather than injected: `NgModel` collects this directive as one of its validators in its
-    // own constructor, so asking for it from this one's would close the loop and throw NG0200.
     const ngModel = this.injector.get(NgModel, null, { self: true });
 
     ngModel?.control.addAsyncValidators((control) => this.validate(control));

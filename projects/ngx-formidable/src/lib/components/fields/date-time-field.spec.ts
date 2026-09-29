@@ -1,5 +1,5 @@
 import { FormidableEmptyHint } from '../../models/formidable.model';
-import { bindField, BoundField } from '../../testing/bind-field';
+import { bindField, BindFieldOptions, BoundField, FORMS_APIS, FormsApi } from '../../testing/bind-field';
 import { press, type } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
@@ -40,16 +40,28 @@ function selection(input: HTMLInputElement): [number | null, number | null] {
   return [input.selectionStart, input.selectionEnd];
 }
 
-/** Binds one field through the forms API. `inputs` are the ones a case sets or changes later. */
+/**
+ * Binds one field through a forms API, `[formControl]` unless `bind` names another. `inputs` are the ones a
+ * case sets or changes later.
+ */
 async function setup(
   kind: 'date' | 'time',
   unicodeTokenFormat: string,
   emptyHint: FormidableEmptyHint,
-  inputs: Record<string, unknown> = {}
+  inputs: Record<string, unknown> = {},
+  bind: Omit<BindFieldOptions, 'inputs'> & { api?: FormsApi } = {}
 ): Promise<MaskedField> {
-  const field = await bindField(kind, 'reactive', { inputs: { unicodeTokenFormat, emptyHint, ...inputs } });
+  const { api = 'reactive', ...options } = bind;
+  const field = await bindField(kind, api, { ...options, inputs: { unicodeTokenFormat, emptyHint, ...inputs } });
 
   return { ...field, input: field.element.querySelector('input') as HTMLInputElement };
+}
+
+/** The messages a decorated field renders. */
+function messages(field: MaskedField): string[] {
+  const root = field.fixture.nativeElement as HTMLElement;
+
+  return Array.from(root.querySelectorAll('formidable-field-errors .error'), (error) => error.textContent!.trim());
 }
 
 describe('masked date/time field', () => {
@@ -98,7 +110,7 @@ describe('masked date/time field', () => {
       expect(input.value).toBe('12 . 05 . 2024');
     });
 
-    it('restores the hint on blur when the value is incomplete', async () => {
+    it('keeps an incomplete date on blur, uncommitted', async () => {
       const { fixture, input, value } = await setup('date', 'dd . MM . yyyy', 'format');
 
       input.focus();
@@ -106,7 +118,7 @@ describe('masked date/time field', () => {
       input.blur();
       await settle(fixture);
 
-      expect(input.value).toBe('dd . MM . yyyy');
+      expect(input.value).toBe('1_ . __ . ____');
       expect(value()).toBeNull();
     });
 
@@ -182,7 +194,7 @@ describe('masked date/time field', () => {
       expect(state(input)).toBe('14 : __|2');
     });
 
-    it('commits the parsed time on blur and restores the hint when incomplete', async () => {
+    it('commits the parsed time on blur and keeps it over an incomplete one', async () => {
       const { fixture, input, value, dirty } = await setup('time', 'HH : mm', 'underscores');
 
       input.focus();
@@ -194,8 +206,7 @@ describe('masked date/time field', () => {
       await settle(fixture);
 
       expect(dirty()).toBe(true);
-      expect((value() as Date | null)?.getHours()).toBe(14);
-      expect((value() as Date | null)?.getMinutes()).toBe(30);
+      expect(value()).toEqual(new Date(1970, 0, 1, 14, 30));
 
       input.focus();
       input.setSelectionRange(0, input.value.length);
@@ -203,8 +214,8 @@ describe('masked date/time field', () => {
       input.blur();
       await settle(fixture);
 
-      expect(input.value).toBe('__ : __');
-      expect(value()).toBeNull();
+      expect(input.value).toBe('9_ : __');
+      expect(value()).toEqual(new Date(1970, 0, 1, 14, 30));
     });
   });
 
@@ -237,6 +248,106 @@ describe('masked date/time field', () => {
 
       expect(input.value).toBe('2024-05-12');
     });
+  });
+
+  describe('unsupported unicodeTokenFormat', () => {
+    for (const { kind, value, format, unsupported, fallback } of [
+      {
+        kind: 'date',
+        value: new Date(2024, 4, 12),
+        format: 'dd . MM . yyyy',
+        unsupported: 'dd . MM . qqqq',
+        fallback: '2024-05-12'
+      },
+      { kind: 'time', value: new Date(1970, 0, 1, 9, 5), format: 'HH : mm', unsupported: 'HH : qq', fallback: '09.05' }
+    ] as const) {
+      it(`warns and falls back to the default ${kind} format when it is set after init`, async () => {
+        const warn = spyOn(console, 'warn');
+        const { input, set } = await setup(kind, format, 'underscores', {}, { value });
+
+        await set('unicodeTokenFormat', unsupported);
+
+        expect(input.value).toBe(fallback);
+        expect(warn).toHaveBeenCalledWith(jasmine.stringContaining(`"${unsupported}"`));
+      });
+    }
+  });
+
+  describe('unparseable text', () => {
+    const cases = [
+      {
+        kind: 'date',
+        format: 'dd . MM . yyyy',
+        held: new Date(2024, 4, 12),
+        partial: '1_ . __ . ____',
+        complete: '13052024',
+        parsed: new Date(2024, 4, 13)
+      },
+      {
+        kind: 'time',
+        format: 'HH : mm',
+        held: new Date(1970, 0, 1, 9, 5),
+        partial: '1_ : __',
+        complete: '1430',
+        parsed: new Date(1970, 0, 1, 14, 30)
+      }
+    ] as const;
+
+    /** Types over the whole text and leaves, which is when typing commits. */
+    async function typeAndLeave(field: MaskedField, text: string): Promise<void> {
+      field.input.focus();
+      field.input.setSelectionRange(0, field.input.value.length);
+      type(field.input, text);
+      field.input.blur();
+      await settle(field.fixture);
+    }
+
+    for (const api of FORMS_APIS) {
+      for (const { kind, format, held, partial, complete, parsed } of cases) {
+        describe(`${kind} field bound ${api}`, () => {
+          function bindHeld(): Promise<MaskedField> {
+            return setup(kind, format, 'underscores', {}, { api, value: held, decorated: true });
+          }
+
+          it('reports a parse error, keeps the text and leaves the model alone', async () => {
+            const field = await bindHeld();
+
+            await typeAndLeave(field, '1');
+
+            expect(field.input.value).toBe(partial);
+            expect(field.value()).toEqual(held);
+            expect(field.dirty()).toBe(false);
+            expect(messages(field)).toEqual(['parse']);
+            expect(field.input.getAttribute('aria-invalid')).toBe('true');
+          });
+
+          it('drops the parse error once the text parses', async () => {
+            const field = await bindHeld();
+
+            await typeAndLeave(field, '1');
+            await typeAndLeave(field, complete);
+
+            expect(field.value()).toEqual(parsed);
+            expect(messages(field)).toEqual([]);
+            expect(field.input.getAttribute('aria-invalid')).toBeNull();
+          });
+
+          it('commits emptied text as null, with no parse error', async () => {
+            const field = await bindHeld();
+
+            await typeAndLeave(field, '1');
+
+            field.input.focus();
+            clearText(field.input);
+            field.input.blur();
+            await settle(field.fixture);
+
+            expect(field.value()).toBeNull();
+            expect(messages(field)).toEqual([]);
+          });
+        });
+      }
+    }
   });
 
   describe('clearing the text', () => {
@@ -528,6 +639,32 @@ describe('masked date/time field', () => {
 
       expect(picker.querySelectorAll('td.is-disabled').length).toBe(0);
       expect(years()).toBe(5);
+    });
+
+    it('names its month and year selects, and names them again on every redraw', async () => {
+      const { picker, set } = await setupCalendar();
+
+      const names = () => Array.from(picker.querySelectorAll('select'), (select) => select.name);
+
+      expect(names()).toEqual([jasmine.stringMatching(/-month$/), jasmine.stringMatching(/-year$/)]);
+
+      await set('numberOfMonths', 2);
+
+      expect(names()).toEqual([
+        jasmine.stringMatching(/-month-0$/),
+        jasmine.stringMatching(/-year-0$/),
+        jasmine.stringMatching(/-month-1$/),
+        jasmine.stringMatching(/-year-1$/)
+      ]);
+    });
+
+    it('tears its calendar down with the field', async () => {
+      const { fixture, picker } = await setupCalendar();
+      const calendar = picker.querySelector('.pika-single')!;
+
+      fixture.destroy();
+
+      expect(calendar.parentNode).toBeNull();
     });
   });
 });
