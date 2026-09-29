@@ -7,41 +7,25 @@ import {
   ElementRef,
   inject,
   input,
-  linkedSignal,
-  model,
   OnDestroy,
-  OnInit,
   signal,
   untracked,
   viewChild
 } from '@angular/core';
-import { addDays, format, isEqual } from 'date-fns';
-import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
+import { addDays, format } from 'date-fns';
+import { NgxMaskDirective } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { filter, fromEvent, merge, takeUntil } from 'rxjs';
 import { FieldToggleIcon } from '../../../directives/field-toggle-icon';
-import {
-  findSegmentAtCaret,
-  formatToDateTokenMask,
-  isValidDateObject,
-  normalizeTimePart,
-  parseUnicodeDateTime,
-  stepDateTimeUnit,
-  UNICODE_DATE_TOKENS,
-  validateUnicodeDateTokenFormat
-} from '../../../helpers/format.helpers';
-import { renderEmptyMask } from '../../../helpers/input.helpers';
-import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../../helpers/mask.helpers';
+import { normalizeTimePart, UNICODE_DATE_TOKENS } from '../../../helpers/format.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
-  FieldDecoratorLayout,
   FORMIDABLE_DEFAULTS,
   FORMIDABLE_FIELD,
-  FormidableEmptyHint,
   FormidablePanelField,
   FormidablePanelPosition
 } from '../../../models/formidable.model';
-import { BaseField } from '../base-field';
+import { BaseDateTimeField } from '../base-date-time-field';
 
 /**
  * A date entered three ways over one value: typed into a mask derived from `unicodeTokenFormat`, picked from a
@@ -69,9 +53,8 @@ import { BaseField } from '../base-field';
     }
   ]
 })
-export class DateField extends BaseField<Date | null> implements OnInit, AfterViewInit, OnDestroy {
+export class DateField extends BaseDateTimeField implements AfterViewInit, OnDestroy {
   readonly dateRef = viewChild.required<ElementRef<HTMLDivElement>>('dateRef');
-  readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
   readonly pickerRef = viewChild<ElementRef<HTMLDivElement>>('pickerRef');
 
   private readonly projectedToggleIcon = contentChild(FieldToggleIcon);
@@ -82,11 +65,11 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'];
 
-  private maskChar = '0';
-  private readonly defaultUnicodeTokenFormat = 'yyyy-MM-dd';
+  protected readonly defaultUnicodeTokenFormat = 'yyyy-MM-dd';
+  protected readonly unicodeTokens = UNICODE_DATE_TOKENS;
 
   private readonly staticOptions: PikadayOptions = {
-    field: undefined, // not supported
+    field: undefined, // not supported: the field parses and formats its own text
     trigger: undefined, // not supported
     bound: false, // not supported
     position: undefined, // not supported
@@ -101,16 +84,12 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
     blurFieldOnSelect: false, // not supported
     formatStrict: false, // not supported
     keyboardInput: false, // not supported
-    toString: (date: Date, unicodeTokenFormat: string): string => this.onFormat(date, unicodeTokenFormat),
-    parse: (dateString: string, unicodeTokenFormat: string): Date | null =>
-      this.onParse(dateString, unicodeTokenFormat),
-    onSelect: (date: Date) => this.selectDate(date),
+    onSelect: (date: Date) => this.commit(date),
     onDraw: () => this.decoratePikadayControls()
   };
 
   private readonly defaultOptions: PikadayOptions = {
     ariaLabel: undefined,
-    format: this.defaultUnicodeTokenFormat,
     defaultDate: undefined,
     setDefaultDate: true,
     firstDay: 1,
@@ -153,7 +132,7 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
 
     // Every Pikaday passthrough input, which is exactly what `updateOptions()` reads. It is guarded on the
     // picker rather than skipping the first run: the instance is built in `ngAfterViewInit`, because it
-    // needs `pickerRef` as its container, and there is nothing to reconfigure before that.
+    // needs `pickerRef` to live in, and there is nothing to reconfigure before that.
     onSignalChange(
       () => this.pikadayOptionInputs(),
       () => {
@@ -161,19 +140,17 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
       }
     );
 
-    // Renders the model, and renders it again in a changed format.
+    // The calendar shows the model's date.
     afterRenderEffect(() => {
       const date = this.value();
 
-      this.tokenFormat();
-      untracked(() => this.render(date));
+      untracked(() => this.picker?.setDate(date, true)); // silent: the model already holds it
     });
   }
 
   // Read as one list so the effect above depends on all of them.
   private pikadayOptionInputs(): unknown[] {
     return [
-      this.tokenFormat(),
       this.ariaLabel(),
       this.defaultDate(),
       this.setDefaultDate(),
@@ -190,19 +167,6 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
       this.enableSelectionDaysInNextAndPreviousMonths(),
       this.numberOfMonths()
     ];
-  }
-
-  override ngOnInit(): void {
-    super.ngOnInit();
-
-    if (!validateUnicodeDateTokenFormat(this.unicodeTokenFormat())) {
-      console.warn(
-        `[ngx-formidable] Invalid unicodeTokenFormat: "${this.unicodeTokenFormat()}". ` +
-          `Falling back to default "${this.defaultUnicodeTokenFormat}". Supported tokens: ${UNICODE_DATE_TOKENS.join(', ')}.`
-      );
-
-      this.tokenFormat.set(this.defaultUnicodeTokenFormat);
-    }
   }
 
   override ngAfterViewInit(): void {
@@ -228,30 +192,13 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
       .subscribe(() => this.focus());
   }
 
-  // Typing commits on blur — a half-typed date is not a date — so the value is committed through
-  // `selectDate`. Wiping the text is the exception: it commits at once, or the cleared date would stay the
-  // model's and `stepSegment` would keep stepping from it.
-  protected onInput(): void {
-    if (this.value() && this.isInputCleared) this.setDate(null);
-  }
+  override ngOnDestroy(): void {
+    this.picker?.destroy();
 
-  protected doOnFocusChange(isFocused: boolean): void {
-    // A readonly field has nothing to type into: it neither hands its display to ngxMask nor commits on blur.
-    if (this.readonly()) return;
-
-    // hand the empty display over to ngxMask while focused (see renderEmpty)
-    if (isFocused) {
-      if (this.showsNothingTyped) this.renderEmpty();
-      this.selectOnKeyboardFocus(this.inputRef().nativeElement, true);
-      return;
-    }
-
-    // try set date on blur
-    this.trySetDateFromInput(this.inputRef().nativeElement.value);
+    super.ngOnDestroy();
   }
 
   private handleKeydown(event: KeyboardEvent): boolean {
-    const date = this.picker?.getDate();
     const isOpen = this.isPanelOpen();
 
     switch (event.key) {
@@ -259,9 +206,9 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
       case 'Tab':
       case 'Enter':
         if (this.isPanelOpen()) this.togglePanel(false);
-        // Commit what's in the input — it reflects both typing and calendar
-        // arrow-navigation — never the picker's default cursor (which is "today").
-        this.trySetDateFromInput(this.inputRef().nativeElement.value);
+        // Commit what's in the input — it reflects both typing and calendar arrow-navigation — never the
+        // picker's default cursor (which is "today").
+        this.commitText();
         // `Tab` still moves on, and an `Escape` with no panel to close belongs to whatever holds the field.
         return event.key === 'Enter' || (event.key === 'Escape' && isOpen);
       case 'ArrowDown':
@@ -271,9 +218,8 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
           this.togglePanel(true);
         } else if (!this.isPanelOpen()) {
           this.stepSegment(-1);
-        } else if (date) {
-          const nextDate = addDays(date, 7);
-          this.picker?.setDate(nextDate, true); // silent update
+        } else {
+          this.moveCalendar(7);
         }
         return true;
       case 'ArrowUp':
@@ -281,55 +227,46 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
           this.togglePanel(false);
         } else if (!this.isPanelOpen()) {
           this.stepSegment(1);
-        } else if (date) {
-          const nextDate = addDays(date, -7);
-          this.picker?.setDate(nextDate, true); // silent update
+        } else {
+          this.moveCalendar(-7);
         }
         return true;
       case 'ArrowLeft':
-        if (this.isPanelOpen() && date) {
-          const nextDate = addDays(date, -1);
-          this.picker?.setDate(nextDate, true); // silent update
-        }
         // While the calendar is open, the horizontal arrows move it instead of the caret.
+        if (isOpen) this.moveCalendar(-1);
         return isOpen;
       case 'ArrowRight':
-        if (this.isPanelOpen() && date) {
-          const nextDate = addDays(date, 1);
-          this.picker?.setDate(nextDate, true); // silent update
-        }
+        if (isOpen) this.moveCalendar(1);
         return isOpen;
       default:
         return false;
     }
   }
 
-  // Steps the date part under the caret by one, and leaves that part selected so repeated arrows keep to
-  // it — and so the next digit typed replaces it.
-  //
-  // The input text is what gets stepped, not the model: it also carries what was typed but not yet
-  // committed. An empty field is seeded first, so arrows alone can fill it.
-  private stepSegment(direction: 1 | -1): void {
-    const input = this.inputRef().nativeElement;
-    const segment = findSegmentAtCaret(this.tokenFormat(), input.selectionStart ?? 0);
-    if (!segment) return;
+  // Moves the calendar's cursor without committing, and shows the date it lands on in the input, which is
+  // what `Enter` commits.
+  private moveCalendar(days: number): void {
+    const date = this.picker?.getDate();
+    if (!this.picker || !date) return;
 
-    const base =
-      this.onParse(input.value, this.tokenFormat()) ??
-      this.value() ??
-      this.getDefaultDate(this.minDate(), this.maxDate(), this.defaultDate());
+    this.picker.setDate(addDays(date, days), true); // silent: moving is not a pick
+    this.inputRef().nativeElement.value = format(this.picker.getDate()!, this.tokenFormat());
+  }
 
-    const nextDate = normalizeTimePart(stepDateTimeUnit(base, segment.unit, direction));
-    if (this.isOutOfRange(nextDate)) return;
+  protected normalize(value: Date): Date {
+    return normalizeTimePart(value);
+  }
 
-    this.setDate(nextDate);
+  protected stepSeed(): Date {
+    return this.getDefaultDate(this.minDate(), this.maxDate(), this.defaultDate());
+  }
 
-    // setDate re-renders the input from a setTimeout of its own; ours has to land after it
-    setTimeout(() => input.setSelectionRange(segment.start, segment.end));
+  protected select(value: Date | null): void {
+    this.selectDate(value);
   }
 
   // A step is refused rather than clamped, so arrows can never reach a date the calendar forbids.
-  private isOutOfRange(date: Date): boolean {
+  protected override isOutOfRange(date: Date): boolean {
     const minDate = this.minDate();
     const maxDate = this.maxDate();
 
@@ -341,26 +278,12 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
 
   // #region FormidableField
 
-  /** The picked date, at midnight once the user picked it, or `null` for none. */
-  public readonly value = model<Date | null>(null);
-
-  // A pick builds a new `Date`, so the same day is the same value.
-  protected override isSameValue(a: Date | null, b: Date | null): boolean {
-    return a === b || (!!a && !!b && isEqual(normalizeTimePart(a), normalizeTimePart(b)));
-  }
-
   get fieldRef(): ElementRef<HTMLElement> {
     return this.dateRef() as ElementRef<HTMLElement>;
   }
 
-  protected override get focusElement(): HTMLElement {
-    return this.inputRef().nativeElement;
-  }
-
   // Mirrors the template: there is nothing to open once the field is readonly or disabled.
   readonly hasInFieldToggle = computed(() => !this.readonly() && !this.disabled());
-
-  decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
   // #endregion
 
@@ -371,65 +294,13 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
    * keys step. An unrecognized format warns and falls back to the default.
    */
   public readonly unicodeTokenFormat = input(this.defaultUnicodeTokenFormat);
-  /** What an empty, unfocused field shows: underscores (default, "____-__-__") or the `unicodeTokenFormat` ("dd . MM . yyyy"). */
-  public readonly emptyHint = input<FormidableEmptyHint>('underscores');
-
-  // The format actually in force. A `linkedSignal` and not a `computed`, because the fallback also warns —
-  // which a computed must not do — so `ngOnInit` writes it once for an unrecognized format.
-  protected readonly tokenFormat = linkedSignal(() => this.unicodeTokenFormat());
-
-  protected readonly ngxMask = computed(() => formatToDateTokenMask(this.tokenFormat(), this.maskChar));
-
-  protected ngxMaskConfig: Pick<
-    NgxMaskConfig,
-    'showMaskTyped' | 'leadZeroDateTime' | 'dropSpecialCharacters' | 'placeHolderCharacter'
-  > = {
-    showMaskTyped: true,
-    // Bound rather than inherited: the empty display is compared against character by character, so a
-    // global `provideNgxMask` must not be able to change it out from under that.
-    placeHolderCharacter: DEFAULT_PLACEHOLDER_CHARACTER,
-    leadZeroDateTime: false, // must be enforced by unicodeTokenFormat, if required
-    dropSpecialCharacters: false // keep special characters like '-', '.' or '/' in the input
-  };
-
-  // An empty date field always shows its `emptyHint` in the value area, so a label can never rest there.
-  protected override readonly showsEmptyValueHint = signal(true);
-
-  // ngxMask's own empty display: the mask with every slot as its placeholder character.
-  private get maskPlaceholder(): string {
-    return this.ngxMask().replace(/\w/g, this.maskPlaceholderCharacter);
-  }
-
-  // The resting display of an empty field for the current `emptyHint`: the format string, or
-  // `maskPlaceholder`.
-  private get emptyDisplay(): string {
-    return this.emptyHint() === 'format' ? this.tokenFormat() : this.maskPlaceholder;
-  }
-
-  // ngxMask either empties the input outright or leaves the slots it renders for a focused empty field.
-  private get isInputCleared(): boolean {
-    const value = this.inputRef().nativeElement.value;
-
-    return value === '' || value === this.maskPlaceholder;
-  }
-
-  // Whether the input is showing one of its two empty displays rather than characters somebody typed, which
-  // is the only display focus may hand over to ngxMask.
-  private get showsNothingTyped(): boolean {
-    return this.isInputCleared || this.inputRef().nativeElement.value === this.emptyDisplay;
-  }
-
-  // Shows the `emptyHint` at rest, but lets ngxMask own the text while focused.
-  private renderEmpty(): void {
-    renderEmptyMask(this.inputRef().nativeElement, this.emptyDisplay, this.maskPlaceholder, this.isFieldFocused());
-  }
 
   /** Commits a date as the user's pick, as the calendar and the arrow keys do. The same day is no change. */
   public selectDate(date: Date | null): void {
     // the panel can close without a change of date
     if (this.isSameValue(this.value(), date)) return;
 
-    this.setValue(date ? normalizeTimePart(date) : null);
+    this.setValue(date ? this.normalize(date) : null);
     this.togglePanel(false);
   }
 
@@ -488,7 +359,6 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
     const dynamicOptions: PikadayOptions = {
       ...this.defaultOptions,
       ariaLabel: this.ariaLabel() ?? this.defaultOptions.ariaLabel,
-      format: this.tokenFormat(),
       defaultDate: viewDate,
       setDefaultDate: this.setDefaultDate() ?? this.defaultOptions.setDefaultDate,
       firstDay: this.firstDay() ?? this.defaultOptions.firstDay,
@@ -508,16 +378,15 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
       numberOfMonths: this.numberOfMonths() ?? this.defaultOptions.numberOfMonths
     };
 
-    const updatedOptions: PikadayOptions = {
-      ...this.staticOptions,
-      ...dynamicOptions,
-      field: this.inputRef().nativeElement, // must be set to use onFormat/onParse
-      bound: false,
-      container: this.pickerRef()?.nativeElement
-    };
+    const updatedOptions: PikadayOptions = { ...this.staticOptions, ...dynamicOptions };
 
     if (!this.picker) {
       this.picker = new Pikaday(updatedOptions);
+
+      // Pikaday places its calendar only beside a `field`. The draw it ran while being built was of a
+      // calendar nothing held yet, so its selects are named once it is placed.
+      this.pickerRef()!.nativeElement.appendChild(this.picker.el);
+      this.decoratePikadayControls();
       return;
     }
 
@@ -564,20 +433,6 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
 
   // #region Pikaday
 
-  /** Uses the selected Date, formats it and writes the resulting string into the field. */
-  private onFormat(date: Date | null, unicodeTokenFormat: string): string {
-    const formattedDate = date ? format(date, unicodeTokenFormat) : '';
-
-    return formattedDate;
-  }
-
-  /** Uses the entered string, parses it and writes/selects the resulting Date into the picker. */
-  private onParse(dateString: string, unicodeTokenFormat: string): Date | null {
-    return parseUnicodeDateTime(dateString, unicodeTokenFormat);
-  }
-
-  // #endregion
-
   private getDefaultDate(minDate?: Date, maxDate?: Date, initialDate: Date = new Date()): Date {
     const initialDateMs = initialDate.getTime();
 
@@ -590,58 +445,6 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
     return initialDate;
   }
 
-  private trySetDateFromInput(value: Date | null | string): void {
-    if (value === null || value === undefined || value === '') {
-      this.setDate(null);
-      return;
-    }
-
-    if (isValidDateObject(value)) {
-      this.setDate(value as Date);
-      return;
-    }
-
-    if (typeof value === 'string') {
-      const trimmed = value.trim();
-      if (trimmed.length === 0) {
-        this.setDate(null);
-        return;
-      }
-
-      const parsedDate = this.onParse(trimmed, this.tokenFormat());
-
-      if (parsedDate) {
-        this.setDate(parsedDate);
-        return;
-      }
-    }
-
-    this.setDate(null);
-  }
-
-  // Commits what the user typed or stepped to, and renders the model again even where that is no change:
-  // text that parsed to nothing, or to the day already held, still has to give way to the model.
-  private setDate(date: Date | null): void {
-    this.selectDate(date);
-    this.render(this.value());
-  }
-
-  private render(date: Date | null): void {
-    // Waits for the ngxMask directive to initialize on the input, which it does across a full task —
-    // a microtask would land before it. `stepSegment` restores the caret from a timer queued behind
-    // this one, so this must stay a macrotask.
-    setTimeout(() => {
-      this.picker?.setDate(date, true); // silent: the model already holds it
-
-      // ngxMask leaves an empty input untouched, so render the empty state ourselves
-      if (date == null) {
-        this.renderEmpty();
-      }
-    });
-  }
-
-  // #region Pikaday fix
-
   // Developer Note:
   // Pikaday’s internal <select> elements for month/year do not include `id` or `name` attributes by
   // default. This triggers Chrome’s "A form field element should have an id or name" warning during
@@ -650,13 +453,10 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
   //   - Improves accessibility (screen readers can target the controls).
   //   - Produces predictable, unique IDs for easier testing/debugging.
   //
-  // We hook into Pikaday’s `onDraw` (and run once on init) to set both `id` and `name` based on the field’s
-  // `name`/`fieldId`. A MutationObserver is also attached to catch any DOM rebuilds outside of `onDraw`.
+  // Pikaday rebuilds its whole calendar on every draw and calls `onDraw` after each one, so that hook sets
+  // both `id` and `name` from the field's `name`/`fieldId`.
   //
   // This is a cosmetic/accessibility fix — it does not affect Pikaday’s behavior.
-
-  private mo?: MutationObserver;
-
   private decoratePikadayControls(): void {
     const host = this.pickerRef()?.nativeElement;
     if (!host) return;
@@ -671,7 +471,7 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
       const id = `${prefix}-month${monthSelects.length > 1 ? `-${i}` : ''}`;
       el.id = id;
       el.name = id; // name is what Chrome’s warning cares about, too
-      el.setAttribute('aria-label', this.i18n()?.months ? 'Month' : 'Month');
+      el.setAttribute('aria-label', 'Month');
       el.setAttribute('autocomplete', 'off');
     });
 
@@ -682,18 +482,6 @@ export class DateField extends BaseField<Date | null> implements OnInit, AfterVi
       el.setAttribute('aria-label', 'Year');
       el.setAttribute('autocomplete', 'off');
     });
-
-    // Optional: observe future redraws if UI mutates outside of onDraw
-    if (!this.mo) {
-      this.mo = new MutationObserver(() => this.decoratePikadayControls());
-      this.mo.observe(host, { subtree: true, childList: true });
-    }
-  }
-
-  override ngOnDestroy(): void {
-    this.mo?.disconnect();
-
-    super.ngOnDestroy();
   }
 
   // #endregion

@@ -6,6 +6,7 @@ export * from './lib/components/field-decorator/field-decorator';
 export * from './lib/components/field-errors/field-errors';
 export * from './lib/components/field-option/field-option';
 export * from './lib/components/fields/autocomplete-field/autocomplete-field';
+export * from './lib/components/fields/base-date-time-field';
 export * from './lib/components/fields/base-field';
 export * from './lib/components/fields/base-option-field';
 export * from './lib/components/fields/base-option-list-field';

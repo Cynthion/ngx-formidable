@@ -124,9 +124,24 @@ It owns the keys, too, as two `keyboardCallback`s that each return whether they 
 
 ---
 
+## Base Date Time Field Directive
+
+`BaseDateTimeField` — exported abstract `@Directive()` (no selector) extending `BaseField<Date | null>`, behind `date-field` and `time-field`. It holds their `value`, the mask derived from each field's own `unicodeTokenFormat`, and the arrow-key steps:
+
+| Input       | Type                  | Default         | Description           |
+| :---------- | :-------------------- | :-------------- | :-------------------- |
+| `emptyHint` | `FormidableEmptyHint` | `'underscores'` | Resting empty display |
+
+- **Commit**: typed text commits on blur and on `Enter`. The arrow keys, and the date field's calendar, commit at once.
+- **Parse Error**: text that does not parse stays as typed, leaves the model alone and reports a `{ kind: 'parse' }` error to whichever forms API binds the field — `[formField]`, `ngModel` or `[formControl]` — so the field shows it as a message once revealed. Text that parses again drops the error.
+- **Empty Text**: emptying the text commits `null` at once, with no error.
+- **Unsupported Format**: a `unicodeTokenFormat` with a token the field does not support logs a warning and falls back to the field's default format, whenever it is set.
+
+---
+
 ## Field Components
 
-All extend `BaseField<T>` (inherited API above); `input-field` and `textarea-field` extend `BaseTextField`, `select-field` extends `BaseOptionListField<T>`, and the four other option fields `BaseOptionField<T>`. Tables list each field's OWN inputs only.
+All extend `BaseField<T>` (inherited API above); `input-field` and `textarea-field` extend `BaseTextField`, `date-field` and `time-field` extend `BaseDateTimeField`, `select-field` extends `BaseOptionListField<T>`, and the four other option fields `BaseOptionField<T>`. Tables list each field's OWN inputs only.
 
 **Panel Control**: the three fields with a panel — `dropdown-field`, `autocomplete-field` and `date-field` — expose `isPanelOpen` as a signal to read and `togglePanel(isOpen)` as the way to open or close it from outside. There is no `isPanelOpen` input: a panel is state the field owns and closes by itself (on a selection, an outside click, `Escape`), so a one-way binding would go stale the moment it did. Reach the method through a template reference (`#field`) or a `viewChild()`, exactly as `focus()` is reached.
 
@@ -193,13 +208,12 @@ The default option and the action entry are both applied after filtering, so an 
 
 **Selector** `formidable-date-field` · **Value** `Date | null`
 
-Date picker backed by Pikaday.
+Date picker backed by Pikaday. The mask, the empty display, the commit and the parse error come from **Base Date Time Field Directive**.
 
-| Input                | Type                      | Default         | Description                 |
-| :------------------- | :------------------------ | :-------------- | :-------------------------- |
-| `unicodeTokenFormat` | `string`                  | `'yyyy-MM-dd'`  | date-fns parse/format token |
-| `emptyHint`          | `FormidableEmptyHint`     | `'underscores'` | Resting empty display       |
-| `panelPosition`      | `FormidablePanelPosition` | `'right'`       | Panel placement             |
+| Input                | Type                      | Default        | Description                 |
+| :------------------- | :------------------------ | :------------- | :-------------------------- |
+| `unicodeTokenFormat` | `string`                  | `'yyyy-MM-dd'` | date-fns parse/format token |
+| `panelPosition`      | `FormidablePanelPosition` | `'right'`      | Panel placement             |
 
 The calendar is opened and closed from outside through `togglePanel(isOpen)` — see **Panel Control**.
 
@@ -215,12 +229,11 @@ The calendar is opened and closed from outside through `togglePanel(isOpen)` —
 
 **Selector** `formidable-time-field` · **Value** `Date | null`
 
-Masked time input.
+Masked time input. The mask, the empty display, the commit and the parse error come from **Base Date Time Field Directive**.
 
-| Input                | Type                  | Default         | Description                 |
-| :------------------- | :-------------------- | :-------------- | :-------------------------- |
-| `unicodeTokenFormat` | `string`              | `'HH.mm'`       | date-fns parse/format token |
-| `emptyHint`          | `FormidableEmptyHint` | `'underscores'` | Resting empty display       |
+| Input                | Type     | Default   | Description                 |
+| :------------------- | :------- | :-------- | :-------------------------- |
+| `unicodeTokenFormat` | `string` | `'HH.mm'` | date-fns parse/format token |
 
 **Keyboard**: `ArrowUp` / `ArrowDown` step the `unicodeTokenFormat` segment under the caret — hour, minute, second or AM/PM — and leave it selected. Full table in [`user/fields.md`](fields.md).
 

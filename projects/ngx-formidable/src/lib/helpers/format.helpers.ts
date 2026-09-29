@@ -24,49 +24,38 @@ export function parseUnicodeDateTime(input: string, unicodeTokenFormat: string):
   return parsed;
 }
 
+/**
+ * Validates that every alphabetic token in a format string is one of `tokens` — `UNICODE_DATE_TOKENS` or
+ * `UNICODE_TIME_TOKENS`.
+ *
+ * @param format - A Unicode format string (e.g. 'yyyy-MM-dd' or 'HH.mm')
+ * @returns True if all extracted tokens are in `tokens`; otherwise false.
+ */
+export function validateUnicodeTokenFormat(format: string, tokens: readonly string[]): boolean {
+  return extractTokens(format).every((token) => tokens.includes(token));
+}
+
+/**
+ * Converts a Unicode date or time format string into an input mask string.
+ * Replaces known tokens (e.g. 'dd', 'MM', 'yyyy', 'HH', 'mm') with their corresponding mask.
+ * Unknown alphabetic tokens are replaced with repeated mask characters.
+ * Non-alphabetic characters (e.g. separators) are preserved as-is.
+ *
+ * @param unicodeTokenFormat - The format string to convert (e.g. 'dd/MM/yyyy')
+ * @param maskChar - The character used to fill unknown token positions (e.g. '_')
+ * @returns A mask string suitable for input masking (e.g. '00/00/0000')
+ */
+export function formatToTokenMask(unicodeTokenFormat: string, maskChar: string): string {
+  return tokenizeFormat(unicodeTokenFormat)
+    .map((token) => tokenMask(token) ?? (/^[a-zA-Z]+$/.test(token) ? maskChar.repeat(token.length) : token))
+    .join('');
+}
+
 // #region Date
 
 /** Used for date normalization. Normalizes the time part to 00:00:00:00. */
 export function normalizeTimePart(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
-}
-
-/**
- * Validates that all alphabetic tokens in a format string are valid
- * date-related tokens (years, months, days only).
- *
- * @param format - A Unicode date format string (e.g. 'yyyy-MM-dd')
- * @returns True if all extracted tokens are recognized date tokens; otherwise false.
- */
-export function validateUnicodeDateTokenFormat(format: string): boolean {
-  const tokens = extractTokens(format);
-  return tokens.every(isDateToken);
-}
-
-/**
- * Converts a Unicode date format string into an input mask string.
- * Replaces known date tokens (e.g. 'dd', 'MM', 'yyyy') with their corresponding mask.
- * Unknown alphabetic tokens are replaced with repeated mask characters.
- * Non-alphabetic characters (e.g. separators) are preserved as-is.
- *
- * @param unicodeTokenFormat - The date format string to convert (e.g. 'dd/MM/yyyy')
- * @param maskChar - The character used to fill unknown token positions (e.g. '_')
- * @returns A mask string suitable for input masking (e.g. '00/00/0000')
- */
-export function formatToDateTokenMask(unicodeTokenFormat: string, maskChar: string): string {
-  const tokens = tokenizeFormat(unicodeTokenFormat);
-
-  return tokens
-    .map((token) => {
-      if (isDateToken(token)) return DATE_TOKEN_MASK_MAP[token];
-
-      if (/^[a-zA-Z]+$/.test(token)) {
-        return maskChar.repeat(token.length);
-      }
-
-      return token;
-    })
-    .join('');
 }
 
 /** Unicode Date Tokens that are allowed to be used with date-fns. */
@@ -119,44 +108,6 @@ function isDateToken(token: string): token is DateToken {
 /** Used for time normalization. Normalizes the date part to 1970-01-01. */
 export function normalizeDatePart(date: Date): Date {
   return new Date(1970, 0, 1, date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
-}
-
-/**
- * Validates that all alphabetic tokens in a format string are valid
- * time-related tokens (hours, minutes, seconds, etc.).
- *
- * @param format - A Unicode time format string (e.g. 'HH.mm')
- * @returns True if all extracted tokens are recognized time tokens; otherwise false.
- */
-export function validateUnicodeTimeTokenFormat(format: string): boolean {
-  const tokens = extractTokens(format);
-  return tokens.every(isTimeToken);
-}
-
-/**
- * Converts a Unicode time format string into an input mask string.
- * Replaces known time tokens (e.g. 'HH', 'mm', 'ss') with their corresponding mask.
- * Unknown alphabetic tokens are replaced with repeated mask characters.
- * Non-alphabetic characters (e.g. separators) are preserved as-is.
- *
- * @param unicodeTokenFormat - The time format string to convert (e.g. 'HH:mm')
- * @param maskChar - The character used to fill unknown token positions (e.g. '_')
- * @returns A mask string suitable for input masking (e.g. '00:00')
- */
-export function formatToTimeTokenMask(unicodeTokenFormat: string, maskChar: string): string {
-  const tokens = tokenizeFormat(unicodeTokenFormat);
-
-  return tokens
-    .map((token) => {
-      if (isTimeToken(token)) return TIME_TOKEN_MASK_MAP[token];
-
-      if (/^[a-zA-Z]+$/.test(token)) {
-        return maskChar.repeat(token.length);
-      }
-
-      return token;
-    })
-    .join('');
 }
 
 /** Unicode Time Tokens that are allowed to be used with date-fns. */
@@ -284,13 +235,14 @@ function getFormatSegments(unicodeTokenFormat: string): FormatSegment[] {
 }
 
 function renderedWidth(token: string): number {
-  const mask = isDateToken(token)
-    ? DATE_TOKEN_MASK_MAP[token]
-    : isTimeToken(token)
-      ? TIME_TOKEN_MASK_MAP[token]
-      : token;
+  return (tokenMask(token) ?? token).length;
+}
 
-  return mask.length;
+function tokenMask(token: string): string | null {
+  if (isDateToken(token)) return DATE_TOKEN_MASK_MAP[token];
+  if (isTimeToken(token)) return TIME_TOKEN_MASK_MAP[token];
+
+  return null;
 }
 
 // #endregion

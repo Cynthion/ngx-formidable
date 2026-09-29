@@ -1,31 +1,40 @@
 import {
   findSegmentAtCaret,
-  formatToDateTokenMask,
-  formatToTimeTokenMask,
+  formatToTokenMask,
   parseUnicodeDateTime,
   stepDateTimeUnit,
-  validateUnicodeDateTokenFormat
+  UNICODE_DATE_TOKENS,
+  UNICODE_TIME_TOKENS,
+  validateUnicodeTokenFormat
 } from './format.helpers';
 
 describe('format.helpers', () => {
-  describe('formatToDateTokenMask', () => {
+  describe('formatToTokenMask', () => {
     it('maps date tokens to ngx-mask digit patterns and keeps separators', () => {
-      expect(formatToDateTokenMask('yyyy-MM-dd', '0')).toBe('0000-00-00');
-      expect(formatToDateTokenMask('dd . MM . yyyy', '0')).toBe('00 . 00 . 0000');
+      expect(formatToTokenMask('yyyy-MM-dd', '0')).toBe('0000-00-00');
+      expect(formatToTokenMask('dd . MM . yyyy', '0')).toBe('00 . 00 . 0000');
     });
-  });
 
-  describe('formatToTimeTokenMask', () => {
     it('maps time tokens to ngx-mask digit patterns and keeps separators', () => {
-      expect(formatToTimeTokenMask('HH:mm', '0')).toBe('00:00');
-      expect(formatToTimeTokenMask('HH : mm', '0')).toBe('00 : 00');
+      expect(formatToTokenMask('HH:mm', '0')).toBe('00:00');
+      expect(formatToTokenMask('HH : mm', '0')).toBe('00 : 00');
+    });
+
+    it('fills a token it does not know with the mask character', () => {
+      expect(formatToTokenMask('HH:qq', '_')).toBe('00:__');
     });
   });
 
-  describe('validateUnicodeDateTokenFormat', () => {
-    it('accepts valid date tokens and rejects time tokens', () => {
-      expect(validateUnicodeDateTokenFormat('yyyy-MM-dd')).toBe(true);
-      expect(validateUnicodeDateTokenFormat('HH:mm')).toBe(false);
+  describe('validateUnicodeTokenFormat', () => {
+    it('accepts only the tokens it is given', () => {
+      expect(validateUnicodeTokenFormat('yyyy-MM-dd', UNICODE_DATE_TOKENS)).toBe(true);
+      expect(validateUnicodeTokenFormat('HH:mm', UNICODE_DATE_TOKENS)).toBe(false);
+      expect(validateUnicodeTokenFormat('HH:mm', UNICODE_TIME_TOKENS)).toBe(true);
+      expect(validateUnicodeTokenFormat('yyyy-MM-dd', UNICODE_TIME_TOKENS)).toBe(false);
+    });
+
+    it('ignores quoted literal text', () => {
+      expect(validateUnicodeTokenFormat("HH 'Uhr' mm", UNICODE_TIME_TOKENS)).toBe(true);
     });
   });
 
