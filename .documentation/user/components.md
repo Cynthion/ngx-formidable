@@ -108,19 +108,9 @@ It owns the keys, too, as two `keyboardCallback`s that each return whether they 
 
 ---
 
-## Field Components
+## Base Text Field Directive
 
-All extend `BaseField<T>` (inherited API above); `select-field` extends `BaseOptionListField<T>`, and the four other option fields `BaseOptionField<T>`. Tables list each field's OWN inputs only.
-
-**Panel Control**: the three fields with a panel — `dropdown-field`, `autocomplete-field` and `date-field` — expose `isPanelOpen` as a signal to read and `togglePanel(isOpen)` as the way to open or close it from outside. There is no `isPanelOpen` input: a panel is state the field owns and closes by itself (on a selection, an outside click, `Escape`), so a one-way binding would go stale the moment it did. Reach the method through a template reference (`#field`) or a `viewChild()`, exactly as `focus()` is reached.
-
-**Action Option**: the two panel fields take an `actionOption` — an entry pinned to the end of the list that runs an action instead of becoming a value, which is what an "Add A New Address…" row is. It renders as an option and the keyboard walks it as one, because `aria-activedescendant` may only name an option the `listbox` owns; what separates it is every value path, none of which it takes. Picking it closes the panel, runs its `action` and commits nothing; a model written to its value finds no option; the autocomplete never auto-selects it off an exact label and the dropdown's type-ahead walks past it. It never stands in for a result either — an otherwise empty list still renders `noOptionsText`, because that is a status and the action is a control. What happens next is the consumer's: see **An Action Row Is Not A Value** in [`user/fields.md`](fields.md) for the round trip.
-
-### Input Field
-
-**Selector** `formidable-input-field` · **Value** `string`
-
-Text input with optional ngx-mask masking.
+`BaseTextField` — exported abstract `@Directive()` (no selector) extending `BaseField<string>`, behind the two text fields, `input-field` and `textarea-field`. It holds their `value` — the text, unmasked — and everything they share:
 
 | Input          | Type                     | Default | Description              |
 | :------------- | :----------------------- | :------ | :----------------------- |
@@ -130,23 +120,36 @@ Text input with optional ngx-mask masking.
 | `mask`         | `string`                 | —       | ngx-mask pattern         |
 | `maskConfig`   | `Partial<NgxMaskConfig>` | —       | Per-field mask overrides |
 
+`minLength` and `maxLength` are the native attributes and validate nothing; a `mask` that cannot satisfy either logs a warning, as does a `placeHolderCharacter` the mask can also draw as content.
+
+---
+
+## Field Components
+
+All extend `BaseField<T>` (inherited API above); `input-field` and `textarea-field` extend `BaseTextField`, `select-field` extends `BaseOptionListField<T>`, and the four other option fields `BaseOptionField<T>`. Tables list each field's OWN inputs only.
+
+**Panel Control**: the three fields with a panel — `dropdown-field`, `autocomplete-field` and `date-field` — expose `isPanelOpen` as a signal to read and `togglePanel(isOpen)` as the way to open or close it from outside. There is no `isPanelOpen` input: a panel is state the field owns and closes by itself (on a selection, an outside click, `Escape`), so a one-way binding would go stale the moment it did. Reach the method through a template reference (`#field`) or a `viewChild()`, exactly as `focus()` is reached.
+
+**Action Option**: the two panel fields take an `actionOption` — an entry pinned to the end of the list that runs an action instead of becoming a value, which is what an "Add A New Address…" row is. It renders as an option and the keyboard walks it as one, because `aria-activedescendant` may only name an option the `listbox` owns; what separates it is every value path, none of which it takes. Picking it closes the panel, runs its `action` and commits nothing; a model written to its value finds no option; the autocomplete never auto-selects it off an exact label and the dropdown's type-ahead walks past it. It never stands in for a result either — an otherwise empty list still renders `noOptionsText`, because that is a status and the action is a control. What happens next is the consumer's: see **An Action Row Is Not A Value** in [`user/fields.md`](fields.md) for the round trip.
+
+### Input Field
+
+**Selector** `formidable-input-field` · **Value** `string`
+
+Text input with optional ngx-mask masking. No inputs of its own — everything comes from **Base Text Field Directive**.
+
 **Use when** you need a single-line text field, optionally masked (phone, IBAN, etc.).
 
 ### Textarea Field
 
 **Selector** `formidable-textarea-field` · **Value** `string`
 
-Multi-line text with optional autosize and a length indicator.
+Multi-line text with optional autosize and a length indicator. The text, mask and length inputs come from **Base Text Field Directive**. The length indicator keeps the value's right padding, so it stays clear of a projected suffix.
 
-| Input                 | Type                     | Default | Description              |
-| :-------------------- | :----------------------- | :------ | :----------------------- |
-| `autocomplete`        | `AutoFill`               | `'off'` | Native autocomplete hint |
-| `minLength`           | `number`                 | —       | Min length, unset = off  |
-| `maxLength`           | `number`                 | —       | Max length, unset = off  |
-| `enableAutosize`      | `boolean`                | `true`  | Grow height with content |
-| `showLengthIndicator` | `boolean`                | `false` | Show a character counter |
-| `mask`                | `string`                 | —       | ngx-mask pattern         |
-| `maskConfig`          | `Partial<NgxMaskConfig>` | —       | Per-field mask overrides |
+| Input                 | Type      | Default | Description              |
+| :-------------------- | :-------- | :------ | :----------------------- |
+| `enableAutosize`      | `boolean` | `true`  | Grow height with content |
+| `showLengthIndicator` | `boolean` | `false` | Show a character counter |
 
 **Use when** you need free-form multi-line input.
 

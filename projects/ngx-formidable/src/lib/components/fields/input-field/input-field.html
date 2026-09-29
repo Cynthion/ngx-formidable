@@ -1,7 +1,7 @@
 @if (mask()) {
 <!-- NgxMaskDirective only when mask exists -->
 <input
-  #inputRef
+  #editorRef
   type="text"
   class="field"
   [id]="fieldId"
@@ -17,28 +17,28 @@
   [attr.aria-invalid]="showErrors() || null"
   [attr.aria-describedby]="describedBy"
   [mask]="mask()"
-  [validation]="mergedMaskConfig.validation && !readonly() && !disabled()"
-  [showMaskTyped]="mergedMaskConfig.showMaskTyped"
-  [placeHolderCharacter]="mergedMaskConfig.placeHolderCharacter"
-  [dropSpecialCharacters]="mergedMaskConfig.dropSpecialCharacters"
-  [specialCharacters]="mergedMaskConfig.specialCharacters"
-  [thousandSeparator]="mergedMaskConfig.thousandSeparator"
-  [decimalMarker]="mergedMaskConfig.decimalMarker"
-  [prefix]="mergedMaskConfig.prefix"
-  [suffix]="mergedMaskConfig.suffix"
-  [allowNegativeNumbers]="mergedMaskConfig.allowNegativeNumbers"
-  [leadZeroDateTime]="mergedMaskConfig.leadZeroDateTime"
-  [patterns]="mergedMaskConfig.patterns"
-  [clearIfNotMatch]="mergedMaskConfig.clearIfNotMatch"
+  [validation]="mergedMaskConfig().validation && !readonly() && !disabled()"
+  [showMaskTyped]="mergedMaskConfig().showMaskTyped"
+  [placeHolderCharacter]="mergedMaskConfig().placeHolderCharacter"
+  [dropSpecialCharacters]="mergedMaskConfig().dropSpecialCharacters"
+  [specialCharacters]="mergedMaskConfig().specialCharacters"
+  [thousandSeparator]="mergedMaskConfig().thousandSeparator"
+  [decimalMarker]="mergedMaskConfig().decimalMarker"
+  [prefix]="mergedMaskConfig().prefix"
+  [suffix]="mergedMaskConfig().suffix"
+  [allowNegativeNumbers]="mergedMaskConfig().allowNegativeNumbers"
+  [leadZeroDateTime]="mergedMaskConfig().leadZeroDateTime"
+  [patterns]="mergedMaskConfig().patterns"
+  [clearIfNotMatch]="mergedMaskConfig().clearIfNotMatch"
   (mousedown)="onEditorMouseDown()"
-  (mouseup)="rememberClickedCaret(inputRef)"
-  (click)="restoreClickedCaret(inputRef)"
+  (mouseup)="rememberClickedCaret(editorRef)"
+  (click)="restoreClickedCaret(editorRef)"
   (input)="onInput()"
   (focus)="onFocusChange(true)"
   (blur)="onFocusChange(false)" />
 } @else {
 <input
-  #inputRef
+  #editorRef
   type="text"
   class="field"
   [id]="fieldId"
