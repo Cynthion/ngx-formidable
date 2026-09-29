@@ -24,6 +24,7 @@ import { SliderField } from '../components/fields/slider-field/slider-field';
 import { TextareaField } from '../components/fields/textarea-field/textarea-field';
 import { TimeField } from '../components/fields/time-field/time-field';
 import { ToggleField } from '../components/fields/toggle-field/toggle-field';
+import { FieldSuffix } from '../directives/field-suffix';
 import { settle } from './test-bed';
 
 /** A field the library ships, named as its selector is: `date` is `formidable-date-field`. */
@@ -58,6 +59,8 @@ export interface BindFieldOptions {
   content?: string;
   /** Wraps the field in a `formidable-field-decorator`. */
   decorated?: boolean;
+  /** Markup projected into the decorator beside the field, such as a `formidableFieldSuffix`. Only with `decorated`. */
+  decoration?: string;
   /** Angular's `updateOn`, on the `<form>` or on the `FormControl`. Ignored by Signal Forms. */
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -141,17 +144,22 @@ const BINDINGS: Record<FormsApi, string> = {
 
 /** Renders one field bound through `api`, as a consumer's template binds it, and settles its first render. */
 export async function bindField(kind: FieldKind, api: FormsApi, options: BindFieldOptions = {}): Promise<BoundField> {
-  const { value = null, inputs = {}, content = '', decorated = false, updateOn } = options;
+  const { value = null, inputs = {}, content = '', decorated = false, decoration = '', updateOn } = options;
   const tag = `formidable-${kind}-field`;
   const bindings = Object.keys(inputs).map((name) => `[${name}]="inputs()['${name}']"`);
   const outputs = `(valueChange)="events.push('value')" (touch)="events.push('touch')"`;
   const field = `<${tag} ${BINDINGS[api]} ${bindings.join(' ')} ${outputs}>${content}</${tag}>`;
-  const decoratedField = decorated ? `<formidable-field-decorator>${field}</formidable-field-decorator>` : field;
+  const decoratedField = decorated
+    ? `<formidable-field-decorator>${field}${decoration}</formidable-field-decorator>`
+    : field;
   const formOptions = updateOn ? `[ngFormOptions]="{ updateOn: '${updateOn}' }"` : '';
   const template = api === 'template-driven' ? `<form ${formOptions}>${decoratedField}</form>` : decoratedField;
 
   TestBed.overrideComponent(FieldHost, {
-    set: { imports: [FormsModule, ReactiveFormsModule, FormField, FieldDecorator, FieldOption, ...FIELDS], template }
+    set: {
+      imports: [FormsModule, ReactiveFormsModule, FormField, FieldDecorator, FieldOption, FieldSuffix, ...FIELDS],
+      template
+    }
   });
 
   const fixture = TestBed.createComponent(FieldHost);

@@ -62,7 +62,7 @@ Angular registers a directive's host listeners before a template's on the same e
 
 A display with no placeholder left is all content, trailing literals included. One with placeholders left ends after the last filled position — and the separator drawn between that position and the first empty slot belongs to the unused area, so `079 123 __ __` ends at 7, not 8 or 13.
 
-Which character marks an empty slot is ngx-mask's `placeHolderCharacter`, and it is settable. Every masked field therefore **binds** it rather than inheriting it, so a global `provideNgxMask` cannot change what the library reads its values out of while the library carries on looking for `_`. `BaseField.maskPlaceholderCharacter` is what the caret rules ask; `input-field` and `textarea-field` override it from their merged config, and the date and time fields pin it.
+Which character marks an empty slot is ngx-mask's `placeHolderCharacter`, and it is settable. Every masked field therefore **binds** it rather than inheriting it, so a global `provideNgxMask` cannot change what the library reads its values out of while the library carries on looking for `_`. `BaseField.maskPlaceholderCharacter` is what the caret rules ask; `BaseTextField` overrides it for `input-field` and `textarea-field` from their merged config, and the date and time fields pin it.
 
 One combination cannot be made to work: a placeholder the mask can also produce as content, through a token pattern that accepts it or a literal in the mask. The rendered text is then genuinely ambiguous, and no reading of it can be right. `isPlaceholderAmbiguous` detects exactly that and the two mask fields warn, naming the field and the character.
 

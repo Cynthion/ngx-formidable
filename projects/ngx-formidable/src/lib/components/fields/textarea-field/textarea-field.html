@@ -4,7 +4,7 @@
   @if (mask()) {
   <!-- NgxMaskDirective only when mask exists -->
   <textarea
-    #maskedTextareaRef
+    #editorRef
     class="field"
     [id]="fieldId"
     [placeholder]="placeholder()"
@@ -19,28 +19,28 @@
     [attr.aria-invalid]="showErrors() || null"
     [attr.aria-describedby]="describedBy"
     [mask]="mask()"
-    [validation]="!!mask() && mergedMaskConfig.validation && !readonly() && !disabled()"
-    [showMaskTyped]="mergedMaskConfig.showMaskTyped"
-    [placeHolderCharacter]="mergedMaskConfig.placeHolderCharacter"
-    [dropSpecialCharacters]="mergedMaskConfig.dropSpecialCharacters"
-    [specialCharacters]="mergedMaskConfig.specialCharacters"
-    [thousandSeparator]="mergedMaskConfig.thousandSeparator"
-    [decimalMarker]="mergedMaskConfig.decimalMarker"
-    [prefix]="mergedMaskConfig.prefix"
-    [suffix]="mergedMaskConfig.suffix"
-    [allowNegativeNumbers]="mergedMaskConfig.allowNegativeNumbers"
-    [leadZeroDateTime]="mergedMaskConfig.leadZeroDateTime"
-    [patterns]="mergedMaskConfig.patterns"
-    [clearIfNotMatch]="mergedMaskConfig.clearIfNotMatch"
-    (mouseup)="rememberClickedCaret(maskedTextareaRef)"
-    (click)="restoreClickedCaret(maskedTextareaRef)"
+    [validation]="mergedMaskConfig().validation && !readonly() && !disabled()"
+    [showMaskTyped]="mergedMaskConfig().showMaskTyped"
+    [placeHolderCharacter]="mergedMaskConfig().placeHolderCharacter"
+    [dropSpecialCharacters]="mergedMaskConfig().dropSpecialCharacters"
+    [specialCharacters]="mergedMaskConfig().specialCharacters"
+    [thousandSeparator]="mergedMaskConfig().thousandSeparator"
+    [decimalMarker]="mergedMaskConfig().decimalMarker"
+    [prefix]="mergedMaskConfig().prefix"
+    [suffix]="mergedMaskConfig().suffix"
+    [allowNegativeNumbers]="mergedMaskConfig().allowNegativeNumbers"
+    [leadZeroDateTime]="mergedMaskConfig().leadZeroDateTime"
+    [patterns]="mergedMaskConfig().patterns"
+    [clearIfNotMatch]="mergedMaskConfig().clearIfNotMatch"
+    (mouseup)="rememberClickedCaret(editorRef)"
+    (click)="restoreClickedCaret(editorRef)"
     (input)="onInput()"
     (focus)="onFocusChange(true)"
     (blur)="onFocusChange(false)">
   </textarea>
   } @else {
   <textarea
-    #plainTextareaRef
+    #editorRef
     class="field"
     [id]="fieldId"
     [placeholder]="placeholder()"
@@ -59,10 +59,6 @@
     (blur)="onFocusChange(false)">
   </textarea>
   } @if (showLengthIndicator() && !readonly() && !disabled()) {
-  <div
-    #lengthIndicatorRef
-    class="length-indicator">
-    {{ valueLength() }} @if (maxLength() !== undefined) { / {{ maxLength() }} }
-  </div>
+  <div class="length-indicator">{{ valueLength() }} @if (maxLength() !== undefined) { / {{ maxLength() }} }</div>
   }
 </div>

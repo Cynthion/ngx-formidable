@@ -112,14 +112,6 @@ Found by the architecture review and the test harness. Each is fixed in the phas
 
 ## Library Phases
 
-### Phase 23 — Text Fields
-
-**Depends On**: nothing.
-
-- **One Masked Editor**: `input-field` and `textarea-field` share their mask handling — a `computed` mask configuration, one template reference, no first-pass bookkeeping.
-- **Render Hooks**: the textarea's autosize and length-indicator timers move to `afterNextRender`.
-- **Specs**: the caret specs assert through a host.
-
 ### Phase 24 — Date And Time Fields
 
 **Depends On**: nothing.
@@ -132,7 +124,7 @@ Found by the architecture review and the test harness. Each is fixed in the phas
 
 ### Phase 25 — Field Symmetry Sweep
 
-**Depends On**: Phases 23 and 24.
+**Depends On**: Phase 24.
 
 - **Side By Side**: all eleven fields compared for input order, provider block, template attribute order and `tabindex`, and brought in line with [`impl/components.md`](components.md).
 - **One Edit Guard**: a `canEdit` computed on the base guards every public mutator — `toggle()`, `selectValue()`, `selectDate()`, `selectTime()`, `selectOption()` — and the keyboard and pointer guards.

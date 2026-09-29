@@ -2,6 +2,7 @@ import { Component, Provider } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { provideNgxMask } from 'ngx-mask';
+import { bindField, FORMS_APIS } from '../../testing/bind-field';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { DateField } from './date-field/date-field';
 import { InputField } from './input-field/input-field';
@@ -147,28 +148,23 @@ describe('mask placeholder character', () => {
     });
   });
 
-  it('warns when the mask could draw the placeholder as content', async () => {
-    const warn = spyOn(console, 'warn');
+  // `_` is both the placeholder and a literal these masks draw, so the two cannot be told apart.
+  for (const kind of ['input', 'textarea'] as const) {
+    for (const api of FORMS_APIS) {
+      it(`${kind} warns once when the mask could draw the placeholder as content, and again when it changes (${api})`, async () => {
+        const warn = spyOn(console, 'warn');
+        const warnings = () => warn.calls.allArgs().filter(([text]) => String(text).includes('placeHolderCharacter'));
 
-    TestBed.resetTestingModule();
-    configureFormidableTestBed();
+        TestBed.resetTestingModule();
+        configureFormidableTestBed();
+        const field = await bindField(kind, api, { inputs: { mask: '000_000' } });
 
-    @Component({
-      imports: [FormsModule, InputField],
-      // `_` is both the placeholder and a literal this mask draws, so the two cannot be told apart.
-      template: `<formidable-input-field
-        name="ambiguous"
-        mask="000_000"
-        ngModel />`
-    })
-    class AmbiguousHost {}
+        expect(warnings().length).toBe(1);
 
-    const ambiguous = TestBed.createComponent(AmbiguousHost);
-    await settle(ambiguous);
+        await field.set('mask', '00_00');
 
-    expect(warn).toHaveBeenCalled();
-    expect(warn.calls.mostRecent().args[0]).toContain('placeHolderCharacter');
-
-    ambiguous.destroy();
-  });
+        expect(warnings().length).toBe(2);
+      });
+    }
+  }
 });
