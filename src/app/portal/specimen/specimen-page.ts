@@ -9,7 +9,6 @@ import {
   signal,
   viewChild
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
   AutocompleteField,
@@ -50,9 +49,9 @@ import {
   variableLink
 } from '../model/specimen';
 import { THEME_TOKENS_BY_NAME } from '../model/token-manifest';
-import { PreviewField } from '../stage/preview-form/preview-field';
 import { CALENDAR_SVG, MARKER_SVG } from '../stage/preview-form/preview-icons';
 import { ThemeStore } from '../state/theme.store';
+import { SpecimenCell } from './specimen-cell';
 import { SpecimenMatrix } from './specimen-matrix';
 
 /** Whose theme the page wears: the Studio's, one preset's, or the ladder at one of its steps. */
@@ -129,13 +128,12 @@ const PARTS = [
   templateUrl: './specimen-page.html',
   styleUrl: './specimen-page.scss',
   imports: [
-    FormsModule,
     RouterLink,
     TopBar,
     ThemeScope,
     ExampleIcon,
     SpecimenMatrix,
-    PreviewField,
+    SpecimenCell,
     FieldDecorator,
     FieldHint,
     FieldLabel,

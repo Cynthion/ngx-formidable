@@ -1,13 +1,14 @@
 import { Type } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { DateField, DropdownField, NgxFormidableForm } from '@cynthion/ngx-formidable';
+import { DateField, DropdownField } from '@cynthion/ngx-formidable';
 import { provideNgxMask } from 'ngx-mask';
 import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../model/field-capabilities';
 import { PortalFieldKind } from '../model/field-spec.model';
 import { PREVIEW_FORM_DEFINITION } from '../model/preview-form.definition';
 import { PreviewForm } from '../stage/preview-form/preview-form';
 import { FormDefinitionStore } from '../state/form-definition.store';
+import { FormValueStore } from '../state/form-value.store';
 import { AppDefaults } from './settings/app-defaults';
 import { FieldEditor } from './settings/field-editor';
 import { FormSettings } from './settings/form-settings';
@@ -240,8 +241,13 @@ describe('studio settings', () => {
     }));
 
     // The preview is provided the defaults, rather than the portal resolving them beside the library.
-    it('reaches the fields and the form through the library’s own resolution', fakeAsync(() => {
+    it('reaches the fields through the library’s own resolution', fakeAsync(() => {
+      const values = TestBed.inject(FormValueStore);
+      values.model.set({ ...values.model(), orderName: '' });
       settle();
+
+      // Nobody has touched the name, so the default reveal holds its message back.
+      expect(stage.textContent).not.toContain('We need a name for the order.');
 
       choose('panelPosition', 'sheet');
       choose('revealOn', 'always');
@@ -249,7 +255,7 @@ describe('studio settings', () => {
       // The date states nothing; the pizza picker states `right`.
       expect(instance(DateField).map((field) => field.panelPosition())).toEqual(['sheet']);
       expect(instance(DropdownField).map((field) => field.panelPosition())).toContain('right');
-      expect(instance(NgxFormidableForm)[0]!.revealOn()).toBe('always');
+      expect(stage.textContent).toContain('We need a name for the order.');
 
       choose('panelPosition', '');
 

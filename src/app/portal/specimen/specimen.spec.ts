@@ -113,11 +113,12 @@ describe('specimen', () => {
     settle();
 
     const states = root.querySelector('#states')!;
-    const invalid = Array.from(states.querySelectorAll('form[portalReportsRequired]'));
+    const invalid = Array.from(states.querySelectorAll('.cell')).filter((cell) =>
+      cell.textContent?.includes('Required.')
+    );
 
     expect(states.querySelectorAll('.cell').length).toBe(SPECIMEN_KINDS.length * STATE_COLUMNS.length);
     expect(invalid.length).toBe(SPECIMEN_KINDS.length);
-    expect(invalid.filter((form) => !form.textContent?.includes('Required.')).length).toBe(0);
   }));
 
   it('shows label positions only on the kinds whose layout has room for them', fakeAsync(() => {

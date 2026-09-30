@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { FieldDecorator, FieldLabel, InputField } from '@cynthion/ngx-formidable';
 import { SelectedValue } from '../../chrome/selected-value';
 import { ThemeScope } from '../../chrome/theme-scope';
@@ -26,7 +25,7 @@ import { ThemeStore } from '../../state/theme.store';
   selector: 'portal-preset-gallery',
   templateUrl: './preset-gallery.html',
   styleUrl: './preset-gallery.scss',
-  imports: [FormsModule, ThemeScope, FieldDecorator, FieldLabel, InputField, SelectedValue]
+  imports: [ThemeScope, FieldDecorator, FieldLabel, InputField, SelectedValue]
 })
 export class PresetGallery {
   protected readonly theme = inject(ThemeStore);

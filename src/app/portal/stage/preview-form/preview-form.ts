@@ -1,16 +1,8 @@
-import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import {
-  FieldErrors,
-  FormidableFormErrors,
-  NgxFormidableForm,
-  NgxFormidableGroupValidate,
-  NgxFormidableWholeFormValidate
-} from '@cynthion/ngx-formidable';
-import { NgxFormidableVestValidator } from '@cynthion/ngx-formidable/vest';
-import { readPath } from '../../helpers/model-path.helpers';
+import { Component, computed, inject, input, signal } from '@angular/core';
+import { FieldTree, FormRoot } from '@angular/forms/signals';
+import { FieldErrors } from '@cynthion/ngx-formidable';
+import { fieldAt } from '../../helpers/model-path.helpers';
 import { PortalOptionSpec } from '../../model/field-spec.model';
-import { createPreviewValidationSuite, PREVIEW_DEPENDENT_FIELDS } from '../../model/preview-form.validation';
 import { FormDefinitionStore } from '../../state/form-definition.store';
 import { FormValueStore, PortalModel } from '../../state/form-value.store';
 import { InspectorStore } from '../../state/inspector.store';
@@ -19,29 +11,17 @@ import { CreateOptionDialog } from './create-option-dialog';
 import { PortalActionRequest, PreviewField } from './preview-field';
 
 /**
- * The preview form itself, rendered from the definition tree.
+ * The preview form itself, rendered from the definition tree over the store's field tree.
  *
- * `NgForm` reads its options once, in `ngAfterViewInit`, so a new `updateOn` only reaches the controls when
- * the form is rebuilt — which is what the render flip does. The app defaults flip it too: a field and the form
- * read theirs once, when they are created, as they do at bootstrap in a consumer's app. The form's own
- * `revealOn` deliberately does not flip: it has to be live, or switching it would reset the touched and dirty
- * state it reads.
+ * A field reads its defaults once, when it is created, as it does at bootstrap in a consumer's app — so new
+ * defaults rebuild the form, and so does a new field tree. The tree keeps the touched and dirty state rather
+ * than the fields, so a rebuild for defaults alone loses none of it.
  */
 @Component({
   selector: 'portal-preview-form',
   templateUrl: './preview-form.html',
   styleUrl: './preview-form.scss',
-  imports: [
-    FormsModule,
-    FieldErrors,
-    NgxFormidableForm,
-    NgxFormidableGroupValidate,
-    NgxFormidableWholeFormValidate,
-    NgxFormidableVestValidator,
-    PreviewField,
-    CreateOptionDialog,
-    AppDefaultsProvider
-  ]
+  imports: [FormRoot, FieldErrors, PreviewField, CreateOptionDialog, AppDefaultsProvider]
 })
 export class PreviewForm {
   protected readonly definitionStore = inject(FormDefinitionStore);
@@ -58,61 +38,19 @@ export class PreviewForm {
   protected readonly intro = computed(() => this.definitionStore.definition().intro);
   protected readonly submit = computed(() => this.definitionStore.definition().submit);
 
-  protected readonly dependentFields = PREVIEW_DEPENDENT_FIELDS;
+  /** A new object whenever the form has to be rebuilt, which is what the template tracks. */
+  protected readonly build = computed(() => ({
+    form: this.valueStore.form(),
+    defaults: this.definitionStore.previewDefaults()
+  }));
 
-  /** Changing the run axis or an app default rebuilds the form; nothing else does. */
-  protected readonly formKey = signal(0);
-  protected readonly ngFormOptions = computed(() => ({ updateOn: this.options().updateOn }));
-
-  /**
-   * One suite per form, built fresh whenever the form is. Read through `validator` rather than `options()`
-   * so an unrelated option does not discard the validation state the current form has built up.
-   */
-  private readonly validator = computed(() => this.options().validator);
-  protected readonly suite = computed(() => {
-    this.formKey();
-
-    return this.validator() === 'vest' ? createPreviewValidationSuite() : null;
-  });
-
-  private lastUpdateOn = this.options().updateOn;
-  private lastAppDefaults = this.definitionStore.appDefaults();
-
-  constructor() {
-    effect(() => {
-      const updateOn = this.options().updateOn;
-      const appDefaults = this.definitionStore.appDefaults();
-
-      if (updateOn === this.lastUpdateOn && appDefaults === this.lastAppDefaults) return;
-
-      this.lastUpdateOn = updateOn;
-      this.lastAppDefaults = appDefaults;
-      this.formKey.update((key) => untracked(() => key + 1));
-    });
+  /** The field at a model path: `group.name` for a field in a grouped section, the group's name for the group. */
+  protected fieldAt(tree: FieldTree<PortalModel>, path: string): FieldTree<unknown> {
+    return fieldAt(tree, path);
   }
 
-  protected onModelChange(model: PortalModel): void {
-    this.valueStore.setModel(model);
-  }
-
-  protected onErrors(errors: FormidableFormErrors): void {
-    this.valueStore.errors.set(errors);
-  }
-
-  protected onSubmit(): void {
-    this.valueStore.submitted.set(true);
-  }
-
-  /** A group rule's messages as errors, keyed by the message as the harness keys them, shown as soon as it reports. */
-  protected groupErrors(groupName: string): { kind: string }[] {
-    return (this.valueStore.errors()[groupName] ?? []).map((message) => ({ kind: message }));
-  }
-
-  /** By field id, because the model path is `group.name` for a field in an `ngModelGroup` section. */
-  protected valueFor(id: string): unknown {
-    const path = this.definitionStore.pathById().get(id);
-
-    return (path ? readPath(this.valueStore.model(), path) : null) ?? null;
+  protected pathOf(id: string): string {
+    return this.definitionStore.pathById().get(id) ?? id;
   }
 
   /**
@@ -164,9 +102,7 @@ export class PreviewForm {
     // The option first, then the value: either order works, because a field re-applies a value it could not
     // place when the options it was missing arrive. This one reads as what happened.
     this.definitionStore.addFieldOption(id, { value, label, subtitle: 'Added from the form' });
-
-    const path = this.definitionStore.pathById().get(id);
-    if (path) this.valueStore.setModel(withValueAt(this.valueStore.model(), path, value));
+    this.fieldAt(this.valueStore.form(), this.pathOf(id))().value.set(value);
 
     this.closeActionDialog();
   }
@@ -194,13 +130,4 @@ function uniqueValue(label: string, options: readonly PortalOptionSpec[]): strin
   while (taken.has(`${base}-${suffix}`)) suffix++;
 
   return `${base}-${suffix}`;
-}
-
-/** One value written into the model by its path, which is `group.name` for a field inside an `ngModelGroup`. */
-function withValueAt(model: PortalModel, path: string, value: unknown): PortalModel {
-  const [head, tail] = path.split('.');
-
-  if (!tail) return { ...model, [head!]: value };
-
-  return { ...model, [head!]: { ...((model[head!] ?? {}) as PortalModel), [tail]: value } };
 }

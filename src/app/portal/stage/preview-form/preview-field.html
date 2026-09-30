@@ -3,53 +3,34 @@
 <formidable-field-decorator>
   @switch (field.kind) { @case ('input') {
   <formidable-input-field
-    [name]="field.name"
     [placeholder]="field.placeholder"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
     [mask]="field.mask"
     [maskConfig]="field.showMaskTyped ? { showMaskTyped: true } : undefined"
-    [minLength]="field.minLength"
-    [maxLength]="field.maxLength"
     [autocomplete]="field.autocompleteHint ?? 'off'"
-    [required]="requiredInAngularMode()"
-    [minlength]="minLengthInAngularMode()"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
     (focusin)="onFocus()" />
   } @case ('textarea') {
   <formidable-textarea-field
-    [name]="field.name"
     [placeholder]="field.placeholder"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
     [enableAutosize]="field.enableAutosize ?? true"
     [showLengthIndicator]="field.showLengthIndicator ?? false"
     [mask]="field.mask"
     [maskConfig]="field.showMaskTyped ? { showMaskTyped: true } : undefined"
-    [minLength]="field.minLength"
-    [maxLength]="field.maxLength"
     [autocomplete]="field.autocompleteHint ?? 'off'"
-    [required]="requiredInAngularMode()"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
     (focusin)="onFocus()" />
   } @case ('select') {
   <formidable-select-field
-    [name]="field.name"
     [placeholder]="field.placeholder"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
     [defaultOption]="defaultOption()"
     [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
     [noOptionsText]="field.noOptionsText ?? 'No options available.'"
     [sortFn]="sortFn()"
-    [required]="requiredInAngularMode()"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
+    (valueChange)="picked.emit($event)"
     (focusin)="onFocus()">
     @for (option of options(); track option.value) {
     <formidable-field-option
@@ -61,12 +42,8 @@
   </formidable-select-field>
   } @case ('dropdown') {
   <formidable-dropdown-field
-    [name]="field.name"
     [placeholder]="field.placeholder"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
     [defaultOption]="defaultOption()"
     [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
     [actionOption]="actionOption()"
@@ -74,8 +51,8 @@
     [noOptionsText]="field.noOptionsText ?? 'No options available.'"
     [sortFn]="sortFn()"
     [panelPosition]="panelPosition()"
-    [required]="requiredInAngularMode()"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
+    (valueChange)="picked.emit($event)"
     (focusin)="onFocus()">
     @for (option of options(); track option.value) {
     <formidable-field-option
@@ -87,12 +64,8 @@
   </formidable-dropdown-field>
   } @case ('autocomplete') {
   <formidable-autocomplete-field
-    [name]="field.name"
     [placeholder]="field.placeholder"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
     [defaultOption]="defaultOption()"
     [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
     [actionOption]="actionOption()"
@@ -100,8 +73,8 @@
     [noOptionsText]="field.noOptionsText ?? 'No options available.'"
     [sortFn]="sortFn()"
     [panelPosition]="panelPosition()"
-    [required]="requiredInAngularMode()"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
+    (valueChange)="picked.emit($event)"
     (filterChange)="filterText.set($event)"
     (focusin)="onFocus()">
     <!-- A custom option component: the field reads the plain option it provides and renders its template. -->
@@ -117,19 +90,14 @@
   </formidable-autocomplete-field>
   } @case ('date') {
   <formidable-date-field
-    [name]="field.name"
     [placeholder]="field.placeholder"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
     [unicodeTokenFormat]="field.unicodeTokenFormat ?? 'yyyy-MM-dd'"
     [emptyHint]="field.emptyHint ?? 'underscores'"
     [panelPosition]="panelPosition()"
     [i18n]="locale().i18n"
     [firstDay]="locale().firstDay"
-    [required]="requiredInAngularMode()"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
     (focusin)="onFocus()">
     <!-- The library ships no SVG, so everything about the projected icon is the page's: size and colour. -->
     @if (capabilities().toggleIcon) {
@@ -142,38 +110,23 @@
   </formidable-date-field>
   } @case ('time') {
   <formidable-time-field
-    [name]="field.name"
     [placeholder]="field.placeholder"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
     [unicodeTokenFormat]="field.unicodeTokenFormat ?? 'HH:mm'"
     [emptyHint]="field.emptyHint ?? 'underscores'"
-    [required]="requiredInAngularMode()"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
     (focusin)="onFocus()" />
   } @case ('toggle') {
   <formidable-toggle-field
-    [name]="field.name"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
     [labelPosition]="field.toggleLabelPosition ?? 'before'"
     [onLabel]="field.onLabel"
     [offLabel]="field.offLabel"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
     (focusin)="onFocus()" />
   } @case ('slider') {
   <formidable-slider-field
-    [name]="field.name"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
-    [min]="field.min ?? 0"
-    [max]="field.max ?? 100"
     [step]="field.step ?? 1"
     [minLabel]="field.minLabel"
     [maxLabel]="field.maxLabel"
@@ -184,21 +137,17 @@
     [tickInterval]="field.tickInterval"
     [transformValueToThumbLabel]="thumbLabelFn()"
     [transformTickToTickLabel]="tickLabelFn()"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
     (focusin)="onFocus()" />
   } @case ('radio-group') {
   <formidable-radio-group-field
-    [name]="field.name"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
     [defaultOption]="defaultOption()"
     [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
     [noOptionsText]="field.noOptionsText ?? 'No options available.'"
     [sortFn]="sortFn()"
-    [required]="requiredInAngularMode()"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
+    (valueChange)="picked.emit($event)"
     (focusin)="onFocus()">
     @for (option of options(); track option.value) {
     <formidable-field-option
@@ -211,17 +160,12 @@
   </formidable-radio-group-field>
   } @case ('checkbox-group') {
   <formidable-checkbox-group-field
-    [name]="field.name"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
     [defaultOption]="defaultOption()"
     [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
     [noOptionsText]="field.noOptionsText ?? 'No options available.'"
     [sortFn]="sortFn()"
-    [required]="requiredInAngularMode()"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
     (focusin)="onFocus()">
     @for (option of options(); track option.value) {
     <formidable-field-option
@@ -234,15 +178,9 @@
   </formidable-checkbox-group-field>
   } @case ('counter') {
   <example-counter-field
-    [name]="field.name"
-    [readonly]="isReadonly()"
-    [disabled]="isDisabled()"
     [autoFocus]="field.state.autoFocus"
-    [required]="decoration.markRequired"
-    [min]="field.min ?? 0"
-    [max]="field.max ?? 10"
     [step]="field.step ?? 1"
-    [ngModel]="value()"
+    [formField]="$any(fieldTree())"
     (focusin)="onFocus()" />
   } } @if (showLabel()) {
   <div

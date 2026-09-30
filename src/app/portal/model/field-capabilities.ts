@@ -107,7 +107,7 @@ export const FIELD_KIND_SELECTORS: Readonly<Record<PortalFieldKind, string>> = {
 /** A field's value type, as TypeScript spells it. `user/components.md` states each one beside its selector. */
 export type PortalValueType = 'string' | 'string[]' | 'Date' | 'boolean' | 'number';
 
-/** What each kind writes into the model. The preview's shape and the exported component both read it. */
+/** What each kind writes into the model. The exported component types its model with it. */
 export const FIELD_KIND_VALUE_TYPES: Readonly<Record<PortalFieldKind, PortalValueType>> = {
   'input': 'string',
   'textarea': 'string',

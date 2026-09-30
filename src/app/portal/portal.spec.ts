@@ -53,6 +53,24 @@ describe('portal', () => {
     localStorage.clear();
   });
 
+  /** The model keys of the fields on the stage, read off the names Signal Forms gives them. */
+  function names(): string[] {
+    return Array.from(root.querySelectorAll('portal-preview-field')).map(
+      (element) => element.querySelector('[name]')?.getAttribute('name')?.split('.').pop() ?? ''
+    );
+  }
+
+  /** Picks an option the way a user does: a click on it in the field's own list. */
+  function pick(fieldId: string, label: string): void {
+    const field = root.querySelector(`#chip-tip-${fieldId}`)!.closest('portal-preview-field')!;
+    const option = Array.from(field.querySelectorAll('formidable-field-option')).find((candidate) =>
+      candidate.textContent?.trim().startsWith(label)
+    );
+
+    (option!.firstElementChild as HTMLElement).click();
+    settle();
+  }
+
   it('renders the three regions', fakeAsync(() => {
     settle();
 
@@ -61,8 +79,8 @@ describe('portal', () => {
     expect(root.querySelector('portal-inspector')).toBeTruthy();
   }));
 
-  // Every field except the one its condition is currently holding back. That field is not hidden but
-  // destroyed, which is the whole point of the pair — see `user/validation.md`, Conditional Fields.
+  // Every field except the one its condition is currently holding back, which `hidden()` marks and `@if`
+  // takes off the page.
   it('renders every unconditional field of the preview form, each in a decorator', fakeAsync(() => {
     settle();
 
@@ -86,8 +104,8 @@ describe('portal', () => {
     expect(Array.from(onScreen).sort()).toEqual(Object.values(FIELD_KIND_LABELS).sort());
   }));
 
-  // The group is the one place the model is not flat, and it is flat unless every field registers on the
-  // group rather than on the form — which the per-field component's own `ControlContainer` decides.
+  // The group is the one place the model is not flat, and the field tree follows it: a grouped field is bound
+  // to the field under its group.
   it('nests a grouped section’s fields under its group name in the model', fakeAsync(() => {
     settle();
 
@@ -98,6 +116,7 @@ describe('portal', () => {
     expect(when['date'] instanceof Date).toBeTrue();
     expect(when['time'] instanceof Date).toBeTrue();
     expect(model['date']).toBeUndefined();
+    expect(root.querySelector('formidable-date-field [name]')?.getAttribute('name')).toMatch(/\.when\.date$/);
   }));
 
   // The group rule reads both members and reports on neither, so its message has to land on the group.
@@ -108,35 +127,33 @@ describe('portal', () => {
 
     // 02:00 is outside the opening hours the group rule states; neither field is wrong on its own.
     const when = values.model()['when'] as Record<string, unknown>;
-    values.setModel({ ...values.model(), when: { ...when, time: new Date(2000, 0, 1, 2, 0) } });
+    values.model.set({ ...values.model(), when: { ...when, time: new Date(2000, 0, 1, 2, 0) } });
     settle();
 
     expect(values.errors()['when']).toEqual(['We are open from 11:00 to 23:00.']);
     expect(values.errors()['when.time']).toBeUndefined();
   }));
 
-  // One toggle, two fields, one each way. The hidden one is destroyed with its control, so its key leaves
-  // the model entirely — which is what the rules have to survive and what `omitWhen` is there for.
-  it('swaps the two conditional fields when the toggle moves, and moves the key with them', fakeAsync(() => {
+  // One toggle, two fields, one each way. The hidden one keeps its key, and nothing validates it: the branch
+  // is empty and required from the start, and reports only once it is on the form.
+  it('swaps the two conditional fields when the toggle moves, and validates only the one showing', fakeAsync(() => {
     settle();
 
     const values = TestBed.inject(FormValueStore);
-    const names = (): string[] =>
-      Array.from(root.querySelectorAll('portal-preview-field')).map(
-        (element) => element.querySelector('[name]')?.getAttribute('name') ?? ''
-      );
 
     expect(names()).toContain('address');
     expect(names()).not.toContain('branch');
-    expect(values.model()['address']).toBe('langstrasse');
-    expect(values.model()['branch']).toBeUndefined();
+    expect(values.model()['branch']).toBeNull();
+    expect(values.errors()['branch']).toBeUndefined();
 
-    values.setModel({ ...values.model(), pickup: true });
+    values.model.set({ ...values.model(), pickup: true, address: '' });
     settle();
 
     expect(names()).toContain('branch');
     expect(names()).not.toContain('address');
-    expect(values.model()['address']).toBeUndefined();
+    expect(values.model()['address']).toBe('');
+    expect(values.errors()['address']).toBeUndefined();
+    expect(values.errors()['branch']).toEqual(['Pick a branch to collect from.']);
 
     // The crust is the reason the swap is workable: the dropdown never leaves the form with the branch.
     expect(names()).toContain('crust');
@@ -144,7 +161,7 @@ describe('portal', () => {
 
   // The template picker: choosing a pizza writes the two fields it stands for and leaves every other alone,
   // and a later edit to one of those fields is not undone — a pizza is a starting point, not a lock.
-  it('applies a pizza’s preset when the picker moves, and does not re-apply it afterwards', fakeAsync(() => {
+  it('applies a pizza’s preset when the user picks it, and does not re-apply it afterwards', fakeAsync(() => {
     settle();
 
     const values = TestBed.inject(FormValueStore);
@@ -152,29 +169,34 @@ describe('portal', () => {
     expect(values.model()['sauce']).toBe('tomato');
     expect(values.model()['toppings']).toEqual(['mozzarella', 'basil']);
 
-    values.setModel({ ...values.model(), pizza: 'diavola' });
-    settle();
+    pick('pizza', 'Diavola');
 
+    expect(values.model()['pizza']).toBe('diavola');
     expect(values.model()['sauce']).toBe('arrabbiata');
     expect(values.model()['toppings']).toEqual(['mozzarella', 'salami', 'chilli']);
     // Untouched by the preset, which patches only the keys it names.
     expect(values.model()['size']).toBe('large');
 
-    values.setModel({ ...values.model(), sauce: 'pesto' });
-    settle();
+    pick('sauce', 'Pesto');
 
     expect(values.model()['sauce']).toBe('pesto');
+    expect(values.model()['pizza']).toBe('diavola');
   }));
 
-  it('leaves the model alone for an option that carries no preset', fakeAsync(() => {
+  it('leaves the model alone for an option that carries no preset, and for a write that is not a pick', fakeAsync(() => {
     settle();
 
     const values = TestBed.inject(FormValueStore);
 
-    values.setModel({ ...values.model(), sauce: 'bbq', pizza: 'custom' });
+    values.model.set({ ...values.model(), pizza: 'diavola' });
     settle();
 
-    expect(values.model()['sauce']).toBe('bbq');
+    expect(values.model()['sauce']).toBe('tomato');
+
+    pick('pizza', 'Custom');
+
+    expect(values.model()['pizza']).toBe('custom');
+    expect(values.model()['sauce']).toBe('tomato');
     expect(values.model()['toppings']).toEqual(['mozzarella', 'basil']);
   }));
 
@@ -185,20 +207,16 @@ describe('portal', () => {
 
     const values = TestBed.inject(FormValueStore);
     const payment = (): Record<string, unknown> => values.model()['payment'] as Record<string, unknown>;
-    const names = (): string[] =>
-      Array.from(root.querySelectorAll('portal-preview-field')).map(
-        (element) => element.querySelector('[name]')?.getAttribute('name') ?? ''
-      );
 
     expect(payment()['method']).toBe('card');
     expect(payment()['cardNumber']).toBe('4242 4242 4242 4242');
     expect(names()).toContain('cardNumber');
 
-    values.setModel({ ...values.model(), payment: { ...payment(), method: 'twint' } });
+    values.model.set({ ...values.model(), payment: { ...payment(), method: 'twint' } });
     settle();
 
     expect(names()).not.toContain('cardNumber');
-    expect(payment()['cardNumber']).toBeUndefined();
+    expect(payment()['cardNumber']).toBe('4242 4242 4242 4242');
   }));
 
   it('starts pre-filled, so the filled and floating-label states are on screen from the first frame', fakeAsync(() => {

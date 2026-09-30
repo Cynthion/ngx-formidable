@@ -1,19 +1,25 @@
 import { Component, computed, inject } from '@angular/core';
 import { SelectedValue } from '../../chrome/selected-value';
-import { LIBRARY_DEFAULTS, PortalFormOptions, PortalLocaleId, REVEAL_LABELS } from '../../model/field-spec.model';
+import {
+  LIBRARY_DEFAULTS,
+  PortalDebounce,
+  PortalFormOptions,
+  PortalLocaleId,
+  REVEAL_LABELS
+} from '../../model/field-spec.model';
 import { PORTAL_LOCALES } from '../../model/locales';
 import { FormDefinitionStore } from '../../state/form-definition.store';
 import { AdornmentExamples } from './adornment-examples';
 
-const UPDATE_ON = [
-  ['change', 'Change'],
-  ['blur', 'Blur'],
-  ['submit', 'Submit']
+const DEBOUNCES = [
+  ['0', 'Every Change'],
+  ['300', 'A 300 ms Pause'],
+  ['blur', 'Blur']
 ] as const;
 
 const VALIDATORS = [
   ['vest', 'Vest suite'],
-  ['angular', "Angular's own validators"],
+  ['angular', "Angular's built-in rules"],
   ['none', 'None']
 ] as const;
 
@@ -26,8 +32,8 @@ const VALIDATORS = [
  * The adornment examples are here rather than among the app defaults because projected content is markup,
  * which no default can supply — they sit under the master switch that already shows or hides them.
  *
- * Run and reveal are two axes, not one setting: run is Angular's `updateOn` and decides when the validator
- * runs, reveal is the library's `revealOn` and decides when the messages appear.
+ * Debounce and reveal are two axes, not one setting: the debounce is Signal Forms' and decides when an edit
+ * reaches the model and the rules run, reveal is the library's `revealOn` and decides when the messages appear.
  */
 @Component({
   selector: 'portal-form-settings',
@@ -39,7 +45,7 @@ export class FormSettings {
   protected readonly store = inject(FormDefinitionStore);
 
   protected readonly reveals = Object.entries(REVEAL_LABELS);
-  protected readonly updateOns = UPDATE_ON;
+  protected readonly debounces = DEBOUNCES;
   protected readonly validators = VALIDATORS;
   protected readonly locales = PORTAL_LOCALES;
 
@@ -54,6 +60,10 @@ export class FormSettings {
   /** A select's value for an optional option, `''` standing for "state nothing". */
   protected stated(value: unknown): string {
     return value === undefined ? '' : String(value);
+  }
+
+  protected setDebounce(raw: string): void {
+    this.set('debounce', (raw === 'blur' ? raw : Number(raw)) as PortalDebounce);
   }
 
   protected setRevealOn(raw: string): void {

@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { FieldDecorator, FieldLabel, NgxFormidableFieldValidate, NgxFormidableForm } from '@cynthion/ngx-formidable';
+import { form, FormField, max, min, readonly } from '@angular/forms/signals';
+import { FieldDecorator, FieldLabel } from '@cynthion/ngx-formidable';
 import { ExampleCounterField } from './example-counter-field';
 
 /**
@@ -11,35 +11,22 @@ import { ExampleCounterField } from './example-counter-field';
  */
 
 @Component({
-  imports: [
-    FormsModule,
-    NgxFormidableForm,
-    NgxFormidableFieldValidate,
-    FieldDecorator,
-    FieldLabel,
-    ExampleCounterField
-  ],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FormField, FieldDecorator, FieldLabel, ExampleCounterField],
   template: `
-    <form
-      formidableForm
-      [formValue]="formValue"
-      (formValueChange)="formValue = $event">
-      <formidable-field-decorator>
-        <example-counter-field
-          name="pets"
-          [min]="0"
-          [max]="3"
-          [readonly]="readonly"
-          [ngModel]="formValue.pets" />
-        <div formidableFieldLabel>Pets</div>
-      </formidable-field-decorator>
-    </form>
+    <formidable-field-decorator>
+      <example-counter-field [formField]="form.pets" />
+      <div formidableFieldLabel>Pets</div>
+    </formidable-field-decorator>
   `
 })
 class CounterHost {
-  formValue: { pets?: number } = { pets: 1 };
-  readonly = false;
+  readonly model = signal({ pets: 1 });
+  readonly readonly = signal(false);
+  readonly form = form(this.model, (path) => {
+    min(path.pets, 0);
+    max(path.pets, 3);
+    readonly(path.pets, () => this.readonly());
+  });
 }
 
 describe('custom field contract: example-counter-field', () => {
@@ -74,7 +61,7 @@ describe('custom field contract: example-counter-field', () => {
     settle();
   }));
 
-  it('renders the value the form wrote into it', fakeAsync(() => {
+  it('renders the value the model holds', fakeAsync(() => {
     expect(displayedValue()).toBe('1');
   }));
 
@@ -94,7 +81,7 @@ describe('custom field contract: example-counter-field', () => {
     press('ArrowUp');
 
     expect(displayedValue()).toBe('2');
-    expect(host.formValue.pets).toBe(2);
+    expect(host.model().pets).toBe(2);
   }));
 
   it('steps down on ArrowDown', fakeAsync(() => {
@@ -104,7 +91,7 @@ describe('custom field contract: example-counter-field', () => {
     press('ArrowDown');
 
     expect(displayedValue()).toBe('0');
-    expect(host.formValue.pets).toBe(0);
+    expect(host.model().pets).toBe(0);
   }));
 
   it('clamps at both ends rather than running past them', fakeAsync(() => {
@@ -123,7 +110,7 @@ describe('custom field contract: example-counter-field', () => {
   }));
 
   it('ignores the keys while readonly', fakeAsync(() => {
-    host.readonly = true;
+    host.readonly.set(true);
     settle();
 
     counter().dispatchEvent(new Event('focus'));

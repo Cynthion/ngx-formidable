@@ -20,7 +20,7 @@ export function serializeDefinition(definition: PortalFormDefinition): string {
   if (options.validator === 'vest') lines.push('  [formSuite]="suite"');
   // Stated only where the form states them: absent, the app default applies, which is the App Config's.
   if (options.revealOn) lines.push(`  [revealOn]="'${options.revealOn}'"`);
-  lines.push(`  [ngFormOptions]="{ updateOn: '${options.updateOn}' }"`);
+  lines.push(`  [ngFormOptions]="{ updateOn: '${options.debounce === 'blur' ? 'blur' : 'change'}' }"`);
   if (options.hideRequiredMarkers !== undefined) {
     lines.push(`  [hideRequiredMarkers]="${options.hideRequiredMarkers}"`);
   }

@@ -79,7 +79,7 @@ The top bar is on all of them and its tabs are the only navigation there is, so 
 
 **No Preview Route**: turning the `Field Types` switch off leaves the stage showing the form exactly as a consumer's page would, which is what a preview route would have duplicated.
 
-**The Specimen Is Not A Second Stage**: it holds fixed comparisons and no editor, so it cannot disagree with the Studio. Every cell is the Studio's own `PreviewField` over the sample form's field of that kind, each in a form of its own so no two cells share a control; the invalid cells sit in a `formidableForm` whose validator reports every target, so they show the library's real invalid state. Its theme is a `ThemeScope` over the page rather than a write to `:root`, which is what lets a preset repaint the page without touching the Studio's theme. The chapters run concept first — what paints a field, then decoration, then behaviour — and a matrix opens on a few kinds covering the three layouts, because twelve rows at once teach nothing that four do not. The ladder carries `data-shot`, because `npm run screenshots` shoots it for the README.
+**The Specimen Is Not A Second Stage**: it holds fixed comparisons and no editor, so it cannot disagree with the Studio. Every cell is a `SpecimenCell`: the Studio's own `PreviewField` over the sample form's field of that kind, bound to a form of its own so no two cells share a field. An invalid cell carries a rule reporting its field required, so it shows the library's real invalid state. Its theme is a `ThemeScope` over the page rather than a write to `:root`, which is what lets a preset repaint the page without touching the Studio's theme. The chapters run concept first — what paints a field, then decoration, then behaviour — and a matrix opens on a few kinds covering the three layouts, because twelve rows at once teach nothing that four do not. The ladder carries `data-shot`, because `npm run screenshots` shoots it for the README.
 
 **Deep Links Into The Docs**: `docs/:topic/:anchor` opens a document at a heading or at a variable's row. The renderer gives every `##` and `###` heading and every Theme Reference row an id; only the `##` ones are listed in the contents.
 
@@ -250,9 +250,9 @@ The family is `--formidable-font-family`, an ordinary override like any other va
 
 **The Section Title And Its Fields Never Repeat A Name.** `Delivery Or Collection` heads the section whose toggle is `How To Get It`; a heading and a label reading the same words twice is the page stuttering at the visitor.
 
-**A Pizza Is A Template.** The picker carries `presets`, a patch per option, so choosing one fills the sauce and the toppings and leaves every other field alone. The patch is applied when that field's own value moves and never again, so an edit afterwards stands — the choice is a starting point, not a lock. An option with no entry patches nothing, which is what makes `Custom` the absence of a rule rather than a special case.
+**A Pizza Is A Template.** The picker carries `presets`, a patch per option, so choosing one fills the sauce and the toppings and leaves every other field alone. The patch is applied when the user picks that option and never again, so an edit afterwards stands — the choice is a starting point, not a lock. An option with no entry patches nothing, which is what makes `Custom` the absence of a rule rather than a special case.
 
-Presets are applied in `FormValueStore.setModel`, which is the one place the model is written, and their keys are **top-level** model keys. That is deliberate: the patch is a spread, and a spread is exactly what the exported component's handler does. A preset the Studio could apply and the export could not would be the divergence the export contract exists to prevent.
+Presets are applied by `FormValueStore.applyPreset` on the field's own `valueChange`, which only a user's pick emits, so a write to the model applies none. Their keys are **top-level** model keys. That is deliberate: the patch is a spread, and a spread is exactly what the exported component's handler does. A preset the Studio could apply and the export could not would be the divergence the export contract exists to prevent.
 
 The export splits in two, because a map is data and a template cannot hold one. The template binds `(ngModelChange)="applyPizzaPreset($event)"`; the component declares `pizzaPresets` and that handler, both named off the field by `presetHandlerName` so the two halves cannot drift. The import reads only the template, so a re-imported form arrives without its presets and says so — the one `in-the-component` note.
 
@@ -272,8 +272,8 @@ The export splits in two, because a map is data and a template cannot hold one. 
 
 | Behaviour              | Carried By                                       | What It Demonstrates                                                                  |
 | :--------------------- | :----------------------------------------------- | :------------------------------------------------------------------------------------ |
-| **Groups**             | `groupName` on the `When` and `Payment` sections | An `ngModelGroup` and a nested model; `When` adds a rule that reports on the group    |
-| **Conditional fields** | `visibleWhen` on the address, branch and card    | `@if` destroys the control, so the key leaves the model — and `omitWhen` in the suite |
+| **Groups**             | `groupName` on the `When` and `Payment` sections | A nested model; `When` adds a rule that reports on the group                          |
+| **Conditional fields** | `visibleWhen` on the address, branch and card    | `hidden()` leaves the field out of validation and `@if` off the page; the key stays   |
 | **A template picker**  | `presets` on the pizza field                     | One choice filling several fields, and an export split between template and component |
 | **Consumer filtering** | `filterStrategy` on the autocomplete             | The field emits filter text and renders what it is handed; the matching is not its    |
 
@@ -283,11 +283,15 @@ The export splits in two, because a map is data and a template cannot hold one. 
 
 **A Condition Names A Field, Not A Path.** `visibleWhen` carries the watched field's `name`, and the group is resolved wherever that field turns out to sit: the renderer resolves it through `pathById`, and the serializer through the section the field belongs to, which is what writes `model().payment.method === 'card'`. Keeping the path out of the specification is what lets a field move into or out of a group without every condition naming it having to be rewritten.
 
-**The Group Sits On The Section**, not on each field. A group is a run of adjacent controls, which is what a section already is, and one member per field would be a second ordering to keep in step with the first. The model path follows from it — `FormDefinitionStore.pathById` is the one place that resolves `group.name`, and the shape, the drawer, the rule targets and the exported model access all read it.
+**The Group Sits On The Section**, not on each field. A group is a run of adjacent controls, which is what a section already is, and one member per field would be a second ordering to keep in step with the first. The model path follows from it — `FormDefinitionStore.pathById` is the one place that resolves `group.name`, and the model, the field tree, the drawer, the rule targets and the exported model access all read it.
 
 **Conditional Fields Are A Condition, Not A Predicate.** Equality against one field is the whole grammar, because it has to survive a round trip: the serializer writes it as an `@if` and the import reads it back. That is also what keeps the Studio a form previewer rather than a form builder — there is no sidebar control for it, and the sample is where a visitor meets it.
 
-**The Per-Field Component Resolves Its Own `ControlContainer`.** A field lives in its own component, so `ngModel`'s `@Host()` injection stops at that boundary and the component has to provide one. It provides the **nearest** container rather than the `NgForm`, or a field inside a grouped section would register on the form and flatten the group out of the model. For the same reason the field loop is written out under both branches of the group's `@if` rather than shared through an `ng-template`: an embedded view resolves DI where the template is declared, not where it is inserted.
+**The Per-Field Component Is Handed Its Field.** `PreviewForm` resolves each field's `FieldTree` from its model path and passes it in, and `PreviewField` binds it with `[formField]`. A group is a path, not a container, so a grouped field needs nothing an ungrouped one does not.
+
+**A Field's Settings Are Rules.** `[formField]` owns `readonly`, `disabled`, `required` and the limits, and the compiler rejects a binding to any of them beside it. `fieldRules` in `preview-form.schema.ts` states them as rules instead — the required marker as `REQUIRED` metadata, so it marks without reporting — and the Specimen's cells share it. The rules read the specification live, so an edit on the `Settings` tab reaches the field without a new form.
+
+**The Model Has A Key For Every Field.** Signal Forms binds a field only to a key its model defines, so the model is a `linkedSignal` over the fields and their paths: an added field brings its key, empty, and a field moved into a group takes its value with it. A hidden field keeps its key, which is why the drawer states it as hidden rather than absent.
 
 **Chips Are Controls, And Are Derived**: each chip names the component its field is, opens that field on the `Settings` tab, and carries a `↗` to say so. The preview explains itself, and every explanation is also the way to change it — which is what replaces the instructions the page is required not to need.
 
@@ -297,7 +301,16 @@ A chip is the portal's annotation rather than part of the form, so the `Field Ty
 
 **Option Fields** always carry a sample option that is `disabled` and one that is `readonly`, so their theming is demonstrable.
 
-**A Vest Suite Belongs To One Form.** Changing the run axis rebuilds the form — `NgForm` reads `updateOn` once — and each rebuild gets a suite of its own from `createPreviewValidationSuite()`. A suite from `create` carries state, and the cost of a run grows with every form that has ever used it: `runStatic` does not isolate that and `reset()` does not clear it. One module-level suite shared across forms is therefore quadratic in the number of forms. The suite is read through the `validator` option alone, so changing an unrelated option does not discard the validation state the current form has built up.
+**A Schema Is Fixed Once Its Form Exists.** A new validator, a new debounce or a structural edit therefore builds a new field tree, on an injector of its own that is destroyed with it, since a form's effects live as long as their injector. Every other setting a rule reads is read live, so it discards none of the touched, dirty and validation state the current tree holds.
+
+**A Vest Suite Belongs To One Form.** Each tree gets a suite of its own from `createPreviewValidationSuite()`, run through `validateStandardSchema`. A suite from `create` carries state, and the cost of a run grows with every form that has ever used it: `runStatic` does not isolate that and `reset()` does not clear it. One module-level suite shared across forms is therefore quadratic in the number of forms.
+
+**How A Vest Test Reaches Signal Forms.** A test's target becomes its issue's path, and `vest-integration.spec.ts` pins what follows from that:
+
+- **Whole Form**: a target naming no field of the model reports on the root. An empty target would too, but breaks Vest's check that tests run in the same order on every run.
+- **Unknown Path**: Signal Forms throws on an issue whose path runs through a key the model lacks. The suite is written for the sample and the structure editor builds other forms, so the portal drops such an issue before it is reported.
+- **Async Tests**: they never surface — the form stays valid and never pending.
+- **Conditions**: a rule reads no condition, because a hidden field is left out of validation.
 
 **Starting Theme**: a preset that is not the shipped default, so that the page is evidence of configurability from the first frame.
 
@@ -309,7 +322,7 @@ A chip is the portal's annotation rather than part of the form, so the `Field Ty
 
 Expandable and collapsible panels over the form's current model, mirroring the preview's sections, plus errors, validity, dirty state and the raw serialization. The collapsed bar states fill count and validity and is never hidden, because it is the cheapest evidence that the form is real.
 
-The library's Ubiquitous Language names the object a form edits the **model**. `formValue` remains the directive's input name, which is the binding rather than the concept.
+The library's Ubiquitous Language names the object a form edits the **model**. Errors, validity, dirty and submitting are read off the field tree rather than kept beside it, and a whole-form message is listed under `Whole Form`.
 
 ### Settings And Decoration
 
@@ -335,7 +348,7 @@ One editor, under an `Applies to` switch. The three positions are the three kind
 
 **Adornments** are content projection rather than inputs, so no app default can supply one. They live in a field's decoration group and, as adornment examples, on `The Form`, each slot offering none, an icon, text or a button.
 
-**App Defaults Are Given To The Preview.** `App Defaults` holds values of its own, because the library renders from them: `AppDefaultsProvider` provides `FORMIDABLE_DEFAULTS` on the preview `<form>` from `FormDefinitionStore.appDefaults`, so the stage runs the library's resolution rather than a copy of it, and the chrome keeps the library's own. A field and the form read their defaults once, when they are created, so a change rebuilds the preview, as a new `updateOn` does.
+**App Defaults Are Given To The Preview.** `App Defaults` holds values of its own, because the library renders from them: `AppDefaultsProvider` provides `FORMIDABLE_DEFAULTS` on the preview `<form>` from `FormDefinitionStore.previewDefaults`, so the stage runs the library's resolution rather than a copy of it, and the chrome keeps the library's own. The form's own `revealOn` and `hideRequiredMarkers` are defaults the form scopes over its fields, so they sit over the app defaults there. A field reads its defaults once, when it is created, so a change rebuilds the preview's fields; the field tree survives it.
 
 **A Field States Its Own Value Or Nothing.** An app-defaulted member is `undefined` in the specification until a field or the form states one, and the editor offers that as a first `App Default` choice naming the value in force. Each `App Defaults` control counts who states their own and clears them back to inheriting. `LIBRARY_DEFAULTS` and the capability table's `panel` name the library's own fallbacks for the `Library Default` choice.
 
@@ -357,7 +370,7 @@ An Angular production build contains no template compiler, so user-authored mark
 | **In**        | A pasted template parsed with `DOMParser` into the configuration, reporting what it ignored                                    |
 | **Structure** | Fields added, removed and reordered through controls rather than by typing                                                     |
 
-**The Component Is The Template's Other Half**: the template binds `model`, `shape` and, under Vest, `suite`, which only a component defines. `component-serializer.ts` emits one — each key typed from `FIELD_KIND_VALUE_TYPES`, the table the preview's own shape reads, and the suite a skeleton, because the Studio has no rule editor. It is a tab beside the template, since it is not a third thing to take away, and it is not read back in, since it holds nothing the configuration does not. The top bar copies the theme alone for the same reason: a template copied without its component does not compile.
+**The Component Is The Template's Other Half**: the template binds `model`, `shape` and, under Vest, `suite`, which only a component defines. `component-serializer.ts` emits one — each key typed from `FIELD_KIND_VALUE_TYPES`, and the suite a skeleton, because the Studio has no rule editor. It is a tab beside the template, since it is not a third thing to take away, and it is not read back in, since it holds nothing the configuration does not. The top bar copies the theme alone for the same reason: a template copied without its component does not compile.
 
 **The App Config Is What The Template Leaves Out**: the template states a label position, an adornment alignment, a panel position, `revealOn` and `hideRequiredMarkers` only where a field or the form states its own, so the app defaults are what give the rest their value. `config-serializer.ts` emits the `app.config.ts` that provides them, beside the template for that reason. It is not read back in: it belongs to the app rather than the form, which is also why replacing the form leaves it alone.
 
@@ -394,12 +407,12 @@ Three stores, holding signals. Everything a template reads is a `signal` or a `c
 | Store               | Holds                                                                                    |
 | :------------------ | :--------------------------------------------------------------------------------------- |
 | **Form Definition** | One immutable field-specification tree, plus the form-level options and the app defaults |
-| **Form Value**      | The model, and the shape derived from the definition                                     |
+| **Form Value**      | The model, and the field tree over it                                                    |
 | **Theme**           | The user's overrides, the selected preset and scheme, and the resolved result            |
 
 **One Signal Over A Tree**, not one signal per input. The renderer tracks by field identity, and each field component takes its specification as an input, so only the changed field's view is marked.
 
-**The Shape Is Derived** from the definition rather than declared. A static shape starts reporting mismatches the moment a field is added or renamed.
+**The Schema Is Derived** from the definition rather than declared. A static one stops matching the moment a field is added, moved or renamed.
 
 **The Resolved Theme Is One Computed**, feeding both the applied properties and the export, so the two cannot disagree. Application diffs against the set of previously applied keys and removes what is no longer set.
 

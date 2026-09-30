@@ -1,28 +1,13 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { FormidableFormErrors, WHOLE_FORM } from '@cynthion/ngx-formidable';
-import { buildNested, readPath } from '../helpers/model-path.helpers';
-import { FIELD_KIND_VALUE_TYPES } from '../model/field-capabilities';
-import { PortalFieldKind, PortalFieldSpec } from '../model/field-spec.model';
+import { computed, effect, inject, Injectable, Injector, linkedSignal, signal, untracked } from '@angular/core';
+import { form } from '@angular/forms/signals';
+import { FORMIDABLE_ERROR_MESSAGE } from '@cynthion/ngx-formidable';
+import { buildNested, fieldAt, readPath } from '../helpers/model-path.helpers';
+import { PortalFieldSpec } from '../model/field-spec.model';
 import { PREVIEW_INITIAL_MODEL } from '../model/preview-form.definition';
+import { previewSchema, PreviewSchemaField } from '../model/preview-form.schema';
 import { FormDefinitionStore } from './form-definition.store';
 
 export type PortalModel = Record<string, unknown>;
-
-/** What the shape holds for a kind. The library checks the model against it in dev mode. */
-function shapeValueFor(kind: PortalFieldKind): unknown {
-  switch (FIELD_KIND_VALUE_TYPES[kind]) {
-    case 'string[]':
-      return [];
-    case 'Date':
-      return new Date();
-    case 'boolean':
-      return false;
-    case 'number':
-      return 0;
-    case 'string':
-      return '';
-  }
-}
 
 function isFilled(value: unknown): boolean {
   if (value === null || value === undefined) return false;
@@ -32,54 +17,126 @@ function isFilled(value: unknown): boolean {
   return true;
 }
 
+/** Two builds with the same fields at the same paths, in any order: nothing a schema is built from moved. */
+function sameFields(a: readonly PreviewSchemaField[], b: readonly PreviewSchemaField[]): boolean {
+  const key = (fields: readonly PreviewSchemaField[]) =>
+    fields
+      .map((field) => `${field.spec.id}=${field.path}`)
+      .sort()
+      .join('|');
+
+  return key(a) === key(b);
+}
+
 /** One field's row in the model drawer. */
 interface ModelEntry {
   readonly spec: PortalFieldSpec;
-  /** Where this field's value sits in the model, which is `group.name` inside an `ngModelGroup`. */
+  /** Where this field's value sits in the model, which is `group.name` inside a grouped section. */
   readonly path: string;
   readonly value: unknown;
   readonly display: string;
   readonly filled: boolean;
-  /** A condition is keeping this field off the form, so it has no control and no key in the model. */
+  /** A condition is keeping this field off the form. Its key stays, and nothing validates it. */
   readonly hidden: boolean;
   readonly messages: readonly string[];
 }
 
 /**
- * The model the preview form edits, and the shape derived from the definition.
- *
- * The shape is derived rather than declared: a static one starts reporting mismatches the moment a field is
- * added or renamed, which the structure editor does constantly.
+ * The model the preview form edits, and the field tree over it that the form and the model drawer both read.
  */
 @Injectable({ providedIn: 'root' })
 export class FormValueStore {
   private readonly definitionStore = inject(FormDefinitionStore);
+  private readonly injector = inject(Injector);
+  private readonly message = inject(FORMIDABLE_ERROR_MESSAGE);
 
-  public readonly model = signal<PortalModel>({ ...PREVIEW_INITIAL_MODEL });
-  public readonly errors = signal<FormidableFormErrors>({});
-  public readonly valid = signal<boolean | null>(null);
-  public readonly dirty = signal<boolean | null>(null);
-  public readonly submitted = signal(false);
+  /** The fields and their model paths, which only a structural edit changes. */
+  private readonly fields = computed<readonly PreviewSchemaField[]>(
+    () => {
+      const paths = this.definitionStore.pathById();
+
+      return this.definitionStore.fields().map((spec) => ({ spec, path: paths.get(spec.id) ?? spec.name }));
+    },
+    { equal: sameFields }
+  );
+
+  private readonly specById = computed(
+    () => new Map(this.definitionStore.fields().map((field) => [field.id, field] as const))
+  );
 
   /**
-   * The shape carries every field the form could render, including the two a condition currently hides.
-   *
-   * That is not a leak: the shape is a dev-mode typo check over `DeepPartial`, and it is checked against the
-   * keys the *model* has. A key it lists and the model lacks is exactly the conditional case, and is legal.
+   * A key for every field the definition has. Signal Forms binds a field only to a key its model defines, so
+   * a field added in the structure editor brings its key, empty, and a field moved into a group takes its
+   * value with it.
    */
-  public readonly shape = computed<PortalModel>(() => {
-    const paths = this.definitionStore.pathById();
+  public readonly model = linkedSignal<readonly PreviewSchemaField[], PortalModel>({
+    source: this.fields,
+    computation: (fields, previous) => {
+      const model = previous?.value ?? PREVIEW_INITIAL_MODEL;
+      const before = new Map(previous?.source.map((field) => [field.spec.id, field.path]));
 
-    return buildNested(
-      this.definitionStore.fields().map((field) => [paths.get(field.id) ?? field.name, shapeValueFor(field.kind)])
-    );
+      return buildNested(
+        fields.map((field) => [
+          field.path,
+          readPath(model, before.get(field.spec.id) ?? field.path) ?? (field.spec.kind === 'checkbox-group' ? [] : null)
+        ])
+      );
+    }
   });
 
+  /** Whether the form has been submitted, which the footer answers with the definition's own two lines. */
+  public readonly submitted = signal(false);
+
+  private readonly validator = computed(() => this.definitionStore.options().validator);
+  private readonly debounce = computed(() => this.definitionStore.options().debounce);
+
   /**
-   * The fields a condition is currently keeping off the form.
+   * One build of the form: its field tree, and the injector the tree lives in.
    *
-   * `@if` destroys the control, so a hidden field has no entry in the model at all — which is why this is
-   * derived from the model rather than read out of it.
+   * A schema is fixed once its form exists, so a new validator, a new debounce or a structural edit builds a
+   * new one, with a Vest suite of its own; every other setting a rule reads is read live. Each tree gets an
+   * injector of its own and the effect below destroys it with the build, because a form's effects — its
+   * validator's among them — live as long as their injector, and this store's lives as long as the app.
+   */
+  private readonly build = computed(() => {
+    const schema = previewSchema(
+      { fields: this.fields(), validator: this.validator(), debounce: this.debounce() },
+      {
+        spec: (field) => this.specById().get(field.spec.id) ?? field.spec,
+        options: () => this.definitionStore.options(),
+        isHidden: (id) => this.hiddenFieldIds().has(id)
+      }
+    );
+
+    return untracked(() => {
+      const injector = Injector.create({ providers: [], parent: this.injector });
+      const tree = form(this.model, schema, {
+        injector,
+        submission: {
+          action: async () => this.submitted.set(true),
+          onInvalid: () => this.submitted.set(true)
+        }
+      });
+
+      return { injector, tree };
+    });
+  });
+
+  /** The field tree the form binds and the model drawer reads its state off. */
+  public readonly form = computed(() => this.build().tree);
+
+  constructor() {
+    effect((onCleanup) => {
+      const { injector } = this.build();
+
+      onCleanup(() => injector.destroy());
+    });
+  }
+
+  /**
+   * The fields a condition is currently keeping off the form, which the schema's `hidden()` rules read.
+   * A condition naming a field that is no longer on the form renders rather than hides: removing one field
+   * in the structure editor must not leave another permanently unreachable.
    */
   public readonly hiddenFieldIds = computed<ReadonlySet<string>>(() => {
     const model = this.model();
@@ -90,8 +147,6 @@ export class FormValueStore {
       const condition = field.visibleWhen;
       if (!condition) return false;
 
-      // A condition naming a field that is no longer on the form renders rather than hides: removing one
-      // field in the structure editor must not leave another permanently unreachable.
       const watched = byName.get(condition.field);
       if (!watched) return false;
 
@@ -103,35 +158,50 @@ export class FormValueStore {
 
   public readonly entries = computed<readonly ModelEntry[]>(() => {
     const model = this.model();
-    const errors = this.errors();
-    const paths = this.definitionStore.pathById();
+    const tree = this.form();
     const hidden = this.hiddenFieldIds();
 
-    return this.definitionStore.fields().map((spec) => {
-      const path = paths.get(spec.id) ?? spec.name;
+    return this.fields().map(({ spec, path }) => {
       const value = readPath(model, path);
 
       return {
-        spec,
+        spec: this.specById().get(spec.id) ?? spec,
         path,
         value,
         display: this.display(value),
         filled: isFilled(value),
         hidden: hidden.has(spec.id),
-        messages: errors[path] ?? []
+        messages: fieldAt(tree, path)().errors().map(this.message)
       };
     });
   });
 
-  /** Both counts skip what a condition is hiding: a field with no control cannot be filled in. */
-  public readonly filledCount = computed(() => this.entries().filter((entry) => entry.filled).length);
+  /** Both counts skip what a condition is hiding: a field that is not on the form cannot be filled in. */
+  public readonly filledCount = computed(() => this.entries().filter((entry) => entry.filled && !entry.hidden).length);
   public readonly fieldCount = computed(() => this.entries().filter((entry) => !entry.hidden).length);
 
-  public readonly wholeFormMessages = computed<readonly string[]>(() => this.errors()[WHOLE_FORM] ?? []);
+  /** Every message the form holds, keyed by its target's model path — `''` for the whole form. */
+  public readonly errors = computed<Readonly<Record<string, readonly string[]>>>(() => {
+    const root = this.form()().name();
+    const errors: Record<string, string[]> = {};
 
-  public readonly errorCount = computed(() =>
-    Object.values(this.errors()).reduce((total, messages) => total + messages.length, 0)
-  );
+    for (const error of this.form()().errorSummary()) {
+      const target = error
+        .fieldTree()
+        .name()
+        .slice(root.length + 1);
+
+      (errors[target] ??= []).push(this.message(error));
+    }
+
+    return errors;
+  });
+
+  public readonly wholeFormMessages = computed(() => this.errors()[''] ?? []);
+  public readonly errorCount = computed(() => this.form()().errorSummary().length);
+  public readonly valid = computed(() => this.form()().valid());
+  public readonly dirty = computed(() => this.form()().dirty());
+  public readonly submitting = computed(() => this.form()().submitting());
 
   /** The model as the consumer would see it after a submit. */
   public readonly serialized = computed(() =>
@@ -139,58 +209,16 @@ export class FormValueStore {
   );
 
   /**
-   * Takes the model the form produced, with any template preset the change asked for applied over it.
+   * Applies the preset of the option the user just chose, if it carries one.
    *
-   * Here rather than on the field, because a preset writes keys the field it sits on does not own: it is a
-   * change to the model, and this is what holds the model.
+   * Called from the field's `valueChange`, which only the user's own pick emits — so a later edit to one of
+   * the fields the preset filled stands, and the choice is a starting point, not a lock. The patch is a
+   * spread, which is exactly what the exported component's handler does.
    */
-  public setModel(model: PortalModel): void {
-    this.model.set(this.withPresets(model));
-  }
+  public applyPreset(spec: PortalFieldSpec, value: unknown): void {
+    const preset = typeof value === 'string' ? spec.presets?.[value] : undefined;
 
-  /**
-   * Applies the preset of every field whose own value just moved to an option that carries one.
-   *
-   * Measured against the previous model rather than against the field's value alone, so a later edit to one
-   * of the fields a preset filled is not undone on the next keystroke — the choice is a starting point, not
-   * a lock. The patch is a spread, which is exactly what the exported component's handler does.
-   */
-  private withPresets(model: PortalModel): PortalModel {
-    const previous = this.model();
-    const paths = this.definitionStore.pathById();
-    let patched = model;
-
-    for (const field of this.definitionStore.fields()) {
-      if (!field.presets) continue;
-
-      const path = paths.get(field.id) ?? field.name;
-      const value = readPath(model, path);
-
-      if (typeof value !== 'string' || value === readPath(previous, path)) continue;
-
-      const preset = field.presets[value];
-      if (preset) patched = { ...patched, ...preset };
-    }
-
-    return patched;
-  }
-
-  public reset(): void {
-    this.model.set({ ...PREVIEW_INITIAL_MODEL });
-    this.submitted.set(false);
-  }
-
-  public clear(): void {
-    const paths = this.definitionStore.pathById();
-
-    this.model.set(
-      buildNested(
-        this.definitionStore
-          .fields()
-          .map((field) => [paths.get(field.id) ?? field.name, field.kind === 'checkbox-group' ? [] : null])
-      )
-    );
-    this.submitted.set(false);
+    if (preset) this.model.update((model) => ({ ...model, ...preset }));
   }
 
   private display(value: unknown): string {

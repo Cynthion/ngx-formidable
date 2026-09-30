@@ -124,12 +124,12 @@ A control appears only where that kind of field honours the input. The decorator
 
 The sample form is a pizza order that starts already filled in, because an empty form shows none of the filled, selected and floating-label states a theme is judged by. Beyond a field of every type, it carries four things a single field cannot show on its own.
 
-| Feature                | Where                                                                                                                                     |
-| :--------------------- | :---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Groups**             | `When` and `Payment` each wrap their fields in an `ngModelGroup`, so they nest in the model. `When` adds a rule that reports on the group |
-| **Conditional Fields** | The handover toggle decides whether the address or the branch is rendered, and the payment method whether the card number is              |
-| **A Template Picker**  | Choosing a pizza fills the sauce and the toppings below it, and leaves every other field alone                                            |
-| **A Masked Field**     | An unmasked and a masked input side by side, so the mask is visible without being described                                               |
+| Feature                | Where                                                                                                                           |
+| :--------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
+| **Groups**             | `When` and `Payment` each nest their fields under a key of their own in the model. `When` adds a rule that reports on the group |
+| **Conditional Fields** | The handover toggle decides whether the address or the branch is rendered, and the payment method whether the card number is    |
+| **A Template Picker**  | Choosing a pizza fills the sauce and the toppings below it, and leaves every other field alone                                  |
+| **A Masked Field**     | An unmasked and a masked input side by side, so the mask is visible without being described                                     |
 
 **Every field type is on screen when the form loads.** Some appear more than once for that reason — the branch dropdown can be swapped out only because the pizza picker keeps that component on the page.
 

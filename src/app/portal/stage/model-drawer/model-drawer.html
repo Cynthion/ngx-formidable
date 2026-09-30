@@ -12,12 +12,14 @@
   <span class="counts">{{ valueStore.filledCount() }} of {{ valueStore.fieldCount() }} filled</span>
   <span
     class="validity"
-    [class.is-invalid]="valueStore.valid() === false"
-    [class.is-valid]="valueStore.valid() === true">
+    [class.is-invalid]="!valueStore.valid()"
+    [class.is-valid]="valueStore.valid()">
     {{ validity() }}
   </span>
   @if (valueStore.dirty()) {
   <span class="dirty">Dirty</span>
+  } @if (valueStore.submitting()) {
+  <span class="dirty">Submitting</span>
   }
 </button>
 
@@ -76,7 +78,7 @@
           </dt>
           <dd>
             @if (entry.hidden) {
-            <span class="message">Not rendered — no control, no key.</span>
+            <span class="message">Hidden — kept in the model, left out of validation.</span>
             } @else { {{ entry.display }} } @for (message of entry.messages; track message) {
             <span class="message">{{ message }}</span>
             }
@@ -90,7 +92,7 @@
     <dl class="entries">
       @for (entry of errorEntries(); track entry[0]) {
       <div class="entry">
-        <dt>{{ entry[0] }}</dt>
+        <dt>{{ entry[0] || 'Whole Form' }}</dt>
         <dd>
           @for (message of entry[1]; track message) {
           <span class="message">{{ message }}</span>

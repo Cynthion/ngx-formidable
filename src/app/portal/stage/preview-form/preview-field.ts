@@ -1,5 +1,5 @@
 import { Component, computed, ElementRef, inject, input, output, signal } from '@angular/core';
-import { ControlContainer, FormsModule } from '@angular/forms';
+import { FieldTree, FormField } from '@angular/forms/signals';
 import {
   AutocompleteField,
   CheckboxGroupField,
@@ -17,7 +17,6 @@ import {
   FormidableActionOption,
   FormidableOption,
   InputField,
-  NgxFormidableFieldValidate,
   RadioGroupField,
   SelectField,
   SliderField,
@@ -36,7 +35,6 @@ import { CALENDAR_SVG, MARKER_SVG, SPARK_SVG } from './preview-icons';
 import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabilities';
 import { PortalFieldSpec, PortalFormOptions, PortalOptionSpec } from '../../model/field-spec.model';
 import { localeOf } from '../../model/locales';
-import { ANGULAR_MIN_LENGTHS, ANGULAR_REQUIRED_FIELDS } from '../../model/preview-form.validation';
 
 /** What a picked `actionOption` hands to the form: which field asked, and the text typed into it so far. */
 export interface PortalActionRequest {
@@ -53,17 +51,18 @@ const FORMATTERS: Readonly<Record<string, (value: number) => string>> = {
 };
 
 /**
- * One field of the preview form, rendered from its specification.
+ * One field of the preview form, rendered from its specification and bound to its field in a field tree.
  *
  * The specification arrives as an input, so a change to one field marks only this view — which is what makes
- * one signal over the whole definition tree workable.
+ * one signal over the whole definition tree workable. Its state — readonly, disabled, required, the limits —
+ * arrives through `[formField]` from the schema, which is the only way a field bound by it takes any.
  */
 @Component({
   selector: 'portal-preview-field',
   templateUrl: './preview-field.html',
   styleUrl: './preview-field.scss',
   imports: [
-    FormsModule,
+    FormField,
     FieldDecorator,
     FieldHint,
     FieldLabelAdornment,
@@ -72,7 +71,6 @@ const FORMATTERS: Readonly<Record<string, (value: number) => string>> = {
     FieldPrefix,
     FieldSuffix,
     FieldToggleIcon,
-    NgxFormidableFieldValidate,
     InputField,
     TextareaField,
     SelectField,
@@ -90,14 +88,6 @@ const FORMATTERS: Readonly<Record<string, (value: number) => string>> = {
     ExampleTooltip,
     AccessibilityReadout
   ],
-  // A field lives in its own component, and `@Host()` stops `ngModel`'s `ControlContainer` injection at that
-  // boundary — so without this every control would register as standalone, outside the form. A standalone
-  // `ngModel` also sets its control up before the field's view exists, which `impl/backlog.md` records as a
-  // crash, so this is what makes the per-field component workable at all.
-  //
-  // The container is resolved rather than named: a field inside a section's `ngModelGroup` has to register
-  // on that group, and pinning every field to the `NgForm` instead would flatten the group out of the model.
-  viewProviders: [{ provide: ControlContainer, useFactory: () => inject(ControlContainer, { skipSelf: true }) }],
   host: {
     '[class.is-selected]': 'selected()',
     '[style.grid-column]': "spec().span === 2 ? '1 / -1' : null"
@@ -108,7 +98,8 @@ export class PreviewField {
 
   public readonly spec = input.required<PortalFieldSpec>();
   public readonly formOptions = input.required<PortalFormOptions>();
-  public readonly value = input<unknown>(null);
+  /** The field in the tree this one is bound to. Its value's type is the kind's, which the tree cannot state. */
+  public readonly fieldTree = input.required<FieldTree<unknown>>();
   public readonly selected = input(false);
   public readonly showAccessibility = input(false);
   public readonly showFieldTypes = input(true);
@@ -119,6 +110,8 @@ export class PreviewField {
   public readonly chipActivated = output<string>();
   /** An `actionOption` was picked. The form owns what happens next, because it owns the model. */
   public readonly actionRequested = output<PortalActionRequest>();
+  /** The user chose an option, which is what a preset answers. Never emitted for a write to the model. */
+  public readonly picked = output<unknown>();
 
   protected readonly host = this.elementRef.nativeElement;
 
@@ -149,16 +142,13 @@ export class PreviewField {
   /** Bumped whenever this field may have repainted, so the accessibility readout re-reads the DOM. */
   protected readonly revision = computed(() => {
     this.spec();
-    this.value();
+    this.fieldTree()().value();
     this.formOptions();
 
     return Date.now();
   });
 
   protected readonly locale = computed(() => localeOf(this.spec().locale ?? this.formOptions().locale));
-
-  protected readonly isReadonly = computed(() => this.spec().state.readonly || this.formOptions().readonly);
-  protected readonly isDisabled = computed(() => this.spec().state.disabled || this.formOptions().disabled);
 
   protected readonly showLabel = computed(() => this.formOptions().showLabels && this.spec().decoration.showLabel);
 
@@ -177,14 +167,6 @@ export class PreviewField {
   protected readonly panelPosition = computed(() => this.spec().panelPosition);
 
   protected readonly options = computed<PortalOptionSpec[]>(() => [...(this.spec().options ?? [])]);
-
-  protected readonly requiredInAngularMode = computed(
-    () => this.formOptions().validator === 'angular' && ANGULAR_REQUIRED_FIELDS.has(this.spec().name)
-  );
-
-  protected readonly minLengthInAngularMode = computed(() =>
-    this.formOptions().validator === 'angular' ? (ANGULAR_MIN_LENGTHS.get(this.spec().name) ?? null) : null
-  );
 
   /** An `always` default is pinned first, exempt from both the sort and the autocomplete filter. */
   protected readonly defaultOption = computed(() => {
