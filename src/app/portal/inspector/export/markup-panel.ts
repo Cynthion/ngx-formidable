@@ -26,7 +26,7 @@ const OUTPUTS: readonly { id: Output; label: string; help: string }[] = [
   {
     id: 'schema',
     label: 'Schema',
-    help: 'my-form.form.ts. The model’s type, its initial value, and the rules: each field’s state, limits and condition, and your validation.'
+    help: 'my-form.form.ts. The model’s type, its initial value, and the form’s rules, always: each field’s state, limits and condition, then the checks, written by the validator chosen on Form ▸ Settings ▸ The Form.'
   },
   {
     id: 'config',

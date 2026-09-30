@@ -18,8 +18,9 @@ const DEBOUNCES = [
 ] as const;
 
 const VALIDATORS = [
-  ['vest', 'Vest suite'],
   ['angular', "Angular's built-in rules"],
+  ['vest', 'Vest suite'],
+  ['zod', 'Zod schema'],
   ['none', 'None']
 ] as const;
 

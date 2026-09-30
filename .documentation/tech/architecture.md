@@ -68,7 +68,7 @@ The portal lives in `src/app/portal/` and is routed with hash location, because 
 | `portal/export/`      | Theme export and import, and the markup serializer and parser                   |
 | `src/styles/portal/`  | The portal's own appearance, the chrome insulation and the shared controls      |
 | `src/app/example-*`   | The custom field, option, icon and tooltip the portal projects                  |
-| `src/app/validation/` | The hand-written model and Vest suite the validation integration spec drives    |
+| `src/app/validation/` | The hand-written models, Vest suite and Zod schema the integration specs drive  |
 
 **Mirrored Documentation**: the `Docs` route imports `.documentation/user/*.md` as text — `angular.json` maps `.md` to esbuild's `text` loader for the application and the test target — and renders it with `marked`. The markdown is the single source: there is no second copy to drift, and the deploy stays static because nothing is fetched. `docs:check` still guards the token manifest, whose descriptions the **inspector** reads for inline help.
 

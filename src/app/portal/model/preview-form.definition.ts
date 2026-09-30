@@ -406,7 +406,7 @@ const PREVIEW_FORM_OPTIONS: PortalFormOptions = {
   readonly: false,
   disabled: false,
   debounce: 0,
-  validator: 'vest',
+  validator: 'angular',
   locale: 'en-GB'
 };
 

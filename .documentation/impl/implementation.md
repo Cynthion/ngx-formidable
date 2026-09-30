@@ -111,19 +111,6 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 
 ## Library Phases
 
-### Phase 28 — One Rule Set In Every Validator
-
-**Depends On**: nothing.
-
-- **The Gap**: the Studio's validators check different rules. Vest checks the formats, the toppings limit, the `when` group and the whole form; Angular's rules check `required()` and the phone's length, with raw `kind` messages. The export writes Angular's rules but an empty Vest suite, so under the default validator the exported form checks nothing the stage checks.
-- **One Rule Set**: the sample's rules are stated once — the field, the check, the message — and spelled per validator. The preview runs each spelling and the export writes it, so switching the validator changes the library and never the rules. A rule whose fields are not all on the form is left out, on the stage and in the export alike.
-- **Angular First**: Angular's rules become the default validator, then Vest, Zod and none.
-- **Zod**: a validator of its own, through `validateStandardSchema` like Vest. `zod` joins the portal's dependencies.
-- **Opt-In Without A Package**: a Vest suite and a Zod schema are Standard Schemas, which Signal Forms runs with no adapter, so neither needs library code — **Validation** in **Decisions**. The export imports `vest` or `zod` only under its own validator.
-- **The Required Marker**: under Angular's rules `required()` marks and checks. Under Vest and Zod the schema adds `REQUIRED` metadata, because neither can tell Signal Forms a field is required. The Studio says so beside the validator.
-- **In The Studio**: the validator control and the `Schema` tab say that `my-form.form.ts` always holds the form's rules, and the validator decides who writes the checks. [`user/studio.md`](../user/studio.md) follows.
-- **Proof**: a parity spec runs every validator over the same models and expects the same messages on the same paths. The golden export covers each validator, compiled and rendered.
-
 ### Phase 29 — Delete The Template-Driven Harness
 
 **Depends On**: nothing.
@@ -134,7 +121,7 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 
 ### Phase 30 — Maintainer Documentation
 
-**Depends On**: Phases 28 and 29.
+**Depends On**: Phase 29.
 
 - **Forms Integration**: a new `tech/forms-integration.md` replaces [`tech/validation.md`](../tech/validation.md) — the field contract against each API's custom-control integration, the value and state flow as diagrams, how each validator reaches a field from **Validators** in **Target Architecture**, the accepted compromises, and why there is no value accessor, no harness and no validator package.
 - **Updated**: [`tech/architecture.md`](../tech/architecture.md), [`tech/decoration.md`](../tech/decoration.md), [`tech/portal.md`](../tech/portal.md), the `impl/` conventions and the index in [`README.md`](../README.md).

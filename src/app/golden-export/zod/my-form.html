@@ -1,0 +1,383 @@
+<form [formRoot]="form">
+
+  <!-- Your Pizza -->
+  <formidable-field-decorator>
+    <formidable-dropdown-field
+      placeholder="Choose one from the menu…"
+      [panelPosition]="'right'"
+      [formField]="form.pizza"
+      (valueChange)="applyPizzaPreset($event)">
+      <formidable-field-option
+        value="margherita"
+        label="Margherita" />
+      <formidable-field-option
+        value="marinara"
+        label="Marinara" />
+      <formidable-field-option
+        value="funghi"
+        label="Funghi" />
+      <formidable-field-option
+        value="diavola"
+        label="Diavola" />
+      <formidable-field-option
+        value="hawaii"
+        label="Hawaii" />
+      <formidable-field-option
+        value="quattro-formaggi"
+        label="Quattro Formaggi" />
+      <formidable-field-option
+        value="custom"
+        label="Custom — Your Own Combination" />
+      <formidable-field-option
+        value="calzone"
+        label="Calzone — the oven is full"
+        [disabled]="true" />
+    </formidable-dropdown-field>
+    <div formidableFieldLabel>
+      Pizza
+    </div>
+    <div
+      formidableFieldHint
+      align="start">
+      Fills the sauce and the toppings below. Change either afterwards — a pizza is a starting point, not a lock.
+    </div>
+  </formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-select-field
+      placeholder="Choose a size…"
+      [formField]="form.size">
+      <formidable-field-option
+        value="small"
+        label="Small — 26 cm" />
+      <formidable-field-option
+        value="medium"
+        label="Medium — 32 cm" />
+      <formidable-field-option
+        value="large"
+        label="Large — 40 cm" />
+      <formidable-field-option
+        value="family"
+        label="Family — sold out today"
+        [disabled]="true" />
+    </formidable-select-field>
+    <div formidableFieldLabel>
+      Size
+    </div>
+  </formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-select-field
+      placeholder="Choose a crust…"
+      [formField]="form.crust">
+      <formidable-field-option
+        value="thin"
+        label="Thin" />
+      <formidable-field-option
+        value="classic"
+        label="Classic" />
+      <formidable-field-option
+        value="deep-pan"
+        label="Deep Pan" />
+      <formidable-field-option
+        value="stuffed"
+        label="Stuffed" />
+      <formidable-field-option
+        value="sourdough"
+        label="Sourdough — tomorrow only"
+        [readonly]="true" />
+      <formidable-field-option
+        value="gluten-free"
+        label="Gluten-Free — sold out"
+        [disabled]="true" />
+    </formidable-select-field>
+    <div formidableFieldLabel>
+      Crust
+    </div>
+  </formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-radio-group-field
+      [formField]="form.sauce">
+      <formidable-field-option
+        value="tomato"
+        label="Tomato" />
+      <formidable-field-option
+        value="arrabbiata"
+        label="Arrabbiata" />
+      <formidable-field-option
+        value="white"
+        label="White (Garlic Cream)" />
+      <formidable-field-option
+        value="gorgonzola"
+        label="Gorgonzola Cream" />
+      <formidable-field-option
+        value="bbq"
+        label="BBQ" />
+      <formidable-field-option
+        value="pesto"
+        label="Pesto" />
+      <formidable-field-option
+        value="house"
+        label="House Sauce — the kitchen decides"
+        [readonly]="true" />
+      <formidable-field-option
+        value="truffle"
+        label="Truffle Cream — sold out"
+        [disabled]="true" />
+    </formidable-radio-group-field>
+    <div formidableFieldLabel>
+      Sauce
+    </div>
+  </formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-checkbox-group-field
+      [formField]="form.toppings">
+      <formidable-field-option
+        value="basil"
+        label="Basil" />
+      <formidable-field-option
+        value="chilli"
+        label="Chilli" />
+      <formidable-field-option
+        value="ham"
+        label="Ham" />
+      <formidable-field-option
+        value="mushrooms"
+        label="Mushrooms" />
+      <formidable-field-option
+        value="pineapple"
+        label="Pineapple" />
+      <formidable-field-option
+        value="salami"
+        label="Salami" />
+      <formidable-field-option
+        value="mozzarella"
+        label="Mozzarella — in the price"
+        [readonly]="true" />
+      <formidable-field-option
+        value="anchovies"
+        label="Anchovies — sold out"
+        [disabled]="true" />
+    </formidable-checkbox-group-field>
+    <div formidableFieldLabel>
+      Toppings
+    </div>
+    <div
+      formidableFieldHint
+      align="start">
+      Five is the limit.
+    </div>
+  </formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-slider-field
+      [step]="1"
+      minLabel="Mild"
+      maxLabel="Volcanic"
+      [showTickMarks]="true"
+      [showMinMaxLabels]="true"
+      [formField]="form.spice" />
+    <div formidableFieldLabel>
+      Spice
+    </div>
+  </formidable-field-decorator>
+
+  <!-- Delivery Or Collection -->
+  <formidable-field-decorator>
+    <formidable-toggle-field
+      [labelPosition]="'after'"
+      onLabel="I Will Pick It Up"
+      offLabel="Deliver It To Me"
+      [formField]="form.pickup" />
+    <div formidableFieldLabel>
+      How To Get It
+    </div>
+  </formidable-field-decorator>
+  @if (!form.address().hidden()) {
+    <formidable-field-decorator>
+      <formidable-autocomplete-field
+        placeholder="Start typing a street…"
+        [actionOptionMode]="'always'"
+        [formField]="form.address">
+        <!-- [actionOption]="add-address": last in the list, and runs an action -->
+        <formidable-field-option
+          value="bahnhofstrasse"
+          label="Bahnhofstrasse 12" />
+        <formidable-field-option
+          value="langstrasse"
+          label="Langstrasse 84" />
+        <formidable-field-option
+          value="seefeldstrasse"
+          label="Seefeldstrasse 40" />
+        <formidable-field-option
+          value="birmensdorferstrasse"
+          label="Birmensdorferstrasse 5" />
+        <formidable-field-option
+          value="hardturmstrasse"
+          label="Hardturmstrasse 120" />
+        <formidable-field-option
+          value="flughafen"
+          label="Flughafen Zürich"
+          [disabled]="true" />
+        <formidable-field-option
+          value="office"
+          label="Office — on file"
+          [readonly]="true" />
+      </formidable-autocomplete-field>
+      <div formidableFieldLabel>
+        Delivery Address
+      </div>
+      <div
+        formidableFieldHint
+        align="start">
+        Fuzzy search over a custom option component.
+      </div>
+    </formidable-field-decorator>
+  }
+  @if (!form.branch().hidden()) {
+    <formidable-field-decorator>
+      <formidable-dropdown-field
+        placeholder="Which branch?"
+        [panelPosition]="'left'"
+        [defaultOptionMode]="'always'"
+        [formField]="form.branch">
+        <!-- pinned first, never sorted and never filtered -->
+        <formidable-field-option
+          value="central"
+          label="Central — Bahnhofstrasse" />
+        <formidable-field-option
+          value="west"
+          label="West — Hardturm" />
+        <formidable-field-option
+          value="lake"
+          label="Lakeside — Seefeld" />
+        <formidable-field-option
+          value="north"
+          label="North — closed for renovation"
+          [disabled]="true" />
+        <formidable-field-option
+          value="airport"
+          label="Airport — staff only"
+          [readonly]="true" />
+      </formidable-dropdown-field>
+      <div formidableFieldLabel>
+        Pick Up From
+      </div>
+    </formidable-field-decorator>
+  }
+
+  <!-- When -->
+  <formidable-field-decorator>
+    <formidable-date-field
+      [unicodeTokenFormat]="'dd . MM . yyyy'"
+      [emptyHint]="'format'"
+      [formField]="form.when.date" />
+    <div formidableFieldLabel>
+      Date
+    </div>
+    <div
+      formidableFieldHint
+      align="start">
+      Open 11:00 to 23:00, closed on Mondays.
+    </div>
+  </formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-time-field
+      [unicodeTokenFormat]="'HH:mm'"
+      [emptyHint]="'format'"
+      [formField]="form.when.time" />
+    <div formidableFieldLabel>
+      Time
+    </div>
+  </formidable-field-decorator>
+
+  <!-- Payment -->
+  <formidable-field-decorator>
+    <formidable-radio-group-field
+      [formField]="form.payment.method">
+      <formidable-field-option
+        value="card"
+        label="Card" />
+      <formidable-field-option
+        value="twint"
+        label="Twint" />
+      <formidable-field-option
+        value="cash"
+        label="Cash On Handover" />
+      <formidable-field-option
+        value="invoice"
+        label="Invoice — regular customers only"
+        [disabled]="true" />
+    </formidable-radio-group-field>
+    <div formidableFieldLabel>
+      Pay By
+    </div>
+  </formidable-field-decorator>
+  @if (!form.payment.cardNumber().hidden()) {
+    <formidable-field-decorator>
+      <formidable-input-field
+        mask="0000 0000 0000 0000"
+        [formField]="form.payment.cardNumber" />
+      <div
+        formidableFieldLabel
+        position="outside">
+        Card Number
+      </div>
+      <div
+        formidableFieldHint
+        align="start">
+        This form posts nowhere. Type whatever you like.
+      </div>
+    </formidable-field-decorator>
+  }
+
+  <!-- Your Order -->
+  <formidable-field-decorator>
+    <formidable-input-field
+      placeholder="Who is it for?"
+      [formField]="form.orderName" />
+    <div formidableFieldLabel>
+      Name On The Order
+    </div>
+  </formidable-field-decorator>
+  <formidable-field-decorator>
+    <example-counter-field
+      [step]="1"
+      [formField]="form.quantity" />
+    <div formidableFieldLabel>
+      How Many
+    </div>
+  </formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-input-field
+      mask="000 000 00 00"
+      [formField]="form.phone" />
+    <div formidableFieldLabel>
+      Phone Number
+    </div>
+    <div
+      formidableFieldHint
+      align="start">
+      Only used if the driver cannot find you.
+    </div>
+  </formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-input-field
+      placeholder="you@example.com"
+      [formField]="form.email" />
+    <div formidableFieldLabel>
+      Email Address
+    </div>
+    <div
+      formidableFieldHint
+      align="start">
+      The receipt goes here.
+    </div>
+  </formidable-field-decorator>
+  <formidable-field-decorator>
+    <formidable-textarea-field
+      placeholder="Extra crispy? Ring twice?"
+      [showLengthIndicator]="true"
+      [formField]="form.notes" />
+    <div formidableFieldLabel>
+      Notes For The Kitchen
+    </div>
+  </formidable-field-decorator>
+</form>

@@ -271,8 +271,8 @@ export interface PortalSectionSpec {
   readonly groupName?: string;
 }
 
-/** Which rules the schema validates with, and so what the errors under each field come from. */
-export type PortalValidatorKind = 'vest' | 'angular' | 'none';
+/** Who writes the sample's rules into the schema, and so what the errors under each field come from. */
+export type PortalValidatorKind = 'angular' | 'vest' | 'zod' | 'none';
 
 /** Signal Forms' `debounce`: how long an edit waits before it reaches the model, and so before the rules run. */
 export type PortalDebounce = 0 | 300 | 'blur';

@@ -7,16 +7,19 @@ import {
   metadata,
   min,
   minLength,
+  pattern,
   readonly,
   required,
   REQUIRED,
   SchemaFn,
   SchemaPath,
   SchemaPathTree,
+  validate,
   validateStandardSchema
 } from '@angular/forms/signals';
+import { FIELD_KIND_VALUE_TYPES } from './field-capabilities';
 import { PortalDebounce, PortalFieldSpec, PortalFormOptions, PortalValidatorKind } from './field-spec.model';
-import { ANGULAR_MIN_LENGTHS, ANGULAR_REQUIRED_FIELDS, createPreviewValidationSuite } from './preview-form.validation';
+import { createPreviewSuite, PortalRule, previewZodSchema, rulesOn, SampleModel } from './preview-form.validation';
 
 type PreviewModel = Record<string, unknown>;
 
@@ -59,7 +62,10 @@ export function fieldRules(path: SchemaPath<unknown>, spec: () => PortalFieldSpe
   max(path as SchemaPath<number>, () => spec().max);
 }
 
-/** The preview form's schema: the form's master switches, each field's settings and condition, and the rules. */
+/**
+ * The preview form's schema: the form's master switches, each field's settings and condition, then the
+ * sample's rules as the validator spells them.
+ */
 export function previewSchema(build: PreviewSchemaBuild, live: PreviewSchemaLive): SchemaFn<PreviewModel> {
   return (root) => {
     // A rule on the root reaches every field under it: the debounce, readonly and disabled are inherited.
@@ -72,17 +78,47 @@ export function previewSchema(build: PreviewSchemaBuild, live: PreviewSchemaLive
 
       fieldRules(path, () => live.spec(field));
       hidden(path, () => live.isHidden(field.spec.id));
-
-      if (build.validator !== 'angular') continue;
-
-      if (ANGULAR_REQUIRED_FIELDS.has(field.spec.name)) required(path);
-
-      const length = ANGULAR_MIN_LENGTHS.get(field.spec.name);
-      if (length) minLength(path as SchemaPath<string>, length);
     }
 
-    if (build.validator === 'vest') validateStandardSchema(root, createPreviewValidationSuite());
+    if (build.validator === 'none') return;
+
+    const rules = rulesOn(new Map(build.fields.map((field) => [field.path, FIELD_KIND_VALUE_TYPES[field.spec.kind]])));
+
+    if (build.validator === 'angular') return angularChecks(root, rules);
+
+    // Neither Vest nor Zod can tell Signal Forms a field is required, so the schema says so beside them.
+    for (const rule of rules) {
+      if (rule.check.kind === 'required') metadata(pathAt(root, rule.target), REQUIRED, () => true);
+    }
+
+    validateStandardSchema(root, build.validator === 'vest' ? createPreviewSuite(rules) : previewZodSchema(rules));
   };
+}
+
+/**
+ * The rules as Angular's own. `required()` marks the field as well as checking it, and `pattern()` leaves an
+ * empty value alone by itself.
+ */
+function angularChecks(root: SchemaPathTree<PreviewModel>, rules: readonly PortalRule[]): void {
+  for (const { target, message, check } of rules) {
+    const path = target ? pathAt(root, target) : (root as SchemaPath<unknown>);
+
+    switch (check.kind) {
+      case 'required':
+        required(path, { message });
+        break;
+      case 'pattern':
+        pattern(path as SchemaPath<string>, check.pattern, { message });
+        break;
+      case 'maxItems':
+        maxLength(path as SchemaPath<string[]>, check.max, { message });
+        break;
+      case 'cross':
+        validate(path, (context) =>
+          check.test(context.valueOf(root) as unknown as SampleModel) ? undefined : { kind: check.name, message }
+        );
+    }
+  }
 }
 
 /** The schema path for a dotted model path, which is `group.name` for a field in a grouped section. */

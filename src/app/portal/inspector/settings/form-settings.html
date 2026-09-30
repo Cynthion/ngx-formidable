@@ -104,7 +104,11 @@
     <option [value]="entry[0]">{{ entry[1] }}</option>
     }
   </select>
-  <p class="pc-help">The rules the form's schema validates with. With none, the form is still observable, and only the fields' own limits apply.</p>
+  <p class="pc-help">
+    <code class="pc-code">my-form.form.ts</code> always holds the form's rules; the validator decides who writes the checks. Angular's own rules mark a field
+    required as they check it. Vest and Zod cannot, so the schema adds <code class="pc-code">REQUIRED</code> beside them. With none, nothing checks, and only
+    the fields' own limits apply.
+  </p>
 </div>
 
 <div class="pc-row">
