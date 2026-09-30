@@ -22,8 +22,6 @@ Not `@angular/build:unit-test`, Angular's stable Vitest builder: Karma stays, an
 
 Two things behave differently in a zoneless `TestBed`, and both mislead if they are not known. `fixture.detectChanges()` refreshes only what something marked, so an `OnPush` host holding plain fields is skipped — a spec host that mutates its own state needs signals. And a spec proving that a repaint arrives on its own must not call `detectChanges()` after the act at all, since it ticks the whole application and would pass either way.
 
-The library's `test` target sets `include` explicitly, as `['**/*.spec.ts', '../vest/**/*.spec.ts']`. The builder resolves those globs against `sourceRoot` and not, as its schema says, the project root — so the default glob covers `src/` only and the `vest/` entry point's spec is silently skipped. The second glob is what runs it.
-
 ---
 
 ## Library Specs
@@ -51,15 +49,12 @@ Every library spec is built on the harness in `lib/testing/`. `public-api.ts` do
 
 The `helpers/` modules are pure functions and the highest-value, lowest-cost target. Test them directly with a colocated `*.helpers.spec.ts`.
 
-| Area                  | Where                      | What To Assert                                                                                 |
-| :-------------------- | :------------------------- | :--------------------------------------------------------------------------------------------- |
-| Formatting/parsing    | `format.helpers.ts`        | date/time format + parse round-trips, edge tokens                                              |
-| Masking               | `mask.helpers.ts`          | mask config resolution, min/max-length validation                                              |
-| Field-path resolution | `form.helpers.ts`          | control/group path resolution in a form tree                                                   |
-| Model shape checking  | `form-validate.helpers.ts` | dev-mode mismatch detection: nested keys, array index-0 rule, record wildcards                 |
-| Options               | `option.helpers.ts`        | sorting, matching, selection                                                                   |
-| Panel placement       | `position.helpers.ts`      | side chosen from available space, the flip it marks the panel with, and that a sheet is exempt |
-| Utilities             | `utility.helpers.ts`       | `cloneDeep`, `set`, `mergeValuesAndRawValues`, `getAllFormErrors`                              |
+| Area               | Where                 | What To Assert                                                                                 |
+| :----------------- | :-------------------- | :--------------------------------------------------------------------------------------------- |
+| Formatting/parsing | `format.helpers.ts`   | date/time format + parse round-trips, edge tokens                                              |
+| Masking            | `mask.helpers.ts`     | mask config resolution, min/max-length validation                                              |
+| Options            | `option.helpers.ts`   | sorting, matching, selection                                                                   |
+| Panel placement    | `position.helpers.ts` | side chosen from available space, the flip it marks the panel with, and that a sheet is exempt |
 
 ---
 
@@ -68,8 +63,6 @@ The `helpers/` modules are pure functions and the highest-value, lowest-cost tar
 Behavior that carries real risk, tested through a minimal host — not the framework around it:
 
 - **The Field Contract**: `field-contract.spec.ts` runs every field through all three forms APIs — model to display, edit to model, the touch, a pristine programmatic write, the forwarded state. A field-wide change proves itself there.
-- **NgxFormidableForm ↔ the validator**: `createAsyncValidator` debounces per the form's `debounceMs` and maps a validator's messages to Angular errors for one target. Specs drive it through a stub validator, so the library's own tests need no validation library.
-- **Directive attach behavior**: `NgxFormidableFieldValidate`/`NgxFormidableGroupValidate` attach to `[ngModel]`/`[ngModelGroup]` and **no-op outside a formidable form** (they inject `NgxFormidableForm` optionally) — a regression here breaks any consuming app.
 - **Keyboard navigation**: option/panel fields respond to the registered keys.
 
 ---
@@ -77,7 +70,7 @@ Behavior that carries real risk, tested through a minimal host — not the frame
 ## What NOT To Test
 
 - Angular binding mechanics (that `@Input()` receives a value, that `OnPush` renders).
-- Third-party internals — Pikaday, ngx-mask, fuse.js, Vest. Test how the library _uses_ them, not their behavior.
+- Third-party internals — Pikaday, ngx-mask, fuse.js. Test how the library _uses_ them, not their behavior.
 - Exact rendered markup/pixels.
 
 ---

@@ -95,7 +95,7 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 ### Accepted Compromises
 
 - **`updateOn` In The Classic APIs**: `blur` and `submit` no longer hold back a library field's value. Signal Forms' `debounce(path, 'blur')` does, through `touch`.
-- **Template-Driven Forms Validate No Field**: Angular 22.2 attaches no directive validator — `required`, `minlength` — to a custom control, so no validator declared in a template reaches a library field under `ngModel`. The harness never attached them either, and Phase 29 deletes it. The `required` attribute still marks, because it also matches Angular's `RequiredValidator`. To validate, a consumer uses Signal Forms or reactive forms, until the upstream fix in [`impl/backlog.md`](backlog.md).
+- **Template-Driven Forms Validate No Field**: Angular 22.2 attaches no directive validator — `required`, `minlength` — to a custom control, so no validator declared in a template reaches a library field under `ngModel`. The `required` attribute still marks, because it also matches Angular's `RequiredValidator`. To validate, a consumer uses Signal Forms or reactive forms, until the upstream fix in [`impl/backlog.md`](backlog.md).
 - **Required Checkbox Group**: Signal Forms' `required()` does not count `[]` as empty, so the guide pairs it with `minLength(path, 1)`.
 
 ### Integration Branch
@@ -111,17 +111,9 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 
 ## Library Phases
 
-### Phase 29 — Delete The Template-Driven Harness
-
-**Depends On**: nothing.
-
-- **Deleted**: `lib/forms/` with its specs and its stub validator; the `vest/` entry point with its peer dependency and its path alias; `FORMIDABLE_VALIDATOR` and its interface; `WHOLE_FORM`, `FormidableFormErrors`, `DeepPartial`, `DeepRequired` and `cloneDeep`; `NgxFormidableModule` with its `FormsModule` re-export.
-- **Public Surface**: `public-api.ts` and [`user/components.md`](../user/components.md). [`impl/ubiquitous-language.md`](ubiquitous-language.md) drops target, whole form, run and shape.
-- **Proof**: the library's only forms import is `@angular/forms/signals`, and the packed package has no `vest` entry point.
-
 ### Phase 30 — Maintainer Documentation
 
-**Depends On**: Phase 29.
+**Depends On**: nothing.
 
 - **Forms Integration**: a new `tech/forms-integration.md` replaces [`tech/validation.md`](../tech/validation.md) — the field contract against each API's custom-control integration, the value and state flow as diagrams, how each validator reaches a field from **Validators** in **Target Architecture**, the accepted compromises, and why there is no value accessor, no harness and no validator package.
 - **Updated**: [`tech/architecture.md`](../tech/architecture.md), [`tech/decoration.md`](../tech/decoration.md), [`tech/portal.md`](../tech/portal.md), the `impl/` conventions and the index in [`README.md`](../README.md).

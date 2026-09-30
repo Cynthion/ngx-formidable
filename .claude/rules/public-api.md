@@ -2,9 +2,7 @@
 paths:
   - 'projects/ngx-formidable/src/lib/components/**'
   - 'projects/ngx-formidable/src/lib/directives/**'
-  - 'projects/ngx-formidable/src/lib/forms/**'
   - 'projects/ngx-formidable/src/public-api.ts'
-  - 'projects/ngx-formidable/vest/**'
 ---
 
 # Public API

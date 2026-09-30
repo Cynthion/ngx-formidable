@@ -1,10 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
+import { form, FormField, required } from '@angular/forms/signals';
 import { FieldLabel } from '../../directives/field-label';
-import { NgxFormidableFieldValidate } from '../../forms/field-validate.directive';
-import { NgxFormidableForm } from '../../forms/form.directive';
-import { StubValidator } from '../../forms/testing/stub-validator.directive';
 import { fill } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { InputField } from '../fields/input-field/input-field';
@@ -68,41 +65,18 @@ class InputHost {
 })
 class RadioGroupHost {}
 
-interface NameModel {
-  name?: string;
-}
-
-/** A real form, so the flag is proven to travel from a validator all the way to the host class. */
+/** A real form, so the flag is proven to travel from a rule all the way to the host class. */
 @Component({
-  imports: [
-    FormsModule,
-    NgxFormidableForm,
-    StubValidator,
-    NgxFormidableFieldValidate,
-    FieldDecorator,
-    InputField,
-    FieldLabel
-  ],
+  imports: [FormField, FieldDecorator, InputField, FieldLabel],
   template: `
-    <form
-      formidableForm
-      [formValue]="formValue"
-      [formShape]="shape"
-      [stubValidator]="required"
-      (formValueChange)="formValue = $event">
-      <formidable-field-decorator>
-        <formidable-input-field
-          name="name"
-          [ngModel]="formValue.name" />
-        <div formidableFieldLabel>Name</div>
-      </formidable-field-decorator>
-    </form>
+    <formidable-field-decorator>
+      <formidable-input-field [formField]="form.name" />
+      <div formidableFieldLabel>Name</div>
+    </formidable-field-decorator>
   `
 })
 class ValidatedHost {
-  formValue: NameModel = {};
-  shape: Required<NameModel> = { name: '' };
-  required = { name: 'Required' };
+  readonly form = form(signal({ name: '' }), (path) => required(path.name));
 }
 
 describe('field state colors', () => {
@@ -226,7 +200,7 @@ describe('field state colors', () => {
   });
 
   // Everything above sets `.is-invalid` by hand. This is the claim that it gets there on its own: the
-  // validator's error reaches the field through `ngModel`, the field reveals it, and the decorator turns
+  // rule's error reaches the field through `[formField]`, the field reveals it, and the decorator turns
   // that into the class the styling hangs off.
   it('raises the class from the control’s own validity', async () => {
     const formFixture = TestBed.createComponent(ValidatedHost);

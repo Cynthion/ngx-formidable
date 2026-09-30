@@ -54,7 +54,7 @@ Every command runs from the repository root.
 ## Library Obligations
 
 - **Component Catalog**: Any change to a public component, directive, token or type is fully reflected in [`user/components.md`](../user/components.md) — the whole entry, prose and input and output tables, not only the changed row.
-- **Public API**: A new public symbol is exported from `public-api.ts`; a new component is also added to `NgxFormidableModule`.
+- **Public API**: A new public symbol is exported from `public-api.ts`.
 - **Doc Comments**: A new or changed public symbol carries a doc comment per **Code Comments** in [`impl/typescript.md`](typescript.md).
 - **Theme Tokens**: A new or renamed `--formidable-*` variable is added to `src/app/portal/model/token-manifest.ts` as well as [`user/theme-reference.md`](../user/theme-reference.md), with the same description text. `token-manifest.spec.ts` gates the names and `docs:check` gates the text.
 

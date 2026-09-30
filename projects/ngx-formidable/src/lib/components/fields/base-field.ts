@@ -18,7 +18,6 @@ import {
 } from '@angular/core';
 import { FormValueControl, ValidationError } from '@angular/forms/signals';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
-import { NgxFormidableForm } from '../../forms/form.directive';
 import { endOfMaskedValue } from '../../helpers/input.helpers';
 import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../helpers/mask.helpers';
 import { openPanelPosition, scrollIntoView, updatePanelPosition } from '../../helpers/position.helpers';
@@ -256,14 +255,12 @@ export abstract class BaseField<T = string | null>
   /** Whether the user has edited the field — what `revealOn: 'dirty'` waits for. */
   public readonly dirty = input(false, { transform: booleanAttribute });
 
-  /** When the messages appear. Unset, the form's `revealOn` applies, then the app default, then `touched`. */
+  /** When the messages appear. Unset, the app default applies, then `touched`. */
   public readonly revealOn = input<FormidableReveal | undefined>(undefined);
 
   /** Emits as the last act of a blur — the user leaving the field — which marks it touched. */
   public readonly touch = output<void>();
 
-  // Optional: a field reveals by its own setting and the app default alone, with no form around it.
-  private readonly formDirective = inject(NgxFormidableForm, { optional: true });
   private readonly defaultRevealOn = inject(FORMIDABLE_DEFAULTS).revealOn ?? 'touched';
 
   // A pending validator has not reported yet, so the forms API holds none of its errors: keeping the last
@@ -280,7 +277,7 @@ export abstract class BaseField<T = string | null>
   public readonly showErrors = computed(() => {
     if (!this.invalid() && !this.settledErrors().length) return false;
 
-    switch (this.revealOn() ?? this.formDirective?.revealOn() ?? this.defaultRevealOn) {
+    switch (this.revealOn() ?? this.defaultRevealOn) {
       case 'always':
         return true;
       case 'dirty':

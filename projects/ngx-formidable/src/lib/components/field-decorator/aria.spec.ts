@@ -2,10 +2,8 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
-import { StubValidator } from '../../forms/testing/stub-validator.directive';
 import { FieldHint } from '../../directives/field-hint';
 import { FieldLabel } from '../../directives/field-label';
-import { NgxFormidableForm } from '../../forms/form.directive';
 import { FormidableOption } from '../../models/formidable.model';
 import { fill, referenced } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
@@ -35,12 +33,6 @@ import { FieldDecorator } from './field-decorator';
  * `aria-invalid` follows the field's own `showErrors`, which reads the state the forms API writes into it —
  * the end-to-end spec at the bottom pins that the state arrives with nothing pumping it.
  */
-
-interface Model {
-  field?: string;
-}
-
-const shape = { field: '' };
 
 const options: FormidableOption[] = [
   { value: 'red', label: 'Red' },
@@ -114,19 +106,15 @@ class NamedFieldsHost {
 })
 class UnlabelledHost {}
 
-/** An input with real validation behind it — the only way to reach the invalid state honestly. */
+/** An input under a forms API, whose control holds the errors the field reads. */
 @Component({
-  imports: [FormsModule, NgxFormidableForm, StubValidator, FieldDecorator, InputField, FieldLabel, FieldHint],
+  imports: [FormsModule, FieldDecorator, InputField, FieldLabel, FieldHint],
   template: `
-    <form
-      formidableForm
-      [formValue]="formValue"
-      [formShape]="shape"
-      [stubValidator]="required">
+    <form>
       <formidable-field-decorator>
         <formidable-input-field
           name="field"
-          [ngModel]="formValue.field" />
+          [ngModel]="model" />
         <div formidableFieldLabel>Field</div>
         <div formidableFieldHint>Some hint.</div>
       </formidable-field-decorator>
@@ -134,9 +122,7 @@ class UnlabelledHost {}
   `
 })
 class ErrorsHost {
-  formValue: Model = {};
-  shape = shape;
-  required = { field: 'Required.' };
+  model = '';
 }
 
 /** The shape a consumer uses for a bare field: no decorator, so nothing to point at. */
