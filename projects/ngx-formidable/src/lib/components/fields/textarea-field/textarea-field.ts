@@ -31,10 +31,8 @@ export class TextareaField extends BaseTextField {
     // No additional actions needed
   }
 
-  /**
-   * What the length indicator counts: the characters shown, which `maxLength` caps — a mask's included. A
-   * signal, because a masked render lands in a timer no render owns.
-   */
+  // What the length indicator counts: the characters shown, which `maxLength` caps — a mask's included. A
+  // signal, because a masked render lands in a timer no render owns.
   protected readonly valueLength = signal(0);
 
   protected override onTextChanged(): void {

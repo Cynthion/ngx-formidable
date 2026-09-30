@@ -13,7 +13,7 @@ Placement, naming, selectors, the field contract and the signal API of component
 
 - **Folder Placement**: `directives/` holds only the `formidableField*` attribute directives that decorate a field. Test-only code goes in a `testing/` folder and stays unreachable from `public-api.ts`, which is what keeps ng-packagr from compiling it.
 - **Examples Must Be Reachable**: `tsconfig.app.json` compiles only what `src/main.ts` reaches, so an example nothing imports is never compiled.
-- **Selector Prefixes**: enforced per path by `eslint.config.js` — `formidable` under `projects/ngx-formidable/src/lib`, `portal` under `src/app/portal`. The two directives that deliberately hijack Angular's own selectors (`[ngModel]`, `[ngModelGroup]`) and the test-only stub carry an inline waiver naming the reason.
+- **Selector Prefixes**: enforced per path by `eslint.config.js` — `formidable` under `projects/ngx-formidable/src/lib`, `portal` under `src/app/portal`.
 
 ---
 

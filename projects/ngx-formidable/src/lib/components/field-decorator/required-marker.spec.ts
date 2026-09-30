@@ -16,8 +16,8 @@ import { FieldDecorator } from './field-decorator';
  * what ellipsizes and the marker survives at full width. Its glyph comes from a theme variable, and it
  * carries no colour of its own, so it follows the label through every state.
  *
- * The field validates nothing, and nothing here asserts validity. Under `ngModel` the same `required`
- * attribute also attaches Angular's own `RequiredValidator`, which is that API's rule and not the field's.
+ * The field validates nothing, and nothing here asserts validity. Under `ngModel` the `required` attribute
+ * only marks: `ngModel` attaches no directive validator to a library field.
  *
  * The app default `hideRequiredMarkers` hides every marker at once.
  */

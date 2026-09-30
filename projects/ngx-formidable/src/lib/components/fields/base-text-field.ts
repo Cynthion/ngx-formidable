@@ -74,7 +74,7 @@ export abstract class BaseTextField extends BaseField<string> {
     });
   }
 
-  /** The model, as the user edits it: what the element shows, with the mask's characters taken out. */
+  // The model, as the user edits it: what the element shows, with the mask's characters taken out.
   protected onInput(): void {
     this.setValue(this.editorValue);
     this.onTextChanged();

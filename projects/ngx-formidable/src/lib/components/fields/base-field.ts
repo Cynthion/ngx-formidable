@@ -230,7 +230,8 @@ export abstract class BaseField<T = string | null>
   /**
    * Marks the field required: suffixes the marker to the label and sets `aria-required`. Validates nothing.
    * `[formField]` and `[formControl]` write it from their rules; under `ngModel` it is the `required`
-   * attribute, which also attaches Angular's own validator. The form can hide every marker at once.
+   * attribute, which marks only: `ngModel` attaches no validator to the field. `hideRequiredMarkers` in the
+   * app defaults hides every marker at once.
    */
   public readonly required = input(false, { transform: booleanAttribute });
 
@@ -238,7 +239,8 @@ export abstract class BaseField<T = string | null>
   public readonly autoFocus = input(false);
 
   /** The forms API's errors for the field, each rendered as a message through `FORMIDABLE_ERROR_MESSAGE`. */
-  // `FormUiControl` requires a transform to take `unknown`; what every forms API writes is an array.
+  // Angular's `FormUiControl` interface requires a transform to take `unknown`; what every forms API writes
+  // is an array.
   public readonly errors = input<readonly ValidationError[], unknown>([], {
     transform: (errors) => (errors as readonly ValidationError[] | undefined) ?? []
   });

@@ -6,7 +6,7 @@ import { FORMIDABLE_DEFAULTS, FORMIDABLE_MASK_DEFAULTS, FormidableDefaults } fro
 export interface NgxFormidableConfig {
   /** App-wide ngx-mask defaults, which any field's own `maskConfig` still overrides. */
   globalMaskConfig?: Partial<NgxMaskConfig>;
-  /** App-wide defaults for label position, adornment alignment, panel position and the form's options. */
+  /** App-wide defaults for label position, adornment alignment, panel position, reveal and required marker. */
   defaults?: FormidableDefaults;
 }
 

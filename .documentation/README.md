@@ -26,14 +26,14 @@ For consumers of the library. A **guide** teaches a topic; a **reference** lists
 
 For maintainers of the library and the portal. Contains technical documentation of features, configurations, patterns and architecture.
 
-| File                                           | Purpose                                                            |
-| :--------------------------------------------- | :----------------------------------------------------------------- |
-| [`tech/architecture.md`](tech/architecture.md) | Workspace structure, library and portal roles, build and publish   |
-| [`tech/caret.md`](tech/caret.md)               | Caret placement on focus entry, and the ngx-mask timing around it  |
-| [`tech/decoration.md`](tech/decoration.md)     | The decorator, field and errors wiring: slot, ids, repaint, insets |
-| [`tech/layering.md`](tech/layering.md)         | Stacking contexts, the layer ordinals and the two public z-indices |
-| [`tech/portal.md`](tech/portal.md)             | Portal design: page structure, theming, preview form, state        |
-| [`tech/validation.md`](tech/validation.md)     | The validation seam, its three layers and the package layout       |
+| File                                                     | Purpose                                                            |
+| :------------------------------------------------------- | :----------------------------------------------------------------- |
+| [`tech/architecture.md`](tech/architecture.md)           | Workspace structure, library and portal roles, build and publish   |
+| [`tech/caret.md`](tech/caret.md)                         | Caret placement on focus entry, and the ngx-mask timing around it  |
+| [`tech/decoration.md`](tech/decoration.md)               | The decorator, field and errors wiring: slot, ids, repaint, insets |
+| [`tech/forms-integration.md`](tech/forms-integration.md) | The field contract under each forms API, validators, reveal        |
+| [`tech/layering.md`](tech/layering.md)                   | Stacking contexts, the layer ordinals and the two public z-indices |
+| [`tech/portal.md`](tech/portal.md)                       | Portal design: page structure, theming, preview form, state        |
 
 ---
 

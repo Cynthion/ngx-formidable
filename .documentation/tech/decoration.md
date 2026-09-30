@@ -22,7 +22,7 @@ The decorator renders a `formidable-field-errors` below the container that posit
 
 ## The Invalid State
 
-The field decides when its errors show. `showErrors` weighs the errors and `invalid` the forms API wrote into it against its reveal, and every consumer of it reads the same signal:
+The field decides when its errors show. `showErrors` weighs the errors and `invalid` the forms API wrote into it against its reveal, as [`tech/forms-integration.md`](forms-integration.md) describes, and every consumer of it reads the same signal:
 
 ```mermaid
 flowchart LR

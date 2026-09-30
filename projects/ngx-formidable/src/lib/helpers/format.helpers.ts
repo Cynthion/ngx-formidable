@@ -25,25 +25,16 @@ export function parseUnicodeDateTime(input: string, unicodeTokenFormat: string):
 }
 
 /**
- * Validates that every alphabetic token in a format string is one of `tokens` — `UNICODE_DATE_TOKENS` or
+ * Whether every alphabetic token in a Unicode format string is one of `tokens` — `UNICODE_DATE_TOKENS` or
  * `UNICODE_TIME_TOKENS`.
- *
- * @param format - A Unicode format string (e.g. 'yyyy-MM-dd' or 'HH.mm')
- * @returns True if all extracted tokens are in `tokens`; otherwise false.
  */
 export function validateUnicodeTokenFormat(format: string, tokens: readonly string[]): boolean {
   return extractTokens(format).every((token) => tokens.includes(token));
 }
 
 /**
- * Converts a Unicode date or time format string into an input mask string.
- * Replaces known tokens (e.g. 'dd', 'MM', 'yyyy', 'HH', 'mm') with their corresponding mask.
- * Unknown alphabetic tokens are replaced with repeated mask characters.
- * Non-alphabetic characters (e.g. separators) are preserved as-is.
- *
- * @param unicodeTokenFormat - The format string to convert (e.g. 'dd/MM/yyyy')
- * @param maskChar - The character used to fill unknown token positions (e.g. '_')
- * @returns A mask string suitable for input masking (e.g. '00/00/0000')
+ * Converts a Unicode date or time format string into an input mask: `dd/MM/yyyy` becomes `00/00/0000`.
+ * Known tokens take their own mask, an unknown alphabetic token is `maskChar` repeated, and separators stay.
  */
 export function formatToTokenMask(unicodeTokenFormat: string, maskChar: string): string {
   return tokenizeFormat(unicodeTokenFormat)
@@ -285,9 +276,6 @@ function extractTokens(format: string): string[] {
  *   tokenizeFormat("dd/MM/yyyy") => ['dd', '/', 'MM', '/', 'yyyy']
  *   tokenizeFormat("yyyy 'year' MM") => ['yyyy', ' ', 'year', ' ', 'MM']
  *   tokenizeFormat("HH:mm") => ['HH', ':', 'mm']
- *
- * @param format - The Unicode format string (e.g. 'yyyy-MM-dd' or 'HH:mm')
- * @returns An array of tokens and literals for further processing.
  */
 function tokenizeFormat(format: string): string[] {
   const tokens: string[] = [];
