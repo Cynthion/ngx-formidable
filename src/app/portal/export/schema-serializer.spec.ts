@@ -106,30 +106,125 @@ describe('schema serializer', () => {
     expect(rules(only(['address'], { validator: 'none' })).join('\n')).not.toContain('hidden(');
   });
 
-  it('states the built-in mode’s rules, required() in place of the marker', () => {
-    const definition = only(['orderName', 'phone', 'toppings'], { validator: 'angular' });
+  // The sample's rules in form order, each in Angular's own terms, after the fields' own settings.
+  it('writes the rules as Angular’s own, required() in place of the marker', () => {
+    const definition = only(['orderName', 'phone', 'toppings', 'notes'], { validator: 'angular' });
     const source = serializeSchema(definition);
 
     expect(rules(definition)).toEqual([
-      '  required(path.orderName);',
-      '  required(path.phone);',
-      '  minLength(path.phone, 13);'
+      '  maxLength(path.notes, 200);',
+      "  maxLength(path.toppings, 5, { message: 'Five toppings is the limit.' });",
+      "  required(path.orderName, { message: 'We need a name for the order.' });",
+      "  required(path.phone, { message: 'A phone number is required.' });",
+      "  pattern(path.phone, /^\\d{3} \\d{3} \\d{2} \\d{2}$/, { message: 'A phone number reads 079 123 45 67.' });"
     ]);
+    expect(source).toContain('  maxLength(path.notes, 200);\n\n  maxLength(path.toppings');
     expect(source).not.toContain('REQUIRED');
     expect(source).not.toContain('vest');
+    expect(source).not.toContain('zod');
   });
 
-  it('runs a Vest suite through Standard Schema, and leaves its rules to the consumer', () => {
-    const vest = serializeSchema(only(['date'], { validator: 'vest' }));
+  it('writes a check across fields as validate() on the path it reports on', () => {
+    const source = serializeSchema(only(['sauce', 'toppings'], { validator: 'angular' }));
 
-    expect(vest).toContain("import { create, mode, Modes } from 'vest';");
-    expect(vest).toContain("test('when.date', 'Required.', () => enforce(model.when.date).isNotBlank())");
-    // One suite per form: the schema runs once for each `form()`, and a suite carries state across forms.
-    expect(vest).toContain('export function createMyFormSuite() {');
+    expect(source).toContain(
+      [
+        '  validate(path, (context) => {',
+        '    const model = context.valueOf(path);',
+        '',
+        "    return !(model.sauce === 'bbq' && model.toppings.includes('pineapple'))",
+        '      ? undefined',
+        "      : { kind: 'pineappleOnBbq', message: 'Pineapple on a BBQ base is a combination this kitchen refuses.' };",
+        '  });'
+      ].join('\n')
+    );
+  });
+
+  // The Monday rule reads the date, the opening hours the time: with only the date, only the first is there.
+  it('leaves out a rule whose fields are not all on the form', () => {
+    const lines = rules(only(['date'], { validator: 'angular' }));
+
+    expect(lines).toContain('  validate(path.when, (context) => {');
+    expect(lines.join('\n')).toContain('closedOnMondays');
+    expect(lines.join('\n')).not.toContain('openingHours');
+    expect(rules(only(['toppings'], { validator: 'angular' })).join('\n')).not.toContain('pineappleOnBbq');
+  });
+
+  // A number at the phone's path: a phone rule on it would not compile.
+  it('leaves out a rule whose field writes another type than the sample’s', () => {
+    const definition = only(['quantity'], { validator: 'angular' });
+    const fields = definition.fields.map((field) => ({ ...field, name: 'phone' }));
+
+    expect(rules({ ...definition, fields })).toEqual(['  min(path.phone, 1);', '  max(path.phone, 10);']);
+  });
+
+  // Neither Vest nor Zod can tell Signal Forms a field is required, so the schema marks it beside them.
+  it('writes the rules into a Vest suite, one per form, and marks what it requires', () => {
+    const vest = serializeSchema(only(['orderName', 'email', 'sauce', 'toppings'], { validator: 'vest' }));
+
+    expect(vest).toContain("import { create, enforce, mode, Modes, omitWhen, test } from 'vest';");
+    expect(vest).toContain('export function createMyFormSuite() {\n  return create((model: MyFormModel) => {');
+    expect(vest).toContain(
+      [
+        "    test('email', 'An email address is required.', () => {",
+        '      enforce(model.email).isNotEmpty();',
+        '    });',
+        '',
+        '    omitWhen(!model.email, () => {',
+        "      test('email', 'That does not look like an email address.', () => {",
+        '        enforce(model.email).matches(/^[^@\\s]+@[^@\\s.]+\\.[^@\\s]+$/);',
+        '      });',
+        '    });'
+      ].join('\n')
+    );
+    expect(vest).toContain(
+      "    test('wholeForm', 'Pineapple on a BBQ base is a combination this kitchen refuses.', () => {"
+    );
+    expect(vest).toContain('  metadata(path.orderName, REQUIRED, () => true);');
     expect(vest).toContain('  validateStandardSchema(path, createMyFormSuite());');
-    expect(vest).not.toMatch(/^\s*test\(/m);
+    expect(vest).not.toContain('required(');
+    expect(vest).not.toContain('zod');
+  });
 
-    expect(serializeSchema(only(['date'], { validator: 'none' }))).not.toContain('vest');
+  it('writes the rules into a Zod schema, a check across fields as a refinement of the whole', () => {
+    const zod = serializeSchema(only(['date', 'time', 'orderName', 'sauce'], { validator: 'zod' }));
+
+    expect(zod).toContain("import * as z from 'zod';");
+    expect(zod).toContain(
+      [
+        'export const myFormZodSchema = z',
+        '  .object({',
+        "    sauce: z.string().nullable().refine((value) => !!value, 'Pick a sauce.'),",
+        '    when: z.object({',
+        '      date: z.date().nullable(),',
+        '      time: z.date().nullable()',
+        '    }),',
+        "    orderName: z.string().min(1, 'We need a name for the order.')",
+        '  })'
+      ].join('\n')
+    );
+    expect(zod).toContain(
+      [
+        '  .refine((model) => model.when.date?.getDay() !== 1, {',
+        "    error: 'We are closed on Mondays.',",
+        "    path: ['when']",
+        '  });'
+      ].join('\n')
+    );
+    expect(zod).toContain('  metadata(path.sauce, REQUIRED, () => true);');
+    expect(zod).toContain('  validateStandardSchema(path, myFormZodSchema);');
+    expect(zod).not.toContain('vest');
+  });
+
+  it('writes no checks and imports no validator without one', () => {
+    const none = serializeSchema(only(['orderName', 'email'], { validator: 'none' }));
+
+    expect(rules(only(['orderName', 'email'], { validator: 'none' }))).toEqual([
+      '  metadata(path.orderName, REQUIRED, () => true);',
+      '  metadata(path.email, REQUIRED, () => true);'
+    ]);
+    expect(none).not.toContain('vest');
+    expect(none).not.toContain('zod');
   });
 
   it('states the form’s own debounce, readonly and disabled on the root', () => {

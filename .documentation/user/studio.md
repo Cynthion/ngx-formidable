@@ -163,13 +163,24 @@ The page surface is the page's rather than the library's, so `Onto The Defaults`
 
 **The Form Is Signal Forms.** The three files are one form, laid out the way the library's convention has it:
 
-| File              | Tab         | Holds                                                                                           |
-| :---------------- | :---------- | :---------------------------------------------------------------------------------------------- |
-| `my-form.html`    | `Template`  | `<form [formRoot]="form">`, and every field decorated and bound by `[formField]`                |
-| `my-form.ts`      | `Component` | The model `signal`, the `form()` over it, the components the template uses, the preset handlers |
-| `my-form.form.ts` | `Schema`    | The model's type, an initial model defining every key, and the `schema()` with the rules        |
+| File              | Tab         | Holds                                                                                              |
+| :---------------- | :---------- | :------------------------------------------------------------------------------------------------- |
+| `my-form.html`    | `Template`  | `<form [formRoot]="form">`, and every field decorated and bound by `[formField]`                   |
+| `my-form.ts`      | `Component` | The model `signal`, the `form()` over it, the components the template uses, the preset handlers    |
+| `my-form.form.ts` | `Schema`    | The model's type, an initial model defining every key, the `schema()`, and a suite or a Zod schema |
 
-**The Schema Holds A Field's State.** `[formField]` hands a field its readonly and disabled state, its required marker and its limits, and rejects a binding to any of them beside it. So the schema states them as rules — `readonly()`, `min()`, `maxLength()` — and a required marker with no rule behind it as `REQUIRED` metadata. Under `Angular's built-in rules` the schema states them, `required()` among them. Under `Vest suite` it runs a suite with no rules in it through `validateStandardSchema` — the Studio has no rule editor. Neither the component nor the schema is read back in.
+**The Schema Holds A Field's State.** `[formField]` hands a field its readonly and disabled state, its required marker and its limits, and rejects a binding to any of them beside it. So the schema states them as rules — `readonly()`, `min()`, `maxLength()` — and a required marker with no rule behind it as `REQUIRED` metadata. Neither the component nor the schema is read back in.
+
+**The Validator Writes The Checks.** `my-form.form.ts` always holds the form's rules, and the validator decides who writes the checks. The sample's rules are the same under every validator — the same messages on the same fields, groups and whole form, on the stage and in the export alike. `Validator` on `The Form` picks who writes them:
+
+| Validator                  | Writes The Checks As                                                          | Marks A Field Required        |
+| :------------------------- | :---------------------------------------------------------------------------- | :---------------------------- |
+| `Angular's built-in rules` | `required()`, `pattern()`, `maxLength()` and `validate()` in the `schema()`   | `required()` itself           |
+| `Vest suite`               | `createMyFormSuite()`, a suite per form, run through `validateStandardSchema` | `REQUIRED` metadata beside it |
+| `Zod schema`               | `myFormZodSchema`, run through `validateStandardSchema`                       | `REQUIRED` metadata beside it |
+| `None`                     | Nothing: only the fields' own limits apply                                    | The marker alone              |
+
+The file imports `vest` or `zod` only under its own validator. A rule is left out unless every field it reads is on the form and writes the same type as in the sample, so a form built from the sample exports only the rules it can run.
 
 **The App Config Holds What The Export Leaves Out.** A field or form that states nothing is emitted without the attribute, so the app defaults are what give it its value. What the form states for itself — when messages appear, whether required markers show — the component provides over them. `Copy App Config` copies the `app.config.ts` that provides them; it is also on `App Defaults`. The app config belongs to the app rather than the form, so it is not read back in.
 
@@ -208,7 +219,7 @@ Each chapter states what to notice, one thing to try, and the snippet that does 
 ## What The Studio Does Not Decide
 
 - **The page behind the form** is the consumer's. The library styles fields only, so that block is emitted separately and is yours to place.
-- **The validator.** The Studio demonstrates Vest, Angular's own validators and none, but the rules themselves belong in your project. [`user/validation.md`](validation.md) covers connecting one.
+- **The validator.** The Studio runs and exports the sample's rules under Angular's own, Vest and Zod, but your own rules belong in your project. [`user/validation.md`](validation.md) covers connecting one.
 - **The layout.** The preview lays its fields on a grid of its own. The exported template carries the fields and their decorators, not that grid.
 
 ---

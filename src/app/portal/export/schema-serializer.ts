@@ -1,19 +1,9 @@
-import { FIELD_KIND_VALUE_TYPES, PortalValueType } from '../model/field-capabilities';
-import { PortalFieldSpec, PortalFormDefinition } from '../model/field-spec.model';
-import { ANGULAR_MIN_LENGTHS, ANGULAR_REQUIRED_FIELDS } from '../model/preview-form.validation';
+import { emptyValueOf, FIELD_KIND_VALUE_TYPES, PortalValueType } from '../model/field-capabilities';
+import { PortalFieldSpec, PortalFormDefinition, PortalValidatorKind } from '../model/field-spec.model';
+import { fieldsOf, PortalRule, rulesOn, WHOLE_FORM } from '../model/preview-form.validation';
 import { pathOf } from '../helpers/model-path.helpers';
 import { ALL_FIELD_ATTRIBUTES } from './markup-attributes';
 import { accessOf, isIdentifier } from './markup-serializer';
-
-/** What a key starts as, for each value type, as source text. A number starts at its field's `min` instead. */
-const EMPTY_VALUES: Readonly<Record<PortalValueType, string>> = {
-  'string': "''",
-  'string | null': 'null',
-  'string[]': '[]',
-  'Date | null': 'null',
-  'boolean': 'false',
-  'number': '0'
-};
 
 /** One member of the model: a field, or a group holding fields. Groups come from a section's `groupName`. */
 interface ModelNode {
@@ -70,10 +60,11 @@ function modelTree(definition: PortalFormDefinition): ModelNode[] {
   return nodes;
 }
 
+/** What a key starts as, as source text. */
 function emptyValue(field: PortalFieldSpec): string {
-  const type = FIELD_KIND_VALUE_TYPES[field.kind];
+  const value = emptyValueOf(field);
 
-  return type === 'number' ? String(field.min ?? 0) : EMPTY_VALUES[type];
+  return Array.isArray(value) ? '[]' : value === null ? 'null' : literal(value);
 }
 
 /** The interface's members, and — with `values` — the initial model's, which differ only after the key. */
@@ -93,50 +84,30 @@ function memberLines(nodes: readonly ModelNode[], depth: number, values: boolean
   });
 }
 
-/** The first leaf's dotted path, which the suite names as its example target. */
-function firstPath(nodes: readonly ModelNode[], prefix = ''): string | null {
-  for (const node of nodes) {
-    const path = prefix ? `${prefix}.${node.name}` : node.name;
-
-    if (!node.children) return path;
-
-    const nested = firstPath(node.children, path);
-    if (nested) return nested;
-  }
-
-  return null;
-}
-
 function literal(value: string | number | boolean): string {
   return typeof value === 'string' ? `'${value.replace(/'/g, "\\'")}'` : String(value);
 }
 
 /**
- * One field's rules, in the order the preview's schema states them: its state, its required marker or the
- * built-in mode's `required()`, its limits, and its condition.
+ * One field's rules, in the order the preview's schema states them: its state, its required marker, its
+ * limits, and its condition. A field the validator checks as required takes its marker from the checks.
  *
  * A condition naming a field that is no longer on the form states no rule, so the field renders — as it does
  * on the stage.
  */
-function fieldRules(spec: PortalFieldSpec, path: string, definition: PortalFormDefinition): string[] {
+function fieldRules(spec: PortalFieldSpec, path: string, definition: PortalFormDefinition, checked: boolean): string[] {
   const target = accessOf('path', path);
-  const angular = definition.options.validator === 'angular';
   const rules: string[] = [];
 
   if (spec.state.readonly) rules.push(`readonly(${target});`);
   if (spec.state.disabled) rules.push(`disabled(${target});`);
-
-  if (angular && ANGULAR_REQUIRED_FIELDS.has(spec.name)) rules.push(`required(${target});`);
-  else if (spec.decoration.markRequired) rules.push(`metadata(${target}, REQUIRED, () => true);`);
+  if (spec.decoration.markRequired && !checked) rules.push(`metadata(${target}, REQUIRED, () => true);`);
 
   for (const attribute of ALL_FIELD_ATTRIBUTES) {
     const value = attribute.rule ? attribute.read(spec) : null;
 
     if (value !== null) rules.push(`${attribute.name}(${target}, ${value});`);
   }
-
-  const length = angular ? ANGULAR_MIN_LENGTHS.get(spec.name) : undefined;
-  if (length) rules.push(`minLength(${target}, ${length});`);
 
   const condition = spec.visibleWhen;
   const watched = condition && definition.fields.find((field) => field.name === condition.field);
@@ -182,35 +153,242 @@ export function importLines(names: readonly string[], from: string): string[] {
   ];
 }
 
+/** Indents every line of a block that has text, so a blank line inside it stays blank. */
+function indent(lines: readonly string[], depth: number): string[] {
+  return lines.flatMap((line) => line.split('\n')).map((line) => (line ? `${'  '.repeat(depth)}${line}` : line));
+}
+
+/** The rules as Angular's own: `required()` marks the field it checks, and `pattern()` leaves `''` alone. */
+function angularChecks(rules: readonly PortalRule[]): string[] {
+  return rules.map(({ target, message, check }) => {
+    // The whole form is the root itself.
+    const access = target ? accessOf('path', target) : 'path';
+    const text = `{ message: ${literal(message)} }`;
+
+    switch (check.kind) {
+      case 'required':
+        return `required(${access}, ${text});`;
+      case 'pattern':
+        return `pattern(${access}, ${String(check.pattern)}, ${text});`;
+      case 'maxItems':
+        return `maxLength(${access}, ${check.max}, ${text});`;
+      case 'cross':
+        return [
+          `validate(${access}, (context) => {`,
+          '  const model = context.valueOf(path);',
+          '',
+          `  return ${check.source}`,
+          '    ? undefined',
+          `    : { kind: '${check.name}', message: ${literal(message)} };`,
+          '});'
+        ].join('\n');
+    }
+  });
+}
+
+/** One rule as a Vest test, reading the suite's `model`. */
+function vestTest({ target, message, check }: PortalRule): string[] {
+  const value = accessOf('model', target);
+  const open = `test(${literal(target || WHOLE_FORM)}, ${literal(message)}, () => {`;
+
+  switch (check.kind) {
+    case 'required':
+      return [open, `  enforce(${value}).isNotEmpty();`, '});'];
+    case 'pattern':
+      return [
+        `omitWhen(!${value}, () => {`,
+        `  ${open}`,
+        `    enforce(${value}).matches(${String(check.pattern)});`,
+        '  });',
+        '});'
+      ];
+    case 'maxItems':
+      return [open, `  enforce(${value}).shorterThanOrEquals(${check.max});`, '});'];
+    case 'cross':
+      return [
+        ...(target ? [] : ['// A target naming no field reports on the whole form.']),
+        open,
+        `  enforce(${check.source}).isTruthy();`,
+        '});'
+      ];
+  }
+}
+
+/** The rules as a Vest suite, created per form because a suite carries state across the forms it runs for. */
+function vestSuite(rules: readonly PortalRule[]): string[] {
+  return [
+    '/**',
+    " * The form's checks, as a Vest suite run through Standard Schema. A suite carries state across every form",
+    ' * it has run for, so each form creates its own.',
+    ' */',
+    'export function createMyFormSuite() {',
+    `  return create((${rules.length ? 'model: MyFormModel' : ''}) => {`,
+    "    mode(Modes.ALL); // every failing rule, not only a field's first",
+    ...indent(
+      rules.flatMap((rule) => ['', ...vestTest(rule)]),
+      2
+    ),
+    '  });',
+    '}'
+  ];
+}
+
+/** A key's Zod type, from what its field writes. */
+const ZOD_TYPES: Readonly<Record<PortalValueType, string>> = {
+  'string': 'z.string()',
+  'string | null': 'z.string().nullable()',
+  'string[]': 'z.array(z.string())',
+  'Date | null': 'z.date().nullable()',
+  'boolean': 'z.boolean()',
+  'number': 'z.number()'
+};
+
+/** One field check, chained onto its key's Zod type. A format check leaves `''` to the required check. */
+function zodCheck(type: PortalValueType, { message, check }: PortalRule): string {
+  switch (check.kind) {
+    case 'required':
+      return type === 'string' ? `.min(1, ${literal(message)})` : `.refine((value) => !!value, ${literal(message)})`;
+    case 'pattern':
+      return `.refine((value) => !value || ${String(check.pattern)}.test(value), ${literal(message)})`;
+    case 'maxItems':
+      return `.max(${check.max}, ${literal(message)})`;
+    default:
+      return '';
+  }
+}
+
+/** One entry per line of a list, each but the last ending in a comma. A multi-line entry takes it on its last. */
+function commas(entries: readonly string[]): string[] {
+  return entries.map((entry, index) => (index < entries.length - 1 ? `${entry},` : entry));
+}
+
+/**
+ * The rules as a Zod schema. Its keys are the fields the rules read, in form order and nested under a group
+ * as the model is; a check across fields refines the whole, reporting on the path it names.
+ */
+function zodSchema(rules: readonly PortalRule[], fields: readonly PlacedField[]): string[] {
+  const read = new Set(rules.flatMap(fieldsOf));
+  const shape = new Map<string, string | Map<string, string>>();
+
+  for (const { spec, path } of fields.filter((field) => read.has(field.path))) {
+    const type = FIELD_KIND_VALUE_TYPES[spec.kind];
+    const checks = rules.filter((rule) => rule.target === path).map((rule) => zodCheck(type, rule));
+    // A key with more than one check takes one line per check, which is where a second one would not fit.
+    const expression =
+      checks.length > 1
+        ? [ZOD_TYPES[type], ...checks.map((check) => `  ${check}`)].join('\n')
+        : `${ZOD_TYPES[type]}${checks.join('')}`;
+    const [head, leaf] = path.split('.') as [string, string?];
+    const group = shape.get(head);
+
+    if (leaf === undefined) shape.set(head, expression);
+    else if (group instanceof Map) group.set(leaf, expression);
+    else shape.set(head, new Map([[leaf, expression]]));
+  }
+
+  const members = [...shape].map(([name, value]) =>
+    typeof value === 'string'
+      ? `${key(name)}: ${value}`
+      : [
+          `${key(name)}: z.object({`,
+          ...indent(commas([...value].map(([member, type]) => `${key(member)}: ${type}`)), 1),
+          '})'
+        ].join('\n')
+  );
+
+  const refinements = rules.flatMap(({ target, message, check }) =>
+    check.kind === 'cross'
+      ? [
+          `.refine((model) => ${check.source}, {`,
+          ...indent(
+            commas([
+              `error: ${literal(message)}`,
+              ...(target ? [`path: [${target.split('.').map(literal).join(', ')}]`] : [])
+            ]),
+            1
+          ),
+          '})'
+        ]
+      : []
+  );
+
+  const object = members.length ? ['object({', ...indent(commas(members), 1), '})'] : ['object({})'];
+
+  return [
+    '/**',
+    " * The form's checks, as a Zod schema run through Standard Schema. It holds no state, so one serves every",
+    ' * form. A check across fields refines the whole, and reports on the path it names.',
+    ' */',
+    ...(refinements.length
+      ? ['export const myFormZodSchema = z', ...indent([`.${object[0]}`, ...object.slice(1), ...refinements], 1)]
+      : [`export const myFormZodSchema = z.${object[0]}`, ...object.slice(1)]
+    ).map((line, index, lines) => (index === lines.length - 1 ? `${line};` : line))
+  ];
+}
+
+/** A field of the form with its model path, in section order: the order the schema states the rules in. */
+interface PlacedField {
+  readonly spec: PortalFieldSpec;
+  readonly path: string;
+}
+
+/**
+ * The rules the validator writes into the schema. Angular's are rules of the schema itself; Vest and Zod run
+ * beside it through Standard Schema, and neither can tell Signal Forms a field is required, so the schema
+ * marks those fields itself.
+ */
+function validatorRules(validator: PortalValidatorKind, rules: readonly PortalRule[]): string[] {
+  if (validator === 'none') return [];
+  if (validator === 'angular') return angularChecks(rules);
+
+  return [
+    ...rules
+      .filter((rule) => rule.check.kind === 'required')
+      .map((rule) => `metadata(${accessOf('path', rule.target)}, REQUIRED, () => true);`),
+    `validateStandardSchema(path, ${validator === 'vest' ? 'createMyFormSuite()' : 'myFormZodSchema'});`
+  ];
+}
+
 /**
  * The form file, `my-form.form.ts`: the model, the initial model and the schema over it.
  *
  * Everything the stage runs as a rule is here, because `[formField]` hands a field its state from the schema
- * and rejects a binding to it beside it — readonly, disabled, required and the limits alike. Under Vest the
- * suite is a skeleton, since the Studio has no rule editor; under Angular's built-in rules, they are stated.
+ * and rejects a binding to it beside it — readonly, disabled, required and the limits alike. The sample's
+ * checks follow, as the validator spells them: Angular's rules in the schema, or a Vest suite or a Zod schema
+ * above it, run through Standard Schema.
  */
 export function serializeSchema(definition: PortalFormDefinition): string {
-  const vest = definition.options.validator === 'vest';
+  const { validator } = definition.options;
   const nodes = modelTree(definition);
 
-  const rules = [...rootRules(definition)];
+  const fields: PlacedField[] = definition.sections.flatMap((section) =>
+    definition.fields
+      .filter((field) => field.sectionId === section.id)
+      .map((spec) => ({ spec, path: pathOf(spec.name, section.groupName) }))
+  );
 
-  for (const section of definition.sections) {
-    for (const field of definition.fields.filter((candidate) => candidate.sectionId === section.id)) {
-      rules.push(...fieldRules(field, pathOf(field.name, section.groupName), definition));
-    }
-  }
+  const types = new Map(fields.map(({ spec, path }) => [path, FIELD_KIND_VALUE_TYPES[spec.kind]]));
+  const checks = validator === 'none' ? [] : rulesOn(types);
+  const checked = new Set(checks.filter((rule) => rule.check.kind === 'required').map((rule) => rule.target));
 
-  if (vest) rules.push('validateStandardSchema(path, createMyFormSuite());');
+  const settings = [
+    ...rootRules(definition),
+    ...fields.flatMap(({ spec, path }) => fieldRules(spec, path, definition, checked.has(path)))
+  ];
+  const written = validatorRules(validator, checks);
+  const rules = [...settings, ...written];
 
   const used = new Set(rules.map((rule) => rule.slice(0, rule.indexOf('('))));
   if (rules.some((rule) => rule.includes('REQUIRED'))) used.add('REQUIRED');
 
-  const example = firstPath(nodes) ?? 'name';
+  const vest = ['create', 'mode', 'Modes'];
+  if (checks.length) vest.push('enforce', 'test');
+  if (checks.some((rule) => rule.check.kind === 'pattern')) vest.push('omitWhen');
 
   return [
     ...importLines(['schema', ...used], '@angular/forms/signals'),
-    ...(vest ? ["import { create, mode, Modes } from 'vest';"] : []),
+    ...(validator === 'vest' ? importLines(vest, 'vest') : []),
+    ...(validator === 'zod' ? ["import * as z from 'zod';"] : []),
     '',
     '/** What the form edits: one key per field, and a grouped section nested under its group name. */',
     'export interface MyFormModel {',
@@ -221,26 +399,12 @@ export function serializeSchema(definition: PortalFormDefinition): string {
     'export const myFormInitialModel: MyFormModel = {',
     ...memberLines(nodes, 0, true),
     '};',
-    ...(vest
-      ? [
-          '',
-          '/**',
-          ' * Your rules, run through Standard Schema. A suite carries state across every form it has run for, so',
-          ' * each form creates its own. The Studio has no rule editor, so there are none yet: give the callback its',
-          ` * \`model: MyFormModel\` and add them, for example`,
-          ` * \`test('${example}', 'Required.', () => enforce(${accessOf('model', example)}).isNotBlank())\`.`,
-          ' */',
-          'export function createMyFormSuite() {',
-          '  return create(() => {',
-          "    mode(Modes.ALL); // every failing rule, not only a field's first",
-          '  });',
-          '}'
-        ]
-      : []),
+    ...(validator === 'vest' ? ['', ...vestSuite(checks)] : []),
+    ...(validator === 'zod' ? ['', ...zodSchema(checks, fields)] : []),
     '',
     "/** Each field's state, limits, condition and rules, which `[formField]` hands to the field. */",
     'export const myFormSchema = schema<MyFormModel>((path) => {',
-    ...rules.map((rule) => `  ${rule}`),
+    ...indent([...settings, ...(settings.length && written.length ? [''] : []), ...written], 1),
     '});',
     ''
   ].join('\n');

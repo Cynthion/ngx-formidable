@@ -1,5 +1,5 @@
 import { FieldDecoratorLayout, FormidablePanelPosition } from '@cynthion/ngx-formidable';
-import { PortalFieldKind } from './field-spec.model';
+import { PortalFieldKind, PortalFieldSpec } from './field-spec.model';
 
 /**
  * What one field kind can actually be configured with. `decoratorLayout` is fixed per field component and is
@@ -138,6 +138,22 @@ export const FIELD_KIND_VALUE_TYPES: Readonly<Record<PortalFieldKind, PortalValu
   'checkbox-group': 'string[]',
   'counter': 'number'
 };
+
+/** What a field's key starts as: its value type's empty value, and a number its field's `min`. */
+export function emptyValueOf(field: PortalFieldSpec): string | string[] | boolean | number | null {
+  switch (FIELD_KIND_VALUE_TYPES[field.kind]) {
+    case 'string':
+      return '';
+    case 'string[]':
+      return [];
+    case 'boolean':
+      return false;
+    case 'number':
+      return field.min ?? 0;
+    default:
+      return null;
+  }
+}
 
 /** The reverse lookup the markup parser needs. */
 export const FIELD_KIND_BY_SELECTOR: ReadonlyMap<string, PortalFieldKind> = new Map(

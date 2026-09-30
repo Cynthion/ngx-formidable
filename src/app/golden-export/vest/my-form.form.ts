@@ -1,0 +1,177 @@
+import {
+  hidden,
+  max,
+  maxLength,
+  metadata,
+  min,
+  REQUIRED,
+  schema,
+  validateStandardSchema
+} from '@angular/forms/signals';
+import { create, enforce, mode, Modes, omitWhen, test } from 'vest';
+
+/** What the form edits: one key per field, and a grouped section nested under its group name. */
+export interface MyFormModel {
+  pizza: string | null;
+  size: string | null;
+  crust: string | null;
+  sauce: string | null;
+  toppings: string[];
+  spice: number;
+  pickup: boolean;
+  address: string | null;
+  branch: string | null;
+  when: {
+    date: Date | null;
+    time: Date | null;
+  };
+  payment: {
+    method: string | null;
+    cardNumber: string;
+  };
+  orderName: string;
+  quantity: number;
+  phone: string;
+  email: string;
+  notes: string;
+}
+
+/** Every key defined, because Signal Forms drops an `undefined` one and binds a field only to a key. */
+export const myFormInitialModel: MyFormModel = {
+  pizza: null,
+  size: null,
+  crust: null,
+  sauce: null,
+  toppings: [],
+  spice: 0,
+  pickup: false,
+  address: null,
+  branch: null,
+  when: {
+    date: null,
+    time: null
+  },
+  payment: {
+    method: null,
+    cardNumber: ''
+  },
+  orderName: '',
+  quantity: 1,
+  phone: '',
+  email: '',
+  notes: ''
+};
+
+/**
+ * The form's checks, as a Vest suite run through Standard Schema. A suite carries state across every form
+ * it has run for, so each form creates its own.
+ */
+export function createMyFormSuite() {
+  return create((model: MyFormModel) => {
+    mode(Modes.ALL); // every failing rule, not only a field's first
+
+    test('pizza', 'Pick a pizza to start from.', () => {
+      enforce(model.pizza).isNotEmpty();
+    });
+
+    test('size', 'Pick a size.', () => {
+      enforce(model.size).isNotEmpty();
+    });
+
+    test('crust', 'Pick a crust.', () => {
+      enforce(model.crust).isNotEmpty();
+    });
+
+    test('sauce', 'Pick a sauce.', () => {
+      enforce(model.sauce).isNotEmpty();
+    });
+
+    test('toppings', 'Five toppings is the limit.', () => {
+      enforce(model.toppings).shorterThanOrEquals(5);
+    });
+
+    test('address', 'We need an address to deliver to.', () => {
+      enforce(model.address).isNotEmpty();
+    });
+
+    test('branch', 'Pick a branch to collect from.', () => {
+      enforce(model.branch).isNotEmpty();
+    });
+
+    test('payment.method', 'Choose how to pay.', () => {
+      enforce(model.payment.method).isNotEmpty();
+    });
+
+    test('payment.cardNumber', 'A card number is required.', () => {
+      enforce(model.payment.cardNumber).isNotEmpty();
+    });
+
+    omitWhen(!model.payment.cardNumber, () => {
+      test('payment.cardNumber', 'A card number is sixteen digits.', () => {
+        enforce(model.payment.cardNumber).matches(/^\d{4} \d{4} \d{4} \d{4}$/);
+      });
+    });
+
+    test('orderName', 'We need a name for the order.', () => {
+      enforce(model.orderName).isNotEmpty();
+    });
+
+    test('phone', 'A phone number is required.', () => {
+      enforce(model.phone).isNotEmpty();
+    });
+
+    omitWhen(!model.phone, () => {
+      test('phone', 'A phone number reads 079 123 45 67.', () => {
+        enforce(model.phone).matches(/^\d{3} \d{3} \d{2} \d{2}$/);
+      });
+    });
+
+    test('email', 'An email address is required.', () => {
+      enforce(model.email).isNotEmpty();
+    });
+
+    omitWhen(!model.email, () => {
+      test('email', 'That does not look like an email address.', () => {
+        enforce(model.email).matches(/^[^@\s]+@[^@\s.]+\.[^@\s]+$/);
+      });
+    });
+
+    test('when', 'We are open from 11:00 to 23:00.', () => {
+      enforce(!model.when.time || (model.when.time.getHours() >= 11 && model.when.time.getHours() < 23)).isTruthy();
+    });
+
+    test('when', 'We are closed on Mondays.', () => {
+      enforce(model.when.date?.getDay() !== 1).isTruthy();
+    });
+
+    // A target naming no field reports on the whole form.
+    test('wholeForm', 'Pineapple on a BBQ base is a combination this kitchen refuses.', () => {
+      enforce(!(model.sauce === 'bbq' && model.toppings.includes('pineapple'))).isTruthy();
+    });
+  });
+}
+
+/** Each field's state, limits, condition and rules, which `[formField]` hands to the field. */
+export const myFormSchema = schema<MyFormModel>((path) => {
+  min(path.spice, 0);
+  max(path.spice, 4);
+  hidden(path.address, (context) => context.valueOf(path.pickup) !== false);
+  hidden(path.branch, (context) => context.valueOf(path.pickup) !== true);
+  hidden(path.payment.cardNumber, (context) => context.valueOf(path.payment.method) !== 'card');
+  min(path.quantity, 1);
+  max(path.quantity, 10);
+  maxLength(path.notes, 200);
+
+  metadata(path.pizza, REQUIRED, () => true);
+  metadata(path.size, REQUIRED, () => true);
+  metadata(path.crust, REQUIRED, () => true);
+  metadata(path.sauce, REQUIRED, () => true);
+  metadata(path.address, REQUIRED, () => true);
+  metadata(path.branch, REQUIRED, () => true);
+  metadata(path.payment.method, REQUIRED, () => true);
+  metadata(path.payment.cardNumber, REQUIRED, () => true);
+  metadata(path.orderName, REQUIRED, () => true);
+  metadata(path.phone, REQUIRED, () => true);
+  metadata(path.email, REQUIRED, () => true);
+  validateStandardSchema(path, createMyFormSuite());
+});

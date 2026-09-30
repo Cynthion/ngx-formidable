@@ -2,6 +2,7 @@ import { computed, effect, inject, Injectable, Injector, linkedSignal, signal, u
 import { form } from '@angular/forms/signals';
 import { FORMIDABLE_ERROR_MESSAGE } from '@cynthion/ngx-formidable';
 import { buildNested, fieldAt, readPath } from '../helpers/model-path.helpers';
+import { emptyValueOf } from '../model/field-capabilities';
 import { PortalFieldSpec } from '../model/field-spec.model';
 import { PREVIEW_INITIAL_MODEL } from '../model/preview-form.definition';
 import { previewSchema, PreviewSchemaField } from '../model/preview-form.schema';
@@ -78,7 +79,7 @@ export class FormValueStore {
       return buildNested(
         fields.map((field) => [
           field.path,
-          readPath(model, before.get(field.spec.id) ?? field.path) ?? (field.spec.kind === 'checkbox-group' ? [] : null)
+          readPath(model, before.get(field.spec.id) ?? field.path) ?? emptyValueOf(field.spec)
         ])
       );
     }
@@ -94,9 +95,10 @@ export class FormValueStore {
    * One build of the form: its field tree, and the injector the tree lives in.
    *
    * A schema is fixed once its form exists, so a new validator, a new debounce or a structural edit builds a
-   * new one, with a Vest suite of its own; every other setting a rule reads is read live. Each tree gets an
-   * injector of its own and the effect below destroys it with the build, because a form's effects — its
-   * validator's among them — live as long as their injector, and this store's lives as long as the app.
+   * new one, with a Vest suite or a Zod schema of its own; every other setting a rule reads is read live.
+   * Each tree gets an injector of its own and the effect below destroys it with the build, because a form's
+   * effects — its validator's among them — live as long as their injector, and this store's lives as long
+   * as the app.
    */
   private readonly build = computed(() => {
     const schema = previewSchema(
