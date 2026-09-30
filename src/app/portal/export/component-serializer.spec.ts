@@ -3,47 +3,49 @@ import { PREVIEW_FORM_DEFINITION } from '../model/preview-form.definition';
 import { serializeComponent } from './component-serializer';
 import { serializeDefinition } from './markup-serializer';
 
-function only(ids: readonly string[], validator = PREVIEW_FORM_DEFINITION.options.validator): PortalFormDefinition {
+function only(ids: readonly string[]): PortalFormDefinition {
   return {
     ...PREVIEW_FORM_DEFINITION,
-    fields: PREVIEW_FORM_DEFINITION.fields.filter((field) => ids.includes(field.id)),
-    options: { ...PREVIEW_FORM_DEFINITION.options, validator }
+    fields: PREVIEW_FORM_DEFINITION.fields.filter((field) => ids.includes(field.id))
   };
 }
 
 describe('component serializer', () => {
-  it('types each key by what its field writes, and shapes it to match', () => {
-    const source = serializeComponent(only(['orderName', 'pickup', 'spice', 'toppings', 'quantity']));
+  it('holds the form over a signal of the initial model, under the names the template binds', () => {
+    const definition = only(['orderName']);
 
-    expect(source).toContain('  orderName: string;');
-    expect(source).toContain('  pickup: boolean;');
-    expect(source).toContain('  spice: number;');
-    expect(source).toContain('  toppings: string[];');
-    expect(source).toContain('  quantity: number;');
-
-    // Keys follow the definition's section and field order, not the order asked for here, and only the last
-    // drops its comma — so the block is asserted whole rather than a line at a time.
-    expect(source).toContain(
+    expect(serializeDefinition(definition)).toContain('<form [formRoot]="form">');
+    expect(serializeComponent(definition)).toContain(
       [
-        'export const myFormShape: MyFormShape = {',
-        '  toppings: [],',
-        '  spice: 0,',
-        '  pickup: false,',
-        "  orderName: '',",
-        '  quantity: 0',
-        '};'
+        'export class MyForm {',
+        '  readonly model = signal<MyFormModel>(myFormInitialModel);',
+        '  readonly form = form(this.model, myFormSchema);',
+        '}'
       ].join('\n')
     );
   });
 
-  // A grouped section nests in the model, so it has to nest in the interface and the shape too.
-  it('nests a grouped section under its group name', () => {
-    const source = serializeComponent(only(['date', 'time', 'orderName']));
+  // Read off the template, so a decoration the template leaves out is not imported, and one it adds is.
+  it('imports exactly what the template uses', () => {
+    const source = serializeComponent(only(['orderName', 'size']));
 
-    expect(source).toContain(['  when: {', '    date: Date;', '    time: Date;', '  };'].join('\n'));
     expect(source).toContain(
-      ['  when: {', '    date: new Date(),', '    time: new Date()', '  },', "  orderName: ''"].join('\n')
+      "import { FieldDecorator, FieldLabel, FieldOption, InputField, SelectField } from '@cynthion/ngx-formidable';"
     );
+    expect(source).toContain(
+      [
+        '  imports: [',
+        '    FormRoot,',
+        '    FormField,',
+        '    FieldDecorator,',
+        '    FieldLabel,',
+        '    FieldOption,',
+        '    InputField,',
+        '    SelectField',
+        '  ]'
+      ].join('\n')
+    );
+    expect(source).not.toContain('FieldHint');
   });
 
   // The presets are data, so they live in the component and the template only names the handler. Both
@@ -51,11 +53,13 @@ describe('component serializer', () => {
   it('declares the preset map and the handler the template binds to', () => {
     const source = serializeComponent(only(['pizza', 'sauce', 'toppings']));
 
-    expect(source).toContain('  readonly pizzaPresets: Record<string, Partial<MyForm>> = {');
+    expect(source).toContain('  readonly pizzaPresets: Record<string, Partial<MyFormModel>> = {');
     expect(source).toContain("    margherita: { sauce: 'tomato', toppings: ['mozzarella', 'basil'] },");
     expect(source).toContain("    'quattro-formaggi': { sauce: 'gorgonzola', toppings: ['mozzarella'] }");
-    expect(source).toContain('  applyPizzaPreset(value: string): void {');
-    expect(source).toContain('    this.model.update((model) => ({ ...model, ...this.pizzaPresets[value] }));');
+    expect(source).toContain('  applyPizzaPreset(value: string | null): void {');
+    expect(source).toContain(
+      '    if (value) this.model.update((model) => ({ ...model, ...this.pizzaPresets[value] }));'
+    );
   });
 
   it('declares no preset member for a form that has none', () => {
@@ -65,67 +69,36 @@ describe('component serializer', () => {
     expect(source).not.toContain('Preset(');
   });
 
-  it('provides every name the template binds', () => {
-    const definition = only(['orderName'], 'vest');
-    const template = serializeDefinition(definition);
-    const source = serializeComponent(definition);
-
-    expect(template).toContain('[formValue]="model()"');
-    expect(template).toContain('(formValueChange)="model.set($event)"');
-    expect(template).toContain('[formShape]="shape"');
-    expect(template).toContain('[formSuite]="suite"');
-
-    expect(source).toContain('  readonly model = signal<MyFormModel>({});');
-    expect(source).toContain('  readonly shape = myFormShape;');
-    expect(source).toContain('  readonly suite = myFormSuite;');
-  });
-
-  it('carries a suite only under Vest, and leaves its rules to the consumer', () => {
-    const vest = serializeComponent(only(['orderName'], 'vest'));
-    const angular = serializeComponent(only(['orderName'], 'angular'));
-
-    expect(vest).toContain("from 'vest'");
-    expect(vest).toContain('NgxFormidableVestValidator');
-    expect(vest).toContain("    // test('orderName', 'Required.', () => {");
-    expect(vest).not.toMatch(/^\s*test\(/m);
-
-    expect(angular).not.toContain('vest');
-    expect(angular).not.toContain('suite');
-  });
-
-  it('names a grouped example target by its dotted path', () => {
-    const vest = serializeComponent(only(['date'], 'vest'));
-
-    expect(vest).toContain("    // test('when.date', 'Required.', () => {");
-    expect(vest).toContain('    //   enforce(model.when.date).isNotBlank();');
-  });
-
-  it('quotes a name that is not an identifier, in the component and the template alike', () => {
+  // The library has no form-level input for either, so the component scopes them over its own fields.
+  it('provides what the form states itself over the app defaults, and nothing where it states nothing', () => {
     const definition = only(['orderName']);
-    const field = { ...definition.fields[0]!, name: 'radio-group1' };
-    const renamed = { ...definition, fields: [field] };
+    const stating = serializeComponent({
+      ...definition,
+      options: { ...definition.options, revealOn: 'dirty', hideRequiredMarkers: false }
+    });
 
-    expect(serializeComponent(renamed)).toContain("  'radio-group1': string;");
-    expect(serializeDefinition(renamed)).toContain(`[ngModel]="model()['radio-group1']"`);
-  });
+    expect(stating).toContain("import { Component, inject, signal } from '@angular/core';");
+    expect(stating).toContain('FORMIDABLE_DEFAULTS');
+    expect(stating).toContain(
+      "      useFactory: () => ({ ...inject(FORMIDABLE_DEFAULTS, { skipSelf: true }), revealOn: 'dirty', hideRequiredMarkers: false })"
+    );
 
-  it('declares a shared name once', () => {
-    const definition = only(['orderName', 'phone']);
-    const fields = definition.fields.map((field) => ({ ...field, name: 'shared' }));
-
-    expect(serializeComponent({ ...definition, fields }).match(/ {2}shared: string;/g)?.length).toBe(1);
+    expect(serializeComponent(definition)).not.toContain('providers');
+    expect(serializeComponent(definition)).not.toContain('inject');
   });
 
   it('points at the custom field it cannot import', () => {
-    expect(serializeComponent(only(['quantity']))).toContain('<example-counter-field>');
-    expect(serializeComponent(only(['orderName']))).not.toContain('<example-counter-field>');
+    expect(serializeComponent(only(['quantity']))).toContain(
+      "import { ExampleCounterField } from '../example-counter-field/example-counter-field';"
+    );
+    expect(serializeComponent(only(['orderName']))).not.toContain('ExampleCounterField');
   });
 
   it('still produces a component for a blank form', () => {
     const source = serializeComponent(only([]));
 
-    expect(source).toContain('export interface MyForm {\n}');
-    expect(source).toContain('export const myFormShape: MyFormShape = {\n};');
-    expect(source).toContain('export class MyFormComponent {');
+    expect(source).toContain("import { form, FormRoot } from '@angular/forms/signals';");
+    expect(source).not.toContain('@cynthion/ngx-formidable');
+    expect(source).toContain('export class MyForm {');
   });
 });

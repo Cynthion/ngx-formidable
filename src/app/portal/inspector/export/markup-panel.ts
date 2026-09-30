@@ -4,42 +4,48 @@ import { MARKUP_NOTE_LABELS, MarkupParseResult, parseMarkup } from '../../export
 import { serializeComponent } from '../../export/component-serializer';
 import { serializeAppConfig } from '../../export/config-serializer';
 import { serializeDefinition } from '../../export/markup-serializer';
+import { serializeSchema } from '../../export/schema-serializer';
 import { copyText } from '../../helpers/clipboard.helpers';
 import { FormDefinitionStore } from '../../state/form-definition.store';
 import { ExportDirection, InspectorStore } from '../../state/inspector.store';
 
-/** The three files the form half generates. */
-type Output = 'template' | 'component' | 'config';
+/** The four files the form half generates. */
+type Output = 'template' | 'component' | 'schema' | 'config';
 
 const OUTPUTS: readonly { id: Output; label: string; help: string }[] = [
   {
     id: 'template',
     label: 'Template',
-    help: 'Goes in your component’s template. The names it binds are the ones Component defines.'
+    help: 'my-form.html. Every field, bound by [formField] to the form that Component holds.'
   },
   {
     id: 'component',
     label: 'Component',
-    help: 'Optional. The library’s convention for what the template binds to — the model, its shape and, under Vest, a suite for your rules. Any component that provides them serves the template just as well.'
+    help: 'my-form.ts. The model, the form over it, and the handlers the template binds.'
+  },
+  {
+    id: 'schema',
+    label: 'Schema',
+    help: 'my-form.form.ts. The model’s type, its initial value, and the rules: each field’s state, limits and condition, and your validation.'
   },
   {
     id: 'config',
     label: 'App Config',
-    help: 'The app defaults from Settings ▸ App Defaults. The template leaves out whatever these supply, so take both. Not read back in: it belongs to the app, not the form.'
+    help: 'app.config.ts. The app defaults from Settings ▸ App Defaults. The template leaves out whatever these supply, so take both. Not read back in: it belongs to the app, not the form.'
   }
 ];
 
 /**
- * The Form half: the template the configuration produces, a component for it to bind to, the app config
- * whose defaults the template leaves out, and a way to read a template back.
+ * The Form half: the template the configuration produces, the component and the schema it binds to, the
+ * app config whose defaults the template leaves out, and a way to read a template back.
  *
  * An Angular production build contains no template compiler, so pasted markup cannot become live
- * components. The configuration is the source of truth: all three are derived from it, read-only, and an
- * import is parsed back into it. Only the template is read back — the component holds nothing the Studio
- * configures, and the app config is the app's rather than the form's.
+ * components. The configuration is the source of truth: all four are derived from it, read-only, and an
+ * import is parsed back into it. Only the template is read back — what the component and the schema hold
+ * is reported as left behind, and the app config is the app's rather than the form's.
  *
- * The three are tabs, one showing at a time: stacked, they were three screens of code with the import
- * below all of them. Out and back in are an accordion each, the same two the theme half has, so the area
+ * The four are tabs, one showing at a time: stacked, they were screens of code with the import below all
+ * of them. Out and back in are an accordion each, the same two the theme half has, so the area
  * reads the same whichever half is showing.
  */
 @Component({
@@ -61,11 +67,13 @@ export class MarkupPanel {
   protected readonly importResult = signal<MarkupParseResult | null>(null);
   protected readonly justCopied = signal(false);
 
-  /** Only the file on screen is serialized: the other two are a function of the same stores, on demand. */
+  /** Only the file on screen is serialized: the others are a function of the same stores, on demand. */
   protected readonly text = computed(() => {
     switch (this.output()) {
       case 'component':
         return serializeComponent(this.store.definition());
+      case 'schema':
+        return serializeSchema(this.store.definition());
       case 'config':
         return serializeAppConfig(this.store.appDefaults());
       default:

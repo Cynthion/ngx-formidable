@@ -898,10 +898,10 @@ describe('portal', () => {
     expect(headings()).toEqual(['Export', 'Import']);
   }));
 
-  // The template binds names only a component defines, and leaves out what the app config supplies, so both
-  // sit beside it — as tabs, one file on screen at a time, because stacked they buried the import under three
-  // screens of code.
-  it('offers the template, the component and the app config as tabs, one at a time', fakeAsync(() => {
+  // The template binds names only the component and its schema define, and leaves out what the app config
+  // supplies, so all three sit beside it — as tabs, one file on screen at a time, because stacked they buried
+  // the import under screens of code.
+  it('offers the template, the component, the schema and the app config as tabs, one at a time', fakeAsync(() => {
     settle();
 
     TestBed.inject(InspectorStore).openExport('form');
@@ -915,23 +915,34 @@ describe('portal', () => {
       return { count: blocks.length, text: blocks[0]?.textContent ?? '', copy: (copy?.textContent ?? '').trim() };
     };
 
-    expect(tabs().map((el) => (el.textContent ?? '').trim())).toEqual(['Template', 'Component', 'App Config']);
+    expect(tabs().map((el) => (el.textContent ?? '').trim())).toEqual([
+      'Template',
+      'Component',
+      'Schema',
+      'App Config'
+    ]);
     expect(shown().count).toBe(1);
-    expect(shown().text).toContain('<form');
+    expect(shown().text).toContain('<form [formRoot]="form">');
     expect(shown().copy).toBe('Copy Template');
 
     tabs()[1]!.click();
     settle();
     expect(shown().count).toBe(1);
-    expect(shown().text).toContain('export class MyFormComponent');
+    expect(shown().text).toContain('export class MyForm {');
     expect(shown().copy).toBe('Copy Component');
 
     tabs()[2]!.click();
     settle();
     expect(shown().count).toBe(1);
+    expect(shown().text).toContain('export const myFormSchema = schema<MyFormModel>');
+    expect(shown().copy).toBe('Copy Schema');
+
+    tabs()[3]!.click();
+    settle();
+    expect(shown().count).toBe(1);
     expect(shown().text).toContain('provideNgxFormidable');
     expect(shown().copy).toBe('Copy App Config');
-    expect(tabs()[2]!.getAttribute('aria-selected')).toBe('true');
+    expect(tabs()[3]!.getAttribute('aria-selected')).toBe('true');
   }));
 
   // A reset beside the copy is one misclick from wiping the work being exported, and each already lives where

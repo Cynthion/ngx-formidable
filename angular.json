@@ -82,6 +82,7 @@
         "test": {
           "builder": "@angular/build:karma",
           "options": {
+            "aot": true,
             "karmaConfig": "karma.conf.cjs",
             "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
