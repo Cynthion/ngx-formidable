@@ -1,12 +1,9 @@
 import { Component, computed, input, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { NgxFormidableForm } from '@cynthion/ngx-formidable';
 import { FIELD_KIND_LABELS, FIELD_KIND_SELECTORS } from '../model/field-capabilities';
 import { PortalFieldKind } from '../model/field-spec.model';
 import { kindLink, MatrixColumn, sampleSpec, SPECIMEN_FORM_OPTIONS } from '../model/specimen';
-import { PreviewField } from '../stage/preview-form/preview-field';
-import { ReportsRequired } from './reports-required';
+import { SpecimenCell } from './specimen-cell';
 
 /**
  * Field kinds against one axis: a row per kind, a column per value of the axis, and nothing else varying.
@@ -14,14 +11,13 @@ import { ReportsRequired } from './reports-required';
  * It opens on `featured`, a few kinds that between them cover the three layouts, and shows the rest on request:
  * the rule is legible from four rows, and twelve at once is a wall.
  *
- * Every cell is the Studio's own field renderer in a form of its own, so no two cells share a control and a
- * cell renders exactly what the same field renders on the stage.
+ * Every cell is a `SpecimenCell`: the Studio's own field renderer, over a form of its own.
  */
 @Component({
   selector: 'portal-specimen-matrix',
   templateUrl: './specimen-matrix.html',
   styleUrl: './specimen-matrix.scss',
-  imports: [FormsModule, RouterLink, NgxFormidableForm, PreviewField, ReportsRequired]
+  imports: [RouterLink, SpecimenCell]
 })
 export class SpecimenMatrix {
   public readonly kinds = input.required<readonly PortalFieldKind[]>();

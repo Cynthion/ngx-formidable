@@ -6,6 +6,10 @@
 
 - **Parse Errors One Check Late**: under `ngModel` and `[formControl]`, `@angular/forms` 22.2 takes a `transformedValue` parse error into the control from an effect that runs after the host's template and calls `updateValueAndValidity({ emitEvent: false })`. `control.status` is read untracked, so nothing checks the host again, and the field's `errors` input follows only on its next check. Upstream; `BaseDateTimeField` works around it with one `markForCheck()` after render, and the `unparseable text` specs in `date-time-field.spec.ts` fail without it. Report it to Angular with a minimal reproduction. Once fixed, drop the workaround and its exception in [`impl/components.md`](components.md).
 
+- **Vest Empty Target**: a Vest suite run through its Standard Schema gives a test with an empty target an issue without a path, then fails its own check on the next run with `Tests called in different order than previous run`. Upstream; the portal's suite reports on the whole form through a target that names no field instead. Report it to Vest with a minimal reproduction.
+
+- **Standard Schema Path Through A Missing Key**: `validateStandardSchema` throws a `TypeError` for an issue whose path runs through a key the model lacks, where an unknown last key falls back to the path the schema validates. Upstream; the portal's suite drops such an issue first. Report it to Angular with a minimal reproduction.
+
 ## Features
 
 - **Vitest Spike**: move both test projects from Karma to the `@angular/build:unit-test` builder, whose default runner is Vitest. The open question is the library: its geometry specs need `test-styles.scss`, while a library build target carries no `styles`. Try `setupFiles` and a `runnerConfig`, and prove it with the whole library suite passing.

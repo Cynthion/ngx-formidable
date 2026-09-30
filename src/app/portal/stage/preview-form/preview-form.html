@@ -1,24 +1,9 @@
-@let opts = options();
-
-<!-- `NgForm` reads its options once, and a field its app defaults, so either change rebuilds the form. -->
-@for (key of [formKey()]; track key) {
+<!-- A field reads its defaults once, so new defaults rebuild the form, and so does a new field tree. -->
+@for (built of [build()]; track built) { @let tree = built.form;
 <form
-  formidableForm
-  formidableValidateWholeForm
   portalAppDefaults
   class="preview-form"
-  [formValue]="valueStore.model()"
-  [formShape]="valueStore.shape()"
-  [formSuite]="suite()"
-  [dependentFields]="dependentFields"
-  [revealOn]="opts.revealOn"
-  [hideRequiredMarkers]="opts.hideRequiredMarkers"
-  [ngFormOptions]="ngFormOptions()"
-  (formValueChange)="onModelChange($event)"
-  (errorsChange)="onErrors($event)"
-  (validChange)="valueStore.valid.set($event)"
-  (dirtyChange)="valueStore.dirty.set($event)"
-  (ngSubmit)="onSubmit()">
+  [formRoot]="tree">
   <header class="form-header">
     <h1>{{ heading() }}</h1>
     @if (intro(); as text) {
@@ -39,55 +24,32 @@
     <h2>{{ entry.section.title }}</h2>
 
     <!--
-          A section carrying a `groupName` renders as an `ngModelGroup`, which nests its fields in the model
-          and gives a rule reading two of them somewhere to report. The `formidable-field-errors` after the grid
-          draws that rule's messages, under the group rather than under either field.
-
-          The field loop is written out under both branches rather than shared through an `ng-template`: an
-          embedded view resolves DI where the template is *declared*, so fields rendered through an outlet
-          would inject the `NgForm` and register outside the group they are sitting in.
+          A section carrying a `groupName` nests its fields under that name in the model, which gives a rule
+          reading two of them somewhere to report. The `formidable-field-errors` after the grid draws that
+          rule's messages, under the group rather than under either field.
         -->
-    @if (entry.section.groupName; as groupName) {
-    <div
-      class="form-group"
-      [ngModelGroup]="groupName">
+    <div [class.form-group]="!!entry.section.groupName">
       <div class="field-grid">
-        @for (field of entry.fields; track field.id) { @if (!valueStore.hiddenFieldIds().has(field.id)) {
+        @for (field of entry.fields; track field.id) { @let control = fieldAt(tree, pathOf(field.id));
+        <!-- `hidden()` takes the field out of validation; `@if` takes it off the page. -->
+        @if (!control().hidden()) {
         <portal-preview-field
           [spec]="field"
-          [formOptions]="opts"
-          [value]="valueFor(field.id)"
+          [formOptions]="options()"
+          [fieldTree]="control"
           [selected]="definitionStore.selectedFieldId() === field.id"
           [showFieldTypes]="showFieldTypes()"
           [showAccessibility]="showAccessibility()"
           (focused)="onFieldFocused($event)"
           (chipActivated)="openInInspector($event)"
-          (actionRequested)="onActionRequested($event)" />
+          (actionRequested)="onActionRequested($event)"
+          (picked)="valueStore.applyPreset(field, $event)" />
         } }
       </div>
-      <formidable-field-errors [errors]="groupErrors(groupName)" />
+      @if (entry.section.groupName; as groupName) {
+      <formidable-field-errors [errors]="fieldAt(tree, groupName)().errors()" />
+      }
     </div>
-    } @else {
-    <div class="field-grid">
-      @for (field of entry.fields; track field.id) {
-      <!--
-                A conditional field is destroyed, not hidden: Angular removes the control with it and the
-                model loses the key, which `user/validation.md` covers under Conditional Fields.
-              -->
-      @if (!valueStore.hiddenFieldIds().has(field.id)) {
-      <portal-preview-field
-        [spec]="field"
-        [formOptions]="opts"
-        [value]="valueFor(field.id)"
-        [selected]="definitionStore.selectedFieldId() === field.id"
-        [showFieldTypes]="showFieldTypes()"
-        [showAccessibility]="showAccessibility()"
-        (focused)="onFieldFocused($event)"
-        (chipActivated)="openInInspector($event)"
-        (actionRequested)="onActionRequested($event)" />
-      } }
-    </div>
-    }
   </section>
   }
 

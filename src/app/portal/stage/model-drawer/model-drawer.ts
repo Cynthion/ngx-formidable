@@ -7,11 +7,10 @@ import { LayoutStore } from '../../state/layout.store';
 type DrawerPanel = 'sections' | 'errors' | 'raw';
 
 /**
- * The model the form edits, its errors, its validity and its raw serialization.
+ * The model the form edits, and its errors, validity, dirty and submitting state, read off the field tree.
  *
- * The library's Ubiquitous Language names the object a form edits the **model**; `formValue` stays the
- * directive's input name, which is the binding rather than the concept. The collapsed bar always states the
- * fill count and the validity, because that is the cheapest evidence that the form is real.
+ * The collapsed bar always states the fill count and the validity, because that is the cheapest evidence
+ * that the form is real.
  */
 @Component({
   selector: 'portal-model-drawer',
@@ -43,13 +42,9 @@ export class ModelDrawer {
     Object.entries(this.valueStore.errors()).filter(([, messages]) => messages.length)
   );
 
-  protected readonly validity = computed(() => {
-    const valid = this.valueStore.valid();
-
-    if (valid === null) return 'Not validated';
-
-    return valid ? 'Form valid' : `Form invalid · ${this.valueStore.errorCount()}`;
-  });
+  protected readonly validity = computed(() =>
+    this.valueStore.valid() ? 'Form valid' : `Form invalid · ${this.valueStore.errorCount()}`
+  );
 
   protected toggle(): void {
     this.layout.drawerOpen.update((open) => !open);

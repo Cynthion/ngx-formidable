@@ -133,9 +133,9 @@
           <div class="anatomy-field">
             <formidable-field-decorator>
               <formidable-input-field
+                value="Langstrasse 84"
                 name="anatomy"
-                [required]="true"
-                [ngModel]="'Langstrasse 84'" />
+                [required]="true" />
               <div formidableFieldLabel>Delivery Address</div>
               <div formidableFieldPrefix>
                 <example-icon
@@ -212,13 +212,11 @@
 
           <div class="ladder-fields">
             @for (entry of ladderFields; track entry.kind) {
-            <form class="ladder-cell">
-              <portal-preview-field
-                [spec]="entry.spec"
-                [formOptions]="formOptions"
-                [value]="entry.value"
-                [showFieldTypes]="false" />
-            </form>
+            <portal-specimen-cell
+              class="ladder-cell"
+              [spec]="entry.spec"
+              [formOptions]="formOptions"
+              [value]="entry.value" />
             }
           </div>
         </div>
@@ -486,25 +484,23 @@
           class="panels">
           <formidable-field-decorator>
             <formidable-dropdown-field
+              value="margherita"
               name="pizza"
-              [options]="pizzas"
-              [ngModel]="'margherita'" />
+              [options]="pizzas" />
             <div formidableFieldLabel>Pizza</div>
           </formidable-field-decorator>
 
           <formidable-field-decorator>
             <formidable-autocomplete-field
               name="address"
-              [options]="addresses"
-              [ngModel]="null" />
+              [options]="addresses" />
             <div formidableFieldLabel>Delivery Address</div>
           </formidable-field-decorator>
 
           <formidable-field-decorator>
             <formidable-date-field
               name="date"
-              [unicodeTokenFormat]="'dd.MM.yyyy'"
-              [ngModel]="null">
+              [unicodeTokenFormat]="'dd.MM.yyyy'">
               <example-icon
                 formidableFieldToggleIcon
                 [svg]="calendarSvg"

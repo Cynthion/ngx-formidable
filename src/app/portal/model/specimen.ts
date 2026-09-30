@@ -143,7 +143,7 @@ export interface MatrixColumn {
   readonly title: string;
   readonly value: (kind: PortalFieldKind) => unknown;
   readonly spec?: (spec: PortalFieldSpec) => PortalFieldSpec;
-  /** Rendered in a form whose validator reports the field as required, so the library shows it invalid. */
+  /** Rendered with a rule reporting the field as required, so the library shows it invalid. */
   readonly invalid?: boolean;
 }
 

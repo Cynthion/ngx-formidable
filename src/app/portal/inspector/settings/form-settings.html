@@ -104,29 +104,26 @@
     <option [value]="entry[0]">{{ entry[1] }}</option>
     }
   </select>
-  <p class="pc-help">
-    The form directive owns the model, the targets and the debounce, and delegates the rules. With none provided, the form is still observable and nothing
-    validates.
-  </p>
+  <p class="pc-help">The rules the form's schema validates with. With none, the form is still observable, and only the fields' own limits apply.</p>
 </div>
 
 <div class="pc-row">
   <div class="pc-field">
     <label
-      for="fs-update-on"
+      for="fs-debounce"
       class="pc-label">
-      <span class="pc-label-name">Run On</span>
+      <span class="pc-label-name">Debounce</span>
     </label>
     <select
-      id="fs-update-on"
+      id="fs-debounce"
       class="pc-select"
-      [portalSelectedValue]="options.updateOn"
-      (change)="set('updateOn', $any($event.target).value)">
-      @for (entry of updateOns; track entry[0]) {
+      [portalSelectedValue]="stated(options.debounce)"
+      (change)="setDebounce($any($event.target).value)">
+      @for (entry of debounces; track entry[0]) {
       <option [value]="entry[0]">{{ entry[1] }}</option>
       }
     </select>
-    <p class="pc-help">When the validator runs. Angular's own axis.</p>
+    <p class="pc-help">When an edit reaches the model, and so when the rules run. Signal Forms' axis.</p>
   </div>
 
   <div class="pc-field">
@@ -149,4 +146,4 @@
   </div>
 </div>
 
-<p class="pc-help">Changing the run axis rebuilds the form, because `NgForm` reads its options once.</p>
+<p class="pc-help">Changing the validator or the debounce rebuilds the form, because a schema is fixed once its form exists.</p>

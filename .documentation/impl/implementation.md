@@ -81,6 +81,7 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 | A classic error reaches a custom control as `{ kind, context }`, with no `message`                                                                                          |    20     |
 | `transformedValue` reports parse errors to all three APIs. `ngModel` and `[formControl]` hand one to the field only on the host's next check                                |    24     |
 | A Vest suite is a Standard Schema, and an async Vest test does not surface through it                                                                                       |    26     |
+| A Standard Schema issue whose path names no field reports on the root, and one whose path runs through a key the model lacks throws                                         |    26     |
 
 ### Accepted Compromises
 
@@ -93,7 +94,7 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 - **One Branch**: `feature/signal-forms-support` collects Phases 17 to 31. `main`, the deployed portal and the published package stay on the last beta until Phase 31.
 - **Phase Branches**: each phase branches off it and returns through a pull request with every CI gate of [`impl/definition-of-done.md`](definition-of-done.md) green.
 - **Test First**: each phase opens with behaviour specs that fail — DOM, ARIA and model assertions through a host that binds the field with a forms API.
-- **Interim Portal**: it builds and passes its tests at every phase. Visual regressions are tolerated until Phase 26 rebuilds it.
+- **Interim Portal**: it builds and passes its tests at every phase.
 - **Interim Guides**: [`user/components.md`](../user/components.md) follows every public change in the same phase; the guides are rewritten once, in Phase 30.
 - **This Section**: deleted with Phase 31, once Phases 29 and 30 have moved what holds into `tech/` and `user/`.
 
@@ -101,20 +102,9 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 
 ## Library Phases
 
-### Phase 26 — Portal Preview On Signal Forms
-
-**Depends On**: nothing.
-
-- **Preview Form**: built with `form()` — `[formRoot]` and a submission, `[formField]` on every field, groups as nested model objects, conditional fields through `hidden()` and `@if`. The `ControlContainer` workaround goes.
-- **Validation Modes**: Vest through `validateStandardSchema`, with one suite per form build; Signal Forms' built-in rules; none. The run setting becomes `debounce`.
-- **State**: the stores hold the model `signal`, and the model drawer reads errors, validity, dirty and submitting off the field tree.
-- **Specimen**: cells without a `<form>`.
-- **Verify First**: how a Vest whole-form test and an async Vest test surface through Standard Schema. The fallback is `validate`, `validateTree` or `validateAsync`.
-- **Proof**: no `ngModel` and no `formidableForm` left in `src/app` outside the export text; portal specs green; screenshots of the served Studio in each validation mode.
-
 ### Phase 27 — Studio Export On Signal Forms
 
-**Depends On**: Phase 26.
+**Depends On**: nothing.
 
 - **The Convention**: the export is the **Consumer Convention** of **Target Architecture**.
 - **What It Carries**: conditions as `hidden()` rules, presets through `(valueChange)`, and the rules of the built-in validation mode, which the export drops today.
