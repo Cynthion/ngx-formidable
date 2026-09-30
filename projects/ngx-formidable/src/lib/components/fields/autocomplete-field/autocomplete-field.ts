@@ -135,20 +135,18 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
 
   private readonly filterText = signal('');
 
-  /**
-   * The filter text the field moved on its own, rather than the user typing it.
-   *
-   * A value written from outside takes the filter with it — to the selected label, or to nothing where the
-   * field cannot place the value yet — and a consumer who supplies the options is the only one who can put
-   * the matching option back into the list. Move the field's filter without telling them and the two lists
-   * drift: the field holds a value whose option the consumer has filtered out, and has nothing left to
-   * display it with. That is the second lap of an `actionOption` round trip, where the created option
-   * carries a label the text typed to find it does not match.
-   *
-   * Reported only while the field is not the user's. A focused field is one being typed into, where the
-   * typed text is the filter and the field's own narrowing — a deselect, or a written value re-applied
-   * because the list moved — must not pull the list out from under them.
-   */
+  // The filter text the field moved on its own, rather than the user typing it.
+  //
+  // A value written from outside takes the filter with it — to the selected label, or to nothing where the
+  // field cannot place the value yet — and a consumer who supplies the options is the only one who can put
+  // the matching option back into the list. Move the field's filter without telling them and the two lists
+  // drift: the field holds a value whose option the consumer has filtered out, and has nothing left to
+  // display it with. That is the second lap of an `actionOption` round trip, where the created option
+  // carries a label the text typed to find it does not match.
+  //
+  // Reported only while the field is not the user's. A focused field is one being typed into, where the
+  // typed text is the filter and the field's own narrowing — a deselect, or a written value re-applied
+  // because the list moved — must not pull the list out from under them.
   private setFilterText(value: string): void {
     this.filterChangeSubject$.next(value);
     this.filterText.set(value);

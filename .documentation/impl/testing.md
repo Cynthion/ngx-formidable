@@ -26,7 +26,7 @@ Two things behave differently in a zoneless `TestBed`, and both mislead if they 
 
 ## Library Specs
 
-Every library spec is built on the harness in `lib/testing/`. `public-api.ts` does not reach it, so ng-packagr never compiles it.
+Every library spec is built on the helpers in `lib/testing/`. `public-api.ts` does not reach it, so ng-packagr never compiles it.
 
 | Helper                          | Does                                                                                                                                   |
 | :------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
@@ -86,4 +86,4 @@ When each run is a gate is in [`impl/definition-of-done.md`](definition-of-done.
 
 ## Visual Testing
 
-There is no Storybook or visual-regression layer yet; it is Phase 32 in [`impl/implementation.md`](implementation.md). Until then, the portal is the manual visual check — run `npm start` and exercise the changed field in its preview form, by hand or through the `playwright` MCP server described in [`impl/ai-harness.md`](ai-harness.md). Turning the `Field Types` switch off leaves that form without the portal's own annotations.
+There is no Storybook or visual-regression layer yet; it is Phase 33 in [`impl/implementation.md`](implementation.md). Until then, the portal is the manual visual check — run `npm start` and exercise the changed field in its preview form, by hand or through the `playwright` MCP server described in [`impl/ai-harness.md`](ai-harness.md). Turning the `Field Types` switch off leaves that form without the portal's own annotations.

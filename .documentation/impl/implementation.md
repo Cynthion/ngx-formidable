@@ -105,23 +105,15 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 - **Test First**: each phase opens with behaviour specs that fail — DOM, ARIA and model assertions through a host that binds the field with a forms API.
 - **Interim Portal**: it builds and passes its tests at every phase.
 - **Interim Guides**: [`user/components.md`](../user/components.md) follows every public change in the same phase; the guides are rewritten once, in Phase 31.
-- **This Section**: deleted with Phase 32, once Phases 30 and 31 have moved what holds into `tech/` and `user/`.
+- **This Section**: deleted with Phase 32, once Phase 31 has moved what holds into `user/`. What holds for maintainers is in [`tech/forms-integration.md`](../tech/forms-integration.md).
 
 ---
 
 ## Library Phases
 
-### Phase 30 — Maintainer Documentation
-
-**Depends On**: nothing.
-
-- **Forms Integration**: a new `tech/forms-integration.md` replaces [`tech/validation.md`](../tech/validation.md) — the field contract against each API's custom-control integration, the value and state flow as diagrams, how each validator reaches a field from **Validators** in **Target Architecture**, the accepted compromises, and why there is no value accessor, no harness and no validator package.
-- **Updated**: [`tech/architecture.md`](../tech/architecture.md), [`tech/decoration.md`](../tech/decoration.md), [`tech/portal.md`](../tech/portal.md), the `impl/` conventions and the index in [`README.md`](../README.md).
-- **Code Comments**: every doc comment checked against [`impl/typescript.md`](typescript.md).
-
 ### Phase 31 — User Documentation
 
-**Depends On**: Phase 30.
+**Depends On**: nothing.
 
 - **Forms Guide**: a new `user/forms.md`, `ngx-formidable And Angular Forms` — who owns what and how value and state flow, as diagrams; one field bound through all three APIs; compatibility by feature; model rules, conditional fields and submission per API.
 - **Validation Guide**: [`user/validation.md`](../user/validation.md), rewritten to make explicit, as a diagram and a comparison table, how validation works and is configured — Angular's rules by default, Vest or Zod through Standard Schema, or none — from **Validators** in **Target Architecture**. Where each lives in the `*.form.ts`, what marks a field required under each, and how two combine; then messages, reveal and the classic validators, stating up front that a template-driven form validates no library field.

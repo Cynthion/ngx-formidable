@@ -12,6 +12,8 @@
 
 - **Standard Schema Path Through A Missing Key**: `validateStandardSchema` throws a `TypeError` for an issue whose path runs through a key the model lacks, where an unknown last key falls back to the path the schema validates. Upstream; the portal's suite drops such an issue first. Report it to Angular with a minimal reproduction.
 
+- **Stale First-Render Pending**: `first-render.spec.ts` still marks a reactive `select` pending as defect `D16, Phase 21`, and both specs pass once the pending is removed. Delete `reactiveDefects` and its `pending()` call.
+
 ## Features
 
 - **Vitest Spike**: move both test projects from Karma to the `@angular/build:unit-test` builder, whose default runner is Vitest. The open question is the library: its geometry specs need `test-styles.scss`, while a library build target carries no `styles`. Try `setupFiles` and a `runnerConfig`, and prove it with the whole library suite passing.

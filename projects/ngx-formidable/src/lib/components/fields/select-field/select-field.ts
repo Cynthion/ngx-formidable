@@ -40,7 +40,6 @@ export class SelectField extends BaseOptionListField<string | null> {
     // No additional actions needed
   }
 
-  /** The user picked one. */
   protected onSelectChanged(): void {
     this.setValue(this.selectRef().nativeElement.value);
   }
