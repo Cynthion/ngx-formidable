@@ -120,6 +120,7 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 - **Rewritten**: [`user/getting-started.md`](../user/getting-started.md) with Signal Forms and Angular's rules first; [`user/custom-fields.md`](../user/custom-fields.md) on the new base.
 - **Updated**: [`user/fields.md`](../user/fields.md), [`user/decoration.md`](../user/decoration.md), [`user/studio.md`](../user/studio.md), [`user/components.md`](../user/components.md) and the root `README.md`.
 - **Diagrams In The Portal**: the `Docs` route renders Mermaid, lazy-loaded and inside the bundle budget.
+- **Link Notation**: Fix the link notation in all documents.
 
 ### Phase 32 — Release
 
