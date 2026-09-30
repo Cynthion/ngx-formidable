@@ -2,11 +2,9 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, NgModel } from '@angular/forms';
 import { By } from '@angular/platform-browser';
-import { StubValidator } from '../../forms/testing/stub-validator.directive';
 import { FieldLabel } from '../../directives/field-label';
 import { FieldPrefix } from '../../directives/field-prefix';
 import { FieldSuffix } from '../../directives/field-suffix';
-import { NgxFormidableForm } from '../../forms/form.directive';
 import { FieldAdornmentAlignment, FieldLabelPosition } from '../../models/formidable.model';
 import { rem } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
@@ -33,24 +31,14 @@ import { FieldDecorator } from './field-decorator';
  * prefix with the first line rather than centering it in a box that grows as you type.
  */
 
-interface Model {
-  field?: string;
-}
-
-const shape = { field: '' };
-
 @Component({
-  imports: [FormsModule, NgxFormidableForm, StubValidator, FieldDecorator, InputField, FieldPrefix, FieldSuffix],
+  imports: [FormsModule, FieldDecorator, InputField, FieldPrefix, FieldSuffix],
   template: `
-    <form
-      formidableForm
-      [formValue]="model"
-      [formShape]="shape"
-      [stubValidator]="required">
+    <form>
       <formidable-field-decorator>
         <formidable-input-field
           name="field"
-          [ngModel]="model.field" />
+          [ngModel]="model" />
         <div formidableFieldPrefix>Prefix</div>
         <div formidableFieldSuffix>Suffix</div>
       </formidable-field-decorator>
@@ -58,9 +46,7 @@ const shape = { field: '' };
   `
 })
 class PrefixWithErrorsHost {
-  model: Model = {};
-  shape = shape;
-  required = { field: 'Required.' };
+  model = '';
 }
 
 @Component({

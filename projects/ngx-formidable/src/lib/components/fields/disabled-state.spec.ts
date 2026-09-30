@@ -1,7 +1,6 @@
 import { Component, signal, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, NgForm } from '@angular/forms';
-import { NgxFormidableForm } from '../../forms/form.directive';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldDecorator } from '../field-decorator/field-decorator';
 import { InputField } from './input-field/input-field';
@@ -17,9 +16,9 @@ import { InputField } from './input-field/input-field';
  */
 
 @Component({
-  imports: [FormsModule, NgxFormidableForm, FieldDecorator, InputField],
+  imports: [FormsModule, FieldDecorator, InputField],
   template: `
-    <form formidableForm>
+    <form>
       <formidable-field-decorator>
         <formidable-input-field
           name="name"

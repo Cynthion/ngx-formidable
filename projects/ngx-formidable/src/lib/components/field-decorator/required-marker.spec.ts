@@ -1,9 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
 import { FieldLabel } from '../../directives/field-label';
-import { NgxFormidableForm } from '../../forms/form.directive';
-import { FieldLabelPosition } from '../../models/formidable.model';
+import { FORMIDABLE_DEFAULTS, FieldLabelPosition } from '../../models/formidable.model';
 import { configureFormidableTestBed } from '../../testing/test-bed';
 import { InputField } from '../fields/input-field/input-field';
 import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
@@ -21,7 +19,7 @@ import { FieldDecorator } from './field-decorator';
  * The field validates nothing, and nothing here asserts validity. Under `ngModel` the same `required`
  * attribute also attaches Angular's own `RequiredValidator`, which is that API's rule and not the field's.
  *
- * A form may hide every marker on it at once with `hideRequiredMarkers`.
+ * The app default `hideRequiredMarkers` hides every marker at once.
  */
 
 @Component({
@@ -67,30 +65,24 @@ class InputHost {
 })
 class RadioGroupHost {}
 
-/** The form-wide switch: one flag hides every marker on the form, whatever its fields asked for. */
+/** The app-wide switch: one flag hides every marker, whatever the fields asked for. */
 @Component({
-  imports: [FormsModule, NgxFormidableForm, FieldDecorator, InputField, FieldLabel],
+  imports: [FieldDecorator, InputField, FieldLabel],
+  providers: [{ provide: FORMIDABLE_DEFAULTS, useValue: { hideRequiredMarkers: true } }],
   template: `
-    <form
-      formidableForm
-      [hideRequiredMarkers]="hideRequiredMarkers()">
-      <formidable-field-decorator>
-        <formidable-input-field
-          name="field"
-          ngModel
-          [required]="true" />
-        <div
-          formidableFieldLabel
-          position="outside">
-          Label
-        </div>
-      </formidable-field-decorator>
-    </form>
+    <formidable-field-decorator>
+      <formidable-input-field
+        name="field"
+        [required]="true" />
+      <div
+        formidableFieldLabel
+        position="outside">
+        Label
+      </div>
+    </formidable-field-decorator>
   `
 })
-class FormHost {
-  readonly hideRequiredMarkers = signal(false);
-}
+class HiddenMarkersHost {}
 
 describe('required marker', () => {
   let fixture: ReturnType<typeof TestBed.createComponent<InputHost>>;
@@ -146,18 +138,13 @@ describe('required marker', () => {
     expect(wrapper.querySelector('.required-marker')).not.toBeNull();
   });
 
-  it('lets the form hide every marker on it, and give them back', () => {
-    const formFixture = TestBed.createComponent(FormHost);
-    formFixture.detectChanges();
+  it('lets the app default hide every marker', () => {
+    const hiddenFixture = TestBed.createComponent(HiddenMarkersHost);
+    hiddenFixture.detectChanges();
 
-    expect(formFixture.nativeElement.querySelector('.required-marker')).not.toBeNull();
-
-    formFixture.componentInstance.hideRequiredMarkers.set(true);
-    formFixture.detectChanges();
-
-    expect(formFixture.nativeElement.querySelector('.required-marker')).toBeNull();
+    expect(hiddenFixture.nativeElement.querySelector('.required-marker')).toBeNull();
     // The glyph only: the field still tells assistive tech what it is.
-    expect(formFixture.nativeElement.querySelector('input')?.getAttribute('aria-required')).toBe('true');
+    expect(hiddenFixture.nativeElement.querySelector('input')?.getAttribute('aria-required')).toBe('true');
   });
 
   it('shows nothing when the field is required but projects no label', () => {

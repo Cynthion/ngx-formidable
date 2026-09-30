@@ -1,9 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { StubValidator } from '../../forms/testing/stub-validator.directive';
 import { FieldHint } from '../../directives/field-hint';
-import { NgxFormidableForm } from '../../forms/form.directive';
 import { FieldHintAlignment } from '../../models/formidable.model';
 import { configureFormidableTestBed } from '../../testing/test-bed';
 import { InputField } from '../fields/input-field/input-field';
@@ -18,25 +16,15 @@ import { FieldDecorator } from './field-decorator';
  * stylesheet cannot reach it. Measuring where the text lands proves the global rule actually applies.
  */
 
-interface Model {
-  field?: string;
-}
-
-const shape = { field: '' };
-
 /** Two hints that come and go, the way a consumer's own `*ngIf` moves them. */
 @Component({
-  imports: [FormsModule, NgxFormidableForm, StubValidator, FieldDecorator, InputField, FieldHint],
+  imports: [FormsModule, FieldDecorator, InputField, FieldHint],
   template: `
-    <form
-      formidableForm
-      [formValue]="formValue"
-      [formShape]="shape"
-      [stubValidator]="required">
+    <form>
       <formidable-field-decorator>
         <formidable-input-field
           name="field"
-          [ngModel]="formValue.field" />
+          [ngModel]="model" />
         @if (showHints()) {
           <div formidableFieldHint>Note</div>
         }
@@ -52,9 +40,7 @@ const shape = { field: '' };
   `
 })
 class HintHost {
-  formValue: Model = {};
-  shape = shape;
-  required = { field: 'Required.' };
+  model = '';
   readonly showHints = signal(true);
   readonly showCounter = signal(true);
   readonly counterAlign = signal<FieldHintAlignment>('end');

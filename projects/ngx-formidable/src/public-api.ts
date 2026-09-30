@@ -28,14 +28,8 @@ export * from './lib/directives/field-label-adornment';
 export * from './lib/directives/field-prefix';
 export * from './lib/directives/field-suffix';
 export * from './lib/directives/field-toggle-icon';
-export * from './lib/forms/field-validate.directive';
-export * from './lib/forms/form.directive';
-export * from './lib/forms/group-validate.directive';
-export * from './lib/forms/whole-form-validate.directive';
 
 export * from './lib/models/formidable.model';
-export * from './lib/models/utility-types';
 export * from './lib/models/validation.model';
 
-export * from './lib/ngx-formidable.module';
 export * from './lib/provide-ngx-formidable';

@@ -2,7 +2,7 @@
 
 ## Bugs
 
-- **Directive Validators On A Custom Control**: `@angular/forms` 22.2 binds a `FormValueControl` under `ngModel`, `[formControl]` and `formControlName` through `setupCustomControl()`, which never calls `setUpValidators()` — so a directive validator such as `required` or `minlength` beside the field is never attached to its control. Upstream; `forms-api-state.spec.ts` pins it. Report it to Angular with a minimal reproduction. Once fixed, drop the self-attachment in `NgxFormidableFieldValidate` and the `DIRECTIVE_VALIDATORS_UNATTACHED` pendings.
+- **Directive Validators On A Custom Control**: `@angular/forms` 22.2 binds a `FormValueControl` under `ngModel`, `[formControl]` and `formControlName` through `setupCustomControl()`, which never calls `setUpValidators()` — so a directive validator such as `required` or `minlength` beside the field is never attached to its control. Upstream; `forms-api-state.spec.ts` pins it. Report it to Angular with a minimal reproduction. Once fixed, drop the `DIRECTIVE_VALIDATORS_UNATTACHED` pendings.
 
 - **Parse Errors One Check Late**: under `ngModel` and `[formControl]`, `@angular/forms` 22.2 takes a `transformedValue` parse error into the control from an effect that runs after the host's template and calls `updateValueAndValidity({ emitEvent: false })`. `control.status` is read untracked, so nothing checks the host again, and the field's `errors` input follows only on its next check. Upstream; `BaseDateTimeField` works around it with one `markForCheck()` after render, and the `unparseable text` specs in `date-time-field.spec.ts` fail without it. Report it to Angular with a minimal reproduction. Once fixed, drop the workaround and its exception in [`impl/components.md`](components.md).
 

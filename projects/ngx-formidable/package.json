@@ -50,8 +50,7 @@
     "date-fns": "^3.0.1 || ^4.0.0",
     "ngx-mask": "^22.0.0",
     "pikaday": "^1.8.0",
-    "rxjs": "^7.8.0",
-    "vest": "^6.0.0"
+    "rxjs": "^7.8.0"
   },
   "peerDependenciesMeta": {
     "date-fns": {
@@ -59,9 +58,6 @@
     },
     "pikaday": {
       "optional": false
-    },
-    "vest": {
-      "optional": true
     }
   }
 }

@@ -102,8 +102,8 @@ export type FormidableEmptyHint = 'underscores' | 'format';
 /**
  * App-wide defaults for the inputs every template would otherwise repeat. Set via `provideNgxFormidable`, or
  * provide `FORMIDABLE_DEFAULTS` in a component's `providers` to scope them to that subtree. A binding still
- * wins, and binding `undefined` falls back to the default. Each is read once, when its field or form is
- * created, so changing one afterwards reaches only what is created afterwards.
+ * wins, and binding `undefined` falls back to the default. Each is read once, when its field is created, so
+ * changing one afterwards reaches only what is created afterwards.
  */
 export interface FormidableDefaults {
   /** `FieldLabel.position`. The library's own: `inside`. */
@@ -114,9 +114,9 @@ export interface FormidableDefaults {
   suffixAlign?: FieldAdornmentAlignment;
   /** `panelPosition` on the dropdown, autocomplete and date fields, which otherwise each keep their own. */
   panelPosition?: FormidablePanelPosition;
-  /** A field's `revealOn`, and the form's. The library's own: `touched`. */
+  /** A field's `revealOn`. The library's own: `touched`. */
   revealOn?: FormidableReveal;
-  /** The form's `hideRequiredMarkers`, and a field's without a form. The library's own: `false`. */
+  /** Hides every field's required marker, the glyph only. The library's own: `false`. */
   hideRequiredMarkers?: boolean;
 }
 

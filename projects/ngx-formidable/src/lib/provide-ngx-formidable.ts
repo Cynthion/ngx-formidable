@@ -11,11 +11,10 @@ export interface NgxFormidableConfig {
 }
 
 /**
- * Registers the library's providers, ngx-mask included. Call it once in `bootstrapApplication`, or through
- * `NgxFormidableModule.forRoot()` in an NgModule app.
+ * Registers the library's providers, ngx-mask included. Call it once in `bootstrapApplication`, or list it
+ * in the root module's `providers` in an NgModule app.
  *
- * It provides no validator. Fields and forms work without one; to validate, provide `FORMIDABLE_VALIDATOR`
- * on the form — the Vest adapter from the `vest` entry point, or an `FormidableValidator` of your own.
+ * It provides no validator. Rules belong to the forms API the fields are bound through.
  */
 export function provideNgxFormidable(config: NgxFormidableConfig = {}): Provider[] {
   return [

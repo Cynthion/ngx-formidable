@@ -1,6 +1,5 @@
 import { Component, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { FieldDecorator } from './components/field-decorator/field-decorator';
 import { AutocompleteField } from './components/fields/autocomplete-field/autocomplete-field';
@@ -10,20 +9,17 @@ import { InputField } from './components/fields/input-field/input-field';
 import { FieldLabel } from './directives/field-label';
 import { FieldPrefix } from './directives/field-prefix';
 import { FieldSuffix } from './directives/field-suffix';
-import { NgxFormidableForm } from './forms/form.directive';
 import { FORMIDABLE_DEFAULTS, FormidableDefaults } from './models/formidable.model';
 import { provideNgxFormidable } from './provide-ngx-formidable';
 import { configureFormidableTestBed, settle } from './testing/test-bed';
 
 /**
  * Contract of the app-wide defaults: an input left unset, or bound to `undefined`, takes the app default,
- * then the library's own; a binding wins over both. Without a form directive, the decorator's required
- * marker and a field's reveal fall back to the app default too.
+ * then the library's own; a binding wins over both. The decorator's required marker and a field's reveal
+ * fall back to the app default too.
  */
 
 const IMPORTS = [
-  FormsModule,
-  NgxFormidableForm,
   FieldDecorator,
   InputField,
   DropdownField,
@@ -36,17 +32,15 @@ const IMPORTS = [
 
 /** Every defaulted input, none of them bound. */
 const UNSET = `
-  <form formidableForm>
-    <formidable-field-decorator>
-      <formidable-input-field name="a" />
-      <div formidableFieldLabel>A</div>
-      <div formidableFieldPrefix>P</div>
-      <div formidableFieldSuffix>S</div>
-    </formidable-field-decorator>
-    <formidable-dropdown-field name="d" />
-    <formidable-autocomplete-field name="ac" />
-    <formidable-date-field name="dt" />
-  </form>
+  <formidable-field-decorator>
+    <formidable-input-field name="a" />
+    <div formidableFieldLabel>A</div>
+    <div formidableFieldPrefix>P</div>
+    <div formidableFieldSuffix>S</div>
+  </formidable-field-decorator>
+  <formidable-dropdown-field name="d" />
+  <formidable-autocomplete-field name="ac" />
+  <formidable-date-field name="dt" />
 `;
 
 @Component({ imports: IMPORTS, template: UNSET })
@@ -64,38 +58,33 @@ class ScopedHost {}
 @Component({
   imports: IMPORTS,
   template: `
-    <form
-      formidableForm
-      [revealOn]="undefined"
-      [hideRequiredMarkers]="undefined">
-      <formidable-field-decorator>
-        <formidable-input-field name="a" />
-        <div
-          formidableFieldLabel
-          [position]="undefined">
-          A
-        </div>
-        <div
-          formidableFieldPrefix
-          [align]="undefined">
-          P
-        </div>
-        <div
-          formidableFieldSuffix
-          [align]="undefined">
-          S
-        </div>
-      </formidable-field-decorator>
-      <formidable-dropdown-field
-        name="d"
-        [panelPosition]="undefined" />
-      <formidable-autocomplete-field
-        name="ac"
-        [panelPosition]="undefined" />
-      <formidable-date-field
-        name="dt"
-        [panelPosition]="undefined" />
-    </form>
+    <formidable-field-decorator>
+      <formidable-input-field name="a" />
+      <div
+        formidableFieldLabel
+        [position]="undefined">
+        A
+      </div>
+      <div
+        formidableFieldPrefix
+        [align]="undefined">
+        P
+      </div>
+      <div
+        formidableFieldSuffix
+        [align]="undefined">
+        S
+      </div>
+    </formidable-field-decorator>
+    <formidable-dropdown-field
+      name="d"
+      [panelPosition]="undefined" />
+    <formidable-autocomplete-field
+      name="ac"
+      [panelPosition]="undefined" />
+    <formidable-date-field
+      name="dt"
+      [panelPosition]="undefined" />
   `
 })
 class UndefinedHost {}
@@ -104,43 +93,38 @@ class UndefinedHost {}
 @Component({
   imports: IMPORTS,
   template: `
-    <form
-      formidableForm
-      revealOn="always"
-      [hideRequiredMarkers]="false">
-      <formidable-field-decorator>
-        <formidable-input-field name="a" />
-        <div
-          formidableFieldLabel
-          position="inside-floating">
-          A
-        </div>
-        <div
-          formidableFieldPrefix
-          align="center">
-          P
-        </div>
-        <div
-          formidableFieldSuffix
-          align="center">
-          S
-        </div>
-      </formidable-field-decorator>
-      <formidable-dropdown-field
-        name="d"
-        panelPosition="left" />
-      <formidable-autocomplete-field
-        name="ac"
-        panelPosition="left" />
-      <formidable-date-field
-        name="dt"
-        panelPosition="left" />
-    </form>
+    <formidable-field-decorator>
+      <formidable-input-field name="a" />
+      <div
+        formidableFieldLabel
+        position="inside-floating">
+        A
+      </div>
+      <div
+        formidableFieldPrefix
+        align="center">
+        P
+      </div>
+      <div
+        formidableFieldSuffix
+        align="center">
+        S
+      </div>
+    </formidable-field-decorator>
+    <formidable-dropdown-field
+      name="d"
+      panelPosition="left" />
+    <formidable-autocomplete-field
+      name="ac"
+      panelPosition="left" />
+    <formidable-date-field
+      name="dt"
+      panelPosition="left" />
   `
 })
 class ExplicitHost {}
 
-/** A decorated field asking for its required marker, with no form directive above it. */
+/** A decorated field asking for its required marker. */
 @Component({
   imports: IMPORTS,
   template: `
@@ -152,9 +136,9 @@ class ExplicitHost {}
     </formidable-field-decorator>
   `
 })
-class MarkerWithoutFormHost {}
+class MarkerHost {}
 
-/** A dirty, untouched field holding an error, with no formidable form to say when its messages appear. */
+/** A dirty, untouched field holding an error, with no `revealOn` of its own. */
 @Component({
   imports: IMPORTS,
   template: `
@@ -166,7 +150,7 @@ class MarkerWithoutFormHost {}
     </formidable-field-decorator>
   `
 })
-class RevealWithoutFormHost {
+class RevealHost {
   readonly errors = [{ kind: 'minlength' }];
 }
 
@@ -179,7 +163,7 @@ const DEFAULTS: Required<FormidableDefaults> = {
   hideRequiredMarkers: true
 };
 
-/** What every defaulted input resolved to, keyed as `FormidableDefaults` is. */
+/** What every readable defaulted input resolved to. The reveal and the marker are asserted by what renders. */
 interface Resolved {
   labelPosition: string;
   prefixAlign: string;
@@ -187,8 +171,6 @@ interface Resolved {
   dropdownPanel: string;
   autocompletePanel: string;
   datePanel: string;
-  revealOn: string;
-  hideRequiredMarkers: boolean;
 }
 
 describe('app defaults', () => {
@@ -212,17 +194,13 @@ describe('app defaults', () => {
   }
 
   function resolved(): Resolved {
-    const form = get(NgxFormidableForm);
-
     return {
       labelPosition: get(FieldLabel).position(),
       prefixAlign: get(FieldPrefix).align(),
       suffixAlign: get(FieldSuffix).align(),
       dropdownPanel: get(DropdownField).panelPosition(),
       autocompletePanel: get(AutocompleteField).panelPosition(),
-      datePanel: get(DateField).panelPosition(),
-      revealOn: form.revealOn(),
-      hideRequiredMarkers: form.hideRequiredMarkers()
+      datePanel: get(DateField).panelPosition()
     };
   }
 
@@ -232,9 +210,7 @@ describe('app defaults', () => {
     suffixAlign: 'center',
     dropdownPanel: 'full',
     autocompletePanel: 'full',
-    datePanel: 'right',
-    revealOn: 'touched',
-    hideRequiredMarkers: false
+    datePanel: 'right'
   };
 
   const APP_DEFAULTS: Resolved = {
@@ -243,9 +219,7 @@ describe('app defaults', () => {
     suffixAlign: 'value',
     dropdownPanel: 'sheet',
     autocompletePanel: 'sheet',
-    datePanel: 'sheet',
-    revealOn: 'dirty',
-    hideRequiredMarkers: true
+    datePanel: 'sheet'
   };
 
   it('keeps the library’s own without a provider, each panel field its own', async () => {
@@ -286,9 +260,7 @@ describe('app defaults', () => {
       suffixAlign: 'center',
       dropdownPanel: 'left',
       autocompletePanel: 'left',
-      datePanel: 'left',
-      revealOn: 'always',
-      hideRequiredMarkers: false
+      datePanel: 'left'
     });
   });
 
@@ -300,21 +272,21 @@ describe('app defaults', () => {
     expect(resolved()).toEqual({ ...LIBRARY_OWN, labelPosition: 'outside' });
   });
 
-  describe('without a form directive', () => {
+  describe('the required marker and the reveal', () => {
     function marker(): Element | null {
       return (fixture.nativeElement as HTMLElement).querySelector('.required-marker');
     }
 
     it('shows the required marker by the library’s own default', async () => {
       configure();
-      await mount(MarkerWithoutFormHost);
+      await mount(MarkerHost);
 
       expect(marker()).not.toBeNull();
     });
 
     it('hides the required marker when the app default says so', async () => {
       configure(DEFAULTS);
-      await mount(MarkerWithoutFormHost);
+      await mount(MarkerHost);
 
       expect(marker()).toBeNull();
     });
@@ -328,14 +300,14 @@ describe('app defaults', () => {
 
     it('reveals on touch by the library’s own default', async () => {
       configure();
-      await mount(RevealWithoutFormHost);
+      await mount(RevealHost);
 
       expect(messages()).toEqual([]);
     });
 
     it('reveals on the app default', async () => {
       configure(DEFAULTS);
-      await mount(RevealWithoutFormHost);
+      await mount(RevealHost);
 
       expect(messages()).toEqual(['minlength']);
     });

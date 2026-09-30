@@ -133,8 +133,7 @@
             "stylePreprocessorOptions": {
               "includePaths": ["projects/ngx-formidable/src/lib/styles"]
             },
-            "styles": ["projects/ngx-formidable/src/test-styles.scss"],
-            "include": ["**/*.spec.ts", "../vest/**/*.spec.ts"]
+            "styles": ["projects/ngx-formidable/src/test-styles.scss"]
           }
         }
       }

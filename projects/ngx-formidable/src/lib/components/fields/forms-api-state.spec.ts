@@ -68,8 +68,7 @@ describe('forms API state', () => {
     expect(range.max).toBe('50');
   });
 
-  // Angular's own gap, pinned so it is noticed once it closes. `NgxFormidableFieldValidate` works around it
-  // for its own validator only.
+  // Angular's own gap, pinned so it is noticed once it closes.
   it('gets no directive validator attached by ngModel', async () => {
     const fixture = TestBed.createComponent(DirectiveValidatorsHost);
     await settle(fixture);

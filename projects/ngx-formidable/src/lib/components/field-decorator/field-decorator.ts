@@ -15,7 +15,6 @@ import { FieldLabel } from '../../directives/field-label';
 import { FieldLabelAdornment } from '../../directives/field-label-adornment';
 import { FieldPrefix } from '../../directives/field-prefix';
 import { FieldSuffix } from '../../directives/field-suffix';
-import { NgxFormidableForm } from '../../forms/form.directive';
 import { openPanelPosition } from '../../helpers/position.helpers';
 import {
   FieldAdornmentAlignment,
@@ -58,8 +57,7 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
 // are plain getters. They are reactive all the same: every one bottoms out in a `contentChild()` query or a
 // signal on the field, and a signal read inside a getter is tracked by whichever view called it.
 export class FieldDecorator implements AfterViewInit, OnDestroy {
-  private readonly formDirective = inject(NgxFormidableForm, { optional: true });
-  private readonly defaultHideRequiredMarkers = inject(FORMIDABLE_DEFAULTS).hideRequiredMarkers ?? false;
+  private readonly hideRequiredMarkers = inject(FORMIDABLE_DEFAULTS).hideRequiredMarkers ?? false;
 
   // View children are used to access the prefix and suffix wrappers
   readonly prefixWrapper = viewChild<ElementRef<HTMLDivElement>>('prefixWrapperRef');
@@ -172,14 +170,11 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
   }
 
   /**
-   * Drives the label's required marker. The field asks for it with `required`, and the form — or, without
-   * one, the app default — may hide it for all fields.
+   * Drives the label's required marker. The field asks for it with `required`, and the app default may hide
+   * it for all fields.
    */
   get showRequiredMarker(): boolean {
-    return (
-      !(this.formDirective?.hideRequiredMarkers() ?? this.defaultHideRequiredMarkers) &&
-      (this.projectedField()?.required() ?? false)
-    );
+    return !this.hideRequiredMarkers && (this.projectedField()?.required() ?? false);
   }
 
   get canLabelRest(): boolean {

@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { ValidationError } from '@angular/forms/signals';
 import { FieldLabel } from '../../directives/field-label';
-import { NgxFormidableFieldValidate } from '../../forms/field-validate.directive';
 import { FORMIDABLE_ERROR_MESSAGE } from '../../models/validation.model';
 import { fill } from '../../testing/dom';
 import { configureFormidableTestBed, DIRECTIVE_VALIDATORS_UNATTACHED, settle } from '../../testing/test-bed';
@@ -14,8 +13,8 @@ import { InputField } from '../fields/input-field/input-field';
  * Contract of the library's independence from any one validation library.
  *
  * Errors reach the UI through what `ngModel` writes into the field, so the decorator's `.is-invalid` state,
- * the field's `aria-invalid` and the message list must all work with no formidable form directive, no
- * `FORMIDABLE_VALIDATOR` and no validation library — driven by Angular's built-in validators alone.
+ * the field's `aria-invalid` and the message list must all work with no validation library — driven by
+ * Angular's built-in validators alone.
  *
  * An Angular error reaches the field as its key, `{ kind: 'required' }`, which `FORMIDABLE_ERROR_MESSAGE`
  * renders as it is by default and as a consumer's text once overridden.
@@ -37,24 +36,6 @@ import { InputField } from '../fields/input-field/input-field';
   `
 })
 class AngularValidatorsHost {
-  name = '';
-}
-
-/** The same field with the `[ngModel]` hijack directive imported and no harness above it. */
-@Component({
-  imports: [FormsModule, NgxFormidableFieldValidate, FieldDecorator, InputField],
-  template: `
-    <form>
-      <formidable-field-decorator>
-        <formidable-input-field
-          name="name"
-          [required]="true"
-          [(ngModel)]="name" />
-      </formidable-field-decorator>
-    </form>
-  `
-})
-class HijackWithoutHarnessHost {
   name = '';
 }
 
@@ -92,12 +73,12 @@ describe('validator-agnostic error rendering', () => {
     input().dispatchEvent(new FocusEvent('blur'));
   }
 
-  describe('with Angular’s built-in validators and no formidable form', () => {
+  describe('with Angular’s built-in validators', () => {
     beforeEach(() => {
       configureFormidableTestBed();
     });
 
-    it('renders the decorator’s errors component without a harness in the injector chain', async () => {
+    it('renders the decorator’s errors component', async () => {
       await mount(AngularValidatorsHost);
 
       expect(root.querySelector('formidable-field-errors')).toBeTruthy();
@@ -149,19 +130,6 @@ describe('validator-agnostic error rendering', () => {
       expect(messages()).toEqual([]);
       expect(decorator().classList.contains('is-invalid')).toBe(false);
       expect(input().getAttribute('aria-invalid')).toBeNull();
-    });
-
-    // `[ngModel]` is hijacked by the harness's async-validator directive. A consumer who imports
-    // NgxFormidableModule gets it on every control, so it must not swallow Angular's own errors.
-    it('leaves Angular’s validators alone when the ngModel hijack has no harness', async () => {
-      pending(DIRECTIVE_VALIDATORS_UNATTACHED);
-
-      await mount(HijackWithoutHarnessHost);
-
-      touch();
-      await settle(fixture);
-
-      expect(messages()).toEqual(['required']);
     });
   });
 

@@ -10,7 +10,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "eslint projects/ngx-formidable/src projects/ngx-formidable/vest src",
+    "lint": "eslint projects/ngx-formidable/src src",
     "style-lint": "stylelint \"projects/ngx-formidable/src/**/*.scss\" \"src/**/*.scss\"",
     "docs:check": "node scripts/check-token-descriptions.mjs",
     "docs:lint": "markdownlint-cli2",
