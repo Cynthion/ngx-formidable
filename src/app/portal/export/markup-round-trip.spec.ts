@@ -17,24 +17,28 @@ function roundTrip(ids: readonly string[]) {
 }
 
 describe('markup serializer', () => {
-  it('emits one decorator per field, inside a formidable form', () => {
+  it('emits one decorator per field, each bound to its key, inside a form over the field tree', () => {
     const markup = serializeDefinition(only(['orderName', 'phone']));
 
-    expect(markup).toContain('<form');
-    expect(markup).toContain('formidableForm');
+    expect(markup).toContain('<form [formRoot]="form">');
     expect(markup.match(/<formidable-field-decorator>/g)?.length).toBe(2);
-    expect(markup).toContain('<formidable-input-field');
+    expect(markup).toContain('[formField]="form.orderName" />');
+    expect(markup).toContain('[formField]="form.phone" />');
+  });
+
+  // `[formField]` hands the field its name, state and limits, and the compiler rejects a binding to any of
+  // them beside it — so the schema states them, and the template does not.
+  it('leaves what [formField] owns to the schema', () => {
+    const definition = only(['spice', 'notes', 'orderName']);
+    const fields = definition.fields.map((field) => ({ ...field, state: { ...field.state, readonly: true } }));
+    const markup = serializeDefinition({ ...definition, fields });
+
+    expect(markup).not.toMatch(/\s(name|\[min\]|\[max\]|\[maxLength\]|\[readonly\]|\[required\])=/);
+    expect(markup).toContain('[step]="1"');
   });
 
   it('emits a section comment before its fields', () => {
     expect(serializeDefinition(only(['orderName']))).toContain('<!-- Your Order -->');
-  });
-
-  it('omits the suite binding when the form is not wired to Vest', () => {
-    const definition = only(['orderName']);
-    const markup = serializeDefinition({ ...definition, options: { ...definition.options, validator: 'none' } });
-
-    expect(markup).not.toContain('[formSuite]');
   });
 
   it('emits options for an option field', () => {
@@ -53,61 +57,50 @@ describe('markup serializer', () => {
     expect(markup).toContain('A &lt;b&gt; &amp; &quot;quote&quot;');
   });
 
-  // The group is on the section, so the wrapper and the nested model access both come from one place.
-  it('wraps a grouped section in an ngModelGroup and nests its model access', () => {
+  // The group is the model's, so a grouped field is bound to the field under its group.
+  it('binds a grouped section’s fields under their group', () => {
     const markup = serializeDefinition(only(['date', 'time']));
 
-    expect(markup).toContain('ngModelGroup="when"');
-    expect(markup).toContain('[ngModel]="model().when.date"');
-    expect(markup).toContain('[ngModel]="model().when.time"');
+    expect(markup).toContain('[formField]="form.when.date"');
+    expect(markup).toContain('[formField]="form.when.time"');
   });
 
   // The export carries the behaviour, not the state the stage happens to be in: the field the preview is
-  // currently hiding is still part of the form.
-  it('wraps a conditional field in the @if its condition states', () => {
-    const markup = serializeDefinition(only(['address', 'branch']));
+  // currently hiding is still part of the form. The condition itself is a `hidden()` rule in the schema.
+  it('gates a conditional field on its hidden state', () => {
+    const markup = serializeDefinition(only(['address', 'branch', 'cardNumber']));
 
-    expect(markup).toContain('@if (model().pickup === false) {');
-    expect(markup).toContain('@if (model().pickup === true) {');
+    expect(markup).toContain('@if (!form.address().hidden()) {');
+    expect(markup).toContain('@if (!form.branch().hidden()) {');
+    expect(markup).toContain('@if (!form.payment.cardNumber().hidden()) {');
   });
 
-  // `visibleWhen` names a field, not a path, so the group the watched field sits in is resolved here — a
-  // condition reading `model().method` would read a key that does not exist.
-  it('resolves a condition on a grouped field through its group', () => {
-    const markup = serializeDefinition(only(['method', 'cardNumber']));
+  it('reads a key that is not an identifier through a bracket', () => {
+    const definition = only(['orderName']);
+    const markup = serializeDefinition({ ...definition, fields: [{ ...definition.fields[0]!, name: 'radio-group1' }] });
 
-    expect(markup).toContain("@if (model().payment.method === 'card') {");
+    expect(markup).toContain(`[formField]="form['radio-group1']"`);
   });
 
-  // A preset writes keys the field does not own, so it is a handler on the component rather than an input.
-  // What an app default is for: the template states only what a field or the form states itself.
-  it('leaves out what the field and the form state nothing for, so the app default applies', () => {
+  // What an app default is for: the template states only what a field states itself.
+  it('leaves out what the field states nothing for, so the app default applies', () => {
     const markup = serializeDefinition(only(['orderName', 'date']));
 
     expect(markup).toContain('<div formidableFieldLabel>');
     expect(markup).not.toContain('position=');
     expect(markup).not.toContain('[panelPosition]');
-    expect(markup).not.toContain('[revealOn]');
-    expect(markup).not.toContain('[hideRequiredMarkers]');
   });
 
-  it('states what the field and the form state themselves', () => {
-    const definition = only(['cardNumber']);
-    const markup = serializeDefinition({
-      ...definition,
-      options: { ...definition.options, revealOn: 'dirty', hideRequiredMarkers: true }
-    });
-
-    expect(markup).toContain('position="outside"');
-    expect(markup).toContain(`[revealOn]="'dirty'"`);
-    expect(markup).toContain('[hideRequiredMarkers]="true"');
+  it('states what the field states itself', () => {
+    expect(serializeDefinition(only(['cardNumber']))).toContain('position="outside"');
   });
 
-  it('binds a preset field to the handler the component declares', () => {
+  // A preset writes keys the field does not own, so it is a handler on the component rather than an input.
+  it('binds a preset field’s valueChange to the handler the component declares', () => {
     const markup = serializeDefinition(only(['pizza']));
 
-    expect(markup).toContain('(ngModelChange)="applyPizzaPreset($event)"');
-    expect(serializeDefinition(only(['size']))).not.toContain('(ngModelChange)');
+    expect(markup).toContain('(valueChange)="applyPizzaPreset($event)"');
+    expect(serializeDefinition(only(['size']))).not.toContain('(valueChange)');
   });
 });
 
@@ -122,7 +115,6 @@ describe('markup import', () => {
     expect(parsed.name).toBe(source.name);
     expect(parsed.label).toBe(source.label);
     expect(parsed.placeholder).toBe(source.placeholder);
-    expect(parsed.decoration.markRequired).toBe(true);
     expect(result.notes).toEqual([]);
   });
 
@@ -133,14 +125,14 @@ describe('markup import', () => {
     expect(result.notes).toEqual([]);
   });
 
-  it('round-trips the numeric and boolean inputs of a slider', () => {
+  // The limits are rules, so the template has none to give back.
+  it('round-trips the numeric and boolean inputs of a slider, leaving its limits behind', () => {
     const { definition, result } = roundTrip(['spice']);
-    const source = definition.fields[0]!;
     const parsed = result.fields[0]!;
 
-    expect(parsed.min).toBe(source.min);
-    expect(parsed.max).toBe(source.max);
-    expect(parsed.step).toBe(source.step);
+    expect(parsed.min).toBeUndefined();
+    expect(parsed.max).toBeUndefined();
+    expect(parsed.step).toBe(definition.fields[0]!.step);
     expect(parsed.showTickMarks).toBe(true);
     expect(parsed.showMinMaxLabels).toBe(true);
   });
@@ -180,30 +172,31 @@ describe('markup import', () => {
     expect(result.fields[0]?.options?.find((o) => o.value === 'mozzarella')?.readonly).toBe(true);
   });
 
-  it('round-trips the readonly and disabled state', () => {
+  it('round-trips autofocus', () => {
     const definition = only(['orderName']);
     const field = definition.fields[0]!;
+    const markup = serializeDefinition({
+      ...definition,
+      fields: [{ ...field, state: { ...field.state, autoFocus: true } }]
+    });
 
-    const readonly = parseMarkup(
-      serializeDefinition({ ...definition, fields: [{ ...field, state: { ...field.state, readonly: true } }] })
-    );
-    const disabled = parseMarkup(
-      serializeDefinition({ ...definition, fields: [{ ...field, state: { ...field.state, disabled: true } }] })
-    );
-
-    expect(readonly.fields[0]?.state.readonly).toBe(true);
-    expect(disabled.fields[0]?.state.disabled).toBe(true);
+    expect(parseMarkup(markup).fields[0]?.state.autoFocus).toBe(true);
   });
 
-  // Every field comes back, and the one thing that does not is named rather than dropped in silence: a
-  // preset map is data and lives in the component, which the import does not read.
-  it('round-trips every field in the preview form, naming only what the component holds', () => {
+  // Every field comes back, and what does not is named rather than dropped in silence: a preset map lives in
+  // the component, and a condition in the schema, neither of which the import reads.
+  it('round-trips every field in the preview form, naming what the component and the schema hold', () => {
     const { definition, result } = roundTrip(PREVIEW_FORM_DEFINITION.fields.map((field) => field.id));
 
     expect(result.fields.length).toBe(definition.fields.length);
-    // Lowercased, because the HTML parser lowercases every attribute name it reads.
-    expect(result.notes).toEqual([{ text: '(ngmodelchange)="applyPizzaPreset($event)"', reason: 'in-the-component' }]);
-    expect(result.fields.every((field) => field.presets === undefined)).toBeTrue();
+    expect(result.notes).toEqual([
+      { text: '@if (!form.address().hidden())', reason: 'in-the-schema' },
+      { text: '@if (!form.branch().hidden())', reason: 'in-the-schema' },
+      { text: '@if (!form.payment.cardNumber().hidden())', reason: 'in-the-schema' },
+      // Lowercased, because the HTML parser lowercases every attribute name it reads.
+      { text: '(valuechange)="applyPizzaPreset($event)"', reason: 'in-the-component' }
+    ]);
+    expect(result.fields.every((field) => field.presets === undefined && field.visibleWhen === undefined)).toBeTrue();
   });
 
   it('round-trips a field with no behaviour behind it without a note at all', () => {
@@ -234,38 +227,33 @@ describe('markup import', () => {
     expect(result.sections.map((section) => section.groupName)).toEqual(['when']);
   });
 
-  // The condition is Angular's own syntax rather than markup, so it is lifted onto the decorator before the
-  // DOMParser reads the braces as text and drops them.
-  it('round-trips a conditional field’s condition, and reports no control flow for it', () => {
+  // The gate is Angular's own syntax rather than markup, so it comes out before the DOMParser reads the
+  // braces as text — and the field inside it comes back, without the condition the schema holds.
+  it('keeps a gated field, notes its condition, and reports no control flow for it', () => {
     const { result } = roundTrip(['pickup', 'address', 'branch']);
 
-    expect(result.fields.find((field) => field.name === 'address')?.visibleWhen).toEqual({
-      field: 'pickup',
-      equals: false
-    });
-    expect(result.fields.find((field) => field.name === 'branch')?.visibleWhen).toEqual({
-      field: 'pickup',
-      equals: true
-    });
-    expect(result.fields.find((field) => field.name === 'pickup')?.visibleWhen).toBeUndefined();
-    expect(result.notes).toEqual([]);
+    expect(result.fields.map((field) => field.name)).toEqual(['pickup', 'address', 'branch']);
+    expect(result.notes.map((note) => note.reason)).toEqual(['in-the-schema', 'in-the-schema']);
   });
 
-  // The condition comes back naming the field, not the path: the group is the section's, and the import
-  // rebuilds it from the `ngModelGroup` it found rather than from the condition.
-  it('round-trips a condition on a grouped field as the field it names', () => {
+  it('reads a grouped field’s name and group off its [formField] path', () => {
     const { result } = roundTrip(['method', 'cardNumber']);
 
-    expect(result.fields.find((field) => field.name === 'cardNumber')?.visibleWhen).toEqual({
-      field: 'method',
-      equals: 'card'
-    });
+    expect(result.fields.map((field) => field.name)).toEqual(['method', 'cardNumber']);
     expect(result.sections.map((section) => section.groupName)).toEqual(['payment']);
+  });
+
+  it('reports a [formField] that is not a path off the form', () => {
+    const result = parseMarkup(
+      '<formidable-field-decorator><formidable-input-field [formField]="other.name" /></formidable-field-decorator>'
+    );
+
+    expect(result.notes).toEqual([{ text: '[formfield]="other.name"', reason: 'dynamic-binding' }]);
   });
 
   it('puts fields with no section comment above them into one fallback section', () => {
     const result = parseMarkup(
-      '<formidable-field-decorator><formidable-input-field name="a"></formidable-input-field></formidable-field-decorator>'
+      '<formidable-field-decorator><formidable-input-field [formField]="form.a" /></formidable-field-decorator>'
     );
 
     expect(result.sections.length).toBe(1);

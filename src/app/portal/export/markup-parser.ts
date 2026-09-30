@@ -8,15 +8,15 @@ import {
   PortalFieldSpec,
   PortalFieldState,
   PortalOptionSpec,
-  PortalSectionSpec,
-  PortalVisibilitySpec
+  PortalSectionSpec
 } from '../model/field-spec.model';
 import { slugify } from '../helpers/slug.helpers';
 import { ATTRIBUTES_BY_LOWER_NAME, unquote } from './markup-attributes';
 
 interface MarkupParseNote {
   readonly text: string;
-  readonly reason: 'unknown-element' | 'unknown-attribute' | 'dynamic-binding' | 'control-flow' | 'in-the-component';
+  readonly reason:
+    'unknown-element' | 'unknown-attribute' | 'dynamic-binding' | 'control-flow' | 'in-the-component' | 'in-the-schema';
 }
 
 export interface MarkupParseResult {
@@ -33,86 +33,54 @@ const STATE: PortalFieldState = DEFAULT_STATE;
 
 const LABEL_POSITIONS = Object.keys(LABEL_POSITION_LABELS) as readonly FieldLabelPosition[];
 
-/** Attributes the serializer emits that carry no configuration of their own. */
-const STRUCTURAL = new Set(['[ngmodel]', '#field']);
-
 const FALLBACK_SECTION: PortalSectionSpec = { id: 'imported', title: 'Imported' };
 
-/** Where a lifted `@if` condition is parked so the `DOMParser` carries it to its decorator. */
-const CONDITION_ATTRIBUTE = 'data-portal-visible-when';
+/** One step of a model path: `.name`, or `['radio-group1']` for a key that is not an identifier. */
+const STEP = /\.[A-Za-z_$][\w$]*|\['[^']*'\]/g;
+
+/** The `@if` the serializer writes around a conditional field. Its condition is a `hidden()` rule. */
+const HIDDEN_GATE = /^!form(?:\.[A-Za-z_$][\w$]*|\['[^']*'\])+\(\)\.hidden\(\)$/;
 
 function slugOf(title: string): string {
   return slugify(title) || 'imported';
 }
 
-/**
- * The one `@if` condition the import reads: a key of the model against a literal, which is what
- * `visibleWhen` serializes to. Anything else stays in the source and is reported as control flow.
- *
- * The key may be a path, because the watched field can be inside an `ngModelGroup`. Only its last step is
- * kept: `visibleWhen` names a field, and the group is resolved from wherever that field ends up.
- */
-function parseCondition(expression: string): PortalVisibilitySpec | null {
-  const match = /^model\(\)((?:\.[A-Za-z_$][\w$]*|\['[^']*'\])+)\s*===\s*(.+)$/.exec(expression.trim());
+/** The keys of a `[formField]` path off the field tree, `form.when.date`, or `null` for any other expression. */
+function fieldPathOf(expression: string): readonly string[] | null {
+  const match = /^form((?:\.[A-Za-z_$][\w$]*|\['[^']*'\])+)$/.exec(expression.trim());
   if (!match) return null;
 
-  const steps = match[1]!.match(/\.[A-Za-z_$][\w$]*|\['[^']*'\]/g) ?? [];
-  const last = steps[steps.length - 1];
-  if (!last) return null;
-
-  const field = last.startsWith('.') ? last.slice(1) : last.slice(2, -2);
-  const raw = match[2]!.trim();
-
-  if (raw === 'true' || raw === 'false') return { field, equals: raw === 'true' };
-  if (/^-?\d+(\.\d+)?$/.test(raw)) return { field, equals: Number(raw) };
-
-  const quoted = /^'([^']*)'$/.exec(raw);
-
-  return quoted ? { field, equals: quoted[1]! } : null;
+  return (match[1]!.match(STEP) ?? []).map((step) => (step.startsWith('.') ? step.slice(1) : step.slice(2, -2)));
 }
 
 /**
- * Lifts every `@if` the import understands onto the decorator it wraps, as an attribute.
+ * Takes out every `@if` gating a field on its `hidden()` state, noting each: the condition behind it is a rule
+ * in the schema, which the import does not read, so the field comes back without one.
  *
  * A line pass before the `DOMParser`, because `@if` is Angular's own syntax and not markup: the parser reads
- * the braces as text and would drop the condition while keeping the field. An `@if` whose condition does not
- * parse is left exactly where it is, so it still reaches the control-flow note.
+ * the braces as text. Any other `@if` is left exactly where it is, so it still reaches the control-flow note.
  */
-function liftConditions(source: string): string {
-  const lines = source.split('\n');
+function stripHiddenGates(source: string, notes: MarkupParseNote[]): string {
   const output: string[] = [];
-  // One frame per `@if`, holding whether this pass consumed it, so the matching `}` goes the same way.
+  // One frame per `@if`, holding whether this pass took it out, so the matching `}` goes the same way.
   const frames: boolean[] = [];
-  let pending: string | null = null;
 
-  for (const line of lines) {
+  for (const line of source.split('\n')) {
     const opened = /^\s*@if\s*\((.+)\)\s*\{\s*$/.exec(line);
 
     if (opened) {
       const expression = opened[1]!.trim();
-      const understood = parseCondition(expression) !== null;
-      frames.push(understood);
+      const gate = HIDDEN_GATE.test(expression);
+      frames.push(gate);
 
-      if (understood) {
-        pending = expression;
-      } else {
-        output.push(line);
-      }
+      if (gate) notes.push({ text: `@if (${expression})`, reason: 'in-the-schema' });
+      else output.push(line);
 
       continue;
     }
 
     if (/^\s*\}\s*$/.test(line) && frames.length) {
       if (!frames.pop()) output.push(line);
-
-      continue;
-    }
-
-    if (pending && line.includes('<formidable-field-decorator')) {
-      output.push(
-        line.replace('<formidable-field-decorator', `<formidable-field-decorator ${CONDITION_ATTRIBUTE}="${pending}"`)
-      );
-      pending = null;
 
       continue;
     }
@@ -126,28 +94,29 @@ function liftConditions(source: string): string {
 /**
  * Parses a pasted Angular template back into a whole form: its sections and their fields.
  *
- * It handles a **static, attribute-only subset**: one `formidable-field-decorator` per field, with literal
- * attributes and one-way bindings to literals. Bindings to expressions and control flow are out of scope and
- * are reported rather than failing silently, because a template that half-imports is worse than one that
- * says what it dropped.
+ * It handles a **static, attribute-only subset**: one `formidable-field-decorator` per field bound by
+ * `[formField]`, with literal attributes and one-way bindings to literals. Bindings to expressions and control
+ * flow are out of scope and are reported rather than failing silently, because a template that half-imports
+ * is worse than one that says what it dropped.
  *
  * Sections come from the comments the serializer writes above each run of fields, which is what lets the
- * whole form round-trip rather than landing in one undifferentiated list.
+ * whole form round-trip rather than landing in one undifferentiated list. A section's group comes from the
+ * `[formField]` paths of its fields.
  */
 export function parseMarkup(source: string): MarkupParseResult {
   const notes: MarkupParseNote[] = [];
   const fields: PortalFieldSpec[] = [];
   const sections: PortalSectionSpec[] = [];
 
-  // The conditions the import understands are lifted onto their decorators first, so what is left under the
-  // control-flow test is only what really was dropped.
-  const lifted = liftConditions(source);
+  // The gates the serializer writes come out first, so what is left under the control-flow test is only what
+  // really was dropped.
+  const stripped = stripHiddenGates(source, notes);
 
-  if (/@(if|for|switch)\b|\*ngIf|\*ngFor/.test(lifted)) {
+  if (/@(if|for|switch)\b|\*ngIf|\*ngFor/.test(stripped)) {
     notes.push({ text: 'Control flow', reason: 'control-flow' });
   }
 
-  const parsed = new DOMParser().parseFromString(lifted, 'text/html');
+  const parsed = new DOMParser().parseFromString(stripped, 'text/html');
   const scope = parsed.querySelector('form') ?? parsed.body;
 
   let current: PortalSectionSpec | null = null;
@@ -176,16 +145,18 @@ export function parseMarkup(source: string): MarkupParseResult {
     if (node.tagName.toLowerCase() === 'formidable-field-decorator') {
       if (!current) setCurrent(FALLBACK_SECTION);
 
-      const field = parseDecorator(node, current!.id, index, notes);
+      const parsedField = parseDecorator(node, current!.id, index, notes);
       index += 1;
-      if (field) fields.push(field);
+
+      if (parsedField) {
+        fields.push(parsedField.field);
+
+        // A group belongs to the section, which is where the portal keeps it.
+        if (parsedField.groupName) setCurrent({ ...current!, groupName: parsedField.groupName });
+      }
 
       return;
     }
-
-    // An `ngModelGroup` around a section's fields belongs to the section, which is where the portal keeps it.
-    const groupName = node.getAttribute('ngModelGroup') ?? node.getAttribute('ngmodelgroup');
-    if (groupName && current) setCurrent({ ...(current as PortalSectionSpec), groupName });
 
     node.childNodes.forEach(walk);
   };
@@ -204,7 +175,7 @@ function parseDecorator(
   sectionId: string,
   index: number,
   notes: MarkupParseNote[]
-): PortalFieldSpec | null {
+): { field: PortalFieldSpec; groupName?: string } | null {
   const fieldElement = Array.from(decorator.children).find((child) =>
     FIELD_KIND_BY_SELECTOR.has(child.tagName.toLowerCase())
   );
@@ -232,6 +203,7 @@ function parseDecorator(
 
   let state = STATE;
   let decoration = DECORATION;
+  let path: readonly string[] = [];
 
   for (const attribute of Array.from(fieldElement.attributes)) {
     const raw = attribute.name.toLowerCase();
@@ -245,21 +217,19 @@ function parseDecorator(
       continue;
     }
 
-    if (STRUCTURAL.has(raw) || key === 'ngmodel' || raw.startsWith('#')) continue;
+    if (raw.startsWith('#')) continue;
 
-    if (key === 'readonly' || key === 'disabled' || key === 'autofocus') {
-      const on = attribute.value.trim() === 'true' || attribute.value === '';
-      state = {
-        ...state,
-        readonly: key === 'readonly' ? on : state.readonly,
-        disabled: key === 'disabled' ? on : state.disabled,
-        autoFocus: key === 'autofocus' ? on : state.autoFocus
-      };
+    if (key === 'formfield') {
+      const steps = fieldPathOf(attribute.value);
+
+      if (steps) path = steps;
+      else notes.push({ text: `${attribute.name}="${attribute.value}"`, reason: 'dynamic-binding' });
+
       continue;
     }
 
-    if (key === 'required') {
-      decoration = { ...decoration, markRequired: attribute.value.trim() === 'true' };
+    if (key === 'autofocus') {
+      state = { ...state, autoFocus: attribute.value.trim() === 'true' || attribute.value === '' };
       continue;
     }
 
@@ -309,10 +279,11 @@ function parseDecorator(
     decoration = { ...decoration, labelAdornment: 'text' };
   }
 
-  const name = spec.name || `imported${index + 1}`;
-  const visibleWhen = parseCondition(decorator.getAttribute(CONDITION_ATTRIBUTE) ?? '') ?? undefined;
+  // The first key of a two-key path is the group, which is as deep as a section nests.
+  const name = path[path.length - 1] ?? spec.name;
+  const groupName = path.length > 1 ? path[0] : undefined;
 
-  return { ...spec, id: name, name, decoration, state, visibleWhen };
+  return { field: { ...spec, id: name, name, decoration, state }, groupName };
 }
 
 /** A prefix or suffix's stated `align`, or `undefined` where it states none and the app default applies. */
@@ -353,5 +324,6 @@ export const MARKUP_NOTE_LABELS: Readonly<Record<MarkupParseNote['reason'], stri
   'unknown-attribute': 'Not an input the portal exposes',
   'dynamic-binding': 'A binding to an expression, not a literal',
   'control-flow': 'Control flow is out of scope for the import',
-  'in-the-component': 'Behaviour that lives in the component, which the import does not read'
+  'in-the-component': 'Behaviour that lives in the component, which the import does not read',
+  'in-the-schema': 'A rule that lives in the schema, which the import does not read'
 };

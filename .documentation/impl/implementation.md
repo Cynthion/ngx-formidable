@@ -17,7 +17,7 @@ The source of truth for outstanding work. [`impl/backlog.md`](backlog.md) is the
 
 ## Forms-Agnostic Rewrite
 
-The fields work with Signal Forms, reactive forms and template-driven forms alike, validation belongs to whichever forms API the consumer chose, and the library renders, edits, decorates and themes. Phases 17 to 31 get there.
+The fields work with Signal Forms, reactive forms and template-driven forms alike, validation belongs to whichever forms API the consumer chose, and the library renders, edits, decorates and themes. Phases 17 to 32 get there.
 
 ### Decisions
 
@@ -66,6 +66,14 @@ flowchart LR
 - **Field**: `BaseField<T>` — `value` is a `model()`; the `FormUiControl` inputs, each accepting `undefined` and falling back to the field's default; a `touch` output as the last act of a blur; `focus(options?)`; the library's own `placeholder`, `autoFocus` and `revealOn`; and `showErrors`, derived from the state and the reveal.
 - **Decorator**: reads the projected field, and nothing of any forms API.
 - **Consumer Convention**: one `*.form.ts` per form holds the model interface, an initial model defining every key — Signal Forms drops an `undefined` one — and the `schema()`. The component holds `form()` over a `signal` of the initial model; the template is `<form [formRoot]>` with decorated fields bound by `[formField]`. The Studio exports exactly this.
+- **Validators**: each reaches a field through its forms API, never through the library. The library adds only the message text, the reveal, the placement and the marker, all of it read off the field's state. More sources combine as more rules in one schema, each check with one owner, or a field reports the same failure twice.
+
+| Validator                   | Where It Goes                                                                                                                          | Marks Required                                           |
+| :-------------------------- | :------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------- |
+| Angular's rules, by default | The `schema()`: `required()`, `email()`, `pattern()`, `maxLength()`; `validate()` across fields; `validateAsync()` or `validateHttp()` | `required()`                                             |
+| Zod, Valibot, Vest          | The `schema()`: `validateStandardSchema(path, schema)`, with a Vest suite created per form                                             | Not on its own: `required()`, or `REQUIRED` to mark only |
+| A classic `ValidatorFn`     | The `FormControl`, under `[formControl]` or `formControlName`. Its error carries no text, so `FORMIDABLE_ERROR_MESSAGE` maps the kind  | `Validators.required`                                    |
+| A directive validator       | Nowhere: no classic API attaches one to a custom control — **Template-Driven Forms Validate No Field**                                 | The `required` attribute                                 |
 
 ### Angular Behaviour Relied On
 
@@ -82,86 +90,92 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 | `transformedValue` reports parse errors to all three APIs. `ngModel` and `[formControl]` hand one to the field only on the host's next check                                |    24     |
 | A Vest suite is a Standard Schema, and an async Vest test does not surface through it                                                                                       |    26     |
 | A Standard Schema issue whose path names no field reports on the root, and one whose path runs through a key the model lacks throws                                         |    26     |
+| A Zod schema is a Standard Schema, and a refinement reports on the path it names                                                                                            |    28     |
 
 ### Accepted Compromises
 
 - **`updateOn` In The Classic APIs**: `blur` and `submit` no longer hold back a library field's value. Signal Forms' `debounce(path, 'blur')` does, through `touch`.
-- **Required Marker In Template-Driven Forms**: it comes from the `required` attribute, which also matches Angular's `RequiredValidator` — a validator Angular 22.2 leaves unattached on a custom control. See [`impl/backlog.md`](backlog.md).
+- **Template-Driven Forms Validate No Field**: Angular 22.2 attaches no directive validator — `required`, `minlength` — to a custom control, so no validator declared in a template reaches a library field under `ngModel`. The harness never attached them either, and Phase 29 deletes it. The `required` attribute still marks, because it also matches Angular's `RequiredValidator`. To validate, a consumer uses Signal Forms or reactive forms, until the upstream fix in [`impl/backlog.md`](backlog.md).
 - **Required Checkbox Group**: Signal Forms' `required()` does not count `[]` as empty, so the guide pairs it with `minLength(path, 1)`.
 
 ### Integration Branch
 
-- **One Branch**: `feature/signal-forms-support` collects Phases 17 to 31. `main`, the deployed portal and the published package stay on the last beta until Phase 31.
+- **One Branch**: `feature/signal-forms-support` collects Phases 17 to 32. `main`, the deployed portal and the published package stay on the last beta until Phase 32.
 - **Phase Branches**: each phase branches off it and returns through a pull request with every CI gate of [`impl/definition-of-done.md`](definition-of-done.md) green.
 - **Test First**: each phase opens with behaviour specs that fail — DOM, ARIA and model assertions through a host that binds the field with a forms API.
 - **Interim Portal**: it builds and passes its tests at every phase.
-- **Interim Guides**: [`user/components.md`](../user/components.md) follows every public change in the same phase; the guides are rewritten once, in Phase 30.
-- **This Section**: deleted with Phase 31, once Phases 29 and 30 have moved what holds into `tech/` and `user/`.
+- **Interim Guides**: [`user/components.md`](../user/components.md) follows every public change in the same phase; the guides are rewritten once, in Phase 31.
+- **This Section**: deleted with Phase 32, once Phases 30 and 31 have moved what holds into `tech/` and `user/`.
 
 ---
 
 ## Library Phases
 
-### Phase 27 — Studio Export On Signal Forms
+### Phase 28 — One Rule Set In Every Validator
 
 **Depends On**: nothing.
 
-- **The Convention**: the export is the **Consumer Convention** of **Target Architecture**.
-- **What It Carries**: conditions as `hidden()` rules, presets through `(valueChange)`, and the rules of the built-in validation mode, which the export drops today.
-- **Import**: the parser reads `[formField]`.
-- **Proof**: a golden export of the sample form is compiled and rendered by a portal spec, and the serializer's output must equal it.
+- **The Gap**: the Studio's validators check different rules. Vest checks the formats, the toppings limit, the `when` group and the whole form; Angular's rules check `required()` and the phone's length, with raw `kind` messages. The export writes Angular's rules but an empty Vest suite, so under the default validator the exported form checks nothing the stage checks.
+- **One Rule Set**: the sample's rules are stated once — the field, the check, the message — and spelled per validator. The preview runs each spelling and the export writes it, so switching the validator changes the library and never the rules. A rule whose fields are not all on the form is left out, on the stage and in the export alike.
+- **Angular First**: Angular's rules become the default validator, then Vest, Zod and none.
+- **Zod**: a validator of its own, through `validateStandardSchema` like Vest. `zod` joins the portal's dependencies.
+- **Opt-In Without A Package**: a Vest suite and a Zod schema are Standard Schemas, which Signal Forms runs with no adapter, so neither needs library code — **Validation** in **Decisions**. The export imports `vest` or `zod` only under its own validator.
+- **The Required Marker**: under Angular's rules `required()` marks and checks. Under Vest and Zod the schema adds `REQUIRED` metadata, because neither can tell Signal Forms a field is required. The Studio says so beside the validator.
+- **In The Studio**: the validator control and the `Schema` tab say that `my-form.form.ts` always holds the form's rules, and the validator decides who writes the checks. [`user/studio.md`](../user/studio.md) follows.
+- **Proof**: a parity spec runs every validator over the same models and expects the same messages on the same paths. The golden export covers each validator, compiled and rendered.
 
-### Phase 28 — Delete The Template-Driven Harness
+### Phase 29 — Delete The Template-Driven Harness
 
-**Depends On**: Phase 27.
+**Depends On**: nothing.
 
 - **Deleted**: `lib/forms/` with its specs and its stub validator; the `vest/` entry point with its peer dependency and its path alias; `FORMIDABLE_VALIDATOR` and its interface; `WHOLE_FORM`, `FormidableFormErrors`, `DeepPartial`, `DeepRequired` and `cloneDeep`; `NgxFormidableModule` with its `FormsModule` re-export.
 - **Public Surface**: `public-api.ts` and [`user/components.md`](../user/components.md). [`impl/ubiquitous-language.md`](ubiquitous-language.md) drops target, whole form, run and shape.
 - **Proof**: the library's only forms import is `@angular/forms/signals`, and the packed package has no `vest` entry point.
 
-### Phase 29 — Maintainer Documentation
+### Phase 30 — Maintainer Documentation
 
-**Depends On**: Phase 28.
+**Depends On**: Phases 28 and 29.
 
-- **Forms Integration**: a new `tech/forms-integration.md` replaces [`tech/validation.md`](../tech/validation.md) — the field contract against each API's custom-control integration, the value and state flow as diagrams, the accepted compromises, and why there is no value accessor and no harness.
+- **Forms Integration**: a new `tech/forms-integration.md` replaces [`tech/validation.md`](../tech/validation.md) — the field contract against each API's custom-control integration, the value and state flow as diagrams, how each validator reaches a field from **Validators** in **Target Architecture**, the accepted compromises, and why there is no value accessor, no harness and no validator package.
 - **Updated**: [`tech/architecture.md`](../tech/architecture.md), [`tech/decoration.md`](../tech/decoration.md), [`tech/portal.md`](../tech/portal.md), the `impl/` conventions and the index in [`README.md`](../README.md).
 - **Code Comments**: every doc comment checked against [`impl/typescript.md`](typescript.md).
 
-### Phase 30 — User Documentation
+### Phase 31 — User Documentation
 
-**Depends On**: Phase 29.
+**Depends On**: Phase 30.
 
 - **Forms Guide**: a new `user/forms.md`, `ngx-formidable And Angular Forms` — who owns what and how value and state flow, as diagrams; one field bound through all three APIs; compatibility by feature; model rules, conditional fields and submission per API.
-- **Rewritten**: [`user/getting-started.md`](../user/getting-started.md) with Signal Forms first; [`user/validation.md`](../user/validation.md) for messages, reveal, Standard Schema with Vest and Zod, and the classic validators; [`user/custom-fields.md`](../user/custom-fields.md) on the new base.
+- **Validation Guide**: [`user/validation.md`](../user/validation.md), rewritten to make explicit, as a diagram and a comparison table, how validation works and is configured — Angular's rules by default, Vest or Zod through Standard Schema, or none — from **Validators** in **Target Architecture**. Where each lives in the `*.form.ts`, what marks a field required under each, and how two combine; then messages, reveal and the classic validators, stating up front that a template-driven form validates no library field.
+- **Rewritten**: [`user/getting-started.md`](../user/getting-started.md) with Signal Forms and Angular's rules first; [`user/custom-fields.md`](../user/custom-fields.md) on the new base.
 - **Updated**: [`user/fields.md`](../user/fields.md), [`user/decoration.md`](../user/decoration.md), [`user/studio.md`](../user/studio.md), [`user/components.md`](../user/components.md) and the root `README.md`.
 - **Diagrams In The Portal**: the `Docs` route renders Mermaid, lazy-loaded and inside the bundle budget.
 
-### Phase 31 — Release
+### Phase 32 — Release
 
-**Depends On**: Phase 30.
+**Depends On**: Phase 31.
 
 - **Merge**: the integration branch into `main`, through a pull request with every CI gate green.
 - **Version**: `1.0.0` in `projects/ngx-formidable/package.json`. The Angular peer floor is the minor CI tests, per [`impl/renovate.md`](renovate.md).
 - **Publish**: `npm run screenshots` for the README hero, then [`impl/releasing.md`](releasing.md).
 - **Tag**: tag the release commit. Final step.
 
-### Phase 32 — Storybook
+### Phase 33 — Storybook
 
 - **Set It Up**: Storybook is not installed. Take conventions from the sibling project's `storybook.md` and its `.storybook` configuration first. Copy it into this repo from EnerQi repository.
 - **Stories**: all components, including the layout options.
 - demonstrate all fields, directives and decorator, including their properties.
 
-### Phase 33 — Date Range Field
+### Phase 34 — Date Range Field
 
 - **The Calendar Is Not The Problem**: Pikaday renders ranges — `startRange` / `endRange` options and `is-inrange` / `is-startrange` / `is-endrange` classes. What it does not do is manage range _selection_; that is driven from `onSelect`, or with two instances.
 - **The Value Contract Is**: `date-field` is single-valued end to end — `Date | null`, one picker, one masked input with one `unicodeTokenFormat`, arrow-stepping over that one date, and `isFilled`. A range mode means a tuple value, a two-segment mask, parse and format path, per-segment arrow-stepping and clear semantics, and range styling that `_pikaday.scss` does not have.
 - **Size It Honestly**: the largest single item on this roadmap. Split it before starting.
 
-### Phase 34 — AI Support
+### Phase 35 — AI Support
 
 I want to support developers to use AI to use this library. How can I do that? Should that be done with an MCP? What are other ways?
 
-### Phase 35 — Blog Post
+### Phase 36 — Blog Post
 
 - **Where**: `https://thedevexchange.com/`, the company dev blog.
 - **What**: the library, its features, and how it is used to build beautiful, functional Angular forms. Code examples, screenshots, links to the portal and the GitHub repository. Why it beats other form libraries, and a call to action to try it.

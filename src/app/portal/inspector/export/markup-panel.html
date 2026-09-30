@@ -2,7 +2,7 @@
 
 <portal-accordion
   heading="Export"
-  lede="Three files, generated from the form on the stage. Read-only: change the form in the Studio, then copy again."
+  lede="Four files, generated from the form on the stage. Read-only: change the form in the Studio, then copy again."
   [hint]="fieldCount() + ' Fields'"
   [open]="isOpen('export')"
   (toggled)="toggle('export')">
@@ -38,14 +38,14 @@
 
 <portal-accordion
   heading="Import"
-  lede="A template exported here, read back in. It replaces the form on the stage, sections included. What the Studio cannot read — bindings to expressions, control flow — is listed, not silently dropped."
+  lede="A template exported here, read back in. It replaces the form on the stage, sections included. The schema is not read, so each field’s state, limits and required marker stay at their defaults. What else the Studio cannot read — bindings to expressions, control flow, conditions, presets — is listed, not silently dropped."
   hint="Paste A Template"
   [open]="isOpen('import')"
   (toggled)="toggle('import')">
   <textarea
     rows="4"
     spellcheck="false"
-    placeholder="<form formidableForm> … </form>"
+    placeholder='<form [formRoot]="form"> … </form>'
     class="pc-textarea"
     [value]="importText()"
     (input)="importText.set($any($event.target).value)"></textarea>

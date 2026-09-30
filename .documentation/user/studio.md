@@ -135,22 +135,22 @@ The sample form is a pizza order that starts already filled in, because an empty
 
 **The pizza is a starting point, not a lock.** Its preset is applied when you change the picker and never again, so anything you edit afterwards stands. `Custom` carries no preset, so it changes nothing.
 
-The model drawer is where all of this is legible: the two groups nest, and a conditional field that is not rendered has no key at all. [`user/validation.md`](validation.md) covers what conditional fields mean for the rules.
+The model drawer is where all of this is legible: the two groups nest, and a conditional field that is not rendered keeps its key, and nothing validates it. [`user/validation.md`](validation.md) covers what conditional fields mean for the rules.
 
 ---
 
 ## Taking It Away
 
-The `Import & Export` tab has two halves, one per thing the Studio produces. Each is derived from what is on the stage, so neither can disagree with what you are looking at, and pasting either back reproduces it.
+The `Import & Export` tab has two halves, one per thing the Studio produces. Each is derived from what is on the stage, so neither can disagree with what you are looking at. Pasting the theme back reproduces it; pasting the template back reproduces the form's fields and sections, and lists what it leaves behind.
 
-| Half      | Export                                                                                            | Import                                  |
-| :-------- | :------------------------------------------------------------------------------------------------ | :-------------------------------------- |
-| **Theme** | The `:root` block to paste into your own stylesheet                                               | A block you saved earlier               |
-| **Form**  | The Angular template this configuration produces, a component and an app config for it, read-only | A whole template, its sections included |
+| Half      | Export                                                                                                   | Import                                  |
+| :-------- | :------------------------------------------------------------------------------------------------------- | :-------------------------------------- |
+| **Theme** | The `:root` block to paste into your own stylesheet                                                      | A block you saved earlier               |
+| **Form**  | The Angular template this configuration produces, its component, its schema and an app config, read-only | A whole template, its sections included |
 
-Both halves are the same pair of sections, `Export` and `Import`. Each `Export` carries the block and a copy. The form's `Export` holds three files, so it shows them as tabs — `Template`, `Component`, `App Config` — one at a time.
+Both halves are the same pair of sections, `Export` and `Import`. Each `Export` carries the block and a copy. The form's `Export` holds four files, so it shows them as tabs — `Template`, `Component`, `Schema`, `App Config` — one at a time.
 
-The top bar's `Copy Theme` copies the theme with no intermediate dialog. The form has no copy there: its template does not compile without its component, so both are taken from here. The theme's export options cover CSS or SCSS, whether the page surface is included, whether the per-variable comments are emitted, and whether the defaults are stated explicitly. Declarations that only restate a library default are left out.
+The top bar's `Copy Theme` copies the theme with no intermediate dialog. The form has no copy there: its template does not compile without its component and its schema, so all three are taken from here. The theme's export options cover CSS or SCSS, whether the page surface is included, whether the per-variable comments are emitted, and whether the defaults are stated explicitly. Declarations that only restate a library default are left out.
 
 **A Theme Block States A Delta.** The `:root` block carries what the theme says the library's defaults do not, so it reproduces the theme wherever those defaults are what it lands on — your own stylesheet. Read back into the Studio it lands on the theme already on the stage instead, and what a delta leaves unsaid stays as it is. Either checkbox closes that gap:
 
@@ -161,17 +161,25 @@ The top bar's `Copy Theme` copies the theme with no intermediate dialog. The for
 
 The page surface is the page's rather than the library's, so `Onto The Defaults` returns it to the Studio's own starting surface unless the block states it — which is what `Page Surface` is for.
 
-**The Component Is A Proposal.** The template binds `model`, `shape` and, under Vest, `suite`. `Copy Component` copies one standalone component that declares them the way [`user/validation.md`](validation.md) lays a form out: the model typed by what each field writes, its shape, and under Vest a suite with no rules in it — the Studio has no rule editor. Any component that provides the three names serves the template as well. The component is not read back in.
+**The Form Is Signal Forms.** The three files are one form, laid out the way the library's convention has it:
 
-**The App Config Holds What The Template Leaves Out.** A field or form that states nothing is emitted without the attribute, so the app defaults are what give it its value. `Copy App Config` copies the `app.config.ts` that provides them; it is also on `App Defaults`. The app config belongs to the app rather than the form, so it is not read back in.
+| File              | Tab         | Holds                                                                                           |
+| :---------------- | :---------- | :---------------------------------------------------------------------------------------------- |
+| `my-form.html`    | `Template`  | `<form [formRoot]="form">`, and every field decorated and bound by `[formField]`                |
+| `my-form.ts`      | `Component` | The model `signal`, the `form()` over it, the components the template uses, the preset handlers |
+| `my-form.form.ts` | `Schema`    | The model's type, an initial model defining every key, and the `schema()` with the rules        |
 
-**The Export Carries Behaviour, Not State.** A conditional field is emitted inside the `@if` its condition states, and a grouped section inside its `ngModelGroup` — so a field the stage is currently hiding is still in the template, and the model access under a group is nested. The template is the form, not a snapshot of it.
+**The Schema Holds A Field's State.** `[formField]` hands a field its readonly and disabled state, its required marker and its limits, and rejects a binding to any of them beside it. So the schema states them as rules — `readonly()`, `min()`, `maxLength()` — and a required marker with no rule behind it as `REQUIRED` metadata. Under `Angular's built-in rules` the schema states them, `required()` among them. Under `Vest suite` it runs a suite with no rules in it through `validateStandardSchema` — the Studio has no rule editor. Neither the component nor the schema is read back in.
 
-**Some Behaviour Belongs To The Component.** A template picker's presets are a map, and a template cannot hold one. The template binds the handler, `(ngModelChange)="applyPizzaPreset($event)"`, and `Copy Component` declares that handler and the map beside it. The two names are derived from the field, so the pair always fits together.
+**The App Config Holds What The Export Leaves Out.** A field or form that states nothing is emitted without the attribute, so the app defaults are what give it its value. What the form states for itself — when messages appear, whether required markers show — the component provides over them. `Copy App Config` copies the `app.config.ts` that provides them; it is also on `App Defaults`. The app config belongs to the app rather than the form, so it is not read back in.
 
-**What An Import Ignores, It Lists.** A theme import applies the variables the library declares and lists the rest, because a variable the library does not declare would produce a control that appears to do nothing. A template import handles a static, attribute-only subset, plus the two structures the Studio itself emits: an `ngModelGroup` and an `@if` comparing one model key with a literal. Bindings to expressions, any other control flow, and a handler whose behaviour lives in the component are reported rather than silently dropped — so re-importing the sample tells you its presets did not come with it.
+**The Export Carries Behaviour, Not State.** A conditional field's condition is a `hidden()` rule in the schema, and the template wraps the field in `@if (!form.address().hidden())` — so a field the stage is currently hiding is still in the template. A grouped field is bound under its group, `form.payment.method`. Every key of the initial model starts empty. The export is the form, not a snapshot of it.
 
-**The Form Is Derived, Not Authored.** An Angular production build contains no template compiler, so a pasted template cannot become live components. The configuration is the source of truth and the template and component are generated from it, which is why both are read-only and why structure is edited through controls rather than by typing.
+**Some Behaviour Belongs To The Component.** A template picker's presets are a map, and a template cannot hold one. The template binds the handler to the field's pick, `(valueChange)="applyPizzaPreset($event)"`, and `Copy Component` declares that handler and the map beside it. The two names are derived from the field, so the pair always fits together.
+
+**What An Import Ignores, It Lists.** A theme import applies the variables the library declares and lists the rest, because a variable the library does not declare would produce a control that appears to do nothing. A template import handles a static, attribute-only subset: each field's name and group come from its `[formField]` path. It does not read the schema, so a field comes back without its state, its limits, its required marker and its condition. Bindings to expressions, control flow, the `@if` around a conditional field and a handler whose behaviour lives in the component are reported rather than silently dropped — so re-importing the sample tells you its conditions and presets did not come with it.
+
+**The Form Is Derived, Not Authored.** An Angular production build contains no template compiler, so a pasted template cannot become live components. The configuration is the source of truth and the files are generated from it, which is why they are read-only and why structure is edited through controls rather than by typing.
 
 ---
 
