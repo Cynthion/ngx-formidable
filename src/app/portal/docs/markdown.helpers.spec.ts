@@ -142,6 +142,28 @@ describe('renderDoc', () => {
 
     expect(diagram.dataset['diagram']).toBe('flowchart LR\n  Field --> Decorator\n');
     expect(diagram.querySelector('pre code')?.textContent).toContain('Field --> Decorator');
+    expect(diagram.querySelector('.doc-code-bar')).toBeNull();
+    host.remove();
+  });
+
+  it('highlights a code block under a bar naming its language and copying it', () => {
+    const host = mount('```ts\nconst answer = 42;\n```');
+    const frame = host.querySelector('.doc-code')!;
+
+    expect(frame.querySelector('.doc-code-bar')?.firstChild?.textContent).toBe('ts');
+    expect(frame.querySelector('.doc-code-copy')?.getAttribute('aria-label')).toBe('Copy');
+    expect(frame.querySelector('.doc-code-copy svg')).not.toBeNull();
+    expect(frame.querySelector('pre code .hljs-keyword')?.textContent).toBe('const');
+    expect(frame.querySelector('pre code')?.textContent).toBe('const answer = 42;\n');
+    host.remove();
+  });
+
+  it('shows a block in a language it does not highlight as written', () => {
+    const host = mount('```text\n<b>as is</b>\n```');
+    const code = host.querySelector('.doc-code pre code')!;
+
+    expect(code.textContent).toBe('<b>as is</b>\n');
+    expect(code.children.length).toBe(0);
     host.remove();
   });
 });

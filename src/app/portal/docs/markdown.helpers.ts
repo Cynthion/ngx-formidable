@@ -1,5 +1,20 @@
+import hljs from 'highlight.js/lib/core';
+import bash from 'highlight.js/lib/languages/bash';
+import json from 'highlight.js/lib/languages/json';
+import scss from 'highlight.js/lib/languages/scss';
+import typescript from 'highlight.js/lib/languages/typescript';
+import xml from 'highlight.js/lib/languages/xml';
 import { marked } from 'marked';
 import { slugify } from '../helpers/slug.helpers';
+import { COPY_SVG } from './doc-icons';
+
+// The languages the documents' code blocks are written in; `xml` is the one that answers to `html`. A block in
+// any other language is shown as written.
+hljs.registerLanguage('bash', bash);
+hljs.registerLanguage('json', json);
+hljs.registerLanguage('scss', scss);
+hljs.registerLanguage('typescript', typescript);
+hljs.registerLanguage('xml', xml);
 
 /** Where the maintainer-facing buckets live, since the portal only mirrors `user/`. */
 const REPOSITORY_DOCS = 'https://github.com/Cynthion/ngx-formidable/blob/main/.documentation';
@@ -57,8 +72,8 @@ export function rewriteDocHref(
  * Renders one of the checked-in documents.
  *
  * The markdown is the repository's own, imported as text, so this is a rendering of the source rather than
- * a transcription of it. It is post-processed as a DOM rather than through the renderer's own hooks: the
- * two things needed — rewritten links and heading ids for the contents — are both easier to state against
+ * a transcription of it. It is post-processed as a DOM rather than through the renderer's own hooks: what is
+ * needed — rewritten links, heading ids for the contents, highlighted code blocks — is easier to state against
  * the output than against a token stream.
  */
 export function renderDoc(markdown: string, knownSlugs: ReadonlySet<string>, slug?: string): RenderedDoc {
@@ -113,6 +128,20 @@ export function renderDoc(markdown: string, knownSlugs: ReadonlySet<string>, slu
     diagram.dataset['diagram'] = code.textContent ?? '';
     block.replaceWith(diagram);
     diagram.append(block);
+  }
+
+  // Every other code block is highlighted, under a bar naming its language and copying it. The page wires the
+  // copy up, because this is markup rather than a component.
+  for (const code of Array.from(parsed.querySelectorAll('pre > code:not(.language-mermaid)'))) {
+    const block = code.parentElement!;
+    const language = code.className.match(/language-([\w-]+)/)?.[1] ?? '';
+    const frame = parsed.createElement('div');
+
+    frame.className = 'doc-code';
+    frame.innerHTML = `<div class="doc-code-bar">${language}<button type="button" class="doc-code-copy" aria-label="Copy" title="Copy">${COPY_SVG}</button></div>`;
+    block.replaceWith(frame);
+    frame.append(block);
+    if (hljs.getLanguage(language)) code.innerHTML = hljs.highlight(code.textContent ?? '', { language }).value;
   }
 
   // The document's own `# Title` is rendered by the page around it, so it would otherwise appear twice.

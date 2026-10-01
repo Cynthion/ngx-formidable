@@ -33,7 +33,7 @@ Angular form fields you can actually theme, configure and customize. Validated b
 <!-- An absolute URL: this file is also the npm package's README, where a repository-relative path does not resolve. -->
 <p align="center">
   <a href="https://cynthion.github.io/ngx-formidable/#/specimen">
-    <img src="https://raw.githubusercontent.com/Cynthion/ngx-formidable/main/assets/ladder.png" alt="Four ngx-formidable fields, a dropdown open among them, restyled from the library's defaults in eight steps, one CSS variable per step, with the :root block growing beside them">
+    <img src="https://raw.githubusercontent.com/Cynthion/ngx-formidable/main/assets/ladder.png" alt="Demonstration of how to style the ngx-formidable fields.">
   </a>
 </p>
 <!-- markdownlint-enable no-inline-html -->

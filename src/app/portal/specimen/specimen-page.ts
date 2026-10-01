@@ -26,8 +26,8 @@ import { ThemeScope } from '../chrome/theme-scope';
 import { TopBar } from '../chrome/top-bar/top-bar';
 import { PortalFieldKind, PortalOptionSpec } from '../model/field-spec.model';
 import { PREVIEW_FIELDS } from '../model/preview-form.definition';
-import { FONT_FAMILY_TOKEN, PageSurface, PRESETS_BY_KEY, THEME_PRESETS, ThemePreset } from '../model/presets';
-import { COLOR_SCHEMES, GEOMETRY_SCHEMES, USE_SITE_VARS } from '../model/schemes';
+import { FONT_FAMILY_TOKEN, PageSurface, PRESETS_BY_KEY, presetVars, THEME_PRESETS } from '../model/presets';
+import { USE_SITE_VARS } from '../model/schemes';
 import {
   ADORNMENT_COLUMNS,
   ADORNMENT_FEATURED,
@@ -36,6 +36,7 @@ import {
   AnatomyGroup,
   anatomyGroup,
   AnatomyPart,
+  emptyValue,
   LABEL_FEATURED,
   LABEL_POSITION_KINDS,
   labelColumns,
@@ -46,7 +47,8 @@ import {
   SPECIMEN_KINDS,
   STATE_COLUMNS,
   STATE_FEATURED,
-  variableLink
+  variableLink,
+  withState
 } from '../model/specimen';
 import { THEME_TOKENS_BY_NAME } from '../model/token-manifest';
 import { CALENDAR_SVG, MARKER_SVG } from '../stage/preview-form/preview-icons';
@@ -79,11 +81,34 @@ const CALLOUT_SPACING = 50;
 /** Between a callout's label and the field it points into. */
 const CALLOUT_GAP = 40;
 
-/** The library's default theme assumes a light page, so the ladder gives it one. */
+/** The library's default theme assumes a light page, so the ladder starts on one. */
 const LADDER_PAGE: PageSurface = { background: '#ffffff', text: '#1e293b' };
 
-/** The fields the ladder restyles in view of its own code. The dropdown is last, so its panel has room. */
-const LADDER_KINDS: readonly PortalFieldKind[] = ['input', 'date', 'toggle', 'dropdown'];
+/** One field the ladder restyles: a sample field, optionally with its hint, disabled, or empty and reported invalid. */
+interface LadderField {
+  readonly kind: PortalFieldKind;
+  readonly hint?: boolean;
+  readonly invalid?: boolean;
+  readonly disabled?: boolean;
+  /** Across both columns, for a label and a value side by side. */
+  readonly wide?: boolean;
+}
+
+/**
+ * The fields the ladder restyles in view of its own code, two columns of them: every layout, a hint, an error, a
+ * disabled field and an open panel. The dropdown is last, so its panel opens into the room below it.
+ */
+const LADDER_FIELDS: readonly LadderField[] = [
+  { kind: 'input' },
+  { kind: 'autocomplete', invalid: true },
+  { kind: 'date', hint: true },
+  { kind: 'slider' },
+  { kind: 'radio-group' },
+  { kind: 'checkbox-group' },
+  { kind: 'toggle', wide: true },
+  { kind: 'select', disabled: true },
+  { kind: 'dropdown' }
+];
 
 function optionsOf(id: string): PortalOptionSpec[] {
   return [...(PREVIEW_FIELDS.find((field) => field.id === id)?.options ?? [])];
@@ -95,7 +120,7 @@ const PARTS = [
     title: 'How A Field Is Painted',
     chapters: [
       { id: 'anatomy', title: 'What Paints What' },
-      { id: 'ladder', title: 'One Variable At A Time' },
+      { id: 'ladder', title: 'Defaults To Midnight' },
       { id: 'presets', title: 'Whole Themes' }
     ]
   },
@@ -182,10 +207,12 @@ export class SpecimenPage {
   protected readonly adornmentColumns = ADORNMENT_COLUMNS;
 
   protected readonly formOptions = SPECIMEN_FORM_OPTIONS;
-  protected readonly ladderFields = LADDER_KINDS.map((kind) => ({
+  protected readonly ladderFields = LADDER_FIELDS.map(({ kind, hint, invalid, disabled, wide }) => ({
     kind,
-    spec: sampleSpec(kind),
-    value: sampleValue(kind)
+    invalid: invalid ?? false,
+    wide: wide ?? false,
+    spec: disabled ? withState('disabled')(sampleSpec(kind, hint)) : sampleSpec(kind, hint),
+    value: invalid ? emptyValue(kind) : sampleValue(kind)
   }));
 
   protected readonly pizzas = optionsOf('pizza');
@@ -230,9 +257,11 @@ export class SpecimenPage {
     if (source.kind === 'studio') return { ...cleared, ...this.theme.resolved(), ...pageVars(this.theme.page()) };
 
     if (source.kind === 'ladder') {
-      const applied = LADDER_STEPS.slice(0, source.step).map((step) => [step.name, step.value]);
+      const applied = LADDER_STEPS.slice(0, source.step);
+      const declarations = applied.flatMap((step) => step.declarations).map(({ name, value }) => [name, value]);
+      const page = applied.reduce((surface, step) => step.page ?? surface, LADDER_PAGE);
 
-      return { ...cleared, ...Object.fromEntries(applied), ...pageVars(LADDER_PAGE) };
+      return { ...cleared, ...Object.fromEntries(declarations), ...pageVars(page) };
     }
 
     const preset = PRESETS_BY_KEY.get(source.key)!;
@@ -248,7 +277,7 @@ export class SpecimenPage {
     const current = LADDER_STEPS[step - 1];
 
     return current
-      ? `Step ${step} of ${LADDER_STEPS.length}: ${describe(current.name)}`
+      ? `Step ${step} of ${LADDER_STEPS.length}, ${current.title}: ${current.caption}`
       : 'The library’s defaults. Nothing is set yet.';
   });
 
@@ -312,14 +341,6 @@ export class SpecimenPage {
   private layOutCallouts(): void {
     this.callouts.set(layOutCallouts(this.figure().nativeElement));
   }
-}
-
-function presetVars(preset: ThemePreset): Record<string, string> {
-  return {
-    ...GEOMETRY_SCHEMES[preset.geometry],
-    ...COLOR_SCHEMES[preset.color],
-    ...(preset.fontFamily ? { [FONT_FAMILY_TOKEN]: preset.fontFamily } : {})
-  };
 }
 
 function pageVars(page: PageSurface): Record<string, string> {

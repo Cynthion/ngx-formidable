@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { provideNgxMask } from 'ngx-mask';
 import { DOC_PAGES, DOC_PAGES_BY_SLUG } from '../docs/doc-pages';
 import { renderDoc } from '../docs/markdown.helpers';
+import { PRESETS_BY_KEY, presetVars } from '../model/presets';
 import {
   ANATOMY_PARTS,
   LABEL_POSITION_KINDS,
@@ -17,6 +18,9 @@ import { ThemeStore } from '../state/theme.store';
 import { SpecimenPage } from './specimen-page';
 
 const SLUGS = new Set(DOC_PAGES.map((page) => page.slug));
+
+const LADDER_DECLARATIONS = LADDER_STEPS.flatMap((step) => step.declarations);
+const MIDNIGHT = PRESETS_BY_KEY.get('midnight')!;
 
 /**
  * The Specimen names variables, points at the decorator's own DOM and links into the documents, and all three
@@ -40,6 +44,7 @@ describe('specimen', () => {
   const rootVar = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const chip = (label: string) =>
     Array.from(root.querySelectorAll<HTMLButtonElement>('.chip')).find((b) => b.textContent?.trim() === label)!;
+  const lastStepChip = () => chip(`${LADDER_STEPS.length} ${LADDER_STEPS[LADDER_STEPS.length - 1]!.title}`);
 
   beforeEach(() => {
     localStorage.clear();
@@ -58,14 +63,24 @@ describe('specimen', () => {
   });
 
   it('names only variables the library documents', () => {
-    const names = [...LADDER_STEPS.map((step) => step.name), ...ANATOMY_PARTS.map((part) => part.variable)];
+    const names = [...LADDER_DECLARATIONS.map((entry) => entry.name), ...ANATOMY_PARTS.map((part) => part.variable)];
 
     expect(names.filter((name) => !THEME_TOKENS_BY_NAME.has(name))).toEqual([]);
   });
 
+  // Its last step is what picking the preset paints, so the two cannot show different things under one name.
+  it('climbs to the whole Midnight preset, each declaration once', () => {
+    const names = LADDER_DECLARATIONS.map((entry) => entry.name);
+
+    expect(new Set(names).size).toBe(names.length);
+    expect(Object.fromEntries(LADDER_DECLARATIONS.map((entry) => [entry.name, entry.value]))).toEqual(
+      presetVars(MIDNIGHT)
+    );
+  });
+
   it('links only to documents and anchors the Docs route renders', fakeAsync(() => {
     settle();
-    chip(String(LADDER_STEPS.length)).click();
+    lastStepChip().click();
     settle();
 
     const hrefs = Array.from(root.querySelectorAll('a[href*="/docs/"]')).map((a) => a.getAttribute('href')!);
@@ -144,13 +159,17 @@ describe('specimen', () => {
     expect(scopeVar('--formidable-field-border-radius')).not.toBe(rootRadius);
     expect(rootVar('--formidable-field-border-radius')).toBe(rootRadius);
 
-    chip(String(LADDER_STEPS.length)).click();
+    chip('Defaults').click();
     settle();
 
-    expect(scopeVar('--formidable-field-height')).toBe(
-      LADDER_STEPS.find((step) => step.name === '--formidable-field-height')!.value
-    );
+    expect(scopeVar('--portal-page-background')).toBe('#ffffff');
+
+    lastStepChip().click();
+    settle();
+
+    expect(scopeVar('--formidable-field-height')).toBe(presetVars(MIDNIGHT)['--formidable-field-height']!);
+    expect(scopeVar('--portal-page-background')).toBe(MIDNIGHT.page.background);
     expect(rootVar('--formidable-field-height')).toBe(rootHeight);
-    expect(root.querySelectorAll('.code-line').length).toBe(LADDER_STEPS.length);
+    expect(root.querySelectorAll('.code-line').length).toBe(LADDER_DECLARATIONS.length);
   }));
 });
