@@ -13,22 +13,22 @@ Read `.plan/<slug>.md` and its research artifact.
 
 ## What To Attack
 
-| Target                | Question                                                                                          |
-| :-------------------- | :------------------------------------------------------------------------------------------------ |
-| Acceptance Criteria   | Which one cannot be verified by a command or an observation?                                      |
-| Verification          | Which criterion has no command mapped to it?                                                      |
-| Assumptions           | What does this assume about existing behavior without citing it?                                  |
-| Reuse                 | What is being built that already exists: a helper, a base directive, a token?                     |
-| Conventions           | Which part violates `impl/components.md`, `impl/styling.md` or `impl/ubiquitous-language.md`?     |
-| Scope                 | Which listed change is not required by any criterion?                                             |
-| Consumers             | Which public input, output, token, type or `--formidable-*` variable changes, and who breaks?     |
-| Change Detection      | Which state a template or host binding reads is not a signal, so a zoneless app never repaints?   |
-| Failure Paths         | What happens with no options, a disabled or readonly field, an invalid value, a cleared value?    |
-| Accessibility         | What does keyboard-only use do? Which ARIA attribute goes stale?                                  |
-| Responsiveness        | What happens on a narrow viewport, where panels become sheets?                                    |
-| Documentation         | Which changed public API has no catalog update planned, and which feature has no portal showcase? |
-| Rejected Alternatives | Which was rejected for a reason that does not hold?                                               |
-| Out Of Scope          | What is excluded that the requirement actually needs?                                             |
+| Target                | Question                                                                                                                                                                                                                                      |
+| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Acceptance Criteria   | Which one cannot be verified by a command or an observation?                                                                                                                                                                                  |
+| Verification          | Which criterion has no command mapped to it?                                                                                                                                                                                                  |
+| Assumptions           | What does this assume about existing behavior without citing it?                                                                                                                                                                              |
+| Reuse                 | What is being built that already exists: a helper, a base directive, a token?                                                                                                                                                                 |
+| Conventions           | Which part violates [`impl/components.md`](../../../.documentation/impl/components.md), [`impl/styling.md`](../../../.documentation/impl/styling.md) or [`impl/ubiquitous-language.md`](../../../.documentation/impl/ubiquitous-language.md)? |
+| Scope                 | Which listed change is not required by any criterion?                                                                                                                                                                                         |
+| Consumers             | Which public input, output, token, type or `--formidable-*` variable changes, and who breaks?                                                                                                                                                 |
+| Change Detection      | Which state a template or host binding reads is not a signal, so a zoneless app never repaints?                                                                                                                                               |
+| Failure Paths         | What happens with no options, a disabled or readonly field, an invalid value, a cleared value?                                                                                                                                                |
+| Accessibility         | What does keyboard-only use do? Which ARIA attribute goes stale?                                                                                                                                                                              |
+| Responsiveness        | What happens on a narrow viewport, where panels become sheets?                                                                                                                                                                                |
+| Documentation         | Which changed public API has no catalog update planned, and which feature has no portal showcase?                                                                                                                                             |
+| Rejected Alternatives | Which was rejected for a reason that does not hold?                                                                                                                                                                                           |
+| Out Of Scope          | What is excluded that the requirement actually needs?                                                                                                                                                                                         |
 
 ## Workflow
 

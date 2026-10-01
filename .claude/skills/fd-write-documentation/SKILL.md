@@ -17,12 +17,12 @@ The buckets, what each holds, and which content is documented at all are defined
 2. Find the authoritative home. Search for the fact before writing it. If it already exists, link to it and stop.
 3. Write or extend. Extending an existing section beats adding a parallel one.
 4. A `user/` document is also rendered by the portal: check that it reads correctly on the served `Docs` route when its structure changes.
-5. Update `.documentation/README.md` when a file is added, removed, or moved.
-6. Verify: `npm run docs:lint` checks style, relative links and heading anchors. A change to `user/theme-reference.md` also runs `npm run docs:check`.
+5. Update [`.documentation/README.md`](../../../.documentation/README.md) when a file is added, removed, or moved.
+6. Verify: `npm run docs:lint` checks style, relative links and heading anchors. A change to [`user/theme-reference.md`](../../../.documentation/user/theme-reference.md) also runs `npm run docs:check`.
 
 ## Rules
 
-- **Read The Guide First**: `impl/documentation.md` is the single source for style and placement. This skill does not restate it. Apply it.
+- **Read The Guide First**: [`impl/documentation.md`](../../../.documentation/impl/documentation.md) is the single source for style and placement. This skill does not restate it. Apply it.
 - **No Noisy Reformatting**: Do not rewrap or reformat Markdown you did not change.
 - **Cross-Link Both Ways**: A new document references related documents and is referenced by them, so it is reachable.
-- **README Is Published**: The root `README.md` is also the npm package's README. It links by absolute GitHub URL, never by repository path.
+- **README Is Published**: The root [`README.md`](../../../README.md) is also the npm package's README. It links by absolute GitHub URL, never by repository path.

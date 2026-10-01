@@ -10,7 +10,7 @@ The source of truth for outstanding work. [`impl/backlog.md`](backlog.md) is the
 
 - **Bugs First**: defects lead, whichever section they came in under.
 - **State Before Style**: a state hook ships before the styling that reads it: border geometry and `aria-invalid` both read the invalid-state hook.
-- **Docs Last**: API documentation and the `README.md` pass come after the API stops moving.
+- **Docs Last**: API documentation and the [`README.md`](../../README.md) pass come after the API stops moving.
 - **Portal After The Library**: the portal must expose every field option and theme token, so it starts only once those are stable.
 
 ---
@@ -138,7 +138,7 @@ I want to support developers to use AI to use this library. How can I do that? S
 
 ### Phase 36: Blog Post
 
-- **Where**: `https://thedevexchange.com/`, the company dev blog.
+- **Where**: [The Dev Exchange](https://thedevexchange.com/), the company dev blog.
 - **What**: the library, its features, and how it is used to build beautiful, functional Angular forms. Code examples, screenshots, links to the portal and the GitHub repository. Why it beats other form libraries, and a call to action to try it.
 - **Interview First**: interview me before writing, to get my perspective on the library, its development process and its roadmap. The narrative comes out of that, not out of the code.
 - **Tone**: humorous and light, informative and professional. Conversational, so the reader feels part of the journey.

@@ -8,11 +8,11 @@ argument-hint: <slug>
 
 Produce `.research/<slug>.md` and a prompt that can be pasted into an external model for deep research the repository cannot answer.
 
-Template: `.claude/skills/fd-drive-sdd/research.template.md`. The `fd-research` agent carries the method and the rules.
+Template: [`.claude/skills/fd-drive-sdd/research.template.md`](../fd-drive-sdd/research.template.md). The `fd-research` agent carries the method and the rules.
 
 ## Workflow
 
-1. Read the matching phase in `.documentation/impl/implementation.md` or item in `.documentation/impl/backlog.md`. Ask which one when the slug does not resolve. There might be no item yet, in which case ask what should be researched.
+1. Read the matching phase in [`.documentation/impl/implementation.md`](../../../.documentation/impl/implementation.md) or item in [`.documentation/impl/backlog.md`](../../../.documentation/impl/backlog.md). Ask which one when the slug does not resolve. There might be no item yet, in which case ask what should be researched.
 2. Investigate the repository and `.documentation/`. Fill every section of the template except `External Research`.
 3. Decide what external research would actually add. Only questions the repository cannot answer qualify: upstream library behavior (Angular, ngx-mask, Pikaday, Vest), framework migration detail, specification and accessibility detail, and prior art in other form libraries.
 4. Emit the external prompt below in the response, ready to paste. Do not write it into the artifact.

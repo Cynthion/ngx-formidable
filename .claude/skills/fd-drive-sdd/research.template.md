@@ -8,7 +8,7 @@
 
 <What is being asked for, in your own words. Note any contradiction with the code or the documentation.>
 
-Roadmap: `.documentation/impl/implementation.md`. Backlog: `.documentation/impl/backlog.md`
+Roadmap: [`.documentation/impl/implementation.md`](../.documentation/impl/implementation.md). Backlog: [`.documentation/impl/backlog.md`](../.documentation/impl/backlog.md)
 
 ## Current State
 

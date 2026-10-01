@@ -17,7 +17,7 @@ When no plan exists, say so and stop rather than inventing one.
 
 1. Work through the plan in order. Keep each step's diff small enough to verify on its own.
 2. Run the narrowest verification after each step, not once at the end.
-3. Run the applicable gates from `.documentation/impl/definition-of-done.md` before reporting done.
+3. Run the applicable gates from [`.documentation/impl/definition-of-done.md`](../../.documentation/impl/definition-of-done.md) before reporting done.
 4. Record the command and its actual output in the Implementation section.
 
 ## Rules

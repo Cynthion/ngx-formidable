@@ -13,11 +13,11 @@ The slug is a short kebab identifier, for example `date-range-field`.
 
 ## Artifact Contract
 
-| Phase     | Agent          | Artifact                                   | Template                                            |
-| :-------- | :------------- | :----------------------------------------- | :-------------------------------------------------- |
-| Research  | `fd-research`  | `.research/<slug>.md`                      | `.claude/skills/fd-drive-sdd/research.template.md`  |
-| Plan      | `fd-plan`      | `.plan/<slug>.md`                          | `.claude/skills/fd-drive-sdd/plan.template.md`      |
-| Implement | `fd-implement` | Source code, progress appended to the plan | `.claude/skills/fd-drive-sdd/implement.template.md` |
+| Phase     | Agent          | Artifact                                   | Template                                                                     |
+| :-------- | :------------- | :----------------------------------------- | :--------------------------------------------------------------------------- |
+| Research  | `fd-research`  | `.research/<slug>.md`                      | [`.claude/skills/fd-drive-sdd/research.template.md`](research.template.md)   |
+| Plan      | `fd-plan`      | `.plan/<slug>.md`                          | [`.claude/skills/fd-drive-sdd/plan.template.md`](plan.template.md)           |
+| Implement | `fd-implement` | Source code, progress appended to the plan | [`.claude/skills/fd-drive-sdd/implement.template.md`](implement.template.md) |
 
 `.research/` and `.plan/` are untracked. Implementation progress is appended to the plan file rather than written to a third artifact, so a work item has exactly two files.
 

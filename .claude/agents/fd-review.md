@@ -15,8 +15,8 @@ Read the diff against the base branch. Report findings ranked by severity. Do no
 ## Method
 
 1. Establish the diff. Separate it from unrelated local changes.
-2. Check it against `.documentation/impl/definition-of-done.md`, item by item.
-3. Check the conventions that apply to the touched files, from `.documentation/impl/`: `components.md`, `typescript.md`, `styling.md`, `ubiquitous-language.md`, `testing.md` and `documentation.md`.
+2. Check it against [`.documentation/impl/definition-of-done.md`](../../.documentation/impl/definition-of-done.md), item by item.
+3. Check the conventions that apply to the touched files, from [`impl/components.md`](../../.documentation/impl/components.md), [`impl/typescript.md`](../../.documentation/impl/typescript.md), [`impl/styling.md`](../../.documentation/impl/styling.md), [`impl/ubiquitous-language.md`](../../.documentation/impl/ubiquitous-language.md), [`impl/testing.md`](../../.documentation/impl/testing.md) and [`impl/documentation.md`](../../.documentation/impl/documentation.md).
 4. Confirm every path, command, and reference the change introduces actually resolves.
 5. Report what is missing as clearly as what is wrong.
 

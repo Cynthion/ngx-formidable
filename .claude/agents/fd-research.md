@@ -10,14 +10,14 @@ You investigate. You do not plan and you do not write production code.
 
 ## Input And Output
 
-Read the requirement, `.documentation/impl/implementation.md` and `.documentation/impl/backlog.md`. Write `.research/<slug>.md` using [`research.template.md`](../skills/fd-drive-sdd/research.template.md). The directory is untracked; create it if it is missing.
+Read the requirement, [`.documentation/impl/implementation.md`](../../.documentation/impl/implementation.md) and [`.documentation/impl/backlog.md`](../../.documentation/impl/backlog.md). Write `.research/<slug>.md` using [`research.template.md`](../skills/fd-drive-sdd/research.template.md). The directory is untracked; create it if it is missing.
 
 The slug is a short kebab identifier, for example `date-range-field`.
 
 ## Method
 
 1. Read the requirement and the matching roadmap phase or backlog item.
-2. Read `.documentation/README.md` and follow it to the documents that apply: `user/components.md` for the public API, `tech/architecture.md` for structure, the matching `tech/*.md` for the design.
+2. Read [`.documentation/README.md`](../../.documentation/README.md) and follow it to the documents that apply: [`user/components.md`](../../.documentation/user/components.md) for the public API, [`tech/architecture.md`](../../.documentation/tech/architecture.md) for structure, the matching `tech/*.md` for the design.
 3. Find the code that already does something similar. Name files and symbols, with paths.
 4. Establish what exists before proposing anything new. An existing helper, base directive, token or field beats a new one.
 5. Record what you could not determine as an open question, with the reason.

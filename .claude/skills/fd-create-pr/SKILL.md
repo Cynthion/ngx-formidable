@@ -9,7 +9,7 @@ effort: low
 
 Open one pull request against `main` for the current branch.
 
-Template: `.claude/skills/fd-create-pr/pr.template.md`
+Template: [`.claude/skills/fd-create-pr/pr.template.md`](pr.template.md)
 
 ## Prerequisite
 
@@ -48,7 +48,7 @@ gh pr edit <number> --body-file <file>
 - **Name The Risk**: Call out anything a reviewer should look at closely.
 - **Name The Breaking Change**: A renamed or removed public input, output, token, type or `--formidable-*` variable is stated as breaking, with what a consumer changes.
 - **Name What Others Must Do**: Local setup a puller has to run, and anything to exercise by hand in the portal, belongs in `Developer Actions`. A change that silently expects new tooling costs everyone who pulls it.
-- **Style**: Follow `.documentation/impl/documentation.md`. Run `npx prettier --write` on the description file so its tables align.
+- **Style**: Follow [`.documentation/impl/documentation.md`](../../../.documentation/impl/documentation.md). Run `npx prettier --write` on the description file so its tables align.
 
 ## Rules
 

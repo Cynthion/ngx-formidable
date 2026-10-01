@@ -22,18 +22,18 @@ The `fd-review` agent carries the method and what to look for. This skill adds t
 
 Run only what the diff touches. All commands run from the repository root.
 
-| Touched                                        | Command                                                                     |
-| :--------------------------------------------- | :-------------------------------------------------------------------------- |
-| Any file                                       | `npm run prettier:check`                                                    |
-| Any `.ts` or `.html`                           | `npm run lint`                                                              |
-| Any `.scss`                                    | `npm run style-lint`                                                        |
-| Anything under `projects/ngx-formidable/`      | `npm run build:lib`                                                         |
-| Anything under `projects/ngx-formidable/`      | `npx ng test ngx-formidable --watch=false --browsers=ChromeHeadless`        |
-| Anything under `src/`, or any library change   | `npx ng test ngx-formidable-portal --watch=false --browsers=ChromeHeadless` |
-| Anything under `src/`                          | `npm run build`                                                             |
-| Theme tokens, manifest or `theme-reference.md` | `npm run docs:check`                                                        |
-| Any Markdown                                   | `npm run docs:lint`                                                         |
-| A user-visible change                          | Look at it in the served portal, see `Visual Proof`                         |
+| Touched                                                                                                | Command                                                                     |
+| :----------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| Any file                                                                                               | `npm run prettier:check`                                                    |
+| Any `.ts` or `.html`                                                                                   | `npm run lint`                                                              |
+| Any `.scss`                                                                                            | `npm run style-lint`                                                        |
+| Anything under `projects/ngx-formidable/`                                                              | `npm run build:lib`                                                         |
+| Anything under `projects/ngx-formidable/`                                                              | `npx ng test ngx-formidable --watch=false --browsers=ChromeHeadless`        |
+| Anything under `src/`, or any library change                                                           | `npx ng test ngx-formidable-portal --watch=false --browsers=ChromeHeadless` |
+| Anything under `src/`                                                                                  | `npm run build`                                                             |
+| Theme tokens, manifest or [`user/theme-reference.md`](../../../.documentation/user/theme-reference.md) | `npm run docs:check`                                                        |
+| Any Markdown                                                                                           | `npm run docs:lint`                                                         |
+| A user-visible change                                                                                  | Look at it in the served portal, see `Visual Proof`                         |
 
 Run the narrowest scope first. Widen once the narrow scope passes.
 

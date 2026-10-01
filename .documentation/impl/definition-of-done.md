@@ -45,7 +45,7 @@ Every command runs from the repository root.
 - **Rules**: `.markdownlint.json` holds the rule configuration and is read by both the command and the editor extension.
 - **Exclusions**: `.markdownlint-cli2.jsonc` lists the paths that must not be linted: build output, the prebuild copy of `README.md`, and the untracked `.research/` and `.plan/` artifacts.
 - **Link Notation**: Autolinks, `<https://example.com>`, fail the gate. Every link carries descriptive text, see [`impl/documentation.md`](documentation.md).
-- **Inline HTML**: Only `br` and `img` are allowed. `README.md` opts out around its centred hero and badges with an inline `markdownlint-disable` comment, because npm renders that markup.
+- **Inline HTML**: Only `br` and `img` are allowed. [`README.md`](../../README.md) opts out around its centred hero and badges with an inline `markdownlint-disable` comment, because npm renders that markup.
 - **Editor**: The `davidanson.vscode-markdownlint` extension reports violations while editing. A clean editor is the fastest way to arrive at a green gate.
 - **Indentation**: Markdown indentation uses spaces, with no line-length limit and trailing whitespace kept, set in `.editorconfig`. Tabs inside a fenced code block are left alone, because the block is verbatim content.
 
@@ -70,7 +70,7 @@ Every command runs from the repository root.
 ## Documentation
 
 - **Conventions**: Documentation guidelines from [`impl/documentation.md`](documentation.md) are followed.
-- **User Documentation**: A change to public usage updates the matching `user/*.md`. The root `README.md` changes only when public usage does.
+- **User Documentation**: A change to public usage updates the matching `user/*.md`. The root [`README.md`](../../README.md) changes only when public usage does.
 - **Technical Documentation**: A change to a design decision or an internal boundary updates the matching `tech/*.md`. Neither restates the `user/` document it relates to.
 - **Implementation Documentation**: A change to the repository setup or a convention updates the matching `impl/*.md`.
 - **Index**: A new, renamed or removed document is reflected in [`README.md`](../README.md).

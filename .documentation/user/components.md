@@ -1,6 +1,6 @@
 # Components
 
-Catalogue of the library's public API: everything exported from `public-api.ts`. This is the authoritative detailed reference: the root `README.md` lists components abstractly and links here for the full API, and the `user/` guides teach the topics this file only lists.
+Catalogue of the library's public API.
 
 Every component is `standalone` and uses `ChangeDetectionStrategy.OnPush`, with no exception. Field components extend `BaseField` and implement Angular's `FormValueControl<T>`, so `[formField]`, `ngModel`, `[formControl]` and `formControlName` all bind them through their `value` model, with no value accessor; their shared surface is documented once below and not repeated per entry.
 
