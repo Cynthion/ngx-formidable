@@ -48,11 +48,6 @@ const fields: Record<
   'toggle': { kind: 'toggle', value: true, shows: switched, shown: 'true' }
 };
 
-/** Defects the reactive run exposes, each pending until the roadmap phase that rewrites its field. */
-const reactiveDefects: Record<string, string> = {
-  select: 'D16, Phase 21: a select shows its first option for a value written before its options exist'
-};
-
 describe('first render', () => {
   beforeEach(() => configureFormidableTestBed());
 
@@ -60,10 +55,6 @@ describe('first render', () => {
     for (const [key, { kind, value, inputs, shows, shown }] of Object.entries(fields)) {
       for (const decorated of [false, true]) {
         it(`shows the value of ${decorated ? 'a decorated' : 'an undecorated'} ${key}, bound ${api}`, async () => {
-          const defect = api === 'reactive' ? reactiveDefects[key] : undefined;
-
-          if (defect) pending(defect);
-
           const { element } = await bindField(kind, api, { value, inputs, decorated });
 
           expect(shows(element)).toEqual(shown);
