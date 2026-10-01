@@ -1,4 +1,4 @@
-import { ColorKey, GeometryKey } from './schemes';
+import { COLOR_SCHEMES, ColorKey, GEOMETRY_SCHEMES, GeometryKey, ThemeVars } from './schemes';
 
 /** The surface behind the form. The library styles fields and never the page, so this is the consumer's. */
 export interface PageSurface {
@@ -172,6 +172,15 @@ export const THEME_PRESETS: readonly ThemePreset[] = [
 ];
 
 export const PRESETS_BY_KEY: ReadonlyMap<string, ThemePreset> = new Map(THEME_PRESETS.map((p) => [p.key, p]));
+
+/** Every declaration a preset makes: its geometry, its palette and its family. */
+export function presetVars(preset: ThemePreset): ThemeVars {
+  return {
+    ...GEOMETRY_SCHEMES[preset.geometry],
+    ...COLOR_SCHEMES[preset.color],
+    ...(preset.fontFamily ? { [FONT_FAMILY_TOKEN]: preset.fontFamily } : {})
+  };
+}
 
 /**
  * What the page opens on. Deliberately not the shipped default, so the first frame is already evidence that

@@ -1,6 +1,9 @@
 <portal-top-bar />
 
-<div class="docs">
+<div
+  class="docs"
+  [style.--docs-nav-width.px]="layout.docsNavWidth()"
+  [style.--docs-contents-width.px]="layout.docsContentsWidth()">
   <aside class="nav">
     <p class="nav-head">Guides</p>
     @for (entry of guides; track entry.slug) {
@@ -25,6 +28,15 @@
     }
   </aside>
 
+  <div
+    portalResizeHandle
+    axis="x"
+    handleLabel="Resize the navigation"
+    class="divider nav-divider"
+    (moved)="layout.setDocsNavWidth($event)"
+    (nudged)="layout.setDocsNavWidth(layout.docsNavWidth() + $event)"
+    (resetRequested)="layout.resetDocsNavWidth()"></div>
+
   <main class="content">
     <header class="doc-head">
       <p class="doc-kind">{{ page().kind }}</p>
@@ -34,8 +46,18 @@
 
     <article
       class="doc-body"
-      [innerHTML]="body()"></article>
+      [innerHTML]="body()"
+      (click)="onBodyClick($event)"></article>
   </main>
+
+  <div
+    portalResizeHandle
+    axis="x"
+    handleLabel="Resize the contents"
+    class="divider contents-divider"
+    (moved)="onContentsDividerMoved($event)"
+    (nudged)="layout.setDocsContentsWidth(layout.docsContentsWidth() - $event)"
+    (resetRequested)="layout.resetDocsContentsWidth()"></div>
 
   <aside class="contents">
     @if (headings().length) {

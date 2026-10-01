@@ -25,8 +25,11 @@ const LADDER = '[data-shot="ladder"]';
 const STEPS = '#ladder .steps .chip';
 const DROPDOWN = `${LADDER} formidable-dropdown-field input`;
 
-/** How long each frame is held: the defaults and the finished theme longer than the steps between. */
-const HOLD_MS = { first: 1600, step: 1200, last: 3200 };
+/**
+ * How long each frame is held: the defaults and the finished theme longer than the steps between. The steps are
+ * quick, because the image is the overview; the Specimen it links to is where one step is studied.
+ */
+const HOLD_MS = { first: 1600, step: 700, last: 3200 };
 
 /** Clears everything behind the ladder, so its rounded corners are transparent on a light and a dark README. */
 const TRANSPARENT_CSS = `

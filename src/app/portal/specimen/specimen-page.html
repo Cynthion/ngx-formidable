@@ -160,8 +160,8 @@
         <header class="chapter-head">
           <span class="chapter-number">2</span>
           <div>
-            <h2>One Variable At A Time</h2>
-            <p class="lead">Eight declarations, one per step, from the library's defaults to a finished theme.</p>
+            <h2>Defaults To Midnight</h2>
+            <p class="lead">{{ steps.length }} steps, mostly one declaration each, from the library's defaults to the whole Midnight preset.</p>
           </div>
         </header>
 
@@ -169,13 +169,13 @@
           <div class="notes">
             <p class="guide-label">Notice</p>
             <ul>
-              <li>Each step sets a base variable, so what derives from it follows: the radius also rounds the open panel, and the fill also paints it.</li>
+              <li>Each step sets base variables, so what derives from them follows: the radius also rounds the open panel, and the fill also paints it.</li>
               <li>Every field on the page repaints, not only the ones beside the code.</li>
             </ul>
           </div>
           <div class="notes">
             <p class="guide-label">Try</p>
-            <p>Step from Defaults to 8, then scroll down: every chapter wears the step you stopped at.</p>
+            <p>Step from Defaults to {{ steps.length }}, then scroll down: every chapter wears the step you stopped at.</p>
             <a
               class="doc-link"
               [routerLink]="['/docs', 'theming', 'finding-your-theme']">
@@ -195,7 +195,7 @@
             [class.is-on]="ladderStep() === n"
             [attr.aria-pressed]="ladderStep() === n"
             (click)="setStep(n)">
-            {{ n === 0 ? 'Defaults' : n }}
+            {{ n === 0 ? 'Defaults' : n + ' ' + steps[n - 1]!.title }}
           </button>
           }
         </div>
@@ -205,8 +205,8 @@
           class="ladder">
           <div class="ladder-code">
             <pre><code><span class="code-muted">:root {{ '{' }}</span>
-@for (entry of steps.slice(0, ladderStep() ?? 0); track entry.name; let last = $last) {<span class="code-line" [class.is-new]="last">  <a [routerLink]="variableLink(entry.name)">{{ entry.name }}</a>: {{ entry.value }};</span>
-}<span class="code-muted">{{ '}' }}</span></code></pre>
+@for (step of steps.slice(0, ladderStep() ?? 0); track step.title; let last = $last) {@for (entry of step.declarations; track entry.name) {<span class="code-line" [class.is-new]="last">  <a [routerLink]="variableLink(entry.name)">{{ entry.name }}</a>: {{ entry.value }};</span>
+}}<span class="code-muted">{{ '}' }}</span></code></pre>
             <p class="ladder-caption">{{ caption() }}</p>
           </div>
 
@@ -214,9 +214,11 @@
             @for (entry of ladderFields; track entry.kind) {
             <portal-specimen-cell
               class="ladder-cell"
+              [class.is-wide]="entry.wide"
               [spec]="entry.spec"
               [formOptions]="formOptions"
-              [value]="entry.value" />
+              [value]="entry.value"
+              [invalid]="entry.invalid" />
             }
           </div>
         </div>

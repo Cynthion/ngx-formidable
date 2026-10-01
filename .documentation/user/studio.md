@@ -198,11 +198,11 @@ The file imports `vest` or `zod` only under its own validator. A rule is left ou
 
 `/specimen` teaches the library one idea at a time: seven numbered chapters in three parts, each changing one thing and holding everything else still. It changes nothing and exports nothing.
 
-| Part                         | Chapters                                                       |
-| :--------------------------- | :------------------------------------------------------------- |
-| **How A Field Is Painted**   | 1 What Paints What · 2 One Variable At A Time · 3 Whole Themes |
-| **How A Field Is Decorated** | 4 Label Positions · 5 Adornments                               |
-| **How A Field Behaves**      | 6 States · 7 Panels                                            |
+| Part                         | Chapters                                                     |
+| :--------------------------- | :----------------------------------------------------------- |
+| **How A Field Is Painted**   | 1 What Paints What · 2 Defaults To Midnight · 3 Whole Themes |
+| **How A Field Is Decorated** | 4 Label Positions · 5 Adornments                             |
+| **How A Field Behaves**      | 6 States · 7 Panels                                          |
 
 Each chapter states what to notice, one thing to try, and the snippet that does it in your own template or stylesheet.
 

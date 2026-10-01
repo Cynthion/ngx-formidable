@@ -356,13 +356,14 @@ code {
 
 // #region Ladder
 
-// A fixed height, so every step is the same frame: the fields grow and the panel opens inside it.
+// A fixed height, so every step is the same frame: it holds the last step's code, and the fields grow and the
+// panel opens inside it.
 .ladder {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-  gap: 28px;
-  height: 520px;
-  padding: 28px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 24px;
+  height: 680px;
+  padding: 24px;
   border-radius: 18px;
   background: #0f172a;
   color: #e2e8f0;
@@ -376,9 +377,9 @@ code {
   pre {
     flex: 1;
     margin: 0;
-    font-size: 14px;
-    line-height: 1.9;
-    white-space: pre;
+    font-size: 11.5px;
+    line-height: 1.5;
+    white-space: pre-wrap;
     overflow: hidden;
   }
 
@@ -393,8 +394,12 @@ code {
   color: #64748b;
 }
 
+// A long value wraps under its own value rather than under the variable's name.
 .code-line {
+  display: inline-block;
+  padding-left: 6ch;
   color: #94a3b8;
+  text-indent: -4ch;
 
   &.is-new {
     color: #5eead4;
@@ -404,15 +409,17 @@ code {
 
 .ladder-caption {
   min-height: 3em;
-  margin: 0;
+  margin: 12px 0 0;
   color: #cbd5e1;
   font-size: 14px;
 }
 
+// No row gap: each field carries the margin below it, as on the stage.
 .ladder-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0 20px;
+  align-content: start;
   padding: 24px;
   border-radius: 12px;
   background: var(--portal-page-background);
@@ -421,6 +428,18 @@ code {
 
 .ladder-cell {
   margin: 0;
+
+  &.is-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+// Too narrow for the code beside two columns of fields: the code goes above them, and the frame takes their height.
+@media (width <= 1340px) {
+  .ladder {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
 }
 
 // #endregion
