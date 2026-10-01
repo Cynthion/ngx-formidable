@@ -24,7 +24,7 @@ A document belongs to exactly one bucket. When two overlap, one links to the oth
 - **Table Labels**: Use Pascal Case for table headings and left-align text columns, center-align boolean and short value columns, and right-align numeric columns.
 - **Table Alignment**: Align text columns left with `:--`, boolean and short value columns center with `:--:`, and numeric columns right with `--:`.
 - **Inline Code**: Use backticks for all commands, file names, identifiers, values, and inline code.
-- **File References**: Name a document by its full path relative to `.documentation/`, bucket and group included, as the text of a link to it, for example [`user/theming.md`](../user/theming.md).
+- **File References**: Name a document by its full path relative to `.documentation/`, bucket and group included, as the text of a link to it, for example [`tech/architecture.md`](../tech/architecture.md). A `user/` document is the exception, see **Links Between User Documents**.
 - **Version References**: Do not document version numbers. Refer to tools and dependencies by name. Treat `package.json` and similar files as the source of truth for versions.
 - **Preferred Structures**: Prefer lists, tables, and Mermaid diagrams over prose when they communicate the same information.
 - **Section Separators**: Use `---` only between `##` sections. Never use it within a section.
@@ -49,7 +49,7 @@ A document belongs to exactly one bucket. When two overlap, one links to the oth
 - **Audience**: Developers who use the library in their own Angular application.
 - **Content**: A **guide** teaches a topic; a **reference** lists what it accepts. Code examples compile against the published package.
 - **Related Section**: May end with a `## Related` section that links other relevant user documents.
-- **Rendered By The Portal**: every `user/` document is also rendered by the portal's `Docs` route. How its links resolve there is in [`tech/portal.md`](../tech/portal.md).
+- **Links Between User Documents**: a `user/` document names another by its title, and links no `tech/` or `impl/` document.
 
 ## Link Notation
 

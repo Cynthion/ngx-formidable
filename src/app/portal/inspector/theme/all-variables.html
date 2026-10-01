@@ -30,7 +30,7 @@
 
 <portal-accordion
   heading="Variables The Library Sets Itself"
-  lede="Written at runtime as a field measures its own content. They appear in the browser's inspector, but overriding one does nothing — the component writes the value again on the next render."
+  lede="Set by the library itself, on the element where each applies, as a field's state changes. They appear in the browser's inspector, but overriding one does nothing useful."
   [hint]="writtenTokens.length + ''"
   [open]="writtenOpen()"
   (toggled)="writtenOpen.set(!writtenOpen())">

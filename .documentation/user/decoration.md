@@ -21,7 +21,7 @@
 | `formidableFieldSuffix`         | Content at the field's trailing edge        | `align`: `center` or `value`        |
 | `formidableFieldHint`           | Always-visible support text below the field | `align`: `start`, `center` or `end` |
 
-The required marker and the messages have no slot: the decorator renders both from the field's own state, the marker from `required` and the messages once the field's `revealOn` has come. Which rule makes a field invalid, and when its messages appear, is in [`user/validation.md`](validation.md).
+The required marker and the messages have no slot: the decorator renders both from the field's own state, the marker from `required` and the messages once the field's `revealOn` has come. Which rule makes a field invalid, and when its messages appear, is in [Validation](validation.md).
 
 A field works without a decorator. It then has no label, no adornments, no hints, no marker, no invalid styling and no messages; its control still carries `aria-invalid`.
 
@@ -91,18 +91,18 @@ The `vertical` layout stacks its options inside the field's box, which leaves a 
 </div>
 ```
 
-To set one position for every label in an app, see [`user/getting-started.md`](getting-started.md). The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every position on every field that honours it, empty and filled.
+To set one position for every label in an app, see [Getting Started](getting-started.md). The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every position on every field that honours it, empty and filled.
 
 Four rules follow from the table:
 
 - **Only The `horizontal` Layout Has Room Over The Field**: every position other than `outside` is therefore a no-op for the toggle, slider and the two group fields; their label always renders outside.
-- **A Label Rests Only While Nothing Occupies The Value Area**: a value, visible mask slots, `readonly` and `disabled` each make it float instead.
+- **A Label Rests Only While Nothing Occupies The Value Area**: focus, a value, visible mask slots, `readonly` and `disabled` each make it float instead.
 - **`inside` And `inside-placeholder` Differ Only Over The Placeholder**: `inside` yields the value area to it, so a field with a `placeholder` floats its label throughout; `inside-placeholder` hides the placeholder behind the resting label until focus.
 - **A Label Over The Field Stays On One Line And Ellipsizes**: it follows the value's insets, so a prefix, a suffix or a panel toggle pushes it in rather than colliding with it.
 
 ### The Label Adornment
 
-An adornment decorates the label, so it lives and dies with the label's row: every position other than `outside` takes that row away, and the adornment with it. The library owns the slot and never its content: a help icon, a tooltip trigger, a counter, whatever belongs beside that label.
+An adornment decorates the label, so it lives and dies with the label's row: a label rendered over the field takes that row away, and the adornment with it. The library owns the slot and never its content: a help icon, a tooltip trigger, a counter, whatever belongs beside that label.
 
 ```html
 <div formidableFieldLabel>Password</div>
@@ -127,13 +127,13 @@ required(path.firstName, { message: 'We need a first name.' });
 </formidable-field-decorator>
 ```
 
-`hideRequiredMarkers` in the app defaults withholds the glyph from every field, and a component providing `FORMIDABLE_DEFAULTS` decides it for the fields it renders, see [`user/getting-started.md`](getting-started.md).
+`hideRequiredMarkers` in the app defaults withholds the glyph from every field, and a component providing `FORMIDABLE_DEFAULTS` decides it for the fields it renders, see [Getting Started](getting-started.md).
 
 - **The Glyph Is A Variable**: `--formidable-label-required-marker` holds it, so a theme swaps `*` for a word, such as `' (required)'`, without touching markup.
 - **It Inherits The Label's Colour**: and so follows every field state with it.
 - **It Is Never What Gets Cut Off**: the marker is a sibling of the projected label, so a label too long to fit ellipsizes its own text and the marker survives.
 - **It Is Hidden From Assistive Technology**: the field's `aria-required` states the same fact, and keeps stating it when the glyph is hidden.
-- **It Validates Nothing**: whether an empty field is invalid is the rule's call, see [`user/validation.md`](validation.md).
+- **It Validates Nothing**: whether an empty field is invalid is the rule's call, see [Validation](validation.md).
 
 ---
 
@@ -145,10 +145,10 @@ A prefix sits at the field's leading edge and a suffix at its trailing edge, bot
 
 Each slot picks what it follows vertically:
 
-| `align`            | Follows                                                              |
-| :----------------- | :------------------------------------------------------------------- |
-| `center` (default) | The centre of the field's box, wherever the value happens to sit.    |
-| `value`            | The value, which an `inside` or `inside-floating` label pushes down. |
+| `align`            | Follows                                                           |
+| :----------------- | :---------------------------------------------------------------- |
+| `center` (default) | The centre of the field's box, wherever the value happens to sit. |
+| `value`            | The value, which a label inside the field pushes down.            |
 
 ```html
 <div
@@ -167,7 +167,7 @@ A prefix and a suffix are click-through, so a text adornment over the field's ed
 Two things every action needs:
 
 - **`type="button"`**: otherwise it submits the form it sits in.
-- **`(mousedown)="$event.preventDefault()"`**: keeps focus on the field, and stops a panel field closing its panel underneath the click.
+- **`(mousedown)="$event.preventDefault()"`**: keeps focus on the field. A click on it still closes an open panel, as any click outside the field's own box does.
 
 The decorator re-measures its slots whenever their width changes, so an action that appears, disappears or swaps its content re-insets the field on its own. There is no refresh call, because none is needed.
 
@@ -245,15 +245,15 @@ The limit is a `maxLength(path.firstName, 150)` rule in the schema, which `[form
 
 ## Field State
 
-The decorator mirrors the field's state onto its own host as classes (`is-readonly`, `is-disabled`, `is-focused`, `is-invalid`, `label-resting`, `label-inside`, `has-in-field-toggle`, `has-open-panel`, `has-open-sheet`), so a consumer stylesheet can hang off any of them. `is-invalid` appears and clears with the messages, once the field is revealed.
+The decorator mirrors the field's state onto its own host as classes (`is-readonly`, `is-disabled`, `is-focused`, `is-invalid`, `label-resting`, `label-inside`, `has-in-field-toggle`, `has-open-panel`, `has-open-sheet`), so a consumer stylesheet can hang off any of them. `is-invalid` follows the field's `aria-invalid`: it shows once the field is invalid and revealed, with or without a message.
 
-Each state is also a set of colour remaps rather than a set of property declarations, which is why a theme changes the invalid or disabled look by setting colours and not by restating rules. The full variable list is in [`user/theme-reference.md`](theme-reference.md); how the decorator resolves the state is in [`tech/decoration.md`](../tech/decoration.md).
+Each state is also a set of colour remaps rather than a set of property declarations, which is why a theme changes the invalid or disabled look by setting colours and not by restating rules. Where states overlap, `disabled` beats `readonly`, which beats focused, which beats hovered; invalid shows through hover and focus and gives way to `readonly` and `disabled`. The full variable list is in [Theme Reference](theme-reference.md).
 
 ---
 
 ## Related
 
-- [`user/fields.md`](fields.md): options, panels, keyboard, dates and times, masking, focus
-- [`user/validation.md`](validation.md): Angular's rules, Vest, Zod or none; messages and their reveal
-- [`user/theming.md`](theming.md): the default theme, how theming works, and how to find your own
-- [`user/components.md`](components.md): every public component, directive, token and type
+- [Fields](fields.md): options, panels, keyboard, dates and times, masking, focus
+- [Validation](validation.md): Angular's rules, Vest, Zod or none; messages and their reveal
+- [Theming](theming.md): the default theme, how theming works, and how to find your own
+- [Components](components.md): every public component, directive, token and type

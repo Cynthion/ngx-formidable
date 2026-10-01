@@ -1,6 +1,6 @@
 # Theme Reference
 
-Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these you actually need, is in [`user/theming.md`](theming.md); complete schemes to start from are in the Studio, which [`user/studio.md`](studio.md) covers.
+Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these you actually need, is in [Theming](theming.md); complete schemes to start from are in the Studio, which [Studio](studio.md) covers.
 
 ---
 
@@ -112,7 +112,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-color-field-background-focus`              | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when the field is focused.  |
 | `--formidable-color-field-background-invalid`            | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when the field is invalid.  |
 | `--formidable-color-field-background-readonly`           | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when the field is readonly. |
-| `--formidable-color-field-background-disabled`           | Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when the field is disabled. |
+| `--formidable-color-field-background-disabled`           | Overrides `--formidable-color-field-background` when the field is disabled.                                                 |
 | `--formidable-color-field-group-background-hovered`      | Overrides `--formidable-color-field-group-background` when the field group is hovered.                                      |
 | `--formidable-color-field-group-background-readonly`     | Overrides `--formidable-color-field-group-background` when the field group is readonly.                                     |
 | `--formidable-color-field-group-background-disabled`     | Overrides `--formidable-color-field-group-background` when the field group is disabled.                                     |
@@ -323,7 +323,7 @@ Weigh it first: a header that wins covers an open dropdown scrolled underneath i
 
 ## Variables The Library Sets Itself
 
-These are written at runtime as a field measures its own content. They appear in the browser's inspector, but overriding them does nothing useful: the component overwrites the value again on the next render.
+The library sets these itself, from script or from its stylesheet as a field's state changes, on the element where each applies. They appear in the browser's inspector, but overriding one does nothing useful.
 
 | Variable                               | Set By                                                  |
 | :------------------------------------- | :------------------------------------------------------ |
@@ -343,8 +343,8 @@ Every corner of a field falls back to `--formidable-field-border-radius`, and ea
 ```scss
 :root {
   --formidable-field-border-radius: 0.5rem;
-  --formidable-field-border-end-start-radius: 0; /* top-rounded only */
-  --formidable-field-border-end-end-radius: 0;
+  --formidable-field-border-end-start-radius: 0px; /* top-rounded only */
+  --formidable-field-border-end-end-radius: 0px;
 }
 ```
 
@@ -369,7 +369,7 @@ A field can carry an extra line inside its bottom edge, thickening on focus and 
 
 The thickness is `0` by default, so nothing is painted until a theme asks for it. The color follows `--formidable-color-field-border` through every state; name `--formidable-color-field-underline` and its `-focus` / `-invalid` variants only where the two should differ. Field groups never take an underline: a group is a tall multi-row box, and a line across its bottom reads as a divider between its options.
 
-Dropping the field border to `0px` erases four other things drawn by it. See [Borderless Themes](theming.md#4-five-things-that-will-catch-you-out) for the companions to restore.
+Dropping the field border to `0px` erases five other things drawn by it. See [Borderless Themes](theming.md#4-five-things-that-will-catch-you-out) for the companions to restore.
 
 ---
 
@@ -387,5 +387,5 @@ The date field's calendar is rendered by Pikaday, which brings its own class nam
 
 ## Related
 
-- [`user/theming.md`](theming.md): the default theme, how theming works, and how to find your own
-- [`user/studio.md`](studio.md): build a theme and a form in the browser, and take both away
+- [Theming](theming.md): the default theme, how theming works, and how to find your own
+- [Studio](studio.md): build a theme and a form in the browser, and take both away

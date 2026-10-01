@@ -1,6 +1,6 @@
 # Theming
 
-Every visual property of every field is a CSS custom property you can override. This page is how to decide which ones to set; every variable is listed in [`user/theme-reference.md`](theme-reference.md). To wire the stylesheet up, see [`user/getting-started.md`](getting-started.md).
+Every visual property of every field is a CSS custom property you can override. This page is how to decide which ones to set; every variable is listed in [Theme Reference](theme-reference.md). To wire the stylesheet up, see [Getting Started](getting-started.md).
 
 ## The Default Theme
 
@@ -17,32 +17,34 @@ The library ships neutral surfaces and text plus a single accent, deliberate eno
 | Floating label | `--formidable-color-field-label-floating` | `#4338ca` | accent 700  |
 | Error          | `--formidable-color-validation-error`     | `#dc2626` | signal      |
 
-| Geometry     | Variable                              | Value  |
-| :----------- | :------------------------------------ | :----- |
-| Field height | `--formidable-field-height`           | `56px` |
-| Border       | `--formidable-field-border-thickness` | `1px`  |
-| Radius       | `--formidable-border-radius`          | `8px`  |
-| Padding      | `--formidable-field-padding-x`        | `16px` |
+| Geometry     | Variable                              | Value       |
+| :----------- | :------------------------------------ | :---------- |
+| Field height | `--formidable-field-height`           | `3.5rem`    |
+| Border       | `--formidable-field-border-thickness` | `0.0625rem` |
+| Radius       | `--formidable-border-radius`          | `0.5rem`    |
+| Padding      | `--formidable-field-padding-x`        | `1rem`      |
+
+The lengths are `rem`: `56px`, `1px`, `8px` and `16px` at the browser's default root font size.
 
 Everything else in this document derives from those twelve. **To rebrand, set `--formidable-color-field-border-focus`**: it carries the focus border, the focused label, the focused underline and both focus rings. Add `--formidable-color-field-label-floating` if you want the accent on resting labels too.
 
-Alternative colour and geometry schemes (outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one) are selectable in the Studio, which pairs them into named presets. See [`user/studio.md`](studio.md). The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every field under each preset, and steps through a theme one variable at a time.
+Alternative colour and geometry schemes (outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one) are selectable in the Studio, which pairs them into named presets. See [Studio](studio.md). The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every field under each preset, and steps through a theme one variable at a time.
 
 ---
 
 ## How Theming Works
 
 - **Override In Your Own `:root`**: declare the variables you want to change after importing the library's stylesheet. There is nothing else to configure.
-- **Override The Base, Not The Derivative**: many variables default to another one, so setting the base moves everything below it. Set `--formidable-color-field-border` and the underline, the option markers, the slider track and the toggle thumb all follow. Set those overrides in `:root`; a derived variable re-declared further down your app has no effect. The per-corner radius variables are the exception: they work on `:root` and on a single field alike.
+- **Override The Base, Not The Derivative**: many variables default to another one, so setting the base moves everything below it. Set `--formidable-color-field-border` and the underline, the option markers, the slider track and the toggle thumb all follow. Set those overrides in `:root`: a base re-declared further down your app leaves everything derived from it as `:root` computed it. The per-corner radius variables are the exception: they work on `:root` and on a single field alike.
 - **Units Are Mandatory On Length Variables**: write `0px`, not `0`. A unitless zero silently invalidates every value derived from it, taking out label offsets and panel alignment with it.
 - **Derived Values Are Yours Too**: a variable described as _Derived_ is computed from the ones above it. Overriding it pins it, which is occasionally what you want and usually not. Prefer changing what it is computed from.
-- **Chrome And Content Are Separate**: `--formidable-color-field-border` is its own colour, not the text's. Setting `--formidable-color-field-text` recolours the text, the group text, the label and the readonly/disabled states, but leaves the border alone. Recolour the border yourself when you want both to move.
+- **Chrome And Content Are Separate**: `--formidable-color-field-border` is its own colour, not the text's. Setting `--formidable-color-field-text` recolours the text, the group text, the label and the readonly and disabled states, the disabled border included, but leaves `--formidable-color-field-border` alone. Recolour the border yourself when you want both to move.
 
 ---
 
 ## Finding Your Theme
 
-There are around two hundred variables in [`user/theme-reference.md`](theme-reference.md), and you need eight to twelve of them. Work in this order and stop as soon as it looks right: each step is independent of the ones after it.
+There are around two hundred variables in [Theme Reference](theme-reference.md), and you need eight to twelve of them. Work in this order and stop as soon as it looks right: each step is independent of the ones after it.
 
 ### 1. Decide How Far You Are Going
 
@@ -136,18 +138,18 @@ Set these and the rest of the library follows. Do not set the derived variables:
 
 ### 5. Start From A Scheme Instead
 
-Ten palettes and eleven field shapes (outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed) are selectable in the Studio, on two independent axes and as named presets pairing the two. Picking one and adjusting it is usually faster than starting from this page, and the Studio copies the result out as the `:root` block to paste. [`user/studio.md`](studio.md) is the guide to it.
+Ten palettes and eleven field shapes (outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed) are selectable in the Studio, on two independent axes and as named presets pairing the two. Picking one and adjusting it is usually faster than starting from this page, and the Studio copies the result out as the `:root` block to paste. [Studio](studio.md) is the guide to it.
 
 ---
 
 ## The Full List
 
-Every overridable variable, grouped by what it paints, is in [`user/theme-reference.md`](theme-reference.md). The four families that need explaining rather than listing (the variables the library writes itself, the per-corner radius, the underline, and the Pikaday class names) are documented there too.
+Every overridable variable, grouped by what it paints, is in [Theme Reference](theme-reference.md). The four families that need explaining rather than listing (the variables the library writes itself, the per-corner radius, the underline, and the Pikaday class names) are documented there too.
 
 ---
 
 ## Related
 
-- [`user/theme-reference.md`](theme-reference.md): every overridable `--formidable-*` custom property
-- [`user/studio.md`](studio.md): build a theme and a form in the browser, and take both away
-- [`user/getting-started.md`](getting-started.md): install, wiring, the stylesheet, a first form
+- [Theme Reference](theme-reference.md): every overridable `--formidable-*` custom property
+- [Studio](studio.md): build a theme and a form in the browser, and take both away
+- [Getting Started](getting-started.md): install, wiring, the stylesheet, a first form

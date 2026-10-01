@@ -630,8 +630,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     group: 'Colors',
     control: 'color',
     class: 'declared',
-    description:
-      'Overrides `--formidable-color-field-background` and `--formidable-color-field-group-background` when the field is disabled.'
+    description: 'Overrides `--formidable-color-field-background` when the field is disabled.'
   },
   {
     name: '--formidable-color-field-group-background-hovered',
@@ -1449,7 +1448,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
   }
 ];
 
-/** What the library writes itself as a field measures its own content. Never editable. */
+/** What the library sets itself, from script or its stylesheet, on the element where each applies. Never editable. */
 export const LIBRARY_WRITTEN_TOKENS: readonly WrittenToken[] = [
   { name: '--formidable-field-prefix-inset', setBy: 'The decorator, once it has measured a projected prefix.' },
   { name: '--formidable-field-suffix-inset', setBy: 'The decorator, for a projected suffix.' },

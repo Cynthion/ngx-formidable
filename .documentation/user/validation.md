@@ -1,6 +1,6 @@
 # Validation
 
-The library validates nothing. A rule belongs to your forms API, and your validator writes it; the library renders what the rule reports: the message text, when it appears, where it appears, and the required marker. How a field meets each forms API is in [`user/forms.md`](forms.md).
+The library validates nothing. A rule belongs to your forms API, and your validator writes it; the library renders what the rule reports: the message text, when it appears, where it appears, and the required marker. How a field meets each forms API is in [Forms](forms.md).
 
 **Template-Driven Forms Validate No Library Field**: `ngModel` attaches no directive validator, such as `required`, `minlength` or `email`, to a custom control, so no rule written in a template reaches a library field. The `required` attribute still marks the field. To validate, bind the fields through Signal Forms or reactive forms.
 
@@ -46,7 +46,7 @@ signup.form.ts
   signupSchema          the schema(): each field's state, limits, conditions and rules
 ```
 
-The Studio exports a form in exactly this layout, under any of the three. See [`user/studio.md`](studio.md).
+The Studio exports a form in exactly this layout, under any of the three. See [Studio](studio.md).
 
 ---
 
@@ -243,9 +243,9 @@ The two `required`s disagree about what is empty:
   [formField]="form.email" />
 ```
 
-- **Where It Is Set**: on the field, then `revealOn` in the nearest `FORMIDABLE_DEFAULTS`, then `touched`. The app's defaults are in [`user/getting-started.md`](getting-started.md); a component providing `FORMIDABLE_DEFAULTS` sets them for every field it renders.
+- **Where It Is Set**: on the field, then `revealOn` in the nearest `FORMIDABLE_DEFAULTS`, then `touched`. The app's defaults are in [Getting Started](getting-started.md); a component providing `FORMIDABLE_DEFAULTS` sets them for every field it renders.
 - **Touched And Dirty Latch**: a field that becomes valid again has nothing left to say, and one that turns invalid again says it at once. `reset()` clears both, under every API.
-- **A Submit Touches Only Under Signal Forms**: `submit()` touches every field, so it reveals every message under `touched`. A classic `ngSubmit` touches nothing, so call `markAllAsTouched()`. See [`user/forms.md`](forms.md).
+- **A Submit Touches Only Under Signal Forms**: `submit()` touches every field, so it reveals every message under `touched`. A classic `ngSubmit` touches nothing, so call `markAllAsTouched()`. See [Forms](forms.md).
 - **Pending Keeps The Last Messages**: while a rule runs, the field keeps what it last reported, so the messages do not blink away and back on every run.
 - **Invalid With Nothing To Say**: a field the API holds invalid with no errors turns invalid once revealed, with no message.
 
@@ -299,7 +299,7 @@ Leave the rules out. The fields still edit, render, mask and theme, and a date o
 
 ## Related
 
-- [`user/forms.md`](forms.md): how the fields meet Signal Forms, reactive forms and template-driven forms
-- [`user/getting-started.md`](getting-started.md): install, wiring, the stylesheet, a first form
-- [`user/decoration.md`](decoration.md): labels, adornments, prefixes, suffixes, hints, required marker
-- [`user/components.md`](components.md): every public component, directive, token and type
+- [Forms](forms.md): how the fields meet Signal Forms, reactive forms and template-driven forms
+- [Getting Started](getting-started.md): install, wiring, the stylesheet, a first form
+- [Decoration](decoration.md): labels, adornments, prefixes, suffixes, hints, required marker
+- [Components](components.md): every public component, directive, token and type

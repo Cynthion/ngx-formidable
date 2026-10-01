@@ -36,7 +36,7 @@ Then supply the abstract members:
 | :--------------------------- | :------------------------------------------------------------------------------------------------ |
 | `value`                      | A `model<T>()`: the forms API writes it, and the field renders from it                            |
 | `fieldRef`                   | The field's outer element. The decorator measures it and the listeners are scoped to it           |
-| `decoratorLayout`            | `'horizontal'`, `'vertical'` or `'inline'`, see [`user/decoration.md`](decoration.md)             |
+| `decoratorLayout`            | `'horizontal'`, `'vertical'` or `'inline'`, see [Decoration](decoration.md)                       |
 | `doOnFocusChange(isFocused)` | The field's half of a focus change. Guard `readonly` here, not in `onFocusChange`                 |
 | `registeredKeys`             | The keys that reach `keyboardCallback`. `[]` for none                                             |
 | `keyboardCallback`           | Handles those keys and returns whether it acted; only such a key is `preventDefault`ed. Or `null` |
@@ -232,7 +232,7 @@ A custom field styles itself; the library's SCSS surface is closed. What is open
 }
 ```
 
-The three insets are the ones a custom field is likely to miss. The full list is in [`user/theme-reference.md`](theme-reference.md).
+The three insets are the ones a custom field is likely to miss. The full list is in [Theme Reference](theme-reference.md).
 
 ### Using It
 
@@ -299,13 +299,13 @@ What `FORMIDABLE_OPTION` provides is `FormidableOptionSource`: one `option` comp
 
 The option's ARIA role is not its own to choose: it comes from the parent field, so an option inside a listbox is an `option` and one inside a radio group is a `radio`. `layout` is a look, not a role.
 
-A field that hosts options of its own implements `FormidableOptionField` and provides `FORMIDABLE_OPTION_FIELD`; if it walks its list with a highlight, extend `BaseOptionField` instead of `BaseField` and the highlight machinery comes with it. Both are catalogued in [`user/components.md`](components.md).
+A field that hosts options of its own implements `FormidableOptionField` and provides `FORMIDABLE_OPTION_FIELD`; if it walks its list with a highlight, extend `BaseOptionField` instead of `BaseField` and the highlight machinery comes with it. Both are catalogued in [Components](components.md).
 
 ---
 
 ## Related
 
-- [`user/components.md`](components.md): every public component, directive, token and type
-- [`user/forms.md`](forms.md): how the fields meet Signal Forms, reactive forms and template-driven forms
-- [`user/fields.md`](fields.md): options, panels, keyboard, dates and times, masking, focus
-- [`user/theming.md`](theming.md): the default theme, how theming works, and how to find your own
+- [Components](components.md): every public component, directive, token and type
+- [Forms](forms.md): how the fields meet Signal Forms, reactive forms and template-driven forms
+- [Fields](fields.md): options, panels, keyboard, dates and times, masking, focus
+- [Theming](theming.md): the default theme, how theming works, and how to find your own

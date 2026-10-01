@@ -183,7 +183,7 @@ An editor cannot enumerate the themeable surface from the `:root` block alone, a
 | Overridable, read at use site, never declared |   Yes    | The four logical corner radii, the panel and toggle-track thickness |
 | Written by the library itself                 |    No    | Listed in [`user/theme-reference.md`](../user/theme-reference.md)   |
 
-The second class is deliberately absent from `:root` so that it works on a single field as well as globally. It is what an asymmetric field shape needs, so a generator that reads only `:root` misses exactly the interesting variables. The third class is overwritten by the library on the next render, so exposing it would produce a control that appears to do nothing.
+The second class is deliberately absent from `:root` so that it works on a single field as well as globally. It is what an asymmetric field shape needs, so a generator that reads only `:root` misses exactly the interesting variables. The third class is set by the library on the element where it applies, so exposing it would produce a control that does nothing useful.
 
 **Structure**: a checked-in TypeScript manifest carrying the name, group, control type and class of each variable. Defaults are read at runtime with `getComputedStyle` and never stored, so a default cannot drift from the token that produces it.
 
@@ -275,7 +275,7 @@ The export splits in two, because a map is data and a template cannot hold one. 
 | **Groups**             | `groupName` on the `When` and `Payment` sections | A nested model; `When` adds a rule that reports on the group                          |
 | **Conditional fields** | `visibleWhen` on the address, branch and card    | `hidden()` leaves the field out of validation and `@if` off the page; the key stays   |
 | **A template picker**  | `presets` on the pizza field                     | One choice filling several fields, and an export split between template and component |
-| **Consumer filtering** | `filterStrategy` on the autocomplete             | The field emits filter text and renders what it is handed; the matching is not its    |
+| **Consumer filtering** | `filterStrategy` on the autocomplete             | The Studio filters on `filterChange`; its options' `match` keeps all it hands back    |
 
 **Two Groups, Two Reasons.** `When` is the one a rule needs: neither the date nor the time is wrong alone, so the rule reading both has nowhere to report but the group. `Payment` is the plainer case: details that belong together in the model, whether or not a rule ever reads two of them at once. Both are worth showing, because a group is not only for cross-field rules.
 

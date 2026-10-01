@@ -1,6 +1,6 @@
 # ngx-formidable And Angular Forms
 
-Every field binds to Signal Forms, reactive forms and template-driven forms alike. The forms API holds the model, its state and its rules; the library edits, renders, decorates and themes. This guide shows how the two meet under each API. Which validator writes the rules is in [`user/validation.md`](validation.md).
+Every field binds to Signal Forms, reactive forms and template-driven forms alike. The forms API holds the model, its state and its rules; the library edits, renders, decorates and themes. This guide shows how the two meet under each API. Which validator writes the rules is in [Validation](validation.md).
 
 ## Who Owns What
 
@@ -143,7 +143,7 @@ export class UserForm {
 </form>
 ```
 
-`Validators.required` marks the field required. A classic error carries no text, so the messages read `required` and `email` until `FORMIDABLE_ERROR_MESSAGE` maps them, see [`user/validation.md`](validation.md).
+`Validators.required` marks the field required. A classic error carries no text, so the messages read `required` and `email` until `FORMIDABLE_ERROR_MESSAGE` maps them, see [Validation](validation.md).
 
 ### Template-Driven Forms
 
@@ -325,7 +325,7 @@ onSubmit(): void {
 
 ## Related
 
-- [`user/getting-started.md`](getting-started.md): install, wiring, the stylesheet, a first form
-- [`user/validation.md`](validation.md): Angular's rules, Vest, Zod or none; messages and their reveal
-- [`user/fields.md`](fields.md): options, panels, keyboard, dates and times, masking, focus
-- [`user/components.md`](components.md): every public component, directive, token and type
+- [Getting Started](getting-started.md): install, wiring, the stylesheet, a first form
+- [Validation](validation.md): Angular's rules, Vest, Zod or none; messages and their reveal
+- [Fields](fields.md): options, panels, keyboard, dates and times, masking, focus
+- [Components](components.md): every public component, directive, token and type

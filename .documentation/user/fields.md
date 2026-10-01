@@ -2,23 +2,23 @@
 
 How the library's fields behave: what every field shares, how options are supplied, where a panel opens, what the keyboard does, and how dates, times and masks are configured.
 
-Which field to pick, and the full input list for each, is in [`user/components.md`](components.md). What goes _around_ a field (label, prefix, suffix, hint, required marker) is in [`user/decoration.md`](decoration.md). How a field binds to each forms API is in [`user/forms.md`](forms.md).
+Which field to pick, and the full input list for each, is in [Components](components.md). What goes _around_ a field (label, prefix, suffix, hint, required marker) is in [Decoration](decoration.md). How a field binds to each forms API is in [Forms](forms.md).
 
 ## What Every Field Shares
 
 Every field is Angular's `FormValueControl`: `[formField]`, `[formControl]`, `formControlName` and `ngModel` all bind it through its `value`, and each forms API writes the state it holds into the field's inputs.
 
-| Input         | Does                                                                                                       |
-| :------------ | :--------------------------------------------------------------------------------------------------------- |
-| `name`        | The native `name` of the field's control. `[formField]` writes it                                          |
-| `placeholder` | Placeholder text. A field with one leaves an `inside` label nothing to rest in                             |
-| `readonly`    | Blocks edits, stays focusable, keeps its focus ring                                                        |
-| `disabled`    | Blocks edits and leaves the tab order                                                                      |
-| `required`    | Marks the label and sets `aria-required`, and validates nothing. See [`user/decoration.md`](decoration.md) |
-| `autoFocus`   | Focuses the field once its view is ready                                                                   |
-| `revealOn`    | When the field's messages appear, see [`user/validation.md`](validation.md)                                |
+| Input         | Does                                                                                              |
+| :------------ | :------------------------------------------------------------------------------------------------ |
+| `name`        | The native `name` of the field's control. `[formField]` writes it                                 |
+| `placeholder` | Placeholder text. A field with one leaves an `inside` label nothing to rest in                    |
+| `readonly`    | Blocks edits and leaves the tab order. A click or `focus()` still focuses it, focus ring included |
+| `disabled`    | Blocks edits and leaves the tab order                                                             |
+| `required`    | Marks the label and sets `aria-required`, and validates nothing. See [Decoration](decoration.md)  |
+| `autoFocus`   | Focuses the field once its view is ready                                                          |
+| `revealOn`    | When the field's messages appear, see [Validation](validation.md)                                 |
 
-`readonly`, `disabled` and `required` come from the forms API wherever it holds them. Bind one by hand only where it does not, as **Compatibility By Feature** in [`user/forms.md`](forms.md) lists, and never beside `[formField]`, which owns all three.
+`readonly`, `disabled` and `required` come from the forms API wherever it holds them. Bind one by hand only where it does not, as **Compatibility By Feature** in [Forms](forms.md) lists, and never beside `[formField]`, which owns all three.
 
 | Output        | Emits                                                  |
 | :------------ | :----------------------------------------------------- |
@@ -48,7 +48,7 @@ Every field has a `focus()` method. `autoFocus` calls it once the view is ready,
 </button>
 ```
 
-**Focusing Never Opens A Panel**: the dropdown and autocomplete fields open on click, on `ArrowDown`, or on typing, and the date field only from its toggle or `Alt` plus `ArrowDown`, so a focused field is ready for input without a list covering the page. A `disabled` field ignores `focus()` entirely.
+**Focusing Never Opens A Panel**: the dropdown opens on click, on `ArrowDown` or on typing, the autocomplete on `ArrowDown` or on typing, and the date field from its toggle or `Alt` plus `ArrowDown`, so a focused field is ready for input without a list covering the page. A `disabled` field ignores `focus()` entirely.
 
 ### The Caret On Focus
 
@@ -92,9 +92,9 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 **An Option Owns Its Own Content**: anything projected into `formidable-field-option` becomes that option's template, which is how an option carries a subtitle, an icon or highlighted match text. Its `match` input overrides how the autocomplete filter matches it.
 
-**The Autocomplete Does Not Filter For You**: it emits `filterChange` and renders whatever `options` it is given back, so the matching strategy (substring, fuzzy, a server call) stays yours.
+**The Autocomplete Filters, And Reports The Filter**: typing narrows the list to the options whose `match` accepts the text, by default a case-insensitive substring of the label. It also emits the text as `filterChange`, so the options can be fetched or ranked for it instead (fuzzy, a server call). Give an option a `match` of your own where your matching keeps more than a substring would.
 
-**`filterChange` Reports More Than Typing**: the field takes its filter with the value: selecting narrows it to the selected label, and a value it cannot place yet clears it. Those moves are reported too, so the list you supply can follow the value the field was given. Without them, a value written from outside names an option your filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under whoever is typing.
+**`filterChange` Reports More Than Typing**: a value written from outside takes the filter with it: to its option's label, or to nothing while no option carries the value. Those moves are reported too, so the list you supply can follow the value the field was given. Without them, a value written from outside names an option your filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under whoever is typing.
 
 **An Action Row Is Not A Value**: `dropdown-field` and `autocomplete-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. What the action does is entirely yours; the field closes its panel, runs it and touches nothing else. The following is an example.
 
@@ -144,7 +144,7 @@ Three things that recipe relies on:
 | `full`  | Anchored across the field's full width                                         |
 | `sheet` | Fixed across the bottom of the viewport, full width, square at the screen edge |
 
-The three anchored values flip above the field when there is no room below, and adopt the two field corners they sit against so the pair reads as one box. A sheet never flips.
+The three anchored values flip above the field when the panel fits there and not below, measured within the viewport and every ancestor that clips its overflow, and adopt the two field corners they sit against so the pair reads as one box. A sheet never flips.
 
 Opening a panel scrolls the field, or the panel, into view, but only the one that the viewport actually cuts off.
 
@@ -167,34 +167,38 @@ Whatever the placement, the calendar scales to the width its panel has: `--formi
 
 Every control is operable from the keyboard. Disabled and readonly fields ignore navigation.
 
-- **Panel**: the dropdown, autocomplete or date overlay. Panels close on `Esc`, or when focus leaves the field.
+- **Panel**: the dropdown, autocomplete or date overlay. A panel closes on `Esc`, on `Tab`, on a pick, and on a click outside the field.
 - **Segment**: the part of the `unicodeTokenFormat` under the caret: the year, month or day of a date field, the hour, minute, second or AM/PM of a time field.
 
-| Key                  | Inputs / Textareas | Select / Dropdown / Autocomplete                    | Radio / Checkbox Groups   | Date Field                                    | Time Field                |
-| :------------------- | :----------------- | :-------------------------------------------------- | :------------------------ | :-------------------------------------------- | :------------------------ |
-| `Tab`                | Move to next       | Close panel (if open), then move                    | Move to next              | Close panel (if open), then move              | Move to next              |
-| `Shift` + `Tab`      | Move to previous   | Close panel (if open), then move                    | Move to previous          | Close panel (if open), then move              | Move to previous          |
-| `Enter`              |                    | If panel open: choose highlighted option            | Choose highlighted option | Parse and accept the date                     | Parse and accept the time |
-| `Esc`                |                    | If panel open: close panel                          |                           | If panel open: close panel                    |                           |
-| `Space`              |                    |                                                     | Choose highlighted option |                                               |                           |
-| `Arrow Up`           |                    | If open: previous option (wraps)                    | Previous option           | If panel open: previous week; else segment up | Segment up                |
-| `Arrow Down`         |                    | If closed: open panel; if open: next option (wraps) | Next option               | If panel open: next week; else segment down   | Segment down              |
-| `Alt` + `Arrow Up`   |                    |                                                     |                           | Close panel                                   |                           |
-| `Alt` + `Arrow Down` |                    |                                                     |                           | Open panel                                    |                           |
-| `Arrow Left`         |                    |                                                     |                           | If panel open: previous day; else move caret  | Move caret                |
-| `Arrow Right`        |                    |                                                     |                           | If panel open: next day; else move caret      | Move caret                |
+| Key                  | Inputs / Textareas | Dropdown / Autocomplete                             | Radio / Checkbox Groups | Date Field                                         | Time Field                |
+| :------------------- | :----------------- | :-------------------------------------------------- | :---------------------- | :------------------------------------------------- | :------------------------ |
+| `Tab`                | Move to next       | Close panel (if open), then move                    | Move to next            | Close panel (if open), then move                   | Move to next              |
+| `Shift` + `Tab`      | Move to previous   | Close panel (if open), then move                    | Move to previous        | Close panel (if open), then move                   | Move to previous          |
+| `Enter`              |                    | If panel open: pick highlighted option              | Pick highlighted option | Parse and accept the date, and close the panel     | Parse and accept the time |
+| `Esc`                |                    | If panel open: close panel                          |                         | Parse and accept the date; if panel open: close it |                           |
+| `Space`              |                    | Typed like any character, see **Type-Ahead**        | Pick highlighted option |                                                    |                           |
+| `Arrow Up`           |                    | If open: previous option (wraps)                    | Previous option (wraps) | If panel open: previous week; else segment up      | Segment up                |
+| `Arrow Down`         |                    | If closed: open panel; if open: next option (wraps) | Next option (wraps)     | If panel open: next week; else segment down        | Segment down              |
+| `Alt` + `Arrow Up`   |                    |                                                     |                         | Close panel                                        |                           |
+| `Alt` + `Arrow Down` |                    |                                                     |                         | Open panel                                         |                           |
+| `Arrow Left`         |                    |                                                     |                         | If panel open: previous day; else move caret       | Move caret                |
+| `Arrow Right`        |                    |                                                     |                         | If panel open: next day; else move caret           | Move caret                |
 
-An empty cell is a key the field does not act on, and it keeps its native effect: `Enter` on a dropdown or autocomplete with its panel closed submits the form, and `Esc` with no panel open reaches the dialog around the field.
+An empty cell is a key the field does not act on, and it keeps its native effect: `Enter` on a dropdown or autocomplete with its panel closed submits the form, and `Esc` with no panel open reaches the dialog around the field. Picking a highlighted option in a checkbox group toggles it. Arrows skip disabled and readonly options.
+
+The rest keep the platform's keys: `select-field` is a native `<select>` and `slider-field` a native range input. `toggle-field` flips on `Space` and `Enter`.
 
 ### Type-Ahead
 
-Typing into a dropdown or autocomplete builds a short buffer and highlights the first matching option. Backspace edits the buffer, the first character opens a closed panel, and the buffer clears itself after a pause.
+Typing into a dropdown builds a short buffer and highlights the first option whose label starts with it. Backspace edits the buffer, the first character opens a closed panel, and the buffer clears itself after a pause.
+
+The autocomplete has no buffer: what is typed is its filter, and typing an option's exact label picks it.
 
 ### Stepping A Date Or Time Segment
 
 `ArrowUp` and `ArrowDown` step the segment under the caret and leave it selected, so repeated arrows stay on it and the next digit typed replaces it.
 
-- **An Empty Field Is Seeded First**: a date with today, a time with midnight, so the arrows alone can fill one.
+- **An Empty Field Is Seeded First**: a date with `defaultDate`, else today, kept within `minDate` and `maxDate`; a time with midnight. So the arrows alone can fill one.
 - **A Date Step Past A Limit Is Refused**: a step that would leave `minDate` or `maxDate` is refused rather than clamped.
 - **A Plain `ArrowDown` Does Not Open The Date Panel**: `Alt` plus the arrows works the panel, per the ARIA combobox pattern.
 
@@ -215,7 +219,7 @@ A focused empty field always shows underscore slots, because the mask's caret ar
 - **Text That Does Not Parse Stays As Typed**: the model keeps its value, and the field reports a `parse` error to whichever forms API binds it, which the decorator renders once revealed. Text that parses again drops it.
 - **Emptying The Text Commits `null`**: at once, with no error.
 
-The date field passes a set of options straight through to Pikaday: `minDate`, `maxDate`, `firstDay`, `i18n`, `yearRange`, `disableWeekends`, `disableDayFn` and the rest, listed in [`user/components.md`](components.md). Each is applied to the calendar when it changes at runtime.
+The date field passes a set of options straight through to Pikaday: `minDate`, `maxDate`, `firstDay`, `i18n`, `yearRange`, `disableWeekends`, `disableDayFn` and the rest, listed in [Components](components.md). Each is applied to the calendar when it changes at runtime.
 
 **The Toggle Icon**: the date field's panel toggle draws a CSS arrow by default. The library ships no icons, so to replace it, project your own:
 
@@ -284,7 +288,7 @@ So keyboard focus on `12/3_/____` selects `12/3` and stops, and a click anywhere
 
 ## Related
 
-- [`user/components.md`](components.md): every public component, directive, token and type
-- [`user/forms.md`](forms.md): how the fields meet Signal Forms, reactive forms and template-driven forms
-- [`user/decoration.md`](decoration.md): labels, adornments, prefixes, suffixes, hints, required marker
-- [`user/custom-fields.md`](custom-fields.md): building a field or an option of your own
+- [Components](components.md): every public component, directive, token and type
+- [Forms](forms.md): how the fields meet Signal Forms, reactive forms and template-driven forms
+- [Decoration](decoration.md): labels, adornments, prefixes, suffixes, hints, required marker
+- [Custom Fields](custom-fields.md): building a field or an option of your own

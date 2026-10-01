@@ -2,7 +2,7 @@
 
 Install the package, provide it, import the stylesheet, and build a form with Signal Forms and Angular's rules. Every step below is the whole step.
 
-The API each symbol carries is in [`user/components.md`](components.md). How the fields meet reactive and template-driven forms is in [`user/forms.md`](forms.md).
+The API each symbol carries is in [Components](components.md). How the fields meet reactive and template-driven forms is in [Forms](forms.md).
 
 ## Install
 
@@ -18,9 +18,9 @@ npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday
 | `ngx-mask` | Input masking                                   |
 | `pikaday`  | The date field's calendar                       |
 
-Angular's `common`, `core` and `forms`, and `rxjs`, are peers you already have. The package is published in partial compilation mode, so your app runs the Angular major in its `peerDependencies`, or a newer one.
+Angular's `common`, `core` and `forms`, and `rxjs`, are peers you already have. The package is published in partial compilation mode, so your app's own compiler links it, under any Angular version its `peerDependencies` accept.
 
-No validation library is a peer. Install `vest` or `zod` only to validate with one, see [`user/validation.md`](validation.md).
+No validation library is a peer. Install `vest` or `zod` only to validate with one, see [Validation](validation.md).
 
 `pikaday` ships CommonJS, so a build warns `Module 'pikaday' … is not ESM` until you name it in `angular.json`:
 
@@ -42,7 +42,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-An NgModule app lists the same call in its root module's `providers`. It takes an optional `NgxFormidableConfig`: `globalMaskConfig`, the app-wide ngx-mask settings described in [`user/fields.md`](fields.md), and `defaults`, below.
+An NgModule app lists the same call in its root module's `providers`. It takes an optional `NgxFormidableConfig`: `globalMaskConfig`, the app-wide ngx-mask settings described in [Fields](fields.md), and `defaults`, below.
 
 ### App-Wide Defaults
 
@@ -91,13 +91,13 @@ Styling is a stylesheet, not a provider, so it is imported separately:
 @use '@cynthion/ngx-formidable/styles/ngx-formidable';
 ```
 
-That is the whole default theme. To change it, redeclare the variables you want in your own `:root` after the import, see [`user/theming.md`](theming.md).
+That is the whole default theme. To change it, redeclare the variables you want in your own `:root` after the import, see [Theming](theming.md).
 
 ---
 
 ## Build A Form
 
-The forms API holds the model and its rules; the library renders the fields around them. The form below is Signal Forms with Angular's own rules, the layout the Studio exports. [`user/validation.md`](validation.md) swaps the rules for Vest or Zod, and [`user/forms.md`](forms.md) binds the same fields through reactive or template-driven forms.
+The forms API holds the model and its rules; the library renders the fields around them. The form below is Signal Forms with Angular's own rules, the layout the Studio exports. [Validation](validation.md) swaps the rules for Vest or Zod, and [Forms](forms.md) binds the same fields through reactive or template-driven forms.
 
 ### 1. Declare The Model And Its Rules
 
@@ -126,7 +126,7 @@ export const userSchema = schema<UserModel>((path) => {
 });
 ```
 
-Each field writes one value type into the model: `string` for the text fields, `string | null` for the single-choice fields, `Date | null` for a date. The whole list is in **The Model** in [`user/forms.md`](forms.md).
+Each field writes one value type into the model: `string` for the text fields, `string | null` for the single-choice fields, `Date | null` for a date. The whole list is in **The Model** in [Forms](forms.md).
 
 ### 2. Hold The Form
 
@@ -204,13 +204,13 @@ Every field is bound by `[formField]` and wrapped in a decorator, which renders 
 
 ## Related
 
-| To Do This                                                 | Read                                        |
-| :--------------------------------------------------------- | :------------------------------------------ |
-| Bind the fields through reactive or template-driven forms  | [`user/forms.md`](forms.md)                 |
-| Validate with Vest, Zod, Angular's rules or none           | [`user/validation.md`](validation.md)       |
-| Pick a field, work its keyboard, mask it, place its panel  | [`user/fields.md`](fields.md)               |
-| Label it, prefix it, hint it, mark it required             | [`user/decoration.md`](decoration.md)       |
-| Repaint and reshape it                                     | [`user/theming.md`](theming.md)             |
-| Build a theme and a form in the browser and take both away | [`user/studio.md`](studio.md)               |
-| Build a field the library does not have                    | [`user/custom-fields.md`](custom-fields.md) |
-| Look up an input, a type or a token                        | [`user/components.md`](components.md)       |
+| To Do This                                                 | Read                              |
+| :--------------------------------------------------------- | :-------------------------------- |
+| Bind the fields through reactive or template-driven forms  | [Forms](forms.md)                 |
+| Validate with Vest, Zod, Angular's rules or none           | [Validation](validation.md)       |
+| Pick a field, work its keyboard, mask it, place its panel  | [Fields](fields.md)               |
+| Label it, prefix it, hint it, mark it required             | [Decoration](decoration.md)       |
+| Repaint and reshape it                                     | [Theming](theming.md)             |
+| Build a theme and a form in the browser and take both away | [Studio](studio.md)               |
+| Build a field the library does not have                    | [Custom Fields](custom-fields.md) |
+| Look up an input, a type or a token                        | [Components](components.md)       |

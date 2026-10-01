@@ -4,7 +4,7 @@ The Studio is a page that builds a theme and a form against the real components,
 
 Nothing you do on it leaves the page. The theme and the workspace sizes are kept in the browser's local storage, so a return visit resumes where you stopped.
 
-How theming works, and which variables are worth setting, is in [`user/theming.md`](theming.md). Every variable is listed in [`user/theme-reference.md`](theme-reference.md). This document covers the page itself.
+How theming works, and which variables are worth setting, is in [Theming](theming.md). Every variable is listed in [Theme Reference](theme-reference.md). This document covers the page itself.
 
 ---
 
@@ -51,7 +51,7 @@ The bar under the stage always states how many fields are filled and whether the
 
 ## Building A Theme
 
-The `Theme` tab has two halves. `Design` is a ladder of numbered steps in the order [`user/theming.md`](theming.md) puts them; `Variables` is the whole surface. Work down the ladder and stop as soon as it looks right.
+The `Theme` tab has two halves. `Design` is a ladder of numbered steps in the order [Theming](theming.md) puts them; `Variables` is the whole surface. Work down the ladder and stop as soon as it looks right.
 
 | Step        | Sets                                                          | Variables |
 | :---------- | :------------------------------------------------------------ | --------: |
@@ -68,15 +68,15 @@ The `Theme` tab has two halves. `Design` is a ladder of numbered steps in the or
 
 **Contrast Badges** show a live ratio for each seed that carries a contrast obligation, measured against the fill the browser actually paints. They sit in the theme editor rather than in an audit view so that an unreadable theme cannot be exported without the ratio having been on screen.
 
-**Notices** appear where one value silently costs others: a zero field border erases five lengths that are not the field's border, and a dark fill needs four values the seeds cannot derive. Each names what it affects and offers to restore or set them. [`user/theming.md`](theming.md) explains both.
+**Notices** appear where one value silently costs others: a zero field border erases five lengths that are not the field's border, and a dark fill needs four values the seeds cannot derive. Each names what it affects and offers to restore or set them. [Theming](theming.md) explains both.
 
 ### The Variables Half
 
-Every themeable variable, grouped as [`user/theme-reference.md`](theme-reference.md) groups them, each with its one-line description and its current value. Filter by name or description, or switch to **Only What I Changed**: that view is the export.
+Every themeable variable, grouped as [Theme Reference](theme-reference.md) groups them, each with its one-line description and its current value. Filter by name or description, or switch to **Only What I Changed**: that view is the export.
 
-A variable that derives from another says so and links to its base. Editing a derived variable pins it, which [`user/theming.md`](theming.md) advises against; the control states the consequence rather than hiding it.
+A variable that derives from another says so and links to its base. Editing a derived variable pins it, which [Theming](theming.md) advises against; the control states the consequence rather than hiding it.
 
-A trailing group lists the variables the library writes itself. They appear in the browser's inspector but overriding one does nothing, because the component writes the value again on the next render.
+A trailing group lists the variables the library sets itself. They appear in the browser's inspector, but overriding one does nothing useful, because the library sets each on the element where it applies.
 
 ### The Change Count
 
@@ -110,15 +110,15 @@ One editor, with an `Applies to` switch above it. The switch is how far a contro
 
 Selecting a field selects it for editing; while the `Settings` half is showing, focusing a field in the preview selects it too. A field chip opens this half at `This Field`.
 
-**App Defaults Are What The Preview Is Given**: the stage runs the library's own resolution, as [`user/getting-started.md`](getting-started.md) describes it. Each control there offers `Library Default` to set nothing, says how many fields (or whether the form) state their own value, and offers `Clear` to make them inherit again. At the two narrower scopes, the matching controls offer `App Default`, naming the value in force. A field reads its defaults when it is created, so changing one rebuilds the preview.
+**App Defaults Are What The Preview Is Given**: the stage runs the library's own resolution, as [Getting Started](getting-started.md) describes it. Each control there offers `Library Default` to set nothing, says how many fields (or whether the form) state their own value, and offers `Clear` to make them inherit again. At the two narrower scopes, the matching controls offer `App Default`, naming the value in force. A field reads its defaults when it is created, so changing one rebuilds the preview.
 
 **Adornment Examples Are Samples**: an adornment is markup you project per field, so no default can supply one. `The Form` fills every field's slot with a sample, states what most fields carry, and offers `Apply To All` to reassert it over the rest.
 
-A control appears only where that kind of field honours the input. The decorator layout is fixed per component and decides two answers outright: only the horizontal layout honours a label position other than `outside`, and the vertical layout renders no prefix or suffix at all. [`user/decoration.md`](decoration.md) states the rule, and the Studio never offers a control that would silently do nothing.
+A control appears only where that kind of field honours the input. The decorator layout is fixed per component and decides two answers outright: only the horizontal layout honours a label position other than `outside`, and the vertical layout renders no prefix or suffix at all. [Decoration](decoration.md) states the rule, and the Studio never offers a control that would silently do nothing.
 
 **Locale** is one control, because it moves the date field's translations, its first day and its token format together.
 
-**Filtering** is the one control that is not an input on the field. The autocomplete does not filter: it emits its filter text and renders whatever list it is handed back, so the matching is the consumer's. The control swaps the Studio's own (fuzzy, contains or starts-with), which is what makes the division visible. Type a typo under each. [`user/fields.md`](fields.md) states the rule.
+**Filtering** is the one control that is not an input on the field. The autocomplete filters by each option's `match` and reports its filter text as `filterChange`. The Studio filters the list itself instead, with the strategy this control swaps (fuzzy, contains or starts-with), and gives each option a `match` that keeps it. Type a typo under each. [Fields](fields.md) states the rule.
 
 ### What The Sample Form Shows
 
@@ -135,7 +135,7 @@ The sample form is a pizza order that starts already filled in, because an empty
 
 **The Pizza Is A Starting Point, Not A Lock**: its preset is applied when you change the picker and never again, so anything you edit afterwards stands. `Custom` carries no preset, so it changes nothing.
 
-The model drawer is where all of this is legible: the two groups nest, and a conditional field that is not rendered keeps its key, and nothing validates it. [`user/forms.md`](forms.md) covers what conditional fields mean under each forms API.
+The model drawer is where all of this is legible: the two groups nest, and a conditional field that is not rendered keeps its key, and nothing validates it. [Forms](forms.md) covers what conditional fields mean under each forms API.
 
 ---
 
@@ -212,21 +212,21 @@ Each chapter states what to notice, one thing to try, and the snippet that does 
 
 **A Matrix Opens On A Few Fields**: chapters 4 to 6 compare fields in a grid and open on a few that cover the three layouts; `Show all` adds the rest.
 
-**Every Name Is A Link**: a field's name opens its entry in [`user/components.md`](components.md), and a variable's name opens its own row in [`user/theme-reference.md`](theme-reference.md).
+**Every Name Is A Link**: a field's name opens its entry in [Components](components.md), and a variable's name opens its own row in [Theme Reference](theme-reference.md).
 
 ---
 
 ## What The Studio Does Not Decide
 
 - **The Page Behind The Form**: the consumer's. The library styles fields only, so that block is emitted separately and is yours to place.
-- **The Validator**: the Studio runs and exports the sample's rules under Angular's own, Vest and Zod, but your own rules belong in your project. [`user/validation.md`](validation.md) covers connecting one.
+- **The Validator**: the Studio runs and exports the sample's rules under Angular's own, Vest and Zod, but your own rules belong in your project. [Validation](validation.md) covers connecting one.
 - **The Layout**: the preview lays its fields on a grid of its own. The exported template carries the fields and their decorators, not that grid.
 
 ---
 
 ## Related
 
-- [`user/theming.md`](theming.md): the default theme, how theming works, and how to find your own
-- [`user/theme-reference.md`](theme-reference.md): every overridable `--formidable-*` custom property
-- [`user/getting-started.md`](getting-started.md): install, wiring, the stylesheet, a first form
-- [`user/validation.md`](validation.md): Angular's rules, Vest, Zod or none; messages and their reveal
+- [Theming](theming.md): the default theme, how theming works, and how to find your own
+- [Theme Reference](theme-reference.md): every overridable `--formidable-*` custom property
+- [Getting Started](getting-started.md): install, wiring, the stylesheet, a first form
+- [Validation](validation.md): Angular's rules, Vest, Zod or none; messages and their reveal
