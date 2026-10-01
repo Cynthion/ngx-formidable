@@ -1,6 +1,6 @@
 # Forms Integration
 
-How a field meets Angular's three forms APIs, and why the library holds no validation of its own. What a consumer writes is in [`user/validation.md`](../user/validation.md); what the decorator does with a field's state is in [`tech/decoration.md`](decoration.md).
+How a field meets Angular's three forms APIs, and why the library holds no validation of its own. What a consumer writes is in [`user/forms.md`](../user/forms.md) and [`user/validation.md`](../user/validation.md); what the decorator does with a field's state is in [`tech/decoration.md`](decoration.md).
 
 ## Ownership
 
@@ -52,10 +52,10 @@ flowchart LR
 
 Every field keeps to four rules, and each API relies on them:
 
-- **Touch Last**: `touch` is the last act of a blur. `BaseField.onFocusChange` calls `doOnFocusChange` first, so a field that commits on blur, as `date-field` and `time-field` do, has written its value before the touch — which is what Signal Forms' `debounce(path, 'blur')` releases it on.
-- **Only The User Writes The Model**: a field writes its `value` model only for a user's edit, through `setValue`, which writes nothing for an edit equal to the model. A programmatic write is an input write, so it reports nothing, touches nothing and dirties nothing, and the field corrects nothing it is given — no clamp, no re-mask, no reconcile against the options.
+- **Touch Last**: `touch` is the last act of a blur. `BaseField.onFocusChange` calls `doOnFocusChange` first, so a field that commits on blur, as `date-field` and `time-field` do, has written its value before the touch, which is what Signal Forms' `debounce(path, 'blur')` releases it on.
+- **Only The User Writes The Model**: a field writes its `value` model only for a user's edit, through `setValue`, which writes nothing for an edit equal to the model. A programmatic write is an input write, so it reports nothing, touches nothing and dirties nothing, and the field corrects nothing it is given: no clamp, no re-mask, no reconcile against the options.
 - **A Write Does Not Take The Caret**: a text field writes through `replaceText`, which leaves the element alone when it already shows that text and collapses the caret behind the text only when it replaced something. A consumer that echoes its model back writes the displayed value on every keystroke, and the caret and selection stay the user's.
-- **A Blur Leaves The Field**: focus moving between a field's own elements is no blur — `onFocusChange` ignores a `focusout` whose `relatedTarget` is inside `fieldRef`. A press inside a panel keeps focus in the input, a pick from a panel neither commits nor touches, and only `date-field`'s month and year selects take focus, which returns to the input before Pikaday redraws them.
+- **A Blur Leaves The Field**: focus moving between a field's own elements is no blur: `onFocusChange` ignores a `focusout` whose `relatedTarget` is inside `fieldRef`. A press inside a panel keeps focus in the input, a pick from a panel neither commits nor touches, and only `date-field`'s month and year selects take focus, which returns to the input before Pikaday redraws them.
 
 A touch is not cosmetic: it is what `revealOn="touched"` reads, so a touch nobody made would reveal a field nobody has visited. Dirty is not cosmetic either: it is what `revealOn="dirty"` reads.
 
@@ -70,15 +70,15 @@ sequenceDiagram
   participant A as Forms API
   participant F as Field
   participant D as Decorator
-  A->>F: value — the model, as an input
-  A->>F: state — touched, dirty, errors, invalid, pending, disabled, required
-  D->>F: showErrors, shownErrors — read, never pushed
+  A->>F: value: the model, as an input
+  A->>F: state: touched, dirty, errors, invalid, pending, disabled, required
+  D->>F: showErrors, shownErrors: read, never pushed
   Note over F: The user edits
-  F->>A: valueChange — the API dirties the control
+  F->>A: valueChange: the API dirties the control
   Note over F: Focus leaves the field
-  F->>A: valueChange — a date or time commits its text
-  F->>A: touch — the last act of the blur
-  A->>F: touched — the reveal may come
+  F->>A: valueChange: a date or time commits its text
+  F->>A: touch: the last act of the blur
+  A->>F: touched: the reveal may come
 ```
 
 Every input is a signal and `showErrors` is a `computed` over them, so a state change repaints on its own. What that one signal reaches, and why no classic API needs pumping, is in [`tech/decoration.md`](decoration.md).
@@ -130,7 +130,7 @@ flowchart LR
 - **Resolution**: the field's own `revealOn`, then the nearest `FORMIDABLE_DEFAULTS.revealOn`, then `touched`. The default is read once, when the field is created; the input is read live.
 - **Invalid Without Errors**: a field the API holds `invalid` shows invalid once revealed, with no message.
 - **Pending Keeps The Last Errors**: while `pending`, `shownErrors` holds the last settled errors, so the messages do not flicker away and back on every run.
-- **No `submitted`**: Signal Forms keeps no submitted state, and `submit()` touches every field, so `touched` covers a submit.
+- **No `submitted`**: Signal Forms keeps no submitted state, and `submit()` touches every field, so `touched` covers a submit. A classic `ngSubmit` touches no control, so a classic form reveals on a submit only once it calls `markAllAsTouched()`.
 
 ---
 
@@ -146,6 +146,7 @@ Each is pinned by a spec, so an Angular update that changes it fails one.
 | `ngModel` attaches no directive validator to a custom control's control                                                                                | `forms-api-state.spec.ts`                           |
 | A classic error reaches a custom control as `{ kind, context }`, with no `message`                                                                     | `error-message.spec.ts`                             |
 | `transformedValue` reports parse errors to all three APIs. `ngModel` and `[formControl]` hand one to the field only on the host's next check           | `date-time-field.spec.ts`                           |
+| Signal Forms' `submit()` touches every field, and a classic `ngSubmit` touches no control                                                              | `reveal.spec.ts`                                    |
 | A Vest suite is a Standard Schema, and an async Vest test does not surface through it                                                                  | `vest-integration.spec.ts`                          |
 | A Standard Schema issue whose path names no field reports on the root, and one whose path runs through a key the model lacks throws                    | `vest-integration.spec.ts`                          |
 | A Zod schema is a Standard Schema, and a refinement reports on the path it names                                                                       | `zod-integration.spec.ts`                           |
@@ -157,7 +158,7 @@ The last three are portal specs in `src/app/validation/`; the rest are library s
 ## Accepted Compromises
 
 - **`updateOn` In The Classic APIs**: `blur` and `submit` do not hold back a library field's value. Signal Forms' `debounce(path, 'blur')` does, through `touch`.
-- **Template-Driven Forms Validate No Field**: no classic API attaches a directive validator — `required`, `minlength` — to a custom control, so no validator declared in a template reaches a library field under `ngModel`. The `required` attribute still marks, because it binds the field's `required` input as well. The upstream report is in [`impl/backlog.md`](../impl/backlog.md).
+- **Template-Driven Forms Validate No Field**: no classic API attaches a directive validator, such as `required` or `minlength`, to a custom control, so no validator declared in a template reaches a library field under `ngModel`. The `required` attribute still marks, because it binds the field's `required` input as well. The upstream report is in [`impl/backlog.md`](../impl/backlog.md).
 - **Required Checkbox Group**: Signal Forms' `required()` does not count `[]` as empty, so a required `checkbox-group-field` pairs it with `minLength(path, 1)`.
 
 ---
@@ -165,7 +166,7 @@ The last three are portal specs in `src/app/validation/`; the rest are library s
 ## What The Library Leaves Out
 
 - **No Value Accessor**: both integrations prefer a value accessor to a custom control. The classic `NgControl` skips its custom-control path when one is provided, and `[formField]` then binds through an interop `NgControl` with no `markAs*`, `events` or `valueChanges`. A field that was both would receive none of its state inputs under any API. `FormValueControl` alone is bound the same way by all three.
-- **No Form Harness**: the model, the rules, a rule across fields, debouncing and submission are the forms API's — Signal Forms' `schema()`, `validate()` on a group or the root, `debounce()` and `submit()`; a `FormGroup` in the classic APIs. A library form directive would restate them and tie the fields to the one API it wraps. The two form-wide settings, `revealOn` and `hideRequiredMarkers`, are `FORMIDABLE_DEFAULTS` entries, which a component provides over its subtree.
+- **No Form Harness**: the model, the rules, a rule across fields, debouncing and submission are the forms API's: Signal Forms' `schema()`, `validate()` on a group or the root, `debounce()` and `submit()`; a `FormGroup` in the classic APIs. A library form directive would restate them and tie the fields to the one API it wraps. The two form-wide settings, `revealOn` and `hideRequiredMarkers`, are `FORMIDABLE_DEFAULTS` entries, which a component provides over its subtree.
 - **No Validator Package**: `validateStandardSchema` runs any Standard Schema, and Vest, Zod and Valibot are Standard Schemas, so an adapter would wrap a single call. The package has one entry point and no validation library among its peers. `vest` and `zod` are dev dependencies, for the Studio's export and the integration specs.
 
 `validation.model.ts` is therefore the library's whole validation vocabulary: `FormidableReveal`, `FormidableErrorMessageFn` and `FORMIDABLE_ERROR_MESSAGE`.

@@ -34,7 +34,7 @@ The slug is a short kebab identifier, for example `date-range-field`.
 | Research and plan                   | Implement                    |
 | Plan with an Implementation section | Review, then `/fd-create-pr` |
 
-For a small task, skip this entirely — edit directly and run `fd-review-change`.
+For a small task, skip this entirely: edit directly and run `fd-review-change`.
 
 ## Rules
 

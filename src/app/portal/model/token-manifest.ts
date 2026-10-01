@@ -189,7 +189,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     class: 'declared',
     seed: true,
     description:
-      'Thickness of field borders. Also the default for the group border, the panel outline, the focus ring, the toggle track and the slider track — see [Borderless Themes](theming.md#4-five-things-that-will-catch-you-out).'
+      'Thickness of field borders. Also the default for the group border, the panel outline, the focus ring, the toggle track and the slider track. See [Borderless Themes](theming.md#4-five-things-that-will-catch-you-out).'
   },
   {
     name: '--formidable-field-focus-ring-width',
@@ -205,14 +205,14 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     control: 'length',
     class: 'declared',
     derivedFrom: '--formidable-border-radius',
-    description: 'Border-radius every corner of a field falls back to — see [Per-Corner Radius](#per-corner-radius).'
+    description: 'Border-radius every corner of a field falls back to. See [Per-Corner Radius](#per-corner-radius).'
   },
   {
     name: '--formidable-field-underline-thickness',
     group: 'Field Dimensions',
     control: 'length',
     class: 'declared',
-    description: "Extra line painted inside a field's bottom edge. `0` paints none — see [Underline](#underline)."
+    description: "Extra line painted inside a field's bottom edge. `0` paints none. See [Underline](#underline)."
   },
   {
     name: '--formidable-field-underline-thickness-focus',
@@ -389,7 +389,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     group: 'Field Dimensions',
     control: 'quoted-string',
     class: 'declared',
-    description: "The `content` string suffixed to a required field's label — `'*'`, or a word such as `' (required)'`."
+    description: "The `content` string suffixed to a required field's label: `'*'`, or a word such as `' (required)'`."
   },
   {
     name: '--formidable-field-group-option-padding',
@@ -1445,7 +1445,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     class: 'overridable',
     derivedFrom: '--formidable-field-border-thickness',
     description:
-      "Border thickness of the track, which is what draws it. Follows the field's border thickness unless set — see [Underline](#underline)."
+      "Border thickness of the track, which is what draws it. Follows the field's border thickness unless set. See [Underline](#underline)."
   }
 ];
 

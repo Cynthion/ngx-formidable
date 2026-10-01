@@ -20,7 +20,7 @@ Template: `.claude/skills/fd-drive-sdd/research.template.md`. The `fd-research` 
 
 ## External Prompt
 
-Emit this shape, filled in. Keep it self-contained — the external model has no access to the repository.
+Emit this shape, filled in. Keep it self-contained: the external model has no access to the repository.
 
 ```txt
 Context: <the problem, in three or four sentences, with no internal names or paths>

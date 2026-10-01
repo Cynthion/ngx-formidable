@@ -32,7 +32,7 @@ A document belongs to exactly one bucket. When two overlap, one links to the oth
 - **Explicit Line Breaks**: Use `<br/>` only when a line break is required inside a table cell or Mermaid diagram.
 - **Mermaid Labels**: Use Pascal Case for labels, titles, table label entries, etc. Use `<br/>` for line breaks. Do not use `\n`.
 - **Tone**: Treat documentation as reference material, not promotional content. Use plain English and factual statements. Do not use promotional adjectives or adverbs.
-- **Punctuation**: Use an em dash for a parenthetical or an abrupt turn. Do not use one as a general purpose connector where a comma, colon or semicolon reads as well.
+- **Punctuation**: Avoid using em dashes (—). Do not use one as a general purpose connector where a comma, colon or semicolon reads as well.
 - **Placeholders**: Wrap a placeholder in backticks, for example `` `<TODO>` ``. Unbackticked angle brackets are parsed as inline HTML and fail the lint gate. Name the roadmap phase or backlog item when one exists, so the placeholder is traceable.
 - **Maintenance**: Keep documentation up-to-date with code changes. Review and update regularly to ensure accuracy and relevance.
 

@@ -14,7 +14,7 @@ The AI setup of this repository. It serves Claude Code only. Every artifact has 
 | MCP Approval      | `.claude/settings.json`                  |
 | MCP Servers       | `.mcp.json`                              |
 
-`CLAUDE.md` is intentionally minimal — behavioral directives only. Project knowledge stays in its documented home and is reached through [`README.md`](../README.md), which `CLAUDE.md` links. That link is the only always-on hop in the harness.
+`CLAUDE.md` is intentionally minimal: behavioral directives only. Project knowledge stays in its documented home and is reached through [`README.md`](../README.md), which `CLAUDE.md` links. That link is the only always-on hop in the harness.
 
 ### Naming
 
@@ -93,7 +93,7 @@ An agent body stands alone and never assumes who invoked it.
 
 The harness supports Spec Driven Development. Each phase reads the previous phase's artifact from disk rather than from the conversation, so any phase can be resumed in a fresh session.
 
-There is no issue tracker. [`impl/implementation.md`](implementation.md) is the source of truth for outstanding work — check it before starting. [`impl/backlog.md`](backlog.md) is the intake buffer for ideas that have not been triaged into a phase yet.
+There is no issue tracker. [`impl/implementation.md`](implementation.md) is the source of truth for outstanding work. Check it before starting. [`impl/backlog.md`](backlog.md) is the intake buffer for ideas that have not been triaged into a phase yet.
 
 ### Planning
 
@@ -133,7 +133,7 @@ flowchart LR
 | Pull Request     | Verified change       | Pull request                   | `/fd-create-pr`                                     |
 | Release          | Merge to `main`       | Deployed portal, npm package   | `deploy.yml`, then `publish:lib` by hand            |
 
-`.research/` and `.plan/` are untracked. Implementation progress is appended to the plan file rather than written to a third artifact, so a work item has exactly two files. Templates live in `.claude/skills/fd-drive-sdd/`. For a small task, skip SDD — edit directly and run `fd-review-change`.
+`.research/` and `.plan/` are untracked. Implementation progress is appended to the plan file rather than written to a third artifact, so a work item has exactly two files. Templates live in `.claude/skills/fd-drive-sdd/`. For a small task, skip SDD: edit directly and run `fd-review-change`.
 
 ### Maintenance
 
@@ -143,7 +143,7 @@ flowchart LR
   Backlog --> Branch[Branch]
 ```
 
-A defect reported by a consumer becomes a backlog item and then follows the development flow; bugs lead the roadmap. Dependency updates arrive as Renovate pull requests, see [`impl/renovate.md`](renovate.md). There is no separate hotfix path — `main` is the only release branch.
+A defect reported by a consumer becomes a backlog item and then follows the development flow; bugs lead the roadmap. Dependency updates arrive as Renovate pull requests, see [`impl/renovate.md`](renovate.md). There is no separate hotfix path: `main` is the only release branch.
 
 ---
 
@@ -172,7 +172,7 @@ The recommended baseline denies what must stay manual. `deny` outranks `allow`, 
 | `git commit/push/merge/rebase/reset/revert/cherry-pick/tag` | History and remote changes stay manual |
 | `git clean`, `git filter-branch`, `rm -rf`, `sudo`          | Irreversible                           |
 | `gh pr merge`, `gh release`, `npm publish`                  | Outward facing                         |
-| `npm run publish:lib`                                       | Outward facing — see below             |
+| `npm run publish:lib`                                       | Outward facing, see below              |
 
 - **Match On The Command String**: a `Bash` rule matches what is typed, not what runs. `npm run publish:lib` calls `npm publish` inside a script, so `npm publish` alone does not deny it.
 - **Allow Rules Are Personal**: anything not allowed prompts. The allow list is a guardrail against routine mistakes, not a sandbox.

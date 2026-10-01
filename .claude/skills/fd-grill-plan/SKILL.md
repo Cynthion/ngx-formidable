@@ -18,7 +18,7 @@ Read `.plan/<slug>.md` and its research artifact.
 | Acceptance Criteria   | Which one cannot be verified by a command or an observation?                                      |
 | Verification          | Which criterion has no command mapped to it?                                                      |
 | Assumptions           | What does this assume about existing behavior without citing it?                                  |
-| Reuse                 | What is being built that already exists — a helper, a base directive, a token?                    |
+| Reuse                 | What is being built that already exists: a helper, a base directive, a token?                     |
 | Conventions           | Which part violates `impl/components.md`, `impl/styling.md` or `impl/ubiquitous-language.md`?     |
 | Scope                 | Which listed change is not required by any criterion?                                             |
 | Consumers             | Which public input, output, token, type or `--formidable-*` variable changes, and who breaks?     |

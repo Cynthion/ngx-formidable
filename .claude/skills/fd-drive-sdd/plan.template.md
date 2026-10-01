@@ -2,7 +2,7 @@
 <!-- Save as .plan/<slug>.md. One approach only. -->
 <!-- Must be executable by someone with no memory of the conversation that produced it. -->
 
-# <slug> — <Requirement Summary>
+# <slug>: <Requirement Summary>
 
 ## Context
 
@@ -19,7 +19,7 @@ Research: `.research/<slug>.md`
 
 <The chosen approach. What changes conceptually, and why this way.>
 
-**Rejected** — <alternative>: <why it lost, one line.>
+**Rejected**: <alternative>. <Why it lost, one line.>
 
 ## Changes
 

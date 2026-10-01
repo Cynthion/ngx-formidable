@@ -2,7 +2,7 @@
 <!-- Save as .research/<slug>.md. Findings only: no chosen approach, no code. -->
 <!-- Every claim about the codebase carries a file path. A claim without one is an open question. -->
 
-# <slug> — <Requirement Summary>
+# <slug>: <Requirement Summary>
 
 ## Requirement
 

@@ -1,9 +1,14 @@
-import { afterRenderEffect, Component, computed, ElementRef, inject, input } from '@angular/core';
+import { afterRenderEffect, Component, computed, DOCUMENT, ElementRef, inject, input } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
+import { EMPTY, fromEvent, map } from 'rxjs';
 import { TopBar } from '../chrome/top-bar/top-bar';
+import { ThemeStore } from '../state/theme.store';
 import { DEFAULT_DOC_SLUG, DOC_PAGES, DOC_PAGES_BY_SLUG } from './doc-pages';
-import { renderDoc } from './markdown.helpers';
+import { drawDiagrams, renderDoc } from './markdown.helpers';
+
+const PREFERS_DARK = '(prefers-color-scheme: dark)';
 
 const KNOWN_SLUGS = new Set(DOC_PAGES.map((page) => page.slug));
 
@@ -27,6 +32,24 @@ const KNOWN_SLUGS = new Set(DOC_PAGES.map((page) => page.slug));
 export class DocsPage {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly theme = inject(ThemeStore);
+
+  private readonly darkQuery = inject(DOCUMENT).defaultView?.matchMedia(PREFERS_DARK) ?? null;
+
+  // The operating system's preference, which the portal follows while its appearance toggle is on `system`.
+  private readonly systemPrefersDark = toSignal(
+    this.darkQuery
+      ? fromEvent<MediaQueryListEvent>(this.darkQuery, 'change').pipe(map((event) => event.matches))
+      : EMPTY,
+    { initialValue: this.darkQuery?.matches ?? false }
+  );
+
+  /** Whether the portal is painted dark, which decides the theme its diagrams are drawn in. */
+  private readonly isDark = computed(() => {
+    const appearance = this.theme.appearance();
+
+    return appearance === 'system' ? this.systemPrefersDark() : appearance === 'dark';
+  });
 
   /** Bound from the route parameter by `withComponentInputBinding()`. */
   public readonly topic = input<string | undefined>(undefined);
@@ -38,7 +61,7 @@ export class DocsPage {
 
   protected readonly page = computed(() => DOC_PAGES_BY_SLUG.get(this.topic() ?? DEFAULT_DOC_SLUG) ?? DOC_PAGES[0]!);
 
-  private readonly rendered = computed(() => renderDoc(this.page().markdown, KNOWN_SLUGS));
+  private readonly rendered = computed(() => renderDoc(this.page().markdown, KNOWN_SLUGS, this.page().slug));
 
   protected readonly body = computed<SafeHtml>(() => this.sanitizer.bypassSecurityTrustHtml(this.rendered().html));
 
@@ -64,6 +87,14 @@ export class DocsPage {
       }
       target.classList.add('is-anchored');
       target.scrollIntoView({ block: 'center' });
+    });
+
+    // After the render too, because a diagram is part of the document being rendered, and again whenever the
+    // appearance flips.
+    afterRenderEffect(() => {
+      this.page();
+
+      void drawDiagrams(this.elementRef.nativeElement, this.isDark());
     });
   }
 

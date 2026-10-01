@@ -1,423 +1,305 @@
 # Validation
 
-The main `@cynthion/ngx-formidable` package has no validation library in it. It renders fields, themes them, and shows whatever errors it finds on Angular's own `AbstractControl.errors`. So any validator works, including none:
+The library validates nothing. A rule belongs to your forms API, and your validator writes it; the library renders what the rule reports: the message text, when it appears, where it appears, and the required marker. How a field meets each forms API is in [`user/forms.md`](forms.md).
 
-- Vest (use `@cynthion/ngx-formidable/vest`)
-- zod
-- Angular's built-in validators
-- ...
-- your own, see [The Validator Contract](#the-validator-contract)
-- none
+**Template-Driven Forms Validate No Library Field**: `ngModel` attaches no directive validator, such as `required`, `minlength` or `email`, to a custom control, so no rule written in a template reaches a library field. The `required` attribute still marks the field. To validate, bind the fields through Signal Forms or reactive forms.
 
-## The Model
+## How Validation Works
 
-The library prescribes no model type. `formValue` takes any object, and a validator reads whatever it is handed. The one contract is Angular's: `NgForm` builds its value from the control tree, so the model follows that tree.
-
-| In The Model    | Comes From                                                                        |
-| :-------------- | :-------------------------------------------------------------------------------- |
-| A key           | A control's `name`                                                                |
-| A nested object | An `ngModelGroup` around its controls                                             |
-| A value's type  | The field that writes it — its **Value** in [`user/components.md`](components.md) |
-
-A target is a path into the same tree, so a rule whose target names no control never runs.
-
-Everything beyond that is convention — `DeepPartial`, the shape, one `*.form.ts` per form — see [The Convention](#the-convention). The Studio's `Copy Component` generates it for the form on its stage, see [`user/studio.md`](studio.md).
-
-## Rule Targets
-
-Every rule has a **target** it reports on.
-
-| Target           | Written As                            | Called A            | Reports On |
-| :--------------- | :------------------------------------ | :------------------ | :--------- |
-| A single control | `'firstName'`, `'passwords.password'` | **field rule**      | that field |
-| A nested object  | `'passwords'`                         | **group rule**      | that group |
-| The form itself  | `WHOLE_FORM`                          | **whole-form rule** | the form   |
-
-A target is what your validator receives as its second argument, and what `errorsChange` keys its messages by.
-
-> **"Cross-field" is not a target.** It describes what a rule _reads_. A group rule comparing a password with its confirmation is cross-field; so is a whole-form rule. Where the rule reports is the target; how many fields it reads is up to you.
-
-## The Ways In
-
-| Approach                        | What You Write                                             | When To Use                                |
-| :------------------------------ | :--------------------------------------------------------- | :----------------------------------------- |
-| Angular validators              | Nothing — `required`, `minlength` and friends already work | Simple field rules                         |
-| A validator                     | One class implementing `FormidableValidator`               | Group rules, whole-form rules, schemas     |
-| `@cynthion/ngx-formidable/vest` | An import — the Vest validator ships with the library      | Vest suites                                |
-| Nothing                         | Nothing                                                    | Display-only or externally validated forms |
-
-**A Field Inside Your Own Component**: `ngModel` injects its `ControlContainer` with `@Host()`, which stops at a component boundary. Wrap a field in a component of your own and its control registers as **standalone** — outside your `<form>`, invisible to the model and to every rule. Angular logs `NG01354` and names the fix; add it to the wrapping component:
-
-```ts
-viewProviders: [{ provide: ControlContainer, useExisting: NgForm }];
+```mermaid
+flowchart LR
+  Rules["Angular's Rules<br/>required(), email(), validate()"] --> Schema["schema()"]
+  Standard["Vest, Zod, Valibot<br/>Standard Schema"] -- "validateStandardSchema()" --> Schema
+  Schema --> SF["Signal Forms<br/>[formField]"]
+  Classic["Validators, ValidatorFn"] --> Control["FormControl"]
+  Control --> RF["Reactive Forms<br/>[formControl], formControlName"]
+  Directive["Directive Validators<br/>required, minlength"] -. "Not Attached" .-> TD["Template-Driven Forms<br/>ngModel"]
+  SF -- "Errors, Required" --> Field["Field<br/>Reveal"]
+  RF -- "Errors, Required" --> Field
+  Field --> Decorator["Decorator<br/>Messages, Marker"]
 ```
 
-This applies to any wrapper, including one that renders fields from a configuration.
+- **A Rule Reaches The Field Through Its Forms API**: as the field's errors, and as its required state where the rule marks one.
+- **The Field Decides When**: its messages appear once its reveal has come, `touched` by default, see [When A Rule Runs And When Its Messages Appear](#when-a-rule-runs-and-when-its-messages-appear).
+- **The Decorator Renders Them**: below the field, each through `FORMIDABLE_ERROR_MESSAGE`, see [Messages](#messages).
 
 ---
 
-## Angular's Built-In Validators
+## Choosing A Validator
 
-Nothing to wire. Put the validator on the field and the error renders.
+| Validator                       | Where It Goes                                                                 | Marks Required        | Message Text                                                 | Install          |
+| :------------------------------ | :---------------------------------------------------------------------------- | :-------------------- | :----------------------------------------------------------- | :--------------- |
+| Angular's rules, the default    | The `schema()`                                                                | `required()`          | The rule's `message`                                         |                  |
+| Vest                            | A suite created per form, run by `validateStandardSchema()` in the `schema()` | `REQUIRED` beside it  | The test's message                                           | `vest`           |
+| Zod, Valibot, a Standard Schema | A schema beside the `schema()`, run by `validateStandardSchema()` in it       | `REQUIRED` beside it  | The issue's message                                          | `zod`, `valibot` |
+| Classic validators              | The `FormControl`, under `[formControl]` or `formControlName`                 | `Validators.required` | The error's `kind`, until `FORMIDABLE_ERROR_MESSAGE` maps it |                  |
+| None                            | Nowhere                                                                       | `REQUIRED`            |                                                              |                  |
 
-```html
-<formidable-field-decorator>
-  <formidable-input-field
-    formidableFieldErrors
-    name="name"
-    [required]="true"
-    [minlength]="3"
-    [(ngModel)]="name" />
-  <div formidableFieldLabel>Name</div>
-</formidable-field-decorator>
+The first three are Signal Forms and live in one `*.form.ts` per form, beside the model's type and its initial model:
+
+```text
+signup.form.ts
+  SignupModel           the model's type
+  initialSignupModel    the initial model, every key defined
+  createSignupSuite()   Vest only: a factory, called once per form
+  signupZodSchema       Zod only
+  signupSchema          the schema(): each field's state, limits, conditions and rules
 ```
 
-`required` writes `{ required: true }`. `FORMIDABLE_ERROR_EXTRACTOR` falls back to the error keys when there is no message array, so the field displays `required`. Pair it with `FORMIDABLE_ERROR_TRANSLATOR` to turn those keys into real sentences — see [Messages](#messages).
-
-### The Required Marker
-
-The `*` beside a label (configurable with `--formidable-label-required-marker`) is a separate concern from validating, and has its own input:
-
-| Input                 | On       | Does                                              |
-| :-------------------- | :------- | :------------------------------------------------ |
-| `markRequired`        | a field  | Suffixes the marker to that field's label         |
-| `hideRequiredMarkers` | `<form>` | Withholds the marker from every field on the form |
-
-Neither registers a validator. `markRequired` also sets `aria-required`; the form-level switch hides the glyph only.
+The Studio exports a form in exactly this layout, under any of the three. See [`user/studio.md`](studio.md).
 
 ---
 
-## Validation Timing
+## Angular's Rules
 
-Two independent settings, and most forms want a mismatch between them.
-
-| Axis         | Question                     | Set With                                     | Default   |
-| :----------- | :--------------------------- | :------------------------------------------- | :-------- |
-| **Run**      | When does the validator run? | Angular's `ngFormOptions` / `ngModelOptions` | `change`  |
-| **Reveal**   | When do the messages appear? | `revealOn`                                   | `touched` |
-| **Debounce** | How long after a run?        | `debounceMs`                                 | `0`       |
-
-### The Pairings Worth Using
-
-| Run      | Reveal      | Behaviour                                                                                         |
-| :------- | :---------- | :------------------------------------------------------------------------------------------------ |
-| `change` | `touched`   | The default. Quiet while a field is first typed into, live while it is corrected.                 |
-| `change` | `submitted` | Validity is current, so a submit button can be trusted, but nothing is said until the user tries. |
-| `blur`   | `touched`   | One run per field, reported as the user leaves it.                                                |
-| `submit` | `submitted` | Nothing runs and nothing appears until submit.                                                    |
-
-The first two are mismatches by construction, which is why the two axes stay separate.
-
-### Run
-
-Angular owns this one, so there is no library input for it. `ngFormOptions` on the `<form>` cascades to every control under it, and `ngModelOptions` on one field overrides it:
-
-```html
-<form
-  formidableForm
-  [ngFormOptions]="{ updateOn: 'blur' }">
-  <formidable-input-field
-    name="firstName"
-    [ngModel]="model.firstName" />
-
-  <!-- this one field validates on every keystroke anyway -->
-  <formidable-input-field
-    name="lastName"
-    [ngModel]="model.lastName"
-    [ngModelOptions]="{ updateOn: 'change' }" />
-</form>
-```
-
-A validator never runs on a schedule of its own. It runs because the control **committed** its value, which is the same moment the model updates, so `updateOn` moves the value and both the sync and the async validators together.
-
-| Value    | The Control Commits, And So Validates          | Until Then                                                               |
-| :------- | :--------------------------------------------- | :----------------------------------------------------------------------- |
-| `change` | On every keystroke, and every other value edit | Nothing waits. This is Angular's default and the library's.              |
-| `blur`   | When the control loses focus                   | What the user typed sits in the DOM only                                 |
-| `submit` | When the form is submitted                     | What the user typed sits in the DOM only, across every field on the form |
-
-The "until then" column is the part that surprises people. Under `blur` and `submit` the control's value, and therefore the model and `formValueChange`, do not move while the user types. A field that reads its own value mid-typing reads the old one.
-
-### Reveal
-
-| Input      | On       | Does                                                   |
-| :--------- | :------- | :----------------------------------------------------- |
-| `revealOn` | `<form>` | Sets when every field on the form reveals its messages |
-| `revealOn` | a field  | Overrides the form's setting for that field            |
-
-A field takes it on `formidableFieldErrors`, which is the directive that renders the messages:
-
-```html
-<form
-  formidableForm
-  revealOn="submitted">
-  <formidable-input-field
-    formidableFieldErrors
-    name="firstName"
-    [ngModel]="model.firstName" />
-
-  <!-- this one reports as soon as it is edited -->
-  <formidable-input-field
-    formidableFieldErrors
-    name="lastName"
-    revealOn="dirty"
-    [ngModel]="model.lastName" />
-</form>
-```
-
-Each value names a state Angular already tracks, so the wording is Angular's:
-
-| Value       | Messages Appear Once         | Which Means                                                          | Scope       | Cleared By                     |
-| :---------- | :--------------------------- | :------------------------------------------------------------------- | :---------- | :----------------------------- |
-| `touched`   | `control.touched` is `true`  | The user has focused the control and left it again, at least once    | Per control | `reset()`, `markAsUntouched()` |
-| `dirty`     | `control.dirty` is `true`    | The control's value has been changed since it was set, at least once | Per control | `reset()`, `markAsPristine()`  |
-| `submitted` | `NgForm.submitted` is `true` | The form has been submitted, at least once                           | Per form    | `resetForm()`                  |
-| `always`    | There is anything to say     | No gate at all                                                       | Per control | Nothing                        |
-
-Three things follow from the table:
-
-- **None Of Them Reset Themselves.** `touched` and `dirty` latch on the first blur or the first edit and stay set, so a field that becomes valid again simply stops having messages to show. They are gates, not conditions.
-- **`touched` Also Reveals On Submit.** Submitting marks every control on the form touched, so a submit reveals the whole form under `touched` as well as under `submitted`. The difference is that `submitted` reveals nothing before that, however much the user has clicked around.
-- **`dirty` Is About The Value, `touched` Is About The Focus.** A user who tabs through a field without typing has touched it and not dirtied it. Neither flag is ever raised by the library: a value the form writes, and a value a field corrects, leave the control untouched and pristine.
-
-While a control is validating, its previous messages stay on screen rather than blanking and returning. This holds for `always` too, so a debounce window does not make the messages flicker.
-
-### Debounce
-
-`debounceMs` on the `<form>` delays every target on it. It only earns its place under `change`: under `blur` and `submit` Angular already coalesces to one commit per blur or per submit, so a window there only delays the messages.
-
-### Reading Validity After A Submit
-
-Every rule this library runs is asynchronous, so the form is `PENDING` at the moment `ngSubmit` fires. A submit handler that reads `form.valid` synchronously reads a stale answer. Gate on `validChange` or `idle$` instead:
-
-```typescript
-onSubmit(): void {
-  this.isValid$.pipe(take(1)).subscribe((isValid) => {
-    if (isValid) this.save();
-  });
-}
-```
-
----
-
-## The Validator Contract
-
-Everything else goes through one interface. `NgxFormidableForm` owns the model, the targets and the debouncing; your validator owns the rules.
+The default, and the only validator that needs nothing installed. Every rule is a function in the `schema()`:
 
 ```ts
-export interface FormidableValidator<T = Record<string, unknown>> {
-  /** Runs the rules for one target against the whole model. `null` means valid. */
-  validate(model: T, target: string): Observable<string[] | null>;
+// signup.form.ts
+import { email, minLength, required, schema, validate } from '@angular/forms/signals';
+
+export interface SignupModel {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  terms: boolean;
 }
+
+export const initialSignupModel: SignupModel = { email: '', password: '', confirmPassword: '', terms: false };
+
+export const signupSchema = schema<SignupModel>((path) => {
+  required(path.email, { message: 'An email address is required.' });
+  email(path.email, { message: 'That does not look like an email address.' });
+  required(path.password, { message: 'Choose a password.' });
+  minLength(path.password, 12, { message: 'At least twelve characters.' });
+  validate(path.confirmPassword, (context) => (context.value() === context.valueOf(path.password) ? undefined : { kind: 'mismatch', message: 'The passwords differ.' }));
+  required(path.terms, { message: 'Accept the terms to continue.' });
+});
 ```
 
-Provide it as `FORMIDABLE_VALIDATOR` on the `<form>`. The form directive picks it up and calls it once per target, with the current model and the changed value already patched in.
-
-A directive on the form is the idiomatic way to supply one, because it can take the rules as an input:
-
-```ts
-@Directive({
-  selector: 'form[mySchema]',
-  providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: MySchemaValidatorDirective }]
-})
-export class MySchemaValidatorDirective<T extends Record<string, unknown>> implements FormidableValidator<T> {
-  public readonly mySchema = input.required<MySchema<T>>();
-
-  public validate(model: T, target: string): Observable<string[] | null> {
-    return of(this.mySchema().messagesFor(model, target) ?? null);
-  }
-}
-```
-
-Without a `FORMIDABLE_VALIDATOR` the form directive still reports value, dirty and validity, but it never validates.
+- **`required()` Marks And Checks**: `[formField]` hands the field its required state from the same rule, so the marker and the check cannot disagree.
+- **A Check Across Fields**: `validate()` reads any field through `context.valueOf()` and reports on the path it is given. On a field, the field's decorator renders it; on a group or on `path` itself it reports on the group or the whole form, which you place by hand. See [Messages](#messages).
+- **A Check That Answers Later**: `validateAsync()` and `validateHttp()`. The field is `pending` meanwhile, and keeps its last messages on screen.
 
 ---
 
 ## Vest
 
-Ships with the library as a second entry point, so `vest` is an optional peer dependency you only install if you use it.
-
-```bash
-npm i vest
-```
-
-The entry point itself ships inside `@cynthion/ngx-formidable` — there is nothing extra to install, only to import.
+A Vest suite is a Standard Schema, so `validateStandardSchema()` runs it in the `schema()`:
 
 ```ts
-import { NgxFormidableVestValidator } from '@cynthion/ngx-formidable/vest';
+// signup.form.ts
+import { metadata, REQUIRED, schema, validateStandardSchema } from '@angular/forms/signals';
+import { create, enforce, mode, Modes, omitWhen, test } from 'vest';
 
-@Component({
-  imports: [/* … */ NgxFormidableForm, NgxFormidableVestValidator]
-})
-```
+// SignupModel and initialSignupModel as above.
 
-```html
-<form
-  formidableForm
-  formidableValidateWholeForm
-  [formValue]="formValue$ | async"
-  [formShape]="formShape"
-  [formSuite]="formSuite"
-  [debounceMs]="0"
-  (formValueChange)="formValue$.next($event)"
-  (validChange)="isValid$.next($event)"
-  (dirtyChange)="isDirty$.next($event)"
-  (errorsChange)="errors$.next($event)"
-  (ngSubmit)="onSubmit()">
-  <!-- fields -->
-</form>
-```
+/** A suite carries state across every run, so each form creates its own. */
+export function createSignupSuite() {
+  return create((model: SignupModel) => {
+    mode(Modes.ALL); // every failing test, not only a field's first
 
-### The Convention
+    test('email', 'An email address is required.', () => {
+      enforce(model.email).isNotEmpty();
+    });
 
-One `*.form.ts` per form holds its model, shape and suite. [`user/getting-started.md`](getting-started.md) builds one in full, and the Studio's `Copy Component` generates one. Notes on the pieces:
+    omitWhen(!model.email, () => {
+      test('email', 'That does not look like an email address.', () => {
+        enforce(model.email).matches(/^[^@\s]+@[^@\s.]+\.[^@\s]+$/);
+      });
+    });
 
-- **`only(field)`** is required. The form directive asks the suite about one target at a time, and `only` is what keeps a run from reporting every other target too.
-- **`FIELD_NAMES`** keeps the target, the control `name` and the model key from drifting apart:
-
-  ```ts
-  export const USER_FORM_FIELD_NAMES = { name: 'name' } as const;
-
-  test(USER_FORM_FIELD_NAMES.name, 'user.form.name.required', () => {
-    enforce(model[USER_FORM_FIELD_NAMES.name]).isNotBlank();
+    test('confirmPassword', 'The passwords differ.', () => {
+      enforce(model.confirmPassword === model.password).isTruthy();
+    });
   });
-  ```
-
-- **`formShape`** is a dev-mode typo check, not a validator. It has no runtime cost in production.
-- **Messages are translation keys**, resolved by `FORMIDABLE_ERROR_TRANSLATOR`.
-- **Group rules** target the group (`test('passwords', …)`), usually inside `omitWhen`. Pair them with `dependentFields` so changing one member re-runs the rule:
-
-  ```ts
-  dependentFields = { 'passwords.password': ['passwords.confirmPassword'] };
-  ```
-
-- **Whole-form rules** use `test(WHOLE_FORM, …)` and need `formidableValidateWholeForm` on the `<form>`.
-- **`debounceMs`** sits on the `<form>` and governs every target on it.
-
----
-
-## Conditional Fields
-
-A field that appears only under some condition is Angular's `@if`, not a library feature. The library has no input for it and needs none.
-
-```html
-<formidable-toggle-field
-  name="pickup"
-  [ngModel]="model().pickup" />
-
-@if (!model().pickup) {
-<formidable-field-decorator>
-  <formidable-autocomplete-field
-    formidableFieldErrors
-    name="address"
-    [ngModel]="model().address" />
-  <div formidableFieldLabel>Delivery Address</div>
-</formidable-field-decorator>
 }
-```
 
-`@if` **destroys** the control rather than hiding it. Angular deregisters it, `NgForm` rebuilds its value without that key, and the model shrinks. Everything below follows from that one fact.
-
-| Concern           | What To Do                                                                                                      |
-| :---------------- | :-------------------------------------------------------------------------------------------------------------- |
-| The rule          | Wrap it in `omitWhen`, or it reports on a target nobody can see or fix                                          |
-| The re-run        | Name the controlling field in `dependentFields`, or the last message stands after the field has gone            |
-| The value         | Yours to clear. Angular removes the control, never your model key — the field returns carrying its old value    |
-| A whole-form rule | Reads a key that may be absent, so it handles `undefined` rather than assuming the field is there               |
-| `formShape`       | Nothing to do. It is `DeepPartial` and is checked against the keys the **model** has, so a missing one is legal |
-
-```ts
-omitWhen(model.pickup === true, () => {
-  test('address', 'We need an address to deliver to.', () => {
-    enforce(model.address).isNotBlank();
-  });
+export const signupSchema = schema<SignupModel>((path) => {
+  metadata(path.email, REQUIRED, () => true);
+  validateStandardSchema(path, createSignupSuite());
 });
 ```
 
-```ts
-dependentFields = { pickup: ['address', 'branch'] };
-```
-
-**Two Fields, One Switch.** A pair that swaps — one field replaced by another — is two `@if` blocks over the same control and two `omitWhen` rules with opposite conditions. Both fields belong in the shape; only one is ever in the model.
-
-**Not `[disabled]`.** A disabled control keeps its key: the form still carries it, and the raw value a group or whole-form rule reads still holds it. Use `[disabled]` for a field that is present but not editable, and `@if` for a field that is not part of this form right now.
+- **A Suite Per Form**: a suite made by `create` keeps state across every form it runs for, and grows slower with each. Call the factory inside `schema()`, which runs once per `form()`.
+- **Every Failing Test**: without `mode(Modes.ALL)`, Vest reports only a field's first failing test.
+- **A Target Is A Path**: `'payment.method'` reports on that field and `'payment'` on its group. A target naming no key of the model, such as `'wholeForm'`, reports on the whole form; one running through a key the model lacks throws.
+- **Async Tests Do Not Surface**: an async Vest test never reaches the form through Standard Schema; the form stays valid and never pending. Write that check as `validateAsync()` or `validateHttp()` beside the suite.
+- **Marking Required**: a Standard Schema cannot tell Signal Forms a field is required, so `metadata(path, REQUIRED, () => true)` marks it. `required()` would mark it as well, and report a second message for the same failure.
 
 ---
 
 ## Zod
 
-Not shipped. But it is the same shape, and the library is built so this is all it takes:
+A Zod schema is a Standard Schema too, and holds no state, so one serves every form:
 
 ```ts
-@Directive({
-  selector: 'form[formSchema]',
-  providers: [{ provide: FORMIDABLE_VALIDATOR, useExisting: ZodValidatorDirective }]
-})
-export class ZodValidatorDirective<T extends Record<string, unknown>> implements FormidableValidator<T> {
-  public readonly formSchema = input<ZodType<T> | null>(null);
+// signup.form.ts
+import { metadata, REQUIRED, schema, validateStandardSchema } from '@angular/forms/signals';
+import * as z from 'zod';
 
-  public validate(model: T, target: string): Observable<string[] | null> {
-    const schema = this.formSchema();
+// SignupModel and initialSignupModel as above.
 
-    if (!schema) {
-      return of(null);
-    }
+export const signupZodSchema = z
+  .object({
+    email: z
+      .string()
+      .min(1, 'An email address is required.')
+      .refine((value) => !value || /^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(value), 'That does not look like an email address.'),
+    password: z.string().min(12, 'At least twelve characters.'),
+    confirmPassword: z.string()
+  })
+  .refine((model) => model.confirmPassword === model.password, {
+    error: 'The passwords differ.',
+    path: ['confirmPassword']
+  });
 
-    const result = schema.safeParse(model);
-
-    if (result.success) {
-      return of(null);
-    }
-
-    const messages = result.error.issues.filter((issue) => (issue.path.join('.') || WHOLE_FORM) === target).map((issue) => issue.message);
-
-    return of(messages.length ? messages : null);
-  }
-}
+export const signupSchema = schema<SignupModel>((path) => {
+  metadata(path.email, REQUIRED, () => true);
+  validateStandardSchema(path, signupZodSchema);
+});
 ```
 
-A `refine` on the whole schema reports an empty path, which the filter maps to `WHOLE_FORM`. Like any whole-form rule, it needs `formidableValidateWholeForm` on the `<form>`.
+- **Type Each Key As Its Field Writes It**: `z.string().nullable()` for an option field, `z.date().nullable()` for a date. A key holding a value of another type fails with a message of Zod's own and stops every refinement.
+- **A Refinement Reports On The Path It Names**: a field, a group, or the whole form when it names no `path`.
+- **The Schema Holds What It Checks**: its keys are the ones its rules read. The model may carry more.
+- **Marking Required**: `REQUIRED` beside it, as for Vest.
+- **Valibot And Every Other Standard Schema**: run through `validateStandardSchema()` the same way.
 
 ---
 
-## No Validation
+## Two Validators In One Form
 
-Omit `FORMIDABLE_VALIDATOR` and use no Angular validators. Fields render, theme, mask and emit values; nothing ever goes invalid. `formidableFieldErrors` is still safe to leave on. It renders an empty error line, which keeps the layout from shifting if you add rules later.
+More validators combine as more rules in one `schema()`. Here Zod checks the shape, and Angular's `validateHttp()` asks a server whether the address is taken:
+
+```ts
+export const signupSchema = schema<SignupModel>((path) => {
+  metadata(path.email, REQUIRED, () => true);
+  validateStandardSchema(path, signupZodSchema);
+  validateHttp(path.email, {
+    request: (context) => (context.value() ? `/api/email-taken?address=${encodeURIComponent(context.value())}` : undefined),
+    onSuccess: (taken: boolean) => (taken ? { kind: 'taken', message: 'That address is taken.' } : undefined),
+    onError: () => undefined
+  });
+});
+```
+
+- **One Owner Per Check**: give each check to one validator. A field checked for emptiness by both Zod and `required()` reports the same failure twice.
+- **`validateHttp()` Needs `HttpClient`**: `provideHttpClient()` in the app config.
+
+---
+
+## Classic Validators
+
+Under reactive forms, the rules are the control's validators:
+
+```ts
+readonly form = new FormGroup({
+  name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.minLength(3)] })
+});
+```
+
+- **An Error Carries No Text**: a classic error reaches the field as `{ kind, context }` (`Validators.minLength(3)` as `{ kind: 'minlength', context: { requiredLength: 3, actualLength: 2 } }`), so its message is its `kind` until `FORMIDABLE_ERROR_MESSAGE` gives it one. See [Messages](#messages).
+- **`Validators.required` Marks The Field**: the control holding `Validators.required` itself is what marks it. A validator wrapping it, or `Validators.requiredTrue`, does not.
+- **A Standard Schema Needs A `ValidatorFn` Here**: `validateStandardSchema()` is Signal Forms'. Under reactive forms, a Zod or Vest schema runs inside a `ValidatorFn` of your own, and its message reaches the field only through the error's `context`.
+- **`updateOn` Holds Nothing Back**: `blur` and `submit` do not delay a library field's value, and so do not delay its rules.
+
+---
+
+## Required By Value Type
+
+The two `required`s disagree about what is empty:
+
+| Field                                                                       | `required()` Fails On                                 | `Validators.required` Fails On             |
+| :-------------------------------------------------------------------------- | :---------------------------------------------------- | :----------------------------------------- |
+| `input-field`, `textarea-field`                                             | `''`                                                  | `''`                                       |
+| `select-field`, `dropdown-field`, `autocomplete-field`, `radio-group-field` | `null`                                                | `null`                                     |
+| `date-field`, `time-field`                                                  | `null`                                                | `null`                                     |
+| `toggle-field`                                                              | `false`                                               | Never: `Validators.requiredTrue` checks it |
+| `slider-field`                                                              | Never                                                 | Never                                      |
+| `checkbox-group-field`                                                      | Never: `[]` is not empty, so add `minLength(path, 1)` | `[]`                                       |
+
+---
+
+## When A Rule Runs And When Its Messages Appear
+
+**Run** is when a rule checks and **reveal** is when its messages appear. They have separate owners, and most forms want them apart: quiet while a field is first typed into, live while it is corrected.
+
+| Axis   | Owner          | Set With                                                                                                     |
+| :----- | :------------- | :----------------------------------------------------------------------------------------------------------- |
+| Run    | Your forms API | Signal Forms: every change, or `debounce(path, 'blur')` to hold an edit until the touch. Classic: every edit |
+| Reveal | The library    | `revealOn`                                                                                                   |
+
+| `revealOn`          | Messages Appear Once                                |
+| :------------------ | :-------------------------------------------------- |
+| `touched` (default) | The user has left the field, or a submit touched it |
+| `dirty`             | The user has edited the field                       |
+| `always`            | The field is invalid                                |
+
+```html
+<!-- this one reveals as soon as it is edited -->
+<formidable-input-field
+  revealOn="dirty"
+  [formField]="form.email" />
+```
+
+- **Where It Is Set**: on the field, then `revealOn` in the nearest `FORMIDABLE_DEFAULTS`, then `touched`. The app's defaults are in [`user/getting-started.md`](getting-started.md); a component providing `FORMIDABLE_DEFAULTS` sets them for every field it renders.
+- **Touched And Dirty Latch**: a field that becomes valid again has nothing left to say, and one that turns invalid again says it at once. `reset()` clears both, under every API.
+- **A Submit Touches Only Under Signal Forms**: `submit()` touches every field, so it reveals every message under `touched`. A classic `ngSubmit` touches nothing, so call `markAllAsTouched()`. See [`user/forms.md`](forms.md).
+- **Pending Keeps The Last Messages**: while a rule runs, the field keeps what it last reported, so the messages do not blink away and back on every run.
+- **Invalid With Nothing To Say**: a field the API holds invalid with no errors turns invalid once revealed, with no message.
 
 ---
 
 ## Messages
 
-Two tokens sit between `control.errors` and the text on screen.
-
-| Token                         | Signature                                        | Default                                        |
-| :---------------------------- | :----------------------------------------------- | :--------------------------------------------- |
-| `FORMIDABLE_ERROR_EXTRACTOR`  | `(errors: ValidationErrors \| null) => string[]` | `errors['errors']`, else `Object.keys(errors)` |
-| `FORMIDABLE_ERROR_TRANSLATOR` | `(error: string) => string`                      | identity                                       |
-
-**Extractor**: Override it when your validator writes a shape neither the form directive nor Angular uses. It also normalises `errorsChange`, so a form mixing validators still reports one homogeneous `FormidableFormErrors` map:
+Each decorator renders its own field's messages, below the field, in an `aria-live="polite"` region. The text of every message is `FORMIDABLE_ERROR_MESSAGE`'s, which defaults to the error's `message`, else its `kind`. A rule of Signal Forms carries the `message` you wrote; a classic error carries none, so this is where it gets one:
 
 ```ts
-{ provide: FORMIDABLE_ERROR_EXTRACTOR, useValue: (e) => (e?.['issues'] as Issue[])?.map((i) => i.message) ?? [] }
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
+import { ValidationError } from '@angular/forms/signals';
+import { FORMIDABLE_ERROR_MESSAGE, FormidableErrorMessageFn, provideNgxFormidable } from '@cynthion/ngx-formidable';
+
+const errorMessage: FormidableErrorMessageFn = (error) => {
+  const context = (error as ValidationError & { context?: Record<string, unknown> }).context;
+
+  switch (error.kind) {
+    case 'required':
+      return 'This field is required.';
+    case 'minlength':
+      return `At least ${context?.['requiredLength']} characters.`;
+    default:
+      return error.message ?? error.kind;
+  }
+};
+
+export const appConfig: ApplicationConfig = {
+  providers: [...provideNgxFormidable(), { provide: FORMIDABLE_ERROR_MESSAGE, useValue: errorMessage }]
+};
 ```
 
-**Translator**: Override it to resolve messages through `i18n`:
+Provide it with `useFactory` instead to read a translation service through `inject()`.
 
-```ts
-{
-  provide: FORMIDABLE_ERROR_TRANSLATOR,
-  useFactory: (ts: TranslationService) => (key: string) => ts.translate(key),
-  deps: [TranslationService]
-}
+**A Group's Or The Form's Messages**: a rule on a group or on the whole form reports on no field, so no decorator renders it. Place a `formidable-field-errors` where the messages belong and hand it the errors, gated as you want them revealed:
+
+```html
+<formidable-field-errors [errors]="form.when().touched() ? form.when().errors() : []" /> <formidable-field-errors [errors]="form().errors()" />
 ```
 
-When the messages appear is a separate setting from when the validator runs: see [Validation Timing](#validation-timing).
+A group is touched once any field in it is. `formidable-field-errors` renders what it is given and decides nothing about when.
+
+---
+
+## No Validation
+
+Leave the rules out. The fields still edit, render, mask and theme, and a date or time field still reports text it cannot parse, as a `parse` error. Under Signal Forms, `REQUIRED` marks a field required with no check behind it; under `ngModel`, the `required` attribute does the same.
 
 ---
 
 ## Related
 
-- [`user/getting-started.md`](getting-started.md) — install, wiring, the stylesheet, a first form
-- [`user/decoration.md`](decoration.md) — labels, adornments, prefixes, suffixes, hints, required marker
-- [`user/custom-fields.md`](custom-fields.md) — building a field, an option or a validator of your own
-- [`user/components.md`](components.md) — every public component, directive, token and type
+- [`user/forms.md`](forms.md): how the fields meet Signal Forms, reactive forms and template-driven forms
+- [`user/getting-started.md`](getting-started.md): install, wiring, the stylesheet, a first form
+- [`user/decoration.md`](decoration.md): labels, adornments, prefixes, suffixes, hints, required marker
+- [`user/components.md`](components.md): every public component, directive, token and type

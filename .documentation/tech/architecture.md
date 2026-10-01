@@ -64,9 +64,9 @@ The portal lives in `src/app/portal/` and is routed with hash location, because 
 | `src/app/example-*`   | The custom field, option, icon and tooltip the portal projects                  |
 | `src/app/validation/` | The Vest and Zod integration specs, run under Signal Forms                      |
 
-**Mirrored Documentation**: the `Docs` route imports `.documentation/user/*.md` as text — `angular.json` maps `.md` to esbuild's `text` loader for the application and the test target — and renders it with `marked`. The markdown is the single source: there is no second copy to drift, and the deploy stays static because nothing is fetched. `docs:check` still guards the token manifest, whose descriptions the **inspector** reads for inline help.
+**Mirrored Documentation**: the `Docs` route imports `.documentation/user/*.md` as text (`angular.json` maps `.md` to esbuild's `text` loader for the application and the test target) and renders it with `marked`, drawing its Mermaid blocks with `mermaid`, loaded on demand. The markdown is the single source: there is no second copy to drift, and the deploy stays static because nothing is fetched. `docs:check` still guards the token manifest, whose descriptions the **inspector** reads for inline help.
 
-**Chrome Insulation**: the portal's own controls read `--formidable-*`, and the user's theme is written to `:root`, so the chrome would follow it. It cannot be insulated by scoping alone — most of the library's variables are derived and declared once, in that `:root` block, so an override further down the tree leaves the derived ones frozen. The chrome therefore re-emits the whole default block under `.portal-chrome`, where derivation recomputes against its own bases. That is what the `formidable-vars` mixin in `_formidable-vars.scss` exists for; it is not forwarded from `_ngx-formidable.scss`, so the closed SCSS surface is unchanged.
+**Chrome Insulation**: the portal's own controls read `--formidable-*`, and the user's theme is written to `:root`, so the chrome would follow it. It cannot be insulated by scoping alone: most of the library's variables are derived and declared once, in that `:root` block, so an override further down the tree leaves the derived ones frozen. The chrome therefore re-emits the whole default block under `.portal-chrome`, where derivation recomputes against its own bases. That is what the `formidable-vars` mixin in `_formidable-vars.scss` exists for; it is not forwarded from `_ngx-formidable.scss`, so the closed SCSS surface is unchanged.
 
 ## Build And Publish
 
@@ -86,9 +86,9 @@ Two workflows in `.github/workflows/`. Both take the Node version from `.nvmrc` 
 | `ci.yml`     | Push to `main`, pull request, manual | `prettier:check`, `lint`, `style-lint`, `docs:check`, `docs:lint`, `build:lib`, both test projects, `build` |
 | `deploy.yml` | Push to `main`, manual               | Builds the portal and deploys `dist/ngx-formidable-portal/browser` to GitHub Pages                          |
 
-- **Checks Mirror The Scripts**: `ci.yml` runs the same scripts a contributor runs locally, in the order of the Verification table in [`impl/definition-of-done.md`](../impl/definition-of-done.md). `build:lib` is in it because it is also the type and template check — there is no standalone typecheck script.
+- **Checks Mirror The Scripts**: `ci.yml` runs the same scripts a contributor runs locally, in the order of the Verification table in [`impl/definition-of-done.md`](../impl/definition-of-done.md). `build:lib` is in it because it is also the type and template check; there is no standalone typecheck script.
 - **Tests**: the two projects are separate steps, because `ng test` takes one project at a time. Both run in `ChromeHeadless` with `--watch=false`.
-- **Dependency Updates**: Renovate opens the pull requests, and `ci.yml` checks them like any other — see [`impl/renovate.md`](../impl/renovate.md).
+- **Dependency Updates**: Renovate opens the pull requests, and `ci.yml` checks them like any other. See [`impl/renovate.md`](../impl/renovate.md).
 
 ## Consumer Setup
 
@@ -99,7 +99,7 @@ One wiring path, `provideNgxFormidable()`, listed in `bootstrapApplication` or i
 | Path                                                 | Purpose                                                          |
 | :--------------------------------------------------- | :--------------------------------------------------------------- |
 | `projects/ngx-formidable/src/lib/`                   | Library source (components, directives, helpers, models, styles) |
-| `projects/ngx-formidable/src/public-api.ts`          | Public API — everything the package exports                      |
+| `projects/ngx-formidable/src/public-api.ts`          | Public API: everything the package exports                       |
 | `projects/ngx-formidable/src/lib/components/fields/` | Field components                                                 |
 | `projects/ngx-formidable/src/lib/styles/`            | SCSS tokens, `:root` CSS-variable block, field mixins            |
 | `src/app/`                                           | The portal                                                       |

@@ -34,7 +34,14 @@
               "includePaths": ["projects/ngx-formidable/src/lib/styles"]
             },
             "scripts": [],
-            "allowedCommonJsDependencies": ["pikaday"],
+            "allowedCommonJsDependencies": [
+              "pikaday",
+              "@braintree/sanitize-url",
+              "cytoscape-cose-bilkent",
+              "cytoscape-fcose",
+              "dayjs",
+              "fastdom"
+            ],
             "browser": "src/main.ts",
             "loader": {
               ".md": "text"
