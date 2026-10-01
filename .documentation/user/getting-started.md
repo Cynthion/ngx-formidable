@@ -1,8 +1,8 @@
 # Getting Started
 
-Install the package, wire it once, import the stylesheet, build a form. Every step below is the whole step — there is no further configuration.
+Install the package, provide it, import the stylesheet, and build a form with Signal Forms and Angular's rules. Every step below is the whole step.
 
-The API each symbol carries is in [`user/components.md`](components.md).
+The API each symbol carries is in [Components](components.md). How the fields meet reactive and template-driven forms is in [Forms](forms.md).
 
 ## Install
 
@@ -12,14 +12,15 @@ Install the package and its peer dependencies:
 npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday
 ```
 
-| Peer       | Needed For                                          |
-| :--------- | :-------------------------------------------------- |
-| `date-fns` | Parsing and formatting the date and time fields     |
-| `ngx-mask` | Input masking                                       |
-| `pikaday`  | The date field's calendar                           |
-| `vest`     | Optional — only for `@cynthion/ngx-formidable/vest` |
+| Peer       | Needed For                                      |
+| :--------- | :---------------------------------------------- |
+| `date-fns` | Parsing and formatting the date and time fields |
+| `ngx-mask` | Input masking                                   |
+| `pikaday`  | The date field's calendar                       |
 
-Angular's `common`, `core` and `forms`, and `rxjs`, are peers you already have. The floor is the Angular major in the package's `peerDependencies`: the library is published in partial compilation mode, so your app's linker has to be at or above the major it was built with.
+Angular's `common`, `core` and `forms`, and `rxjs`, are peers you already have. The package is published in partial compilation mode, so your app's own compiler links it, under any Angular version its `peerDependencies` accept.
+
+No validation library is a peer. Install `vest` or `zod` only to validate with one, see [Validation](validation.md).
 
 `pikaday` ships CommonJS, so a build warns `Module 'pikaday' … is not ESM` until you name it in `angular.json`:
 
@@ -29,42 +30,23 @@ Angular's `common`, `core` and `forms`, and `rxjs`, are peers you already have. 
 
 ---
 
-## Wire It
-
-### Standalone
+## Provide It
 
 ```ts
-// main.ts
-import { bootstrapApplication } from '@angular/platform-browser';
+// app.config.ts
+import { ApplicationConfig } from '@angular/core';
 import { provideNgxFormidable } from '@cynthion/ngx-formidable';
-import { App } from './app/app';
 
-bootstrapApplication(App, {
+export const appConfig: ApplicationConfig = {
   providers: [...provideNgxFormidable()]
-}).catch(console.error);
+};
 ```
 
-### NgModule
-
-```ts
-// app.module.ts
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { NgxFormidableModule } from '@cynthion/ngx-formidable';
-import { App } from './app';
-
-@NgModule({
-  imports: [BrowserModule, NgxFormidableModule.forRoot()],
-  bootstrap: [App]
-})
-export class AppModule {}
-```
-
-Both accept a `NgxFormidableConfig`: `globalMaskConfig` (see [`user/fields.md`](fields.md)) and `defaults`, below.
+An NgModule app lists the same call in its root module's `providers`. It takes an optional `NgxFormidableConfig`: `globalMaskConfig`, the app-wide ngx-mask settings described in [Fields](fields.md), and `defaults`, below.
 
 ### App-Wide Defaults
 
-`defaults` sets once what every template would otherwise repeat.
+`defaults` sets once what every template would otherwise repeat:
 
 ```ts
 provideNgxFormidable({
@@ -76,18 +58,27 @@ provideNgxFormidable({
 });
 ```
 
-| Key                   | Defaults                                                            | Library's Own |
-| :-------------------- | :------------------------------------------------------------------ | :------------ |
-| `labelPosition`       | `formidableFieldLabel`'s `position`                                 | `'inside'`    |
-| `prefixAlign`         | `formidableFieldPrefix`'s `align`                                   | `'center'`    |
-| `suffixAlign`         | `formidableFieldSuffix`'s `align`                                   | `'center'`    |
-| `panelPosition`       | `panelPosition` on the dropdown, autocomplete and date fields       | Per field     |
-| `revealOn`            | The form's `revealOn`, and a field's when it has no form            | `'touched'`   |
-| `hideRequiredMarkers` | The form's `hideRequiredMarkers`, and a field's when it has no form | `false`       |
+| Key                   | Default For                                                   | Library's Own |
+| :-------------------- | :------------------------------------------------------------ | :------------ |
+| `labelPosition`       | `formidableFieldLabel`'s `position`                           | `'inside'`    |
+| `prefixAlign`         | `formidableFieldPrefix`'s `align`                             | `'center'`    |
+| `suffixAlign`         | `formidableFieldSuffix`'s `align`                             | `'center'`    |
+| `panelPosition`       | `panelPosition` on the dropdown, autocomplete and date fields | Per field     |
+| `revealOn`            | Every field's `revealOn`                                      | `'touched'`   |
+| `hideRequiredMarkers` | Whether every field hides its required marker                 | `false`       |
 
-- **A Binding Wins.** An input left unset, or bound to `undefined`, takes the app default, then the library's own. Binding `undefined` is how a dynamic template states nothing.
-- **Read Once.** A field or form reads its defaults when it is created. A default changed afterwards reaches only what is created afterwards.
-- **Scoped By Providing.** Provide `FORMIDABLE_DEFAULTS` in a component's `providers` to give that subtree defaults of its own. They replace the app's, they do not merge with them.
+- **A Binding Wins**: an input left unset, or bound to `undefined`, takes the app default, then the library's own. Binding `undefined` is how a dynamic template states nothing.
+- **Read Once**: a field reads its defaults when it is created. A default changed afterwards reaches only the fields created afterwards.
+- **Scoped By Providing**: provide `FORMIDABLE_DEFAULTS` in a component's `providers` to give the fields it renders defaults of their own. Given as a value, they replace the app's. To change one and keep the rest, spread the app's:
+
+```ts
+providers: [
+  {
+    provide: FORMIDABLE_DEFAULTS,
+    useFactory: () => ({ ...inject(FORMIDABLE_DEFAULTS, { skipSelf: true }), revealOn: 'always' })
+  }
+];
+```
 
 ---
 
@@ -100,98 +91,104 @@ Styling is a stylesheet, not a provider, so it is imported separately:
 @use '@cynthion/ngx-formidable/styles/ngx-formidable';
 ```
 
-That is the whole default theme. To change it, redeclare the variables you want in your own `:root` after the import — see [`user/theming.md`](theming.md).
+That is the whole default theme. To change it, redeclare the variables you want in your own `:root` after the import, see [Theming](theming.md).
 
 ---
 
 ## Build A Form
 
-The library holds the model and renders the fields. Rules come from whatever validator you provide, or from none at all — see [`user/validation.md`](validation.md). The example below uses Vest, whose validator ships in the `@cynthion/ngx-formidable/vest` entry point.
+The forms API holds the model and its rules; the library renders the fields around them. The form below is Signal Forms with Angular's own rules, the layout the Studio exports. [Validation](validation.md) swaps the rules for Vest or Zod, and [Forms](forms.md) binds the same fields through reactive or template-driven forms.
 
-### 1. Declare The Model, The Shape And The Rules
+### 1. Declare The Model And Its Rules
 
-Keep them in one `*.form.ts` per form. The layout is a convention, not a requirement: what the model has to match is **The Model** in [`user/validation.md`](validation.md).
+One `*.form.ts` per form holds the model's type, its initial model and its `schema()`:
 
 ```ts
 // user.form.ts
-import { DeepPartial, DeepRequired } from '@cynthion/ngx-formidable';
-import { create, enforce, Modes, mode, only, Suite, test } from 'vest';
+import { required, schema } from '@angular/forms/signals';
 
-export interface User {
+export interface UserModel {
   name: string;
-  hobby: 'reading' | 'gaming' | 'swimming';
-  birthdate: Date;
+  hobby: string | null;
+  birthdate: Date | null;
 }
 
-export type UserFormModel = DeepPartial<User>;
-export type UserFormShape = DeepRequired<UserFormModel>;
-
-/** Initial values. Every key the form edits, `undefined` where it starts empty. */
-export const initialUserFormModel: UserFormModel = {
-  name: undefined,
-  hobby: undefined,
-  birthdate: undefined
-};
-
-/** Every key the model may carry, all required — a dev-mode typo check, not a validator. */
-export const userFormShape: UserFormShape = {
+/** Every key defined: Signal Forms binds a field only to a key its model holds. */
+export const initialUserModel: UserModel = {
   name: '',
-  hobby: 'reading',
-  birthdate: new Date()
+  hobby: null,
+  birthdate: null
 };
 
-export const userFormSuite: Suite<string, string, (model: UserFormModel, field?: string) => void> = create((model: UserFormModel, field?: string) => {
-  mode(Modes.ALL); // Vest 6 defaults to `EAGER`, which reports only a field's first failing message
-  if (field) only(field); // the form asks about one target at a time
-
-  test('name', 'Name is required.', () => {
-    enforce(model.name).isNotBlank();
-  });
+export const userSchema = schema<UserModel>((path) => {
+  required(path.name, { message: 'Name is required.' });
+  required(path.birthdate, { message: 'When were you born?' });
 });
 ```
 
-### 2. Write The Template
+Each field writes one value type into the model: `string` for the text fields, `string | null` for the single-choice fields, `Date | null` for a date. The whole list is in **The Model** in [Forms](forms.md).
+
+### 2. Hold The Form
+
+The component holds the model as a `signal`, and the form over it:
+
+```ts
+// user-form.ts
+import { Component, signal } from '@angular/core';
+import { form, FormField, FormRoot } from '@angular/forms/signals';
+import { DateField, DropdownField, FieldDecorator, FieldHint, FieldLabel, FormidableOption, InputField } from '@cynthion/ngx-formidable';
+import { initialUserModel, UserModel, userSchema } from './user.form';
+
+@Component({
+  selector: 'app-user-form',
+  templateUrl: './user-form.html',
+  imports: [FormRoot, FormField, DateField, DropdownField, FieldDecorator, FieldHint, FieldLabel, InputField]
+})
+export class UserForm {
+  readonly model = signal<UserModel>(initialUserModel);
+  readonly form = form(this.model, userSchema, {
+    submission: { action: async () => this.save(this.model()) }
+  });
+
+  readonly today = new Date();
+
+  readonly hobbyOptions: FormidableOption[] = [
+    { value: 'reading', label: 'Reading' },
+    { value: 'gaming', label: 'Gaming' },
+    { value: 'swimming', label: 'Swimming' }
+  ];
+
+  private async save(user: UserModel): Promise<void> {
+    await fetch('/api/users', { method: 'POST', body: JSON.stringify(user) });
+  }
+}
+```
+
+### 3. Write The Template
+
+Every field is bound by `[formField]` and wrapped in a decorator, which renders its label, its hint, its required marker and its messages:
 
 ```html
-<form
-  formidableForm
-  [formValue]="formValue$ | async"
-  [formShape]="formShape"
-  [formSuite]="formSuite"
-  (formValueChange)="formValue$.next($event)"
-  (validChange)="isValid$.next($event)"
-  (errorsChange)="errors$.next($event)"
-  (ngSubmit)="onSubmit()">
+<!-- user-form.html -->
+<form [formRoot]="form">
   <formidable-field-decorator>
-    <formidable-input-field
-      formidableFieldErrors
-      name="name"
-      [markRequired]="true"
-      [ngModel]="(formValue$ | async)?.name" />
+    <formidable-input-field [formField]="form.name" />
     <div formidableFieldLabel>Name</div>
     <div formidableFieldHint>As it appears on your passport</div>
   </formidable-field-decorator>
 
   <formidable-field-decorator>
     <formidable-dropdown-field
-      formidableFieldErrors
-      name="hobby"
       [options]="hobbyOptions"
-      [ngModel]="(formValue$ | async)?.hobby" />
-    <div
-      formidableFieldLabel
-      [position]="'inside'">
-      Hobby
-    </div>
+      [formField]="form.hobby" />
+    <div formidableFieldLabel>Hobby</div>
   </formidable-field-decorator>
 
   <formidable-field-decorator>
     <formidable-date-field
-      formidableFieldErrors
-      name="birthdate"
       [maxDate]="today"
       [unicodeTokenFormat]="'dd.MM.yyyy'"
-      [ngModel]="(formValue$ | async)?.birthdate" />
+      [formField]="form.birthdate" />
     <div formidableFieldLabel>Birthdate</div>
   </formidable-field-decorator>
 
@@ -199,42 +196,21 @@ export const userFormSuite: Suite<string, string, (model: UserFormModel, field?:
 </form>
 ```
 
-### 3. Hold The State
-
-The form directive reports through observable outputs, so the component keeps subjects and derives from them.
-
-```ts
-readonly formShape = userFormShape;
-readonly formSuite = userFormSuite;
-
-readonly formValue$ = new BehaviorSubject<UserFormModel>(initialUserFormModel);
-readonly isValid$ = new BehaviorSubject<boolean | null>(null);
-readonly errors$ = new BehaviorSubject<FormidableFormErrors>({});
-
-readonly hobbyOptions: FormidableOption[] = [
-  { value: 'reading', label: 'Reading' },
-  { value: 'gaming', label: 'Gaming' },
-  { value: 'swimming', label: 'Swimming' }
-];
-
-onSubmit(): void {
-  // Every rule runs asynchronously, so the form is still PENDING when ngSubmit fires.
-  this.isValid$.pipe(take(1)).subscribe((isValid) => {
-    if (isValid) this.save(this.formValue$.value);
-  });
-}
-```
+- **The Rules Mark The Fields**: `required()` is what marks Name and Birthdate required. Nothing in the template states it, and nothing may: Signal Forms owns a field's `required`, `readonly`, `disabled` and limits.
+- **Messages Wait For The User**: a field's messages appear once the user has left it, `touched` being the default reveal.
+- **A Submit Reveals Everything**: `[formRoot]` submits the form, which touches every field, and runs the `action` unless the form is invalid.
 
 ---
 
 ## Related
 
-| To Do This                                                | Read                                        |
-| :-------------------------------------------------------- | :------------------------------------------ |
-| Pick a field, work its keyboard, mask it, place its panel | [`user/fields.md`](fields.md)               |
-| Label it, prefix it, hint it, mark it required            | [`user/decoration.md`](decoration.md)       |
-| Connect Vest, zod, Angular's validators, or none          | [`user/validation.md`](validation.md)       |
-| Repaint and reshape it                                    | [`user/theming.md`](theming.md)             |
-| Build a theme in the browser and paste the result back    | [`user/studio.md`](studio.md)               |
-| Build a field the library does not have                   | [`user/custom-fields.md`](custom-fields.md) |
-| Look up an input, a type or a token                       | [`user/components.md`](components.md)       |
+| To Do This                                                 | Read                              |
+| :--------------------------------------------------------- | :-------------------------------- |
+| Bind the fields through reactive or template-driven forms  | [Forms](forms.md)                 |
+| Validate with Vest, Zod, Angular's rules or none           | [Validation](validation.md)       |
+| Pick a field, work its keyboard, mask it, place its panel  | [Fields](fields.md)               |
+| Label it, prefix it, hint it, mark it required             | [Decoration](decoration.md)       |
+| Repaint and reshape it                                     | [Theming](theming.md)             |
+| Build a theme and a form in the browser and take both away | [Studio](studio.md)               |
+| Build a field the library does not have                    | [Custom Fields](custom-fields.md) |
+| Look up an input, a type or a token                        | [Components](components.md)       |

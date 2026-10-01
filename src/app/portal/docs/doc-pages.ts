@@ -2,6 +2,7 @@ import components from '../../../../.documentation/user/components.md';
 import customFields from '../../../../.documentation/user/custom-fields.md';
 import decoration from '../../../../.documentation/user/decoration.md';
 import fields from '../../../../.documentation/user/fields.md';
+import forms from '../../../../.documentation/user/forms.md';
 import gettingStarted from '../../../../.documentation/user/getting-started.md';
 import themeReference from '../../../../.documentation/user/theme-reference.md';
 import studio from '../../../../.documentation/user/studio.md';
@@ -32,8 +33,15 @@ export const DOC_PAGES: readonly DocPage[] = [
     slug: 'getting-started',
     title: 'Getting Started',
     kind: 'Guide',
-    purpose: 'Registry, install, wiring, the stylesheet, a first form',
+    purpose: 'Install, wiring, the stylesheet, a first form',
     markdown: gettingStarted
+  },
+  {
+    slug: 'forms',
+    title: 'Forms',
+    kind: 'Guide',
+    purpose: 'How the fields meet Signal Forms, reactive forms and template-driven forms',
+    markdown: forms
   },
   {
     slug: 'fields',
@@ -53,7 +61,7 @@ export const DOC_PAGES: readonly DocPage[] = [
     slug: 'validation',
     title: 'Validation',
     kind: 'Guide',
-    purpose: 'How to connect a validator: Vest, Angular, zod or none',
+    purpose: "Angular's rules, Vest, Zod or none; messages and their reveal",
     markdown: validation
   },
   {
@@ -74,7 +82,7 @@ export const DOC_PAGES: readonly DocPage[] = [
     slug: 'custom-fields',
     title: 'Custom Fields',
     kind: 'Guide',
-    purpose: 'Building a field, an option or a validator of your own',
+    purpose: 'Building a field or an option of your own',
     markdown: customFields
   },
   {

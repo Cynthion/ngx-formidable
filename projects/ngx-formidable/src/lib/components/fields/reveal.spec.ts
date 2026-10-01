@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, Type, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ValidationError } from '@angular/forms/signals';
+import { FormControl, FormGroup, FormsModule, NgForm, NgModel, ReactiveFormsModule, Validators } from '@angular/forms';
+import { form, FormField, FormRoot, required, ValidationError } from '@angular/forms/signals';
 import { FormidableReveal } from '../../models/validation.model';
 import { bindField, BoundField, FORMS_APIS } from '../../testing/bind-field';
 import { fill } from '../../testing/dom';
@@ -34,8 +35,70 @@ class StateHost {
   readonly pending = signal(false);
 }
 
+/** A required field in a form that submits, as a consumer writes one under each forms API. */
+@Component({
+  imports: [FormRoot, FormField, FieldDecorator, InputField],
+  template: `
+    <form [formRoot]="form">
+      <formidable-field-decorator>
+        <formidable-input-field [formField]="form.name" />
+      </formidable-field-decorator>
+    </form>
+  `
+})
+class SignalSubmitHost {
+  readonly model = signal({ name: '' });
+  readonly form = form(this.model, (path) => required(path.name), { submission: { action: async () => undefined } });
+}
+
+@Component({
+  imports: [ReactiveFormsModule, FieldDecorator, InputField],
+  template: `
+    <form [formGroup]="group">
+      <formidable-field-decorator>
+        <formidable-input-field formControlName="name" />
+      </formidable-field-decorator>
+    </form>
+  `
+})
+class ReactiveSubmitHost {
+  readonly group = new FormGroup({ name: new FormControl('', Validators.required) });
+
+  markAllAsTouched(): void {
+    this.group.markAllAsTouched();
+  }
+}
+
+@Component({
+  imports: [FormsModule, FieldDecorator, InputField],
+  template: `
+    <form>
+      <formidable-field-decorator>
+        <formidable-input-field
+          name="name"
+          [(ngModel)]="name" />
+      </formidable-field-decorator>
+    </form>
+  `
+})
+class TemplateDrivenSubmitHost {
+  readonly ngForm = viewChild.required(NgForm);
+  readonly ngModel = viewChild.required(NgModel);
+  readonly name = signal('');
+
+  markAllAsTouched(): void {
+    this.ngForm().form.markAllAsTouched();
+  }
+}
+
 function messages(root: HTMLElement): string[] {
   return Array.from(root.querySelectorAll('formidable-field-errors .error'), (error) => error.textContent!.trim());
+}
+
+/** Submits the form as a submit button does. */
+async function submit(fixture: ComponentFixture<unknown>): Promise<void> {
+  (fixture.nativeElement as HTMLElement).querySelector('form')!.requestSubmit();
+  await settle(fixture);
 }
 
 /** Whether the field shows as invalid, which the control and its decorator must agree on. */
@@ -173,5 +236,50 @@ describe('reveal', () => {
       expect(isInvalid(root)).toBe(true);
       expect(messages(root)).toEqual([]);
     });
+  });
+
+  // `touched` covers a submit only where the submit touches: Signal Forms' `submit()` does, a classic
+  // `ngSubmit` does not.
+  describe('on submit', () => {
+    it('reveals every field on a Signal Forms submit', async () => {
+      const fixture = TestBed.createComponent(SignalSubmitHost);
+      await settle(fixture);
+
+      expect(messages(fixture.nativeElement)).toEqual([]);
+
+      await submit(fixture);
+
+      expect(messages(fixture.nativeElement)).toEqual(['required']);
+      expect(isInvalid(fixture.nativeElement)).toBe(true);
+    });
+
+    const classicHosts: Record<string, Type<ReactiveSubmitHost | TemplateDrivenSubmitHost>> = {
+      'reactive': ReactiveSubmitHost,
+      'template-driven': TemplateDrivenSubmitHost
+    };
+
+    for (const [api, host] of Object.entries(classicHosts)) {
+      it(`reveals nothing on a ${api} submit until the form marks its controls touched`, async () => {
+        const fixture = TestBed.createComponent(host);
+        await settle(fixture);
+
+        // `ngModel` attaches no directive validator to a custom control, so its rule goes on imperatively.
+        const component = fixture.componentInstance;
+        if (component instanceof TemplateDrivenSubmitHost) {
+          component.ngModel().control.addValidators(Validators.required);
+          component.ngModel().control.updateValueAndValidity();
+          await settle(fixture);
+        }
+
+        await submit(fixture);
+
+        expect(messages(fixture.nativeElement)).toEqual([]);
+
+        component.markAllAsTouched();
+        await settle(fixture);
+
+        expect(messages(fixture.nativeElement)).toEqual(['required']);
+      });
+    }
   });
 });

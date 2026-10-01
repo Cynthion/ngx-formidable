@@ -1,8 +1,8 @@
 # Documentation Guidelines
 
-How to write docs in `.documentation/`. This is the single source for documentation style. The index is `.documentation/README.md`.
+How to write docs in `.documentation/`. This is the single source for documentation style. The index is [`.documentation/README.md`](../README.md).
 
-Documentation sits in three buckets, one per audience. The root `README.md` is the entry point for consumers and links onward.
+Documentation sits in three buckets, one per audience. The root [`README.md`](../../README.md) is the entry point for consumers and links onward.
 
 | Bucket  | Audience               | Holds                                                                                                          |
 | :------ | :--------------------- | :------------------------------------------------------------------------------------------------------------- |
@@ -24,7 +24,7 @@ A document belongs to exactly one bucket. When two overlap, one links to the oth
 - **Table Labels**: Use Pascal Case for table headings and left-align text columns, center-align boolean and short value columns, and right-align numeric columns.
 - **Table Alignment**: Align text columns left with `:--`, boolean and short value columns center with `:--:`, and numeric columns right with `--:`.
 - **Inline Code**: Use backticks for all commands, file names, identifiers, values, and inline code.
-- **File References**: Name a document by its full path relative to `.documentation/`, bucket and group included, as the text of a link to it, for example [`user/theming.md`](../user/theming.md).
+- **File References**: Name a document by its full path relative to `.documentation/`, bucket and group included, as the text of a link to it, for example [`tech/architecture.md`](../tech/architecture.md). A `user/` document is the exception, see **Links Between User Documents**.
 - **Version References**: Do not document version numbers. Refer to tools and dependencies by name. Treat `package.json` and similar files as the source of truth for versions.
 - **Preferred Structures**: Prefer lists, tables, and Mermaid diagrams over prose when they communicate the same information.
 - **Section Separators**: Use `---` only between `##` sections. Never use it within a section.
@@ -32,7 +32,7 @@ A document belongs to exactly one bucket. When two overlap, one links to the oth
 - **Explicit Line Breaks**: Use `<br/>` only when a line break is required inside a table cell or Mermaid diagram.
 - **Mermaid Labels**: Use Pascal Case for labels, titles, table label entries, etc. Use `<br/>` for line breaks. Do not use `\n`.
 - **Tone**: Treat documentation as reference material, not promotional content. Use plain English and factual statements. Do not use promotional adjectives or adverbs.
-- **Punctuation**: Use an em dash for a parenthetical or an abrupt turn. Do not use one as a general purpose connector where a comma, colon or semicolon reads as well.
+- **Punctuation**: Avoid using em dashes (—). Do not use one as a general purpose connector where a comma, colon or semicolon reads as well.
 - **Placeholders**: Wrap a placeholder in backticks, for example `` `<TODO>` ``. Unbackticked angle brackets are parsed as inline HTML and fail the lint gate. Name the roadmap phase or backlog item when one exists, so the placeholder is traceable.
 - **Maintenance**: Keep documentation up-to-date with code changes. Review and update regularly to ensure accuracy and relevance.
 
@@ -49,7 +49,7 @@ A document belongs to exactly one bucket. When two overlap, one links to the oth
 - **Audience**: Developers who use the library in their own Angular application.
 - **Content**: A **guide** teaches a topic; a **reference** lists what it accepts. Code examples compile against the published package.
 - **Related Section**: May end with a `## Related` section that links other relevant user documents.
-- **Rendered By The Portal**: every `user/` document is also rendered by the portal's `Docs` route. How its links resolve there is in [`tech/portal.md`](../tech/portal.md).
+- **Links Between User Documents**: a `user/` document names another by its title, and links no `tech/` or `impl/` document.
 
 ## Link Notation
 
@@ -65,7 +65,7 @@ Autolink notation, `<https://example.com>`, is rejected by the lint gate.
 
 - **Assets Directory**: Every file a document references, image or template, lives in an `assets/` directory beside that document. Never beside the document itself.
 - **Asset References**: Reference an asset relative to the referencing document, for example `![name](./assets/image.png)`.
-- **README Exception**: the root `README.md` is also the npm package's README, where a repository path does not resolve. It references an asset and a document by its absolute GitHub URL on `main`.
+- **README Exception**: the root [`README.md`](../../README.md) is also the npm package's README, where a repository path does not resolve. It references an asset and a document by its absolute GitHub URL on `main`.
 - **Show It Live, Not In A Picture**: what the fields look like is shown on the portal's Specimen route, where every name is a link, rather than in screenshots a document embeds. The one exception is `assets/ladder.png`, the README's animated hero, because npm renders no live page. It is generated by `npm run screenshots` from the served portal; regenerate it after a visual change and never edit it by hand.
 
 ## Source Code

@@ -42,12 +42,12 @@ sequenceDiagram
     participant B as Browser
     participant F as Field
     participant M as NgxMask
-    B->>F: mousedown — the press is recorded
-    B->>F: focus — the keyboard selection is skipped
+    B->>F: mousedown: the press is recorded
+    B->>F: focus: the keyboard selection is skipped
     B->>B: the caret is placed from the click
-    B->>F: mouseup — the chosen position is read
-    B->>M: click — the caret is pulled to the end of the typed text
-    B->>F: click — the chosen position is written back
+    B->>F: mouseup: the chosen position is read
+    B->>M: click: the caret is pulled to the end of the typed text
+    B->>F: click: the chosen position is written back
 ```
 
 Angular registers a directive's host listeners before a template's on the same element, so the field's `(click)` runs after ngx-mask's and has the last word. Reading on `mouseup` and writing on `click` therefore needs no timer, and nothing is ever left queued to reach back over what the user does next.
@@ -60,7 +60,7 @@ Angular registers a directive's host listeners before a template's on the same e
 
 `endOfMaskedValue` in `helpers/input.helpers.ts` is the only rule with any arithmetic in it, and both jobs use it: the keyboard selection stops there, and a click is clamped to it.
 
-A display with no placeholder left is all content, trailing literals included. One with placeholders left ends after the last filled position — and the separator drawn between that position and the first empty slot belongs to the unused area, so `079 123 __ __` ends at 7, not 8 or 13.
+A display with no placeholder left is all content, trailing literals included. One with placeholders left ends after the last filled position, and the separator drawn between that position and the first empty slot belongs to the unused area, so `079 123 __ __` ends at 7, not 8 or 13.
 
 Which character marks an empty slot is ngx-mask's `placeHolderCharacter`, and it is settable. Every masked field therefore **binds** it rather than inheriting it, so a global `provideNgxMask` cannot change what the library reads its values out of while the library carries on looking for `_`. `BaseField.maskPlaceholderCharacter` is what the caret rules ask; `BaseTextField` overrides it for `input-field` and `textarea-field` from their merged config, and the date and time fields pin it.
 

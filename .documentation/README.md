@@ -8,17 +8,18 @@ Three buckets, one per audience. The root [`README.md`](../README.md) is the ent
 
 For consumers of the library. A **guide** teaches a topic; a **reference** lists what it accepts. The portal's `Docs` route renders the same files.
 
-| File                                                 |   Kind    | Purpose                                                                |
-| :--------------------------------------------------- | :-------: | :--------------------------------------------------------------------- |
-| [`user/getting-started.md`](user/getting-started.md) |   Guide   | Install, wiring, the stylesheet, a first form                          |
-| [`user/fields.md`](user/fields.md)                   |   Guide   | Options, panels, keyboard, dates and times, masking, focus             |
-| [`user/decoration.md`](user/decoration.md)           |   Guide   | Labels, adornments, prefixes, suffixes, hints, required marker         |
-| [`user/validation.md`](user/validation.md)           |   Guide   | Connecting a validator: Vest, Angular, zod or none; conditional fields |
-| [`user/theming.md`](user/theming.md)                 |   Guide   | The default theme, how theming works, and how to find your own         |
-| [`user/studio.md`](user/studio.md)                   |   Guide   | The Studio: build a theme and a form, and take both away               |
-| [`user/custom-fields.md`](user/custom-fields.md)     |   Guide   | Building a field, an option or a validator of your own                 |
-| [`user/components.md`](user/components.md)           | Reference | Catalogue of every public component, directive, token and type         |
-| [`user/theme-reference.md`](user/theme-reference.md) | Reference | Every overridable `--formidable-*` custom property                     |
+| File                                                 |   Kind    | Purpose                                                                    |
+| :--------------------------------------------------- | :-------: | :------------------------------------------------------------------------- |
+| [`user/getting-started.md`](user/getting-started.md) |   Guide   | Install, wiring, the stylesheet, a first form                              |
+| [`user/forms.md`](user/forms.md)                     |   Guide   | How the fields meet Signal Forms, reactive forms and template-driven forms |
+| [`user/fields.md`](user/fields.md)                   |   Guide   | Options, panels, keyboard, dates and times, masking, focus                 |
+| [`user/decoration.md`](user/decoration.md)           |   Guide   | Labels, adornments, prefixes, suffixes, hints, required marker             |
+| [`user/validation.md`](user/validation.md)           |   Guide   | Angular's rules, Vest, Zod or none; messages and their reveal              |
+| [`user/theming.md`](user/theming.md)                 |   Guide   | The default theme, how theming works, and how to find your own             |
+| [`user/studio.md`](user/studio.md)                   |   Guide   | The Studio: build a theme and a form, and take both away                   |
+| [`user/custom-fields.md`](user/custom-fields.md)     |   Guide   | Building a field or an option of your own                                  |
+| [`user/components.md`](user/components.md)           | Reference | Catalogue of every public component, directive, token and type             |
+| [`user/theme-reference.md`](user/theme-reference.md) | Reference | Every overridable `--formidable-*` custom property                         |
 
 ---
 

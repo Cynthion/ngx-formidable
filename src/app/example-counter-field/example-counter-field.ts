@@ -2,7 +2,7 @@ import { Component, ElementRef, input, model, signal, viewChild } from '@angular
 import { BaseField, FieldDecoratorLayout, FORMIDABLE_FIELD, FormidableField } from '@cynthion/ngx-formidable';
 
 /**
- * A custom field built on `BaseField` — the reference implementation for `user/custom-fields.md`.
+ * A custom field built on `BaseField`: the reference implementation for `user/custom-fields.md`.
  *
  * It holds a number rather than a string, steps with the arrow keys, and always renders something where the
  * value goes, which is the three things a text field does not have to deal with.
@@ -87,7 +87,7 @@ export class ExampleCounterField extends BaseField<number> implements Formidable
   private stepBy(by: number): void {
     if (this.readonly() || this.disabled()) return;
 
-    // `setValue` reports nothing for a step that changes nothing — one pressed at `min` or `max`.
+    // `setValue` reports nothing for a step that changes nothing, such as one pressed at `min` or `max`.
     this.setValue(this.clamp(this.value() + by));
   }
 

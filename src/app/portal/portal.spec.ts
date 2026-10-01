@@ -159,6 +159,30 @@ describe('portal', () => {
     expect(names()).toContain('crust');
   }));
 
+  // The Studio filters the address options itself, so the field must render what that filter finds: a typo
+  // fuse.js forgives, and a match on the subtitle, are both lost to a substring test of the label.
+  it('renders what the fuzzy filter finds, beyond what a substring test of the label would', fakeAsync(() => {
+    settle();
+
+    const field = root.querySelector('#chip-tip-address')!.closest('portal-preview-field')!;
+    const input = field.querySelector('formidable-autocomplete-field input') as HTMLInputElement;
+    const rendered = (): string[] =>
+      Array.from(field.querySelectorAll('[role=option]')).map((option) => option.textContent?.trim() ?? '');
+
+    input.focus();
+
+    for (const typed of ['bahnhfo', '8001']) {
+      input.value = typed;
+      input.dispatchEvent(new Event('input'));
+      tick(300); // past the field's filter debounce
+      settle();
+
+      expect(rendered().some((label) => label.startsWith('Bahnhofstrasse 12')))
+        .withContext(typed)
+        .toBeTrue();
+    }
+  }));
+
   // The template picker: choosing a pizza writes the two fields it stands for and leaves every other alone,
   // and a later edit to one of those fields is not undone — a pizza is a starting point, not a lock.
   it('applies a pizza’s preset when the user picks it, and does not re-apply it afterwards', fakeAsync(() => {

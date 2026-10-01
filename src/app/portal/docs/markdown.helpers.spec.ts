@@ -1,7 +1,18 @@
 import { DOC_PAGES } from './doc-pages';
-import { renderDoc, rewriteDocHref } from './markdown.helpers';
+import { drawDiagrams, renderDoc, rewriteDocHref } from './markdown.helpers';
 
 const SLUGS = new Set(DOC_PAGES.map((page) => page.slug));
+
+const FLOWCHART = '```mermaid\nflowchart LR\n  Field --> Decorator\n```';
+
+/** A document rendered into the page, as the `Docs` route puts it there. */
+function mount(markdown: string): HTMLElement {
+  const host = document.createElement('div');
+
+  host.innerHTML = renderDoc(markdown, SLUGS).html;
+  document.body.append(host);
+  return host;
+}
 
 describe('rewriteDocHref', () => {
   it('turns a sibling user document into a route', () => {
@@ -20,9 +31,16 @@ describe('rewriteDocHref', () => {
     expect(result.href).toContain('/tech/layering.md');
   });
 
-  it('leaves an in-page anchor and an absolute URL alone', () => {
-    expect(rewriteDocHref('#underline', SLUGS)).toEqual({ href: '#underline', external: false });
+  it('leaves an absolute URL alone', () => {
     expect(rewriteDocHref('https://angular.dev', SLUGS)).toEqual({ href: 'https://angular.dev', external: true });
+  });
+
+  // A bare fragment would replace the route the portal holds on the hash, and land on the Studio.
+  it('turns an in-page anchor into a route to that anchor in the same document', () => {
+    expect(rewriteDocHref('#underline', SLUGS, 'theme-reference')).toEqual({
+      href: '#/docs/theme-reference/underline',
+      external: false
+    });
   });
 
   it('leaves a document it does not mirror as written', () => {
@@ -99,6 +117,71 @@ describe('renderDoc', () => {
     for (const page of DOC_PAGES) {
       expect(page.markdown.length).withContext(page.slug).toBeGreaterThan(1000);
       expect(page.markdown).withContext(page.slug).toContain('#');
+    }
+  });
+
+  it('gives every in-page link a target the page renders', () => {
+    for (const page of DOC_PAGES) {
+      const { html } = renderDoc(page.markdown, SLUGS, page.slug);
+      const prefix = `#/docs/${page.slug}/`;
+      const anchors = Array.from(html.matchAll(/href="([^"]+)"/g), (match) => match[1]!).filter((href) =>
+        href.startsWith(prefix)
+      );
+
+      for (const anchor of anchors) {
+        expect(html)
+          .withContext(`${page.slug}: ${anchor}`)
+          .toContain(` id="${anchor.slice(prefix.length)}"`);
+      }
+    }
+  });
+
+  it('marks a Mermaid block as a diagram, and keeps the block to show until it is drawn', () => {
+    const host = mount(FLOWCHART);
+    const diagram = host.querySelector<HTMLElement>('.doc-diagram')!;
+
+    expect(diagram.dataset['diagram']).toBe('flowchart LR\n  Field --> Decorator\n');
+    expect(diagram.querySelector('pre code')?.textContent).toContain('Field --> Decorator');
+    host.remove();
+  });
+});
+
+describe('drawDiagrams', () => {
+  it('draws a diagram as an SVG in place of its code block', async () => {
+    const host = mount(FLOWCHART);
+
+    await drawDiagrams(host, false);
+
+    expect(host.querySelector('.doc-diagram pre')).toBeNull();
+    expect(host.querySelector('.doc-diagram svg')?.textContent).toContain('Decorator');
+    host.remove();
+  });
+
+  // Mermaid bakes its theme into the drawing, so the dark one is a drawing of its own.
+  it('draws the diagram again, in the dark theme, from the source it keeps', async () => {
+    const host = mount(FLOWCHART);
+    const style = (): string => host.querySelector('.doc-diagram svg style')?.textContent?.toLowerCase() ?? '';
+
+    await drawDiagrams(host, false);
+    expect(style()).toContain('#ececff');
+
+    await drawDiagrams(host, true);
+    expect(style()).toContain('#1f2020');
+    expect(host.querySelector('.doc-diagram svg')?.textContent).toContain('Decorator');
+    host.remove();
+  });
+
+  // Each checked-in diagram is drawn by the real Mermaid, so one it cannot parse fails here and not on the page.
+  it('draws every checked-in diagram', async () => {
+    for (const page of DOC_PAGES) {
+      const host = mount(page.markdown);
+
+      await drawDiagrams(host, false);
+
+      expect(host.querySelectorAll('.doc-diagram svg').length)
+        .withContext(page.slug)
+        .toBe(page.markdown.split('```mermaid').length - 1);
+      host.remove();
     }
   });
 });

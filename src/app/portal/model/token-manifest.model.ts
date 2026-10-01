@@ -37,7 +37,7 @@ export interface ThemeToken {
   readonly description: string;
 }
 
-/** A variable the library overwrites on the next render, so the portal never offers a control for it. */
+/** A variable the library sets itself where it applies, so the portal never offers a control for it. */
 export interface WrittenToken {
   readonly name: string;
   readonly setBy: string;

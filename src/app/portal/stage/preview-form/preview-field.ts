@@ -215,6 +215,10 @@ export class PreviewField {
     filterOptions(this.options(), this.filterText(), this.spec().filterStrategy ?? 'fuzzy')
   );
 
+  // Each option's `match`. The list is already the strategy's result, and the field's default substring test
+  // would drop whatever it found beyond a substring of the label: a typo, a subtitle.
+  protected readonly matchesEveryFilter = (): boolean => true;
+
   protected onFocus(): void {
     this.focused.emit(this.spec().id);
   }

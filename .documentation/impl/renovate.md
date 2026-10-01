@@ -16,16 +16,16 @@ Dependency updates arrive as pull requests from the Renovate GitHub App. `renova
 
 Packages share a pull request when one peers the other's major. A pull request carrying only half of such a pair fails `npm ci`.
 
-| Pull Request                 | Holds                                                                                     |
-| :--------------------------- | :---------------------------------------------------------------------------------------- |
-| `all non-major dependencies` | Every minor and patch update — Angular, Node and GitHub Actions included                  |
-| `Angular (major)`            | `@angular/*`, `angular-eslint`, `ng-packagr`, `ngx-mask`, `typescript`, `zone.js` — gated |
-| `ESLint (major)`             | `eslint`, `@eslint/js`, `typescript-eslint`, `eslint-plugin-rxjs-x`                       |
-| `Stylelint (major)`          | `stylelint`, `stylelint-config-standard-scss`                                             |
-| `Prettier (major)`           | `prettier`, `prettier-plugin-organize-attributes`                                         |
-| `Karma (major)`              | `karma`, `karma-*`, `jasmine-core`, `@types/jasmine`, `istanbul-lib-instrument`           |
-| `GitHub Actions (major)`     | Every action in `.github/workflows/`                                                      |
-| One per package              | Any other major, such as `marked`, `date-fns` or `vest`                                   |
+| Pull Request                 | Holds                                                                                    |
+| :--------------------------- | :--------------------------------------------------------------------------------------- |
+| `all non-major dependencies` | Every minor and patch update, including Angular, Node and GitHub Actions                 |
+| `Angular (major)`            | Gated: `@angular/*`, `angular-eslint`, `ng-packagr`, `ngx-mask`, `typescript`, `zone.js` |
+| `ESLint (major)`             | `eslint`, `@eslint/js`, `typescript-eslint`, `eslint-plugin-rxjs-x`                      |
+| `Stylelint (major)`          | `stylelint`, `stylelint-config-standard-scss`                                            |
+| `Prettier (major)`           | `prettier`, `prettier-plugin-organize-attributes`                                        |
+| `Karma (major)`              | `karma`, `karma-*`, `jasmine-core`, `@types/jasmine`, `istanbul-lib-instrument`          |
+| `GitHub Actions (major)`     | Every action in `.github/workflows/`                                                     |
+| One per package              | Any other major, such as `marked`, `date-fns` or `vest`                                  |
 
 - **Majors Apart**: a major never joins the monthly non-major pull request, so a breaking release cannot block it.
 - **Lockfile Only**: an update inside an existing caret range changes `package-lock.json` and leaves `package.json` alone.
@@ -36,7 +36,7 @@ Packages share a pull request when one peers the other's major. A pull request c
 
 An Angular major moves with `ng update`, whose migrations Renovate cannot run. The `Angular (major)` update therefore waits on the Dependency Dashboard instead of opening a pull request.
 
-1. Leave the dashboard checkbox unticked — ticking it opens a pull request without the migrations.
+1. Leave the dashboard checkbox unticked: ticking it opens a pull request without the migrations.
 2. On a feature branch, run `ng update @angular/core @angular/cli angular-eslint`, one major at a time.
 3. Raise the `typescript` ceiling in `renovate.json` if the new major lifts the peer that caps it.
 4. Move the library's Angular and `ngx-mask` peers to the new major.
@@ -60,12 +60,12 @@ CI tests only the newest version, so an older major in a widened range is proven
 
 `typescript`, `jasmine-core` and `@types/jasmine` are held below a ceiling by `allowedVersions`. `renovate.json` holds the exact bounds. Renovate does not warn when a ceiling goes stale: raise it in `renovate.json` once its reason is gone.
 
-- **TypeScript**: capped by `@angular/compiler-cli` and `ng-packagr`, which both peer a single TypeScript minor — so the next TypeScript major is unavailable while the current Angular major is the floor.
+- **TypeScript**: capped by `@angular/compiler-cli` and `ng-packagr`, which both peer a single TypeScript minor, so the next TypeScript major is unavailable while the current Angular major is the floor.
 - **Jasmine**: `jasmine-core` stays below the major that makes `describe`/`it` read-only on the global, which breaks `zone.js`'s `patchJasmine` and with it every `fakeAsync` spec.
 
 ---
 
 ## Limits
 
-- **No Scripts**: the hosted app runs no project scripts, so an update that needs a code change — a reformat after a `prettier` release, a migration — fails CI and needs a fix-up commit on its branch.
+- **No Scripts**: the hosted app runs no project scripts, so an update that needs a code change (a reformat after a `prettier` release, a migration) fails CI and needs a fix-up commit on its branch.
 - **Deploy Workflow**: `deploy.yml` runs only on `main`, so no pull request proves an update to the GitHub Pages actions.

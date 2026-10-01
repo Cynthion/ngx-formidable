@@ -1,6 +1,6 @@
 # Definition Of Done
 
-A change is done when every applicable item below holds. Stating that something works is not sufficient — prove it by running the command and reading its output.
+A change is done when every applicable item below holds. Stating that something works is not sufficient: prove it by running the command and reading its output.
 
 ## General
 
@@ -33,7 +33,7 @@ Every command runs from the repository root.
 
 - **Chain**: `ci.yml` runs the CI gates in this order on every push to `main` and every pull request, and stops at the first failing step. The workflow is described in [`tech/architecture.md`](../tech/architecture.md).
 - **No Typecheck Script**: `build:lib` is the type and template check.
-- **Visual Proof**: A user-visible change is proven against the served portal — the Studio's preview form for a field, the Specimen for a theme — not only against a passing test. Reuse a running dev server, never start or stop one that is already running.
+- **Visual Proof**: A user-visible change is proven against the served portal (the Studio's preview form for a field, the Specimen for a theme), not only against a passing test. Reuse a running dev server, never start or stop one that is already running.
 - **README Hero**: `npm run screenshots` regenerates `assets/ladder.png` from the served portal after a visual change, see [`impl/documentation.md`](documentation.md).
 - **No Commit Hooks**: There is no Husky, lint-staged or commit hook. Every gate is run deliberately.
 - **Narrowest Scope First**: Run the narrowest scope first. Widen to the full suite once the narrow scope passes.
@@ -45,7 +45,7 @@ Every command runs from the repository root.
 - **Rules**: `.markdownlint.json` holds the rule configuration and is read by both the command and the editor extension.
 - **Exclusions**: `.markdownlint-cli2.jsonc` lists the paths that must not be linted: build output, the prebuild copy of `README.md`, and the untracked `.research/` and `.plan/` artifacts.
 - **Link Notation**: Autolinks, `<https://example.com>`, fail the gate. Every link carries descriptive text, see [`impl/documentation.md`](documentation.md).
-- **Inline HTML**: Only `br` and `img` are allowed. `README.md` opts out around its centred hero and badges with an inline `markdownlint-disable` comment, because npm renders that markup.
+- **Inline HTML**: Only `br` and `img` are allowed. [`README.md`](../../README.md) opts out around its centred hero and badges with an inline `markdownlint-disable` comment, because npm renders that markup.
 - **Editor**: The `davidanson.vscode-markdownlint` extension reports violations while editing. A clean editor is the fastest way to arrive at a green gate.
 - **Indentation**: Markdown indentation uses spaces, with no line-length limit and trailing whitespace kept, set in `.editorconfig`. Tabs inside a fenced code block are left alone, because the block is verbatim content.
 
@@ -53,7 +53,7 @@ Every command runs from the repository root.
 
 ## Library Obligations
 
-- **Component Catalog**: Any change to a public component, directive, token or type is fully reflected in [`user/components.md`](../user/components.md) — the whole entry, prose and input and output tables, not only the changed row.
+- **Component Catalog**: Any change to a public component, directive, token or type is fully reflected in [`user/components.md`](../user/components.md): the whole entry, prose and input and output tables, not only the changed row.
 - **Public API**: A new public symbol is exported from `public-api.ts`.
 - **Doc Comments**: A new or changed public symbol carries a doc comment per **Code Comments** in [`impl/typescript.md`](typescript.md).
 - **Theme Tokens**: A new or renamed `--formidable-*` variable is added to `src/app/portal/model/token-manifest.ts` as well as [`user/theme-reference.md`](../user/theme-reference.md), with the same description text. `token-manifest.spec.ts` gates the names and `docs:check` gates the text.
@@ -63,14 +63,14 @@ Every command runs from the repository root.
 ## Portal Obligations
 
 - **Showcase**: New or changed fields and features are exercised in the portal's preview form, `src/app/portal/model/preview-form.definition.ts`. A new field component gets a `PortalFieldKind`, a capability row and a specification there, so it renders and can be tried. The portal is the showcase and the only visual-test surface.
-- **Portal Tests**: A change under `src/` passes the portal tests, which `npm test` does not run — the project has to be named.
+- **Portal Tests**: A change under `src/` passes the portal tests, which `npm test` does not run, so the project has to be named.
 
 ---
 
 ## Documentation
 
 - **Conventions**: Documentation guidelines from [`impl/documentation.md`](documentation.md) are followed.
-- **User Documentation**: A change to public usage updates the matching `user/*.md`. The root `README.md` changes only when public usage does.
+- **User Documentation**: A change to public usage updates the matching `user/*.md`. The root [`README.md`](../../README.md) changes only when public usage does.
 - **Technical Documentation**: A change to a design decision or an internal boundary updates the matching `tech/*.md`. Neither restates the `user/` document it relates to.
 - **Implementation Documentation**: A change to the repository setup or a convention updates the matching `impl/*.md`.
 - **Index**: A new, renamed or removed document is reflected in [`README.md`](../README.md).

@@ -22,6 +22,6 @@ Always in effect. Area conventions load automatically for the files they apply t
 
 ## Where Things Live
 
-- **Index**: repository knowledge is indexed by `.documentation/README.md`.
-- **Definition Of Done**: `.documentation/impl/definition-of-done.md`.
-- **AI Setup**: `.documentation/impl/ai-harness.md`.
+- **Index**: repository knowledge is indexed by [`.documentation/README.md`](../../.documentation/README.md).
+- **Definition Of Done**: [`.documentation/impl/definition-of-done.md`](../../.documentation/impl/definition-of-done.md).
+- **AI Setup**: [`.documentation/impl/ai-harness.md`](../../.documentation/impl/ai-harness.md).

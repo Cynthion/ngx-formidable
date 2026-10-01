@@ -123,6 +123,12 @@
     font-weight: 650;
   }
 
+  // A Mermaid diagram, drawn in place of the code block it was written as. Mermaid caps it at its own width.
+  .doc-diagram svg {
+    display: block;
+    margin: 0 auto 12px;
+  }
+
   // The row or heading a link opened the document at.
   .is-anchored {
     background: var(--portal-accent-soft);

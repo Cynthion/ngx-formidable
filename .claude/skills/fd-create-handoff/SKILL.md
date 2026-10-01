@@ -13,7 +13,7 @@ Read `.plan/<slug>.md`, including any Implementation section, and the current `g
 
 ## Output
 
-Emit the brief in the response. Do not create a new file — the plan is the artifact, and a second copy would drift from it.
+Emit the brief in the response. Do not create a new file: the plan is the artifact, and a second copy would drift from it.
 
 ```txt
 ## State

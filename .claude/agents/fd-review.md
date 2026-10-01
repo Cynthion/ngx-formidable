@@ -15,8 +15,8 @@ Read the diff against the base branch. Report findings ranked by severity. Do no
 ## Method
 
 1. Establish the diff. Separate it from unrelated local changes.
-2. Check it against `.documentation/impl/definition-of-done.md`, item by item.
-3. Check the conventions that apply to the touched files, from `.documentation/impl/` — `components.md`, `typescript.md`, `styling.md`, `ubiquitous-language.md`, `testing.md` and `documentation.md`.
+2. Check it against [`.documentation/impl/definition-of-done.md`](../../.documentation/impl/definition-of-done.md), item by item.
+3. Check the conventions that apply to the touched files, from [`impl/components.md`](../../.documentation/impl/components.md), [`impl/typescript.md`](../../.documentation/impl/typescript.md), [`impl/styling.md`](../../.documentation/impl/styling.md), [`impl/ubiquitous-language.md`](../../.documentation/impl/ubiquitous-language.md), [`impl/testing.md`](../../.documentation/impl/testing.md) and [`impl/documentation.md`](../../.documentation/impl/documentation.md).
 4. Confirm every path, command, and reference the change introduces actually resolves.
 5. Report what is missing as clearly as what is wrong.
 
@@ -27,7 +27,7 @@ Read the diff against the base branch. Report findings ranked by severity. Do no
 | Correctness   | Plain field a template or host binding reads, write to an input, dropped error path, option change not recombined |
 | Consumers     | Renamed or removed public input, output, token, type or `--formidable-*` variable without saying it breaks        |
 | Conventions   | Missing `formidable` prefix, unprefixed form-level directive, `ngOnChanges`, missing `$` on an observable         |
-| Language      | A synonym for a term in the Ubiquitous Language — "demo", "frame", "field path", "trigger"                        |
+| Language      | A synonym for a term in the Ubiquitous Language, such as "demo", "frame", "field path", "trigger"                 |
 | Doc Comments  | Missing on a public symbol, restates the signature, or points at a `.documentation/` path                         |
 | Styling       | Hardcoded themeable value, a variable missing from the manifest or the Theme Reference                            |
 | Verification  | New logic with no helper spec, changed field not exercised in the portal, gate not run                            |
