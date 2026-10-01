@@ -144,6 +144,27 @@ describe('Vest through Standard Schema', () => {
     expect(host.form().errors()).toEqual([]);
   }));
 
+  // Vest's own defect, pinned so it is noticed once fixed: https://github.com/ealush/vest/issues/1346.
+  it('fails Vest’s order check on every later run of a test whose target is empty', async () => {
+    await jasmine.spyOnGlobalErrorsAsync(async (globalError) => {
+      const suite = create(() => {
+        test('', 'Nobody delivers today.', () => {
+          enforce(false).isTruthy();
+        });
+      });
+
+      suite['~standard'].validate({});
+      suite['~standard'].validate({});
+      // Vest defers the throw to a timer of its own.
+      await new Promise((resolve) => setTimeout(resolve));
+
+      expect(globalError).toHaveBeenCalledWith(
+        jasmine.objectContaining({ message: jasmine.stringContaining('Tests called in different order') })
+      );
+    });
+  });
+
+  // Angular's own defect, pinned so it is noticed once fixed: https://github.com/angular/angular/issues/71128.
   it('throws on a test whose target runs through a key the model does not have', () => {
     const tree = TestBed.runInInjectionContext(() =>
       form(signal({ name: '' }), (path) =>
