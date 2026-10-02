@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { page } from 'vitest/browser';
+import { NO_OPTIONS_TEXT } from '../../models/formidable.model';
 import { theme } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldOption } from '../field-option/field-option';
@@ -42,37 +44,28 @@ import { RadioGroupField } from './radio-group-field/radio-group-field';
 class TestHost {}
 
 describe('group option alignment', () => {
-  let fixture: ComponentFixture<TestHost>;
-  let root: HTMLElement;
-
   // A group collects its options in a microtask after content init, so the rows need the render to settle.
   beforeEach(async () => {
     configureFormidableTestBed();
 
-    fixture = TestBed.createComponent(TestHost);
-    root = fixture.nativeElement;
-    await settle(fixture);
+    await settle(TestBed.createComponent(TestHost));
   });
 
-  function padding(selector: string): { left: string; right: string } {
-    const style = getComputedStyle(root.querySelector(selector) as HTMLElement);
+  function padding(element: Element): { left: string; right: string } {
+    const style = getComputedStyle(element);
 
     return { left: style.paddingLeft, right: style.paddingRight };
   }
 
   // Where a field's value starts.
-  const fieldText = (): string => padding('formidable-input-field .field').left;
+  const fieldText = (): string => padding(page.getByRole('textbox').element()).left;
 
-  // Where a group's marker starts, and the gap it leaves before the label.
-  const marker = (): { left: string; right: string } => padding('formidable-radio-group-field .field-option-prefix');
+  // Where a group's marker starts, and the gap it leaves before the label. The marker has no role of its own.
+  const marker = (): { left: string; right: string } =>
+    padding(page.getByRole('radiogroup').element().querySelector('.field-option-prefix')!);
 
   // Where a group's empty state starts.
-  const emptyState = (): string => padding('formidable-checkbox-group-field .no-option').left;
-
-  it('renders the three elements the assertions read', () => {
-    expect(root.querySelector('formidable-radio-group-field .field-option-prefix')).toBeTruthy();
-    expect(root.querySelector('formidable-checkbox-group-field .no-option')).toBeTruthy();
-  });
+  const emptyState = (): string => padding(page.getByText(NO_OPTIONS_TEXT).element()).left;
 
   describe('derivation', () => {
     it('starts a marker where a field starts its value', () => {

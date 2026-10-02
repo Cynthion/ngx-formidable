@@ -26,6 +26,7 @@ import { TimeField } from '../components/fields/time-field/time-field';
 import { ToggleField } from '../components/fields/toggle-field/toggle-field';
 import { FieldHint } from '../directives/field-hint';
 import { FieldLabel } from '../directives/field-label';
+import { FieldLabelAdornment } from '../directives/field-label-adornment';
 import { FieldPrefix } from '../directives/field-prefix';
 import { FieldSuffix } from '../directives/field-suffix';
 import { settle } from './test-bed';
@@ -187,6 +188,7 @@ export async function bindField(kind: FieldKind, api: FormsApi, options: BindFie
         FieldDecorator,
         FieldHint,
         FieldLabel,
+        FieldLabelAdornment,
         FieldOption,
         FieldPrefix,
         FieldSuffix,

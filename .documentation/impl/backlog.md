@@ -27,6 +27,10 @@ Library:
 - **Readonly Slider Takes No Click**: a click on a readonly slider leaves it unfocused, though **What Every Field Shares** in [`user/fields.md`](../user/fields.md) says a click still focuses a readonly field. Its `.is-readonly` rule in `styles/mixins/_forms.scss` sets `pointer-events: none` on the range, so no press reaches it, and `preventPointerDown`, which keeps the press from moving the thumb and focuses the field instead, never runs. A readonly field also leaves the tab order, so only `focus()` reaches this one. Deleting that `pointer-events: none` fixes it, and the slider specs in `blocked-edits.spec.ts` still pass without it. The `READONLY_SLIDER_UNCLICKABLE` skip in `focus.spec.ts` passes once it is fixed.
 - **Value-Top Adornment Above The First Line**: a textarea's prefix and suffix sit one field border above its first line. `field-prefix-suffix-value-top` in `styles/mixins/_forms.scss` offsets them by the textarea's top padding from the field's outer edge and leaves the border out: one pixel in the default theme, six under a `6px` `--formidable-field-border-thickness`. The `VALUE_TOP_ABOVE_FIRST_LINE` skip in `field-decorator.spec.ts` passes once it is fixed.
 
+Feedback from consumer:
+
+- Sass resolution: Vite resolves @use '@cynthion/ngx-formidable/styles/...' through the package's exports, which list no styles, so the build failed. I added an alias in viteFinal. The proper fix belongs in your ngx-formidable repo: export ./styles/*, then the alias can go.
+
 ## Features
 
 - **Renovate & Dependabot**: document the distinction and what is what, both probably need to be set up. The goal is to bump dependencies that change and belong together in the same PRs. Less PRs are appreciated.
