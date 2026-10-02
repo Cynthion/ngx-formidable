@@ -60,6 +60,7 @@ The portal lives in `src/app/portal/` and is routed with hash location, because 
 | `portal/stage/`       | The preview form, the model drawer and the accessibility readout                |
 | `portal/inspector/`   | The theme editor, the field editor and the structure editor                     |
 | `portal/export/`      | Theme export and import, and the markup serializer and parser                   |
+| `portal/testing/`     | The spec helpers that open a portal page and drive it as a visitor does         |
 | `src/styles/portal/`  | The portal's own appearance, the chrome insulation and the shared controls      |
 | `src/app/example-*`   | The custom field, option, icon and tooltip the portal projects                  |
 | `src/app/validation/` | The Vest and Zod integration specs, run under Signal Forms                      |

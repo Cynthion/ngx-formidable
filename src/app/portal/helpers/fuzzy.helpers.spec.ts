@@ -1,4 +1,5 @@
-import { PortalOptionSpec } from '../model/field-spec.model';
+import fc from 'fast-check';
+import { PortalFilterStrategy, PortalOptionSpec } from '../model/field-spec.model';
 import { filterOptions } from './fuzzy.helpers';
 
 const OPTIONS: readonly PortalOptionSpec[] = [
@@ -7,33 +8,29 @@ const OPTIONS: readonly PortalOptionSpec[] = [
   { value: 'colossus', label: 'Colossus of Rhodes', subtitle: 'Bronze' }
 ];
 
+/** Text from a small alphabet, both cases, so a filter drawn from it often matches. */
+const text = (minLength: number, maxLength: number) =>
+  fc.string({ unit: fc.constantFrom('a', 'b', 'A', 'B', ' '), minLength, maxLength });
+
+/** Any option list, each option with a label and a subtitle. */
+const OPTION_LISTS = fc
+  .array(fc.record({ label: text(1, 10), subtitle: text(1, 10) }), { maxLength: 8 })
+  .map((entries) => entries.map((entry, index): PortalOptionSpec => ({ value: `o${index}`, ...entry })));
+
+/** Any filter that is not blank. */
+const FILTERS = text(1, 4).filter((filter) => filter.trim() !== '');
+
+const STRATEGIES = fc.constantFrom<PortalFilterStrategy>('fuzzy', 'contains', 'starts-with');
+
+const values = (matches: ReturnType<typeof filterOptions>) => matches.map((match) => match.option.value);
+
 describe('filterOptions', () => {
-  it('returns the whole list, unhighlighted, for an empty filter', () => {
-    const result = filterOptions(OPTIONS, '   ');
-
-    expect(result.length).toBe(OPTIONS.length);
-    expect(result[0]?.highlights.labelEntries).toEqual([]);
-  });
-
   it('matches on the label', () => {
-    const result = filterOptions(OPTIONS, 'colossus');
-
-    expect(result.map((entry) => entry.option.value)).toEqual(['colossus']);
+    expect(values(filterOptions(OPTIONS, 'colossus'))).toEqual(['colossus']);
   });
 
   it('matches on the subtitle too', () => {
-    const result = filterOptions(OPTIONS, 'bronze');
-
-    expect(result.map((entry) => entry.option.value)).toContain('colossus');
-  });
-
-  it('splits the matched label into runs that rebuild the original text', () => {
-    const [first] = filterOptions(OPTIONS, 'rhodes');
-    const entries = first!.highlights.labelEntries;
-
-    expect(entries.length).toBeGreaterThan(1);
-    expect(entries.map((entry) => entry.text).join('')).toBe('Colossus of Rhodes');
-    expect(entries.some((entry) => entry.isHighlighted)).toBe(true);
+    expect(values(filterOptions(OPTIONS, 'bronze'))).toContain('colossus');
   });
 
   it('returns nothing for a filter that matches nothing', () => {
@@ -45,29 +42,74 @@ describe('filterOptions', () => {
   it('forgives a typo under fuzzy and not under the literal strategies', () => {
     const typo = 'colosus';
 
-    expect(filterOptions(OPTIONS, typo, 'fuzzy').map((entry) => entry.option.value)).toEqual(['colossus']);
+    expect(values(filterOptions(OPTIONS, typo, 'fuzzy'))).toEqual(['colossus']);
     expect(filterOptions(OPTIONS, typo, 'contains')).toEqual([]);
     expect(filterOptions(OPTIONS, typo, 'starts-with')).toEqual([]);
   });
 
-  it('matches mid-label under contains but not under starts-with', () => {
-    expect(filterOptions(OPTIONS, 'alexandria', 'contains').map((entry) => entry.option.value)).toEqual(['library']);
-    expect(filterOptions(OPTIONS, 'alexandria', 'starts-with')).toEqual([]);
-    expect(filterOptions(OPTIONS, 'pharos', 'starts-with').map((entry) => entry.option.value)).toEqual(['lighthouse']);
+  it('returns the whole list, in order and unhighlighted, for a blank filter', () => {
+    const blank = fc.string({ unit: fc.constantFrom(' ', '\t', '\n'), maxLength: 3 });
+
+    fc.assert(
+      fc.property(OPTION_LISTS, blank, STRATEGIES, (options, filter, strategy) => {
+        expect(filterOptions(options, filter, strategy)).toEqual(
+          options.map((option) => ({ option, highlights: { labelEntries: [], subtitleEntries: [] } }))
+        );
+      })
+    );
   });
 
-  // Only the label, which is the difference from fuzzy: `lighthouse` carries Alexandria as its subtitle and
-  // a literal strategy does not reach it.
-  it('reads only the label under a literal strategy', () => {
-    expect(filterOptions(OPTIONS, 'bronze', 'contains')).toEqual([]);
-    expect(filterOptions(OPTIONS, 'bronze', 'fuzzy').map((entry) => entry.option.value)).toEqual(['colossus']);
+  it('returns only options from the list, each once', () => {
+    fc.assert(
+      fc.property(OPTION_LISTS, FILTERS, STRATEGIES, (options, filter, strategy) => {
+        const found = filterOptions(options, filter, strategy).map((match) => match.option);
+
+        expect(new Set(found).size).toBe(found.length);
+        for (const option of found) expect(options).toContain(option);
+      })
+    );
   });
 
-  it('marks the matched run under a literal strategy too', () => {
-    const [first] = filterOptions(OPTIONS, 'rhodes', 'contains');
-    const entries = first!.highlights.labelEntries;
+  it('splits a matched label and subtitle into runs that rebuild them', () => {
+    fc.assert(
+      fc.property(OPTION_LISTS, FILTERS, STRATEGIES, (options, filter, strategy) => {
+        for (const { option, highlights } of filterOptions(options, filter, strategy)) {
+          const rebuilt = (entries: readonly { text: string }[]) => entries.map((entry) => entry.text).join('');
 
-    expect(entries.map((entry) => entry.text).join('')).toBe('Colossus of Rhodes');
-    expect(entries.filter((entry) => entry.isHighlighted).map((entry) => entry.text)).toEqual(['Rhodes']);
+          if (highlights.labelEntries.length) expect(rebuilt(highlights.labelEntries)).toBe(option.label);
+          if (highlights.subtitleEntries.length) expect(rebuilt(highlights.subtitleEntries)).toBe(option.subtitle);
+        }
+      })
+    );
+  });
+
+  it('finds under contains every label holding the filter, in order, and marks where', () => {
+    fc.assert(
+      fc.property(OPTION_LISTS, FILTERS, (options, filter) => {
+        const needle = filter.trim().toLowerCase();
+        const found = filterOptions(options, filter, 'contains');
+
+        expect(values(found)).toEqual(
+          options.filter((option) => option.label.toLowerCase().includes(needle)).map((option) => option.value)
+        );
+        for (const { highlights } of found) {
+          const marked = highlights.labelEntries.filter((entry) => entry.isHighlighted);
+
+          expect(marked.map((entry) => entry.text.toLowerCase())).toEqual([needle]);
+        }
+      })
+    );
+  });
+
+  it('finds under starts-with every label opening with the filter, in order', () => {
+    fc.assert(
+      fc.property(OPTION_LISTS, FILTERS, (options, filter) => {
+        const needle = filter.trim().toLowerCase();
+
+        expect(values(filterOptions(options, filter, 'starts-with'))).toEqual(
+          options.filter((option) => option.label.toLowerCase().startsWith(needle)).map((option) => option.value)
+        );
+      })
+    );
   });
 });

@@ -1,6 +1,15 @@
+import fc from 'fast-check';
 import { PortalFieldSpec } from '../model/field-spec.model';
 import { PREVIEW_FORM_DEFINITION } from '../model/preview-form.definition';
 import { describeFieldSettings } from './field-summary';
+
+/** Any field of the preview form, in any state. */
+const FIELDS = fc
+  .tuple(
+    fc.constantFrom(...PREVIEW_FORM_DEFINITION.fields),
+    fc.record({ readonly: fc.boolean(), disabled: fc.boolean(), autoFocus: fc.boolean() })
+  )
+  .map(([field, state]): PortalFieldSpec => ({ ...field, state }));
 
 function fieldById(id: string): PortalFieldSpec {
   const field = PREVIEW_FORM_DEFINITION.fields.find((entry) => entry.id === id);
@@ -32,30 +41,27 @@ describe('describeFieldSettings', () => {
     expect(valueOf('date', 'unicodeTokenFormat')).toBe('dd . MM . yyyy');
   });
 
-  it('never states the name, which is the field’s identity rather than one of its settings', () => {
-    for (const field of PREVIEW_FORM_DEFINITION.fields) {
-      expect(describeFieldSettings(field).map((setting) => setting.name)).not.toContain('name');
-    }
+  it('states each setting once, and never the name, which is the field’s identity rather than a setting', () => {
+    fc.assert(
+      fc.property(FIELDS, (field) => {
+        const names = describeFieldSettings(field).map((setting) => setting.name);
+
+        expect(names).not.toContain('name');
+        expect(names.length).toBe(new Set(names).size);
+      })
+    );
   });
 
-  it('states each setting once', () => {
-    for (const field of PREVIEW_FORM_DEFINITION.fields) {
-      const names = describeFieldSettings(field).map((setting) => setting.name);
+  it('states a state flag exactly when it is set, which the serializer emits outside the attribute table', () => {
+    fc.assert(
+      fc.property(FIELDS, (field) => {
+        const names = describeFieldSettings(field).map((setting) => setting.name);
 
-      expect(names.length).toBe(new Set(names).size);
-    }
-  });
-
-  it('carries the state flags, which the serializer emits outside the attribute table', () => {
-    const base = fieldById('orderName');
-
-    expect(describeFieldSettings({ ...base, state: { ...base.state, disabled: true } }).map((s) => s.name)).toContain(
-      'disabled'
+        for (const flag of ['readonly', 'disabled', 'autoFocus'] as const) {
+          expect(names.includes(flag), flag).toBe(field.state[flag]);
+        }
+      })
     );
-    expect(describeFieldSettings({ ...base, state: { ...base.state, readonly: true } }).map((s) => s.name)).toContain(
-      'readonly'
-    );
-    expect(namesOf('orderName')).not.toContain('disabled');
   });
 
   it('carries the sort, which is a function input the markup cannot express', () => {
