@@ -47,23 +47,23 @@ describe('display-only value selection', () => {
   });
 
   it('prevents a select-all with the meta key', () => {
-    expect(press(input, 'a', { metaKey: true }).defaultPrevented).toBeTrue();
+    expect(press(input, 'a', { metaKey: true }).defaultPrevented).toBe(true);
   });
 
   it('prevents a select-all with the control key', () => {
-    expect(press(input, 'a', { ctrlKey: true }).defaultPrevented).toBeTrue();
+    expect(press(input, 'a', { ctrlKey: true }).defaultPrevented).toBe(true);
   });
 
   it('prevents it regardless of the reported case', () => {
-    expect(press(input, 'A', { metaKey: true }).defaultPrevented).toBeTrue();
+    expect(press(input, 'A', { metaKey: true }).defaultPrevented).toBe(true);
   });
 
   it('leaves a bare "a" to the typeahead', () => {
-    expect(press(input, 'a').defaultPrevented).toBeFalse();
+    expect(press(input, 'a').defaultPrevented).toBe(false);
   });
 
   it('leaves other modifier combos alone, so a copy or a reload still reaches the browser', () => {
-    expect(press(input, 'c', { metaKey: true }).defaultPrevented).toBeFalse();
-    expect(press(input, 'r', { metaKey: true }).defaultPrevented).toBeFalse();
+    expect(press(input, 'c', { metaKey: true }).defaultPrevented).toBe(false);
+    expect(press(input, 'r', { metaKey: true }).defaultPrevented).toBe(false);
   });
 });

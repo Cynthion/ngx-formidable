@@ -152,8 +152,9 @@ describe('mask placeholder character', () => {
   for (const kind of ['input', 'textarea'] as const) {
     for (const api of FORMS_APIS) {
       it(`${kind} warns once when the mask could draw the placeholder as content, and again when it changes (${api})`, async () => {
-        const warn = spyOn(console, 'warn');
-        const warnings = () => warn.calls.allArgs().filter(([text]) => String(text).includes('placeHolderCharacter'));
+        const warn = vi.spyOn(console, 'warn').mockReturnValue(undefined);
+        const warnings = () =>
+          vi.mocked(warn).mock.calls.filter(([text]) => String(text).includes('placeHolderCharacter'));
 
         TestBed.resetTestingModule();
         configureFormidableTestBed();

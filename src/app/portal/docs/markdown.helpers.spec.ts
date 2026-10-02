@@ -99,7 +99,7 @@ describe('renderDoc', () => {
     for (const page of DOC_PAGES) {
       const { html } = renderDoc(page.markdown, SLUGS);
 
-      expect(html.length).withContext(page.slug).toBeGreaterThan(200);
+      expect(html.length, page.slug).toBeGreaterThan(200);
     }
   });
 
@@ -107,7 +107,7 @@ describe('renderDoc', () => {
   // level, like the source the samples are drawn from — `.editorconfig` sets it, this notices if it stops.
   it('indents its code samples the way the repository indents code', () => {
     for (const page of DOC_PAGES) {
-      expect(page.markdown).withContext(page.slug).not.toContain('\t');
+      expect(page.markdown, page.slug).not.toContain('\t');
     }
   });
 
@@ -115,8 +115,8 @@ describe('renderDoc', () => {
   // is a path string rather than a document, and every page would render as one short line.
   it('has the real documents behind it, not their paths', () => {
     for (const page of DOC_PAGES) {
-      expect(page.markdown.length).withContext(page.slug).toBeGreaterThan(1000);
-      expect(page.markdown).withContext(page.slug).toContain('#');
+      expect(page.markdown.length, page.slug).toBeGreaterThan(1000);
+      expect(page.markdown, page.slug).toContain('#');
     }
   });
 
@@ -129,9 +129,7 @@ describe('renderDoc', () => {
       );
 
       for (const anchor of anchors) {
-        expect(html)
-          .withContext(`${page.slug}: ${anchor}`)
-          .toContain(` id="${anchor.slice(prefix.length)}"`);
+        expect(html, `${page.slug}: ${anchor}`).toContain(` id="${anchor.slice(prefix.length)}"`);
       }
     }
   });
@@ -200,9 +198,9 @@ describe('drawDiagrams', () => {
 
       await drawDiagrams(host, false);
 
-      expect(host.querySelectorAll('.doc-diagram svg').length)
-        .withContext(page.slug)
-        .toBe(page.markdown.split('```mermaid').length - 1);
+      expect(host.querySelectorAll('.doc-diagram svg').length, page.slug).toBe(
+        page.markdown.split('```mermaid').length - 1
+      );
       host.remove();
     }
   });

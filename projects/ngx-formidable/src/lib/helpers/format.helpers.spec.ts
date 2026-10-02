@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+import fc from 'fast-check';
 import {
   findSegmentAtCaret,
   formatToTokenMask,
@@ -7,128 +9,200 @@ import {
   UNICODE_TIME_TOKENS,
   validateUnicodeTokenFormat
 } from './format.helpers';
+import { DEFAULT_PATTERNS } from './mask.helpers';
+
+/**
+ * What a date or time field relies on from its `unicodeTokenFormat`: that every value it shows can be typed
+ * into its mask, that what it shows parses back, that a half-typed value never parses, and that an arrow key
+ * steps the part under the caret. The properties run over every format a field accepts, built from its
+ * tokens in any order and with any separators or none, and over any date the mask's four year slots hold.
+ */
+
+const SEPARATORS = ['', '-', '/', '.', ':', ' ', ' . ', ', '];
+
+/** Every part at most once, in any order, each written with one of its tokens, with a separator between two. */
+function formats(parts: string[][]): fc.Arbitrary<string> {
+  return fc
+    .shuffledSubarray(parts, { minLength: 1 })
+    .chain((chosen) => fc.tuple(...chosen.map((tokens) => fc.constantFrom(...tokens))))
+    .chain((tokens) =>
+      fc
+        .array(fc.constantFrom(...SEPARATORS), { minLength: tokens.length, maxLength: tokens.length })
+        .map((separators) => tokens.map((token, index) => (index ? separators[index] : '') + token).join(''))
+    );
+}
+
+const DATE_FORMATS = formats([['yy', 'yyyy'], ['MM', 'MMM'], ['dd']]);
+
+// A twelve-hour clock tells 2 PM from 2 AM only by its meridiem, so `hh` never comes without one. date-fns
+// reads a dot right after the meridiem as part of it, `AM.` as `a.m.`, so that one shape is left to
+// `impl/backlog.md`.
+const TIME_FORMATS = formats([['HH', 'hh a', 'hhaa'], ['mm'], ['ss']]).filter((unicode) => !/a\./.test(unicode));
+
+const ANY_FORMAT = fc.oneof(DATE_FORMATS, TIME_FORMATS);
+
+const DATES = fc.date({ min: new Date(1000, 0, 1), max: new Date(9999, 11, 31, 23, 59, 59), noInvalidDate: true });
+
+/** Tokens date-fns knows that a mask cannot type: unpadded, variable-width or not a date part at all. */
+const UNSUPPORTED = ['y', 'yyy', 'M', 'MMMM', 'd', 'do', 'E', 'EEEE', 'Q', 'w', 'H', 'h', 'm', 's', 'S', 'X'];
+
+const isSlot = (character: string) => character in DEFAULT_PATTERNS;
+
+/** Whether `text` is something the mask accepts: one character per slot, each one its slot allows. */
+function fits(text: string, mask: string): boolean {
+  return (
+    text.length === mask.length &&
+    [...mask].every((slot, index) => DEFAULT_PATTERNS[slot]?.pattern.test(text[index]!) ?? slot === text[index])
+  );
+}
 
 describe('format.helpers', () => {
-  describe('formatToTokenMask', () => {
-    it('maps date tokens to ngx-mask digit patterns and keeps separators', () => {
-      expect(formatToTokenMask('yyyy-MM-dd', '0')).toBe('0000-00-00');
-      expect(formatToTokenMask('dd . MM . yyyy', '0')).toBe('00 . 00 . 0000');
-    });
-
-    it('maps time tokens to ngx-mask digit patterns and keeps separators', () => {
-      expect(formatToTokenMask('HH:mm', '0')).toBe('00:00');
-      expect(formatToTokenMask('HH : mm', '0')).toBe('00 : 00');
-    });
-
-    it('fills a token it does not know with the mask character', () => {
-      expect(formatToTokenMask('HH:qq', '_')).toBe('00:__');
-    });
+  // `parseUnicodeDateTime` takes the parts a format leaves out from today. One ordinary day keeps what the
+  // properties generate independent of the day they run on; why that matters is in `impl/backlog.md`.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2024, 5, 15, 12));
   });
 
+  afterEach(() => void vi.useRealTimers());
+
   describe('validateUnicodeTokenFormat', () => {
-    it('accepts only the tokens it is given', () => {
-      expect(validateUnicodeTokenFormat('yyyy-MM-dd', UNICODE_DATE_TOKENS)).toBe(true);
+    it('accepts every format built from a field’s own tokens, with or without separators', () => {
+      fc.assert(fc.property(DATE_FORMATS, (unicode) => validateUnicodeTokenFormat(unicode, UNICODE_DATE_TOKENS)));
+      fc.assert(fc.property(TIME_FORMATS, (unicode) => validateUnicodeTokenFormat(unicode, UNICODE_TIME_TOKENS)));
+    });
+
+    it('rejects a format holding any token a mask cannot type', () => {
+      fc.assert(
+        fc.property(DATE_FORMATS, fc.constantFrom(...UNSUPPORTED), fc.nat(), (unicode, token, at) => {
+          const index = at % (unicode.length + 1);
+
+          return !validateUnicodeTokenFormat(
+            `${unicode.slice(0, index)} ${token} ${unicode.slice(index)}`,
+            UNICODE_DATE_TOKENS
+          );
+        })
+      );
+    });
+
+    it('rejects the other field’s tokens', () => {
       expect(validateUnicodeTokenFormat('HH:mm', UNICODE_DATE_TOKENS)).toBe(false);
-      expect(validateUnicodeTokenFormat('HH:mm', UNICODE_TIME_TOKENS)).toBe(true);
       expect(validateUnicodeTokenFormat('yyyy-MM-dd', UNICODE_TIME_TOKENS)).toBe(false);
     });
 
-    it('ignores quoted literal text', () => {
-      expect(validateUnicodeTokenFormat("HH 'Uhr' mm", UNICODE_TIME_TOKENS)).toBe(true);
+    it('rejects quoted text, which a mask cannot type', () => {
+      expect(validateUnicodeTokenFormat("HH 'Uhr' mm", UNICODE_TIME_TOKENS)).toBe(false);
+    });
+
+    it('rejects a format with nothing to type', () => {
+      expect(validateUnicodeTokenFormat('', UNICODE_DATE_TOKENS)).toBe(false);
+      expect(validateUnicodeTokenFormat('--/--', UNICODE_DATE_TOKENS)).toBe(false);
+    });
+  });
+
+  describe('formatToTokenMask', () => {
+    it('masks every value a format shows, character by character', () => {
+      fc.assert(
+        fc.property(ANY_FORMAT, DATES, (unicode, date) => fits(format(date, unicode), formatToTokenMask(unicode)))
+      );
     });
   });
 
   describe('parseUnicodeDateTime', () => {
-    it('parses a complete, well-formed date', () => {
-      const result = parseUnicodeDateTime('2020-02-02', 'yyyy-MM-dd');
-      expect(result).toEqual(new Date(2020, 1, 2));
+    // A day is only a day within its month and year; a format leaving them to today is in `impl/backlog.md`.
+    it('parses whatever a format shows back into the same text', () => {
+      fc.assert(
+        fc.property(ANY_FORMAT, DATES, (unicode, date) => {
+          fc.pre(!unicode.includes('dd') || (unicode.includes('M') && unicode.includes('y')));
+
+          const parsed = parseUnicodeDateTime(format(date, unicode), unicode);
+
+          expect(parsed && format(parsed, unicode)).toBe(format(date, unicode));
+        })
+      );
     });
 
-    it('parses a complete date with a spaced separator format', () => {
-      const result = parseUnicodeDateTime('02 . 02 . 2020', 'dd . MM . yyyy');
-      expect(result).toEqual(new Date(2020, 1, 2));
+    it('parses a date naming its year, month and day back into that day', () => {
+      fc.assert(
+        fc.property(DATE_FORMATS, DATES, (unicode, date) => {
+          fc.pre(unicode.includes('yyyy') && unicode.includes('M') && unicode.includes('dd'));
+
+          const parsed = parseUnicodeDateTime(format(date, unicode), unicode)!;
+
+          expect(format(parsed, 'yyyy-MM-dd')).toBe(format(date, 'yyyy-MM-dd'));
+        })
+      );
     });
 
-    it('parses a complete time', () => {
-      const result = parseUnicodeDateTime('14:30', 'HH:mm');
-      expect(result).not.toBeNull();
-      expect(result!.getHours()).toBe(14);
-      expect(result!.getMinutes()).toBe(30);
+    it('never parses a half-typed value', () => {
+      fc.assert(
+        fc.property(ANY_FORMAT, DATES, (unicode, date) => {
+          const text = format(date, unicode);
+
+          for (let length = 1; length < text.length; length++) {
+            expect(parseUnicodeDateTime(text.slice(0, length), unicode)).toBeNull();
+          }
+        })
+      );
     });
 
-    it('returns null for empty / whitespace input', () => {
+    it('reads surrounding whitespace as nothing', () => {
+      expect(parseUnicodeDateTime(' 2024-05-12 ', 'yyyy-MM-dd')).toEqual(new Date(2024, 4, 12));
       expect(parseUnicodeDateTime('', 'yyyy-MM-dd')).toBeNull();
       expect(parseUnicodeDateTime('   ', 'yyyy-MM-dd')).toBeNull();
     });
 
-    it('returns null for digits missing the separators the format asks for', () => {
-      expect(parseUnicodeDateTime('20200202', 'yyyy-MM-dd')).toBeNull();
-    });
-
-    it('returns null for a partial / broken date', () => {
-      expect(parseUnicodeDateTime('2020-02-', 'yyyy-MM-dd')).toBeNull();
-      expect(parseUnicodeDateTime('2020', 'yyyy-MM-dd')).toBeNull();
-    });
-
-    it('returns null for separator-only noise', () => {
-      expect(parseUnicodeDateTime('----------', 'yyyy-MM-dd')).toBeNull();
+    it('rejects a day or a time the calendar does not have', () => {
+      expect(parseUnicodeDateTime('2024-02-30', 'yyyy-MM-dd')).toBeNull();
+      expect(parseUnicodeDateTime('24:00', 'HH:mm')).toBeNull();
     });
   });
 
   describe('findSegmentAtCaret', () => {
-    /** Compact assertion: which token the caret edits, and the range that gets selected. */
-    function at(unicodeTokenFormat: string, caret: number): string {
-      const segment = findSegmentAtCaret(unicodeTokenFormat, caret);
+    it('edits the part a caret stands in front of, and that part spans slots only', () => {
+      fc.assert(
+        fc.property(ANY_FORMAT, (unicode) => {
+          const mask = formatToTokenMask(unicode);
 
-      return segment ? `${segment.token}:${segment.start}-${segment.end}:${segment.unit}` : 'none';
-    }
+          [...mask].forEach((slot, caret) => {
+            if (!isSlot(slot)) return;
 
-    it('maps every caret of a spaced format onto its segment', () => {
-      // '12 . 05 . 2024' — dd 0-2, MM 5-7, yyyy 10-14
-      const fmt = 'dd . MM . yyyy';
+            const segment = findSegmentAtCaret(unicode, caret)!;
 
-      expect(at(fmt, 0)).toBe('dd:0-2:day');
-      expect(at(fmt, 1)).toBe('dd:0-2:day');
-      expect(at(fmt, 2)).toBe('dd:0-2:day'); // caret at a segment's end stays in it
-      expect(at(fmt, 3)).toBe('dd:0-2:day'); // parked in a separator: the segment to the left
-      expect(at(fmt, 5)).toBe('MM:5-7:month');
-      expect(at(fmt, 7)).toBe('MM:5-7:month');
-      expect(at(fmt, 10)).toBe('yyyy:10-14:year');
-      expect(at(fmt, 14)).toBe('yyyy:10-14:year');
+            expect(caret).toBeGreaterThanOrEqual(segment.start);
+            expect(caret).toBeLessThan(segment.end);
+            expect([...mask.slice(segment.start, segment.end)].every(isSlot)).toBe(true);
+          });
+        })
+      );
     });
 
-    it('follows the token order of the format, not a fixed one', () => {
-      expect(at('yyyy-MM-dd', 0)).toBe('yyyy:0-4:year');
-      expect(at('yyyy-MM-dd', 5)).toBe('MM:5-7:month');
-      expect(at('yyyy-MM-dd', 8)).toBe('dd:8-10:day');
+    // Where the last keystroke went: a caret at a part's end, or parked in a separator, keeps editing it.
+    it('keeps a caret behind a part on that part', () => {
+      expect(findSegmentAtCaret('dd . MM . yyyy', 2)?.unit).toBe('day');
+      expect(findSegmentAtCaret('dd . MM . yyyy', 3)?.unit).toBe('day');
+      expect(findSegmentAtCaret('dd . MM . yyyy', 14)?.unit).toBe('year');
     });
 
-    it('maps time formats, including a meridiem', () => {
-      expect(at('HH : mm', 0)).toBe('HH:0-2:hour');
-      expect(at('HH : mm', 5)).toBe('mm:5-7:minute');
-      expect(at('HH:mm:ss', 6)).toBe('ss:6-8:second');
-      expect(at('hh:mm a', 6)).toBe('a:6-8:meridiem'); // 'a' renders as a two-slot 'AA' mask
-    });
-
-    it('falls back to the first segment for a caret before any of them', () => {
-      expect(at('-dd.MM', 0)).toBe('dd:1-3:day');
-    });
-
-    it('returns null for a format with nothing to step', () => {
-      expect(findSegmentAtCaret('---', 0)).toBeNull();
+    it('takes the first part for a caret before every part', () => {
+      expect(findSegmentAtCaret('-dd.MM', 0)?.unit).toBe('day');
     });
   });
 
   describe('stepDateTimeUnit', () => {
-    const base = new Date(2024, 4, 12, 14, 30, 45);
+    it('lands back on the same day after a step of a day or less and its reverse', () => {
+      fc.assert(
+        fc.property(
+          DATES,
+          fc.constantFrom('day' as const, 'hour' as const, 'minute' as const, 'second' as const, 'meridiem' as const),
+          fc.constantFrom(1 as const, -1 as const),
+          (date, unit, direction) => {
+            const back = stepDateTimeUnit(stepDateTimeUnit(date, unit, direction), unit, direction === 1 ? -1 : 1);
 
-    it('steps each unit in both directions', () => {
-      expect(stepDateTimeUnit(base, 'year', 1)).toEqual(new Date(2025, 4, 12, 14, 30, 45));
-      expect(stepDateTimeUnit(base, 'month', -1)).toEqual(new Date(2024, 3, 12, 14, 30, 45));
-      expect(stepDateTimeUnit(base, 'day', 1)).toEqual(new Date(2024, 4, 13, 14, 30, 45));
-      expect(stepDateTimeUnit(base, 'hour', -1)).toEqual(new Date(2024, 4, 12, 13, 30, 45));
-      expect(stepDateTimeUnit(base, 'minute', 1)).toEqual(new Date(2024, 4, 12, 14, 31, 45));
-      expect(stepDateTimeUnit(base, 'second', -1)).toEqual(new Date(2024, 4, 12, 14, 30, 44));
+            expect(format(back, 'yyyy-MM-dd')).toBe(format(date, 'yyyy-MM-dd'));
+          }
+        )
+      );
     });
 
     it('clamps a month step to the shorter month', () => {

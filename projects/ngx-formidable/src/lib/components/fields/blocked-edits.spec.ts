@@ -76,9 +76,7 @@ describe('blocked edits', () => {
         await bound.state({ [state]: true });
 
         for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown']) {
-          expect(press(range(bound.element), key).defaultPrevented)
-            .withContext(key)
-            .toBe(true);
+          expect(press(range(bound.element), key).defaultPrevented, key).toBe(true);
         }
       });
 

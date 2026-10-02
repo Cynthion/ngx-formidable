@@ -87,7 +87,7 @@ Two workflows in `.github/workflows/`. Both take the Node version from `.nvmrc` 
 | `deploy.yml` | Push to `main`, manual               | Builds the portal and deploys `dist/ngx-formidable-portal/browser` to GitHub Pages                          |
 
 - **Checks Mirror The Scripts**: `ci.yml` runs the same scripts a contributor runs locally, in the order of the Verification table in [`impl/definition-of-done.md`](../impl/definition-of-done.md). `build:lib` is in it because it is also the type and template check; there is no standalone typecheck script.
-- **Tests**: the two projects are separate steps, because `ng test` takes one project at a time. Both run in `ChromeHeadless` with `--watch=false`.
+- **Tests**: the two projects are separate steps, because `ng test` takes one project at a time. Both run in Playwright's headless Chromium with `--watch=false`, which a step installs first.
 - **Dependency Updates**: Renovate opens the pull requests, and `ci.yml` checks them like any other. See [`impl/renovate.md`](../impl/renovate.md).
 
 ## Consumer Setup

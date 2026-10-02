@@ -37,7 +37,7 @@ describe('field repaint', () => {
 
     expect(element.querySelector('.panel')!.classList).not.toContain('open');
     expect(element.querySelector('input')!.value).not.toBe('');
-    expect(value()).toEqual(jasmine.any(Date));
+    expect(value()).toEqual(expect.any(Date));
   });
 
   // The panel's `.open` is written by the field's own template, so the signal is what repaints it.

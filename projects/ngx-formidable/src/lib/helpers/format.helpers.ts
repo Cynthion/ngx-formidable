@@ -25,20 +25,23 @@ export function parseUnicodeDateTime(input: string, unicodeTokenFormat: string):
 }
 
 /**
- * Whether every alphabetic token in a Unicode format string is one of `tokens` — `UNICODE_DATE_TOKENS` or
- * `UNICODE_TIME_TOKENS`.
+ * Whether a Unicode format string is one a masked field can be typed into: at least one token, every token
+ * one of `tokens` — `UNICODE_DATE_TOKENS` or `UNICODE_TIME_TOKENS` — and no quoted text, which the mask
+ * cannot type.
  */
 export function validateUnicodeTokenFormat(format: string, tokens: readonly string[]): boolean {
-  return extractTokens(format).every((token) => tokens.includes(token));
+  const formatTokens = tokenizeFormat(format).filter((token) => /^[a-zA-Z]+$/.test(token));
+
+  return !format.includes("'") && formatTokens.length > 0 && formatTokens.every((token) => tokens.includes(token));
 }
 
 /**
- * Converts a Unicode date or time format string into an input mask: `dd/MM/yyyy` becomes `00/00/0000`.
- * Known tokens take their own mask, an unknown alphabetic token is `maskChar` repeated, and separators stay.
+ * Converts a valid Unicode date or time format string into an input mask: `dd/MM/yyyy` becomes `00/00/0000`.
+ * Every token takes its own mask, and separators stay.
  */
-export function formatToTokenMask(unicodeTokenFormat: string, maskChar: string): string {
+export function formatToTokenMask(unicodeTokenFormat: string): string {
   return tokenizeFormat(unicodeTokenFormat)
-    .map((token) => tokenMask(token) ?? (/^[a-zA-Z]+$/.test(token) ? maskChar.repeat(token.length) : token))
+    .map((token) => tokenMask(token) ?? token)
     .join('');
 }
 
@@ -49,42 +52,19 @@ export function normalizeTimePart(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 }
 
-/** Unicode Date Tokens that are allowed to be used with date-fns. */
-export const UNICODE_DATE_TOKENS = [
-  // Calendar Years
-  'y',
-  'yy',
-  'yyy',
-  'yyyy',
-
-  // Calendar Months
-  'M',
-  'MM',
-  'MMM',
-  'MMMM',
-
-  // Day of Month
-  'd',
-  'dd'
-] as const;
+/**
+ * The date-fns tokens a date format may use: the fixed-width ones, because the mask has one slot per
+ * character. `d` would render `31` into a one-slot mask, and `MMMM` `September` into a four-slot one.
+ */
+export const UNICODE_DATE_TOKENS = ['yy', 'yyyy', 'MM', 'MMM', 'dd'] as const;
 
 type DateToken = (typeof UNICODE_DATE_TOKENS)[number];
 
 const DATE_TOKEN_MASK_MAP: Record<DateToken, string> = {
-  // Calendar Years
-  y: '0',
   yy: '00',
-  yyy: '000',
   yyyy: '0000',
-
-  // Calendar Months
-  M: '0',
   MM: '00',
   MMM: 'SSS',
-  MMMM: 'SSSS',
-
-  // Day of Month
-  d: '0',
   dd: '00'
 };
 
@@ -101,15 +81,11 @@ export function normalizeDatePart(date: Date): Date {
   return new Date(1970, 0, 1, date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds());
 }
 
-/** Unicode Time Tokens that are allowed to be used with date-fns. */
+/** The date-fns tokens a time format may use: the fixed-width ones, as for `UNICODE_DATE_TOKENS`. */
 export const UNICODE_TIME_TOKENS = [
-  'H',
   'HH', // Hours (24h)
-  'h',
   'hh', // Hours (12h)
-  'm',
   'mm', // Minutes
-  's',
   'ss', // Seconds
   'a', // AM/PM
   'aa' // AM/PM
@@ -118,13 +94,9 @@ export const UNICODE_TIME_TOKENS = [
 type TimeToken = (typeof UNICODE_TIME_TOKENS)[number];
 
 const TIME_TOKEN_MASK_MAP: Record<TimeToken, string> = {
-  H: '0',
   HH: '00',
-  h: '0',
   hh: '00',
-  m: '0',
   mm: '00',
-  s: '0',
   ss: '00',
   a: 'AA',
   aa: 'AA'
@@ -184,23 +156,14 @@ export function stepDateTimeUnit(date: Date, unit: DateTimeUnit, direction: 1 | 
 
 /** `M` (month) and `m` (minute) differ by case, so date and time tokens share one map without colliding. */
 const TOKEN_UNIT_MAP: Record<string, DateTimeUnit> = {
-  y: 'year',
   yy: 'year',
-  yyy: 'year',
   yyyy: 'year',
-  M: 'month',
   MM: 'month',
   MMM: 'month',
-  MMMM: 'month',
-  d: 'day',
   dd: 'day',
-  H: 'hour',
   HH: 'hour',
-  h: 'hour',
   hh: 'hour',
-  m: 'minute',
   mm: 'minute',
-  s: 'second',
   ss: 'second',
   a: 'meridiem',
   aa: 'meridiem'
@@ -237,35 +200,6 @@ function tokenMask(token: string): string | null {
 }
 
 // #endregion
-
-/**
- * - Parses a format string like "dd/MM/yyyy" or "HH:mm" into its letter-based tokens: ["dd", "MM", "yyyy", "HH", "mm"].
- * - Skips quoted content (used for literal text in format strings).
- * - Groups consecutive letters into single tokens ("yyyy" instead of ["y", "y", "y", "y"]).
- */
-function extractTokens(format: string): string[] {
-  const tokens: string[] = [];
-  let inQuote = false;
-  let currentToken = '';
-  for (const char of format) {
-    if (char === "'") {
-      inQuote = !inQuote;
-      continue;
-    }
-    if (!inQuote && /[a-zA-Z]/.test(char)) {
-      currentToken += char;
-    } else {
-      if (currentToken.length > 0) {
-        tokens.push(currentToken);
-        currentToken = '';
-      }
-    }
-  }
-  if (currentToken.length > 0) {
-    tokens.push(currentToken);
-  }
-  return tokens;
-}
 
 /**
  * Breaks a Unicode format string into an array of tokens and literal characters.

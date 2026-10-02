@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { form, FormField, validateStandardSchema } from '@angular/forms/signals';
 import { FieldDecorator, InputField } from '@cynthion/ngx-formidable';
 import { provideNgxMask } from 'ngx-mask';
@@ -13,7 +13,10 @@ import * as z from 'zod';
 
 interface Order {
   name: string;
-  payment: { method: string; card: string };
+  payment: {
+    method: string;
+    card: string;
+  };
 }
 
 const EMPTY_ORDER: Order = { name: '', payment: { method: '', card: '' } };
@@ -51,12 +54,18 @@ class OrderHost {
 }
 
 describe('Zod through Standard Schema', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideNgxMask()] }));
 
-  function settle(fixture: ComponentFixture<unknown>): void {
+  async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
     for (let i = 0; i < 3; i++) {
       fixture.detectChanges();
-      tick(50);
+      await vi.advanceTimersByTimeAsync(50);
     }
   }
 
@@ -68,18 +77,18 @@ describe('Zod through Standard Schema', () => {
     );
   }
 
-  it('renders a check’s message on its field, a nested one on the nested field', fakeAsync(() => {
+  it('renders a check’s message on its field, a nested one on the nested field', async () => {
     const fixture = TestBed.createComponent(OrderHost);
-    settle(fixture);
+    await settle(fixture);
 
     expect(messages(fixture)).toEqual([['We need a name.'], ['A card number is required.']]);
-  }));
+  });
 
-  it('reports a refinement on the path it names, and on none of the fields it reads', fakeAsync(() => {
+  it('reports a refinement on the path it names, and on none of the fields it reads', async () => {
     const fixture = TestBed.createComponent(OrderHost);
     const host = fixture.componentInstance;
     host.model.set({ name: 'Anna', payment: { method: 'cash', card: '4242' } });
-    settle(fixture);
+    await settle(fixture);
 
     expect(
       host.form
@@ -89,13 +98,13 @@ describe('Zod through Standard Schema', () => {
     ).toEqual(['Cash takes no card.']);
     expect(host.form.payment.card().errors()).toEqual([]);
     expect(host.form.payment.method().errors()).toEqual([]);
-  }));
+  });
 
-  it('reports a refinement that names no path on the whole form', fakeAsync(() => {
+  it('reports a refinement that names no path on the whole form', async () => {
     const fixture = TestBed.createComponent(OrderHost);
     const host = fixture.componentInstance;
     host.model.set({ name: 'Closed', payment: { method: 'card', card: '4242' } });
-    settle(fixture);
+    await settle(fixture);
 
     expect(
       host
@@ -104,5 +113,5 @@ describe('Zod through Standard Schema', () => {
         .map((error) => error.message)
     ).toEqual(['Nobody delivers today.']);
     expect(host.form().errorSummary().length).toBe(1);
-  }));
+  });
 });

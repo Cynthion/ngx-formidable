@@ -38,7 +38,7 @@
     "strict": true,
 
     /* Types */
-    "types": ["jasmine"]
+    "types": ["vitest/globals", "@vitest/browser-playwright"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

@@ -62,8 +62,6 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
   // The field's own pick: `selectDate` or `selectTime`.
   protected abstract select(value: Date | null): void;
 
-  private readonly maskChar = '0';
-
   private readonly changeDetector = inject(ChangeDetectorRef);
 
   constructor() {
@@ -225,7 +223,7 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
       : this.defaultUnicodeTokenFormat
   );
 
-  protected readonly ngxMask = computed(() => formatToTokenMask(this.tokenFormat(), this.maskChar));
+  protected readonly ngxMask = computed(() => formatToTokenMask(this.tokenFormat()));
 
   protected readonly ngxMaskConfig: Pick<
     NgxMaskConfig,

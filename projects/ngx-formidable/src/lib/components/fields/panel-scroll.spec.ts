@@ -1,3 +1,4 @@
+import type { MockInstance } from 'vitest';
 import { Component, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -32,14 +33,14 @@ class TestHost {
 describe('panel field scrolling', () => {
   let fixture: ComponentFixture<TestHost>;
   let field: DateField;
-  let scrolled: jasmine.Spy;
+  let scrolled: MockInstance<Element['scrollIntoView']>;
 
   beforeEach(async () => {
     configureFormidableTestBed();
 
-    // Stubbed rather than spied through: a real scroll would leave the Karma page scrolled for the specs
+    // Stubbed rather than spied through: a real scroll would leave the test page scrolled for the specs
     // that hit-test after this one.
-    scrolled = spyOn(Element.prototype, 'scrollIntoView');
+    scrolled = vi.spyOn(Element.prototype, 'scrollIntoView').mockReturnValue(undefined);
 
     fixture = TestBed.createComponent(TestHost);
     await settle(fixture); // ngAfterViewInit builds the calendar
@@ -63,7 +64,7 @@ describe('panel field scrolling', () => {
   it('does not scroll when the panel closes again', async () => {
     field.togglePanel(true);
     await settle(fixture, 50);
-    scrolled.calls.reset();
+    scrolled.mockClear();
 
     field.togglePanel(false);
     await settle(fixture, 50);

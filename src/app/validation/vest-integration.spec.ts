@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { form, FormField, validateStandardSchema } from '@angular/forms/signals';
 import { FieldDecorator, InputField } from '@cynthion/ngx-formidable';
 import { provideNgxMask } from 'ngx-mask';
@@ -13,7 +13,10 @@ import { create, enforce, mode, Modes, test } from 'vest';
 
 interface Order {
   name: string;
-  payment: { method: string; card: string };
+  payment: {
+    method: string;
+    card: string;
+  };
 }
 
 const EMPTY_ORDER: Order = { name: '', payment: { method: '', card: '' } };
@@ -84,12 +87,18 @@ class AsyncHost {
 }
 
 describe('Vest through Standard Schema', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   beforeEach(() => TestBed.configureTestingModule({ providers: [provideNgxMask()] }));
 
-  function settle(fixture: ComponentFixture<unknown>): void {
+  async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
     for (let i = 0; i < 3; i++) {
       fixture.detectChanges();
-      tick(50);
+      await vi.advanceTimersByTimeAsync(50);
     }
   }
 
@@ -101,18 +110,18 @@ describe('Vest through Standard Schema', () => {
     );
   }
 
-  it('renders a test’s message on its field, a dotted target on the nested one', fakeAsync(() => {
+  it('renders a test’s message on its field, a dotted target on the nested one', async () => {
     const fixture = TestBed.createComponent(OrderHost);
-    settle(fixture);
+    await settle(fixture);
 
     expect(messages(fixture)).toEqual([['We need a name.'], ['A card number is required.']]);
-  }));
+  });
 
-  it('reports a test on a group on the group, and on neither of its fields', fakeAsync(() => {
+  it('reports a test on a group on the group, and on neither of its fields', async () => {
     const fixture = TestBed.createComponent(OrderHost);
     const host = fixture.componentInstance;
     host.model.set({ name: 'Anna', payment: { method: 'cash', card: '4242' } });
-    settle(fixture);
+    await settle(fixture);
 
     expect(
       host.form
@@ -122,13 +131,13 @@ describe('Vest through Standard Schema', () => {
     ).toEqual(['Cash takes no card.']);
     expect(host.form.payment.card().errors()).toEqual([]);
     expect(host.form.payment.method().errors()).toEqual([]);
-  }));
+  });
 
-  it('reports a test whose target names no field on the whole form', fakeAsync(() => {
+  it('reports a test whose target names no field on the whole form', async () => {
     const fixture = TestBed.createComponent(OrderHost);
     const host = fixture.componentInstance;
     host.model.set({ name: 'Closed', payment: { method: 'card', card: '4242' } });
-    settle(fixture);
+    await settle(fixture);
 
     expect(
       host
@@ -139,29 +148,27 @@ describe('Vest through Standard Schema', () => {
     expect(host.form().errorSummary().length).toBe(1);
 
     host.model.set({ name: 'Anna', payment: { method: 'card', card: '4242' } });
-    settle(fixture);
+    await settle(fixture);
 
     expect(host.form().errors()).toEqual([]);
-  }));
+  });
 
   // Vest's own defect, pinned so it is noticed once fixed: https://github.com/ealush/vest/issues/1346.
-  it('fails Vest’s order check on every later run of a test whose target is empty', async () => {
-    await jasmine.spyOnGlobalErrorsAsync(async (globalError) => {
-      const suite = create(() => {
-        test('', 'Nobody delivers today.', () => {
-          enforce(false).isTruthy();
-        });
+  it('fails Vest’s order check on every later run of a test whose target is empty', ({ onTestFinished }) => {
+    vi.useFakeTimers();
+    onTestFinished(() => void vi.useRealTimers());
+
+    const suite = create(() => {
+      test('', 'Nobody delivers today.', () => {
+        enforce(false).isTruthy();
       });
-
-      suite['~standard'].validate({});
-      suite['~standard'].validate({});
-      // Vest defers the throw to a timer of its own.
-      await new Promise((resolve) => setTimeout(resolve));
-
-      expect(globalError).toHaveBeenCalledWith(
-        jasmine.objectContaining({ message: jasmine.stringContaining('Tests called in different order') })
-      );
     });
+
+    suite['~standard'].validate({});
+    suite['~standard'].validate({});
+
+    // Vest defers the throw to a timer of its own.
+    expect(() => vi.runAllTimers()).toThrow('Tests called in different order');
   });
 
   // Angular's own defect, pinned so it is noticed once fixed: https://github.com/angular/angular/issues/71128.
@@ -182,16 +189,16 @@ describe('Vest through Standard Schema', () => {
     expect(() => tree().errors()).toThrowError(TypeError);
   });
 
-  it('never surfaces an async test, and holds the form valid while it fails', fakeAsync(() => {
+  it('never surfaces an async test, and holds the form valid while it fails', async () => {
     const fixture = TestBed.createComponent(AsyncHost);
     const host = fixture.componentInstance;
-    settle(fixture);
+    await settle(fixture);
 
     host.model.set({ name: 'Anna' });
-    settle(fixture);
+    await settle(fixture);
 
     expect(host.form.name().errors()).toEqual([]);
-    expect(host.form().pending()).toBeFalse();
-    expect(host.form().valid()).toBeTrue();
-  }));
+    expect(host.form().pending()).toBe(false);
+    expect(host.form().valid()).toBe(true);
+  });
 });

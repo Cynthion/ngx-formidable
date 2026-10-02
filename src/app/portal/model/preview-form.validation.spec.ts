@@ -89,8 +89,8 @@ describe('one rule set in every validator', () => {
     for (const [name, model] of Object.entries(MODELS)) {
       const expected = errors('angular', model);
 
-      expect(errors('vest', model)).withContext(`Vest, ${name}`).toEqual(expected);
-      expect(errors('zod', model)).withContext(`Zod, ${name}`).toEqual(expected);
+      expect(errors('vest', model), `Vest, ${name}`).toEqual(expected);
+      expect(errors('zod', model), `Zod, ${name}`).toEqual(expected);
     }
   });
 
@@ -124,8 +124,8 @@ describe('one rule set in every validator', () => {
     for (const validator of ['angular', 'vest', 'zod'] as const) {
       definition.updateOptions({ validator });
 
-      expect(values.errors()['phone']).withContext(validator).toBeUndefined();
-      expect(values.errors()['orderName']).withContext(validator).toBeUndefined();
+      expect(values.errors()['phone'], validator).toBeUndefined();
+      expect(values.errors()['orderName'], validator).toBeUndefined();
     }
   });
 
@@ -142,9 +142,9 @@ describe('one rule set in every validator', () => {
     for (const validator of ['angular', 'vest', 'zod'] as const) {
       const reported = errors(validator, BROKEN);
 
-      expect(reported['when']).withContext(validator).toEqual(['We are closed on Mondays.']);
-      expect(reported['']).withContext(validator).toBeUndefined();
-      expect(reported['toppings']).withContext(validator).toEqual(['Five toppings is the limit.']);
+      expect(reported['when'], validator).toEqual(['We are closed on Mondays.']);
+      expect(reported[''], validator).toBeUndefined();
+      expect(reported['toppings'], validator).toEqual(['Five toppings is the limit.']);
     }
   });
 });

@@ -33,7 +33,7 @@ export async function settle(fixture: ComponentFixture<unknown>, ms = 0): Promis
 }
 
 /**
- * Why a spec needing a directive validator — `required` or `minlength` beside a bare `ngModel` — is pending:
+ * Why a spec needing a directive validator — `required` or `minlength` beside a bare `ngModel` — is skipped:
  * `@angular/forms` 22.2 binds a field through its `value` model and on that path never attaches a
  * directive's validators to the control.
  */

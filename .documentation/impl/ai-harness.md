@@ -193,6 +193,8 @@ The recommended baseline denies what must stay manual. `deny` outranks `allow`, 
 
 `playwright` runs headless and isolated, so it never touches a real browser profile. It is a client and never starts or stops a server: reuse whatever is already listening on the portal's port, and ask rather than starting one. That contract is stated in [`.claude/rules/repository.md`](../../.claude/rules/repository.md), because the risk applies to every task and not only to portal files. The portal routes on the hash, so a deep link is `http://localhost:4200/#/docs`, not `/docs`.
 
+The `npx` servers run the exact version pinned in `.mcp.json`, never `@latest`, so a server only changes when its pin is bumped. `playwright` drives the Chromium build of the Playwright it brings, separate from any installed Google Chrome, so bumping its pin also means installing the new version's build.
+
 `angular-cli` runs the workspace's own Angular CLI through `npx ng`, so the server version always matches the installed CLI and its version-specific coding standards. It runs `--read-only`, which drops the tools that would otherwise start, stop or run a project target. That is the same Running Servers invariant `playwright` is held to, enforced by configuration rather than by instruction. The remaining tools cover project discovery, Angular best practices, documentation search, OnPush and zoneless migration planning, a tutor, and waiting on the build of a dev server that is already running.
 
 Setup, the required environment variables and verification are in [`impl/developer-onboarding.md`](developer-onboarding.md).

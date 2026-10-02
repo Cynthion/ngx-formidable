@@ -24,6 +24,7 @@ import { SliderField } from '../components/fields/slider-field/slider-field';
 import { TextareaField } from '../components/fields/textarea-field/textarea-field';
 import { TimeField } from '../components/fields/time-field/time-field';
 import { ToggleField } from '../components/fields/toggle-field/toggle-field';
+import { FieldLabel } from '../directives/field-label';
 import { FieldSuffix } from '../directives/field-suffix';
 import { settle } from './test-bed';
 
@@ -59,7 +60,7 @@ export interface BindFieldOptions {
   content?: string;
   /** Wraps the field in a `formidable-field-decorator`. */
   decorated?: boolean;
-  /** Markup projected into the decorator beside the field, such as a `formidableFieldSuffix`. Only with `decorated`. */
+  /** Markup projected into the decorator beside the field, such as a `formidableFieldLabel`. Only with `decorated`. */
   decoration?: string;
   /** Angular's `updateOn`, on the `<form>` or on the `FormControl`. Ignored by Signal Forms. */
   updateOn?: 'change' | 'blur' | 'submit';
@@ -157,7 +158,16 @@ export async function bindField(kind: FieldKind, api: FormsApi, options: BindFie
 
   TestBed.overrideComponent(FieldHost, {
     set: {
-      imports: [FormsModule, ReactiveFormsModule, FormField, FieldDecorator, FieldOption, FieldSuffix, ...FIELDS],
+      imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        FormField,
+        FieldDecorator,
+        FieldLabel,
+        FieldOption,
+        FieldSuffix,
+        ...FIELDS
+      ],
       template
     }
   });

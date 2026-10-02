@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { PORTAL_ROUTES } from '../../portal.routes';
 import { ThemeStore } from '../../state/theme.store';
@@ -15,13 +15,19 @@ import { TopBar } from './top-bar';
  * and nothing else would notice.
  */
 describe('top bar OnPush contract', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   let fixture: ComponentFixture<TopBar>;
   let root: HTMLElement;
   let theme: ThemeStore;
 
-  function settle(): void {
+  async function settle(): Promise<void> {
     fixture.detectChanges();
-    tick(50);
+    await vi.advanceTimersByTimeAsync(50);
     fixture.detectChanges();
   }
 
@@ -50,43 +56,43 @@ describe('top bar OnPush contract', () => {
     localStorage.clear();
   });
 
-  it('clears the copied confirmation on its own, from a callback nothing ticks', fakeAsync(() => {
-    settle();
+  it('clears the copied confirmation on its own, from a callback nothing ticks', async () => {
+    await settle();
     expect(copyButton().textContent).toContain('Copy Theme');
 
     copyButton().click();
-    settle();
-    tick(2000);
+    await settle();
+    await vi.advanceTimersByTimeAsync(2000);
     fixture.detectChanges();
 
     expect(copyButton().textContent).toContain('Copy Theme');
     expect(copyButton().classList).not.toContain('copied');
-  }));
+  });
 
-  it('repaints the change count from the store, with nothing pumping the view', fakeAsync(() => {
-    settle();
+  it('repaints the change count from the store, with nothing pumping the view', async () => {
+    await settle();
     const before = theme.changeCount();
 
     expect(count().textContent?.trim()).toBe(String(before));
 
     // A variable no scheme sets, so the count has to move.
     theme.setVariable('--formidable-panel-max-height', '42dvh');
-    settle();
+    await settle();
 
     expect(theme.changeCount()).toBe(before + 1);
     expect(count().textContent?.trim()).toBe(String(before + 1));
-  }));
+  });
 
   // The theme is the one thing to take away that stands on its own. The template binds names only its
   // component defines, so a one-click copy of it alone would hand over code that does not compile.
-  it('offers one copy, and it is the theme', fakeAsync(() => {
-    settle();
+  it('offers one copy, and it is the theme', async () => {
+    await settle();
 
     const labels = Array.from(root.querySelectorAll('.copy-button')).map((el) => (el.textContent ?? '').trim());
 
     expect(labels.length).toBe(1);
     expect(labels[0]).toContain('Copy Theme');
-  }));
+  });
 
   // `exact` is right for `/` and wrong for `/docs`, which is only ever seen with a document open.
   //

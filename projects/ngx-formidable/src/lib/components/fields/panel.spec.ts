@@ -1,3 +1,4 @@
+import type { MockInstance } from 'vitest';
 import { bindField, BoundField, FieldKind } from '../../testing/bind-field';
 import { click, press } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
@@ -50,7 +51,7 @@ const cases: PanelCase[] = [
     kind: 'date',
     open: (element) => click(element.querySelector('.toggle')!),
     pick: (element) => element.querySelector('.pika-button:not(.is-empty)')!,
-    picked: jasmine.any(Date)
+    picked: expect.any(Date)
   }
 ];
 
@@ -138,11 +139,11 @@ describe('panel', () => {
       });
 
       describe('on a scroll or resize', () => {
-        let measured: jasmine.Spy;
+        let measured: MockInstance<() => number>;
 
         // `offsetHeight` is the panel's own measurement, which placing it reads.
         const panelsMeasured = () =>
-          measured.calls.all().filter((call) => (call.object as HTMLElement).classList.contains('panel')).length;
+          measured.mock.contexts.filter((element) => (element as HTMLElement).classList.contains('panel')).length;
 
         function scrollAndResize(): void {
           document.dispatchEvent(new Event('scroll'));
@@ -151,7 +152,7 @@ describe('panel', () => {
 
         it('measures no closed panel', async () => {
           const { fixture } = await bindField(panelCase.kind, 'signal', { inputs: panelCase.inputs });
-          measured = spyOnProperty(HTMLElement.prototype, 'offsetHeight').and.callThrough();
+          measured = vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get');
 
           scrollAndResize();
           await settle(fixture, 60);
@@ -161,7 +162,7 @@ describe('panel', () => {
 
         it('places an open panel again', async () => {
           const { fixture } = await openPanel(panelCase);
-          measured = spyOnProperty(HTMLElement.prototype, 'offsetHeight').and.callThrough();
+          measured = vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get');
 
           scrollAndResize();
           await settle(fixture, 60);
@@ -227,7 +228,7 @@ describe('panel', () => {
       click(dateCase!.pick(element));
       await settle(fixture);
 
-      expect(value()).toEqual(jasmine.any(Date));
+      expect(value()).toEqual(expect.any(Date));
       expect(document.activeElement).toBe(input);
       expect(isFocused()).toBe(true);
       expect(events()).toEqual(['value']);

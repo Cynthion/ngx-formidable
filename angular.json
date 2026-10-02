@@ -87,27 +87,9 @@
           "builder": "@angular/build:extract-i18n"
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "aot": true,
-            "karmaConfig": "karma.conf.cjs",
-            "polyfills": ["zone.js", "zone.js/testing"],
-            "tsConfig": "tsconfig.spec.json",
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
-            ],
-            "styles": ["src/styles.scss"],
-            "scripts": [],
-            "stylePreprocessorOptions": {
-              "includePaths": ["projects/ngx-formidable/src/lib/styles"]
-            },
-            "loader": {
-              ".md": "text"
-            }
+            "browsers": ["ChromiumHeadless"]
           }
         }
       }
@@ -134,9 +116,17 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "ngx-formidable:test-build",
+            "browsers": ["ChromiumHeadless"]
+          }
+        },
+        "test-build": {
+          "builder": "@angular/build:application",
           "options": {
             "tsConfig": "projects/ngx-formidable/tsconfig.spec.json",
+            "polyfills": [],
             "stylePreprocessorOptions": {
               "includePaths": ["projects/ngx-formidable/src/lib/styles"]
             },

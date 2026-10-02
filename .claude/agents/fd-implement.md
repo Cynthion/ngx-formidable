@@ -25,7 +25,7 @@ When no plan exists, say so and stop rather than inventing one.
 - **Follow The Plan**: When the plan turns out to be wrong, stop and say so. Do not silently substitute a different approach.
 - **Prove It**: Report the command you ran and what it printed. A claim without output is not a result.
 - **Report Faithfully**: If a test fails, say so and show it. If a step was skipped, say which and why.
-- **Name The Portal Tests**: `npm test` runs the library only. A change under `src/` also runs `npx ng test ngx-formidable-portal --watch=false --browsers=ChromeHeadless`.
+- **Name The Portal Tests**: `npm test` runs the library only. A change under `src/` also runs `npx ng test ngx-formidable-portal --watch=false`.
 - **Never Hand-Edit Build Output**: `dist/` and the prebuild copies of `README.md` and `LICENSE` are generated.
 - **Fix Only What You Touched**: No whole-repository formatting.
 - **Finish The Scope**: Complete every part of the plan. If a part is blocked, finish the rest and state exactly what is left and why.

@@ -196,7 +196,7 @@ describe('markup import', () => {
       // Lowercased, because the HTML parser lowercases every attribute name it reads.
       { text: '(valuechange)="applyPizzaPreset($event)"', reason: 'in-the-component' }
     ]);
-    expect(result.fields.every((field) => field.presets === undefined && field.visibleWhen === undefined)).toBeTrue();
+    expect(result.fields.every((field) => field.presets === undefined && field.visibleWhen === undefined)).toBe(true);
   });
 
   it('round-trips a field with no behaviour behind it without a note at all', () => {
