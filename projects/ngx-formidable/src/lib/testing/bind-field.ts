@@ -62,6 +62,8 @@ export interface BindFieldOptions {
   decorated?: boolean;
   /** Markup projected into the decorator beside the field, such as a `formidableFieldLabel`. Only with `decorated`. */
   decoration?: string;
+  /** Markup rendered after the field, such as a button for focus to leave to by `Tab` and come back from. */
+  after?: string;
   /** Angular's `updateOn`, on the `<form>` or on the `FormControl`. Ignored by Signal Forms. */
   updateOn?: 'change' | 'blur' | 'submit';
 }
@@ -145,14 +147,13 @@ const BINDINGS: Record<FormsApi, string> = {
 
 /** Renders one field bound through `api`, as a consumer's template binds it, and settles its first render. */
 export async function bindField(kind: FieldKind, api: FormsApi, options: BindFieldOptions = {}): Promise<BoundField> {
-  const { value = null, inputs = {}, content = '', decorated = false, decoration = '', updateOn } = options;
+  const { value = null, inputs = {}, content = '', decorated = false, decoration = '', after = '', updateOn } = options;
   const tag = `formidable-${kind}-field`;
   const bindings = Object.keys(inputs).map((name) => `[${name}]="inputs()['${name}']"`);
   const outputs = `(valueChange)="events.push('value')" (touch)="events.push('touch')"`;
   const field = `<${tag} ${BINDINGS[api]} ${bindings.join(' ')} ${outputs}>${content}</${tag}>`;
-  const decoratedField = decorated
-    ? `<formidable-field-decorator>${field}${decoration}</formidable-field-decorator>`
-    : field;
+  const decoratedField =
+    (decorated ? `<formidable-field-decorator>${field}${decoration}</formidable-field-decorator>` : field) + after;
   const formOptions = updateOn ? `[ngFormOptions]="{ updateOn: '${updateOn}' }"` : '';
   const template = api === 'template-driven' ? `<form ${formOptions}>${decoratedField}</form>` : decoratedField;
 

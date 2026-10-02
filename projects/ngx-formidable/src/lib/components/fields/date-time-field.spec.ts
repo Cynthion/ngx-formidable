@@ -1,34 +1,35 @@
+import { TestBed } from '@angular/core/testing';
+import { format } from 'date-fns';
+import fc from 'fast-check';
+import { page, userEvent } from 'vitest/browser';
+import { formatToTokenMask } from '../../helpers/format.helpers';
+import { DEFAULT_PATTERNS } from '../../helpers/mask.helpers';
 import { FormidableEmptyHint } from '../../models/formidable.model';
+import { DATE_FORMATS, DATES, TIME_FORMATS } from '../../testing/arbitraries';
 import { bindField, BindFieldOptions, BoundField, FORMS_APIS, FormsApi } from '../../testing/bind-field';
-import { press, type } from '../../testing/dom';
-import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { clickAt } from '../../testing/dom';
+import { BACKSPACE_UNREPORTED, configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
- * Contract of the masked date/time fields: caret, value rendering and calendar options.
+ * Contract of the masked date/time fields, per **Dates And Times** and **Stepping A Date Or Time Segment** in
+ * `user/fields.md`: caret, value rendering and calendar options.
  *
  * These fields render their empty state themselves (the `emptyHint`), which historically desynced
- * ngxMask's caret math. The keystrokes below therefore go through the real DOM and must never
- * pre-position the caret — doing so is what hid the "second character lands before the first" bug.
+ * ngxMask's caret math. The keystrokes below therefore start from wherever focus entry leaves the caret and
+ * never from one placed by hand — placing it is what hid the "second character lands before the first" bug.
  *
  * Value rendering covers what the input must show for a value it did not receive by typing: a value
  * the form writes, and a `unicodeTokenFormat` change after init. Calendar options cover the Pikaday
  * passthrough inputs, which only reach the rendered calendar if the picker is rebuilt — its `config()`
  * merges options without redrawing.
+ *
+ * Every spec reaches the field by its label and role, with trusted keys and clicks.
  */
 
 type MaskedField = BoundField & { input: HTMLInputElement };
 
-/** Wipes the field the way a select-all + Delete does. */
-function clearText(input: HTMLInputElement): void {
-  input.setSelectionRange(0, input.value.length);
-  input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Delete', bubbles: true }));
-
-  if (document.execCommand('delete')) return;
-
-  input.value = '';
-  input.setSelectionRange(0, 0);
-  input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'deleteContentBackward' }));
-}
+/** **A Step Still In Flight** in `impl/backlog.md`. */
+const STEP_IN_FLIGHT = 'a step renders its text from a timer, and a press before it steps the text it replaces';
 
 /** Result of one keystroke: what the field shows and where the caret sits. */
 function state(input: HTMLInputElement): string {
@@ -41,8 +42,9 @@ function selection(input: HTMLInputElement): [number | null, number | null] {
 }
 
 /**
- * Binds one field through a forms API, `[formControl]` unless `bind` names another. `inputs` are the ones a
- * case sets or changes later.
+ * Binds one field through a forms API, `[formControl]` unless `bind` names another, under the label `When`
+ * and with a button after it for focus to leave to by `Tab` and come back from. `inputs` are the ones a case
+ * sets or changes later.
  */
 async function setup(
   kind: 'date' | 'time',
@@ -52,9 +54,16 @@ async function setup(
   bind: Omit<BindFieldOptions, 'inputs'> & { api?: FormsApi } = {}
 ): Promise<MaskedField> {
   const { api = 'reactive', ...options } = bind;
-  const field = await bindField(kind, api, { ...options, inputs: { unicodeTokenFormat, emptyHint, ...inputs } });
+  const field = await bindField(kind, api, {
+    decorated: true,
+    decoration: '<div formidableFieldLabel>When</div>',
+    after: '<button type="button">Next</button>',
+    ...options,
+    inputs: { unicodeTokenFormat, emptyHint, ...inputs }
+  });
+  const input = page.getByRole(kind === 'date' ? 'combobox' : 'textbox', { name: 'When' }).element();
 
-  return { ...field, input: field.element.querySelector('input') as HTMLInputElement };
+  return { ...field, input: input as HTMLInputElement };
 }
 
 /** The messages a decorated field renders. */
@@ -65,7 +74,10 @@ function messages(field: MaskedField): string[] {
 }
 
 describe('masked date/time field', () => {
-  beforeEach(() => configureFormidableTestBed());
+  beforeEach(() => {
+    configureFormidableTestBed();
+    (document.activeElement as HTMLElement | null)?.blur();
+  });
 
   describe('date field, emptyHint "format"', () => {
     it('shows the format hint at rest and ngxMask slots while focused', async () => {
@@ -73,87 +85,84 @@ describe('masked date/time field', () => {
 
       expect(input.value).toBe('dd . MM . yyyy');
 
-      input.focus();
+      await userEvent.tab();
 
-      expect(input.value).toBe('__ . __ . ____');
-      expect(input.selectionStart).toBe(0);
-      expect(input.selectionEnd).toBe(0);
+      await expect.element(input).toHaveValue('__ . __ . ____');
+      expect(selection(input)).toEqual([0, 0]);
     });
 
-    it('fills left-to-right from a caret at 0, the second digit after the first', async () => {
+    it('fills left-to-right from where focus leaves the caret, the second digit after the first', async () => {
       const { input } = await setup('date', 'dd . MM . yyyy', 'format');
 
-      input.focus();
-      expect(input.selectionStart).toBe(0); // no pre-positioning
+      await userEvent.tab();
+      await userEvent.keyboard('1');
+      await expect.poll(() => state(input)).toBe('1_ . __ . ____|1');
 
-      type(input, '1');
-      expect(state(input)).toBe('1_ . __ . ____|1');
-
-      type(input, '2');
-      expect(state(input)).toBe('12 . __ . ____|2');
+      await userEvent.keyboard('2');
+      await expect.poll(() => state(input)).toBe('12 . __ . ____|2');
     });
 
-    it('jumps separators and commits the parsed date on blur', async () => {
-      const { fixture, input, value, dirty } = await setup('date', 'dd . MM . yyyy', 'format');
+    it('jumps separators and commits the parsed date as focus leaves', async () => {
+      const { input, value, dirty } = await setup('date', 'dd . MM . yyyy', 'format');
 
-      input.focus();
-      type(input, '12052024');
+      await userEvent.tab();
+      await userEvent.keyboard('12052024');
 
-      expect(input.value).toBe('12 . 05 . 2024');
-      expect(input.selectionStart).toBe(14);
+      await expect.poll(() => state(input)).toBe('12 . 05 . 2024|14');
 
-      input.blur();
-      await settle(fixture);
+      await userEvent.tab();
 
-      expect(value()).toEqual(new Date(2024, 4, 12));
+      await expect.poll(value).toEqual(new Date(2024, 4, 12));
       expect(dirty()).toBe(true);
       expect(input.value).toBe('12 . 05 . 2024');
     });
 
-    it('keeps an incomplete date on blur, uncommitted', async () => {
+    it('keeps an incomplete date as focus leaves, uncommitted', async () => {
       const { fixture, input, value } = await setup('date', 'dd . MM . yyyy', 'format');
 
-      input.focus();
-      type(input, '1');
-      input.blur();
+      await userEvent.tab();
+      await userEvent.keyboard('1');
+      await userEvent.tab();
       await settle(fixture);
 
       expect(input.value).toBe('1_ . __ . ____');
       expect(value()).toBeNull();
     });
 
-    it('keeps the hint out of a focused input when cleared while focused', async () => {
-      const { input, write } = await setup('date', 'dd . MM . yyyy', 'format');
+    it('keeps the hint out of a focused field the form empties', async () => {
+      const { input, write } = await setup('date', 'dd . MM . yyyy', 'format', {}, { value: new Date(2024, 4, 12) });
 
-      input.focus();
+      await userEvent.tab();
       await write(null);
 
       expect(input.value).toBe('__ . __ . ____');
 
-      type(input, '12');
+      await userEvent.keyboard('12');
 
-      expect(state(input)).toBe('12 . __ . ____|2');
+      await expect.poll(() => state(input)).toBe('12 . __ . ____|2');
     });
 
     // Where focus leaves the caret is `focus-caret.spec.ts`; what matters here is that it leaves the
     // value alone, and that a selection the user makes afterwards is still theirs to type over.
     it('does not rewrite a filled field when focus lands on it', async () => {
-      const { fixture, input } = await setup('date', 'dd . MM . yyyy', 'format');
+      const { input, value } = await setup('date', 'dd . MM . yyyy', 'format');
 
-      input.focus();
-      type(input, '12052024');
-      input.blur();
-      await settle(fixture);
+      await userEvent.tab();
+      await userEvent.keyboard('12052024');
+      await userEvent.tab();
+      await expect.poll(value).toEqual(new Date(2024, 4, 12));
 
-      input.focus();
+      await clickAt(input, 6);
 
+      await expect.element(input).toHaveFocus();
       expect(input.value).toBe('12 . 05 . 2024');
 
-      // a click-drag selects the second month digit; typing replaces just that digit
-      input.setSelectionRange(6, 7);
-      type(input, '9');
+      // the click and a Shift+ArrowRight select the second month digit; typing replaces just that digit
+      await userEvent.keyboard('{Shift>}{ArrowRight}{/Shift}');
+      await expect.poll(() => selection(input)).toEqual([6, 7]);
+      await userEvent.keyboard('9');
 
-      expect(input.value).toBe('12 . 09 . 2024');
+      await expect.element(input).toHaveValue('12 . 09 . 2024');
     });
   });
 
@@ -163,55 +172,55 @@ describe('masked date/time field', () => {
 
       expect(input.value).toBe('__ . __ . ____');
 
-      input.focus();
+      await userEvent.tab();
 
-      expect(input.value).toBe('__ . __ . ____');
-      expect(input.selectionStart).toBe(0);
+      await expect.element(input).toHaveFocus();
+      expect(state(input)).toBe('__ . __ . ____|0');
 
-      type(input, '1');
-      expect(state(input)).toBe('1_ . __ . ____|1');
+      await userEvent.keyboard('1');
+      await expect.poll(() => state(input)).toBe('1_ . __ . ____|1');
 
-      type(input, '2');
-      expect(state(input)).toBe('12 . __ . ____|2');
+      await userEvent.keyboard('2');
+      await expect.poll(() => state(input)).toBe('12 . __ . ____|2');
     });
   });
 
   describe('time field', () => {
-    it('fills left-to-right from a caret at 0 with the format hint', async () => {
+    it('fills left-to-right from where focus leaves the caret, with the format hint', async () => {
       const { input } = await setup('time', 'HH : mm', 'format');
 
       expect(input.value).toBe('HH : mm');
 
-      input.focus();
+      await userEvent.tab();
 
-      expect(input.value).toBe('__ : __');
+      await expect.element(input).toHaveValue('__ : __');
       expect(input.selectionStart).toBe(0);
 
-      type(input, '1');
-      expect(state(input)).toBe('1_ : __|1');
+      await userEvent.keyboard('1');
+      await expect.poll(() => state(input)).toBe('1_ : __|1');
 
-      type(input, '4');
-      expect(state(input)).toBe('14 : __|2');
+      await userEvent.keyboard('4');
+      await expect.poll(() => state(input)).toBe('14 : __|2');
     });
 
-    it('commits the parsed time on blur and keeps it over an incomplete one', async () => {
+    it('commits the parsed time as focus leaves and keeps it over an incomplete one', async () => {
       const { fixture, input, value, dirty } = await setup('time', 'HH : mm', 'underscores');
 
-      input.focus();
-      type(input, '1430');
+      await userEvent.tab();
+      await userEvent.keyboard('1430');
 
-      expect(input.value).toBe('14 : 30');
+      await expect.element(input).toHaveValue('14 : 30');
 
-      input.blur();
-      await settle(fixture);
+      await userEvent.tab();
 
+      await expect.poll(value).toEqual(new Date(1970, 0, 1, 14, 30));
       expect(dirty()).toBe(true);
-      expect(value()).toEqual(new Date(1970, 0, 1, 14, 30));
 
-      input.focus();
-      input.setSelectionRange(0, input.value.length);
-      type(input, '9');
-      input.blur();
+      // back by keyboard, which selects the time, and over it
+      await userEvent.tab({ shift: true });
+      await expect.poll(() => selection(input)).toEqual([0, 7]);
+      await userEvent.keyboard('9');
+      await userEvent.tab();
       await settle(fixture);
 
       expect(input.value).toBe('9_ : __');
@@ -293,12 +302,14 @@ describe('masked date/time field', () => {
       }
     ] as const;
 
-    /** Types over the whole text and leaves, which is when typing commits. */
-    async function typeAndLeave(field: MaskedField, text: string): Promise<void> {
-      field.input.focus();
-      field.input.setSelectionRange(0, field.input.value.length);
-      type(field.input, text);
-      field.input.blur();
+    /**
+     * Enters the field by keyboard, which selects what it holds, types over that and tabs out, which is when
+     * typing commits. `from` is the side focus comes in from: before the field, or the button after it.
+     */
+    async function typeOver(field: MaskedField, keys: string, from: 'before' | 'after'): Promise<void> {
+      await userEvent.tab({ shift: from === 'after' });
+      await userEvent.keyboard(keys);
+      await userEvent.tab();
       await settle(field.fixture);
     }
 
@@ -306,13 +317,13 @@ describe('masked date/time field', () => {
       for (const { kind, format, held, partial, complete, parsed } of cases) {
         describe(`${kind} field bound ${api}`, () => {
           function bindHeld(): Promise<MaskedField> {
-            return setup(kind, format, 'underscores', {}, { api, value: held, decorated: true });
+            return setup(kind, format, 'underscores', {}, { api, value: held });
           }
 
           it('reports a parse error, keeps the text and leaves the model alone', async () => {
             const field = await bindHeld();
 
-            await typeAndLeave(field, '1');
+            await typeOver(field, '1', 'before');
 
             expect(field.input.value).toBe(partial);
             expect(field.value()).toEqual(held);
@@ -324,8 +335,8 @@ describe('masked date/time field', () => {
           it('drops the parse error once the text parses', async () => {
             const field = await bindHeld();
 
-            await typeAndLeave(field, '1');
-            await typeAndLeave(field, complete);
+            await typeOver(field, '1', 'before');
+            await typeOver(field, complete, 'after');
 
             expect(field.value()).toEqual(parsed);
             expect(messages(field)).toEqual([]);
@@ -335,12 +346,8 @@ describe('masked date/time field', () => {
           it('commits emptied text as null, with no parse error', async () => {
             const field = await bindHeld();
 
-            await typeAndLeave(field, '1');
-
-            field.input.focus();
-            clearText(field.input);
-            field.input.blur();
-            await settle(field.fixture);
+            await typeOver(field, '1', 'before');
+            await typeOver(field, '{Backspace}', 'after');
 
             expect(field.value()).toBeNull();
             expect(messages(field)).toEqual([]);
@@ -351,64 +358,82 @@ describe('masked date/time field', () => {
   });
 
   describe('clearing the text', () => {
-    it('commits null as soon as a date is wiped, without waiting for the blur', async () => {
-      const { fixture, input, value, dirty, write } = await setup('date', 'dd . MM . yyyy', 'format');
+    it('commits null as soon as Delete wipes a date, without waiting for the blur', async () => {
+      const { input, value, dirty } = await setup(
+        'date',
+        'dd . MM . yyyy',
+        'format',
+        {},
+        { value: new Date(2024, 4, 12) }
+      );
 
-      await write(new Date(2024, 4, 12));
+      await userEvent.tab();
+      await userEvent.keyboard('{Delete}');
 
-      input.focus();
-      clearText(input);
-      await settle(fixture);
-
-      expect(value()).toBeNull();
+      await expect.poll(value).toBeNull();
       expect(dirty()).toBe(true);
+      expect(input).toHaveFocus();
+    });
+
+    it('and as soon as Backspace does', async ({ skip }) => {
+      skip(BACKSPACE_UNREPORTED);
+
+      const { input, value, dirty } = await setup(
+        'date',
+        'dd . MM . yyyy',
+        'format',
+        {},
+        { value: new Date(2024, 4, 12) }
+      );
+
+      await userEvent.tab();
+      await userEvent.keyboard('{Backspace}');
+
+      await expect.poll(value).toBeNull();
+      expect(dirty()).toBe(true);
+      expect(input).toHaveFocus();
     });
 
     it('steps from the default date once the text is wiped, not from the date that was there', async () => {
-      const { fixture, input, write } = await setup('date', 'dd . MM . yyyy', 'format', {
-        defaultDate: new Date(2020, 0, 15)
-      });
+      const { input } = await setup(
+        'date',
+        'dd . MM . yyyy',
+        'format',
+        { defaultDate: new Date(2020, 0, 15) },
+        { value: new Date(2024, 4, 12) }
+      );
 
-      await write(new Date(2024, 4, 12));
+      // the wipe leaves the caret at the front, on the day
+      await userEvent.tab();
+      await userEvent.keyboard('{Delete}{ArrowUp}');
 
-      input.focus();
-      clearText(input);
-      await settle(fixture);
-
-      input.setSelectionRange(0, 0); // day
-      press(input, 'ArrowUp');
-      await settle(fixture);
-
-      expect(input.value).toBe('16 . 01 . 2020');
+      await expect.element(input).toHaveValue('16 . 01 . 2020');
     });
 
     it('commits null as soon as a time is wiped', async () => {
-      const { fixture, input, value, dirty, write } = await setup('time', 'HH : mm', 'underscores');
+      const { value, dirty } = await setup(
+        'time',
+        'HH : mm',
+        'underscores',
+        {},
+        { value: new Date(2024, 0, 1, 14, 30) }
+      );
 
-      await write(new Date(2024, 0, 1, 14, 30));
+      await userEvent.tab();
+      await userEvent.keyboard('{Delete}');
 
-      input.focus();
-      clearText(input);
-      await settle(fixture);
-
-      expect(value()).toBeNull();
+      await expect.poll(value).toBeNull();
       expect(dirty()).toBe(true);
     });
 
     it('steps from midnight once the time is wiped', async () => {
-      const { fixture, input, write } = await setup('time', 'HH : mm', 'underscores');
+      const { input } = await setup('time', 'HH : mm', 'underscores', {}, { value: new Date(2024, 0, 1, 14, 30) });
 
-      await write(new Date(2024, 0, 1, 14, 30));
+      // the wipe leaves the caret at the front, on the hour
+      await userEvent.tab();
+      await userEvent.keyboard('{Delete}{ArrowUp}');
 
-      input.focus();
-      clearText(input);
-      await settle(fixture);
-
-      input.setSelectionRange(0, 0); // hour
-      press(input, 'ArrowUp');
-      await settle(fixture);
-
-      expect(input.value).toBe('01 : 00');
+      await expect.element(input).toHaveValue('01 : 00');
     });
   });
 
@@ -419,173 +444,210 @@ describe('masked date/time field', () => {
       { kind: 'time', format: 'HH : mm', hint: 'HH : mm' }
     ] as const) {
       it(`keeps the ${kind} hint in place when the field is clicked into and out of`, async () => {
-        const { fixture, input, dirty } = await setup(kind, format, 'format', { readonly: true });
+        const field = await setup(kind, format, 'format');
+        await field.state({ readonly: true });
 
-        input.focus();
+        await userEvent.click(field.input);
+        await expect.element(field.input).toHaveFocus();
 
-        expect(input.value).toBe(hint);
+        expect(field.input.value).toBe(hint);
 
-        input.blur();
-        await settle(fixture);
+        await userEvent.tab();
+        await settle(field.fixture);
 
-        expect(input.value).toBe(hint);
-        expect(dirty()).toBe(false);
+        expect(field.input.value).toBe(hint);
+        expect(field.dirty()).toBe(false);
       });
     }
   });
 
   describe('arrow keys', () => {
-    /** May 2024, focused, with the caret parked where the test wants it. */
+    /** May 2024, with the caret clicked where the test wants it. */
     async function focusedAt(caret: number, inputs: Record<string, unknown> = {}): Promise<MaskedField> {
-      const field = await setup('date', 'dd . MM . yyyy', 'format', inputs);
+      const field = await setup('date', 'dd . MM . yyyy', 'format', inputs, { value: new Date(2024, 4, 12) });
 
-      await field.write(new Date(2024, 4, 12));
-
-      field.input.focus();
-      field.input.setSelectionRange(caret, caret);
+      await clickAt(field.input, caret);
+      await expect.poll(() => selection(field.input)).toEqual([caret, caret]);
 
       return field;
     }
 
     it('steps the segment under the caret and leaves it selected', async () => {
-      const { fixture, input } = await focusedAt(10); // year
+      const { input } = await focusedAt(10); // year
 
-      press(input, 'ArrowUp');
-      await settle(fixture);
+      await userEvent.keyboard('{ArrowUp}');
 
-      expect(input.value).toBe('12 . 05 . 2025');
+      await expect.element(input).toHaveValue('12 . 05 . 2025');
       expect(selection(input)).toEqual([10, 14]);
 
       // the selection keeps the caret in the year, so repeated arrows stay there
-      press(input, 'ArrowDown');
-      await settle(fixture);
-      press(input, 'ArrowDown');
-      await settle(fixture);
+      await userEvent.keyboard('{ArrowDown}');
+      await expect.element(input).toHaveValue('12 . 05 . 2024');
+      await userEvent.keyboard('{ArrowDown}');
 
-      expect(input.value).toBe('12 . 05 . 2023');
+      await expect.element(input).toHaveValue('12 . 05 . 2023');
+    });
+
+    it('steps once per press however fast the presses come', async ({ skip }) => {
+      skip(STEP_IN_FLIGHT);
+
+      const { input } = await focusedAt(10); // year
+
+      await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+
+      await expect.element(input).toHaveValue('12 . 05 . 2022');
     });
 
     it('steps only the unit under the caret', async () => {
-      const { fixture, input } = await focusedAt(0); // day
+      const { input } = await focusedAt(0); // day
 
-      press(input, 'ArrowUp');
-      await settle(fixture);
-      expect(input.value).toBe('13 . 05 . 2024');
+      await userEvent.keyboard('{ArrowUp}');
+      await expect.element(input).toHaveValue('13 . 05 . 2024');
 
-      input.setSelectionRange(5, 5); // month
-      press(input, 'ArrowUp');
-      await settle(fixture);
-      expect(input.value).toBe('13 . 06 . 2024');
+      await clickAt(input, 5); // month
+      await userEvent.keyboard('{ArrowUp}');
+
+      await expect.element(input).toHaveValue('13 . 06 . 2024');
       expect(selection(input)).toEqual([5, 7]);
     });
 
     it('does not open the panel on a plain ArrowDown', async () => {
-      const { fixture, input } = await focusedAt(0);
+      const { input } = await focusedAt(0);
 
-      press(input, 'ArrowDown');
-      await settle(fixture);
+      await userEvent.keyboard('{ArrowDown}');
 
+      await expect.element(input).toHaveValue('11 . 05 . 2024');
       expect(input.getAttribute('aria-expanded')).toBe('false');
-      expect(input.value).toBe('11 . 05 . 2024');
     });
 
     it('opens and closes the panel on Alt+Arrow', async () => {
-      const { fixture, input } = await focusedAt(0);
+      const { input } = await focusedAt(0);
 
-      press(input, 'ArrowDown', { altKey: true });
-      await settle(fixture);
-      expect(input.getAttribute('aria-expanded')).toBe('true');
+      await userEvent.keyboard('{Alt>}{ArrowDown}{/Alt}');
+      await expect.element(input).toHaveAttribute('aria-expanded', 'true');
       expect(input.value).toBe('12 . 05 . 2024'); // an Alt+Arrow never touches the value
 
-      press(input, 'ArrowUp', { altKey: true });
-      await settle(fixture);
-      expect(input.getAttribute('aria-expanded')).toBe('false');
+      await userEvent.keyboard('{Alt>}{ArrowUp}{/Alt}');
+      await expect.element(input).toHaveAttribute('aria-expanded', 'false');
     });
 
     it('still moves the calendar by a week while the panel is open, committing only on Enter', async () => {
-      const { fixture, input, value } = await focusedAt(0);
+      const { input, value } = await focusedAt(0);
 
-      press(input, 'ArrowDown', { altKey: true });
-      await settle(fixture);
+      await userEvent.keyboard('{Alt>}{ArrowDown}{/Alt}{ArrowDown}');
 
-      press(input, 'ArrowDown');
-      await settle(fixture);
-
-      expect(input.value).toBe('19 . 05 . 2024');
+      await expect.element(input).toHaveValue('19 . 05 . 2024');
       expect(value()).toEqual(new Date(2024, 4, 12)); // navigation is not a commit
 
-      press(input, 'Enter');
-      await settle(fixture);
+      await userEvent.keyboard('{Enter}');
 
-      expect(value()).toEqual(new Date(2024, 4, 19));
+      await expect.poll(value).toEqual(new Date(2024, 4, 19));
       expect(input.getAttribute('aria-expanded')).toBe('false');
-    });
-
-    it('seeds an empty date field before stepping it', async () => {
-      const { fixture, input, value } = await setup('date', 'dd . MM . yyyy', 'format');
-
-      input.focus();
-      input.setSelectionRange(10, 10); // year
-      press(input, 'ArrowUp');
-      await settle(fixture);
-
-      expect((value() as Date | null)?.getFullYear()).toBe(new Date().getFullYear() + 1);
     });
 
     it('refuses a step that would leave minDate/maxDate', async () => {
       const { fixture, input } = await focusedAt(0, { maxDate: new Date(2024, 4, 13) }); // day
 
-      press(input, 'ArrowUp');
-      await settle(fixture);
-      expect(input.value).toBe('13 . 05 . 2024'); // on the boundary, still allowed
+      await userEvent.keyboard('{ArrowUp}');
+      await expect.element(input).toHaveValue('13 . 05 . 2024'); // on the boundary, still allowed
 
-      press(input, 'ArrowUp');
+      await userEvent.keyboard('{ArrowUp}');
       await settle(fixture);
       expect(input.value).toBe('13 . 05 . 2024'); // past it, refused
     });
 
     it('steps the hour and the minute of a time field', async () => {
-      const { fixture, input, write } = await setup('time', 'HH : mm', 'underscores');
+      const { input } = await setup('time', 'HH : mm', 'underscores', {}, { value: new Date(2024, 0, 1, 14, 30) });
 
-      await write(new Date(2024, 0, 1, 14, 30));
+      await clickAt(input, 0); // hour
+      await userEvent.keyboard('{ArrowUp}');
 
-      input.focus();
-      input.setSelectionRange(0, 0); // hour
-      press(input, 'ArrowUp');
-      await settle(fixture);
-
-      expect(input.value).toBe('15 : 30');
+      await expect.element(input).toHaveValue('15 : 30');
       expect(selection(input)).toEqual([0, 2]);
 
-      input.setSelectionRange(5, 5); // minute
-      press(input, 'ArrowDown');
-      await settle(fixture);
+      await clickAt(input, 5); // minute
+      await userEvent.keyboard('{ArrowDown}');
 
-      expect(input.value).toBe('15 : 29');
+      await expect.element(input).toHaveValue('15 : 29');
       expect(selection(input)).toEqual([5, 7]);
     });
 
     it('carries a minute step over midnight', async () => {
-      const { fixture, input, write } = await setup('time', 'HH : mm', 'underscores');
+      const { input } = await setup('time', 'HH : mm', 'underscores', {}, { value: new Date(2024, 0, 1, 23, 59) });
 
-      await write(new Date(2024, 0, 1, 23, 59));
+      await clickAt(input, 5);
+      await userEvent.keyboard('{ArrowUp}');
 
-      input.focus();
-      input.setSelectionRange(5, 5);
-      press(input, 'ArrowUp');
-      await settle(fixture);
-
-      expect(input.value).toBe('00 : 00');
+      await expect.element(input).toHaveValue('00 : 00');
     });
 
     it('seeds an empty time field with midnight before stepping it', async () => {
-      const { fixture, input } = await setup('time', 'HH : mm', 'underscores');
+      const { input } = await setup('time', 'HH : mm', 'underscores');
 
-      input.focus();
-      press(input, 'ArrowUp'); // caret sits at 0, the hour
-      await settle(fixture);
+      await userEvent.tab(); // the caret sits at 0, the hour
+      await userEvent.keyboard('{ArrowUp}');
 
-      expect(input.value).toBe('01 : 00');
+      await expect.element(input).toHaveValue('01 : 00');
+    });
+
+    describe('with today pinned', () => {
+      beforeEach(() => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(new Date(2024, 5, 15, 12));
+      });
+
+      afterEach(() => void vi.useRealTimers());
+
+      it('seeds an empty date field with today before stepping it', async () => {
+        const { input } = await setup('date', 'dd . MM . yyyy', 'format');
+
+        await userEvent.tab(); // the caret sits at 0, the day
+        await userEvent.keyboard('{ArrowUp}');
+
+        await expect.element(input).toHaveValue('16 . 06 . 2024');
+      });
+    });
+  });
+
+  // `parseUnicodeDateTime` takes the parts a format leaves out from today, so today is pinned; why that
+  // matters is in `impl/backlog.md`.
+  describe('typing a whole value', () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2024, 5, 15, 12));
+    });
+
+    afterEach(() => void vi.useRealTimers());
+
+    it('reaches the model as it was typed, in any format the field accepts', async () => {
+      const fields = fc.oneof(
+        DATE_FORMATS.map((unicode) => ({ kind: 'date' as const, unicode })),
+        TIME_FORMATS.map((unicode) => ({ kind: 'time' as const, unicode }))
+      );
+
+      await fc.assert(
+        fc.asyncProperty(fields, DATES, async ({ kind, unicode }, date) => {
+          // A day is only a day within its month and year; a format leaving them to today is in `impl/backlog.md`.
+          fc.pre(!unicode.includes('dd') || (unicode.includes('M') && unicode.includes('y')));
+
+          TestBed.resetTestingModule();
+          configureFormidableTestBed();
+          const field = await setup(kind, unicode, 'underscores');
+          const shown = format(date, unicode);
+          const mask = formatToTokenMask(unicode);
+          // What a user types into a mask: the characters of its slots, the mask drawing the literals between.
+          const keys = [...shown].filter((_, index) => mask[index]! in DEFAULT_PATTERNS).join('');
+
+          await userEvent.tab();
+          await userEvent.keyboard(keys);
+          await userEvent.tab();
+          await settle(field.fixture);
+
+          expect(field.input.value).toBe(shown);
+          expect(format(field.value() as Date, unicode)).toBe(shown);
+        }),
+        { numRuns: 50 }
+      );
     });
   });
 
