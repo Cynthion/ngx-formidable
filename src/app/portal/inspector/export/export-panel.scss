@@ -9,13 +9,22 @@
   margin-bottom: 10px;
 }
 
+// A file name rather than a language, so in the case and face the file is written in.
+.doc-code-bar {
+  font-family: var(--portal-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.doc-code {
+  margin: 0;
+}
+
 .preview {
   max-height: 44dvh;
-  margin: 0 0 8px;
   padding: 8px 10px;
-  border: 1px solid var(--portal-border);
-  border-radius: var(--portal-radius-sm);
-  background: var(--portal-surface-sunken);
   font-family: var(--portal-mono);
   font-size: 11px;
   line-height: 1.5;

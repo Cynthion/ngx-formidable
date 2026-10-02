@@ -151,7 +151,7 @@ The `Export & Import` tab has two halves, `Export` and `Import`, each a row of t
 | **Schema**     | The model's type, its initial value and the form's rules    | Not read back                           |
 | **App Config** | The app defaults the template leaves out, read-only         | Not read back                           |
 
-Each export carries the file and a copy.
+Each export is shown highlighted, under a bar naming the file it is in your project, `styles.css` or `styles.scss` for the theme, with an icon that copies it.
 
 The top bar's `Copy Theme` copies the theme with no intermediate dialog. The form has no copy there: its template does not compile without its component and its schema, so all three are taken from here. The theme's export options cover CSS or SCSS, whether the page surface is included, whether the per-variable comments are emitted, and whether the defaults are stated explicitly. Declarations that only restate a library default are left out.
 

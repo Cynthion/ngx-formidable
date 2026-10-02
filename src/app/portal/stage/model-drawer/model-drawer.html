@@ -104,7 +104,9 @@
     } @else {
     <p class="empty">No errors reported.</p>
     } } @case ('raw') {
-    <pre class="raw">{{ valueStore.serialized() }}</pre>
+    <pre
+      class="raw"
+      [innerHTML]="raw()"></pre>
     } }
   </div>
 </div>

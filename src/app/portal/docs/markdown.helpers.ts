@@ -1,20 +1,7 @@
-import hljs from 'highlight.js/lib/core';
-import bash from 'highlight.js/lib/languages/bash';
-import json from 'highlight.js/lib/languages/json';
-import scss from 'highlight.js/lib/languages/scss';
-import typescript from 'highlight.js/lib/languages/typescript';
-import xml from 'highlight.js/lib/languages/xml';
 import { marked } from 'marked';
+import { highlightCode } from '../helpers/highlight.helpers';
 import { slugify } from '../helpers/slug.helpers';
 import { COPY_SVG } from './doc-icons';
-
-// The languages the documents' code blocks are written in; `xml` is the one that answers to `html`. A block in
-// any other language is shown as written.
-hljs.registerLanguage('bash', bash);
-hljs.registerLanguage('json', json);
-hljs.registerLanguage('scss', scss);
-hljs.registerLanguage('typescript', typescript);
-hljs.registerLanguage('xml', xml);
 
 /** Where the maintainer-facing buckets live, since the portal only mirrors `user/`. */
 const REPOSITORY_DOCS = 'https://github.com/Cynthion/ngx-formidable/blob/main/.documentation';
@@ -141,7 +128,7 @@ export function renderDoc(markdown: string, knownSlugs: ReadonlySet<string>, slu
     frame.innerHTML = `<div class="doc-code-bar">${language}<button type="button" class="doc-code-copy" aria-label="Copy" title="Copy">${COPY_SVG}</button></div>`;
     block.replaceWith(frame);
     frame.append(block);
-    if (hljs.getLanguage(language)) code.innerHTML = hljs.highlight(code.textContent ?? '', { language }).value;
+    code.innerHTML = highlightCode(code.textContent ?? '', language);
   }
 
   // The document's own `# Title` is rendered by the page around it, so it would otherwise appear twice.

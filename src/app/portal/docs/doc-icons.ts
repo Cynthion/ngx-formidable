@@ -1,4 +1,4 @@
-/** The icons a rendered document's code block carries. Inlined, like every other icon of the portal. */
+/** The icons on a code block's bar, in a document or the export preview. Inlined, like every other icon of the portal. */
 
 const STROKE = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
 

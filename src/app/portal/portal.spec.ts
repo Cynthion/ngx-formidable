@@ -864,20 +864,22 @@ describe('portal', () => {
     const files = page.getByRole('tablist', { name: 'Files' }).getByRole('tab');
     const shown = () => document.querySelector('portal-export-panel pre')!.textContent!;
 
-    const expected: [file: string, text: string][] = [
-      ['Theme', ':root'],
-      ['Template', '<form [formRoot]="form">'],
-      ['Component', 'export class MyForm {'],
-      ['Schema', 'export const myFormSchema = schema<MyFormModel>'],
-      ['App Config', 'provideNgxFormidable']
+    const expected: [file: string, name: string, text: string][] = [
+      ['Theme', 'styles.css', ':root'],
+      ['Template', 'my-form.html', '<form [formRoot]="form">'],
+      ['Component', 'my-form.ts', 'export class MyForm {'],
+      ['Schema', 'my-form.form.ts', 'export const myFormSchema = schema<MyFormModel>'],
+      ['App Config', 'app.config.ts', 'provideNgxFormidable']
     ];
 
-    for (const [file, text] of expected) {
+    for (const [file, name, text] of expected) {
       await userEvent.click(files.filter({ hasText: file }));
 
       await expect.element(files.filter({ hasText: file })).toHaveAttribute('aria-selected', 'true');
       expect(document.querySelectorAll('portal-export-panel pre').length, file).toBe(1);
       expect(shown(), file).toContain(text);
+      expect(document.querySelector('portal-export-panel pre [class^="hljs-"]'), file).not.toBeNull();
+      expect(document.querySelector('portal-export-panel .doc-code-bar')!.textContent!.trim(), file).toBe(name);
       await expect.element(page.getByRole('button', { name: `Copy ${file}`, exact: true })).toBeVisible();
       // The theme's options are the theme's alone.
       expect(page.getByRole('radio', { name: 'CSS' }).elements().length, file).toBe(file === 'Theme' ? 1 : 0);

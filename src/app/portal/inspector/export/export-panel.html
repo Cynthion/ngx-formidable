@@ -40,13 +40,22 @@
 </div>
 }
 
-<pre class="preview">{{ text() }}</pre>
-
-<div class="pc-buttons">
-  <button
-    type="button"
-    class="pc-button is-primary"
-    (click)="copy()">
-    {{ justCopied() ? 'Copied' : 'Copy ' + file().label }}
-  </button>
+<div class="doc-code">
+  <div class="doc-code-bar">
+    {{ fileName() }}
+    <button
+      type="button"
+      class="doc-code-copy"
+      [class.is-copied]="justCopied()"
+      [attr.aria-label]="justCopied() ? 'Copied' : 'Copy ' + file().label"
+      [title]="justCopied() ? 'Copied' : 'Copy ' + file().label"
+      (click)="copy()">
+      <example-icon
+        [svg]="justCopied() ? copiedSvg : copySvg"
+        [size]="14" />
+    </button>
+  </div>
+  <pre
+    class="preview"
+    [innerHTML]="highlighted()"></pre>
 </div>

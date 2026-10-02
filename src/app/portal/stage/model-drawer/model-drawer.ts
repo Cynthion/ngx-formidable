@@ -1,5 +1,6 @@
 import { Component, computed, ElementRef, inject, signal } from '@angular/core';
 import { ResizeHandle } from '../../chrome/resize-handle';
+import { highlightCode } from '../../helpers/highlight.helpers';
 import { FormDefinitionStore } from '../../state/form-definition.store';
 import { FormValueStore } from '../../state/form-value.store';
 import { LayoutStore } from '../../state/layout.store';
@@ -41,6 +42,8 @@ export class ModelDrawer {
   protected readonly errorEntries = computed(() =>
     Object.entries(this.valueStore.errors()).filter(([, messages]) => messages.length)
   );
+
+  protected readonly raw = computed(() => highlightCode(this.valueStore.serialized(), 'json'));
 
   protected readonly validity = computed(() =>
     this.valueStore.valid() ? 'Form valid' : `Form invalid · ${this.valueStore.errorCount()}`
