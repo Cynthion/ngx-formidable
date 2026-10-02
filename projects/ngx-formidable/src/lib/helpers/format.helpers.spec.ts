@@ -1,5 +1,6 @@
 import { format } from 'date-fns';
 import fc from 'fast-check';
+import { DATE_FORMATS, DATES, TIME_FORMATS } from '../testing/arbitraries';
 import {
   findSegmentAtCaret,
   formatToTokenMask,
@@ -18,30 +19,7 @@ import { DEFAULT_PATTERNS } from './mask.helpers';
  * tokens in any order and with any separators or none, and over any date the mask's four year slots hold.
  */
 
-const SEPARATORS = ['', '-', '/', '.', ':', ' ', ' . ', ', '];
-
-/** Every part at most once, in any order, each written with one of its tokens, with a separator between two. */
-function formats(parts: string[][]): fc.Arbitrary<string> {
-  return fc
-    .shuffledSubarray(parts, { minLength: 1 })
-    .chain((chosen) => fc.tuple(...chosen.map((tokens) => fc.constantFrom(...tokens))))
-    .chain((tokens) =>
-      fc
-        .array(fc.constantFrom(...SEPARATORS), { minLength: tokens.length, maxLength: tokens.length })
-        .map((separators) => tokens.map((token, index) => (index ? separators[index] : '') + token).join(''))
-    );
-}
-
-const DATE_FORMATS = formats([['yy', 'yyyy'], ['MM', 'MMM'], ['dd']]);
-
-// A twelve-hour clock tells 2 PM from 2 AM only by its meridiem, so `hh` never comes without one. date-fns
-// reads a dot right after the meridiem as part of it, `AM.` as `a.m.`, so that one shape is left to
-// `impl/backlog.md`.
-const TIME_FORMATS = formats([['HH', 'hh a', 'hhaa'], ['mm'], ['ss']]).filter((unicode) => !/a\./.test(unicode));
-
 const ANY_FORMAT = fc.oneof(DATE_FORMATS, TIME_FORMATS);
-
-const DATES = fc.date({ min: new Date(1000, 0, 1), max: new Date(9999, 11, 31, 23, 59, 59), noInvalidDate: true });
 
 /** Tokens date-fns knows that a mask cannot type: unpadded, variable-width or not a date part at all. */
 const UNSUPPORTED = ['y', 'yyy', 'M', 'MMMM', 'd', 'do', 'E', 'EEEE', 'Q', 'w', 'H', 'h', 'm', 's', 'S', 'X'];

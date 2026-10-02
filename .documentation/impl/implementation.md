@@ -117,14 +117,6 @@ Phases 32 to 37 rewrite the specs Vitest inherited to the rules in **Writing A S
 
 - **Size It Honestly**: each phase is about 2,000 lines of specs. Split one before starting if it does not fit a conversation.
 
-### Phase 32: Text Field Specs
-
-**Depends On**: nothing.
-
-- **Scope**: `caret`, `focus-caret`, `focus-caret-keys`, `mask-placeholder`, `blur-commit`, `date-time-field` and `date-panel`.
-- **The Browser's Half**: a trusted click places the caret and a trusted `Tab` selects, so the hand-made browser behaviour in `focus-caret.spec.ts` goes.
-- **Properties**: `mask.helpers` and `input.helpers`, and a date or time typed with real keys into any accepted format reaching the model.
-
 ### Phase 33: Option And Panel Field Specs
 
 **Depends On**: nothing.

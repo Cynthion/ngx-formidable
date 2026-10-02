@@ -53,12 +53,14 @@ Every library spec is built on the helpers in `lib/testing/`. `public-api.ts` do
 | `configureFormidableTestBed()`  | Zoneless change detection and ngx-mask, plus the spec's own metadata. Clears `theme()` overrides and the scroll first                  |
 | `settle(fixture, ms)`           | Awaits timers of up to `ms`, one frame, and the change detection they scheduled. Never calls `detectChanges()`                         |
 | `bindField(kind, api)`          | A host binding one field through any forms API: its model, touched, dirty and events; `write()`, `set()`, `state()`, `markAsTouched()` |
+| `clickAt(editor, index)`        | A trusted click where the caret before `index` sits, so the browser places it; `Shift` extends the selection                           |
+| `DATE_FORMATS`, `TIME_FORMATS`  | fast-check arbitraries of every `unicodeTokenFormat` a date or time field accepts, and `DATES` of any date its mask holds              |
 | `referenced()`                  | What an id-reference attribute such as `aria-activedescendant` resolves to                                                             |
 | `theme()`, `rem()`, `corners()` | A `:root` override, a rem length in px, the four resolved corner radii                                                                 |
 | `fill()`, `type()`, `press()`   | Synthetic input for specs not yet rewritten: a whole value, keystrokes at the caret, a bubbling cancelable `keydown`                   |
 | `click()`                       | A synthetic pointer click for specs not yet rewritten, which moves focus as the browser would                                          |
 
-`bindField` with `decorated: true` and `decoration: '<div formidableFieldLabel>Colour</div>'` gives a field the accessible name `page.getByRole` finds it by.
+`bindField` with `decorated: true` and `decoration: '<div formidableFieldLabel>Colour</div>'` gives a field the accessible name `page.getByRole` finds it by. With `after: '<button type="button">Next</button>'` focus has somewhere to leave to by `Tab` and come back from by `Shift` + `Tab`: a field alone in the test frame would hand focus to the page around it, which does not reliably hand it back.
 
 ---
 
@@ -69,7 +71,8 @@ The `helpers/` modules are pure functions and the cheapest place to find an edge
 | Area               | Where                 | What To Assert                                                                                                                |
 | :----------------- | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------- |
 | Formatting/parsing | `format.helpers.ts`   | Over every accepted format and any date: the text fits the mask, parses back to itself, and no half-typed prefix of it parses |
-| Masking            | `mask.helpers.ts`     | Mask config resolution, min/max-length validation                                                                             |
+| Masking            | `mask.helpers.ts`     | Over any mask of the built-in tokens: its display length range, and that the default placeholder is never taken for content   |
+| Caret              | `input.helpers.ts`    | Over any mask filled from the front: where its value ends; and that writing the text already shown keeps the selection        |
 | Options            | `option.helpers.ts`   | Over any list of options: the arrows land only on options a user can pick, visit all of them in order, and wrap at both ends  |
 | Panel placement    | `position.helpers.ts` | The side chosen from the available space, the flip it marks the panel with, and that a sheet is exempt                        |
 

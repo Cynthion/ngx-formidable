@@ -1,69 +1,51 @@
-import { Component, Provider } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
+import { Provider } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
-import { bindField, FORMS_APIS } from '../../testing/bind-field';
-import { configureFormidableTestBed, settle } from '../../testing/test-bed';
-import { DateField } from './date-field/date-field';
-import { InputField } from './input-field/input-field';
+import { page, userEvent } from 'vitest/browser';
+import { bindField, FieldKind, FORMS_APIS } from '../../testing/bind-field';
+import { clickAt } from '../../testing/dom';
+import { configureFormidableTestBed } from '../../testing/test-bed';
 
 /**
  * `placeHolderCharacter` is the character a mask draws for a position nobody has filled, and the library
  * reads a value back out of the rendered text by looking for it. ngx-mask lets it be set globally, which
- * would change what the fields read without their knowing, so every masked field binds it explicitly.
+ * would change what the fields read without their knowing, so every masked field binds it explicitly, per
+ * **The Slot Character Is The Field's, Not The App's** in `user/fields.md`.
  *
- * Setting it per field still works, and moves the display and the caret rules together.
+ * Setting it per field still works, and moves the display and the caret rules together. Every spec reaches
+ * the field by its label and role, with a trusted `Tab`, click or key.
  */
 
-@Component({
-  imports: [FormsModule, InputField, DateField],
-  template: `
-    <form>
-      <formidable-input-field
-        name="inherited"
-        mask="000 000 00 00"
-        [maskConfig]="{ showMaskTyped: true }"
-        [ngModel]="partial" />
-      <formidable-input-field
-        name="own"
-        mask="000 000 00 00"
-        [maskConfig]="{ showMaskTyped: true, placeHolderCharacter: '*' }"
-        [ngModel]="partial" />
-      <formidable-date-field
-        name="date"
-        unicodeTokenFormat="dd/MM/yyyy" />
-    </form>
-  `
-})
-class PlaceholderHost {
-  partial = '079123';
+/** Binds a field under the label `Field`, with ngx-mask configured app-wide by `providers`, and its editor. */
+async function render(
+  kind: FieldKind,
+  inputs: Record<string, unknown>,
+  providers: Provider[] = [],
+  value: unknown = null
+): Promise<HTMLInputElement> {
+  TestBed.resetTestingModule();
+  configureFormidableTestBed({ providers });
+  await bindField(kind, 'signal', {
+    value,
+    inputs,
+    decorated: true,
+    decoration: '<div formidableFieldLabel>Field</div>'
+  });
+
+  return page.getByRole(kind === 'date' ? 'combobox' : 'textbox', { name: 'Field' }).element() as HTMLInputElement;
 }
 
+/** A phone number half typed, under a mask that shows its empty slots with `placeHolderCharacter`. */
+function phone(providers: Provider[], placeHolderCharacter?: string): Promise<HTMLInputElement> {
+  const maskConfig = { showMaskTyped: true, ...(placeHolderCharacter ? { placeHolderCharacter } : {}) };
+
+  return render('input', { mask: '000 000 00 00', maskConfig }, providers, '079123');
+}
+
+const selection = (editor: HTMLInputElement) => [editor.selectionStart, editor.selectionEnd];
+
 describe('mask placeholder character', () => {
-  let fixture: ComponentFixture<PlaceholderHost>;
-
-  afterEach(() => fixture?.destroy());
-
-  async function build(providers: Provider[]): Promise<void> {
-    TestBed.resetTestingModule();
-    configureFormidableTestBed({ providers });
-    fixture = TestBed.createComponent(PlaceholderHost);
-
-    await settle(fixture);
-  }
-
-  function inputOf(name: string): HTMLInputElement {
-    return fixture.nativeElement.querySelector(`formidable-input-field[name="${name}"] input`);
-  }
-
-  function dateInput(): HTMLInputElement {
-    return fixture.nativeElement.querySelector('formidable-date-field input');
-  }
-
-  /** Tab, which is what makes the field select what it holds. */
-  function tabTo(element: HTMLInputElement): void {
-    element.focus();
-  }
+  beforeEach(() => (document.activeElement as HTMLElement | null)?.blur());
 
   describe('a global setting does not reach the fields', () => {
     for (const [label, providers] of [
@@ -71,80 +53,66 @@ describe('mask placeholder character', () => {
       ['a global placeHolderCharacter', [provideNgxMask({ placeHolderCharacter: '*' })]]
     ] as const) {
       it(`renders its own slots with ${label}`, async () => {
-        await build([...providers]);
+        const editor = await phone([...providers]);
 
-        expect(inputOf('inherited').value).toBe('079 123 __ __');
+        expect(editor.value).toBe('079 123 __ __');
       });
 
       it(`still finds the end of the value with ${label}`, async () => {
-        await build([...providers]);
-        const element = inputOf('inherited');
+        const editor = await phone([...providers]);
 
-        tabTo(element);
-        await settle(fixture);
+        await userEvent.tab();
 
-        expect([element.selectionStart, element.selectionEnd]).toEqual([0, 7]);
+        await expect.poll(() => selection(editor)).toEqual([0, 7]);
       });
 
       // The initial display comes from the mask pipe; this is ngx-mask's own directive re-rendering, which
       // is what the explicit binding protects.
       it(`keeps its own slots when the mask re-renders on typing, with ${label}`, async () => {
-        await build([...providers]);
-        const element = inputOf('inherited');
+        const editor = await phone([...providers]);
 
-        element.focus();
-        element.setSelectionRange(7, 7);
-        document.execCommand('insertText', false, '4');
-        await settle(fixture);
+        await clickAt(editor, 7);
+        await userEvent.keyboard('4');
 
-        expect(element.value).toBe('079 123 4_ __');
+        await expect.element(editor).toHaveValue('079 123 4_ __');
       });
 
       it(`leaves a date field's empty display alone with ${label}`, async () => {
-        await build([...providers]);
-        const element = dateInput();
+        const editor = await render('date', { unicodeTokenFormat: 'dd/MM/yyyy' }, [...providers]);
 
-        expect(element.value).toBe('__/__/____');
+        expect(editor.value).toBe('__/__/____');
 
-        tabTo(element);
-        await settle(fixture);
+        await userEvent.tab();
 
         // An empty date reads as empty, so the caret collapses at the front rather than selecting slots.
-        expect(element.value).toBe('__/__/____');
-        expect([element.selectionStart, element.selectionEnd]).toEqual([0, 0]);
+        await expect.element(editor).toHaveFocus();
+        expect(editor.value).toBe('__/__/____');
+        expect(selection(editor)).toEqual([0, 0]);
       });
     }
   });
 
   describe('a per-field setting moves the display and the rules together', () => {
     it('renders the character the field asked for', async () => {
-      await build([]);
+      const editor = await phone([], '*');
 
-      expect(inputOf('own').value).toBe('079 123 ** **');
+      expect(editor.value).toBe('079 123 ** **');
     });
 
     it('and reads the value back out against it', async () => {
-      await build([]);
-      const element = inputOf('own');
+      const editor = await phone([], '*');
 
-      tabTo(element);
-      await settle(fixture);
+      await userEvent.tab();
 
-      expect([element.selectionStart, element.selectionEnd]).toEqual([0, 7]);
+      await expect.poll(() => selection(editor)).toEqual([0, 7]);
     });
 
     it('and clamps a click to it', async () => {
-      await build([]);
-      const element = inputOf('own');
+      const editor = await phone([], '*');
 
-      element.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-      element.focus();
-      element.setSelectionRange(11, 11);
-      element.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
-      element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      await settle(fixture);
+      await clickAt(editor, 11);
 
-      expect([element.selectionStart, element.selectionEnd]).toEqual([7, 7]);
+      await expect.poll(() => selection(editor)).toEqual([7, 7]);
     });
   });
 

@@ -38,3 +38,16 @@ export async function settle(fixture: ComponentFixture<unknown>, ms = 0): Promis
  * directive's validators to the control.
  */
 export const DIRECTIVE_VALIDATORS_UNATTACHED = 'Angular 22.2 attaches no directive validator to a custom control';
+
+/**
+ * Why a spec selecting or clicking inside a masked value the form wrote is skipped: the field writes that
+ * text past ngx-mask, which goes on taking the field for empty. **Mask State Behind A Written Value** in
+ * `impl/backlog.md`.
+ */
+export const MASK_STATE_BEHIND = 'ngx-mask takes a masked value the form wrote for no value';
+
+/**
+ * Why a spec pressing `Backspace` over the whole of a masked text is skipped: ngx-mask empties the editor
+ * without the `input` event the field listens for. **Backspace Over A Whole Masked Text** in `impl/backlog.md`.
+ */
+export const BACKSPACE_UNREPORTED = 'Backspace over a whole masked text empties the editor but not the model';

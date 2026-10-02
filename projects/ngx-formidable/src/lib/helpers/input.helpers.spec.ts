@@ -1,10 +1,42 @@
+import fc from 'fast-check';
 import { endOfMaskedValue, replaceText } from './input.helpers';
 import { DEFAULT_PLACEHOLDER_CHARACTER } from './mask.helpers';
 
 /**
- * Where a masked editor's value ends, which is the one thing the caret rules cannot read straight off it. The fields themselves are covered by
- * `components/fields/focus-caret.spec.ts`, which drives whole interactions against real editors.
+ * Where a masked editor's value ends, which is the one thing the caret rules cannot read straight off it, and
+ * the one write that leaves the user's caret alone. The fields themselves are `components/fields/focus-caret.spec.ts`.
+ *
+ * The properties run over any mask of slots and the literals ngx-mask draws between them, filled from the
+ * front by any amount, and drawing its empty slots with any character it cannot type.
  */
+
+const LITERALS = [' ', '-', '/', '.', ':', '(', ')', '+', ' . '];
+
+/** A mask with its slots written as `#`, a literal maybe opening and closing it: `(###) ###-####`. */
+const MASKS = fc
+  .tuple(
+    fc.array(fc.tuple(fc.constantFrom('', ...LITERALS), fc.integer({ min: 1, max: 4 })), {
+      minLength: 1,
+      maxLength: 5
+    }),
+    fc.constantFrom('', ...LITERALS)
+  )
+  .map(([groups, closing]) => groups.map(([literal, slots]) => literal + '#'.repeat(slots)).join('') + closing);
+
+/** Where each slot of a mask sits. */
+function slotsOf(mask: string): number[] {
+  return [...mask].flatMap((character, index) => (character === '#' ? [index] : []));
+}
+
+/** A mask with its first slots typed as `typed`, and every other slot drawn as `placeholder`. */
+const DISPLAYS = MASKS.chain((mask) =>
+  fc.record({
+    mask: fc.constant(mask),
+    typed: fc.array(fc.constantFrom('0', '7', 'a', 'Z'), { maxLength: slotsOf(mask).length }),
+    placeholder: fc.constantFrom(DEFAULT_PLACEHOLDER_CHARACTER, '*', '•')
+  })
+);
+
 describe('input helpers', () => {
   let element: HTMLInputElement;
 
@@ -16,75 +48,69 @@ describe('input helpers', () => {
   afterEach(() => element.remove());
 
   describe('replaceText', () => {
-    it('writes text the element does not show, with the caret behind it', () => {
-      element.value = 'old';
+    it('leaves the selection alone when the text is already there, and puts the caret behind any other', () => {
+      fc.assert(
+        fc.property(
+          fc
+            .string()
+            .chain((shown) =>
+              fc.tuple(
+                fc.constant(shown),
+                fc.oneof(fc.constant(shown), fc.string()),
+                fc.nat(shown.length),
+                fc.nat(shown.length)
+              )
+            ),
+          ([shown, written, from, to]) => {
+            const selected = [Math.min(from, to), Math.max(from, to)];
+            element.value = shown;
+            element.setSelectionRange(selected[0]!, selected[1]!);
 
-      replaceText(element, 'a longer value');
+            replaceText(element, written);
 
-      expect(element.value).toBe('a longer value');
-      expect(element.selectionStart).toBe('a longer value'.length);
-    });
-
-    it('leaves the caret alone when the text is already there', () => {
-      element.value = 'unchanged';
-      element.setSelectionRange(3, 3);
-
-      replaceText(element, 'unchanged');
-
-      expect(element.selectionStart).toBe(3);
-    });
-
-    it('leaves a selection alone too', () => {
-      element.value = 'unchanged';
-      element.setSelectionRange(2, 6);
-
-      replaceText(element, 'unchanged');
-
-      expect([element.selectionStart, element.selectionEnd]).toEqual([2, 6]);
+            expect(element.value).toBe(written);
+            expect([element.selectionStart, element.selectionEnd]).toEqual(
+              written === shown ? selected : [written.length, written.length]
+            );
+          }
+        )
+      );
     });
   });
 
   describe('endOfMaskedValue', () => {
-    const cases: Array<[string, number, string]> = [
-      ['079 123 45 67', 13, 'a full mask ends after its last character'],
-      ['12/34/5678', 10, 'and so does one with no slots rendered'],
-      ['079 123', 7, 'a mask told not to render its slots ends where its text does'],
-      ['12/3_/____', 4, 'a partial mask ends after the last filled position'],
-      ['079 123 __ __', 7, 'dropping the separator that leads into the unused area'],
-      ['079 1__ __ __', 5, 'wherever that boundary falls'],
-      ['0__ ___ __ __', 1, 'including after a single character'],
-      ['___ ___ __ __', 0, 'and at the front when nothing is filled'],
-      ['(___) ___', 0, 'even behind a literal the mask opens with'],
-      ['', 0, 'an empty editor ends at 0']
+    it('ends after the last slot typed, short of the literal leading to the rest, and after the whole of a full mask', () => {
+      fc.assert(
+        fc.property(DISPLAYS, ({ mask, typed, placeholder }) => {
+          const slots = slotsOf(mask);
+          let slot = 0;
+          element.value = [...mask]
+            .map((character) => (character === '#' ? (typed[slot++] ?? placeholder) : character))
+            .join('');
+
+          const end =
+            typed.length === slots.length ? mask.length : typed.length === 0 ? 0 : slots[typed.length - 1]! + 1;
+
+          expect(endOfMaskedValue(element, placeholder)).toBe(end);
+        })
+      );
+    });
+
+    // The examples `user/fields.md` gives, and the two no mask generates.
+    const cases: Array<[string, string, number, string]> = [
+      ['12/3_/____', '_', 4, 'keyboard focus selects `12/3` and stops'],
+      ['079 ___ __ __', '_', 3, 'a click into the empty tail lands behind the `9`'],
+      ['___ ___ __ __', '_', 0, 'nothing but slots ends at the front'],
+      ['', '_', 0, 'an empty editor ends at 0'],
+      ['ab_cd*', '*', 5, 'an underscore is content once something else marks the empty slots']
     ];
 
-    for (const [text, end, why] of cases) {
+    for (const [text, placeholder, end, why] of cases) {
       it(`${why}: "${text}" ends at ${end}`, () => {
         element.value = text;
 
-        expect(endOfMaskedValue(element, DEFAULT_PLACEHOLDER_CHARACTER)).toBe(end);
+        expect(endOfMaskedValue(element, placeholder)).toBe(end);
       });
     }
-  });
-
-  describe('endOfMaskedValue, with the placeholder changed', () => {
-    it('reads a value back out against the character the mask actually renders', () => {
-      element.value = '079 123 ** **';
-
-      expect(endOfMaskedValue(element, '*')).toBe(7);
-    });
-
-    it('and stops seeing slots that are no longer slots', () => {
-      element.value = '079 123 ** **';
-
-      expect(endOfMaskedValue(element, '_')).toBe(13);
-    });
-
-    // The point of changing it: a mask whose own alphabet includes the default character.
-    it('lets an underscore be content when something else marks the empty slots', () => {
-      element.value = 'ab_cd*';
-
-      expect(endOfMaskedValue(element, '*')).toBe(5);
-    });
   });
 });

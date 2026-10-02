@@ -1,7 +1,36 @@
+import { userEvent } from 'vitest/browser';
+
 /** A text editor a field renders. */
 export type Editor = HTMLInputElement | HTMLTextAreaElement;
 
 const themed = new Set<string>();
+
+/**
+ * Clicks the editor with a trusted click where the caret before `index` sits, so the browser places the caret
+ * there itself. The point is measured in the editor's own font, on its first line of text. `Shift` extends
+ * the selection the editor already has, as a pointer does.
+ */
+export async function clickAt(editor: Editor, index: number, modifiers: 'Shift'[] = []): Promise<void> {
+  const style = getComputedStyle(editor);
+  const context = document.createElement('canvas').getContext('2d')!;
+  context.font = style.font;
+  context.letterSpacing = style.letterSpacing;
+
+  const top = parseFloat(style.borderTopWidth) + parseFloat(style.paddingTop);
+  const bottom = parseFloat(style.borderBottomWidth) + parseFloat(style.paddingBottom);
+  const x =
+    parseFloat(style.borderLeftWidth) +
+    parseFloat(style.paddingLeft) +
+    context.measureText(editor.value.slice(0, index)).width -
+    editor.scrollLeft;
+  // A textarea starts at its first line; an input centres its one line in its content box.
+  const y =
+    editor instanceof HTMLTextAreaElement
+      ? top + parseFloat(style.lineHeight) / 2
+      : top + (editor.offsetHeight - top - bottom) / 2;
+
+  await userEvent.click(editor, { position: { x, y }, modifiers });
+}
 
 /** Replaces the editor's whole text and reports it with one `input`, the way a paste or an autofill does. */
 export function fill(editor: Editor, text: string): void {
