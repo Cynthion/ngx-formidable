@@ -9,8 +9,8 @@ import { ThemeTab } from './theme/theme-tab';
 const TABS: readonly { id: InspectorTab; label: string; title: string }[] = [
   { id: 'theme', label: 'Theme', title: 'How the fields look' },
   { id: 'form', label: 'Form', title: 'What the fields are, and which of them exist' },
-  // Both directions in one name: the tab has always held a paste-back beside each copy-out.
-  { id: 'export', label: 'Import & Export', title: 'The CSS and the template, out of the Studio and back in' }
+  // Out first: taking the work away is what the area is for, and reading it back is the round trip.
+  { id: 'export', label: 'Export & Import', title: 'The CSS and the template, out of the Studio and back in' }
 ];
 
 /**

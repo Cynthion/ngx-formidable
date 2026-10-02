@@ -34,7 +34,7 @@ const APPEARANCES: readonly { value: PortalAppearance; label: string; glyph: str
  *
  * One copy, not one per thing to take away: the theme is the only one that stands on its own. The template
  * binds names only its component defines, so a one-click copy of it alone hands the user code that does not
- * compile — it lives beside that component in Import & Export, whose tab is always in view on the Studio.
+ * compile — it lives beside that component in Export & Import, whose tab is always in view on the Studio.
  *
  * The count is the number of variables the user has changed, never the size of the token surface: a number
  * that rises as they work says the library needs eight to twelve variables without a sentence of explanation.

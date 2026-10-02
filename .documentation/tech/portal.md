@@ -32,7 +32,7 @@ Three regions. The preview form is never hidden, because the form repainting is 
 │ ◇ ngx-formidable      [ Studio │ Docs ]  ⌘GitHub ◐ [Copy Theme 16]       │
 │   Angular form fields you can actually theme, configure and customize.   │
 ├───────────────────────────────────────────┬──────────────────────────────┤
-│ PREVIEW  Field Types  Accessibility       │ Theme │ Form │ Import&Exp  › │
+│ PREVIEW  Field Types  Accessibility       │ Theme │ Form │ Export&Imp  › │
 │ ┌─ your page ───────────────────────────┐ │                              │
 │ │  Section heading                      │ │ ┌ Design │ Variables ┐       │
 │ │  ┌──────────────┐ ┌──────────────┐    │ │ │ Pick a look, then work…   │
@@ -91,13 +91,13 @@ The top bar is on all of them and its tabs are the only navigation there is, so 
 | :------------------ | :---------------------- | :------------------------------------------------------------------------------------------------------- |
 | **Theme**           | `Design`, `Variables`   | How the fields look                                                                                      |
 | **Form**            | `Structure`, `Settings` | Which fields exist, and what everything is set to                                                        |
-| **Import & Export** | `Theme`, `Form`         | What you take away and paste back: the `:root` block, and the template with its component and app config |
+| **Export & Import** | `Export`, `Import`      | What you take away and paste back: the `:root` block, and the template with its component and app config |
 
 `Form` is `Structure` first: which fields exist has to be settled before what one of them is is worth saying. All three areas carry the same second level, so the strip is learned once rather than per tab. It sticks to the top of the panel's scroll, so which half is showing never leaves the screen.
 
-`Import & Export`'s two halves are the two things there are to take away. Each half is then the same pair of accordions, `Export` and `Import`, because both are round trips and the way back in belongs beside the way out, which is what the tab is named for. A reader who has learned one half has learned the other. The form's `Export` holds four files, so they are tabs (`Template`, `Component`, `Schema`, `App Config`), one on screen at a time, which keeps the `Import` header in view beneath them.
+`Export & Import`'s two halves are the two directions. Under them a second strip names the file, one on screen at a time: `Export` holds `Theme`, `Template`, `Component`, `Schema` and `App Config`; `Import` holds `Theme` and `Template`, the two the Studio reads back. The strip is underlined rather than boxed, so it does not read as a continuation of the sub-tab strip above it.
 
-Which half is showing and which of its two accordions is open are both held in the inspector store rather than in the components: `App Defaults` links to the form half, and `Structure`'s third way to start opens it **at its import**, which a panel's own state could not be reached to say. Inside every area the sections are accordions with one open at a time, so the run of collapsed headers is the panel's table of contents rather than a scroll the user has to survey.
+Which direction and which file are showing are held in the inspector store rather than in the components: `App Defaults` links to `Export` ▸ `App Config`, and `Structure`'s third way to start opens `Import` ▸ `Template`, which a panel's own state could not be reached to say. Inside the other two areas the sections are accordions with one open at a time, so the run of collapsed headers is the panel's table of contents rather than a scroll the user has to survey.
 
 **Anchor Targets**: per-token deep links use a route parameter and scroll programmatically. A fragment on top of a hash route is ambiguous.
 
@@ -397,13 +397,13 @@ An Angular production build contains no template compiler, so user-authored mark
 
 | Step                      | Offers                                                                       |
 | :------------------------ | :--------------------------------------------------------------------------- |
-| **1 Start**               | `Blank Form`, `The Sample`, `Paste Template`. The last opens Import & Export |
+| **1 Start**               | `Blank Form`, `The Sample`, `Paste Template`. The last opens Export & Import |
 | **2 Sections And Fields** | The form as it is: reorder, remove, or open a field on `Settings`            |
 | **3 Add**                 | A field of any type into any section, or a new section                       |
 
 A blank form is one empty section rather than none: every add needs somewhere to add into, so a form with no sections at all would be a dead end rather than a beginning. Adding leaves step 3 open: building a form is a run of adds, and the new field is already visible on the stage. The form's heading and intro belong to the definition rather than the stage template, so a form built from scratch does not claim to be the sample.
 
-The import handles a static, attribute-only subset and states so. It reads a field's name and group off its `[formField]` path, and takes out the `hidden()` gates the serializer writes. The schema is not read, so a field's state, limits, required marker and condition stay behind; the gate and a preset handler are listed, and the rest the `Import` lede states. Bindings and any other control flow are out of scope, and the parser lists unknown elements and attributes rather than failing silently. Both directions are pure functions with colocated specs, which is the highest-value target named in [`impl/testing.md`](../impl/testing.md).
+The import handles a static, attribute-only subset and states so. It reads a field's name and group off its `[formField]` path, and takes out the `hidden()` gates the serializer writes. The schema is not read, so a field's state, limits, required marker and condition stay behind; the gate and a preset handler are listed, and the rest the `Import` ▸ `Template` help states. Bindings and any other control flow are out of scope, and the parser lists unknown elements and attributes rather than failing silently. Both directions are pure functions with colocated specs, which is the highest-value target named in [`impl/testing.md`](../impl/testing.md).
 
 ---
 

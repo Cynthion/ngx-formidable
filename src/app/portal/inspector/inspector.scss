@@ -122,7 +122,10 @@
   }
 }
 
+// Isolated, so the sticky sub-tab strip's chrome z-index stays inside the body and cannot paint over the
+// divider's accent line or swallow its grab area.
 .body {
+  isolation: isolate;
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;

@@ -26,7 +26,7 @@ The top bar carries all three, the repository link, the page's own light or dark
 | :--------------- | :--------------- | :------------------------------------------------------------------------ |
 | **Top Bar**      | Across the top   | The three routes, the appearance toggle and `Copy Theme`                  |
 | **Stage**        | The wide column  | The form, on an explicit page surface, with the model drawer beneath it   |
-| **Editor Panel** | Beside the stage | `Theme`, `Form` and `Import & Export`, each a tab over the same live form |
+| **Editor Panel** | Beside the stage | `Theme`, `Form` and `Export & Import`, each a tab over the same live form |
 
 The form is never hidden, because watching it repaint is the point. Below a narrow breakpoint the editor panel becomes a bottom sheet instead of a column, so the fields stay visible while they are edited.
 
@@ -92,7 +92,7 @@ The `Form` tab has two halves, in the order the work happens.
 
 | Step                      | Offers                                                                          |
 | :------------------------ | :------------------------------------------------------------------------------ |
-| **1 Start**               | `Blank Form`, `The Sample`, or `Paste Template`. The last opens Import & Export |
+| **1 Start**               | `Blank Form`, `The Sample`, or `Paste Template`. The last opens Export & Import |
 | **2 Sections And Fields** | Reorder a field, remove it, or open it for editing                              |
 | **3 Add**                 | A field of any type into any section, or a new section                          |
 
@@ -141,14 +141,17 @@ The model drawer is where all of this is legible: the two groups nest, and a con
 
 ## Taking It Away
 
-The `Import & Export` tab has two halves, one per thing the Studio produces. Each is derived from what is on the stage, so neither can disagree with what you are looking at. Pasting the theme back reproduces it; pasting the template back reproduces the form's fields and sections, and lists what it leaves behind.
+The `Export & Import` tab has two halves, `Export` and `Import`, each a row of tabs with one file on screen at a time. Every export is derived from what is on the stage, so none can disagree with what you are looking at. Pasting the theme back reproduces it; pasting the template back reproduces the form's fields and sections, and lists what it leaves behind.
 
-| Half      | Export                                                                                                   | Import                                  |
-| :-------- | :------------------------------------------------------------------------------------------------------- | :-------------------------------------- |
-| **Theme** | The `:root` block to paste into your own stylesheet                                                      | A block you saved earlier               |
-| **Form**  | The Angular template this configuration produces, its component, its schema and an app config, read-only | A whole template, its sections included |
+| File           | Export                                                      | Import                                  |
+| :------------- | :---------------------------------------------------------- | :-------------------------------------- |
+| **Theme**      | The `:root` block to paste into your own stylesheet         | A block you saved earlier               |
+| **Template**   | The Angular template this configuration produces, read-only | A whole template, its sections included |
+| **Component**  | The component the template binds, read-only                 | Not read back                           |
+| **Schema**     | The model's type, its initial value and the form's rules    | Not read back                           |
+| **App Config** | The app defaults the template leaves out, read-only         | Not read back                           |
 
-Both halves are the same pair of sections, `Export` and `Import`. Each `Export` carries the block and a copy. The form's `Export` holds four files, so it shows them as tabs (`Template`, `Component`, `Schema`, `App Config`), one at a time.
+Each export carries the file and a copy.
 
 The top bar's `Copy Theme` copies the theme with no intermediate dialog. The form has no copy there: its template does not compile without its component and its schema, so all three are taken from here. The theme's export options cover CSS or SCSS, whether the page surface is included, whether the per-variable comments are emitted, and whether the defaults are stated explicitly. Declarations that only restate a library default are left out.
 

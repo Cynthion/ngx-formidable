@@ -72,9 +72,14 @@ describe('inspector layout', () => {
       await report(`Form/Settings/${scope}`);
     }
 
-    for (const half of ['Theme', 'Form']) {
-      await openPanel('Import & Export', half);
-      await eachSection(`Import & Export/${half}`, report);
+    for (const [direction, files] of [
+      ['Export', ['Theme', 'Template', 'Component', 'Schema', 'App Config']],
+      ['Import', ['Theme', 'Template']]
+    ] as const) {
+      for (const file of files) {
+        await openPanel('Export & Import', direction, file);
+        await report(`Export & Import/${direction}/${file}`);
+      }
     }
   }
 
@@ -113,7 +118,7 @@ describe('inspector layout', () => {
     for (const [area, half] of [
       ['Theme', 'Design'],
       ['Form', 'Settings'],
-      ['Import & Export', 'Form']
+      ['Export & Import', 'Export']
     ] as const) {
       await openPanel(area, half);
 
@@ -125,6 +130,18 @@ describe('inspector layout', () => {
       expect(body().scrollTop, half).toBeGreaterThan(100);
       expect(strip.getBoundingClientRect().top - body().getBoundingClientRect().top, half).toBeCloseTo(0, 0);
     }
+  });
+
+  // The strip sticks at the chrome's z-index, so it has to stay inside the body: above the divider it hid the
+  // divider's accent line and took the drag along its own height.
+  it('keeps the divider above the sub-tab strip', async () => {
+    fixture = await openStudio();
+
+    const divider = panel().querySelector('.divider')!;
+    const edge = divider.getBoundingClientRect();
+    const strip = panel().querySelector('.sub-tabs')!.getBoundingClientRect();
+
+    expect(document.elementFromPoint(edge.left + edge.width / 2, strip.top + strip.height / 2)).toBe(divider);
   });
 
   // Open, the toggle keeps the content's gutter, measured against the sub-tab strip so a scrollbar in the body

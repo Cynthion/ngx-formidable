@@ -1,0 +1,52 @@
+@if (file().id === 'theme') {
+<div class="options">
+  <label class="pc-check">
+    <input
+      type="radio"
+      name="export-format"
+      [checked]="theme.exportOptions().format === 'css'"
+      (change)="setFormat('css')" />
+    CSS
+  </label>
+  <label class="pc-check">
+    <input
+      type="radio"
+      name="export-format"
+      [checked]="theme.exportOptions().format === 'scss'"
+      (change)="setFormat('scss')" />
+    SCSS
+  </label>
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="theme.exportOptions().includeComments"
+      (change)="setIncludeComments($any($event.target).checked)" />
+    Comments
+  </label>
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="theme.exportOptions().includePageSurface"
+      (change)="setIncludePageSurface($any($event.target).checked)" />
+    Page Surface
+  </label>
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="theme.exportOptions().includeDefaults"
+      (change)="setIncludeDefaults($any($event.target).checked)" />
+    Explicit Defaults
+  </label>
+</div>
+}
+
+<pre class="preview">{{ text() }}</pre>
+
+<div class="pc-buttons">
+  <button
+    type="button"
+    class="pc-button is-primary"
+    (click)="copy()">
+    {{ justCopied() ? 'Copied' : 'Copy ' + file().label }}
+  </button>
+</div>

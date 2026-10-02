@@ -64,24 +64,27 @@ export function tab(label: string, strip = 'Editor panel'): Locator {
 }
 
 /**
- * Opens one view of the editor panel the way a visitor does: its tab, then the half of it, then for the
- * Settings half the scope the editor applies to.
+ * Opens one view of the editor panel the way a visitor does: its tab, then the half of it, then the third
+ * level — for the Settings half the scope the editor applies to, for Export & Import the file.
  */
 export async function openPanel(
-  area: 'Theme' | 'Form' | 'Import & Export',
+  area: 'Theme' | 'Form' | 'Export & Import',
   half?: string,
-  scope?: string
+  third?: string
 ): Promise<void> {
   const strips = {
     'Theme': 'Theme sections',
     'Form': 'Form sections',
-    'Import & Export': 'Import and export sections'
+    'Export & Import': 'Export and import sections'
   };
 
   await userEvent.click(tab(area));
   if (half) await userEvent.click(tab(half, strips[area]));
+  if (!third) return;
   // A scope's name carries the count of what it reaches.
-  if (scope) await userEvent.click(page.getByRole('button', { name: new RegExp(`^${scope}`) }));
+  await userEvent.click(
+    area === 'Export & Import' ? tab(third, 'Files') : page.getByRole('button', { name: new RegExp(`^${third}`) })
+  );
 }
 
 /** Opens one accordion section, leaving it open if it already is. */

@@ -55,7 +55,7 @@ const GOLDEN: readonly Golden[] = [
  * the proof that what the Studio hands out works, and checks what the stage checks.
  *
  * The serializers must write these files exactly, so a change to them fails here first. To take it on, copy
- * the three files again from the served Studio — Import & Export ▸ Form ▸ Export, with the sample loaded and
+ * the three files again from the served Studio — Export & Import ▸ Export, with the sample loaded and
  * the validator chosen on Form ▸ Settings ▸ The Form.
  */
 describe('golden export', () => {

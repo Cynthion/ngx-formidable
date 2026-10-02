@@ -21,7 +21,7 @@ function count(n: number, noun: string): string {
  * Fields are added, removed and reordered through controls rather than by typing, because the configuration
  * is the source of truth — an Angular production build contains no template compiler, so authored markup
  * could never become live components. Importing markup is therefore a read into the configuration, and it
- * lives on the Import & Export tab; this tab only sends you there.
+ * lives on the Export & Import tab; this tab only sends you there.
  *
  * The three sections are a ladder rather than one per form section: a visitor who wants their own form has
  * to be told that starting over is possible before being shown a list of somebody else's fields.
@@ -71,7 +71,7 @@ export class StructureTab {
 
   /** The third way to start is somebody else's markup, so this goes to the box one is pasted into. */
   protected startImport(): void {
-    this.inspector.openExport('form', 'import');
+    this.inspector.openImport('template');
   }
 
   /** The list is where a field is found; the Settings tab is where it is changed. */

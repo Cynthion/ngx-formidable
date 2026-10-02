@@ -82,17 +82,15 @@ describe('portal', () => {
     }
   }
 
-  /** The `:root` block `Import & Export` states for the theme on screen. */
+  /** The `:root` block `Export & Import` states for the theme on screen. */
   async function exportedTheme(): Promise<string> {
-    await openPanel('Import & Export', 'Theme');
-    await openSection('Export');
+    await openPanel('Export & Import', 'Export', 'Theme');
 
-    return document.querySelector('portal-theme-panel pre')!.textContent!;
+    return document.querySelector('portal-export-panel pre')!.textContent!;
   }
 
   async function importBlock(block: string, ontoDefaults: boolean): Promise<void> {
-    await openPanel('Import & Export', 'Theme');
-    await openSection('Import');
+    await openPanel('Export & Import', 'Import', 'Theme');
     await userEvent.fill(page.getByPlaceholder(':root { --formidable-field-height: 48px; }'), block);
 
     const onto = page.getByRole('checkbox', { name: 'Onto The Defaults' });
@@ -365,8 +363,7 @@ describe('portal', () => {
   it('counts exactly the variables the export carries', async () => {
     await openStudio();
 
-    await openPanel('Import & Export', 'Theme');
-    await openSection('Export');
+    await openPanel('Export & Import', 'Export', 'Theme');
     await userEvent.click(page.getByRole('checkbox', { name: 'Page Surface' }));
     await applyPreset(THEME_PRESETS[2]!.key);
 
@@ -374,9 +371,6 @@ describe('portal', () => {
     const exported = importTheme(await exportedTheme());
     const carried = Object.keys(exported.vars).length + (exported.page ? 1 : 0);
 
-    expect(page.getByRole('button', { name: /^Export \d+ Variables$/ }).element().textContent).toContain(
-      `${carried} Variables`
-    );
     expect(changeCount()).toBe(carried);
   });
 
@@ -413,8 +407,7 @@ describe('portal', () => {
   it('reproduces the theme when the delta is read back onto the defaults', async () => {
     await openStudio();
 
-    await openPanel('Import & Export', 'Theme');
-    await openSection('Export');
+    await openPanel('Export & Import', 'Export', 'Theme');
     await userEvent.click(page.getByRole('checkbox', { name: 'Page Surface' }));
     await applyPreset('consumer');
 
@@ -441,8 +434,7 @@ describe('portal', () => {
   it('reproduces every preset when the block states the defaults and is merged in', async () => {
     await openStudio();
 
-    await openPanel('Import & Export', 'Theme');
-    await openSection('Export');
+    await openPanel('Export & Import', 'Export', 'Theme');
     await userEvent.click(page.getByRole('checkbox', { name: 'Explicit Defaults' }));
     await userEvent.click(page.getByRole('checkbox', { name: 'Page Surface' }));
 
@@ -694,9 +686,9 @@ describe('portal', () => {
         .elements()
         .map((element) => element.textContent!.trim());
 
-    expect(tabs('Editor panel')).toEqual(['Theme', 'Form', 'Import & Export']);
+    expect(tabs('Editor panel')).toEqual(['Theme', 'Form', 'Export & Import']);
 
-    const views: [area: 'Theme' | 'Form' | 'Import & Export', strip: string, halves: Record<string, () => Locator>][] =
+    const views: [area: 'Theme' | 'Form' | 'Export & Import', strip: string, halves: Record<string, () => Locator>][] =
       [
         [
           'Theme',
@@ -715,11 +707,11 @@ describe('portal', () => {
           }
         ],
         [
-          'Import & Export',
-          'Import and export sections',
+          'Export & Import',
+          'Export and import sections',
           {
-            Theme: () => page.getByRole('heading', { name: /^Export \d+ Variables/ }),
-            Form: () => page.getByRole('heading', { name: /^Export \d+ Fields/ })
+            Export: () => page.getByRole('button', { name: 'Copy Theme', exact: true }),
+            Import: () => page.getByRole('button', { name: 'Apply', exact: true })
           }
         ]
       ];
@@ -827,57 +819,53 @@ describe('portal', () => {
     await openSection('Start');
     await userEvent.click(page.getByRole('button', { name: /^Paste Template/ }));
 
-    // Not merely the form half: the box a form goes into, rather than the block that comes out of it.
-    await expect.element(tab('Import & Export')).toHaveAttribute('aria-selected', 'true');
-    await expect.element(tab('Form', 'Import and export sections')).toHaveAttribute('aria-selected', 'true');
-    await expect
-      .element(page.getByRole('heading', { name: /^Import/ }).getByRole('button'))
-      .toHaveAttribute('aria-expanded', 'true');
-    await expect
-      .element(page.getByRole('heading', { name: /^Export/ }).getByRole('button'))
-      .toHaveAttribute('aria-expanded', 'false');
+    // Not merely the import: the box a template goes into, rather than the theme's.
+    await expect.element(tab('Export & Import')).toHaveAttribute('aria-selected', 'true');
+    await expect.element(tab('Import', 'Export and import sections')).toHaveAttribute('aria-selected', 'true');
+    await expect.element(tab('Template', 'Files')).toHaveAttribute('aria-selected', 'true');
     await expect.element(page.getByPlaceholder('<form [formRoot]="form"> … </form>')).toBeVisible();
   });
 
-  // Two halves, navigated the way the other two areas are, each a round trip: the pair of headings is the
-  // same on each, and a reader who has learned one half has learned the other.
-  it('gives both halves of Import & Export the same two directions, one half showing at a time', async () => {
+  it('sends App Defaults to the app config it exports', async () => {
+    await openStudio();
+    await openPanel('Form', 'Settings', 'App Defaults');
+
+    await userEvent.click(page.getByRole('button', { name: 'Export ↗' }));
+
+    await expect.element(tab('Export', 'Export and import sections')).toHaveAttribute('aria-selected', 'true');
+    await expect.element(tab('App Config', 'Files')).toHaveAttribute('aria-selected', 'true');
+    expect(document.querySelector('portal-export-panel pre')!.textContent).toContain('provideNgxFormidable');
+  });
+
+  // Direction first, then the file: everything goes out, and only what the Studio can read comes back in.
+  it('offers every file under Export and only the theme and the template under Import', async () => {
     await openStudio();
 
-    const headings = () =>
+    const files = () =>
       page
-        .getByRole('heading', { level: 3 })
+        .getByRole('tablist', { name: 'Files' })
+        .getByRole('tab')
         .elements()
-        .map((heading) => /^[▾▸]\s*(Export|Import)/.exec(heading.textContent!.trim())?.[1]);
+        .map((file) => file.textContent!.trim());
 
-    await openPanel('Import & Export', 'Theme');
-    expect(headings()).toEqual(['Export', 'Import']);
-    await expect.element(page.getByRole('radio', { name: 'CSS' })).toBeInTheDocument();
+    await openPanel('Export & Import', 'Export');
+    expect(files()).toEqual(['Theme', 'Template', 'Component', 'Schema', 'App Config']);
 
-    await userEvent.click(tab('Form', 'Import and export sections'));
-    expect(headings()).toEqual(['Export', 'Import']);
-    await expect.element(page.getByRole('radio', { name: 'CSS' })).not.toBeInTheDocument();
+    await openPanel('Export & Import', 'Import');
+    expect(files()).toEqual(['Theme', 'Template']);
   });
 
   // The template binds names only the component and its schema define, and leaves out what the app config
-  // supplies, so all three sit beside it — as tabs, one file on screen at a time, because stacked they buried
-  // the import under screens of code.
-  it('offers the template, the component, the schema and the app config as tabs, one at a time', async () => {
+  // supplies, so all of them sit beside it — as tabs, one file on screen at a time.
+  it('exports each file as a tab of its own, one at a time', async () => {
     await openStudio();
-    await openPanel('Import & Export', 'Form');
-    await openSection('Export');
+    await openPanel('Export & Import', 'Export');
 
-    const files = page.getByRole('tablist', { name: 'Generated files' }).getByRole('tab');
-    const shown = () => document.querySelector('portal-markup-panel pre.markup')!.textContent!;
-
-    expect(files.elements().map((file) => file.textContent!.trim())).toEqual([
-      'Template',
-      'Component',
-      'Schema',
-      'App Config'
-    ]);
+    const files = page.getByRole('tablist', { name: 'Files' }).getByRole('tab');
+    const shown = () => document.querySelector('portal-export-panel pre')!.textContent!;
 
     const expected: [file: string, text: string][] = [
+      ['Theme', ':root'],
       ['Template', '<form [formRoot]="form">'],
       ['Component', 'export class MyForm {'],
       ['Schema', 'export const myFormSchema = schema<MyFormModel>'],
@@ -888,24 +876,27 @@ describe('portal', () => {
       await userEvent.click(files.filter({ hasText: file }));
 
       await expect.element(files.filter({ hasText: file })).toHaveAttribute('aria-selected', 'true');
-      expect(document.querySelectorAll('portal-markup-panel pre.markup').length, file).toBe(1);
+      expect(document.querySelectorAll('portal-export-panel pre').length, file).toBe(1);
       expect(shown(), file).toContain(text);
-      await expect.element(page.getByRole('button', { name: `Copy ${file}` })).toBeVisible();
+      await expect.element(page.getByRole('button', { name: `Copy ${file}`, exact: true })).toBeVisible();
+      // The theme's options are the theme's alone.
+      expect(page.getByRole('radio', { name: 'CSS' }).elements().length, file).toBe(file === 'Theme' ? 1 : 0);
     }
   });
 
   // A reset beside the copy is one misclick from wiping the work being exported, and each already lives where
-  // its half is built: the preset gallery, and Structure's first step.
-  it('keeps resets out of Import & Export', async () => {
+  // its file is built: the preset gallery, and Structure's first step.
+  it('keeps resets out of Export & Import', async () => {
     await openStudio();
 
-    for (const half of ['Theme', 'Form']) {
-      await openPanel('Import & Export', half);
+    for (const [direction, files] of [
+      ['Export', ['Theme', 'Template', 'Component', 'Schema', 'App Config']],
+      ['Import', ['Theme', 'Template']]
+    ] as const) {
+      for (const file of files) {
+        await openPanel('Export & Import', direction, file);
 
-      for (const direction of ['Export', 'Import']) {
-        await openSection(direction);
-
-        expect(page.getByRole('button', { name: /reset/i }).elements(), `${half} ▸ ${direction}`).toEqual([]);
+        expect(page.getByRole('button', { name: /reset/i }).elements(), `${direction} ▸ ${file}`).toEqual([]);
       }
     }
   });
