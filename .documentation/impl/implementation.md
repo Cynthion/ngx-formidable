@@ -117,14 +117,6 @@ Phases 32 to 37 rewrite the specs Vitest inherited to the rules in **Writing A S
 
 - **Size It Honestly**: each phase is about 2,000 lines of specs. Split one before starting if it does not fit a conversation.
 
-### Phase 36: Decorator Geometry Specs
-
-**Depends On**: Phases 32 to 35.
-
-- **Scope**: `label-position`, `border-geometry`, `slider-geometry`, `textarea-layout` and `group-alignment`.
-- **Relational**: the hand-computed `rem` constants go; the relations they stand for stay.
-- **Last Library Phase**: `fill()`, `type()`, `press()` and `click()` leave `lib/testing/dom.ts`, with their rows in [`impl/testing.md`](testing.md).
-
 ### Phase 37: Portal Specs
 
 **Depends On**: nothing.

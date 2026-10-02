@@ -48,51 +48,6 @@ export function keptKeys(): (key: string) => boolean | undefined {
   return (key) => kept.get(key);
 }
 
-/** Replaces the editor's whole text and reports it with one `input`, the way a paste or an autofill does. */
-export function fill(editor: Editor, text: string): void {
-  editor.value = text;
-  editor.dispatchEvent(new Event('input'));
-}
-
-/**
- * Types into the focused editor one keystroke at a time, at its live caret: a `keydown`, then the insertion
- * the browser makes of it. Use `fill` where the caret does not matter.
- */
-export function type(editor: Editor, text: string): void {
-  for (const character of text) {
-    press(editor, character);
-    document.execCommand('insertText', false, character);
-  }
-}
-
-/** Dispatches a `keydown` that bubbles and can be cancelled, as a keyboard's does, and returns it. */
-export function press(target: EventTarget, key: string, init: KeyboardEventInit = {}): KeyboardEvent {
-  const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init });
-
-  target.dispatchEvent(event);
-
-  return event;
-}
-
-/**
- * Clicks as a pointer does: a `mousedown`, a `mouseup` and a `click`, all bubbling and cancelable. A dispatched
- * event has no default action, so this performs the press's own: unless a listener cancelled the `mousedown`,
- * focus moves to the nearest focusable ancestor, or leaves when there is none.
- */
-export function click(target: Element): void {
-  const init = { bubbles: true, cancelable: true };
-
-  if (target.dispatchEvent(new MouseEvent('mousedown', init))) {
-    const focusable = target.closest<HTMLElement>('a[href], button, input, select, textarea, [tabindex]');
-
-    if (focusable) focusable.focus();
-    else (document.activeElement as HTMLElement | null)?.blur();
-  }
-
-  target.dispatchEvent(new MouseEvent('mouseup', init));
-  target.dispatchEvent(new MouseEvent('click', init));
-}
-
 /**
  * What an id-reference attribute such as `aria-controls` or `aria-describedby` points at, in the order it
  * names them. An id nothing carries resolves to `null`, so a dangling reference fails the assertion.
@@ -117,11 +72,6 @@ export function theme(property: string, value: string): void {
 export function clearTheme(): void {
   themed.forEach((property) => document.documentElement.style.removeProperty(property));
   themed.clear();
-}
-
-/** A length in rem as px, so an expectation stays written in its token's own unit. */
-export function rem(value: number): number {
-  return value * parseFloat(getComputedStyle(document.documentElement).fontSize);
 }
 
 /** The four resolved corner radii, clockwise from the top left. */
