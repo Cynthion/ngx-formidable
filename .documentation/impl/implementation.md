@@ -117,12 +117,6 @@ Phases 32 to 37 rewrite the specs Vitest inherited to the rules in **Writing A S
 
 - **Size It Honestly**: each phase is about 2,000 lines of specs. Split one before starting if it does not fit a conversation.
 
-### Phase 34: Cross-Field Specs
-
-**Depends On**: nothing.
-
-- **Scope**: `field-contract`, `focus`, `first-render`, `repaint`, `touch-on-leave`, `disabled-state`, `blocked-edits`, `value-round-trip`, `toggle-label` and `defaults`.
-
 ### Phase 35: Decorator Specs
 
 **Depends On**: nothing.

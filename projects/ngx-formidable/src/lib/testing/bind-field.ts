@@ -68,6 +68,11 @@ export interface BindFieldOptions {
   after?: string;
   /** Angular's `updateOn`, on the `<form>` or on the `FormControl`. Ignored by Signal Forms. */
   updateOn?: 'change' | 'blur' | 'submit';
+  /**
+   * The state the forms API holds from the first render, as `BoundField.state` would change it. Under `ngModel`
+   * only `readonly` and `required` hold that early: its control registers after the first render.
+   */
+  state?: Partial<FieldFlags>;
 }
 
 /** The state a forms API holds for a field, which `BoundField.state` changes the way that API's consumer does. */
@@ -157,7 +162,8 @@ export async function bindField(kind: FieldKind, api: FormsApi, options: BindFie
     decoration = '',
     before = '',
     after = '',
-    updateOn
+    updateOn,
+    state: initial = {}
   } = options;
   const tag = `formidable-${kind}-field`;
   const bindings = Object.keys(inputs).map((name) => `[${name}]="inputs()['${name}']"`);
@@ -192,7 +198,11 @@ export async function bindField(kind: FieldKind, api: FormsApi, options: BindFie
   host.model.set(value);
   host.signalModel.set({ field: value as ModelValue });
   host.inputs.set(inputs);
-  host.control = new FormControl<unknown>(value, { updateOn, validators: host.invalid });
+  host.flags.update((current) => ({ ...current, ...initial }));
+  host.control = new FormControl<unknown>(
+    { value, disabled: initial.disabled ?? false },
+    { updateOn, validators: initial.required ? [host.invalid, Validators.required] : host.invalid }
+  );
 
   await settle(fixture);
 

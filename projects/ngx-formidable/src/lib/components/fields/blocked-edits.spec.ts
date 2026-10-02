@@ -1,7 +1,7 @@
 import { By } from '@angular/platform-browser';
+import { page, userEvent } from 'vitest/browser';
 import { FormidableOption } from '../../models/formidable.model';
-import { bindField, FieldKind, FORMS_APIS } from '../../testing/bind-field';
-import { press } from '../../testing/dom';
+import { bindField, BoundField, FieldKind, FORMS_APIS } from '../../testing/bind-field';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
@@ -15,14 +15,19 @@ const options = [
   { value: 'b', label: 'Beta' }
 ];
 
-/** Every public mutator the fields have between them. */
+/** Every public mutator the fields have between them, and `focus()`. */
 interface Mutators {
   toggle(): void;
   selectValue(value: number): void;
   selectDate(date: Date | null): void;
   selectTime(time: Date | null): void;
   selectOption(option: FormidableOption): void;
+  focus(): void;
 }
+
+/** The field, as a consumer holding it through `viewChild()` reaches it. */
+const mutators = ({ fixture, element }: BoundField) =>
+  fixture.debugElement.query(By.css(element.localName)).componentInstance as Mutators;
 
 const pickFirst = (field: Mutators) => field.selectOption(options[0]!);
 
@@ -46,7 +51,12 @@ const mutated: Record<
 };
 
 describe('blocked edits', () => {
-  beforeEach(() => configureFormidableTestBed());
+  beforeEach(() => {
+    configureFormidableTestBed();
+
+    // A focused element left over from a previous spec would take the first Tab somewhere else.
+    (document.activeElement as HTMLElement | null)?.blur();
+  });
 
   for (const api of FORMS_APIS) {
     for (const [key, { kind, value, hasOptions, mutate }] of Object.entries(mutated)) {
@@ -55,7 +65,7 @@ describe('blocked edits', () => {
           const bound = await bindField(kind, api, { value, inputs: hasOptions ? { options } : {} });
           await bound.state({ [state]: true });
 
-          mutate(bound.fixture.debugElement.query(By.css(`formidable-${kind}-field`)).componentInstance as Mutators);
+          mutate(mutators(bound));
           await settle(bound.fixture);
 
           expect(bound.value()).toEqual(value);
@@ -66,67 +76,123 @@ describe('blocked edits', () => {
     }
   }
 
+  // A range input ignores `readonly`, so a press on its track and its own keys would move the thumb.
   describe('slider', () => {
-    const range = (element: HTMLElement) => element.querySelector<HTMLInputElement>('input[type="range"]')!;
+    const slider = () => page.getByRole('slider', { name: 'Volume' });
+    const position = () => (slider().element() as HTMLInputElement).value;
 
-    for (const state of ['readonly', 'disabled'] as const) {
-      // A range input ignores `readonly`, so its own keys would move the thumb.
-      it(`keeps the native range from stepping while ${state}`, async () => {
-        const bound = await bindField('slider', 'signal', { value: 40 });
-        await bound.state({ [state]: true });
-
-        for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown']) {
-          expect(press(range(bound.element), key).defaultPrevented, key).toBe(true);
-        }
+    const bind = () =>
+      bindField('slider', 'signal', {
+        value: 40,
+        decorated: true,
+        decoration: '<div formidableFieldLabel>Volume</div>'
       });
 
-      it(`keeps a pointer from dragging the thumb while ${state}`, async () => {
-        const bound = await bindField('slider', 'signal', { value: 40 });
+    /** A press near the far end of the track, well away from the thumb. */
+    const pressTrackEnd = (force = false) => {
+      const { width, height } = slider().element().getBoundingClientRect();
+
+      return userEvent.click(slider(), { position: { x: width - 2, y: height / 2 }, force });
+    };
+
+    it('moves the thumb on a press on its track and on its keys while editable', async () => {
+      const bound = await bind();
+
+      await pressTrackEnd();
+      await expect.poll(bound.value).toBeGreaterThan(90);
+
+      await userEvent.keyboard('{Home}');
+      await expect.poll(bound.value).toBe(0);
+    });
+
+    for (const state of ['readonly', 'disabled'] as const) {
+      it(`keeps a press on its track from moving the thumb while ${state}`, async () => {
+        const bound = await bind();
         await bound.state({ [state]: true });
 
-        const event = new PointerEvent('pointerdown', { bubbles: true, cancelable: true });
-        range(bound.element).dispatchEvent(event);
+        // Playwright refuses to press a readonly or disabled control, which a user still can.
+        await pressTrackEnd(true);
+        await settle(bound.fixture);
 
-        expect(event.defaultPrevented).toBe(true);
+        expect(position()).toBe('40');
+        expect(bound.events()).toEqual([]);
       });
     }
 
-    it('leaves the native range its keys while editable', async () => {
-      const bound = await bindField('slider', 'signal', { value: 40 });
+    // A disabled slider takes no focus, so no key reaches it. A readonly one leaves the tab order, and a click
+    // does not focus it either: **Readonly Slider Takes No Click** in `impl/backlog.md`.
+    it('keeps its keys from moving the thumb while readonly', async () => {
+      const bound = await bind();
+      await bound.state({ readonly: true });
 
-      expect(press(range(bound.element), 'ArrowRight').defaultPrevented).toBe(false);
+      mutators(bound).focus();
+      await expect.element(slider()).toHaveFocus();
+
+      for (const key of ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown']) {
+        await userEvent.keyboard(`{${key}}`);
+        await settle(bound.fixture);
+
+        expect(position(), key).toBe('40');
+      }
+
+      expect(bound.events()).toEqual([]);
     });
   });
 
   describe('readonly option', () => {
     const lockedFirst = [{ value: 'a', label: 'Alpha', readonly: true }, ...options.slice(1)];
 
-    for (const [kind, focusable] of [
-      ['radio-group', '[role="radiogroup"]'],
-      ['checkbox-group', '[role="group"]']
+    for (const [kind, role] of [
+      ['radio-group', 'radiogroup'],
+      ['checkbox-group', 'group']
     ] as const) {
       it(`is skipped by the highlight, so Enter picks the next option: ${kind}`, async () => {
         const bound = await bindField(kind, 'signal', {
           value: kind === 'radio-group' ? null : [],
-          inputs: { options: lockedFirst }
+          inputs: { options: lockedFirst },
+          decorated: true,
+          decoration: '<div formidableFieldLabel>Letter</div>'
         });
-        const group = bound.element.querySelector<HTMLElement>(focusable)!;
 
-        group.focus();
-        press(group, 'Enter');
-        await settle(bound.fixture);
+        await userEvent.tab();
+        await expect.element(page.getByRole(role, { name: 'Letter' })).toHaveFocus();
+        await userEvent.keyboard('{Enter}');
 
-        expect(bound.value()).toEqual(kind === 'radio-group' ? 'b' : ['b']);
+        await expect.poll(bound.value).toEqual(kind === 'radio-group' ? 'b' : ['b']);
       });
     }
 
-    for (const kind of ['dropdown', 'autocomplete', 'radio-group', 'checkbox-group'] as const) {
+    // How a user brings each option up, and the role it has once there.
+    const cases = [
+      { kind: 'dropdown', role: 'option', open: () => userEvent.click(page.getByRole('combobox'), { force: true }) },
+      {
+        kind: 'autocomplete',
+        role: 'option',
+        open: async () => {
+          await userEvent.click(page.getByRole('combobox'));
+          await userEvent.keyboard('{ArrowDown}');
+        }
+      },
+      { kind: 'radio-group', role: 'radio', open: async () => {} },
+      { kind: 'checkbox-group', role: 'checkbox', open: async () => {} }
+    ] as const;
+
+    for (const { kind, role, open } of cases) {
+      it(`is refused by a click: ${kind}`, async () => {
+        const bound = await bindField(kind, 'signal', { inputs: { options: lockedFirst } });
+
+        await open();
+        // Forced, because an option marked `aria-disabled` is no target to Playwright, though a user can press it.
+        await userEvent.click(page.getByRole(role, { name: 'Alpha' }), { force: true });
+        await settle(bound.fixture);
+
+        expect(bound.events()).toEqual([]);
+      });
+
       it(`is refused by selectOption: ${kind}`, async () => {
         const bound = await bindField(kind, 'signal', { inputs: { options: lockedFirst } });
 
-        (
-          bound.fixture.debugElement.query(By.css(`formidable-${kind}-field`)).componentInstance as Mutators
-        ).selectOption(lockedFirst[0]!);
+        mutators(bound).selectOption(lockedFirst[0]!);
         await settle(bound.fixture);
 
         expect(bound.events()).toEqual([]);

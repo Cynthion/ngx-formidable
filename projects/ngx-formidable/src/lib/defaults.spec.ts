@@ -1,6 +1,7 @@
 import { Component, Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
+import { page, userEvent } from 'vitest/browser';
 import { FieldDecorator } from './components/field-decorator/field-decorator';
 import { AutocompleteField } from './components/fields/autocomplete-field/autocomplete-field';
 import { DateField } from './components/fields/date-field/date-field';
@@ -11,12 +12,13 @@ import { FieldPrefix } from './directives/field-prefix';
 import { FieldSuffix } from './directives/field-suffix';
 import { FORMIDABLE_DEFAULTS, FormidableDefaults } from './models/formidable.model';
 import { provideNgxFormidable } from './provide-ngx-formidable';
+import { BoundField, bindField, FieldFlags } from './testing/bind-field';
 import { configureFormidableTestBed, settle } from './testing/test-bed';
 
 /**
  * Contract of the app-wide defaults: an input left unset, or bound to `undefined`, takes the app default,
  * then the library's own; a binding wins over both. The decorator's required marker and a field's reveal
- * fall back to the app default too.
+ * fall back to the app default too, for the state a forms API holds.
  */
 
 const IMPORTS = [
@@ -123,36 +125,6 @@ class UndefinedHost {}
   `
 })
 class ExplicitHost {}
-
-/** A decorated field asking for its required marker. */
-@Component({
-  imports: IMPORTS,
-  template: `
-    <formidable-field-decorator>
-      <formidable-input-field
-        name="a"
-        [required]="true" />
-      <div formidableFieldLabel>A</div>
-    </formidable-field-decorator>
-  `
-})
-class MarkerHost {}
-
-/** A dirty, untouched field holding an error, with no `revealOn` of its own. */
-@Component({
-  imports: IMPORTS,
-  template: `
-    <formidable-field-decorator>
-      <formidable-input-field
-        name="name"
-        [errors]="errors"
-        [dirty]="true" />
-    </formidable-field-decorator>
-  `
-})
-class RevealHost {
-  readonly errors = [{ kind: 'minlength' }];
-}
 
 const DEFAULTS: Required<FormidableDefaults> = {
   labelPosition: 'border',
@@ -273,43 +245,54 @@ describe('app defaults', () => {
   });
 
   describe('the required marker and the reveal', () => {
-    function marker(): Element | null {
-      return (fixture.nativeElement as HTMLElement).querySelector('.required-marker');
+    /** A decorated input, under a label, in the state Signal Forms holds for it. */
+    const bind = (state: Partial<FieldFlags>) =>
+      bindField('input', 'signal', { decorated: true, decoration: '<div formidableFieldLabel>Name</div>', state });
+
+    const marker = ({ element }: BoundField) =>
+      element.closest('formidable-field-decorator')!.querySelector('.required-marker');
+
+    const messages = () =>
+      page
+        .getByRole('listitem')
+        .elements()
+        .map((message) => message.textContent!.trim());
+
+    /** An invalid field the user has typed into without leaving it: dirty, never touched. */
+    async function editWithoutLeaving(): Promise<void> {
+      const bound = await bind({ invalid: true });
+
+      await userEvent.type(page.getByRole('textbox', { name: 'Name' }), 'x');
+      await expect.poll(bound.dirty).toBe(true);
+      await settle(bound.fixture);
+
+      expect(bound.touched()).toBe(false);
     }
 
     it('shows the required marker by the library’s own default', async () => {
       configure();
-      await mount(MarkerHost);
 
-      expect(marker()).not.toBeNull();
+      expect(marker(await bind({ required: true }))).not.toBeNull();
     });
 
     it('hides the required marker when the app default says so', async () => {
       configure(DEFAULTS);
-      await mount(MarkerHost);
 
-      expect(marker()).toBeNull();
+      expect(marker(await bind({ required: true }))).toBeNull();
     });
 
-    // Dirty but never touched: only the app default's `dirty` reveals the message.
-    function messages(): string[] {
-      const root = fixture.nativeElement as HTMLElement;
-
-      return Array.from(root.querySelectorAll('.error')).map((error) => error.textContent!.trim());
-    }
-
-    it('reveals on touch by the library’s own default', async () => {
+    it('waits for the touch to reveal by the library’s own default', async () => {
       configure();
-      await mount(RevealHost);
+      await editWithoutLeaving();
 
       expect(messages()).toEqual([]);
     });
 
     it('reveals on the app default', async () => {
       configure(DEFAULTS);
-      await mount(RevealHost);
+      await editWithoutLeaving();
 
-      expect(messages()).toEqual(['minlength']);
+      expect(messages()).toEqual(['invalid']);
     });
   });
 });
