@@ -1,8 +1,6 @@
 import { Type } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { DropdownField } from '@cynthion/ngx-formidable';
-import { provideNgxMask } from 'ngx-mask';
+import { page, userEvent } from 'vitest/browser';
 import { serializeComponent } from '../portal/export/component-serializer';
 import { serializeDefinition } from '../portal/export/markup-serializer';
 import { serializeSchema } from '../portal/export/schema-serializer';
@@ -10,6 +8,7 @@ import { PortalFormDefinition, PortalValidatorKind } from '../portal/model/field
 import { PREVIEW_FORM_DEFINITION } from '../portal/model/preview-form.definition';
 import { FormDefinitionStore } from '../portal/state/form-definition.store';
 import { FormValueStore } from '../portal/state/form-value.store';
+import { openPage } from '../portal/testing/studio';
 import { MyForm as AngularForm } from './angular/my-form';
 import { MyForm as VestForm } from './vest/my-form';
 import { MyForm as ZodForm } from './zod/my-form';
@@ -60,12 +59,6 @@ const GOLDEN: readonly Golden[] = [
  * the validator chosen on Form ▸ Settings ▸ The Form.
  */
 describe('golden export', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-  afterEach(() => {
-    vi.useRealTimers();
-  });
   const lines = (text: unknown): string[] => String(text).split('\n');
 
   for (const golden of GOLDEN) {
@@ -85,12 +78,6 @@ describe('golden export', () => {
         let fixture: ComponentFixture<AngularForm>;
         let host: AngularForm;
         let root: HTMLElement;
-
-        async function settle(): Promise<void> {
-          fixture.detectChanges();
-          await vi.advanceTimersByTimeAsync(100);
-          fixture.detectChanges();
-        }
 
         function decorators(): Element[] {
           return Array.from(root.querySelectorAll('formidable-field-decorator'));
@@ -133,13 +120,9 @@ describe('golden export', () => {
         }
 
         beforeEach(async () => {
-          TestBed.configureTestingModule({ providers: [provideNgxMask()] });
-
-          fixture = TestBed.createComponent(golden.form);
+          fixture = await openPage(golden.form);
           host = fixture.componentInstance;
           root = fixture.nativeElement as HTMLElement;
-          await settle();
-          await vi.runOnlyPendingTimersAsync();
         });
 
         // Delivery is the default, so the branch waits on the toggle, and the card number on a card.
@@ -182,40 +165,40 @@ describe('golden export', () => {
           ]);
         });
 
-        it('hands a field its limits from the schema', () => {
-          const slider = root.querySelector<HTMLInputElement>('formidable-slider-field input[type="range"]')!;
+        it('hands a field its limits from the schema', async () => {
+          const spice = page.getByRole('slider', { name: 'Spice' });
 
-          expect([slider.min, slider.max]).toEqual(['0', '4']);
+          await expect.element(spice).toHaveAttribute('min', '0');
+          await expect.element(spice).toHaveAttribute('max', '4');
         });
 
         it('swaps the fields a condition decides when the watched field changes', async () => {
-          host.form.pickup().value.set(true);
-          await settle();
+          await userEvent.click(page.getByRole('switch', { name: 'How To Get It' }));
 
-          expect(labels()).toContain('Pick Up From');
+          await expect.poll(labels).toContain('Pick Up From');
           expect(labels()).not.toContain('Delivery Address');
 
-          host.form.payment.method().value.set('card');
-          await settle();
+          await userEvent.click(page.getByRole('radio', { name: 'Card' }));
 
-          expect(labels()).toContain('Card Number');
+          await expect.poll(labels).toContain('Card Number');
         });
 
-        // The field writes its value model on a pick of the user's, which is what reaches `(valueChange)`.
+        // A pick of the user's is what reaches `(valueChange)`, which the component's handler patches from.
         it('applies a preset on the pick, and leaves the rest of the model alone', async () => {
-          const pizza = fixture.debugElement.query(By.directive(DropdownField)).componentInstance as DropdownField;
+          // The display input takes no pointer events, so the field takes the click.
+          await userEvent.click(page.getByRole('combobox', { name: 'Pizza' }), { force: true });
+          await userEvent.click(page.getByRole('option', { name: 'Margherita' }));
 
-          pizza.value.set('margherita');
-          await settle();
-
-          expect(host.model()).toEqual(
-            expect.objectContaining({
-              pizza: 'margherita',
-              sauce: 'tomato',
-              toppings: ['mozzarella', 'basil'],
-              size: null
-            })
-          );
+          await expect
+            .poll(() => host.model())
+            .toEqual(
+              expect.objectContaining({
+                pizza: 'margherita',
+                sauce: 'tomato',
+                toppings: ['mozzarella', 'basil'],
+                size: null
+              })
+            );
         });
 
         // The export's checks are text and the stage's are code: they agree on the form as exported, which
@@ -234,9 +217,8 @@ describe('golden export', () => {
           expect(errors()).toEqual(stageErrors(host.model()));
 
           host.model.set(broken);
-          await settle();
 
-          expect(errors()).toEqual(stageErrors(broken));
+          await expect.poll(errors).toEqual(stageErrors(broken));
           expect(errors()['']).toEqual(['Pineapple on a BBQ base is a combination this kitchen refuses.']);
         });
       });

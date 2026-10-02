@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { form, FormField, validateStandardSchema } from '@angular/forms/signals';
-import { FieldDecorator, InputField } from '@cynthion/ngx-formidable';
-import { provideNgxMask } from 'ngx-mask';
+import { FieldDecorator, FieldLabel, InputField } from '@cynthion/ngx-formidable';
+import { page, userEvent } from 'vitest/browser';
 import * as z from 'zod';
+import { openPage } from '../portal/testing/studio';
 
 /**
  * A Zod schema is a Standard Schema, and `validateStandardSchema` is all it takes to run one under Signal
@@ -34,17 +34,19 @@ const ORDER = z
   .refine((order) => order.name !== 'Closed', 'Nobody delivers today.');
 
 @Component({
-  imports: [FormField, FieldDecorator, InputField],
+  imports: [FormField, FieldDecorator, FieldLabel, InputField],
   template: `
     <formidable-field-decorator>
       <formidable-input-field
         revealOn="always"
         [formField]="form.name" />
+      <div formidableFieldLabel>Name</div>
     </formidable-field-decorator>
     <formidable-field-decorator>
       <formidable-input-field
         revealOn="always"
         [formField]="form.payment.card" />
+      <div formidableFieldLabel>Card</div>
     </formidable-field-decorator>
   `
 })
@@ -54,42 +56,21 @@ class OrderHost {
 }
 
 describe('Zod through Standard Schema', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-  beforeEach(() => TestBed.configureTestingModule({ providers: [provideNgxMask()] }));
-
-  async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
-    for (let i = 0; i < 3; i++) {
-      fixture.detectChanges();
-      await vi.advanceTimersByTimeAsync(50);
-    }
-  }
-
-  function messages(fixture: ComponentFixture<unknown>): string[][] {
-    const decorators = (fixture.nativeElement as HTMLElement).querySelectorAll('formidable-field-decorator');
-
-    return Array.from(decorators, (decorator) =>
-      Array.from(decorator.querySelectorAll('.error'), (error) => error.textContent!.trim())
-    );
-  }
+  const field = (name: string) => page.getByRole('textbox', { name });
 
   it('renders a check’s message on its field, a nested one on the nested field', async () => {
-    const fixture = TestBed.createComponent(OrderHost);
-    await settle(fixture);
+    await openPage(OrderHost);
 
-    expect(messages(fixture)).toEqual([['We need a name.'], ['A card number is required.']]);
+    await expect.element(field('Name')).toHaveAccessibleDescription('We need a name.');
+    await expect.element(field('Card')).toHaveAccessibleDescription('A card number is required.');
   });
 
   it('reports a refinement on the path it names, and on none of the fields it reads', async () => {
-    const fixture = TestBed.createComponent(OrderHost);
-    const host = fixture.componentInstance;
-    host.model.set({ name: 'Anna', payment: { method: 'cash', card: '4242' } });
-    await settle(fixture);
+    const { componentInstance: host } = await openPage(OrderHost);
 
+    host.model.set({ name: 'Anna', payment: { method: 'cash', card: '4242' } });
+
+    await expect.element(field('Card')).toHaveAccessibleDescription('');
     expect(
       host.form
         .payment()
@@ -101,11 +82,11 @@ describe('Zod through Standard Schema', () => {
   });
 
   it('reports a refinement that names no path on the whole form', async () => {
-    const fixture = TestBed.createComponent(OrderHost);
-    const host = fixture.componentInstance;
-    host.model.set({ name: 'Closed', payment: { method: 'card', card: '4242' } });
-    await settle(fixture);
+    const { componentInstance: host } = await openPage(OrderHost);
 
+    host.model.set({ name: 'Closed', payment: { method: 'card', card: '4242' } });
+
+    await expect.element(field('Name')).toHaveAccessibleDescription('');
     expect(
       host
         .form()
@@ -113,5 +94,11 @@ describe('Zod through Standard Schema', () => {
         .map((error) => error.message)
     ).toEqual(['Nobody delivers today.']);
     expect(host.form().errorSummary().length).toBe(1);
+
+    await userEvent.tripleClick(field('Name'));
+    await userEvent.keyboard('Anna');
+
+    await expect.poll(() => host.form().errors()).toEqual([]);
+    expect(host.model().name).toBe('Anna');
   });
 });

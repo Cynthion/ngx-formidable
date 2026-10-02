@@ -19,7 +19,7 @@ Both `test` targets use `@angular/build:unit-test` with `browsers: ["ChromiumHea
 - **Portal**: builds from its own `build` target's `development` configuration, with the app's styles, assets and loaders.
 - **Library**: an ng-packagr target carries no `styles`, so the library's `test` target builds from `test-build`, an `@angular/build:application` target that exists only for the tests. It loads `test-styles.scss`, which is the shipped theme, so specs measure the real `:root` variables.
 - **AOT**: both compile their specs AOT, so a spec host's template is type-checked as the app's are. A template no build reaches, such as the Studio's golden export, is checked that way.
-- **Zoneless**: both projects run zoneless, as the app does. zone.js is not installed, so `fakeAsync`, `tick` and `flush` do not exist. Library specs and the Studio's specs wait on real timers, since a page that repaints from timers a fake clock holds back never satisfies a retrying assertion. The other portal specs use Vitest's fake timers, `vi.useFakeTimers()` and `await vi.advanceTimersByTimeAsync(ms)`, and one that waits for a real frame, such as a `ResizeObserver`'s, switches back with `vi.useRealTimers()`.
+- **Zoneless**: both projects run zoneless, as the app does. zone.js is not installed, so `fakeAsync`, `tick` and `flush` do not exist. Every spec waits on real timers, since a page that repaints from timers a fake clock holds back never satisfies a retrying assertion.
 - **Failure Screenshots**: a failing spec leaves a screenshot of the page under `.vitest/`.
 
 Two things behave differently in a zoneless `TestBed`, and both mislead if they are not known. `fixture.detectChanges()` refreshes only what something marked, so an `OnPush` host holding plain fields is skipped: a spec host that changes its own state holds it in signals. And a spec proving that a repaint arrives on its own never calls `detectChanges()` after the act, since that ticks the whole application and would pass either way.
@@ -40,8 +40,6 @@ Two things behave differently in a zoneless `TestBed`, and both mislead if they 
 - **No Reaching In**: a spec writes a value through its host's forms API. It never uses `writeValue`, `componentInstance.value`, a protected member or a test subclass of the field base.
 - **Named For Behaviour**: a test is named for what it proves, not after the bug that prompted it, and a file is not named after a framework mechanism.
 - **Upstream Defects**: a spec pinning another project's defect asserts today's behaviour and links the upstream issue, so it fails once the fix ships; its entry in [`impl/backlog.md`](backlog.md) says what to undo then. A spec that needs the fix calls `skip(reason)` from its test context.
-
-Specs not yet rewritten to these rules are the scope of the test phases in [`impl/implementation.md`](implementation.md).
 
 ---
 
@@ -66,16 +64,16 @@ Every library spec is built on the helpers in `lib/testing/`. `public-api.ts` do
 
 ## Portal Helpers
 
-The Studio's specs are built on `src/app/portal/testing/studio.ts`. No build of the app reaches it.
+Every portal spec that renders is built on `src/app/portal/testing/studio.ts`. No build of the app reaches it.
 
-| Helper                                | Does                                                                                                                   |
-| :------------------------------------ | :--------------------------------------------------------------------------------------------------------------------- |
-| `openPage(component)`, `openStudio()` | A portal page as a visitor lands on it: nothing remembered, the two-column layout at `WIDE`. Clears `:root` afterwards |
-| `settle(fixture, ms)`                 | As the library's: timers of up to `ms`, a frame, the change detection they scheduled                                   |
-| `tab()`, `openPanel()`                | The editor panel's tabs by label, and the way through them to one area, half and scope                                 |
-| `openSection(heading)`                | Opens an accordion section, and leaves an open one alone                                                               |
-| `editField(label)`                    | Picks a field on the `Settings` half's field picker                                                                    |
-| `model()`, `errors()`                 | The model and its messages, read off the model drawer's `Raw` and `Errors` views                                       |
+| Helper                                | Does                                                                                                                                      |
+| :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| `openPage(component)`, `openStudio()` | A portal page, or a spec's host, as a visitor lands on it: nothing remembered, the two-column layout at `WIDE`. Clears `:root` afterwards |
+| `settle(fixture, ms)`                 | As the library's: timers of up to `ms`, a frame, the change detection they scheduled                                                      |
+| `tab()`, `openPanel()`                | The editor panel's tabs by label, and the way through them to one area, half and scope                                                    |
+| `openSection(heading)`                | Opens an accordion section, and leaves an open one alone                                                                                  |
+| `editField(label)`                    | Picks a field on the `Settings` half's field picker                                                                                       |
+| `model()`, `errors()`                 | The model and its messages, read off the model drawer's `Raw` and `Errors` views                                                          |
 
 - **Clipboard**: the runner's frame refuses `navigator.clipboard.writeText`, and a copy confirms only a write that took, so a spec of a copy stubs it with `vi.spyOn`.
 - **Routes**: the test bed routes on a mock of the browser's location, so `Location.path()` reads the route, and nothing performs the initial navigation.

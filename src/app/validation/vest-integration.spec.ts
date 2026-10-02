@@ -1,9 +1,10 @@
 import { Component, signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { form, FormField, validateStandardSchema } from '@angular/forms/signals';
-import { FieldDecorator, InputField } from '@cynthion/ngx-formidable';
-import { provideNgxMask } from 'ngx-mask';
+import { FieldDecorator, FieldLabel, InputField } from '@cynthion/ngx-formidable';
+import { page, userEvent } from 'vitest/browser';
 import { create, enforce, mode, Modes, test } from 'vest';
+import { openPage, settle } from '../portal/testing/studio';
 
 /**
  * A Vest suite is a Standard Schema, and `validateStandardSchema` is all it takes to run one under Signal
@@ -48,17 +49,19 @@ function orderSuite() {
 }
 
 @Component({
-  imports: [FormField, FieldDecorator, InputField],
+  imports: [FormField, FieldDecorator, FieldLabel, InputField],
   template: `
     <formidable-field-decorator>
       <formidable-input-field
         revealOn="always"
         [formField]="form.name" />
+      <div formidableFieldLabel>Name</div>
     </formidable-field-decorator>
     <formidable-field-decorator>
       <formidable-input-field
         revealOn="always"
         [formField]="form.payment.card" />
+      <div formidableFieldLabel>Card</div>
     </formidable-field-decorator>
   `
 })
@@ -68,8 +71,15 @@ class OrderHost {
 }
 
 @Component({
-  imports: [FormField, InputField],
-  template: `<formidable-input-field [formField]="form.name" />`
+  imports: [FormField, FieldDecorator, FieldLabel, InputField],
+  template: `
+    <formidable-field-decorator>
+      <formidable-input-field
+        revealOn="always"
+        [formField]="form.name" />
+      <div formidableFieldLabel>Name</div>
+    </formidable-field-decorator>
+  `
 })
 class AsyncHost {
   readonly model = signal({ name: '' });
@@ -87,42 +97,21 @@ class AsyncHost {
 }
 
 describe('Vest through Standard Schema', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-  beforeEach(() => TestBed.configureTestingModule({ providers: [provideNgxMask()] }));
-
-  async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
-    for (let i = 0; i < 3; i++) {
-      fixture.detectChanges();
-      await vi.advanceTimersByTimeAsync(50);
-    }
-  }
-
-  function messages(fixture: ComponentFixture<unknown>): string[][] {
-    const decorators = (fixture.nativeElement as HTMLElement).querySelectorAll('formidable-field-decorator');
-
-    return Array.from(decorators, (decorator) =>
-      Array.from(decorator.querySelectorAll('.error'), (error) => error.textContent!.trim())
-    );
-  }
+  const field = (name: string) => page.getByRole('textbox', { name });
 
   it('renders a test’s message on its field, a dotted target on the nested one', async () => {
-    const fixture = TestBed.createComponent(OrderHost);
-    await settle(fixture);
+    await openPage(OrderHost);
 
-    expect(messages(fixture)).toEqual([['We need a name.'], ['A card number is required.']]);
+    await expect.element(field('Name')).toHaveAccessibleDescription('We need a name.');
+    await expect.element(field('Card')).toHaveAccessibleDescription('A card number is required.');
   });
 
   it('reports a test on a group on the group, and on neither of its fields', async () => {
-    const fixture = TestBed.createComponent(OrderHost);
-    const host = fixture.componentInstance;
-    host.model.set({ name: 'Anna', payment: { method: 'cash', card: '4242' } });
-    await settle(fixture);
+    const { componentInstance: host } = await openPage(OrderHost);
 
+    host.model.set({ name: 'Anna', payment: { method: 'cash', card: '4242' } });
+
+    await expect.element(field('Card')).toHaveAccessibleDescription('');
     expect(
       host.form
         .payment()
@@ -134,11 +123,11 @@ describe('Vest through Standard Schema', () => {
   });
 
   it('reports a test whose target names no field on the whole form', async () => {
-    const fixture = TestBed.createComponent(OrderHost);
-    const host = fixture.componentInstance;
-    host.model.set({ name: 'Closed', payment: { method: 'card', card: '4242' } });
-    await settle(fixture);
+    const { componentInstance: host } = await openPage(OrderHost);
 
+    host.model.set({ name: 'Closed', payment: { method: 'card', card: '4242' } });
+
+    await expect.element(field('Name')).toHaveAccessibleDescription('');
     expect(
       host
         .form()
@@ -147,16 +136,24 @@ describe('Vest through Standard Schema', () => {
     ).toEqual(['Nobody delivers today.']);
     expect(host.form().errorSummary().length).toBe(1);
 
-    host.model.set({ name: 'Anna', payment: { method: 'card', card: '4242' } });
-    await settle(fixture);
+    await userEvent.tripleClick(field('Name'));
+    await userEvent.keyboard('Anna');
 
-    expect(host.form().errors()).toEqual([]);
+    await expect.poll(() => host.form().errors()).toEqual([]);
+    expect(host.model().name).toBe('Anna');
   });
 
   // Vest's own defect, pinned so it is noticed once fixed: https://github.com/ealush/vest/issues/1346.
-  it('fails Vest’s order check on every later run of a test whose target is empty', ({ onTestFinished }) => {
-    vi.useFakeTimers();
-    onTestFinished(() => void vi.useRealTimers());
+  it('fails Vest’s order check on every later run of a test whose target is empty', async ({ onTestFinished }) => {
+    let thrown = '';
+    // A listener of the spec's own keeps the runner from failing the run on the throw it is here to catch.
+    const onError = (event: ErrorEvent) => {
+      thrown = event.message;
+      event.preventDefault();
+    };
+
+    window.addEventListener('error', onError);
+    onTestFinished(() => window.removeEventListener('error', onError));
 
     const suite = create(() => {
       test('', 'Nobody delivers today.', () => {
@@ -168,7 +165,7 @@ describe('Vest through Standard Schema', () => {
     suite['~standard'].validate({});
 
     // Vest defers the throw to a timer of its own.
-    expect(() => vi.runAllTimers()).toThrow('Tests called in different order');
+    await expect.poll(() => thrown).toContain('Tests called in different order');
   });
 
   // Angular's own defect, pinned so it is noticed once fixed: https://github.com/angular/angular/issues/71128.
@@ -190,13 +187,14 @@ describe('Vest through Standard Schema', () => {
   });
 
   it('never surfaces an async test, and holds the form valid while it fails', async () => {
-    const fixture = TestBed.createComponent(AsyncHost);
+    const fixture = await openPage(AsyncHost);
     const host = fixture.componentInstance;
-    await settle(fixture);
 
-    host.model.set({ name: 'Anna' });
-    await settle(fixture);
+    await userEvent.type(field('Name'), 'Anna');
+    await expect.poll(() => host.model().name).toBe('Anna');
+    await settle(fixture, 50);
 
+    await expect.element(field('Name')).toHaveAccessibleDescription('');
     expect(host.form.name().errors()).toEqual([]);
     expect(host.form().pending()).toBe(false);
     expect(host.form().valid()).toBe(true);

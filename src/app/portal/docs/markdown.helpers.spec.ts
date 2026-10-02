@@ -1,7 +1,18 @@
+import fc from 'fast-check';
+import { page } from 'vitest/browser';
+import { slugify } from '../helpers/slug.helpers';
 import { DOC_PAGES } from './doc-pages';
 import { drawDiagrams, renderDoc, rewriteDocHref } from './markdown.helpers';
 
 const SLUGS = new Set(DOC_PAGES.map((page) => page.slug));
+
+/** A document's file name or an anchor, as the documents spell them. */
+const NAME = fc.stringMatching(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+/** No fragment, or any. */
+const FRAGMENT = fc.option(
+  NAME.map((anchor) => `#${anchor}`),
+  { nil: '' }
+);
 
 const FLOWCHART = '```mermaid\nflowchart LR\n  Field --> Decorator\n```';
 
@@ -15,32 +26,51 @@ function mount(markdown: string): HTMLElement {
 }
 
 describe('rewriteDocHref', () => {
-  it('turns a sibling user document into a route', () => {
-    expect(rewriteDocHref('user/theming.md', SLUGS)).toEqual({ href: '#/docs/theming', external: false });
-    expect(rewriteDocHref('theming.md', SLUGS)).toEqual({ href: '#/docs/theming', external: false });
-  });
-
-  it('drops a fragment, because the portal already routes on the hash', () => {
-    expect(rewriteDocHref('theming.md#4-five-things', SLUGS).href).toBe('#/docs/theming');
+  // A fragment is dropped, because the portal already routes on the hash.
+  it('turns a user document it mirrors into a route, from wherever it is linked', () => {
+    fc.assert(
+      fc.property(fc.constantFrom(...SLUGS), fc.constantFrom('', 'user/', '../user/'), FRAGMENT, (slug, at, anchor) => {
+        expect(rewriteDocHref(`${at}${slug}.md${anchor}`, SLUGS)).toEqual({ href: `#/docs/${slug}`, external: false });
+      })
+    );
   });
 
   it('sends a maintainer document to the repository, since the portal does not mirror it', () => {
-    const result = rewriteDocHref('tech/layering.md', SLUGS);
+    fc.assert(
+      fc.property(
+        NAME,
+        fc.constantFrom('tech', 'impl'),
+        fc.constantFrom('', '../'),
+        FRAGMENT,
+        (name, bucket, up, anchor) => {
+          const { href, external } = rewriteDocHref(`${up}${bucket}/${name}.md${anchor}`, SLUGS);
 
-    expect(result.external).toBe(true);
-    expect(result.href).toContain('/tech/layering.md');
+          expect(external).toBe(true);
+          expect(href).toMatch(/^https:\/\//);
+          expect(href.endsWith(`/.documentation/${bucket}/${name}.md`)).toBe(true);
+        }
+      )
+    );
   });
 
   it('leaves an absolute URL alone', () => {
-    expect(rewriteDocHref('https://angular.dev', SLUGS)).toEqual({ href: 'https://angular.dev', external: true });
+    fc.assert(
+      fc.property(fc.webUrl({ withFragments: true, withQueryParameters: true }), (url) => {
+        expect(rewriteDocHref(url, SLUGS)).toEqual({ href: url, external: true });
+      })
+    );
   });
 
   // A bare fragment would replace the route the portal holds on the hash, and land on the Studio.
   it('turns an in-page anchor into a route to that anchor in the same document', () => {
-    expect(rewriteDocHref('#underline', SLUGS, 'theme-reference')).toEqual({
-      href: '#/docs/theme-reference/underline',
-      external: false
-    });
+    fc.assert(
+      fc.property(NAME, fc.constantFrom(...SLUGS), (anchor, slug) => {
+        expect(rewriteDocHref(`#${anchor}`, SLUGS, slug)).toEqual({
+          href: `#/docs/${slug}/${anchor}`,
+          external: false
+        });
+      })
+    );
   });
 
   it('leaves a document it does not mirror as written', () => {
@@ -70,6 +100,22 @@ describe('renderDoc', () => {
     const { headings } = renderDoc('## Slider\n\n## Slider', SLUGS);
 
     expect(headings.map((heading) => heading.id)).toEqual(['slider', 'slider-2']);
+  });
+
+  // `Slider 2` slugs to the id a second `Slider` would take, so the names are drawn to collide.
+  it('gives every heading an id of its own, made from its text', () => {
+    const titles = fc.array(fc.constantFrom('Slider', 'Slider 2', 'Date Field', 'Date Field 3'), { minLength: 1 });
+
+    fc.assert(
+      fc.property(titles, (texts) => {
+        const { headings } = renderDoc(texts.map((text) => `## ${text}`).join('\n\n'), SLUGS);
+        const ids = headings.map((heading) => heading.id);
+
+        expect(headings.map((heading) => heading.text)).toEqual(texts);
+        expect(new Set(ids).size).toBe(ids.length);
+        texts.forEach((text, index) => expect(ids[index]!.startsWith(slugify(text))).toBe(true));
+      })
+    );
   });
 
   // The Specimen links to a component's entry and to a variable's row, neither of which is in the contents.
@@ -149,8 +195,9 @@ describe('renderDoc', () => {
     const frame = host.querySelector('.doc-code')!;
 
     expect(frame.querySelector('.doc-code-bar')?.firstChild?.textContent).toBe('ts');
-    expect(frame.querySelector('.doc-code-copy')?.getAttribute('aria-label')).toBe('Copy');
-    expect(frame.querySelector('.doc-code-copy svg')).not.toBeNull();
+    expect(
+      page.elementLocator(frame).getByRole('button', { name: 'Copy' }).element().querySelector('svg')
+    ).not.toBeNull();
     expect(frame.querySelector('pre code .hljs-keyword')?.textContent).toBe('const');
     expect(frame.querySelector('pre code')?.textContent).toBe('const answer = 42;\n');
     host.remove();

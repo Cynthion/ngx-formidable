@@ -1,19 +1,14 @@
-import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Component, signal } from '@angular/core';
+import { ComponentFixture } from '@angular/core/testing';
+import { page } from 'vitest/browser';
+import { openPage } from '../testing/studio';
 import { SelectedValue } from './selected-value';
 
-/**
- * Contract of `portalSelectedValue`, which exists because `[value]` on a `<select>` cannot state the
- * selection when the options are a control-flow block.
- *
- * Zoneless, because that is how the portal runs and because the directive's whole job is a write timed
- * against the render — a spec that proved it under zone change detection would be proving the harness.
- */
 @Component({
   imports: [SelectedValue],
   template: `
     <select
-      id="dynamic"
+      aria-label="Position"
       [portalSelectedValue]="value()">
       @if (value() === '') {
         <option
@@ -29,7 +24,7 @@ import { SelectedValue } from './selected-value';
 
     <!-- The same list, bound the way every one of these selects used to be. -->
     <select
-      id="plain"
+      aria-label="Plain"
       [value]="value()">
       @for (option of options; track option) {
         <option [value]="option">{{ option }}</option>
@@ -42,46 +37,38 @@ class TestHost {
   readonly value = signal('inside');
 }
 
+/** **A Select States Its Value Through `portalSelectedValue`** in `tech/portal.md`. */
 describe('portalSelectedValue', () => {
   let fixture: ComponentFixture<TestHost>;
 
-  function select(id: string): HTMLSelectElement {
-    return (fixture.nativeElement as HTMLElement).querySelector(`#${id}`) as HTMLSelectElement;
-  }
+  const select = () => page.getByRole('combobox', { name: 'Position' });
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
-
-    fixture = TestBed.createComponent(TestHost);
-    fixture.detectChanges();
+  beforeEach(async () => {
+    fixture = await openPage(TestHost);
   });
 
-  it('states the value it is given rather than the first option', () => {
-    expect(select('dynamic').value).toBe('inside');
+  it('states the value it is given rather than the first option', async () => {
+    await expect.element(select()).toHaveValue('inside');
   });
 
   // Not a claim about Angular so much as the reason this directive exists: the plain binding is applied
   // while the `@for` has produced no options yet, and a `<select>` given a value it cannot match falls
   // back to its first. Two controls, one list, two different answers.
-  it('is what `[value]` on the select cannot do', () => {
-    expect(select('plain').value).toBe('outside');
-    expect(select('plain').value).not.toBe(fixture.componentInstance.value());
+  it('is what `[value]` on the select cannot do', async () => {
+    await expect.element(page.getByRole('combobox', { name: 'Plain' })).toHaveValue('outside');
   });
 
-  it('follows the value', () => {
+  it('follows the value', async () => {
     fixture.componentInstance.value.set('border');
-    fixture.detectChanges();
 
-    expect(select('dynamic').value).toBe('border');
+    await expect.element(select()).toHaveValue('border');
   });
 
   // An empty value is how a form-scope control says the fields disagree. It has to land on the disabled
   // option the block adds for it, not on the first real choice.
-  it('selects the mixed option for an empty value', () => {
+  it('selects the mixed option for an empty value', async () => {
     fixture.componentInstance.value.set('');
-    fixture.detectChanges();
 
-    expect(select('dynamic').value).toBe('');
-    expect(select('dynamic').selectedOptions[0]?.textContent?.trim()).toBe('Mixed');
+    await expect.element(select()).toHaveDisplayValue(/Mixed/);
   });
 });

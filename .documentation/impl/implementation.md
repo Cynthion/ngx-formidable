@@ -111,19 +111,6 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 
 ## Library Phases
 
-### Test Phases
-
-Phases 32 to 37 rewrite the specs Vitest inherited to the rules in **Writing A Spec** in [`impl/testing.md`](testing.md): real input through `userEvent`, a field found by its role and label, properties for pure rules, relational geometry. Each phase deletes the synthetic `fill()`, `type()`, `press()` and `click()` calls in its own specs, and anything a rewrite finds goes to [`impl/backlog.md`](backlog.md).
-
-- **Size It Honestly**: each phase is about 2,000 lines of specs. Split one before starting if it does not fit a conversation.
-
-### Phase 37: Portal Specs
-
-**Depends On**: nothing.
-
-- **Scope**: the portal specs outside the Studio: the example counter field and tooltip, `portalSelectedValue`, the golden export, the Vest and Zod integrations, the layout store, and the pure helpers, whose rules become properties. The Studio's specs and `portal/testing/` are the pattern.
-- **Timers**: they move to real timers, as the Studio's specs did, and **Zoneless** in [`impl/testing.md`](testing.md) drops the fake ones.
-
 ### Phase 38: Release
 
 **Depends On**: Phases 32 to 37.
