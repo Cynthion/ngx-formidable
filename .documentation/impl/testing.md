@@ -62,7 +62,7 @@ Every library spec is built on the helpers in `lib/testing/`. `public-api.ts` do
 | `fill()`, `type()`, `press()`   | Synthetic input for specs not yet rewritten: a whole value, keystrokes at the caret, a bubbling cancelable `keydown`                   |
 | `click()`                       | A synthetic pointer click for specs not yet rewritten, which moves focus as the browser would                                          |
 
-`bindField` with `decorated: true` and `decoration: '<div formidableFieldLabel>Colour</div>'` gives a field the accessible name `page.getByRole` finds it by. With `after: '<button type="button">Next</button>'` focus has somewhere to leave to by `Tab` and come back from by `Shift` + `Tab`: a field alone in the test frame would hand focus to the page around it, which does not reliably hand it back. `before` puts markup ahead of the field, such as a spacer that moves it to the fold.
+`bindField` with `decorated: true` and `decoration: '<div formidableFieldLabel>Colour</div>'` gives a field the accessible name `page.getByRole` finds it by. With `after: '<button type="button">Next</button>'` focus has somewhere to leave to by `Tab` and come back from by `Shift` + `Tab`: a field alone in the test frame would hand focus to the page around it, which does not reliably hand it back. `before` puts markup ahead of the field, such as a spacer that moves it to the fold. `state` has the forms API hold a field `disabled`, `readonly`, `required` or `invalid` from its first render, as `state()` does later; under `ngModel`, whose control registers after that render, only `readonly` and `required`.
 
 ---
 

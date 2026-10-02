@@ -14,7 +14,7 @@ import {
   ValidationError
 } from '@angular/forms/signals';
 import { By } from '@angular/platform-browser';
-import { fill } from '../../testing/dom';
+import { page, userEvent } from 'vitest/browser';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { InputField } from './input-field/input-field';
 import { SliderField } from './slider-field/slider-field';
@@ -140,7 +140,7 @@ describe('forms API state', () => {
       const control = fixture.debugElement.query(By.directive(ParsingControl));
       const errors = () => (control.componentInstance as ParsingControl).errors().map((error) => error.kind);
 
-      fill(control.nativeElement.querySelector('input'), 'x');
+      await userEvent.fill(page.elementLocator(control.nativeElement.querySelector('input')), 'x');
       await settle(fixture);
 
       expect(errors()).toEqual([]);

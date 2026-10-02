@@ -1,189 +1,139 @@
-import { Component, viewChild } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { By } from '@angular/platform-browser';
+import { page, userEvent } from 'vitest/browser';
+import { BindFieldOptions, bindField, BoundField, FieldKind, FORMS_APIS } from '../../testing/bind-field';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
-import { AutocompleteField } from './autocomplete-field/autocomplete-field';
 import { BaseField } from './base-field';
-import { DateField } from './date-field/date-field';
-import { DropdownField } from './dropdown-field/dropdown-field';
-import { InputField } from './input-field/input-field';
-import { SliderField } from './slider-field/slider-field';
-import { ToggleField } from './toggle-field/toggle-field';
 
 /**
- * Contract of `autoFocus` / `focus()`: the field takes focus without its panel opening.
- *
- * `fieldRef` is not the focusable element everywhere — five fields wrap their control in a `div`, which
- * is what `focusElement` exists for. The three shapes are covered here: the control itself
- * (`input-field`), a wrapped `input` (`dropdown`, `autocomplete`, `date`), and a `div` that is itself
- * focusable through `tabindex` (`toggle`).
+ * Per **Focus** in `user/fields.md`: `autoFocus` focuses every field once its view is ready, and so does
+ * `focus()`, and **Focusing Never Opens A Panel**. A `disabled` field takes focus from neither; a `readonly`
+ * one still does, and from a click too.
  */
 
-@Component({
-  imports: [
-    FormsModule,
-    ReactiveFormsModule,
-    InputField,
-    DropdownField,
-    AutocompleteField,
-    DateField,
-    SliderField,
-    ToggleField
-  ],
-  // Inside a `<form>`, like real usage.
-  template: `
-    <form>
-      <formidable-input-field
-        name="text"
-        ngModel
-        [autoFocus]="focused === 'text'" />
-      <formidable-dropdown-field
-        name="dropdown"
-        ngModel
-        [autoFocus]="focused === 'dropdown'"
-        [options]="[{ value: 'a' }, { value: 'b' }]" />
-      <formidable-autocomplete-field
-        name="autocomplete"
-        ngModel
-        [autoFocus]="focused === 'autocomplete'"
-        [options]="[{ value: 'a' }, { value: 'b' }]" />
-      <formidable-date-field
-        name="date"
-        ngModel
-        [autoFocus]="focused === 'date'"
-        [readonly]="dateReadonly" />
-      <formidable-slider-field
-        name="slider"
-        ngModel
-        [autoFocus]="focused === 'slider'" />
-      <!-- A control disabled from the start reaches the field on its first pass, before it would focus. -->
-      <formidable-toggle-field
-        [formControl]="toggle"
-        [autoFocus]="focused === 'toggle'" />
-    </form>
-  `
-})
-class FocusHost {
-  readonly input = viewChild.required(InputField);
-  readonly dropdown = viewChild.required(DropdownField);
-  readonly autocomplete = viewChild.required(AutocompleteField);
-  readonly date = viewChild.required(DateField);
-  readonly slider = viewChild.required(SliderField);
+/** **Readonly Slider Takes No Click** in `impl/backlog.md`. */
+const READONLY_SLIDER_UNCLICKABLE = 'a readonly slider lets no press reach its range, so a click does not focus it';
 
-  focused: string | null = null;
-  readonly toggle = new FormControl(false);
-  dateReadonly = false;
+const options = [
+  { value: 'a', label: 'Alpha' },
+  { value: 'b', label: 'Beta' }
+];
+
+/** The role of what takes focus in each field. */
+const ROLES: Record<FieldKind, 'textbox' | 'combobox' | 'switch' | 'slider' | 'radiogroup' | 'group'> = {
+  'input': 'textbox',
+  'textarea': 'textbox',
+  'select': 'combobox',
+  'dropdown': 'combobox',
+  'autocomplete': 'combobox',
+  'date': 'combobox',
+  'time': 'textbox',
+  'toggle': 'switch',
+  'slider': 'slider',
+  'radio-group': 'radiogroup',
+  'checkbox-group': 'group'
+};
+
+const OPTION_FIELDS: readonly FieldKind[] = ['select', 'dropdown', 'autocomplete', 'radio-group', 'checkbox-group'];
+const PANEL_FIELDS = ['dropdown', 'autocomplete', 'date'] as const;
+
+const control = (kind: FieldKind) => page.getByRole(ROLES[kind], { name: 'Answer' });
+
+/** Binds the field under a label, `autoFocus` set or not. */
+function bind(kind: FieldKind, autoFocus: boolean, extra: BindFieldOptions = {}): Promise<BoundField> {
+  return bindField(kind, 'signal', {
+    inputs: { autoFocus, ...(OPTION_FIELDS.includes(kind) ? { options } : {}) },
+    decorated: true,
+    decoration: '<div formidableFieldLabel>Answer</div>',
+    ...extra
+  });
 }
 
-/** The element `[autoFocus]` is expected to land on, per field. */
-function expectedElement(fixture: ComponentFixture<FocusHost>, field: string): HTMLElement {
-  const host = fixture.nativeElement as HTMLElement;
-
-  switch (field) {
-    case 'text':
-      return host.querySelector('formidable-input-field input') as HTMLElement;
-    case 'dropdown':
-      return host.querySelector('formidable-dropdown-field input') as HTMLElement;
-    case 'autocomplete':
-      return host.querySelector('formidable-autocomplete-field input') as HTMLElement;
-    case 'date':
-      return host.querySelector('formidable-date-field input') as HTMLElement;
-    case 'slider':
-      return host.querySelector('formidable-slider-field input[type="range"]') as HTMLElement;
-    default:
-      return host.querySelector('formidable-toggle-field [role="switch"]') as HTMLElement;
-  }
+/** Calls the field's `focus()`, as a consumer holding it through `viewChild()` does. */
+function focus({ fixture }: BoundField, kind: FieldKind): void {
+  (fixture.debugElement.query(By.css(`formidable-${kind}-field`)).componentInstance as BaseField).focus();
 }
 
 describe('field focus', () => {
-  let fixture: ComponentFixture<FocusHost>;
-  let host: FocusHost;
-
-  /**
-   * The field is only created once `focused` is set, so `autoFocus` is read on its first
-   * `ngAfterViewInit`, exactly as it would be on page load.
-   */
-  async function build(focused: string | null): Promise<void> {
-    fixture = TestBed.createComponent(FocusHost);
-    host = fixture.componentInstance;
-    host.focused = focused;
-    await settle(fixture); // the microtask the base queues, plus the fields' own mask timers
-  }
-
   beforeEach(() => {
-    configureFormidableTestBed({ imports: [FocusHost] });
+    configureFormidableTestBed();
 
     // A focused element left over from a previous spec would make every assertion pass.
     (document.activeElement as HTMLElement | null)?.blur();
   });
 
-  afterEach(() => {
-    fixture?.destroy();
-  });
+  for (const kind of Object.keys(ROLES) as FieldKind[]) {
+    describe(`${kind}-field`, () => {
+      it('takes focus on load with autoFocus', async () => {
+        await bind(kind, true);
 
-  for (const field of ['text', 'dropdown', 'autocomplete', 'date', 'slider', 'toggle']) {
-    it(`focuses ${field} on load`, async () => {
-      await build(field);
+        await expect.element(control(kind)).toHaveFocus();
+      });
 
-      expect(document.activeElement).toBe(expectedElement(fixture, field));
+      it('leaves focus alone without autoFocus', async () => {
+        const bound = await bind(kind, false);
+        await settle(bound.fixture);
+
+        expect(document.activeElement).toBe(document.body);
+      });
+
+      it('takes focus from focus()', async () => {
+        const bound = await bind(kind, false);
+
+        focus(bound, kind);
+
+        await expect.element(control(kind)).toHaveFocus();
+      });
     });
   }
 
-  it('leaves every field alone when autoFocus is not set', async () => {
-    await build(null);
+  for (const kind of PANEL_FIELDS) {
+    it(`opens no panel on autoFocus or focus(): ${kind}-field`, async () => {
+      const bound = await bind(kind, true);
+      await expect.element(control(kind)).toHaveFocus();
+
+      focus(bound, kind);
+      await settle(bound.fixture);
+
+      expect(control(kind).element().getAttribute('aria-expanded')).toBe('false');
+    });
+  }
+
+  // `ngModel` registers its control only after the first render, so it cannot hold a field disabled that early.
+  for (const api of FORMS_APIS.filter((api) => api !== 'template-driven')) {
+    it(`takes no focus while disabled from the first render, bound ${api}`, async () => {
+      const bound = await bindField('toggle', api, { inputs: { autoFocus: true }, state: { disabled: true } });
+      await settle(bound.fixture);
+
+      expect(document.activeElement).toBe(document.body);
+    });
+  }
+
+  it('ignores focus() while disabled', async () => {
+    const bound = await bind('dropdown', false);
+    await bound.state({ disabled: true });
+
+    focus(bound, 'dropdown');
+    await settle(bound.fixture);
 
     expect(document.activeElement).toBe(document.body);
   });
 
-  for (const field of ['dropdown', 'autocomplete', 'date'] as const) {
-    it(`does not open the ${field} panel`, async () => {
-      await build(field);
+  it('still takes focus on load while readonly', async () => {
+    await bind('date', true, { state: { readonly: true } });
 
-      expect(expectedElement(fixture, field).getAttribute('aria-expanded')).toBe('false');
+    await expect.element(control('date')).toHaveFocus();
+  });
+
+  for (const kind of Object.keys(ROLES) as FieldKind[]) {
+    it(`still takes focus from a click while readonly: ${kind}-field`, async ({ skip }) => {
+      if (kind === 'slider') skip(READONLY_SLIDER_UNCLICKABLE);
+
+      await bind(kind, false, { state: { readonly: true } });
+
+      // Forced, because Playwright refuses to click a readonly control, which a user still can.
+      await userEvent.click(control(kind), { force: true });
+
+      await expect.element(control(kind)).toHaveFocus();
     });
   }
-
-  it('does not focus a disabled field', async () => {
-    fixture = TestBed.createComponent(FocusHost);
-    host = fixture.componentInstance;
-    host.focused = 'toggle';
-    host.toggle.disable();
-    await settle(fixture);
-
-    expect(document.activeElement).toBe(document.body);
-  });
-
-  // Unlike a disabled one: readonly guards what the field does with focus, never focus itself.
-  it('still focuses a readonly field', async () => {
-    fixture = TestBed.createComponent(FocusHost);
-    host = fixture.componentInstance;
-    host.focused = 'date';
-    host.dateReadonly = true;
-    await settle(fixture);
-
-    expect(document.activeElement).toBe(expectedElement(fixture, 'date'));
-  });
-
-  it('focus() is callable on the field itself', async () => {
-    await build(null);
-
-    (host.dropdown() as BaseField).focus();
-
-    expect(document.activeElement).toBe(expectedElement(fixture, 'dropdown'));
-  });
-
-  /**
-   * Pins the removal of the dead `panelRef.focus()` in `date-field`'s `togglePanel`: the panel is still
-   * `visibility: hidden` at that point, so it never took focus. Deferring the call until it could is
-   * what this rules out — it would pull focus off the input and run its commit-on-blur path.
-   */
-  it('keeps focus on the date input while its panel opens', async () => {
-    await build('date');
-
-    host.date().togglePanel(true);
-    await settle(fixture);
-
-    expect(expectedElement(fixture, 'date').getAttribute('aria-expanded')).toBe('true');
-    expect(document.activeElement).toBe(expectedElement(fixture, 'date'));
-  });
 });
