@@ -1,37 +1,12 @@
-import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { FormsModule, NgModel } from '@angular/forms';
-import { By } from '@angular/platform-browser';
-import { FieldHint } from '../../directives/field-hint';
-import { FieldLabel } from '../../directives/field-label';
+import { page, userEvent } from 'vitest/browser';
 import { FormidableOption } from '../../models/formidable.model';
-import { fill, referenced } from '../../testing/dom';
-import { configureFormidableTestBed, settle } from '../../testing/test-bed';
-import { CheckboxGroupField } from '../fields/checkbox-group-field/checkbox-group-field';
-import { InputField } from '../fields/input-field/input-field';
-import { RadioGroupField } from '../fields/radio-group-field/radio-group-field';
-import { SliderField } from '../fields/slider-field/slider-field';
-import { ToggleField } from '../fields/toggle-field/toggle-field';
-import { FieldDecorator } from './field-decorator';
+import { bindField, BindFieldOptions, BoundField, FieldKind } from '../../testing/bind-field';
+import { configureFormidableTestBed } from '../../testing/test-bed';
 
 /**
- * Contract of the fields' ARIA wiring.
- *
- * The decorator owns the label, the hint and the errors, so it is what mints the ids they carry —
- * `{fieldId}-label`, `{fieldId}-hint`, `{fieldId}-errors`. A field reads them back by injecting its
- * decorator optionally, which is why a field used on its own emits neither `aria-labelledby` nor
- * `aria-describedby` rather than pointing at ids that do not exist.
- *
- * `aria-describedby` is unconditional: both wrappers always render, and a reference to a hidden or empty
- * element contributes nothing to the accessible description, so there is no state here to go stale.
- *
- * `aria-labelledby` exists for the fields a `<label for>` cannot reach — the two groups and the slider
- * (`vertical` layout renders its label as a `div`) and the toggle (its `[id]` is on a hidden checkbox,
- * while the focusable element is the `role="switch"` div). Those are also the fields that had no
- * accessible name at all before this.
- *
- * `aria-invalid` follows the field's own `showErrors`, which reads the state the forms API writes into it —
- * the end-to-end spec at the bottom pins that the state arrives with nothing pumping it.
+ * Per **Accessibility** in `user/components.md`: a decorated field takes its name from its label, including
+ * the fields a `<label for>` cannot reach, and its description from its hints and messages. It reports its
+ * state on the element that carries it, and **Without A Decorator** it points at nothing.
  */
 
 const options: FormidableOption[] = [
@@ -39,271 +14,145 @@ const options: FormidableOption[] = [
   { value: 'blue', label: 'Blue' }
 ];
 
-@Component({
-  imports: [
-    FormsModule,
-    FieldDecorator,
-    RadioGroupField,
-    CheckboxGroupField,
-    ToggleField,
-    SliderField,
-    FieldLabel,
-    FieldHint
-  ],
-  template: `
-    <formidable-field-decorator>
-      <formidable-radio-group-field
-        name="colour"
-        [options]="options"
-        [required]="required()"
-        [readonly]="readonly()"
-        [disabled]="disabled()" />
-      <div formidableFieldLabel>Favourite colour</div>
-      @if (hasHint) {
-        <div formidableFieldHint>Pick one.</div>
-      }
-    </formidable-field-decorator>
-
-    <formidable-field-decorator>
-      <formidable-checkbox-group-field
-        name="colours"
-        [options]="options" />
-      <div formidableFieldLabel>Colours you like</div>
-    </formidable-field-decorator>
-
-    <formidable-field-decorator>
-      <formidable-toggle-field
-        name="notify"
-        offLabel="Off" />
-      <div formidableFieldLabel>Notifications</div>
-    </formidable-field-decorator>
-
-    <formidable-field-decorator>
-      <formidable-slider-field
-        name="amount"
-        [transformValueToThumbLabel]="transform()" />
-      <div formidableFieldLabel>Amount</div>
-    </formidable-field-decorator>
-  `
-})
-class NamedFieldsHost {
-  options = options;
-  readonly required = signal(false);
-  readonly readonly = signal(false);
-  readonly disabled = signal(false);
-  hasHint = true;
-  readonly transform = signal<((value: number) => string) | undefined>(undefined);
+/** Binds a field through Signal Forms, decorated with the label `Colour` and the markup `extra` projects. */
+function bind(
+  kind: FieldKind,
+  inputs: Record<string, unknown> = {},
+  { decoration = '', ...extra }: BindFieldOptions = {}
+): Promise<BoundField> {
+  return bindField(kind, 'signal', {
+    inputs,
+    decorated: true,
+    decoration: `<div formidableFieldLabel>Colour</div>${decoration}`,
+    ...extra
+  });
 }
-
-/** The same group with nothing projected to name it. */
-@Component({
-  imports: [FieldDecorator, RadioGroupField],
-  template: `
-    <formidable-field-decorator>
-      <formidable-radio-group-field name="colour" />
-    </formidable-field-decorator>
-  `
-})
-class UnlabelledHost {}
-
-/** An input under a forms API, whose control holds the errors the field reads. */
-@Component({
-  imports: [FormsModule, FieldDecorator, InputField, FieldLabel, FieldHint],
-  template: `
-    <form>
-      <formidable-field-decorator>
-        <formidable-input-field
-          name="field"
-          [ngModel]="model" />
-        <div formidableFieldLabel>Field</div>
-        <div formidableFieldHint>Some hint.</div>
-      </formidable-field-decorator>
-    </form>
-  `
-})
-class ErrorsHost {
-  model = '';
-}
-
-/** The shape a consumer uses for a bare field: no decorator, so nothing to point at. */
-@Component({
-  imports: [FormsModule, InputField],
-  template: `<formidable-input-field name="field" />`
-})
-class NoDecoratorHost {}
 
 describe('field ARIA', () => {
   beforeEach(() => configureFormidableTestBed());
 
-  /** What a screen reader would actually read out of an idref list, empty references dropped. */
-  function textOf(control: HTMLElement, attribute: string): string {
-    return referenced(control, attribute)
-      .map((element) => element?.textContent?.trim() ?? '')
-      .filter(Boolean)
-      .join(' ');
-  }
-
   describe('naming the fields a <label for> cannot reach', () => {
-    let fixture: ReturnType<typeof TestBed.createComponent<NamedFieldsHost>>;
-    let root: HTMLElement;
+    const fields: [FieldKind, 'radiogroup' | 'group' | 'switch' | 'slider', Record<string, unknown>][] = [
+      ['radio-group', 'radiogroup', { options }],
+      ['checkbox-group', 'group', { options }],
+      // The toggle's `offLabel` is state text, not a name: `aria-checked` carries the state.
+      ['toggle', 'switch', { offLabel: 'Off' }],
+      ['slider', 'slider', {}]
+    ];
 
-    beforeEach(() => {
-      fixture = TestBed.createComponent(NamedFieldsHost);
-      fixture.detectChanges();
-      root = fixture.nativeElement as HTMLElement;
-    });
+    for (const [kind, role, inputs] of fields) {
+      it(`names the ${kind} field from its label`, async () => {
+        await bind(kind, inputs);
 
-    function control(selector: string): HTMLElement {
-      return root.querySelector(selector) as HTMLElement;
+        await expect.element(page.getByRole(role, { name: 'Colour', exact: true })).toBeInTheDocument();
+      });
     }
 
-    it('names the radio group from the projected label', () => {
-      expect(textOf(control('[role="radiogroup"]'), 'aria-labelledby')).toBe('Favourite colour');
+    it('points at no label when none is projected', async () => {
+      await bindField('radio-group', 'signal', { inputs: { options }, decorated: true });
+
+      await expect.element(page.getByRole('radiogroup')).not.toHaveAttribute('aria-labelledby');
     });
 
-    it('names the checkbox group from the projected label', () => {
-      expect(textOf(control('[role="group"]'), 'aria-labelledby')).toBe('Colours you like');
-    });
+    // The group's fieldset once named itself from the raw control name, beside the label.
+    it('names nothing around a group but the group itself', async () => {
+      await bind('radio-group', { options });
 
-    // The toggle's own `offLabel` is state text, not a name — `aria-checked` is what carries the state.
-    it('names the toggle from the projected label rather than from its own state text', () => {
-      expect(textOf(control('[role="switch"]'), 'aria-labelledby')).toBe('Notifications');
-    });
-
-    it('names the slider from the projected label', () => {
-      expect(textOf(control('input[type="range"]'), 'aria-labelledby')).toBe('Amount');
-    });
-
-    it('emits no aria-labelledby when no label is projected', () => {
-      const unlabelled = TestBed.createComponent(UnlabelledHost);
-      unlabelled.detectChanges();
-
-      const group = unlabelled.nativeElement.querySelector('[role="radiogroup"]') as HTMLElement;
-
-      expect(group.getAttribute('aria-labelledby')).toBeNull();
-    });
-
-    // The fieldset used to name itself from the raw control name, which duplicated the label above.
-    it('renders no legend in the vertical layout', () => {
-      expect(root.querySelector('fieldset')).not.toBeNull();
-      expect(root.querySelector('legend')).toBeNull();
+      await expect.element(page.getByRole('radiogroup', { name: 'Colour', exact: true })).toBeInTheDocument();
+      expect(page.getByRole('group', { name: /./ }).elements()).toEqual([]);
     });
   });
 
   describe('state', () => {
-    let fixture: ReturnType<typeof TestBed.createComponent<NamedFieldsHost>>;
-    let root: HTMLElement;
+    const group = () => page.getByRole('radiogroup', { name: 'Colour' });
 
-    beforeEach(() => {
-      fixture = TestBed.createComponent(NamedFieldsHost);
-      fixture.detectChanges();
-      root = fixture.nativeElement as HTMLElement;
+    it('reports required only while the field is required', async () => {
+      const bound = await bind('radio-group', { options });
+
+      await expect.element(group()).not.toHaveAttribute('aria-required');
+
+      await bound.state({ required: true });
+
+      await expect.element(group()).toHaveAttribute('aria-required', 'true');
     });
 
-    function group(): HTMLElement {
-      return root.querySelector('[role="radiogroup"]') as HTMLElement;
-    }
+    // A `div` has no native `readonly` or `disabled` to speak for it.
+    it('reports readonly and disabled on a div-rooted field', async () => {
+      const bound = await bind('radio-group', { options });
 
-    it('reports required only while the field is required', () => {
-      expect(group().getAttribute('aria-required')).toBeNull();
+      await bound.state({ readonly: true });
+      await expect.element(group()).toHaveAttribute('aria-readonly', 'true');
 
-      fixture.componentInstance.required.set(true);
-      fixture.detectChanges();
-
-      expect(group().getAttribute('aria-required')).toBe('true');
+      await bound.state({ disabled: true });
+      await expect.element(group()).toHaveAttribute('aria-disabled', 'true');
     });
 
-    // A `div` has no native `readonly` / `disabled` to speak for it.
-    it('reports readonly and disabled on a div-rooted field', () => {
-      fixture.componentInstance.readonly.set(true);
-      fixture.componentInstance.disabled.set(true);
-      fixture.detectChanges();
+    it('reports the toggle checked once switched on', async () => {
+      await bind('toggle');
+      const toggle = page.getByRole('switch', { name: 'Colour' });
 
-      expect(group().getAttribute('aria-readonly')).toBe('true');
-      expect(group().getAttribute('aria-disabled')).toBe('true');
-    });
+      await expect.element(toggle).not.toBeChecked();
 
-    it('tracks the toggle state, which was a CSS class only', async () => {
-      const toggle = root.querySelector('[role="switch"]') as HTMLElement;
+      await userEvent.click(toggle);
 
-      expect(toggle.getAttribute('aria-checked')).toBe('false');
-
-      toggle.click();
-      await settle(fixture);
-
-      expect(toggle.getAttribute('aria-checked')).toBe('true');
+      await expect.element(toggle).toBeChecked();
     });
 
     // A native range already reports its number; only a transformed value is something it cannot infer.
     it('gives the slider a valuetext only once the value is transformed', async () => {
-      const range = root.querySelector('input[type="range"]') as HTMLInputElement;
+      const bound = await bind('slider', { transformValueToThumbLabel: undefined });
+      const slider = page.getByRole('slider', { name: 'Colour' });
 
-      fill(range, '50');
-      await settle(fixture);
+      await bound.write(50);
 
-      expect(range.getAttribute('aria-valuetext')).toBeNull();
+      await expect.element(slider).not.toHaveAttribute('aria-valuetext');
 
-      fixture.componentInstance.transform.set((value: number) => `${value} francs`);
-      fixture.detectChanges();
+      await bound.set('transformValueToThumbLabel', (value: number) => `${value} francs`);
 
-      expect(range.getAttribute('aria-valuetext')).toBe('50 francs');
+      await expect.element(slider).toHaveAttribute('aria-valuetext', '50 francs');
     });
   });
 
   describe('descriptions', () => {
-    it('describes the field with its hint', () => {
-      const fixture = TestBed.createComponent(NamedFieldsHost);
-      fixture.detectChanges();
+    it('describes the field with its hint', async () => {
+      await bind('radio-group', { options }, { decoration: '<div formidableFieldHint>Pick one.</div>' });
 
-      const root = fixture.nativeElement as HTMLElement;
-      const group = root.querySelector('[role="radiogroup"]') as HTMLElement;
-
-      expect(textOf(group, 'aria-describedby')).toBe('Pick one.');
+      await expect.element(page.getByRole('radiogroup', { name: 'Colour' })).toHaveAccessibleDescription('Pick one.');
     });
 
-    it('describes nothing while the hint and the errors are empty', () => {
-      const fixture = TestBed.createComponent(NamedFieldsHost);
-      fixture.componentInstance.hasHint = false;
-      fixture.detectChanges();
+    it('describes nothing while the hint and the messages are empty', async () => {
+      await bind('radio-group', { options });
 
-      const root = fixture.nativeElement as HTMLElement;
-      const group = root.querySelector('[role="radiogroup"]') as HTMLElement;
-
-      // The attribute still points at both wrappers — they simply have nothing to contribute.
-      expect(group.getAttribute('aria-describedby')).toBeTruthy();
-      expect(textOf(group, 'aria-describedby')).toBe('');
+      await expect.element(page.getByRole('radiogroup', { name: 'Colour' })).toHaveAccessibleDescription('');
     });
 
-    it('emits neither aria-labelledby nor aria-describedby without a decorator', () => {
-      const fixture = TestBed.createComponent(NoDecoratorHost);
-      fixture.detectChanges();
+    it('points at neither a label nor a description without a decorator', async () => {
+      await bindField('input', 'signal');
 
-      const input = fixture.nativeElement.querySelector('input') as HTMLElement;
-
-      expect(input.getAttribute('aria-labelledby')).toBeNull();
-      expect(input.getAttribute('aria-describedby')).toBeNull();
+      await expect.element(page.getByRole('textbox')).not.toHaveAttribute('aria-labelledby');
+      await expect.element(page.getByRole('textbox')).not.toHaveAttribute('aria-describedby');
     });
 
-    // The end-to-end one: nothing here calls `markForCheck` or `detectChanges()` by hand, so the control's
-    // touched and errors reach the field through `ngModel` alone. The first `settle` is what lets the
-    // debounced validator run, so its own result cannot overwrite the errors set below.
-    it('picks up the error message and reports invalid once the control is touched and invalid', async () => {
-      const fixture = TestBed.createComponent(ErrorsHost);
-      await settle(fixture);
+    it('adds the message to the description and reports invalid once revealed', async () => {
+      await bind(
+        'input',
+        {},
+        {
+          decoration: '<div formidableFieldHint>Some hint.</div>',
+          after: '<button type="button">Next</button>',
+          state: { invalid: true }
+        }
+      );
+      const input = page.getByRole('textbox', { name: 'Colour' });
 
-      const root = fixture.nativeElement as HTMLElement;
-      const input = root.querySelector('input') as HTMLElement;
-      const control = fixture.debugElement.query(By.css('formidable-input-field')).injector.get(NgModel).control;
+      await expect.element(input).toHaveAccessibleDescription('Some hint.');
+      await expect.element(input).not.toHaveAttribute('aria-invalid');
 
-      expect(textOf(input, 'aria-describedby')).toBe('Some hint.');
-      expect(input.getAttribute('aria-invalid')).toBeNull();
+      await userEvent.click(input);
+      await userEvent.tab();
 
-      control.markAsTouched();
-      control.setErrors({ 'Required.': true });
-      await settle(fixture);
-
-      expect(input.getAttribute('aria-invalid')).toBe('true');
-      expect(textOf(input, 'aria-describedby')).toBe('Some hint. Required.');
+      await expect.element(input).toHaveAttribute('aria-invalid', 'true');
+      await expect.element(input).toHaveAccessibleDescription('Some hint. invalid');
     });
   });
 });

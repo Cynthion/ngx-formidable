@@ -1,133 +1,116 @@
-import { Component, signal } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { FieldLabel } from '../../directives/field-label';
-import { configureFormidableTestBed, settle } from '../../testing/test-bed';
-import { InputField } from '../fields/input-field/input-field';
-import { FieldDecorator } from './field-decorator';
+import { onTestFinished } from 'vitest';
+import { page } from 'vitest/browser';
+import { bindField, BindFieldOptions, BoundField, FormsApi } from '../../testing/bind-field';
+import { configureFormidableTestBed } from '../../testing/test-bed';
 
 /**
- * Contract of the decorator's repaint. Everything it renders is read off the projected field — `readonly`,
- * `disabled`, `placeholder`, the value — and none of it is the decorator's own input, so nothing tells it
- * they moved. The signal read inside each getter is what marks its view, and there is nothing else: make
- * `canLabelRest` a plain getter over plain fields again and every assertion below fails with the decorator
- * stuck on its first render.
+ * Per **State Repaints On Its Own** in `user/forms.md` and **A Label Rests Only While Nothing Occupies The Value
+ * Area** in `user/decoration.md`: an `inside` label floats once the field turns readonly or disabled or takes
+ * a placeholder, with nothing to call. Everything the label follows is the projected field's, and none of it
+ * the decorator's own input, so this is the decorator following its field at all. `label-position.spec.ts`
+ * covers where the label lands.
  *
- * Asserted against the decorator's own **template**, never its host classes: host bindings are evaluated in
- * the parent's view, which the host's own signal write refreshes anyway. `settle()` never calls
- * `detectChanges()`, so a repaint that arrives is the decorator's own doing.
- *
- * `label-position.spec.ts` covers where a label lands. This covers only that it follows at all.
+ * `settle()` never calls `detectChanges()`, so a repaint that arrives here is the library's own doing.
  */
 
-@Component({
-  imports: [FieldDecorator, InputField, FieldLabel],
-  template: `
-    <formidable-field-decorator>
-      <label
-        formidableFieldLabel
-        position="inside"
-        >Name</label
-      >
-      <formidable-input-field
-        name="field"
-        [placeholder]="placeholder()"
-        [readonly]="readonly()"
-        [disabled]="disabled()" />
-    </formidable-field-decorator>
-  `
-})
-class LabelStateHost {
-  readonly placeholder = signal('');
-  readonly readonly = signal(false);
-  readonly disabled = signal(false);
+const input = () => page.getByRole('textbox', { name: 'Name' }).element() as HTMLInputElement;
+const centre = (element: Element) => {
+  const rect = element.getBoundingClientRect();
+
+  return rect.top + rect.height / 2;
+};
+
+/** A resting label sits on the field's middle; a floating one above it. */
+const isFloating = (label = input().labels![0]!) => centre(label) < centre(label.control!) - 1;
+
+/** Whether a transition duration animates nothing. */
+const STILL = /^0s(, 0s)*$/;
+
+/** Binds a decorated input under an `inside` label. */
+const bind = (api: FormsApi = 'signal', options: BindFieldOptions = {}): Promise<BoundField> =>
+  bindField('input', api, {
+    decorated: true,
+    decoration: '<div formidableFieldLabel position="inside">Name</div>',
+    ...options
+  });
+
+/** Records every transition the label starts until the test ends. */
+function labelTransitions(): Event[] {
+  const runs: Event[] = [];
+  const record = (event: Event) => {
+    if (event.target instanceof HTMLLabelElement) runs.push(event);
+  };
+
+  document.addEventListener('transitionrun', record, true);
+  onTestFinished(() => document.removeEventListener('transitionrun', record, true));
+
+  return runs;
 }
 
-@Component({
-  imports: [FormsModule, FieldDecorator, FieldLabel, InputField],
-  template: `
-    <form>
-      <formidable-field-decorator>
-        <label formidableFieldLabel>Name</label>
-        <formidable-input-field
-          name="name"
-          [ngModel]="'written in'" />
-      </formidable-field-decorator>
-    </form>
-  `
-})
-class WrittenInHost {}
+/** The transition duration the label resolves to at the moment it first floats, which is what animates it. */
+function durationWhenFloated(): () => string | undefined {
+  let duration: string | undefined;
+  const observer = new MutationObserver((mutations) => {
+    for (const { target } of mutations) {
+      if (duration === undefined && target instanceof HTMLLabelElement && target.control && isFloating(target)) {
+        duration = getComputedStyle(target).transitionDuration;
+      }
+    }
+  });
+
+  observer.observe(document.body, { subtree: true, attributeFilter: ['class'] });
+  onTestFinished(() => observer.disconnect());
+
+  return () => duration;
+}
 
 describe('decorator repaint', () => {
-  let fixture: ComponentFixture<LabelStateHost>;
+  beforeEach(() => configureFormidableTestBed());
 
-  /** The class the decorator's template writes out of `labelState`. */
-  function labelState(): string {
-    const wrapper = fixture.nativeElement.querySelector('.label-wrapper') as HTMLElement;
+  it('floats the label once the field turns readonly', async () => {
+    const bound = await bind();
 
-    return Array.from(wrapper.classList).find(
-      (name) => name.startsWith('label-') && name !== 'label-wrapper' && name !== 'label-animated'
-    )!;
-  }
+    expect(isFloating()).toBe(false);
 
-  beforeEach(async () => {
-    configureFormidableTestBed();
+    await bound.state({ readonly: true });
 
-    fixture = TestBed.createComponent(LabelStateHost);
-    await settle(fixture);
+    await expect.poll(() => isFloating()).toBe(true);
   });
 
-  it('follows the field out of resting when it is made readonly', async () => {
-    expect(labelState()).toBe('label-resting');
+  it('floats the label once the field turns disabled', async () => {
+    const bound = await bind();
 
-    fixture.componentInstance.readonly.set(true);
-    await settle(fixture);
+    await bound.state({ disabled: true });
 
-    expect(labelState()).toBe('label-floating');
+    await expect.poll(() => isFloating()).toBe(true);
   });
 
-  it('follows the field out of resting when it is disabled', async () => {
-    fixture.componentInstance.disabled.set(true);
-    await settle(fixture);
+  // An `inside` label yields the value area to a placeholder.
+  it('floats the label for a placeholder added at runtime', async () => {
+    const bound = await bind('signal', { inputs: { placeholder: '' } });
 
-    expect(labelState()).toBe('label-floating');
+    expect(isFloating()).toBe(false);
+
+    await bound.set('placeholder', 'Your name');
+
+    await expect.poll(() => isFloating()).toBe(true);
   });
 
-  // A `placeholder` leaves an `inside` label nothing to rest in.
-  it('follows a placeholder added at runtime', async () => {
-    fixture.componentInstance.placeholder.set('Your name');
-    await settle(fixture);
+  // `ngModel` registers its control across a microtask, so the first render has no value yet and the label
+  // floats a moment later. Nothing animates into place on load; a change after it does.
+  it('floats a value written in before the first render without animating it, and animates what follows', async () => {
+    const floated = durationWhenFloated();
+    const runs = labelTransitions();
 
-    expect(labelState()).toBe('label-floating');
-  });
+    const bound = await bind('template-driven', { value: 'written in' });
 
-  /**
-   * The label gate opens one bare `requestAnimationFrame` after the first render. Two claims: the initial
-   * resting-to-floating correction lands before the gate, so it is never animated; and the gate's own signal
-   * write is what repaints, with nothing else marking the decorator.
-   */
-  it('floats a written-in value without animating it, then releases the gate from a bare frame', async () => {
-    const written = TestBed.createComponent(WrittenInHost);
-    const label = () => written.nativeElement.querySelector('.label-wrapper') as HTMLElement;
+    expect(isFloating()).toBe(true);
+    expect(floated()).toMatch(STILL);
+    // Ready to animate on its own, before anything else changes.
+    expect(getComputedStyle(input().labels![0]!).transitionDuration).not.toMatch(STILL);
 
-    written.detectChanges();
+    await bound.write('');
 
-    // `NgForm` registers the control across a microtask, so the first render has no value yet.
-    expect(label().classList).toContain('label-resting');
-
-    const animatedWhenFloated = new Promise<boolean>((resolve) => {
-      new MutationObserver((_, observer) => {
-        if (!label().classList.contains('label-floating')) return;
-
-        observer.disconnect();
-        resolve(label().classList.contains('label-animated'));
-      }).observe(label(), { attributeFilter: ['class'] });
-    });
-
-    expect(await animatedWhenFloated).toBe(false);
-
-    await settle(written);
-
-    expect(label().classList).toContain('label-animated');
+    await expect.poll(() => runs.length).toBeGreaterThan(0);
   });
 });

@@ -117,12 +117,6 @@ Phases 32 to 37 rewrite the specs Vitest inherited to the rules in **Writing A S
 
 - **Size It Honestly**: each phase is about 2,000 lines of specs. Split one before starting if it does not fit a conversation.
 
-### Phase 35: Decorator Specs
-
-**Depends On**: nothing.
-
-- **Scope**: `field-decorator`, `aria`, `field-hint`, `field-state`, `required-marker`, `reveal`, the decorator's `repaint`, `font-family`, `error-message` and `validator-agnostic`.
-
 ### Phase 36: Decorator Geometry Specs
 
 **Depends On**: Phases 32 to 35.
