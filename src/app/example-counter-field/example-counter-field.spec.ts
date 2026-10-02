@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { form, FormField, max, min, readonly } from '@angular/forms/signals';
 import { FieldDecorator, FieldLabel } from '@cynthion/ngx-formidable';
 import { ExampleCounterField } from './example-counter-field';
@@ -30,13 +30,19 @@ class CounterHost {
 }
 
 describe('custom field contract: example-counter-field', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   let fixture: ComponentFixture<CounterHost>;
   let host: CounterHost;
   let root: HTMLElement;
 
-  function settle(): void {
+  async function settle(): Promise<void> {
     fixture.detectChanges();
-    tick(50);
+    await vi.advanceTimersByTimeAsync(50);
     fixture.detectChanges();
   }
 
@@ -48,76 +54,77 @@ describe('custom field contract: example-counter-field', () => {
     return (root.querySelector('.counter-value') as HTMLElement).textContent!.trim();
   }
 
-  function press(key: string): void {
+  async function press(key: string): Promise<void> {
     counter().dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
-    settle();
+    await settle();
   }
 
-  beforeEach(fakeAsync(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({ imports: [CounterHost] });
     fixture = TestBed.createComponent(CounterHost);
     host = fixture.componentInstance;
     root = fixture.nativeElement as HTMLElement;
-    settle();
-  }));
+    await settle();
+    await vi.runOnlyPendingTimersAsync();
+  });
 
-  it('renders the value the model holds', fakeAsync(() => {
+  it('renders the value the model holds', () => {
     expect(displayedValue()).toBe('1');
-  }));
+  });
 
-  it('is found by the decorator, which names it', fakeAsync(() => {
+  it('is found by the decorator, which names it', () => {
     // The decorator mints the label's id; the field binds it back. Resolving it proves the two agree.
     const labelId = counter().getAttribute('aria-labelledby');
 
     expect(labelId).toBeTruthy();
     // An attribute selector, not `#id`: the assertion is about the idref, never the id's spelling.
     expect(root.querySelector(`[id="${labelId}"]`)?.textContent?.trim()).toBe('Pets');
-  }));
+  });
 
-  it('steps up on ArrowUp and reports the new value to the model', fakeAsync(() => {
+  it('steps up on ArrowUp and reports the new value to the model', async () => {
     counter().dispatchEvent(new Event('focus'));
-    settle();
+    await settle();
 
-    press('ArrowUp');
+    await press('ArrowUp');
 
     expect(displayedValue()).toBe('2');
     expect(host.model().pets).toBe(2);
-  }));
+  });
 
-  it('steps down on ArrowDown', fakeAsync(() => {
+  it('steps down on ArrowDown', async () => {
     counter().dispatchEvent(new Event('focus'));
-    settle();
+    await settle();
 
-    press('ArrowDown');
+    await press('ArrowDown');
 
     expect(displayedValue()).toBe('0');
     expect(host.model().pets).toBe(0);
-  }));
+  });
 
-  it('clamps at both ends rather than running past them', fakeAsync(() => {
+  it('clamps at both ends rather than running past them', async () => {
     counter().dispatchEvent(new Event('focus'));
-    settle();
+    await settle();
 
-    press('ArrowDown');
-    press('ArrowDown');
+    await press('ArrowDown');
+    await press('ArrowDown');
     expect(displayedValue()).toBe('0');
 
-    press('ArrowUp');
-    press('ArrowUp');
-    press('ArrowUp');
-    press('ArrowUp');
+    await press('ArrowUp');
+    await press('ArrowUp');
+    await press('ArrowUp');
+    await press('ArrowUp');
     expect(displayedValue()).toBe('3');
-  }));
+  });
 
-  it('ignores the keys while readonly', fakeAsync(() => {
+  it('ignores the keys while readonly', async () => {
     host.readonly.set(true);
-    settle();
+    await settle();
 
     counter().dispatchEvent(new Event('focus'));
-    settle();
+    await settle();
 
-    press('ArrowUp');
+    await press('ArrowUp');
 
     expect(displayedValue()).toBe('1');
-  }));
+  });
 });

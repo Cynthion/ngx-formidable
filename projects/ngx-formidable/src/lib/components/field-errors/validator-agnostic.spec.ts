@@ -85,8 +85,8 @@ describe('validator-agnostic error rendering', () => {
     });
 
     // `required` writes `{ required: true }`, and its key is the message the default renders.
-    it('renders Angular’s error keys as messages once touched', async () => {
-      pending(DIRECTIVE_VALIDATORS_UNATTACHED);
+    it('renders Angular’s error keys as messages once touched', async ({ skip }) => {
+      skip(DIRECTIVE_VALIDATORS_UNATTACHED);
 
       await mount(AngularValidatorsHost);
 
@@ -98,8 +98,8 @@ describe('validator-agnostic error rendering', () => {
       expect(messages()).toEqual(['required']);
     });
 
-    it('raises .is-invalid on the decorator and aria-invalid on the field', async () => {
-      pending(DIRECTIVE_VALIDATORS_UNATTACHED);
+    it('raises .is-invalid on the decorator and aria-invalid on the field', async ({ skip }) => {
+      skip(DIRECTIVE_VALIDATORS_UNATTACHED);
 
       await mount(AngularValidatorsHost);
 
@@ -113,8 +113,8 @@ describe('validator-agnostic error rendering', () => {
       expect(input().getAttribute('aria-invalid')).toBe('true');
     });
 
-    it('follows the failing validator, and clears as the value satisfies them all', async () => {
-      pending(DIRECTIVE_VALIDATORS_UNATTACHED);
+    it('follows the failing validator, and clears as the value satisfies them all', async ({ skip }) => {
+      skip(DIRECTIVE_VALIDATORS_UNATTACHED);
 
       await mount(AngularValidatorsHost);
 
@@ -134,8 +134,8 @@ describe('validator-agnostic error rendering', () => {
   });
 
   // An Angular error carries no message of its own, so the token is the one place a consumer gives it one.
-  it('renders an Angular error through an overridden FORMIDABLE_ERROR_MESSAGE', async () => {
-    pending(DIRECTIVE_VALIDATORS_UNATTACHED);
+  it('renders an Angular error through an overridden FORMIDABLE_ERROR_MESSAGE', async ({ skip }) => {
+    skip(DIRECTIVE_VALIDATORS_UNATTACHED);
 
     configureFormidableTestBed({
       providers: [

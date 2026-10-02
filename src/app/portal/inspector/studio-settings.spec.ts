@@ -1,5 +1,5 @@
 import { Type } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DateField, DropdownField } from '@cynthion/ngx-formidable';
 import { provideNgxMask } from 'ngx-mask';
@@ -22,6 +22,12 @@ import { FormSettings } from './settings/form-settings';
  * value nothing rendered from.
  */
 describe('studio settings', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   let store: FormDefinitionStore;
 
   /** One field per kind: the editor renders a different set of controls for each, and only for each. */
@@ -105,7 +111,7 @@ describe('studio settings', () => {
 
       fixture.detectChanges();
 
-      expect(snapshot()).withContext(name).not.toBe(before);
+      expect(snapshot(), name).not.toBe(before);
     }
   }
 
@@ -122,7 +128,7 @@ describe('studio settings', () => {
 
     for (const kind of KINDS) {
       const field = store.fields().find((candidate) => candidate.kind === kind);
-      expect(field).withContext(kind).toBeTruthy();
+      expect(field, kind).toBeTruthy();
 
       store.select(field!.id);
       sweep(fixture, FIELD_KIND_LABELS[kind]);
@@ -138,11 +144,11 @@ describe('studio settings', () => {
     let preview: ComponentFixture<PreviewForm>;
     let stage: HTMLElement;
 
-    function settle(): void {
+    async function settle(): Promise<void> {
       for (let i = 0; i < 3; i++) {
         panel.detectChanges();
         preview.detectChanges();
-        tick(100);
+        await vi.advanceTimersByTimeAsync(100);
       }
       panel.detectChanges();
       preview.detectChanges();
@@ -152,11 +158,11 @@ describe('studio settings', () => {
       return (panel.nativeElement as HTMLElement).querySelector(`#ad-${key}`) as HTMLSelectElement;
     }
 
-    function choose(key: string, value: string): void {
+    async function choose(key: string, value: string): Promise<void> {
       const select = control(key);
       select.value = value;
       select.dispatchEvent(new Event('change'));
-      settle();
+      await settle();
     }
 
     /** The line under one control naming who states their own, or `''` while everything inherits. */
@@ -166,9 +172,9 @@ describe('studio settings', () => {
       return (note?.textContent ?? '').trim();
     }
 
-    function clear(key: string): void {
+    async function clear(key: string): Promise<void> {
       (control(key).closest('.pc-field')!.querySelector('.pc-reset') as HTMLElement).click();
-      settle();
+      await settle();
     }
 
     /**
@@ -203,13 +209,13 @@ describe('studio settings', () => {
       stage = preview.nativeElement as HTMLElement;
     });
 
-    it('moves every label that states nothing, and leaves the one that states its own', fakeAsync(() => {
-      settle();
+    it('moves every label that states nothing, and leaves the one that states its own', async () => {
+      await settle();
 
       // Nothing set: the library's own `inside`, which rests or floats depending on the field's value.
-      expect(labelClasses().some((name) => name === 'label-resting' || name === 'label-floating')).toBeTrue();
+      expect(labelClasses().some((name) => name === 'label-resting' || name === 'label-floating')).toBe(true);
 
-      choose('labelPosition', 'border');
+      await choose('labelPosition', 'border');
 
       expect(labelClasses()).toContain('label-border');
       expect(labelClasses()).not.toContain('label-resting');
@@ -218,52 +224,52 @@ describe('studio settings', () => {
       // The card number states `outside`, and a layout that cannot honour a position labels outside anyway.
       expect(labelOf('cardNumber')).toBe('label-outside');
       expect(labelOf('orderName')).toBe('label-border');
-    }));
+    });
 
-    it('aligns every adornment that states nothing', fakeAsync(() => {
-      settle();
+    it('aligns every adornment that states nothing', async () => {
+      await settle();
 
       // Adornments are off and empty in the sample, so the alignment has nothing to act on until both are set.
       store.updateOptions({ showAdornments: true });
       store.setDecorationOnAllFields({ prefix: 'text' });
-      settle();
+      await settle();
 
       const wrappers = (): HTMLElement[] =>
         Array.from(stage.querySelectorAll<HTMLElement>('.adornment-wrapper:not(.hidden)'));
 
       expect(wrappers().length).toBeGreaterThan(0);
-      expect(wrappers().every((wrapper) => wrapper.classList.contains('align-value'))).toBeFalse();
+      expect(wrappers().every((wrapper) => wrapper.classList.contains('align-value'))).toBe(false);
 
-      choose('prefixAlign', 'value');
+      await choose('prefixAlign', 'value');
 
       expect(wrappers().length).toBeGreaterThan(0);
-      expect(wrappers().every((wrapper) => wrapper.classList.contains('align-value'))).toBeTrue();
-    }));
+      expect(wrappers().every((wrapper) => wrapper.classList.contains('align-value'))).toBe(true);
+    });
 
     // The preview is provided the defaults, rather than the portal resolving them beside the library.
-    it('reaches the fields through the library’s own resolution', fakeAsync(() => {
+    it('reaches the fields through the library’s own resolution', async () => {
       const values = TestBed.inject(FormValueStore);
       values.model.set({ ...values.model(), orderName: '' });
-      settle();
+      await settle();
 
       // Nobody has touched the name, so the default reveal holds its message back.
       expect(stage.textContent).not.toContain('We need a name for the order.');
 
-      choose('panelPosition', 'sheet');
-      choose('revealOn', 'always');
+      await choose('panelPosition', 'sheet');
+      await choose('revealOn', 'always');
 
       // The date states nothing; the pizza picker states `right`.
       expect(instance(DateField).map((field) => field.panelPosition())).toEqual(['sheet']);
       expect(instance(DropdownField).map((field) => field.panelPosition())).toContain('right');
       expect(stage.textContent).toContain('We need a name for the order.');
 
-      choose('panelPosition', '');
+      await choose('panelPosition', '');
 
       expect(instance(DateField).map((field) => field.panelPosition())).toEqual(['right']);
-    }));
+    });
 
-    it('counts the fields that state their own, and clears them back to inheriting', fakeAsync(() => {
-      settle();
+    it('counts the fields that state their own, and clears them back to inheriting', async () => {
+      await settle();
 
       const reached = store.fields().filter((field) => FIELD_CAPABILITIES[field.kind].labelPositions).length;
 
@@ -271,30 +277,30 @@ describe('studio settings', () => {
       expect(overrides('labelPosition')).toBe(`1 of ${reached} fields state their own.`);
 
       store.updateDecoration(PREVIEW_FORM_DEFINITION.fields[0]!.id, { labelPosition: 'border' });
-      settle();
+      await settle();
 
       expect(overrides('labelPosition')).toBe(`2 of ${reached} fields state their own.`);
 
-      clear('labelPosition');
+      await clear('labelPosition');
 
       expect(overrides('labelPosition')).toBe('');
-      expect(store.fields().every((field) => field.decoration.labelPosition === undefined)).toBeTrue();
-    }));
+      expect(store.fields().every((field) => field.decoration.labelPosition === undefined)).toBe(true);
+    });
 
-    it('says when the form states its own, and clears it back to inheriting', fakeAsync(() => {
-      settle();
+    it('says when the form states its own, and clears it back to inheriting', async () => {
+      await settle();
 
       expect(overrides('revealOn')).toBe('');
 
       store.updateOptions({ revealOn: 'dirty' });
-      settle();
+      await settle();
 
       expect(overrides('revealOn')).toBe('This form states its own.');
 
-      clear('revealOn');
+      await clear('revealOn');
 
       expect(store.options().revealOn).toBeUndefined();
-    }));
+    });
   });
 
   // #endregion
@@ -324,7 +330,7 @@ describe('studio settings', () => {
       control('prefix').dispatchEvent(new Event('change'));
       panel.detectChanges();
 
-      expect(store.fields().every((field) => field.decoration.prefix === 'icon')).toBeTrue();
+      expect(store.fields().every((field) => field.decoration.prefix === 'icon')).toBe(true);
     });
 
     // The control has no value of its own, so it can only be wrong by disagreeing with the fields.
@@ -339,9 +345,7 @@ describe('studio settings', () => {
       panel.detectChanges();
 
       expect(overrides('prefix')).toBe('');
-      expect(store.fields().every((field) => field.decoration.prefix === 'none')).toBeTrue();
+      expect(store.fields().every((field) => field.decoration.prefix === 'none')).toBe(true);
     });
   });
-
-  // #endregion
 });

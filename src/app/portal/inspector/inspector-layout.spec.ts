@@ -1,4 +1,4 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNgxMask } from 'ngx-mask';
 import { FormDefinitionStore } from '../state/form-definition.store';
 import { FieldScope, InspectorStore } from '../state/inspector.store';
@@ -14,6 +14,12 @@ import { Inspector } from './inspector';
  * the panel the more of it there is to see.
  */
 describe('inspector layout', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   let fixture: ComponentFixture<Inspector>;
   let host: HTMLElement;
   let inspector: InspectorStore;
@@ -36,9 +42,9 @@ describe('inspector layout', () => {
 
   afterEach(() => localStorage.clear());
 
-  function settle(): void {
+  async function settle(): Promise<void> {
     fixture.detectChanges();
-    tick(50);
+    await vi.advanceTimersByTimeAsync(50);
     fixture.detectChanges();
   }
 
@@ -46,10 +52,10 @@ describe('inspector layout', () => {
    * The panel at one width whatever the runner's viewport is. `!important`, because below the two-column
    * breakpoint the panel is a bottom sheet and that rule carries one of its own.
    */
-  function sizeTo(width: number): void {
+  async function sizeTo(width: number): Promise<void> {
     host.style.setProperty('width', `${width}px`, 'important');
     host.style.setProperty('height', '640px', 'important');
-    settle();
+    await settle();
   }
 
   /** Every element whose right edge lands beyond the scroll container's own content box. */
@@ -63,68 +69,68 @@ describe('inspector layout', () => {
   }
 
   /** The view as it opens, then again with each of its sections open in turn. */
-  function eachSection(where: string, report: (where: string) => void): void {
-    settle();
+  async function eachSection(where: string, report: (where: string) => void): Promise<void> {
+    await settle();
     report(where);
 
     const count = host.querySelectorAll('.trigger').length;
 
     for (let i = 0; i < count; i++) {
       (host.querySelectorAll<HTMLElement>('.trigger')[i] as HTMLElement).click();
-      settle();
+      await settle();
       report(`${where} §${i + 1}`);
     }
   }
 
   /** Every tab, sub-tab, scope and section the panel can show. */
-  function eachView(report: (where: string) => void): void {
+  async function eachView(report: (where: string) => void): Promise<void> {
     inspector.tab.set('theme');
     inspector.themeTab.set('design');
-    eachSection('theme/design', report);
+    await eachSection('theme/design', report);
 
     inspector.themeTab.set('variables');
-    eachSection('theme/variables', report);
+    await eachSection('theme/variables', report);
 
     inspector.tab.set('form');
     inspector.formTab.set('structure');
-    eachSection('form/structure', report);
+    await eachSection('form/structure', report);
 
     inspector.formTab.set('settings');
     for (const scope of SCOPES) {
       inspector.fieldScope.set(scope);
-      settle();
+      await settle();
       report(`form/settings/${scope}`);
     }
 
     inspector.tab.set('export');
     inspector.exportSection.set('theme');
-    eachSection('export/theme', report);
+    await eachSection('export/theme', report);
 
     inspector.exportSection.set('form');
-    eachSection('export/form', report);
+    await eachSection('export/form', report);
   }
 
-  function sweep(width: number): string[] {
+  async function sweep(width: number): Promise<string[]> {
     const failures: string[] = [];
 
-    sizeTo(width);
-    eachView((where) => failures.push(...overflowing(where)));
+    await sizeTo(width);
+    await eachView((where) => failures.push(...overflowing(where)));
 
     return failures;
   }
 
-  it('paints nothing outside the gutter at the width it opens at', fakeAsync(() => {
-    expect(sweep(INSPECTOR_WIDTH_DEFAULT)).toEqual([]);
-  }));
+  it('paints nothing outside the gutter at the width it opens at', async () => {
+    expect(await sweep(INSPECTOR_WIDTH_DEFAULT)).toEqual([]);
+  });
 
-  it('paints nothing outside the gutter at the narrowest width the divider allows', fakeAsync(() => {
-    expect(sweep(INSPECTOR_WIDTH_MIN)).toEqual([]);
-  }));
+  it('paints nothing outside the gutter at the narrowest width the divider allows', async () => {
+    expect(await sweep(INSPECTOR_WIDTH_MIN)).toEqual([]);
+  });
 
   // Each area's halves are longer than the panel, so the strip saying which half is showing has to survive
   // the scroll rather than leave with the content.
-  it('keeps the sub-tab strip at the top of the panel scrolled to its end', fakeAsync(() => {
-    sizeTo(INSPECTOR_WIDTH_DEFAULT);
+  it('keeps the sub-tab strip at the top of the panel scrolled to its end', async () => {
+    await sizeTo(INSPECTOR_WIDTH_DEFAULT);
     // Short enough that every view below has to scroll, whatever the runner's viewport makes a `dvh`.
     host.style.setProperty('height', '400px', 'important');
 
@@ -136,7 +142,7 @@ describe('inspector layout', () => {
 
     for (const [where, open] of views) {
       open();
-      settle();
+      await settle();
 
       const body = host.querySelector('.body') as HTMLElement;
       body.scrollTop = body.scrollHeight;
@@ -144,17 +150,15 @@ describe('inspector layout', () => {
       const strip = host.querySelector('.sub-tabs') as HTMLElement;
 
       // Scrolled for real, or the strip being at the top would prove nothing.
-      expect(body.scrollTop).withContext(where).toBeGreaterThan(100);
-      expect(strip.getBoundingClientRect().top - body.getBoundingClientRect().top)
-        .withContext(where)
-        .toBeCloseTo(0, 0);
+      expect(body.scrollTop, where).toBeGreaterThan(100);
+      expect(strip.getBoundingClientRect().top - body.getBoundingClientRect().top, where).toBeCloseTo(0, 0);
     }
-  }));
+  });
 
   // Open, the toggle keeps the content's gutter, measured against the sub-tab strip so a scrollbar in the body
   // cannot skew it. Collapsed, the rail holds nothing else, so the toggle centres.
-  it('lines the toggle up with the content open and centres it collapsed', fakeAsync(() => {
-    sizeTo(INSPECTOR_WIDTH_DEFAULT);
+  it('lines the toggle up with the content open and centres it collapsed', async () => {
+    await sizeTo(INSPECTOR_WIDTH_DEFAULT);
 
     const toggle = (): DOMRect => (host.querySelector('.collapse') as HTMLElement).getBoundingClientRect();
     const head = (host.querySelector('.head') as HTMLElement).getBoundingClientRect();
@@ -165,7 +169,7 @@ describe('inspector layout', () => {
 
     host.style.removeProperty('width');
     TestBed.inject(LayoutStore).inspectorCollapsed.set(true);
-    settle();
+    await settle();
 
     const rail = host.getBoundingClientRect();
     const left = toggle().left - (rail.left + host.clientLeft);
@@ -173,23 +177,23 @@ describe('inspector layout', () => {
 
     expect(left).toBeGreaterThan(0);
     expect(left).toBeCloseTo(right, 0);
-  }));
+  });
 
   // The field editor renders a different set of controls per kind, so one selected field proves one of them.
-  it('paints nothing outside the gutter for any field the editor can open', fakeAsync(() => {
+  it('paints nothing outside the gutter for any field the editor can open', async () => {
     const failures: string[] = [];
 
-    sizeTo(INSPECTOR_WIDTH_MIN);
+    await sizeTo(INSPECTOR_WIDTH_MIN);
     inspector.tab.set('form');
     inspector.formTab.set('settings');
     inspector.fieldScope.set('field');
 
     for (const field of store.fields()) {
       store.select(field.id);
-      settle();
+      await settle();
       failures.push(...overflowing(`${field.kind} "${field.label}"`));
     }
 
     expect(failures).toEqual([]);
-  }));
+  });
 });

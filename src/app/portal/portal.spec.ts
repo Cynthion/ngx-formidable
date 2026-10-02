@@ -1,4 +1,4 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideNgxMask } from 'ngx-mask';
 import { DEFAULT_EXPORT_OPTIONS } from './export/theme-export';
@@ -22,14 +22,20 @@ import { ThemeStore } from './state/theme.store';
  * that the chrome's re-emitted block really does recompute the derived values against its own bases.
  */
 describe('portal', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   let fixture: ComponentFixture<Portal>;
   let root: HTMLElement;
   let theme: ThemeStore;
 
-  function settle(): void {
+  async function settle(): Promise<void> {
     for (let i = 0; i < 3; i++) {
       fixture.detectChanges();
-      tick(100);
+      await vi.advanceTimersByTimeAsync(100);
     }
     fixture.detectChanges();
   }
@@ -61,39 +67,39 @@ describe('portal', () => {
   }
 
   /** Picks an option the way a user does: a click on it in the field's own list. */
-  function pick(fieldId: string, label: string): void {
+  async function pick(fieldId: string, label: string): Promise<void> {
     const field = root.querySelector(`#chip-tip-${fieldId}`)!.closest('portal-preview-field')!;
     const option = Array.from(field.querySelectorAll('formidable-field-option')).find((candidate) =>
       candidate.textContent?.trim().startsWith(label)
     );
 
     (option!.firstElementChild as HTMLElement).click();
-    settle();
+    await settle();
   }
 
-  it('renders the three regions', fakeAsync(() => {
-    settle();
+  it('renders the three regions', async () => {
+    await settle();
 
     expect(root.querySelector('portal-top-bar')).toBeTruthy();
     expect(root.querySelector('portal-stage')).toBeTruthy();
     expect(root.querySelector('portal-inspector')).toBeTruthy();
-  }));
+  });
 
   // Every field except the one its condition is currently holding back, which `hidden()` marks and `@if`
   // takes off the page.
-  it('renders every unconditional field of the preview form, each in a decorator', fakeAsync(() => {
-    settle();
+  it('renders every unconditional field of the preview form, each in a decorator', async () => {
+    await settle();
 
     const rendered = PREVIEW_FIELDS.length - 1;
 
     expect(root.querySelectorAll('portal-preview-field').length).toBe(rendered);
     expect(root.querySelectorAll('formidable-field-decorator').length).toBeGreaterThanOrEqual(rendered);
-  }));
+  });
 
   // The rule the layout cannot trade away: a component reachable only by flipping a switch is a component a
   // visitor never finds. It is what decides that the branch dropdown has a second, unconditional sibling.
-  it('has every field kind on screen in the form’s default state', fakeAsync(() => {
-    settle();
+  it('has every field kind on screen in the form’s default state', async () => {
+    await settle();
 
     const onScreen = new Set(
       Array.from(root.querySelectorAll('portal-preview-field .chip-text')).map((element) =>
@@ -102,42 +108,42 @@ describe('portal', () => {
     );
 
     expect(Array.from(onScreen).sort()).toEqual(Object.values(FIELD_KIND_LABELS).sort());
-  }));
+  });
 
   // The group is the one place the model is not flat, and the field tree follows it: a grouped field is bound
   // to the field under its group.
-  it('nests a grouped section’s fields under its group name in the model', fakeAsync(() => {
-    settle();
+  it('nests a grouped section’s fields under its group name in the model', async () => {
+    await settle();
 
     const model = TestBed.inject(FormValueStore).model() as Record<string, unknown>;
     const when = model['when'] as Record<string, unknown>;
 
     expect(when).toBeTruthy();
-    expect(when['date'] instanceof Date).toBeTrue();
-    expect(when['time'] instanceof Date).toBeTrue();
+    expect(when['date'] instanceof Date).toBe(true);
+    expect(when['time'] instanceof Date).toBe(true);
     expect(model['date']).toBeUndefined();
     expect(root.querySelector('formidable-date-field [name]')?.getAttribute('name')).toMatch(/\.when\.date$/);
-  }));
+  });
 
   // The group rule reads both members and reports on neither, so its message has to land on the group.
-  it('reports a group rule under the group rather than under either field', fakeAsync(() => {
-    settle();
+  it('reports a group rule under the group rather than under either field', async () => {
+    await settle();
 
     const values = TestBed.inject(FormValueStore);
 
     // 02:00 is outside the opening hours the group rule states; neither field is wrong on its own.
     const when = values.model()['when'] as Record<string, unknown>;
     values.model.set({ ...values.model(), when: { ...when, time: new Date(2000, 0, 1, 2, 0) } });
-    settle();
+    await settle();
 
     expect(values.errors()['when']).toEqual(['We are open from 11:00 to 23:00.']);
     expect(values.errors()['when.time']).toBeUndefined();
-  }));
+  });
 
   // One toggle, two fields, one each way. The hidden one keeps its key, and nothing validates it: the branch
   // is empty and required from the start, and reports only once it is on the form.
-  it('swaps the two conditional fields when the toggle moves, and validates only the one showing', fakeAsync(() => {
-    settle();
+  it('swaps the two conditional fields when the toggle moves, and validates only the one showing', async () => {
+    await settle();
 
     const values = TestBed.inject(FormValueStore);
 
@@ -147,7 +153,7 @@ describe('portal', () => {
     expect(values.errors()['branch']).toBeUndefined();
 
     values.model.set({ ...values.model(), pickup: true, address: '' });
-    settle();
+    await settle();
 
     expect(names()).toContain('branch');
     expect(names()).not.toContain('address');
@@ -157,12 +163,12 @@ describe('portal', () => {
 
     // The crust is the reason the swap is workable: the dropdown never leaves the form with the branch.
     expect(names()).toContain('crust');
-  }));
+  });
 
   // The Studio filters the address options itself, so the field must render what that filter finds: a typo
   // fuse.js forgives, and a match on the subtitle, are both lost to a substring test of the label.
-  it('renders what the fuzzy filter finds, beyond what a substring test of the label would', fakeAsync(() => {
-    settle();
+  it('renders what the fuzzy filter finds, beyond what a substring test of the label would', async () => {
+    await settle();
 
     const field = root.querySelector('#chip-tip-address')!.closest('portal-preview-field')!;
     const input = field.querySelector('formidable-autocomplete-field input') as HTMLInputElement;
@@ -174,26 +180,27 @@ describe('portal', () => {
     for (const typed of ['bahnhfo', '8001']) {
       input.value = typed;
       input.dispatchEvent(new Event('input'));
-      tick(300); // past the field's filter debounce
-      settle();
+      await vi.advanceTimersByTimeAsync(300); // past the field's filter debounce
+      await settle();
 
-      expect(rendered().some((label) => label.startsWith('Bahnhofstrasse 12')))
-        .withContext(typed)
-        .toBeTrue();
+      expect(
+        rendered().some((label) => label.startsWith('Bahnhofstrasse 12')),
+        typed
+      ).toBe(true);
     }
-  }));
+  });
 
   // The template picker: choosing a pizza writes the two fields it stands for and leaves every other alone,
   // and a later edit to one of those fields is not undone — a pizza is a starting point, not a lock.
-  it('applies a pizza’s preset when the user picks it, and does not re-apply it afterwards', fakeAsync(() => {
-    settle();
+  it('applies a pizza’s preset when the user picks it, and does not re-apply it afterwards', async () => {
+    await settle();
 
     const values = TestBed.inject(FormValueStore);
 
     expect(values.model()['sauce']).toBe('tomato');
     expect(values.model()['toppings']).toEqual(['mozzarella', 'basil']);
 
-    pick('pizza', 'Diavola');
+    await pick('pizza', 'Diavola');
 
     expect(values.model()['pizza']).toBe('diavola');
     expect(values.model()['sauce']).toBe('arrabbiata');
@@ -201,33 +208,33 @@ describe('portal', () => {
     // Untouched by the preset, which patches only the keys it names.
     expect(values.model()['size']).toBe('large');
 
-    pick('sauce', 'Pesto');
+    await pick('sauce', 'Pesto');
 
     expect(values.model()['sauce']).toBe('pesto');
     expect(values.model()['pizza']).toBe('diavola');
-  }));
+  });
 
-  it('leaves the model alone for an option that carries no preset, and for a write that is not a pick', fakeAsync(() => {
-    settle();
+  it('leaves the model alone for an option that carries no preset, and for a write that is not a pick', async () => {
+    await settle();
 
     const values = TestBed.inject(FormValueStore);
 
     values.model.set({ ...values.model(), pizza: 'diavola' });
-    settle();
+    await settle();
 
     expect(values.model()['sauce']).toBe('tomato');
 
-    pick('pizza', 'Custom');
+    await pick('pizza', 'Custom');
 
     expect(values.model()['pizza']).toBe('custom');
     expect(values.model()['sauce']).toBe('tomato');
     expect(values.model()['toppings']).toEqual(['mozzarella', 'basil']);
-  }));
+  });
 
   // The second group, and a condition reading into it: `visibleWhen` names `method`, which the model holds
   // at `payment.method`.
-  it('nests the payment group and resolves its conditional field through it', fakeAsync(() => {
-    settle();
+  it('nests the payment group and resolves its conditional field through it', async () => {
+    await settle();
 
     const values = TestBed.inject(FormValueStore);
     const payment = (): Record<string, unknown> => values.model()['payment'] as Record<string, unknown>;
@@ -237,37 +244,37 @@ describe('portal', () => {
     expect(names()).toContain('cardNumber');
 
     values.model.set({ ...values.model(), payment: { ...payment(), method: 'twint' } });
-    settle();
+    await settle();
 
     expect(names()).not.toContain('cardNumber');
     expect(payment()['cardNumber']).toBe('4242 4242 4242 4242');
-  }));
+  });
 
-  it('starts pre-filled, so the filled and floating-label states are on screen from the first frame', fakeAsync(() => {
-    settle();
+  it('starts pre-filled, so the filled and floating-label states are on screen from the first frame', async () => {
+    await settle();
 
     const values = TestBed.inject(FormValueStore);
 
     expect(values.filledCount()).toBeGreaterThan(values.fieldCount() / 2);
-  }));
+  });
 
-  it('renders a live miniature of a real field for every preset', fakeAsync(() => {
-    settle();
+  it('renders a live miniature of a real field for every preset', async () => {
+    await settle();
 
     const thumbnails = root.querySelectorAll('.portal-theme-scope');
 
     expect(thumbnails.length).toBe(THEME_PRESETS.length);
     expect(thumbnails[0]?.querySelector('formidable-input-field')).toBeTruthy();
     expect(thumbnails[0]?.querySelector('input')?.value).toBe('Sample');
-  }));
+  });
 
   /**
    * The variables `USE_SITE_VARS` names are declared nowhere, so nothing masks them by inheritance and the
    * `:root` theme reaches straight into every thumbnail. Applying a preset that sets one used to repaint
    * the other eleven with it.
    */
-  it('keeps every preset thumbnail on its own theme when another preset is applied', fakeAsync(() => {
-    settle();
+  it('keeps every preset thumbnail on its own theme when another preset is applied', async () => {
+    await settle();
 
     const radius = (index: number): string => {
       const thumbnail = root.querySelectorAll('.portal-theme-scope')[index] as HTMLElement;
@@ -281,45 +288,45 @@ describe('portal', () => {
     const tab = THEME_PRESETS.findIndex((preset) => preset.geometry === 'tab');
 
     theme.applyPreset(THEME_PRESETS.find((preset) => preset.geometry === 'pill')!);
-    settle();
+    await settle();
     const before = radius(outlined);
 
     theme.applyPreset(THEME_PRESETS[tab]!);
-    settle();
+    await settle();
 
     expect(radius(tab)).toBe('18px');
     expect(radius(outlined)).toBe(before);
     expect(radius(outlined)).not.toBe('18px');
-  }));
+  });
 
-  it('writes the theme to `:root`, where the derived variables are declared', fakeAsync(() => {
-    settle();
+  it('writes the theme to `:root`, where the derived variables are declared', async () => {
+    await settle();
 
     theme.setVariable('--formidable-field-height', '80px');
-    settle();
+    await settle();
 
     expect(document.documentElement.style.getPropertyValue('--formidable-field-height')).toBe('80px');
-  }));
+  });
 
-  it('recomputes a derived variable from the theme on the page', fakeAsync(() => {
-    settle();
+  it('recomputes a derived variable from the theme on the page', async () => {
+    await settle();
 
     theme.setVariable('--formidable-field-height', '80px');
     theme.setVariable('--formidable-field-border-thickness', '5px');
-    settle();
+    await settle();
 
     // Declared once in `:root` as `height - 2 * border`, so it only follows if the theme is written there.
     const inner = getComputedStyle(document.documentElement).getPropertyValue('--formidable-field-inner-height');
 
     expect(inner).toContain('80px');
     expect(inner).toContain('5px');
-  }));
+  });
 
-  it('insulates the chrome from the theme, derived variables included', fakeAsync(() => {
-    settle();
+  it('insulates the chrome from the theme, derived variables included', async () => {
+    await settle();
 
     theme.setVariable('--formidable-field-height', '80px');
-    settle();
+    await settle();
 
     const chrome = root.querySelector('.portal-chrome') as HTMLElement;
     const chromeInner = getComputedStyle(chrome).getPropertyValue('--formidable-field-inner-height');
@@ -327,54 +334,54 @@ describe('portal', () => {
     expect(chrome).toBeTruthy();
     expect(getComputedStyle(chrome).getPropertyValue('--formidable-field-height')).not.toContain('80px');
     expect(chromeInner).not.toContain('80px');
-  }));
+  });
 
-  it('removes a variable that leaves the theme instead of leaving it applied', fakeAsync(() => {
-    settle();
+  it('removes a variable that leaves the theme instead of leaving it applied', async () => {
+    await settle();
 
     theme.setVariable('--formidable-field-padding-x', '40px');
-    settle();
+    await settle();
     expect(document.documentElement.style.getPropertyValue('--formidable-field-padding-x')).toBe('40px');
 
     theme.clearVariable('--formidable-field-padding-x');
-    settle();
+    await settle();
 
     expect(document.documentElement.style.getPropertyValue('--formidable-field-padding-x')).not.toBe('40px');
-  }));
+  });
 
-  it('reads the library default at runtime rather than storing one', fakeAsync(() => {
-    settle();
+  it('reads the library default at runtime rather than storing one', async () => {
+    await settle();
 
     // The shipped default, straight off the probe that re-emits the library's own block. The token is
     // authored in `rem`, so this is the value the stylesheet actually emits rather than a restatement of it.
     expect(theme.defaultOf('--formidable-field-height')).toBe('3.5rem');
 
     theme.setVariable('--formidable-field-height', '80px');
-    settle();
+    await settle();
 
     expect(theme.defaultOf('--formidable-field-height')).toBe('3.5rem');
     expect(theme.valueOf('--formidable-field-height')).toBe('80px');
-  }));
+  });
 
-  it('resolves the default of a variable that is declared nowhere through the one it follows', fakeAsync(() => {
-    settle();
+  it('resolves the default of a variable that is declared nowhere through the one it follows', async () => {
+    await settle();
 
     expect(theme.defaultOf('--formidable-field-border-start-start-radius')).toBe(
       theme.defaultOf('--formidable-field-border-radius')
     );
-  }));
+  });
 
-  it('counts exactly the variables the export carries', fakeAsync(() => {
-    settle();
+  it('counts exactly the variables the export carries', async () => {
+    await settle();
 
     theme.applyPreset(THEME_PRESETS[2]!);
-    settle();
+    await settle();
 
     const exported = importTheme(theme.exportText());
 
     expect(Object.keys(exported.vars).length).toBe(Object.keys(theme.changedVars()).length);
     expect(theme.changeCount()).toBeGreaterThanOrEqual(Object.keys(exported.vars).length);
-  }));
+  });
 
   /**
    * What the stage's own field paints. Measured rather than compared as declarations, because the export
@@ -400,138 +407,138 @@ describe('portal', () => {
     return Object.fromEntries(properties.map((property) => [property, String(style[property as never])]));
   }
 
-  it('reproduces the theme when the delta is read back onto the defaults', fakeAsync(() => {
-    settle();
+  it('reproduces the theme when the delta is read back onto the defaults', async () => {
+    await settle();
 
     theme.exportOptions.set({ ...DEFAULT_EXPORT_OPTIONS, includePageSurface: true });
     theme.applyPreset(THEME_PRESETS.find((preset) => preset.key === 'consumer')!);
-    settle();
+    await settle();
 
     const block = theme.exportText();
     const before = painted();
 
     theme.applyPreset(THEME_PRESETS.find((preset) => preset.key === 'brutalist')!);
-    settle();
+    await settle();
     expect(painted()).not.toEqual(before);
 
     // The bug this pins: the delta states only what differs from the library's defaults, so merged onto
     // another scheme every value that scheme sets and the delta does not restate survives into the result.
     theme.importFrom(block, false);
-    settle();
+    await settle();
     expect(painted()).not.toEqual(before);
 
     theme.importFrom(block, true);
-    settle();
+    await settle();
 
     expect(painted()).toEqual(before);
     expect(theme.page()).toEqual(THEME_PRESETS.find((preset) => preset.key === 'consumer')!.page);
     expect(theme.valueOf('--formidable-font-family')).toBe(
       THEME_PRESETS.find((preset) => preset.key === 'consumer')!.fontFamily!
     );
-  }));
+  });
 
   // The other half of the pair: a block that states the defaults outright needs no help on the way in. Every
   // preset, because the hazard is per-variable — a scheme states a base and leaves what follows it unsaid,
   // and a default written over that base would contradict it.
-  it('reproduces every preset when the block states the defaults and is merged in', fakeAsync(() => {
-    settle();
+  it('reproduces every preset when the block states the defaults and is merged in', async () => {
+    await settle();
 
     theme.exportOptions.set({ ...DEFAULT_EXPORT_OPTIONS, includeDefaults: true, includePageSurface: true });
 
     for (const preset of THEME_PRESETS) {
       theme.applyPreset(preset);
-      settle();
+      await settle();
 
       const block = theme.exportText();
       const before = painted();
 
       theme.applyPreset(THEME_PRESETS.find((other) => other.key !== preset.key)!);
-      settle();
+      await settle();
 
       theme.importFrom(block, false);
-      settle();
+      await settle();
 
-      expect(painted()).withContext(preset.key).toEqual(before);
+      expect(painted(), preset.key).toEqual(before);
     }
-  }));
+  });
 
   // The counter is the page's primary claim: eight to twelve variables are enough. It has to start at the
   // bottom, or it says the opposite the moment the page paints.
-  it('counts nothing for a theme that only restates the library defaults', fakeAsync(() => {
-    settle();
+  it('counts nothing for a theme that only restates the library defaults', async () => {
+    await settle();
 
     const shipped = THEME_PRESETS.find((preset) => preset.key === 'enterprise')!;
     theme.applyPreset(shipped);
-    settle();
+    await settle();
 
     expect(theme.changedVars()).toEqual({});
     expect(theme.changeCount()).toBe(0);
-  }));
+  });
 
-  it('compares against the default through the browser, not as text', fakeAsync(() => {
-    settle();
+  it('compares against the default through the browser, not as text', async () => {
+    await settle();
 
     // The shipped height is `3.5rem` in the stylesheet and `56px` in the scheme. Same length, same theme.
     theme.setVariable('--formidable-field-height', '56px');
-    settle();
+    await settle();
     expect(theme.changedVars()['--formidable-field-height']).toBeUndefined();
 
     theme.setVariable('--formidable-field-height', '57px');
-    settle();
+    await settle();
     expect(theme.changedVars()['--formidable-field-height']).toBe('57px');
-  }));
+  });
 
-  it('counts the page surface and the family alongside the variables', fakeAsync(() => {
-    settle();
+  it('counts the page surface and the family alongside the variables', async () => {
+    await settle();
 
     theme.applyPreset(THEME_PRESETS.find((preset) => preset.key === 'enterprise')!);
-    settle();
+    await settle();
     expect(theme.changeCount()).toBe(0);
 
     theme.page.set({ background: '#101010', text: '#f0f0f0' });
-    settle();
+    await settle();
 
     expect(theme.changeCount()).toBe(1);
 
     theme.setVariable('--formidable-font-family', 'monospace');
-    settle();
+    await settle();
 
     expect(theme.changeCount()).toBe(2);
-  }));
+  });
 
-  it('measures contrast against what the page actually paints', fakeAsync(() => {
-    settle();
+  it('measures contrast against what the page actually paints', async () => {
+    await settle();
 
     theme.setVariables({
       '--formidable-color-field-background': '#ffffff',
       '--formidable-color-field-text': '#000000'
     });
-    settle();
+    await settle();
 
     const text = theme.contrastChecks().find((check) => check.token === '--formidable-color-field-text');
 
     expect(text?.ratio).toBeGreaterThan(20);
     expect(text?.passes).toBe(true);
-  }));
+  });
 
-  it('fails the badge for a fill the text cannot be read on', fakeAsync(() => {
-    settle();
+  it('fails the badge for a fill the text cannot be read on', async () => {
+    await settle();
 
     theme.setVariables({
       '--formidable-color-field-background': '#ffffff',
       '--formidable-color-field-text': '#f2f2f2'
     });
-    settle();
+    await settle();
 
     const text = theme.contrastChecks().find((check) => check.token === '--formidable-color-field-text');
 
     expect(text?.passes).toBe(false);
-  }));
+  });
 
   // A chip names one field, so it has to land on that field's own scope — the two wider ones would answer
   // a question the chip did not ask.
-  it('opens the editor panel at the Settings tab, at the field’s own scope, when a chip is used', fakeAsync(() => {
-    settle();
+  it('opens the editor panel at the Settings tab, at the field’s own scope, when a chip is used', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     inspector.tab.set('theme');
@@ -539,49 +546,49 @@ describe('portal', () => {
 
     const chip = root.querySelector('portal-preview-field .chip') as HTMLElement;
     chip.click();
-    settle();
+    await settle();
 
     expect(inspector.tab()).toBe('form');
     expect(inspector.formTab()).toBe('settings');
     expect(inspector.fieldScope()).toBe('field');
     expect(root.querySelector('portal-field-editor')).toBeTruthy();
-  }));
+  });
 
   // Tabbing through the sample form is the thing being tested; a chip between every two fields doubles the
   // presses it takes and puts portal chrome in the middle of the run.
-  it('keeps the chips out of the tab order', fakeAsync(() => {
-    settle();
+  it('keeps the chips out of the tab order', async () => {
+    await settle();
 
     const chips = Array.from(root.querySelectorAll('portal-preview-field .chip'));
 
     expect(chips.length).toBeGreaterThan(0);
-    expect(chips.every((chip) => chip.getAttribute('tabindex') === '-1')).toBeTrue();
-  }));
+    expect(chips.every((chip) => chip.getAttribute('tabindex') === '-1')).toBe(true);
+  });
 
   // Moving to a tab behind a collapsed panel changes nothing the user can see, so the move has to open it.
-  it('expands a collapsed editor panel rather than moving a tab behind it', fakeAsync(() => {
-    settle();
+  it('expands a collapsed editor panel rather than moving a tab behind it', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     const layout = TestBed.inject(LayoutStore);
 
     inspector.tab.set('theme');
     layout.inspectorCollapsed.set(true);
-    settle();
+    await settle();
 
     const chip = root.querySelector('portal-preview-field .chip') as HTMLElement;
     chip.click();
-    settle();
+    await settle();
 
-    expect(layout.inspectorCollapsed()).toBeFalse();
+    expect(layout.inspectorCollapsed()).toBe(false);
     expect(inspector.formTab()).toBe('settings');
     expect(root.querySelector('portal-field-editor')).toBeTruthy();
-  }));
+  });
 
   // The chip names the component rather than describing the configuration, because a description written
   // once cannot survive the field being edited — and says nothing at all about a field added later.
-  it('names the component under every field, including one added in the structure editor', fakeAsync(() => {
-    settle();
+  it('names the component under every field, including one added in the structure editor', async () => {
+    await settle();
 
     const texts = Array.from(root.querySelectorAll('portal-preview-field .chip-text')).map((element) =>
       (element.textContent ?? '').trim()
@@ -589,22 +596,22 @@ describe('portal', () => {
 
     expect(texts.length).toBe(PREVIEW_FIELDS.length - 1);
     expect(texts).toContain('Date');
-    expect(texts.every((text) => Object.values(FIELD_KIND_LABELS).includes(text))).toBeTrue();
+    expect(texts.every((text) => Object.values(FIELD_KIND_LABELS).includes(text))).toBe(true);
 
     TestBed.inject(FormDefinitionStore).addField('radio-group', 'pizza');
-    settle();
+    await settle();
 
     const added = Array.from(root.querySelectorAll('portal-preview-field .chip-text')).map((element) =>
       (element.textContent ?? '').trim()
     );
 
     expect(added.length).toBe(PREVIEW_FIELDS.length);
-    expect(added.every((text) => Object.values(FIELD_KIND_LABELS).includes(text))).toBeTrue();
-  }));
+    expect(added.every((text) => Object.values(FIELD_KIND_LABELS).includes(text))).toBe(true);
+  });
 
   // The defect this replaces: the chip held a string, so editing the field left it stating the old value.
-  it('restates what a field is set to once the field has been edited', fakeAsync(() => {
-    settle();
+  it('restates what a field is set to once the field has been edited', async () => {
+    await settle();
 
     const store = TestBed.inject(FormDefinitionStore);
     const tipFor = (id: string): string => {
@@ -623,17 +630,17 @@ describe('portal', () => {
     expect(tipFor('date')).not.toContain('panelPosition');
 
     store.updateField('date', { panelPosition: 'sheet' });
-    settle();
+    await settle();
 
     expect(tipFor('date')).toContain('panelPosition: sheet');
-  }));
+  });
 
   // The two column headers sit side by side, so a difference between them reads as a step in the rule under
   // them. Read off the rules rather than the layout: the runner's viewport is below the two-column
   // breakpoint, where the stage bar wraps to two rows and the columns are stacked, so measuring there would
   // be measuring the wrong mode.
-  it('gives the two column headers one height', fakeAsync(() => {
-    settle();
+  it('gives the two column headers one height', async () => {
+    await settle();
 
     const declaredHeights = (selector: string): string[] =>
       Array.from(document.styleSheets)
@@ -648,26 +655,26 @@ describe('portal', () => {
     ).toBeTruthy();
 
     for (const selector of ['.stage-bar', '.head']) {
-      expect(declaredHeights(selector)).withContext(selector).toContain('var(--portal-section-header-height)');
+      expect(declaredHeights(selector), selector).toContain('var(--portal-section-header-height)');
     }
-  }));
+  });
 
   // The tabs say what the panel is, so a title row over them would only add the word "Inspector" — which
   // names a panel that edits rather than inspects, and costs a row of the height the bottom sheet is short of.
-  it('makes the tab strip the editor panel’s header', fakeAsync(() => {
-    settle();
+  it('makes the tab strip the editor panel’s header', async () => {
+    await settle();
 
     const head = root.querySelector('portal-inspector .head') as HTMLElement;
 
     expect(head.querySelector('[role="tablist"]')).toBeTruthy();
     expect(head.textContent).not.toContain('Inspector');
     expect(head.querySelector('.collapse')).toBeTruthy();
-  }));
+  });
 
   // Four tabs and three sub-tabs is the navigation a visitor has to learn, so every one of them has to
   // actually render something — an empty tab is worse than no tab.
-  it('renders each inspector tab', fakeAsync(() => {
-    settle();
+  it('renders each inspector tab', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     const expected: [InspectorTab, string][] = [
@@ -678,14 +685,14 @@ describe('portal', () => {
 
     for (const [tab, selector] of expected) {
       inspector.tab.set(tab);
-      settle();
+      await settle();
 
-      expect(root.querySelector(selector)).withContext(tab).toBeTruthy();
+      expect(root.querySelector(selector), tab).toBeTruthy();
     }
-  }));
+  });
 
-  it('renders each of the theme sub-tabs', fakeAsync(() => {
-    settle();
+  it('renders each of the theme sub-tabs', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     const expected: [ThemeSubTab, string][] = [
@@ -696,18 +703,18 @@ describe('portal', () => {
     for (const [subTab, selector] of expected) {
       inspector.tab.set('theme');
       inspector.themeTab.set(subTab);
-      settle();
+      await settle();
 
-      expect(root.querySelector(selector)).withContext(subTab).toBeTruthy();
+      expect(root.querySelector(selector), subTab).toBeTruthy();
     }
-  }));
+  });
 
   // Structure before Fields: which fields exist has to be settled before what one of them is is worth saying.
-  it('offers the form sub-tabs in build order, starting on Structure', fakeAsync(() => {
-    settle();
+  it('offers the form sub-tabs in build order, starting on Structure', async () => {
+    await settle();
 
     TestBed.inject(InspectorStore).tab.set('form');
-    settle();
+    await settle();
 
     const labels = Array.from(root.querySelectorAll('portal-form-tab .sub-tab')).map((el) =>
       (el.textContent ?? '').trim()
@@ -715,10 +722,10 @@ describe('portal', () => {
 
     expect(labels).toEqual(['Structure', 'Settings']);
     expect(root.querySelector('portal-structure-tab')).toBeTruthy();
-  }));
+  });
 
-  it('renders each of the form sub-tabs', fakeAsync(() => {
-    settle();
+  it('renders each of the form sub-tabs', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     const expected: [FormSubTab, string][] = [
@@ -729,24 +736,24 @@ describe('portal', () => {
     for (const [subTab, selector] of expected) {
       inspector.tab.set('form');
       inspector.formTab.set(subTab);
-      settle();
+      await settle();
 
-      expect(root.querySelector(selector)).withContext(subTab).toBeTruthy();
+      expect(root.querySelector(selector), subTab).toBeTruthy();
     }
-  }));
+  });
 
   /**
    * Scope is a control, not the wording of three headings. Each position has to render its own editor and
    * only its own — the defect the three sibling accordions had was the same Decoration group on screen
    * twice, under names that had to be read to be told apart.
    */
-  it('gives the Settings half one editor per scope, and only one', fakeAsync(() => {
-    settle();
+  it('gives the Settings half one editor per scope, and only one', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     inspector.tab.set('form');
     inspector.formTab.set('settings');
-    settle();
+    await settle();
 
     const labels = Array.from(root.querySelectorAll('portal-settings-tab .scope-option-label')).map((el) =>
       (el.textContent ?? '').trim()
@@ -758,66 +765,67 @@ describe('portal', () => {
 
     for (const [index, scope] of (['app', 'form', 'field'] as const).entries()) {
       (root.querySelectorAll<HTMLElement>('portal-settings-tab .scope-option')[index] as HTMLElement).click();
-      settle();
+      await settle();
 
-      expect(inspector.fieldScope()).withContext(scope).toBe(scope);
-      expect(panels.filter((selector) => root.querySelector(selector)))
-        .withContext(scope)
-        .toEqual([panels[index]!]);
+      expect(inspector.fieldScope(), scope).toBe(scope);
+      expect(
+        panels.filter((selector) => root.querySelector(selector)),
+        scope
+      ).toEqual([panels[index]!]);
     }
-  }));
+  });
 
   // The picker governs one scope, so it belongs inside it. Above the switch it was the first control on the
   // page and reached nothing a visitor could see.
-  it('shows the field picker only at the field scope', fakeAsync(() => {
-    settle();
+  it('shows the field picker only at the field scope', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     inspector.tab.set('form');
     inspector.formTab.set('settings');
 
     inspector.fieldScope.set('app');
-    settle();
+    await settle();
     expect(root.querySelector('#ft-select')).toBeNull();
 
     inspector.fieldScope.set('field');
-    settle();
+    await settle();
     expect(root.querySelector('#ft-select')).toBeTruthy();
-  }));
+  });
 
   // The three steps are the answer to "how do I make my own form?", which the old one-accordion-per-section
   // list never asked, let alone answered.
-  it('walks Structure from where a form starts to how it grows', fakeAsync(() => {
-    settle();
+  it('walks Structure from where a form starts to how it grows', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     inspector.tab.set('form');
     inspector.formTab.set('structure');
-    settle();
+    await settle();
 
     const headings = Array.from(root.querySelectorAll('portal-structure-tab portal-accordion .title')).map((el) =>
       (el.textContent ?? '').trim()
     );
 
     expect(headings).toEqual(['Start', 'Sections And Fields', 'Add']);
-  }));
+  });
 
-  it('starts a blank form and lands on the step that can fill it', fakeAsync(() => {
-    settle();
+  it('starts a blank form and lands on the step that can fill it', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     const definition = TestBed.inject(FormDefinitionStore);
     inspector.tab.set('form');
     inspector.formTab.set('structure');
-    settle();
+    await settle();
 
     expect(definition.fields().length).toBe(PREVIEW_FIELDS.length);
 
     // Step 1 is closed on arrival, so open it the way a visitor would.
     (root.querySelectorAll<HTMLElement>('portal-structure-tab portal-accordion .trigger')[0] as HTMLElement).click();
-    settle();
+    await settle();
     (root.querySelector('portal-structure-tab .start') as HTMLElement).click();
-    settle();
+    await settle();
 
     expect(definition.fields()).toEqual([]);
     // One section, not none: every add needs somewhere to add into.
@@ -830,29 +838,29 @@ describe('portal', () => {
 
     // Twice: building a form is a run of adds, so the step has to survive the first one.
     addField();
-    settle();
+    await settle();
     addField();
-    settle();
+    await settle();
 
     expect(definition.fields().length).toBe(2);
     // The stage stops claiming to be the sample: heading, intro and submit label all come from the form.
     expect((root.querySelector('.form-header h1') as HTMLElement).textContent?.trim()).toBe('Your Form');
     expect(root.querySelector('.form-header p')).toBeNull();
     expect((root.querySelector('.submit') as HTMLElement).textContent?.trim()).toBe('Submit');
-  }));
+  });
 
-  it('sends the third way to start to the box a form is pasted into', fakeAsync(() => {
-    settle();
+  it('sends the third way to start to the box a form is pasted into', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     inspector.tab.set('form');
     inspector.formTab.set('structure');
-    settle();
+    await settle();
 
     (root.querySelectorAll<HTMLElement>('portal-structure-tab portal-accordion .trigger')[0] as HTMLElement).click();
-    settle();
+    await settle();
     (root.querySelectorAll<HTMLElement>('portal-structure-tab .start')[2] as HTMLElement).click();
-    settle();
+    await settle();
 
     // Not merely the form half: the box a form goes into, rather than the block that comes out of it.
     expect(inspector.tab()).toBe('export');
@@ -865,25 +873,25 @@ describe('portal', () => {
     expect(open.length).toBe(1);
     expect((open[0]?.textContent ?? '').trim()).toContain('Import');
     expect(root.querySelector('portal-markup-panel .pc-textarea')).toBeTruthy();
-  }));
+  });
 
-  it('names the tab for both directions it goes in', fakeAsync(() => {
-    settle();
+  it('names the tab for both directions it goes in', async () => {
+    await settle();
 
     const labels = Array.from(root.querySelectorAll('portal-inspector .tab')).map((el) =>
       (el.textContent ?? '').trim()
     );
 
     expect(labels).toEqual(['Theme', 'Form', 'Import & Export']);
-  }));
+  });
 
   // Two halves, navigated the way the other two areas are: the same strip in the same place on all three.
-  it('splits the two round trips into sub-tabs, one showing at a time', fakeAsync(() => {
-    settle();
+  it('splits the two round trips into sub-tabs, one showing at a time', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     inspector.tab.set('export');
-    settle();
+    await settle();
 
     const labels = Array.from(root.querySelectorAll('portal-export-tab .sub-tab')).map((el) =>
       (el.textContent ?? '').trim()
@@ -895,17 +903,17 @@ describe('portal', () => {
     expect(root.querySelector('portal-markup-panel')).toBeNull();
 
     (root.querySelectorAll<HTMLElement>('portal-export-tab .sub-tab')[1] as HTMLElement).click();
-    settle();
+    await settle();
 
     expect(inspector.exportSection()).toBe('form');
     expect(root.querySelector('portal-markup-panel')).toBeTruthy();
     expect(root.querySelector('portal-theme-panel')).toBeNull();
-  }));
+  });
 
   // Both halves are a round trip, so both say so the same way: the pair of headings is the same on each and
   // a reader who has learned one half has learned the other.
-  it('gives both halves the same two directions', fakeAsync(() => {
-    settle();
+  it('gives both halves the same two directions', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     const headings = () =>
@@ -914,22 +922,22 @@ describe('portal', () => {
       );
 
     inspector.openExport('theme');
-    settle();
+    await settle();
     expect(headings()).toEqual(['Export', 'Import']);
 
     inspector.openExport('form');
-    settle();
+    await settle();
     expect(headings()).toEqual(['Export', 'Import']);
-  }));
+  });
 
   // The template binds names only the component and its schema define, and leaves out what the app config
   // supplies, so all three sit beside it — as tabs, one file on screen at a time, because stacked they buried
   // the import under screens of code.
-  it('offers the template, the component, the schema and the app config as tabs, one at a time', fakeAsync(() => {
-    settle();
+  it('offers the template, the component, the schema and the app config as tabs, one at a time', async () => {
+    await settle();
 
     TestBed.inject(InspectorStore).openExport('form');
-    settle();
+    await settle();
 
     const tabs = () => Array.from(root.querySelectorAll<HTMLElement>('portal-markup-panel .output'));
     const shown = () => {
@@ -950,49 +958,50 @@ describe('portal', () => {
     expect(shown().copy).toBe('Copy Template');
 
     tabs()[1]!.click();
-    settle();
+    await settle();
     expect(shown().count).toBe(1);
     expect(shown().text).toContain('export class MyForm {');
     expect(shown().copy).toBe('Copy Component');
 
     tabs()[2]!.click();
-    settle();
+    await settle();
     expect(shown().count).toBe(1);
     expect(shown().text).toContain('export const myFormSchema = schema<MyFormModel>');
     expect(shown().copy).toBe('Copy Schema');
 
     tabs()[3]!.click();
-    settle();
+    await settle();
     expect(shown().count).toBe(1);
     expect(shown().text).toContain('provideNgxFormidable');
     expect(shown().copy).toBe('Copy App Config');
     expect(tabs()[3]!.getAttribute('aria-selected')).toBe('true');
-  }));
+  });
 
   // A reset beside the copy is one misclick from wiping the work being exported, and each already lives where
   // its half is built: the preset gallery, and Structure's first step.
-  it('keeps resets out of Import & Export', fakeAsync(() => {
-    settle();
+  it('keeps resets out of Import & Export', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
 
     for (const section of ['theme', 'form'] as const) {
       inspector.openExport(section);
-      settle();
+      await settle();
 
       const labels = Array.from(root.querySelectorAll('portal-export-tab .pc-button')).map((el) =>
         (el.textContent ?? '').trim()
       );
 
-      expect(labels.filter((label) => /reset/i.test(label)))
-        .withContext(section)
-        .toEqual([]);
+      expect(
+        labels.filter((label) => /reset/i.test(label)),
+        section
+      ).toEqual([]);
     }
-  }));
+  });
 
   // All three areas carry the same second level, so the strip is learned once rather than per tab.
-  it('gives every area the same two-half strip', fakeAsync(() => {
-    settle();
+  it('gives every area the same two-half strip', async () => {
+    await settle();
 
     const inspector = TestBed.inject(InspectorStore);
     const expected: [InspectorTab, string[]][] = [
@@ -1003,18 +1012,18 @@ describe('portal', () => {
 
     for (const [tab, labels] of expected) {
       inspector.tab.set(tab);
-      settle();
+      await settle();
 
       const rendered = Array.from(root.querySelectorAll('portal-inspector .sub-tab')).map((el) =>
         (el.textContent ?? '').trim()
       );
 
-      expect(rendered).withContext(tab).toEqual(labels);
+      expect(rendered, tab).toEqual(labels);
     }
-  }));
+  });
 
-  it('opens one accordion section at a time', fakeAsync(() => {
-    settle();
+  it('opens one accordion section at a time', async () => {
+    await settle();
 
     const headers = () => Array.from(root.querySelectorAll<HTMLElement>('portal-accordion .trigger'));
     const openCount = () => headers().filter((header) => header.getAttribute('aria-expanded') === 'true').length;
@@ -1022,42 +1031,42 @@ describe('portal', () => {
     expect(openCount()).toBe(1);
 
     headers()[2]!.click();
-    settle();
+    await settle();
 
     expect(openCount()).toBe(1);
-  }));
+  });
 
-  it('hides the chips when the stage says so', fakeAsync(() => {
-    settle();
+  it('hides the chips when the stage says so', async () => {
+    await settle();
     const layout = TestBed.inject(LayoutStore);
 
     layout.showFieldTypes.set(true);
-    settle();
+    await settle();
     expect(root.querySelectorAll('portal-preview-field .chip').length).toBeGreaterThan(0);
 
     layout.showFieldTypes.set(false);
-    settle();
+    await settle();
     expect(root.querySelectorAll('portal-preview-field .chip').length).toBe(0);
-  }));
+  });
 
   // Two fields sharing a grid row are rarely the same height — one carries a hint or an error and the other
   // does not — and the annotations under them are what a reader compares across the row. They line up
   // because each field lays its three rows out as a subgrid of the field grid, not because anything pushes
   // them to the bottom of the row, which staggers them again as soon as one readout is taller.
-  it('starts the chip and the accessibility readout of a pair on the same line', fakeAsync(() => {
-    settle();
+  it('starts the chip and the accessibility readout of a pair on the same line', async () => {
+    await settle();
     const layout = TestBed.inject(LayoutStore);
 
     layout.showFieldTypes.set(true);
     layout.showAccessibility.set(true);
-    settle();
+    await settle();
 
     // Below 900px the grid is one column, where a pair has no row to share. The banding is what is under
     // test, not the breakpoint that suspends it, so the columns are stated here.
     for (const grid of Array.from(root.querySelectorAll<HTMLElement>('.field-grid'))) {
       grid.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
     }
-    settle();
+    await settle();
 
     const top = (element: Element) => element.getBoundingClientRect().top;
     const hasHint = (host: Element) => !host.querySelector('.hint-wrapper')?.classList.contains('hidden');
@@ -1072,7 +1081,7 @@ describe('portal', () => {
       return top(host) === top(previous) && hasHint(host) !== hasHint(previous);
     });
 
-    expect(pair).withContext('a row holding two fields of unequal height').toBeTruthy();
+    expect(pair, 'a row holding two fields of unequal height').toBeTruthy();
 
     const first = hosts[hosts.indexOf(pair!) - 1]!;
 
@@ -1081,69 +1090,69 @@ describe('portal', () => {
       top(first.querySelector('portal-accessibility-readout')!),
       0
     );
-  }));
+  });
 
   // The stage is a fixed three-row grid, so an optional child of it shifts every row below — which once
   // pushed the drawer off the bottom of the viewport. Whatever the switches add has to stay inside the
   // head, leaving the head, the preview viewport and the drawer as the only three rows.
-  it('keeps the model drawer in the last row whatever the stage is showing', fakeAsync(() => {
-    settle();
+  it('keeps the model drawer in the last row whatever the stage is showing', async () => {
+    await settle();
     const layout = TestBed.inject(LayoutStore);
 
     for (const chips of [false, true]) {
       for (const accessibility of [false, true]) {
         layout.showFieldTypes.set(chips);
         layout.showAccessibility.set(accessibility);
-        settle();
+        await settle();
 
         const stage = root.querySelector('portal-stage') as HTMLElement;
         const children = Array.from(stage.children);
         const context = `chips ${chips}, accessibility ${accessibility}`;
 
-        expect(children.length).withContext(context).toBe(3);
-        expect(children[0]?.classList).withContext(context).toContain('stage-head');
-        expect(children[1]?.classList).withContext(context).toContain('stage-viewport');
-        expect(children[2]?.tagName.toLowerCase()).withContext(context).toBe('portal-model-drawer');
+        expect(children.length, context).toBe(3);
+        expect(children[0]?.classList, context).toContain('stage-head');
+        expect(children[1]?.classList, context).toContain('stage-viewport');
+        expect(children[2]?.tagName.toLowerCase(), context).toBe('portal-model-drawer');
       }
     }
-  }));
+  });
 
-  it('states each annotation on its own line, and only while it is on', fakeAsync(() => {
-    settle();
+  it('states each annotation on its own line, and only while it is on', async () => {
+    await settle();
     const layout = TestBed.inject(LayoutStore);
     const lines = () => root.querySelectorAll('portal-stage .stage-status').length;
 
     layout.showFieldTypes.set(false);
     layout.showAccessibility.set(false);
-    settle();
+    await settle();
     expect(lines()).toBe(0);
 
     layout.showFieldTypes.set(true);
-    settle();
+    await settle();
     expect(lines()).toBe(1);
 
     layout.showAccessibility.set(true);
-    settle();
+    await settle();
     expect(lines()).toBe(2);
-  }));
+  });
 
-  it('takes the inspector width from the layout store', fakeAsync(() => {
-    settle();
+  it('takes the inspector width from the layout store', async () => {
+    await settle();
 
     const layout = TestBed.inject(LayoutStore);
     layout.setInspectorWidth(640);
-    settle();
+    await settle();
 
     const inspector = root.querySelector('portal-inspector') as HTMLElement;
 
     expect(inspector.style.width).toBe('640px');
-  }));
+  });
 
   // A `sheet` panel is `position: fixed`, and the page it belongs to ends at the preview's edges. Without a
   // containing block on the preview viewport it spans the browser window instead, which puts it off-centre
   // and half under the inspector.
-  it('pins a fixed child of the preview to the stage rather than to the window', fakeAsync(() => {
-    settle();
+  it('pins a fixed child of the preview to the stage rather than to the window', async () => {
+    await settle();
 
     const viewport = root.querySelector('.stage-viewport') as HTMLElement;
     const probe = document.createElement('div');
@@ -1162,10 +1171,10 @@ describe('portal', () => {
     expect(pinned.left).toBeCloseTo(stage.left, 0);
     expect(pinned.right).toBeCloseTo(stage.right, 0);
     expect(pinned.bottom).toBeCloseTo(stage.bottom, 0);
-  }));
+  });
 
-  it('keeps the inspector above the library’s own sheet z-index', fakeAsync(() => {
-    settle();
+  it('keeps the inspector above the library’s own sheet z-index', async () => {
+    await settle();
 
     const inspector = root.querySelector('portal-inspector') as HTMLElement;
     const sheet = Number(
@@ -1173,20 +1182,20 @@ describe('portal', () => {
     );
 
     expect(Number(getComputedStyle(inspector).zIndex)).toBeGreaterThan(sheet);
-  }));
+  });
 
-  it('applies the mask the settings give a textarea', fakeAsync(() => {
-    settle();
+  it('applies the mask the settings give a textarea', async () => {
+    await settle();
 
     TestBed.inject(FormDefinitionStore).updateField('notes', { mask: '000-000' });
-    settle();
+    await settle();
 
     const textarea = root.querySelector('formidable-textarea-field textarea') as HTMLTextAreaElement;
 
     textarea.value = '123456';
     textarea.dispatchEvent(new Event('input'));
-    settle();
+    await settle();
 
     expect(textarea.value).toBe('123-456');
-  }));
+  });
 });

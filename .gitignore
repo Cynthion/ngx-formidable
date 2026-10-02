@@ -40,7 +40,7 @@ projects/**/package-lock.json
 /connect.lock
 /coverage
 /libpeerconnection.log
-testem.log
+/.vitest
 /typings
 
 # System files

@@ -1,5 +1,5 @@
 import { provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, fakeAsync, flush, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ExampleTooltip } from './example-tooltip';
 
 /**
@@ -7,11 +7,14 @@ import { ExampleTooltip } from './example-tooltip';
  * Angular owns is on that stack. Its `open` flag is a signal, which is what marks the view there; make it a
  * plain field again and the panel stays on screen while the component believes it is closed — after which
  * the next trigger click opens it again and it can never be dismissed.
- *
- * Zoneless on purpose, because the demo is: see `zoneless.spec.ts` in the library for why the rest of the
- * suite is not, and why the NG0914 warning is expected.
  */
 describe('example-tooltip outside dismissal', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   let fixture: ComponentFixture<ExampleTooltip>;
   let root: HTMLElement;
 
@@ -32,32 +35,32 @@ describe('example-tooltip outside dismissal', () => {
     return root.querySelector('.tooltip-panel') as HTMLElement;
   }
 
-  function open(): void {
+  async function open(): Promise<void> {
     (root.querySelector('.tooltip-trigger') as HTMLElement).click();
-    flush();
+    await vi.runAllTimersAsync();
   }
 
-  it('closes on a click outside, and reopens afterwards', fakeAsync(() => {
-    open();
+  it('closes on a click outside, and reopens afterwards', async () => {
+    await open();
     expect(panel().classList.contains('open')).toBe(true);
 
     document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    flush();
+    await vi.runAllTimersAsync();
 
     expect(panel().classList.contains('open')).toBe(false);
 
     // The flag and the DOM agreed, so the trigger opens it again rather than closing something already shut.
-    open();
+    await open();
     expect(panel().classList.contains('open')).toBe(true);
-  }));
+  });
 
-  it('closes on Escape', fakeAsync(() => {
-    open();
+  it('closes on Escape', async () => {
+    await open();
     expect(panel().classList.contains('open')).toBe(true);
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    flush();
+    await vi.runAllTimersAsync();
 
     expect(panel().classList.contains('open')).toBe(false);
-  }));
+  });
 });

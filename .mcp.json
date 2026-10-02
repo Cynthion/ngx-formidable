@@ -16,7 +16,7 @@
     "playwright": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@playwright/mcp@latest", "--headless", "--isolated", "--browser=chromium"]
+      "args": ["-y", "@playwright/mcp@0.0.83", "--headless", "--isolated", "--browser=chromium"]
     },
     "ux-patterns": {
       "type": "http",

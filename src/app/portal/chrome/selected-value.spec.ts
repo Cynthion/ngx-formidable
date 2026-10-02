@@ -7,8 +7,7 @@ import { SelectedValue } from './selected-value';
  * selection when the options are a control-flow block.
  *
  * Zoneless, because that is how the portal runs and because the directive's whole job is a write timed
- * against the render — a spec that proved it under zone change detection would be proving the harness. The
- * NG0914 warning the provider logs is expected, exactly as in the library's own `zoneless.spec.ts`.
+ * against the render — a spec that proved it under zone change detection would be proving the harness.
  */
 @Component({
   imports: [SelectedValue],

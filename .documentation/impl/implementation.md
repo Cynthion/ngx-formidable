@@ -17,7 +17,7 @@ The source of truth for outstanding work. [`impl/backlog.md`](backlog.md) is the
 
 ## Forms-Agnostic Rewrite
 
-The fields work with Signal Forms, reactive forms and template-driven forms alike, validation belongs to whichever forms API the consumer chose, and the library renders, edits, decorates and themes. Phases 17 to 32 get there.
+The fields work with Signal Forms, reactive forms and template-driven forms alike, validation belongs to whichever forms API the consumer chose, and the library renders, edits, decorates and themes. Phases 17 to 38 get there.
 
 ### Decisions
 
@@ -33,7 +33,7 @@ The fields work with Signal Forms, reactive forms and template-driven forms alik
 | Setup          | `provideNgxFormidable()` only. `NgxFormidableModule` goes                                                                                                                                 |
 | Studio Export  | Signal Forms only                                                                                                                                                                         |
 | Diagrams       | Mermaid, which the portal's `Docs` route renders as well                                                                                                                                  |
-| Test Runner    | Karma stays. A Vitest spike is in [`impl/backlog.md`](backlog.md)                                                                                                                         |
+| Test Runner    | Vitest in browser mode, see [`impl/testing.md`](testing.md)                                                                                                                               |
 
 ### Target Architecture
 
@@ -100,43 +100,90 @@ Read off the installed `@angular/forms` and the Angular documentation. The phase
 
 ### Integration Branch
 
-- **One Branch**: `feature/signal-forms-support` collects Phases 17 to 32. `main`, the deployed portal and the published package stay on the last beta until Phase 32.
+- **One Branch**: `feature/signal-forms-support` collects Phases 17 to 38. `main`, the deployed portal and the published package stay on the last beta until Phase 38.
 - **Phase Branches**: each phase branches off it and returns through a pull request with every CI gate of [`impl/definition-of-done.md`](definition-of-done.md) green.
 - **Test First**: each phase opens with behaviour specs that fail: DOM, ARIA and model assertions through a host that binds the field with a forms API.
 - **Interim Portal**: it builds and passes its tests at every phase.
 - **Interim Guides**: [`user/components.md`](../user/components.md) follows every public change in the same phase; the guides are rewritten once, in Phase 31.
-- **This Section**: deleted with Phase 32, once Phase 31 has moved what holds into `user/`. What holds for maintainers is in [`tech/forms-integration.md`](../tech/forms-integration.md).
+- **This Section**: deleted with Phase 38, once Phase 31 has moved what holds into `user/`. What holds for maintainers is in [`tech/forms-integration.md`](../tech/forms-integration.md).
 
 ---
 
 ## Library Phases
 
-### Phase 32: Release
+### Test Phases
+
+Phases 32 to 37 rewrite the specs Vitest inherited to the rules in **Writing A Spec** in [`impl/testing.md`](testing.md): real input through `userEvent`, a field found by its role and label, properties for pure rules, relational geometry. Each phase deletes the synthetic `fill()`, `type()`, `press()` and `click()` calls in its own specs, and anything a rewrite finds goes to [`impl/backlog.md`](backlog.md).
+
+- **Size It Honestly**: each phase is about 2,000 lines of specs. Split one before starting if it does not fit a conversation.
+
+### Phase 32: Text Field Specs
 
 **Depends On**: nothing.
+
+- **Scope**: `caret`, `focus-caret`, `focus-caret-keys`, `mask-placeholder`, `blur-commit`, `date-time-field` and `date-panel`.
+- **The Browser's Half**: a trusted click places the caret and a trusted `Tab` selects, so the hand-made browser behaviour in `focus-caret.spec.ts` goes.
+- **Properties**: `mask.helpers` and `input.helpers`, and a date or time typed with real keys into any accepted format reaching the model.
+
+### Phase 33: Option And Panel Field Specs
+
+**Depends On**: nothing.
+
+- **Scope**: `panel`, `panel-scroll`, `panel-option-aria`, `option-projection`, `option-value`, `late-options`, `action-option`, `autocomplete-filter-sync`, `handled-keys`, `select-toggle` and `display-only-selection`. `option-highlight.spec.ts` is the pattern.
+- **Properties**: `position.helpers`, the side a panel opens on over any field position, panel height and clipping pane.
+
+### Phase 34: Cross-Field Specs
+
+**Depends On**: nothing.
+
+- **Scope**: `field-contract`, `focus`, `first-render`, `repaint`, `touch-on-leave`, `disabled-state`, `blocked-edits`, `value-round-trip`, `toggle-label` and `defaults`.
+
+### Phase 35: Decorator Specs
+
+**Depends On**: nothing.
+
+- **Scope**: `field-decorator`, `aria`, `field-hint`, `field-state`, `required-marker`, `reveal`, the decorator's `repaint`, `font-family`, `error-message` and `validator-agnostic`.
+
+### Phase 36: Decorator Geometry Specs
+
+**Depends On**: Phases 32 to 35.
+
+- **Scope**: `label-position`, `border-geometry`, `slider-geometry`, `textarea-layout` and `group-alignment`.
+- **Relational**: the hand-computed `rem` constants go; the relations they stand for stay.
+- **Last Library Phase**: `fill()`, `type()`, `press()` and `click()` leave `lib/testing/dom.ts`, with their rows in [`impl/testing.md`](testing.md).
+
+### Phase 37: Portal Specs
+
+**Depends On**: nothing.
+
+- **Scope**: every spec under `src/`. The Studio is reached through its own controls, by role and label, rather than through store calls and CSS selectors.
+
+### Phase 38: Release
+
+**Depends On**: Phases 32 to 37.
 
 - **Merge**: the integration branch into `main`, through a pull request with every CI gate green.
 - **Version**: `1.0.0` in `projects/ngx-formidable/package.json`. The Angular peer floor is the minor CI tests, per [`impl/renovate.md`](renovate.md).
 - **Publish**: `npm run screenshots` for the README hero, then [`impl/releasing.md`](releasing.md).
 - **Tag**: tag the release commit. Final step.
 
-### Phase 33: Storybook
+### Phase 39: Storybook
 
 - **Set It Up**: Storybook is not installed. Take conventions from the sibling project's `storybook.md` and its `.storybook` configuration first. Copy it into this repo from EnerQi repository.
 - **Stories**: all components, including the layout options.
 - demonstrate all fields, directives and decorator, including their properties.
 
-### Phase 34: Date Range Field
+### Phase 40: Date Range Field
 
 - **The Calendar Is Not The Problem**: Pikaday renders ranges, with `startRange` / `endRange` options and `is-inrange` / `is-startrange` / `is-endrange` classes. What it does not do is manage range _selection_; that is driven from `onSelect`, or with two instances.
 - **The Value Contract Is**: `date-field` is single-valued end to end: `Date | null`, one picker, one masked input with one `unicodeTokenFormat`, arrow-stepping over that one date, and `isFilled`. A range mode means a tuple value, a two-segment mask, parse and format path, per-segment arrow-stepping and clear semantics, and range styling that `_pikaday.scss` does not have.
 - **Size It Honestly**: the largest single item on this roadmap. Split it before starting.
 
-### Phase 35: AI Support
+### Phase 41: AI Support
 
 I want to support developers to use AI to use this library. How can I do that? Should that be done with an MCP? What are other ways?
 
-### Phase 36: Blog Post
+### Phase 42: Blog Post
 
 - **Where**: [The Dev Exchange](https://thedevexchange.com/), the company dev blog.
 - **What**: the library, its features, and how it is used to build beautiful, functional Angular forms. Code examples, screenshots, links to the portal and the GitHub repository. Why it beats other form libraries, and a call to action to try it.

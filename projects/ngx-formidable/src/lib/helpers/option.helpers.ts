@@ -79,7 +79,8 @@ export function getNextAvailableOptionIndex(
 
   const step = direction === 'down' ? 1 : -1;
 
-  let idx = currentIndex;
+  // Nothing highlighted yet: a walk down starts before the first option, a walk up after the last.
+  let idx = currentIndex < 0 && direction === 'up' ? n : currentIndex;
 
   for (let i = 0; i < n; i++) {
     idx = (idx + step + n) % n; // wrap around

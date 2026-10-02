@@ -1,5 +1,5 @@
 import { Type } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DropdownField } from '@cynthion/ngx-formidable';
 import { provideNgxMask } from 'ngx-mask';
@@ -60,6 +60,12 @@ const GOLDEN: readonly Golden[] = [
  * the validator chosen on Form ▸ Settings ▸ The Form.
  */
 describe('golden export', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   const lines = (text: unknown): string[] => String(text).split('\n');
 
   for (const golden of GOLDEN) {
@@ -80,9 +86,9 @@ describe('golden export', () => {
         let host: AngularForm;
         let root: HTMLElement;
 
-        function settle(): void {
+        async function settle(): Promise<void> {
           fixture.detectChanges();
-          tick(100);
+          await vi.advanceTimersByTimeAsync(100);
           fixture.detectChanges();
         }
 
@@ -126,17 +132,18 @@ describe('golden export', () => {
           return values.errors();
         }
 
-        beforeEach(fakeAsync(() => {
+        beforeEach(async () => {
           TestBed.configureTestingModule({ providers: [provideNgxMask()] });
 
           fixture = TestBed.createComponent(golden.form);
           host = fixture.componentInstance;
           root = fixture.nativeElement as HTMLElement;
-          settle();
-        }));
+          await settle();
+          await vi.runOnlyPendingTimersAsync();
+        });
 
         // Delivery is the default, so the branch waits on the toggle, and the card number on a card.
-        it('renders every field its condition lets through', fakeAsync(() => {
+        it('renders every field its condition lets through', () => {
           expect(labels()).toEqual([
             'Pizza',
             'Size',
@@ -155,9 +162,9 @@ describe('golden export', () => {
             'Email Address',
             'Notes For The Kitchen'
           ]);
-        }));
+        });
 
-        it('marks a field required from the schema alone', fakeAsync(() => {
+        it('marks a field required from the schema alone', () => {
           const marked = decorators()
             .filter((decorator) => decorator.querySelector('.required-marker'))
             .map(labelOf);
@@ -173,47 +180,47 @@ describe('golden export', () => {
             'Phone Number',
             'Email Address'
           ]);
-        }));
+        });
 
-        it('hands a field its limits from the schema', fakeAsync(() => {
+        it('hands a field its limits from the schema', () => {
           const slider = root.querySelector<HTMLInputElement>('formidable-slider-field input[type="range"]')!;
 
           expect([slider.min, slider.max]).toEqual(['0', '4']);
-        }));
+        });
 
-        it('swaps the fields a condition decides when the watched field changes', fakeAsync(() => {
+        it('swaps the fields a condition decides when the watched field changes', async () => {
           host.form.pickup().value.set(true);
-          settle();
+          await settle();
 
           expect(labels()).toContain('Pick Up From');
           expect(labels()).not.toContain('Delivery Address');
 
           host.form.payment.method().value.set('card');
-          settle();
+          await settle();
 
           expect(labels()).toContain('Card Number');
-        }));
+        });
 
         // The field writes its value model on a pick of the user's, which is what reaches `(valueChange)`.
-        it('applies a preset on the pick, and leaves the rest of the model alone', fakeAsync(() => {
+        it('applies a preset on the pick, and leaves the rest of the model alone', async () => {
           const pizza = fixture.debugElement.query(By.directive(DropdownField)).componentInstance as DropdownField;
 
           pizza.value.set('margherita');
-          settle();
+          await settle();
 
           expect(host.model()).toEqual(
-            jasmine.objectContaining({
+            expect.objectContaining({
               pizza: 'margherita',
               sauce: 'tomato',
               toppings: ['mozzarella', 'basil'],
               size: null
             })
           );
-        }));
+        });
 
         // The export's checks are text and the stage's are code: they agree on the form as exported, which
         // starts empty, and on one with every rule broken. 28 September 2026 is a Monday.
-        it('reports what the stage reports, on the same paths', fakeAsync(() => {
+        it('reports what the stage reports, on the same paths', async () => {
           const broken = {
             ...host.model(),
             sauce: 'bbq',
@@ -227,11 +234,11 @@ describe('golden export', () => {
           expect(errors()).toEqual(stageErrors(host.model()));
 
           host.model.set(broken);
-          settle();
+          await settle();
 
           expect(errors()).toEqual(stageErrors(broken));
           expect(errors()['']).toEqual(['Pineapple on a BBQ base is a combination this kitchen refuses.']);
-        }));
+        });
       });
     });
   }

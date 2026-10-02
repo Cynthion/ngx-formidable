@@ -30,32 +30,32 @@ describe('mask helpers', () => {
 
   describe('isPlaceholderAmbiguous', () => {
     it('is false for the defaults, which no token pattern accepts', () => {
-      expect(isPlaceholderAmbiguous('000 000 00 00', config())).toBeFalse();
+      expect(isPlaceholderAmbiguous('000 000 00 00', config())).toBe(false);
     });
 
     it('is true when a token pattern accepts the placeholder', () => {
       const patterns = { ...DEFAULT_PATTERNS, X: { pattern: /\w/ } };
 
-      expect(isPlaceholderAmbiguous('XXXXXX', config({ patterns }))).toBeTrue();
+      expect(isPlaceholderAmbiguous('XXXXXX', config({ patterns }))).toBe(true);
     });
 
     it('is true when the mask draws the placeholder as a literal', () => {
-      expect(isPlaceholderAmbiguous('000_000', config())).toBeTrue();
+      expect(isPlaceholderAmbiguous('000_000', config())).toBe(true);
     });
 
     it('is true when the placeholder is one of the special characters', () => {
-      expect(isPlaceholderAmbiguous('000.000', config({ placeHolderCharacter: '.' }))).toBeTrue();
+      expect(isPlaceholderAmbiguous('000.000', config({ placeHolderCharacter: '.' }))).toBe(true);
     });
 
     // The way out of all three: a character the mask cannot produce.
     it('is false again once the placeholder is moved out of the way', () => {
       const patterns = { ...DEFAULT_PATTERNS, X: { pattern: /\w/ } };
 
-      expect(isPlaceholderAmbiguous('XXXXXX', config({ patterns, placeHolderCharacter: '•' }))).toBeFalse();
+      expect(isPlaceholderAmbiguous('XXXXXX', config({ patterns, placeHolderCharacter: '•' }))).toBe(false);
     });
 
     it('is false for an empty placeholder, which switches the slots off', () => {
-      expect(isPlaceholderAmbiguous('000_000', config({ placeHolderCharacter: '' }))).toBeFalse();
+      expect(isPlaceholderAmbiguous('000_000', config({ placeHolderCharacter: '' }))).toBe(false);
     });
   });
 
@@ -77,7 +77,7 @@ describe('mask helpers', () => {
     });
 
     it('reports an unbounded mask as variable', () => {
-      expect(analyzeMaskDisplayLength('separator.2').variable).toBeTrue();
+      expect(analyzeMaskDisplayLength('separator.2').variable).toBe(true);
     });
   });
 });

@@ -262,13 +262,13 @@ describe('masked date/time field', () => {
       { kind: 'time', value: new Date(1970, 0, 1, 9, 5), format: 'HH : mm', unsupported: 'HH : qq', fallback: '09.05' }
     ] as const) {
       it(`warns and falls back to the default ${kind} format when it is set after init`, async () => {
-        const warn = spyOn(console, 'warn');
+        const warn = vi.spyOn(console, 'warn').mockReturnValue(undefined);
         const { input, set } = await setup(kind, format, 'underscores', {}, { value });
 
         await set('unicodeTokenFormat', unsupported);
 
         expect(input.value).toBe(fallback);
-        expect(warn).toHaveBeenCalledWith(jasmine.stringContaining(`"${unsupported}"`));
+        expect(warn).toHaveBeenCalledWith(expect.stringContaining(`"${unsupported}"`));
       });
     }
   });
@@ -646,15 +646,15 @@ describe('masked date/time field', () => {
 
       const names = () => Array.from(picker.querySelectorAll('select'), (select) => select.name);
 
-      expect(names()).toEqual([jasmine.stringMatching(/-month$/), jasmine.stringMatching(/-year$/)]);
+      expect(names()).toEqual([expect.stringMatching(/-month$/), expect.stringMatching(/-year$/)]);
 
       await set('numberOfMonths', 2);
 
       expect(names()).toEqual([
-        jasmine.stringMatching(/-month-0$/),
-        jasmine.stringMatching(/-year-0$/),
-        jasmine.stringMatching(/-month-1$/),
-        jasmine.stringMatching(/-year-1$/)
+        expect.stringMatching(/-month-0$/),
+        expect.stringMatching(/-year-0$/),
+        expect.stringMatching(/-month-1$/),
+        expect.stringMatching(/-year-1$/)
       ]);
     });
 

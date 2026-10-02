@@ -1,4 +1,4 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideNgxMask } from 'ngx-mask';
 import { DOC_PAGES, DOC_PAGES_BY_SLUG } from '../docs/doc-pages';
@@ -29,13 +29,19 @@ const MIDNIGHT = PRESETS_BY_KEY.get('midnight')!;
  * actually renders, so none of them drifts into something that names or opens nothing.
  */
 describe('specimen', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   let fixture: ComponentFixture<SpecimenPage>;
   let root: HTMLElement;
 
-  function settle(): void {
+  async function settle(): Promise<void> {
     for (let i = 0; i < 3; i++) {
       fixture.detectChanges();
-      tick(100);
+      await vi.advanceTimersByTimeAsync(100);
     }
     fixture.detectChanges();
   }
@@ -78,10 +84,10 @@ describe('specimen', () => {
     );
   });
 
-  it('links only to documents and anchors the Docs route renders', fakeAsync(() => {
-    settle();
+  it('links only to documents and anchors the Docs route renders', async () => {
+    await settle();
     lastStepChip().click();
-    settle();
+    await settle();
 
     const hrefs = Array.from(root.querySelectorAll('a[href*="/docs/"]')).map((a) => a.getAttribute('href')!);
     const dead = hrefs.filter((href) => {
@@ -93,21 +99,22 @@ describe('specimen', () => {
 
     expect(hrefs.length).toBeGreaterThan(SPECIMEN_KINDS.length);
     expect(dead).toEqual([]);
-  }));
+  });
 
-  it('finds every part of the anatomy in the rendered field', fakeAsync(() => {
-    settle();
+  it('finds every part of the anatomy in the rendered field', async () => {
+    await settle();
 
     const figure = root.querySelector('.anatomy')!;
 
     expect(ANATOMY_PARTS.filter((part) => !figure.querySelector(part.selector)).map((part) => part.selector)).toEqual(
       []
     );
-  }));
+  });
 
   // The callouts are laid out from a `ResizeObserver`, which reports on a real frame rather than on the fake
   // clock, so this one waits for that frame.
   it('draws one callout per part, each stating a value', async () => {
+    vi.useRealTimers();
     fixture.detectChanges();
     await fixture.whenStable();
     await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve)));
@@ -119,13 +126,13 @@ describe('specimen', () => {
     expect(values.filter((value) => !value)).toEqual([]);
   });
 
-  it('opens on a few kinds, and shows every kind in every state on request', fakeAsync(() => {
-    settle();
+  it('opens on a few kinds, and shows every kind in every state on request', async () => {
+    await settle();
 
     expect(root.querySelectorAll('#states .cell').length).toBe(STATE_FEATURED.length * STATE_COLUMNS.length);
 
     root.querySelector<HTMLButtonElement>('#states .more')!.click();
-    settle();
+    await settle();
 
     const states = root.querySelector('#states')!;
     const invalid = Array.from(states.querySelectorAll('.cell')).filter((cell) =>
@@ -134,42 +141,42 @@ describe('specimen', () => {
 
     expect(states.querySelectorAll('.cell').length).toBe(SPECIMEN_KINDS.length * STATE_COLUMNS.length);
     expect(invalid.length).toBe(SPECIMEN_KINDS.length);
-  }));
+  });
 
-  it('shows label positions only on the kinds whose layout has room for them', fakeAsync(() => {
-    settle();
+  it('shows label positions only on the kinds whose layout has room for them', async () => {
+    await settle();
     root.querySelector<HTMLButtonElement>('#labels .more')!.click();
-    settle();
+    await settle();
 
     const rows = Array.from(root.querySelectorAll('#labels .row-name code')).map((el) => el.textContent?.trim());
 
     expect(rows.length).toBe(LABEL_POSITION_KINDS.length);
     expect(rows).not.toContain('formidable-toggle-field');
-  }));
+  });
 
-  it('repaints the page, and only the page, with a preset or a ladder step', fakeAsync(() => {
-    settle();
+  it('repaints the page, and only the page, with a preset or a ladder step', async () => {
+    await settle();
 
     const rootHeight = rootVar('--formidable-field-height');
     const rootRadius = rootVar('--formidable-field-border-radius');
 
     root.querySelector<HTMLButtonElement>('[data-preset="brutalist"]')!.click();
-    settle();
+    await settle();
 
     expect(scopeVar('--formidable-field-border-radius')).not.toBe(rootRadius);
     expect(rootVar('--formidable-field-border-radius')).toBe(rootRadius);
 
     chip('Defaults').click();
-    settle();
+    await settle();
 
     expect(scopeVar('--portal-page-background')).toBe('#ffffff');
 
     lastStepChip().click();
-    settle();
+    await settle();
 
     expect(scopeVar('--formidable-field-height')).toBe(presetVars(MIDNIGHT)['--formidable-field-height']!);
     expect(scopeVar('--portal-page-background')).toBe(MIDNIGHT.page.background);
     expect(rootVar('--formidable-field-height')).toBe(rootHeight);
     expect(root.querySelectorAll('.code-line').length).toBe(LADDER_DECLARATIONS.length);
-  }));
+  });
 });

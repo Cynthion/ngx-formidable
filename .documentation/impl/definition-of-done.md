@@ -17,19 +17,19 @@ A change is done when every applicable item below holds. Stating that something 
 
 Every command runs from the repository root.
 
-| Area               | Command                                                                     | Gate  |
-| :----------------- | :-------------------------------------------------------------------------- | :---: |
-| Formatting         | `npm run prettier:check`                                                    |  CI   |
-| Lint               | `npm run lint`                                                              |  CI   |
-| Style Lint         | `npm run style-lint`                                                        |  CI   |
-| Token Descriptions | `npm run docs:check`                                                        |  CI   |
-| Markdown Lint      | `npm run docs:lint`                                                         |  CI   |
-| Library Build      | `npm run build:lib`                                                         |  CI   |
-| Library Tests      | `npx ng test ngx-formidable --watch=false --browsers=ChromeHeadless`        |  CI   |
-| Portal Tests       | `npx ng test ngx-formidable-portal --watch=false --browsers=ChromeHeadless` |  CI   |
-| Portal Build       | `npm run build`                                                             |  CI   |
-| Visual Proof       | The served portal, `npm start`                                              | Local |
-| README Hero        | `npm run screenshots`                                                       | Local |
+| Area               | Command                                           | Gate  |
+| :----------------- | :------------------------------------------------ | :---: |
+| Formatting         | `npm run prettier:check`                          |  CI   |
+| Lint               | `npm run lint`                                    |  CI   |
+| Style Lint         | `npm run style-lint`                              |  CI   |
+| Token Descriptions | `npm run docs:check`                              |  CI   |
+| Markdown Lint      | `npm run docs:lint`                               |  CI   |
+| Library Build      | `npm run build:lib`                               |  CI   |
+| Library Tests      | `npx ng test ngx-formidable --watch=false`        |  CI   |
+| Portal Tests       | `npx ng test ngx-formidable-portal --watch=false` |  CI   |
+| Portal Build       | `npm run build`                                   |  CI   |
+| Visual Proof       | The served portal, `npm start`                    | Local |
+| README Hero        | `npm run screenshots`                             | Local |
 
 - **Chain**: `ci.yml` runs the CI gates in this order on every push to `main` and every pull request, and stops at the first failing step. The workflow is described in [`tech/architecture.md`](../tech/architecture.md).
 - **No Typecheck Script**: `build:lib` is the type and template check.
