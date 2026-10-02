@@ -117,13 +117,6 @@ Phases 32 to 37 rewrite the specs Vitest inherited to the rules in **Writing A S
 
 - **Size It Honestly**: each phase is about 2,000 lines of specs. Split one before starting if it does not fit a conversation.
 
-### Phase 33: Option And Panel Field Specs
-
-**Depends On**: nothing.
-
-- **Scope**: `panel`, `panel-scroll`, `panel-option-aria`, `option-projection`, `option-value`, `late-options`, `action-option`, `autocomplete-filter-sync`, `handled-keys`, `select-toggle` and `display-only-selection`. `option-highlight.spec.ts` is the pattern.
-- **Properties**: `position.helpers`, the side a panel opens on over any field position, panel height and clipping pane.
-
 ### Phase 34: Cross-Field Specs
 
 **Depends On**: nothing.

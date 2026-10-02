@@ -1,3 +1,4 @@
+import { onTestFinished } from 'vitest';
 import { userEvent } from 'vitest/browser';
 
 /** A text editor a field renders. */
@@ -30,6 +31,21 @@ export async function clickAt(editor: Editor, index: number, modifiers: 'Shift'[
       : top + (editor.offsetHeight - top - bottom) / 2;
 
   await userEvent.click(editor, { position: { x, y }, modifiers });
+}
+
+/**
+ * Records the `keydown`s that reach the window until the test ends, where a form or a dialog around a field
+ * hears them, and returns whether the last one of `key` arrived prevented: whether the field kept it from
+ * the browser. `undefined` for a key that never arrived.
+ */
+export function keptKeys(): (key: string) => boolean | undefined {
+  const kept = new Map<string, boolean>();
+  const record = (event: KeyboardEvent) => kept.set(event.key, event.defaultPrevented);
+
+  window.addEventListener('keydown', record);
+  onTestFinished(() => window.removeEventListener('keydown', record));
+
+  return (key) => kept.get(key);
 }
 
 /** Replaces the editor's whole text and reports it with one `input`, the way a paste or an autofill does. */

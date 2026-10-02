@@ -1,126 +1,153 @@
-import type { MockInstance } from 'vitest';
+import { By } from '@angular/platform-browser';
+import { Locator, page, userEvent } from 'vitest/browser';
 import { bindField, BoundField, FieldKind } from '../../testing/bind-field';
-import { click, press } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { DateField } from './date-field/date-field';
 
 /**
- * Contract of the panel `dropdown-field`, `autocomplete-field` and `date-field` share. A press inside it keeps
- * focus in the input, so a pick is neither a blur nor a touch; focus on a control inside it is still the
- * field's; a panel closing with focus inside hands it back to the input; a click outside the field closes it;
- * and a scroll or resize measures an open panel only.
+ * The panel `dropdown-field`, `autocomplete-field` and `date-field` share, per **Panels** and **Keyboard** in
+ * `user/fields.md`. Focus stays in the field's input while the panel is used: a press inside it keeps focus
+ * there, so a pick is neither a blur nor a touch, and the touch comes once focus leaves the field. The panel
+ * closes on a pick, on `Tab` and on a click outside the field, and an open one is placed again as the page
+ * scrolls.
+ *
+ * Every spec opens the panel and picks from it as a user does, with trusted clicks and keys.
  */
 
-const options = [
+const OPTIONS = [
   { value: 'a', label: 'Alpha' },
-  { value: 'b', label: 'Beta' }
+  { value: 'b', label: 'Beta' },
+  { value: 'c', label: 'Gamma', disabled: true }
 ];
+
+/** **Tab Out Of An Open Calendar** in `impl/backlog.md`. */
+const TAB_INTO_CLOSING_CALENDAR = "Tab moves focus into the calendar's first button as the panel closes over it";
+
+const combobox = () => page.getByRole('combobox', { name: 'Choice' });
+const calendar = () => page.getByRole('dialog', { name: 'Choice' });
+const next = () => page.getByRole('button', { name: 'Next' });
 
 interface PanelCase {
   kind: FieldKind;
   inputs?: Record<string, unknown>;
   /** Opens the panel as a user does, leaving focus in the input. */
-  open: (element: HTMLElement) => void;
+  open: (field: BoundField) => Promise<void>;
+  /** A spot inside the open panel that a press picks nothing from, such as a disabled option. */
+  inert: () => Locator;
   /** What a user clicks to pick from the open panel, and the model that pick leaves. */
-  pick: (element: HTMLElement) => Element;
+  pick: () => Locator;
   picked: unknown;
 }
-
-const firstOption = (element: HTMLElement) => element.querySelector('formidable-field-option div')!;
 
 const cases: PanelCase[] = [
   {
     kind: 'dropdown',
-    inputs: { options },
-    open: (element) => click(element.querySelector('.input-wrapper')!),
-    pick: firstOption,
+    inputs: { options: OPTIONS },
+    // The display input takes no pointer events, so a click on it lands on the field around it.
+    open: () => userEvent.click(combobox(), { force: true }),
+    inert: () => page.getByRole('option', { name: 'Gamma' }),
+    pick: () => page.getByRole('option', { name: 'Alpha' }),
     picked: 'a'
   },
   {
     kind: 'autocomplete',
-    inputs: { options },
-    open: (element) => {
-      const input = element.querySelector('input')!;
-
-      input.focus();
-      press(input, 'ArrowDown');
+    inputs: { options: OPTIONS },
+    open: async () => {
+      await userEvent.click(combobox());
+      await userEvent.keyboard('{ArrowDown}');
     },
-    pick: firstOption,
+    inert: () => page.getByRole('option', { name: 'Gamma' }),
+    pick: () => page.getByRole('option', { name: 'Alpha' }),
     picked: 'a'
   },
   {
     kind: 'date',
-    open: (element) => click(element.querySelector('.toggle')!),
-    pick: (element) => element.querySelector('.pika-button:not(.is-empty)')!,
+    open: (field) => userEvent.click(field.element.querySelector('.toggle')!),
+    inert: () => calendar().getByTitle('Monday'),
+    pick: () => calendar().getByRole('button', { name: '15', exact: true }),
     picked: expect.any(Date)
   }
 ];
 
 interface OpenPanel extends BoundField {
-  input: HTMLInputElement;
-  panel: HTMLElement;
   /** Whether the decorator shows the field focused. */
   isFocused: () => boolean;
 }
 
-async function openPanel({ kind, inputs, open }: PanelCase): Promise<OpenPanel> {
-  const field = await bindField(kind, 'signal', { inputs, decorated: true });
+/** Binds the field under a label, with a button after it unless `layout` puts something else around it. */
+function bind({ kind, inputs }: PanelCase, layout: { before?: string; after?: string } = {}): Promise<BoundField> {
+  return bindField(kind, 'signal', {
+    inputs,
+    decorated: true,
+    decoration: '<div formidableFieldLabel>Choice</div>',
+    after: '<button type="button">Next</button>',
+    ...layout
+  });
+}
+
+/** Binds the field and opens its panel. */
+async function openPanel(panelCase: PanelCase, layout: { before?: string } = {}): Promise<OpenPanel> {
+  const field = await bind(panelCase, layout);
   const decorator = field.element.closest('formidable-field-decorator')!;
 
-  open(field.element);
-  await settle(field.fixture);
+  await panelCase.open(field);
+  await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
 
   return {
     ...field,
-    input: field.element.querySelector('input')!,
-    panel: field.element.querySelector<HTMLElement>('.panel')!,
     isFocused: () => decorator.classList.contains('is-focused')
   };
 }
 
 describe('panel', () => {
-  beforeEach(() => configureFormidableTestBed());
+  beforeEach(() => {
+    configureFormidableTestBed();
+    (document.activeElement as HTMLElement | null)?.blur();
+  });
 
   for (const panelCase of cases) {
     describe(`of ${panelCase.kind}-field`, () => {
       it('opens with focus in the input', async () => {
-        const { input, panel, isFocused } = await openPanel(panelCase);
+        const { isFocused } = await openPanel(panelCase);
 
-        expect(panel.classList).toContain('open');
-        expect(document.activeElement).toBe(input);
+        await expect.element(combobox()).toHaveFocus();
         expect(isFocused()).toBe(true);
       });
 
       it('keeps focus in the input on a press inside the panel', async () => {
-        const { fixture, input, panel, isFocused, events } = await openPanel(panelCase);
+        const { fixture, isFocused, events } = await openPanel(panelCase);
 
-        click(panel);
+        // Forced, because a disabled option is no target to Playwright, though a user can still press it.
+        await userEvent.click(panelCase.inert(), { force: true });
         await settle(fixture);
 
-        expect(document.activeElement).toBe(input);
+        await expect.element(combobox()).toHaveFocus();
+        await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
         expect(isFocused()).toBe(true);
         expect(events()).toEqual([]);
       });
 
       it('takes a pick into the model without a blur or a touch', async () => {
-        const { fixture, element, input, panel, isFocused, events, touched, value } = await openPanel(panelCase);
+        const { fixture, isFocused, events, touched, value } = await openPanel(panelCase);
 
-        click(panelCase.pick(element));
+        await userEvent.click(panelCase.pick());
+        await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
         await settle(fixture);
 
         expect(value()).toEqual(panelCase.picked);
-        expect(panel.classList).not.toContain('open');
-        expect(document.activeElement).toBe(input);
+        await expect.element(combobox()).toHaveFocus();
         expect(isFocused()).toBe(true);
         expect(events()).toEqual(['value']);
         expect(touched()).toBe(false);
       });
 
       it('touches once, when focus leaves the field after a pick', async () => {
-        const { fixture, element, input, isFocused, events, touched } = await openPanel(panelCase);
+        const { fixture, isFocused, events, touched } = await openPanel(panelCase);
 
-        click(panelCase.pick(element));
-        await settle(fixture);
-        input.blur();
+        await userEvent.click(panelCase.pick());
+        await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+        await userEvent.tab();
+        await expect.element(next()).toHaveFocus();
         await settle(fixture);
 
         expect(isFocused()).toBe(false);
@@ -128,47 +155,44 @@ describe('panel', () => {
         expect(touched()).toBe(true);
       });
 
+      it('closes on Tab, and focus moves on', async ({ skip }) => {
+        if (panelCase.kind === 'date') skip(TAB_INTO_CLOSING_CALENDAR);
+
+        await openPanel(panelCase);
+
+        await userEvent.tab();
+
+        await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+        await expect.element(next()).toHaveFocus();
+      });
+
+      // Above the field, where no panel covers it.
       it('closes on a click outside the field', async () => {
-        const { fixture, panel, isFocused } = await openPanel(panelCase);
+        const { isFocused } = await openPanel(panelCase, { before: '<button type="button">Elsewhere</button>' });
 
-        click(document.body);
-        await settle(fixture);
+        await userEvent.click(page.getByRole('button', { name: 'Elsewhere' }));
 
-        expect(panel.classList).not.toContain('open');
+        await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
         expect(isFocused()).toBe(false);
       });
 
-      describe('on a scroll or resize', () => {
-        let measured: MockInstance<() => number>;
+      it('places an open panel again as the page scrolls', async () => {
+        const spacer = '<div style="height: 100vh"></div>';
+        const field = await bind(panelCase, { before: spacer, after: spacer });
+        const panel = field.element.querySelector('.panel')!;
+        const input = () => combobox().element().getBoundingClientRect();
+        const centre = (rect: DOMRect) => rect.top + rect.height / 2;
+        const isAbove = () => centre(panel.getBoundingClientRect()) < centre(input());
 
-        // `offsetHeight` is the panel's own measurement, which placing it reads.
-        const panelsMeasured = () =>
-          measured.mock.contexts.filter((element) => (element as HTMLElement).classList.contains('panel')).length;
+        // The field just above the fold, where the panel has no room below it.
+        window.scrollBy(0, input().bottom - innerHeight + 8);
+        await panelCase.open(field);
+        await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+        await expect.poll(isAbove).toBe(true);
 
-        function scrollAndResize(): void {
-          document.dispatchEvent(new Event('scroll'));
-          window.dispatchEvent(new Event('resize'));
-        }
-
-        it('measures no closed panel', async () => {
-          const { fixture } = await bindField(panelCase.kind, 'signal', { inputs: panelCase.inputs });
-          measured = vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get');
-
-          scrollAndResize();
-          await settle(fixture, 60);
-
-          expect(panelsMeasured()).toBe(0);
-        });
-
-        it('places an open panel again', async () => {
-          const { fixture } = await openPanel(panelCase);
-          measured = vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get');
-
-          scrollAndResize();
-          await settle(fixture, 60);
-
-          expect(panelsMeasured()).toBeGreaterThan(0);
-        });
+        // The field at the top of the viewport, with room below it again.
+        window.scrollBy(0, input().top - 8);
+        await expect.poll(isAbove).toBe(false);
       });
     });
   }
@@ -182,62 +206,75 @@ describe('panel', () => {
 
     async function focusMonthSelect(): Promise<OpenPanel & { select: HTMLSelectElement }> {
       const field = await openPanel(dateCase!);
-      const select = field.panel.querySelector<HTMLSelectElement>('.pika-select-month')!;
+      const select = calendar().getByRole('combobox', { name: 'Month' }).element() as HTMLSelectElement;
 
-      click(select);
-      await settle(field.fixture);
+      await userEvent.click(select);
+      await expect.element(select).toHaveFocus();
 
       return { ...field, select };
     }
 
     it('keeps the field focused, neither committed nor touched', async () => {
-      const { select, isFocused, events } = await focusMonthSelect();
+      const { fixture, isFocused, events } = await focusMonthSelect();
+      await settle(fixture);
 
-      expect(document.activeElement).toBe(select);
       expect(isFocused()).toBe(true);
       expect(events()).toEqual([]);
     });
 
     // Pikaday redraws its selects on a change, and a focused element taken out of the page blurs.
     it('keeps the field focused through a change of month', async () => {
-      const { fixture, input, select, isFocused, events } = await focusMonthSelect();
+      const { fixture, select, isFocused, events } = await focusMonthSelect();
 
-      select.value = select.options[0]!.value;
-      select.dispatchEvent(new Event('change', { bubbles: true }));
+      await userEvent.selectOptions(select, select.options[0]!.value);
+      await expect.element(combobox()).toHaveFocus();
       await settle(fixture);
 
-      expect(document.activeElement).toBe(input);
       expect(isFocused()).toBe(true);
       expect(events()).toEqual([]);
     });
 
     it('keeps the field focused through a step of the calendar', async () => {
-      const { fixture, input, select, isFocused, events } = await focusMonthSelect();
+      const { fixture, isFocused, events } = await focusMonthSelect();
 
-      press(select, 'ArrowDown');
+      await userEvent.keyboard('{ArrowDown}');
+      await expect.element(combobox()).toHaveFocus();
       await settle(fixture);
 
-      expect(document.activeElement).toBe(input);
       expect(isFocused()).toBe(true);
       expect(events()).toEqual([]);
     });
 
     it('hands focus back to the input when a pick closes the panel', async () => {
-      const { fixture, element, input, isFocused, events, value } = await focusMonthSelect();
+      const { fixture, isFocused, events, value } = await focusMonthSelect();
 
-      click(dateCase!.pick(element));
+      await userEvent.click(dateCase!.pick());
+      await expect.element(combobox()).toHaveFocus();
       await settle(fixture);
 
       expect(value()).toEqual(expect.any(Date));
-      expect(document.activeElement).toBe(input);
       expect(isFocused()).toBe(true);
       expect(events()).toEqual(['value']);
     });
 
-    it('touches when focus leaves the field from the select', async () => {
-      const { fixture, select, isFocused, events, touched } = await focusMonthSelect();
+    // A consumer reaches `togglePanel` through a `viewChild()`, as `focus()` is reached.
+    it('hands focus back to the input when its consumer closes the panel', async () => {
+      const { fixture, isFocused, events } = await focusMonthSelect();
 
-      select.blur();
+      fixture.debugElement.query(By.directive(DateField)).injector.get(DateField).togglePanel(false);
+      await expect.element(combobox()).toHaveFocus();
+      await settle(fixture);
+
+      await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+      expect(isFocused()).toBe(true);
+      expect(events()).toEqual([]);
+    });
+
+    it('touches when focus leaves the field from the select', async () => {
+      const { fixture, isFocused, events, touched } = await focusMonthSelect();
+
+      await userEvent.click(next());
+      await expect.element(next()).toHaveFocus();
       await settle(fixture);
 
       expect(isFocused()).toBe(false);

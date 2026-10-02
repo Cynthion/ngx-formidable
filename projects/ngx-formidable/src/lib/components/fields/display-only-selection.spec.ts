@@ -1,17 +1,17 @@
-import { Component } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
+import { page, userEvent } from 'vitest/browser';
 import { FormidableOption } from '../../models/formidable.model';
-import { press } from '../../testing/dom';
-import { configureFormidableTestBed, settle } from '../../testing/test-bed';
-import { DropdownField } from './dropdown-field/dropdown-field';
+import { bindField } from '../../testing/bind-field';
+import { keptKeys, referenced } from '../../testing/dom';
+import { configureFormidableTestBed } from '../../testing/test-bed';
 
 /**
- * A dropdown's value is a label the field draws, not text the user owns. The input showing it is
- * `readonly` and takes no pointer events, so no mouse gesture reaches it — but a select-all does, and
- * leaves a highlight the mouse could never have produced. CSS cannot close that: Chrome honours
- * `user-select: none` for a drag and ignores it for the editing command behind `Cmd/Ctrl+A`, so the
- * field prevents the key instead. A native `<select>` has no selectable text either.
+ * A dropdown's value is a label the field draws, not text the user owns. The input showing it is `readonly`
+ * and takes no pointer events, so no mouse gesture selects it, and CSS cannot stop the key that would: Chrome
+ * honours `user-select: none` for a drag and ignores it for the editing command behind `Cmd/Ctrl+A`. So the
+ * field keeps a select-all from the browser, and leaves every other key where it was going. A native
+ * `<select>` has no selectable text either.
+ *
+ * The field is focused by a click, which, unlike a keyboard entry, selects nothing of its own.
  */
 
 const options: FormidableOption[] = [
@@ -19,51 +19,62 @@ const options: FormidableOption[] = [
   { value: 'blue', label: 'Blue' }
 ];
 
-@Component({
-  imports: [FormsModule, DropdownField],
-  template: `
-    <formidable-dropdown-field
-      name="colour"
-      [options]="options" />
-  `
-})
-class TestHost {
-  options: FormidableOption[] = options;
+const combobox = () => page.getByRole('combobox', { name: 'Colour' });
+
+/** The text of the value the input shows selected. */
+function selected(): string {
+  const input = combobox().element() as HTMLInputElement;
+
+  return input.value.slice(input.selectionStart!, input.selectionEnd!);
 }
 
 describe('display-only value selection', () => {
-  let fixture: ComponentFixture<TestHost>;
-  let input: HTMLInputElement;
-
-  afterEach(() => fixture?.destroy());
+  let kept: (key: string) => boolean | undefined;
 
   beforeEach(async () => {
     configureFormidableTestBed();
+    kept = keptKeys();
 
-    fixture = TestBed.createComponent(TestHost);
-    await settle(fixture);
+    await bindField('dropdown', 'signal', {
+      inputs: { options },
+      value: 'red',
+      decorated: true,
+      decoration: '<div formidableFieldLabel>Colour</div>'
+    });
 
-    input = (fixture.nativeElement as HTMLElement).querySelector('.wrapped-input') as HTMLInputElement;
+    // The display input takes no pointer events, so a click on it lands on the field around it.
+    await userEvent.click(combobox(), { force: true });
+    await userEvent.keyboard('{Escape}');
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('prevents a select-all with the meta key', () => {
-    expect(press(input, 'a', { metaKey: true }).defaultPrevented).toBe(true);
+  it("selects nothing on the platform's select-all", async () => {
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}');
+
+    expect(selected()).toBe('');
   });
 
-  it('prevents a select-all with the control key', () => {
-    expect(press(input, 'a', { ctrlKey: true }).defaultPrevented).toBe(true);
+  it('keeps a select-all from the browser with either modifier, whatever case it reports', async () => {
+    await userEvent.keyboard('{Meta>}a{/Meta}');
+    expect(kept('a')).toBe(true);
+
+    await userEvent.keyboard('{Control>}a{/Control}');
+    expect(kept('a')).toBe(true);
+
+    await userEvent.keyboard('{Meta>}A{/Meta}');
+    expect(kept('A')).toBe(true);
   });
 
-  it('prevents it regardless of the reported case', () => {
-    expect(press(input, 'A', { metaKey: true }).defaultPrevented).toBe(true);
+  it('leaves a bare letter to the type-ahead', async () => {
+    await userEvent.keyboard('b');
+
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+    await expect.poll(() => referenced(combobox().element(), 'aria-activedescendant')[0]).toHaveTextContent('Blue');
   });
 
-  it('leaves a bare "a" to the typeahead', () => {
-    expect(press(input, 'a').defaultPrevented).toBe(false);
-  });
+  it('leaves other modifier combos alone, so a copy still reaches the browser', async () => {
+    await userEvent.keyboard('{ControlOrMeta>}c{/ControlOrMeta}');
 
-  it('leaves other modifier combos alone, so a copy or a reload still reaches the browser', () => {
-    expect(press(input, 'c', { metaKey: true }).defaultPrevented).toBe(false);
-    expect(press(input, 'r', { metaKey: true }).defaultPrevented).toBe(false);
+    expect(kept('c')).toBe(false);
   });
 });

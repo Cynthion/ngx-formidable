@@ -1,33 +1,48 @@
 import { ElementRef } from '@angular/core';
+import fc from 'fast-check';
 import { updatePanelPosition } from './position.helpers';
 
 /**
- * Contract of `updatePanelPosition`.
+ * Contract of `updatePanelPosition`, per **Panels** in `user/fields.md`.
  *
- * It picks the side the panel opens on — below unless there is no room there and there is room above —
- * and marks the panel with it. It touches the panel only: a field's corners are its own, and it is the
- * open panel that adopts the two it sits against. A sheet is exempt: it is pinned to the viewport
- * rather than to the field, so there is no side to pick.
+ * It picks the side the panel opens on, below unless there is no room there and there is room above, measured
+ * within the viewport and every ancestor that clips its overflow, and marks the panel with it. It touches the
+ * panel only: a field's corners are its own, and it is the open panel that adopts the two it sits against. A
+ * sheet is exempt: it is pinned to the viewport rather than to the field, so there is no side to pick.
  */
 
-/** A stand-in for a field, with the rect and the viewport it should be measured against. */
-function elementAt(top: number, height: number): ElementRef<HTMLElement> {
-  const element = document.createElement('div');
+const viewport = window.innerHeight;
 
-  element.getBoundingClientRect = () => ({ top, bottom: top + height, height }) as DOMRect;
-
-  return new ElementRef(element);
+/** A band of the page, as a field or a pane occupies it. */
+interface Band {
+  top: number;
+  bottom: number;
 }
 
-/** Hangs a field in a pane that clips at the given band, the way a scrolling layout column does. */
-function inScrollPane(field: ElementRef<HTMLElement>, top: number, bottom: number): void {
-  const pane = document.createElement('div');
+interface Geometry {
+  field: Band;
+  panel: number;
+  /** The panes the field scrolls in, outermost first. */
+  panes: Band[];
+}
 
-  pane.className = 'test-scroll-pane';
-  pane.style.overflowY = 'auto';
-  pane.getBoundingClientRect = () => ({ top, bottom, height: bottom - top }) as DOMRect;
-  pane.appendChild(field.nativeElement);
-  document.body.appendChild(pane);
+const coordinate = fc.integer({ min: -viewport, max: 2 * viewport });
+const band = fc
+  .tuple(coordinate, fc.integer({ min: 1, max: 2 * viewport }))
+  .map(([top, height]): Band => ({ top, bottom: top + height }));
+const geometry: fc.Arbitrary<Geometry> = fc.record({
+  field: band,
+  panel: fc.integer({ min: 0, max: 2 * viewport }),
+  panes: fc.array(band, { maxLength: 2 })
+});
+
+/** A stand-in for an element occupying `band`: only its rect is read. */
+function elementAt({ top, bottom }: Band): HTMLElement {
+  const element = document.createElement('div');
+
+  element.getBoundingClientRect = () => ({ top, bottom, height: bottom - top }) as DOMRect;
+
+  return element;
 }
 
 /** A stand-in for a panel: only its height is read. */
@@ -39,115 +54,116 @@ function panelOf(height: number): ElementRef<HTMLElement> {
   return new ElementRef(element);
 }
 
+/** Hangs a field in panes that clip at their bands, the way scrolling layout columns do. */
+function fieldIn({ field, panes }: Geometry): ElementRef<HTMLElement> {
+  const element = elementAt(field);
+  const innermost = panes.reduce<HTMLElement>((parent, paneBand) => {
+    const pane = elementAt(paneBand);
+
+    pane.style.overflowY = 'auto';
+    parent.appendChild(pane);
+
+    return pane;
+  }, stage);
+
+  innermost.appendChild(element);
+
+  return new ElementRef(element);
+}
+
+/** The side the rule picks: below wherever the panel fits there, and wherever it fits neither way. */
+function expectedSide({ field, panel, panes }: Geometry): 'above' | 'below' {
+  const top = Math.max(0, ...panes.map((pane) => pane.top));
+  const bottom = Math.min(viewport, ...panes.map((pane) => pane.bottom));
+  const fitsBelow = bottom - field.bottom >= panel;
+  const fitsAbove = field.top - top >= panel;
+
+  return fitsBelow || !fitsAbove ? 'below' : 'above';
+}
+
+const side = (panel: ElementRef<HTMLElement>) => (panel.nativeElement.classList.contains('above') ? 'above' : 'below');
+
+/** Holds every stand-in, so a run leaves nothing on the page. Its own overflow is visible, so it clips nothing. */
+let stage: HTMLElement;
+
 describe('updatePanelPosition', () => {
-  const viewport = window.innerHeight;
-
-  afterEach(() => document.querySelectorAll('.test-scroll-pane').forEach((pane) => pane.remove()));
-
-  it('opens below while there is room below', () => {
-    const field = elementAt(0, 60);
-    const panel = panelOf(100);
-
-    updatePanelPosition(field, panel);
-
-    expect(panel.nativeElement.classList.contains('above')).toBe(false);
+  beforeEach(() => {
+    stage = document.createElement('div');
+    document.body.appendChild(stage);
   });
 
-  it('flips above when the panel does not fit below but does fit above', () => {
-    const field = elementAt(viewport - 70, 60);
-    const panel = panelOf(200);
+  afterEach(() => stage.remove());
 
-    updatePanelPosition(field, panel);
+  /** Places `panel` for the geometry `at`, a fresh one unless given, and clears the stage after it. */
+  function place(at: Geometry, panel = panelOf(at.panel)): ElementRef<HTMLElement> {
+    updatePanelPosition(fieldIn(at), panel);
+    stage.replaceChildren();
 
-    expect(panel.nativeElement.classList.contains('above')).toBe(true);
+    return panel;
+  }
+
+  it('opens on the side the rule picks, over any field, panel and clipping panes', () => {
+    fc.assert(fc.property(geometry, (at) => side(place(at)) === expectedSide(at)));
   });
 
-  // Nowhere to put it: below is the default, so a clipped panel is at least clipped predictably.
-  it('stays below when it fits neither way', () => {
-    const field = elementAt(10, 60);
-    const panel = panelOf(viewport * 2);
+  // The same panel is placed again on every scroll and resize, so a flip has to come back off: a panel that
+  // once had to open upwards must not stay upwards for the rest of its life.
+  it('remembers nothing of an earlier placement', () => {
+    fc.assert(
+      fc.property(geometry, geometry, fc.nat(), (first, then, height) => {
+        const panel = panelOf(height);
 
-    updatePanelPosition(field, panel);
+        place({ ...first, panel: height }, panel);
 
-    expect(panel.nativeElement.classList.contains('above')).toBe(false);
+        return side(place({ ...then, panel: height }, panel)) === expectedSide({ ...then, panel: height });
+      })
+    );
   });
 
-  // The same panel is repositioned on every scroll and resize, so the flip has to come back off again —
-  // otherwise a panel that once had to open upwards stays upwards for the rest of its life.
-  it('drops the flip once the panel fits below again', () => {
-    const panel = panelOf(200);
+  it('leaves the field untouched', () => {
+    fc.assert(
+      fc.property(geometry, (at) => {
+        const field = fieldIn(at);
 
-    updatePanelPosition(elementAt(viewport - 70, 60), panel);
+        updatePanelPosition(field, panelOf(at.panel));
+        stage.replaceChildren();
 
-    expect(panel.nativeElement.classList.contains('above')).toBe(true);
-
-    updatePanelPosition(elementAt(0, 60), panel);
-
-    expect(panel.nativeElement.classList.contains('above')).toBe(false);
+        return field.nativeElement.classList.length === 0;
+      })
+    );
   });
 
-  // The window is not the box the panel has to fit in — an ancestor that clips its overflow is. A panel
-  // measured against the window opens into room the pane it lives in does not have, and is cut off.
+  // A sheet sits on the viewport, not on the field, so the space around the field says nothing about it. The
+  // position is an input, so an anchored panel that flipped can become a sheet at any time.
+  it('never flips a sheet, whatever the room and wherever it was before', () => {
+    fc.assert(
+      fc.property(geometry, geometry, (before, at) => {
+        const panel = place(before);
+
+        panel.nativeElement.classList.add('panel-sheet');
+
+        return side(place(at, panel)) === 'below';
+      })
+    );
+  });
+
+  // The window is not the box the panel has to fit in: an ancestor that clips its overflow is. A panel measured
+  // against the window opens into room the pane it lives in does not have, and is cut off.
   it('flips above when the panel fits below in the window but not in the pane the field scrolls in', () => {
-    const field = elementAt(200, 60);
-    const panel = panelOf(120);
-
-    inScrollPane(field, 40, 300);
-
-    updatePanelPosition(field, panel);
-
-    expect(panel.nativeElement.classList.contains('above')).toBe(true);
+    expect(side(place({ field: { top: 200, bottom: 260 }, panel: 120, panes: [{ top: 40, bottom: 300 }] }))).toBe(
+      'above'
+    );
   });
 
   // The other half of the same mistake: flipping above is only an improvement while the pane has the room.
   it('stays below when the room above is the window’s rather than the pane’s', () => {
-    const field = elementAt(viewport - 70, 60);
-    const panel = panelOf(120);
+    const field = { top: viewport - 70, bottom: viewport - 10 };
 
-    inScrollPane(field, viewport - 120, viewport);
-
-    updatePanelPosition(field, panel);
-
-    expect(panel.nativeElement.classList.contains('above')).toBe(false);
-  });
-
-  it('leaves the field untouched', () => {
-    const field = elementAt(viewport - 70, 60);
-
-    updatePanelPosition(field, panelOf(200));
-
-    expect(field.nativeElement.classList.length).toBe(0);
+    expect(side(place({ field, panel: 120, panes: [{ top: viewport - 120, bottom: viewport }] }))).toBe('below');
   });
 
   it('does nothing without both elements', () => {
     expect(() => updatePanelPosition(undefined, panelOf(100))).not.toThrow();
-    expect(() => updatePanelPosition(elementAt(0, 60), undefined)).not.toThrow();
-  });
-
-  // A sheet sits on the viewport, not on the field, so the space around the field says nothing about it.
-  it('never flips a sheet, however little room the field leaves', () => {
-    const panel = panelOf(200);
-
-    panel.nativeElement.classList.add('panel-sheet');
-
-    updatePanelPosition(elementAt(viewport - 70, 60), panel);
-
-    expect(panel.nativeElement.classList.contains('above')).toBe(false);
-  });
-
-  // The position is an input: a panel that was anchored and flipped can become a sheet at any time, and it
-  // must not keep the transform that flip carries.
-  it('drops a flip a panel picked up before it became a sheet', () => {
-    const panel = panelOf(200);
-
-    updatePanelPosition(elementAt(viewport - 70, 60), panel);
-
-    expect(panel.nativeElement.classList.contains('above')).toBe(true);
-
-    panel.nativeElement.classList.add('panel-sheet');
-
-    updatePanelPosition(elementAt(viewport - 70, 60), panel);
-
-    expect(panel.nativeElement.classList.contains('above')).toBe(false);
+    expect(() => updatePanelPosition(new ElementRef(elementAt({ top: 0, bottom: 60 })), undefined)).not.toThrow();
   });
 });
