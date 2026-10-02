@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { form, FormField, minLength, ValidationError } from '@angular/forms/signals';
+import { page } from 'vitest/browser';
 import { FORMIDABLE_ERROR_MESSAGE } from '../../models/validation.model';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldDecorator } from '../field-decorator/field-decorator';
@@ -9,9 +10,10 @@ import { InputField } from '../fields/input-field/input-field';
 import { FieldErrors } from './field-errors';
 
 /**
- * Contract of the message text: every error the library renders becomes a message through
- * `FORMIDABLE_ERROR_MESSAGE`, which defaults to the error's `message`, else its `kind`. A classic API hands
- * a field its errors as `{ kind, context }` with no `message`, so the token is where one gets its text.
+ * Per **Messages** in `user/validation.md`: every error the library renders becomes a message through
+ * `FORMIDABLE_ERROR_MESSAGE`, which defaults to the error's `message`, else its `kind`, in an `aria-live`
+ * region. Per **An Error Carries No Text** there, a classic API hands a field its errors as `{ kind, context }`
+ * with no `message`, so the token is where one gets its text.
  */
 
 /** Placed by hand, as a consumer places one for a group or the form. */
@@ -52,9 +54,11 @@ class SignalHost {
   readonly form = form(this.model, (path) => minLength(path.name, 3, { message: 'At least three letters.' }));
 }
 
-function messages(root: HTMLElement): string[] {
-  return Array.from(root.querySelectorAll('.error'), (error) => error.textContent!.trim());
-}
+const messages = () =>
+  page
+    .getByRole('listitem')
+    .elements()
+    .map((message) => message.textContent!.trim());
 
 describe('error message', () => {
   it('renders an error’s message, else its kind', async () => {
@@ -63,7 +67,7 @@ describe('error message', () => {
     fixture.componentInstance.errors.set([{ kind: 'taken', message: 'Taken.' }, { kind: 'required' }]);
     await settle(fixture);
 
-    expect(messages(fixture.nativeElement)).toEqual(['Taken.', 'required']);
+    expect(messages()).toEqual(['Taken.', 'required']);
   });
 
   it('keeps its live region in place while it has nothing to announce', async () => {
@@ -85,7 +89,7 @@ describe('error message', () => {
     fixture.componentInstance.errors.set([{ kind: 'taken', message: 'Taken.' }]);
     await settle(fixture);
 
-    expect(messages(fixture.nativeElement)).toEqual(['No: taken']);
+    expect(messages()).toEqual(['No: taken']);
   });
 
   it('renders a Signal Forms rule’s own message', async () => {
@@ -93,7 +97,7 @@ describe('error message', () => {
     const fixture = TestBed.createComponent(SignalHost);
     await settle(fixture);
 
-    expect(messages(fixture.nativeElement)).toEqual(['At least three letters.']);
+    expect(messages()).toEqual(['At least three letters.']);
   });
 
   it('hands a classic error over as its kind and context, with no message', async () => {
@@ -109,7 +113,7 @@ describe('error message', () => {
     const fixture = TestBed.createComponent(ReactiveHost);
     await settle(fixture);
 
-    expect(messages(fixture.nativeElement)).toEqual(['At least 3 letters.']);
+    expect(messages()).toEqual(['At least 3 letters.']);
     expect(seen[0]?.kind).toBe('minlength');
     expect(seen[0]?.message).toBeUndefined();
     expect((seen[0] as ValidationError & { context: unknown }).context).toEqual({ requiredLength: 3, actualLength: 2 });

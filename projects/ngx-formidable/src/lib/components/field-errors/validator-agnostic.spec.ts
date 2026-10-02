@@ -1,23 +1,21 @@
 import { Component, Type } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { ValidationError } from '@angular/forms/signals';
+import { page, userEvent } from 'vitest/browser';
 import { FieldLabel } from '../../directives/field-label';
 import { FORMIDABLE_ERROR_MESSAGE } from '../../models/validation.model';
-import { fill } from '../../testing/dom';
 import { configureFormidableTestBed, DIRECTIVE_VALIDATORS_UNATTACHED, settle } from '../../testing/test-bed';
 import { FieldDecorator } from '../field-decorator/field-decorator';
 import { InputField } from '../fields/input-field/input-field';
 
 /**
- * Contract of the library's independence from any one validation library.
+ * Per **Classic Validators** and **Messages** in `user/validation.md`: the decorator's invalid state, the field's
+ * `aria-invalid` and its messages need no validation library, Angular's built-in validators alone drive
+ * them. An Angular error reaches the field as its key, `{ kind: 'required' }`, which
+ * `FORMIDABLE_ERROR_MESSAGE` renders as it is by default and as a consumer's text once overridden.
  *
- * Errors reach the UI through what `ngModel` writes into the field, so the decorator's `.is-invalid` state,
- * the field's `aria-invalid` and the message list must all work with no validation library — driven by
- * Angular's built-in validators alone.
- *
- * An Angular error reaches the field as its key, `{ kind: 'required' }`, which `FORMIDABLE_ERROR_MESSAGE`
- * renders as it is by default and as a consumer's text once overridden.
+ * Every spec here waits on **Directive Validators On A Custom Control** in `impl/backlog.md`.
  */
 
 @Component({
@@ -32,6 +30,7 @@ import { InputField } from '../fields/input-field/input-field';
           [(ngModel)]="name" />
         <div formidableFieldLabel>Name</div>
       </formidable-field-decorator>
+      <button type="button">Next</button>
     </form>
   `
 })
@@ -39,50 +38,27 @@ class AngularValidatorsHost {
   name = '';
 }
 
+const input = () => page.getByRole('textbox', { name: 'Name' });
+const messages = () =>
+  page
+    .getByRole('listitem')
+    .elements()
+    .map((message) => message.textContent!.trim());
+const isInvalid = () => document.querySelector('formidable-field-decorator')!.classList.contains('is-invalid');
+
+async function mount(host: Type<unknown>): Promise<void> {
+  await settle(TestBed.createComponent(host));
+}
+
+/** Leaves the field as a user does, which touches it. */
+async function touch(): Promise<void> {
+  await userEvent.click(input());
+  await userEvent.tab();
+}
+
 describe('validator-agnostic error rendering', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let fixture: ComponentFixture<any>;
-  let root: HTMLElement;
-
-  function decorator(): HTMLElement {
-    return root.querySelector('formidable-field-decorator') as HTMLElement;
-  }
-
-  function input(): HTMLInputElement {
-    return root.querySelector('input') as HTMLInputElement;
-  }
-
-  function messages(): (string | undefined)[] {
-    return Array.from(root.querySelectorAll('.error')).map((e) => e.textContent?.trim());
-  }
-
-  /**
-   * Builds the fixture and settles it. Settling matters: the field renders its input through an `@if` whose
-   * branch flips once ngxMask initializes, replacing the element — so nothing may be dispatched before it.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async function mount(host: Type<any>): Promise<void> {
-    fixture = TestBed.createComponent(host);
-    root = fixture.nativeElement as HTMLElement;
-
-    await settle(fixture);
-  }
-
-  function touch(): void {
-    input().dispatchEvent(new FocusEvent('focus'));
-    input().dispatchEvent(new FocusEvent('blur'));
-  }
-
   describe('with Angular’s built-in validators', () => {
-    beforeEach(() => {
-      configureFormidableTestBed();
-    });
-
-    it('renders the decorator’s errors component', async () => {
-      await mount(AngularValidatorsHost);
-
-      expect(root.querySelector('formidable-field-errors')).toBeTruthy();
-    });
+    beforeEach(() => configureFormidableTestBed());
 
     // `required` writes `{ required: true }`, and its key is the message the default renders.
     it('renders Angular’s error keys as messages once touched', async ({ skip }) => {
@@ -92,10 +68,9 @@ describe('validator-agnostic error rendering', () => {
 
       expect(messages()).toEqual([]);
 
-      touch();
-      await settle(fixture);
+      await touch();
 
-      expect(messages()).toEqual(['required']);
+      await expect.poll(messages).toEqual(['required']);
     });
 
     it('raises .is-invalid on the decorator and aria-invalid on the field', async ({ skip }) => {
@@ -103,14 +78,13 @@ describe('validator-agnostic error rendering', () => {
 
       await mount(AngularValidatorsHost);
 
-      expect(decorator().classList.contains('is-invalid')).toBe(false);
-      expect(input().getAttribute('aria-invalid')).toBeNull();
+      expect(isInvalid()).toBe(false);
+      await expect.element(input()).not.toHaveAttribute('aria-invalid');
 
-      touch();
-      await settle(fixture);
+      await touch();
 
-      expect(decorator().classList.contains('is-invalid')).toBe(true);
-      expect(input().getAttribute('aria-invalid')).toBe('true');
+      await expect.element(input()).toHaveAttribute('aria-invalid', 'true');
+      expect(isInvalid()).toBe(true);
     });
 
     it('follows the failing validator, and clears as the value satisfies them all', async ({ skip }) => {
@@ -118,18 +92,16 @@ describe('validator-agnostic error rendering', () => {
 
       await mount(AngularValidatorsHost);
 
-      touch();
-      fill(input(), 'ab');
-      await settle(fixture);
+      await touch();
+      await userEvent.type(input(), 'ab');
 
-      expect(messages()).toEqual(['minlength']);
+      await expect.poll(messages).toEqual(['minlength']);
 
-      fill(input(), 'abc');
-      await settle(fixture);
+      await userEvent.type(input(), 'c');
 
-      expect(messages()).toEqual([]);
-      expect(decorator().classList.contains('is-invalid')).toBe(false);
-      expect(input().getAttribute('aria-invalid')).toBeNull();
+      await expect.poll(messages).toEqual([]);
+      expect(isInvalid()).toBe(false);
+      await expect.element(input()).not.toHaveAttribute('aria-invalid');
     });
   });
 
@@ -148,9 +120,8 @@ describe('validator-agnostic error rendering', () => {
 
     await mount(AngularValidatorsHost);
 
-    touch();
-    await settle(fixture);
+    await touch();
 
-    expect(messages()).toEqual(['Please tell us your name.']);
+    await expect.poll(messages).toEqual(['Please tell us your name.']);
   });
 });

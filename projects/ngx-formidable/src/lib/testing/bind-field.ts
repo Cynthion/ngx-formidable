@@ -24,7 +24,9 @@ import { SliderField } from '../components/fields/slider-field/slider-field';
 import { TextareaField } from '../components/fields/textarea-field/textarea-field';
 import { TimeField } from '../components/fields/time-field/time-field';
 import { ToggleField } from '../components/fields/toggle-field/toggle-field';
+import { FieldHint } from '../directives/field-hint';
 import { FieldLabel } from '../directives/field-label';
+import { FieldPrefix } from '../directives/field-prefix';
 import { FieldSuffix } from '../directives/field-suffix';
 import { settle } from './test-bed';
 
@@ -183,8 +185,10 @@ export async function bindField(kind: FieldKind, api: FormsApi, options: BindFie
         ReactiveFormsModule,
         FormField,
         FieldDecorator,
+        FieldHint,
         FieldLabel,
         FieldOption,
+        FieldPrefix,
         FieldSuffix,
         ...FIELDS
       ],

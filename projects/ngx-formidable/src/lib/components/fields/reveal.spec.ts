@@ -2,30 +2,32 @@ import { Component, signal, Type, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, FormsModule, NgForm, NgModel, ReactiveFormsModule, Validators } from '@angular/forms';
 import { form, FormField, FormRoot, required, ValidationError } from '@angular/forms/signals';
+import { page, userEvent } from 'vitest/browser';
+import { FieldLabel } from '../../directives/field-label';
 import { FormidableReveal } from '../../models/validation.model';
 import { bindField, BoundField, FORMS_APIS } from '../../testing/bind-field';
-import { fill } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldDecorator } from '../field-decorator/field-decorator';
 import { InputField } from './input-field/input-field';
 
 /**
- * Contract of the reveal: a field's messages appear once it is `touched` (the default), once it is `dirty`,
- * or `always`, whichever forms API holds its errors. The field turns invalid at that moment and not before —
- * `aria-invalid` on its control, `.is-invalid` on its decorator — and the decorator renders the messages.
+ * Per **When A Rule Runs And When Its Messages Appear** in `user/validation.md`: a field's messages appear once
+ * it is `touched` (the default), once it is `dirty`, or `always`, whichever forms API holds its errors. The
+ * field turns invalid at that moment and not before, `aria-invalid` on its control and `.is-invalid` on its
+ * decorator, and the decorator renders the messages.
  */
 
 /** The field's state inputs bound by hand, as a custom forms integration would bind them. */
 @Component({
-  imports: [FieldDecorator, InputField],
+  imports: [FieldDecorator, InputField, FieldLabel],
   template: `
     <formidable-field-decorator>
       <formidable-input-field
-        name="field"
         [errors]="errors()"
         [invalid]="invalid()"
         [pending]="pending()"
         [touched]="true" />
+      <div formidableFieldLabel>Name</div>
     </formidable-field-decorator>
   `
 })
@@ -37,12 +39,14 @@ class StateHost {
 
 /** A required field in a form that submits, as a consumer writes one under each forms API. */
 @Component({
-  imports: [FormRoot, FormField, FieldDecorator, InputField],
+  imports: [FormRoot, FormField, FieldDecorator, InputField, FieldLabel],
   template: `
     <form [formRoot]="form">
       <formidable-field-decorator>
         <formidable-input-field [formField]="form.name" />
+        <div formidableFieldLabel>Name</div>
       </formidable-field-decorator>
+      <button type="submit">Submit</button>
     </form>
   `
 })
@@ -52,12 +56,14 @@ class SignalSubmitHost {
 }
 
 @Component({
-  imports: [ReactiveFormsModule, FieldDecorator, InputField],
+  imports: [ReactiveFormsModule, FieldDecorator, InputField, FieldLabel],
   template: `
     <form [formGroup]="group">
       <formidable-field-decorator>
         <formidable-input-field formControlName="name" />
+        <div formidableFieldLabel>Name</div>
       </formidable-field-decorator>
+      <button type="submit">Submit</button>
     </form>
   `
 })
@@ -70,14 +76,16 @@ class ReactiveSubmitHost {
 }
 
 @Component({
-  imports: [FormsModule, FieldDecorator, InputField],
+  imports: [FormsModule, FieldDecorator, InputField, FieldLabel],
   template: `
     <form>
       <formidable-field-decorator>
         <formidable-input-field
           name="name"
           [(ngModel)]="name" />
+        <div formidableFieldLabel>Name</div>
       </formidable-field-decorator>
+      <button type="submit">Submit</button>
     </form>
   `
 })
@@ -91,24 +99,27 @@ class TemplateDrivenSubmitHost {
   }
 }
 
-function messages(root: HTMLElement): string[] {
-  return Array.from(root.querySelectorAll('formidable-field-errors .error'), (error) => error.textContent!.trim());
-}
-
-/** Submits the form as a submit button does. */
-async function submit(fixture: ComponentFixture<unknown>): Promise<void> {
-  (fixture.nativeElement as HTMLElement).querySelector('form')!.requestSubmit();
-  await settle(fixture);
-}
+const input = () => page.getByRole('textbox', { name: 'Name' });
+const messages = () =>
+  page
+    .getByRole('listitem')
+    .elements()
+    .map((message) => message.textContent!.trim());
 
 /** Whether the field shows as invalid, which the control and its decorator must agree on. */
-function isInvalid(root: HTMLElement): boolean {
-  const control = root.querySelector('input')!.getAttribute('aria-invalid') === 'true';
-  const decorator = root.querySelector('formidable-field-decorator')!.classList.contains('is-invalid');
+function isInvalid(): boolean {
+  const control = input().element().getAttribute('aria-invalid') === 'true';
+  const decorator = document.querySelector('formidable-field-decorator')!.classList.contains('is-invalid');
 
   expect(control).toBe(decorator);
 
   return control;
+}
+
+/** Submits the form as a user does, with its submit button. */
+async function submit(fixture: ComponentFixture<unknown>): Promise<void> {
+  await userEvent.click(page.getByRole('button', { name: 'Submit' }));
+  await settle(fixture);
 }
 
 describe('reveal', () => {
@@ -117,32 +128,30 @@ describe('reveal', () => {
   for (const api of FORMS_APIS) {
     describe(`bound ${api}`, () => {
       async function bindInvalid(revealOn?: FormidableReveal): Promise<BoundField> {
-        const inputs = revealOn ? { revealOn } : {};
-        const bound = await bindField('input', api, { value: 'filled', inputs, decorated: true });
+        const bound = await bindField('input', api, {
+          value: 'filled',
+          inputs: revealOn ? { revealOn } : {},
+          decorated: true,
+          decoration: '<div formidableFieldLabel>Name</div>',
+          after: '<button type="button">Next</button>'
+        });
 
         await bound.state({ invalid: true });
 
         return bound;
       }
 
-      function root(bound: BoundField): HTMLElement {
-        return bound.fixture.nativeElement as HTMLElement;
-      }
-
       it('reveals once the field is touched by default', async () => {
-        const bound = await bindInvalid();
+        await bindInvalid();
 
-        expect(messages(root(bound))).toEqual([]);
-        expect(isInvalid(root(bound))).toBe(false);
+        expect(messages()).toEqual([]);
+        expect(isInvalid()).toBe(false);
 
-        const input = bound.element.querySelector('input')!;
+        await userEvent.click(input());
+        await userEvent.tab();
 
-        input.focus();
-        input.dispatchEvent(new FocusEvent('blur'));
-        await settle(bound.fixture);
-
-        expect(messages(root(bound))).toEqual(['invalid']);
-        expect(isInvalid(root(bound))).toBe(true);
+        await expect.poll(messages).toEqual(['invalid']);
+        expect(isInvalid()).toBe(true);
       });
 
       // What a submit does: the API marks every field touched, and none of them was blurred.
@@ -151,38 +160,37 @@ describe('reveal', () => {
 
         await bound.markAsTouched();
 
-        expect(messages(root(bound))).toEqual(['invalid']);
-        expect(isInvalid(root(bound))).toBe(true);
+        expect(messages()).toEqual(['invalid']);
+        expect(isInvalid()).toBe(true);
       });
 
       it('reveals once the field is dirty under dirty, before any blur', async () => {
         const bound = await bindInvalid('dirty');
 
-        expect(messages(root(bound))).toEqual([]);
+        expect(messages()).toEqual([]);
 
-        fill(bound.element.querySelector('input')!, 'edited');
-        await settle(bound.fixture);
+        await userEvent.type(input(), 'x');
 
+        await expect.poll(messages).toEqual(['invalid']);
         expect(bound.touched()).toBe(false);
-        expect(messages(root(bound))).toEqual(['invalid']);
-        expect(isInvalid(root(bound))).toBe(true);
+        expect(isInvalid()).toBe(true);
       });
 
       it('reveals with neither a touch nor an edit under always', async () => {
-        const bound = await bindInvalid('always');
+        await bindInvalid('always');
 
-        expect(messages(root(bound))).toEqual(['invalid']);
-        expect(isInvalid(root(bound))).toBe(true);
+        expect(messages()).toEqual(['invalid']);
+        expect(isInvalid()).toBe(true);
       });
 
       it('takes a revealOn changed after the first render', async () => {
         const bound = await bindInvalid('touched');
 
-        expect(messages(root(bound))).toEqual([]);
+        expect(messages()).toEqual([]);
 
         await bound.set('revealOn', 'always');
 
-        expect(messages(root(bound))).toEqual(['invalid']);
+        expect(messages()).toEqual(['invalid']);
       });
 
       it('clears once the error goes', async () => {
@@ -190,8 +198,8 @@ describe('reveal', () => {
 
         await bound.state({ invalid: false });
 
-        expect(messages(root(bound))).toEqual([]);
-        expect(isInvalid(root(bound))).toBe(false);
+        expect(messages()).toEqual([]);
+        expect(isInvalid()).toBe(false);
       });
     });
   }
@@ -199,12 +207,10 @@ describe('reveal', () => {
   describe('bound by hand', () => {
     let fixture: ComponentFixture<StateHost>;
     let host: StateHost;
-    let root: HTMLElement;
 
     beforeEach(async () => {
       fixture = TestBed.createComponent(StateHost);
       host = fixture.componentInstance;
-      root = fixture.nativeElement as HTMLElement;
       await settle(fixture);
     });
 
@@ -219,22 +225,22 @@ describe('reveal', () => {
       host.pending.set(true);
       await settle(fixture);
 
-      expect(messages(root)).toEqual(['Taken.']);
-      expect(isInvalid(root)).toBe(true);
+      expect(messages()).toEqual(['Taken.']);
+      expect(isInvalid()).toBe(true);
 
       host.pending.set(false);
       await settle(fixture);
 
-      expect(messages(root)).toEqual([]);
-      expect(isInvalid(root)).toBe(false);
+      expect(messages()).toEqual([]);
+      expect(isInvalid()).toBe(false);
     });
 
     it('shows a field invalid with no message when the API holds it invalid without errors', async () => {
       host.invalid.set(true);
       await settle(fixture);
 
-      expect(isInvalid(root)).toBe(true);
-      expect(messages(root)).toEqual([]);
+      expect(isInvalid()).toBe(true);
+      expect(messages()).toEqual([]);
     });
   });
 
@@ -245,12 +251,12 @@ describe('reveal', () => {
       const fixture = TestBed.createComponent(SignalSubmitHost);
       await settle(fixture);
 
-      expect(messages(fixture.nativeElement)).toEqual([]);
+      expect(messages()).toEqual([]);
 
       await submit(fixture);
 
-      expect(messages(fixture.nativeElement)).toEqual(['required']);
-      expect(isInvalid(fixture.nativeElement)).toBe(true);
+      expect(messages()).toEqual(['required']);
+      expect(isInvalid()).toBe(true);
     });
 
     const classicHosts: Record<string, Type<ReactiveSubmitHost | TemplateDrivenSubmitHost>> = {
@@ -273,12 +279,12 @@ describe('reveal', () => {
 
         await submit(fixture);
 
-        expect(messages(fixture.nativeElement)).toEqual([]);
+        expect(messages()).toEqual([]);
 
         component.markAllAsTouched();
         await settle(fixture);
 
-        expect(messages(fixture.nativeElement)).toEqual(['required']);
+        expect(messages()).toEqual(['required']);
       });
     }
   });
