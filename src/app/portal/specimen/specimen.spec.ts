@@ -1,6 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { provideNgxMask } from 'ngx-mask';
+import { page, userEvent } from 'vitest/browser';
 import { DOC_PAGES, DOC_PAGES_BY_SLUG } from '../docs/doc-pages';
 import { renderDoc } from '../docs/markdown.helpers';
 import { PRESETS_BY_KEY, presetVars } from '../model/presets';
@@ -13,8 +11,7 @@ import {
   STATE_FEATURED
 } from '../model/specimen';
 import { THEME_TOKENS_BY_NAME } from '../model/token-manifest';
-import { PORTAL_ROUTES } from '../portal.routes';
-import { ThemeStore } from '../state/theme.store';
+import { openPage } from '../testing/studio';
 import { SpecimenPage } from './specimen-page';
 
 const SLUGS = new Set(DOC_PAGES.map((page) => page.slug));
@@ -29,44 +26,13 @@ const MIDNIGHT = PRESETS_BY_KEY.get('midnight')!;
  * actually renders, so none of them drifts into something that names or opens nothing.
  */
 describe('specimen', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-  let fixture: ComponentFixture<SpecimenPage>;
-  let root: HTMLElement;
-
-  async function settle(): Promise<void> {
-    for (let i = 0; i < 3; i++) {
-      fixture.detectChanges();
-      await vi.advanceTimersByTimeAsync(100);
-    }
-    fixture.detectChanges();
-  }
-
-  const scopeVar = (name: string) => getComputedStyle(root.querySelector('.scope')!).getPropertyValue(name).trim();
+  const scopeVar = (name: string) => getComputedStyle(document.querySelector('.scope')!).getPropertyValue(name).trim();
   const rootVar = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  const chip = (label: string) =>
-    Array.from(root.querySelectorAll<HTMLButtonElement>('.chip')).find((b) => b.textContent?.trim() === label)!;
-  const lastStepChip = () => chip(`${LADDER_STEPS.length} ${LADDER_STEPS[LADDER_STEPS.length - 1]!.title}`);
+  const step = (label: string) => page.getByRole('group', { name: 'Ladder step' }).getByRole('button', { name: label });
+  const lastStep = () => step(`${LADDER_STEPS.length} ${LADDER_STEPS[LADDER_STEPS.length - 1]!.title}`);
 
-  beforeEach(() => {
-    localStorage.clear();
-    TestBed.configureTestingModule({ providers: [provideNgxMask(), provideRouter(PORTAL_ROUTES)] });
-    TestBed.inject(ThemeStore).reset();
-
-    fixture = TestBed.createComponent(SpecimenPage);
-    root = fixture.nativeElement as HTMLElement;
-    document.body.append(root);
-  });
-
-  afterEach(() => {
-    root.remove();
-    document.documentElement.removeAttribute('style');
-    localStorage.clear();
-  });
+  /** One chapter's matrix, by the id its heading links to. */
+  const chapter = (id: string) => page.elementLocator(document.getElementById(id)!);
 
   it('names only variables the library documents', () => {
     const names = [...LADDER_DECLARATIONS.map((entry) => entry.name), ...ANATOMY_PARTS.map((part) => part.variable)];
@@ -85,16 +51,20 @@ describe('specimen', () => {
   });
 
   it('links only to documents and anchors the Docs route renders', async () => {
-    await settle();
-    lastStepChip().click();
-    await settle();
+    await openPage(SpecimenPage);
+    await userEvent.click(lastStep());
+    await expect.element(lastStep()).toHaveAttribute('aria-pressed', 'true');
 
-    const hrefs = Array.from(root.querySelectorAll('a[href*="/docs/"]')).map((a) => a.getAttribute('href')!);
+    const hrefs = page
+      .getByRole('link')
+      .elements()
+      .map((link) => link.getAttribute('href')!)
+      .filter((href) => href.includes('/docs/'));
     const dead = hrefs.filter((href) => {
       const [topic, anchor] = href.split('/docs/')[1]!.split('/');
-      const page = DOC_PAGES_BY_SLUG.get(topic!);
+      const doc = DOC_PAGES_BY_SLUG.get(topic!);
 
-      return !page || (anchor !== undefined && !renderDoc(page.markdown, SLUGS).html.includes(` id="${anchor}"`));
+      return !doc || (anchor !== undefined && !renderDoc(doc.markdown, SLUGS).html.includes(` id="${anchor}"`));
     });
 
     expect(hrefs.length).toBeGreaterThan(SPECIMEN_KINDS.length);
@@ -102,81 +72,73 @@ describe('specimen', () => {
   });
 
   it('finds every part of the anatomy in the rendered field', async () => {
-    await settle();
+    await openPage(SpecimenPage);
 
-    const figure = root.querySelector('.anatomy')!;
+    const figure = document.querySelector('.anatomy')!;
 
     expect(ANATOMY_PARTS.filter((part) => !figure.querySelector(part.selector)).map((part) => part.selector)).toEqual(
       []
     );
   });
 
-  // The callouts are laid out from a `ResizeObserver`, which reports on a real frame rather than on the fake
-  // clock, so this one waits for that frame.
+  // The callouts are laid out from a `ResizeObserver`, which reports on a frame of its own.
   it('draws one callout per part, each stating a value', async () => {
-    vi.useRealTimers();
-    fixture.detectChanges();
-    await fixture.whenStable();
-    await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve)));
-    fixture.detectChanges();
+    await openPage(SpecimenPage);
 
-    const values = Array.from(root.querySelectorAll('.callout-value')).map((el) => el.textContent?.trim());
+    const values = () => Array.from(document.querySelectorAll('.callout-value'), (el) => el.textContent?.trim());
 
-    expect(values.length).toBe(ANATOMY_PARTS.length);
-    expect(values.filter((value) => !value)).toEqual([]);
+    await expect.poll(() => values().length).toBe(ANATOMY_PARTS.length);
+    expect(values().filter((value) => !value)).toEqual([]);
   });
 
   it('opens on a few kinds, and shows every kind in every state on request', async () => {
-    await settle();
+    await openPage(SpecimenPage);
 
-    expect(root.querySelectorAll('#states .cell').length).toBe(STATE_FEATURED.length * STATE_COLUMNS.length);
+    const cells = () => document.querySelectorAll('#states .cell');
 
-    root.querySelector<HTMLButtonElement>('#states .more')!.click();
-    await settle();
+    expect(cells().length).toBe(STATE_FEATURED.length * STATE_COLUMNS.length);
 
-    const states = root.querySelector('#states')!;
-    const invalid = Array.from(states.querySelectorAll('.cell')).filter((cell) =>
-      cell.textContent?.includes('Required.')
+    await userEvent.click(chapter('states').getByRole('button', { name: /^Show all/ }));
+
+    await expect.poll(() => cells().length).toBe(SPECIMEN_KINDS.length * STATE_COLUMNS.length);
+    expect(Array.from(cells()).filter((cell) => cell.textContent?.includes('Required.')).length).toBe(
+      SPECIMEN_KINDS.length
     );
-
-    expect(states.querySelectorAll('.cell').length).toBe(SPECIMEN_KINDS.length * STATE_COLUMNS.length);
-    expect(invalid.length).toBe(SPECIMEN_KINDS.length);
   });
 
   it('shows label positions only on the kinds whose layout has room for them', async () => {
-    await settle();
-    root.querySelector<HTMLButtonElement>('#labels .more')!.click();
-    await settle();
+    await openPage(SpecimenPage);
 
-    const rows = Array.from(root.querySelectorAll('#labels .row-name code')).map((el) => el.textContent?.trim());
+    await userEvent.click(chapter('labels').getByRole('button', { name: /^Show all/ }));
 
-    expect(rows.length).toBe(LABEL_POSITION_KINDS.length);
-    expect(rows).not.toContain('formidable-toggle-field');
+    const rows = () => Array.from(document.querySelectorAll('#labels .row-name code'), (el) => el.textContent?.trim());
+
+    await expect.poll(() => rows().length).toBe(LABEL_POSITION_KINDS.length);
+    expect(rows()).not.toContain('formidable-toggle-field');
   });
 
   it('repaints the page, and only the page, with a preset or a ladder step', async () => {
-    await settle();
+    await openPage(SpecimenPage);
 
     const rootHeight = rootVar('--formidable-field-height');
     const rootRadius = rootVar('--formidable-field-border-radius');
 
-    root.querySelector<HTMLButtonElement>('[data-preset="brutalist"]')!.click();
-    await settle();
+    await userEvent.click(page.getByRole('button', { name: new RegExp(`^${PRESETS_BY_KEY.get('brutalist')!.label}`) }));
 
-    expect(scopeVar('--formidable-field-border-radius')).not.toBe(rootRadius);
+    await expect.poll(() => scopeVar('--formidable-field-border-radius')).not.toBe(rootRadius);
     expect(rootVar('--formidable-field-border-radius')).toBe(rootRadius);
 
-    chip('Defaults').click();
-    await settle();
+    await userEvent.click(step('Defaults'));
 
-    expect(scopeVar('--portal-page-background')).toBe('#ffffff');
+    await expect.poll(() => scopeVar('--portal-page-background')).toBe('#ffffff');
 
-    lastStepChip().click();
-    await settle();
+    await userEvent.click(lastStep());
 
-    expect(scopeVar('--formidable-field-height')).toBe(presetVars(MIDNIGHT)['--formidable-field-height']!);
+    await expect
+      .poll(() => scopeVar('--formidable-field-height'))
+      .toBe(presetVars(MIDNIGHT)['--formidable-field-height']!);
     expect(scopeVar('--portal-page-background')).toBe(MIDNIGHT.page.background);
     expect(rootVar('--formidable-field-height')).toBe(rootHeight);
-    expect(root.querySelectorAll('.code-line').length).toBe(LADDER_DECLARATIONS.length);
+    expect(document.querySelectorAll('.code-line').length).toBe(LADDER_DECLARATIONS.length);
   });
 });

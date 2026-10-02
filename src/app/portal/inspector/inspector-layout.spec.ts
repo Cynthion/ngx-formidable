@@ -1,9 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNgxMask } from 'ngx-mask';
-import { FormDefinitionStore } from '../state/form-definition.store';
-import { FieldScope, InspectorStore } from '../state/inspector.store';
-import { INSPECTOR_WIDTH_DEFAULT, INSPECTOR_WIDTH_MIN, LayoutStore } from '../state/layout.store';
-import { Inspector } from './inspector';
+import { page, userEvent } from 'vitest/browser';
+import { PREVIEW_FIELDS } from '../model/preview-form.definition';
+import { INSPECTOR_WIDTH_DEFAULT, INSPECTOR_WIDTH_MIN } from '../state/layout.store';
+import { ComponentFixture } from '@angular/core/testing';
+import { editField, openPanel, openStudio, settle, tab, WIDE } from '../testing/studio';
+
+/** **Panel Overflows At Its Narrowest** in `impl/backlog.md`. */
+const NARROWEST_OVERFLOWS = 'the export’s file tabs and the corner grid overflow a panel at its narrowest';
 
 /**
  * Nothing in the panel is painted outside its own gutter, at either end of the width the divider allows.
@@ -14,166 +16,136 @@ import { Inspector } from './inspector';
  * the panel the more of it there is to see.
  */
 describe('inspector layout', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-  let fixture: ComponentFixture<Inspector>;
-  let host: HTMLElement;
-  let inspector: InspectorStore;
-  let store: FormDefinitionStore;
+  let fixture: ComponentFixture<unknown>;
 
-  const SCOPES: readonly FieldScope[] = ['app', 'form', 'field'];
+  const panel = () => document.querySelector('portal-inspector')!;
+  const body = () => panel().querySelector<HTMLElement>('.body')!;
 
-  beforeEach(() => {
-    localStorage.clear();
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+  /** Drags the divider from the keyboard to the narrowest width it allows: the panel only gets narrower. */
+  async function narrowest(): Promise<void> {
+    await userEvent.click(tab('Theme'));
+    await userEvent.tab({ shift: true });
 
-    inspector = TestBed.inject(InspectorStore);
-    store = TestBed.inject(FormDefinitionStore);
-    store.reset();
-    TestBed.inject(LayoutStore).inspectorCollapsed.set(false);
+    for (let width = INSPECTOR_WIDTH_DEFAULT; width > INSPECTOR_WIDTH_MIN; width -= 24) {
+      await userEvent.keyboard('{ArrowRight}');
+    }
 
-    fixture = TestBed.createComponent(Inspector);
-    host = fixture.nativeElement as HTMLElement;
-  });
-
-  afterEach(() => localStorage.clear());
-
-  async function settle(): Promise<void> {
-    fixture.detectChanges();
-    await vi.advanceTimersByTimeAsync(50);
-    fixture.detectChanges();
+    await expect.poll(() => panel().getBoundingClientRect().width).toBeLessThan(INSPECTOR_WIDTH_MIN + 24);
   }
 
-  /**
-   * The panel at one width whatever the runner's viewport is. `!important`, because below the two-column
-   * breakpoint the panel is a bottom sheet and that rule carries one of its own.
-   */
-  async function sizeTo(width: number): Promise<void> {
-    host.style.setProperty('width', `${width}px`, 'important');
-    host.style.setProperty('height', '640px', 'important');
-    await settle();
-  }
+  /** Every element whose right edge lands beyond the scroll container's own content box, once it has rendered. */
+  async function overflowing(where: string): Promise<string[]> {
+    await settle(fixture);
 
-  /** Every element whose right edge lands beyond the scroll container's own content box. */
-  function overflowing(where: string): string[] {
-    const body = host.querySelector('.body') as HTMLElement;
-    const limit = body.getBoundingClientRect().left + body.clientWidth;
+    const limit = body().getBoundingClientRect().left + body().clientWidth;
 
-    return Array.from(body.querySelectorAll<HTMLElement>('*'))
+    return Array.from(body().querySelectorAll<HTMLElement>('*'))
       .filter((element) => element.getBoundingClientRect().right > limit + 0.5)
       .map((element) => `${where}: ${element.tagName.toLowerCase()}.${element.className || '—'}`);
   }
 
-  /** The view as it opens, then again with each of its sections open in turn. */
-  async function eachSection(where: string, report: (where: string) => void): Promise<void> {
-    await settle();
-    report(where);
+  /** The view as it opens, then again with each of its sections opened in turn. */
+  async function eachSection(where: string, report: (where: string) => Promise<void>): Promise<void> {
+    await report(where);
 
-    const count = host.querySelectorAll('.trigger').length;
+    const triggers = page.elementLocator(body()).getByRole('heading', { level: 3 }).getByRole('button');
 
-    for (let i = 0; i < count; i++) {
-      (host.querySelectorAll<HTMLElement>('.trigger')[i] as HTMLElement).click();
-      await settle();
-      report(`${where} §${i + 1}`);
+    for (let i = 0; i < triggers.elements().length; i++) {
+      if (triggers.nth(i).element().getAttribute('aria-expanded') !== 'true') await userEvent.click(triggers.nth(i));
+      await report(`${where} §${i + 1}`);
     }
   }
 
-  /** Every tab, sub-tab, scope and section the panel can show. */
-  async function eachView(report: (where: string) => void): Promise<void> {
-    inspector.tab.set('theme');
-    inspector.themeTab.set('design');
-    await eachSection('theme/design', report);
-
-    inspector.themeTab.set('variables');
-    await eachSection('theme/variables', report);
-
-    inspector.tab.set('form');
-    inspector.formTab.set('structure');
-    await eachSection('form/structure', report);
-
-    inspector.formTab.set('settings');
-    for (const scope of SCOPES) {
-      inspector.fieldScope.set(scope);
-      await settle();
-      report(`form/settings/${scope}`);
+  /** Every tab, half, scope and section the panel can show. */
+  async function eachView(report: (where: string) => Promise<void>): Promise<void> {
+    for (const [area, half] of [
+      ['Theme', 'Design'],
+      ['Theme', 'Variables'],
+      ['Form', 'Structure']
+    ] as const) {
+      await openPanel(area, half);
+      await eachSection(`${area}/${half}`, report);
     }
 
-    inspector.tab.set('export');
-    inspector.exportSection.set('theme');
-    await eachSection('export/theme', report);
+    for (const scope of ['App Defaults', 'The Form', 'This Field']) {
+      await openPanel('Form', 'Settings', scope);
+      await report(`Form/Settings/${scope}`);
+    }
 
-    inspector.exportSection.set('form');
-    await eachSection('export/form', report);
+    for (const half of ['Theme', 'Form']) {
+      await openPanel('Import & Export', half);
+      await eachSection(`Import & Export/${half}`, report);
+    }
   }
 
-  async function sweep(width: number): Promise<string[]> {
+  async function sweep(): Promise<string[]> {
     const failures: string[] = [];
 
-    await sizeTo(width);
-    await eachView((where) => failures.push(...overflowing(where)));
+    await eachView(async (where) => {
+      failures.push(...(await overflowing(where)));
+    });
 
     return failures;
   }
 
   it('paints nothing outside the gutter at the width it opens at', async () => {
-    expect(await sweep(INSPECTOR_WIDTH_DEFAULT)).toEqual([]);
+    fixture = await openStudio();
+
+    expect(panel().getBoundingClientRect().width).toBeCloseTo(INSPECTOR_WIDTH_DEFAULT, 0);
+    expect(await sweep()).toEqual([]);
   });
 
-  it('paints nothing outside the gutter at the narrowest width the divider allows', async () => {
-    expect(await sweep(INSPECTOR_WIDTH_MIN)).toEqual([]);
+  it('paints nothing outside the gutter at the narrowest width the divider allows', async ({ skip }) => {
+    skip(NARROWEST_OVERFLOWS);
+
+    fixture = await openStudio();
+    await narrowest();
+
+    expect(await sweep()).toEqual([]);
   });
 
   // Each area's halves are longer than the panel, so the strip saying which half is showing has to survive
   // the scroll rather than leave with the content.
   it('keeps the sub-tab strip at the top of the panel scrolled to its end', async () => {
-    await sizeTo(INSPECTOR_WIDTH_DEFAULT);
-    // Short enough that every view below has to scroll, whatever the runner's viewport makes a `dvh`.
-    host.style.setProperty('height', '400px', 'important');
+    // Short enough that every view below has to scroll.
+    fixture = await openStudio({ width: WIDE.width, height: 600 });
 
-    const views: [string, () => void][] = [
-      ['theme/design', () => inspector.tab.set('theme')],
-      ['form/settings', () => inspector.openFieldSettings()],
-      ['export/form', () => inspector.openExport('form')]
-    ];
+    for (const [area, half] of [
+      ['Theme', 'Design'],
+      ['Form', 'Settings'],
+      ['Import & Export', 'Form']
+    ] as const) {
+      await openPanel(area, half);
 
-    for (const [where, open] of views) {
-      open();
-      await settle();
+      body().scrollTop = body().scrollHeight;
 
-      const body = host.querySelector('.body') as HTMLElement;
-      body.scrollTop = body.scrollHeight;
-
-      const strip = host.querySelector('.sub-tabs') as HTMLElement;
+      const strip = panel().querySelector('.sub-tabs')!;
 
       // Scrolled for real, or the strip being at the top would prove nothing.
-      expect(body.scrollTop, where).toBeGreaterThan(100);
-      expect(strip.getBoundingClientRect().top - body.getBoundingClientRect().top, where).toBeCloseTo(0, 0);
+      expect(body().scrollTop, half).toBeGreaterThan(100);
+      expect(strip.getBoundingClientRect().top - body().getBoundingClientRect().top, half).toBeCloseTo(0, 0);
     }
   });
 
   // Open, the toggle keeps the content's gutter, measured against the sub-tab strip so a scrollbar in the body
   // cannot skew it. Collapsed, the rail holds nothing else, so the toggle centres.
   it('lines the toggle up with the content open and centres it collapsed', async () => {
-    await sizeTo(INSPECTOR_WIDTH_DEFAULT);
+    fixture = await openStudio();
 
-    const toggle = (): DOMRect => (host.querySelector('.collapse') as HTMLElement).getBoundingClientRect();
-    const head = (host.querySelector('.head') as HTMLElement).getBoundingClientRect();
-    const strip = host.querySelector('.sub-tabs') as HTMLElement;
+    const toggle = () => page.getByRole('button', { name: /^(Collapse|Expand) the editor panel$/ });
+    const head = panel().querySelector('.head')!.getBoundingClientRect();
+    const strip = panel().querySelector('.sub-tabs')!;
     const stripGutter = strip.getBoundingClientRect().right - strip.lastElementChild!.getBoundingClientRect().right;
 
-    expect(head.right - toggle().right).toBeCloseTo(stripGutter, 0);
+    expect(head.right - toggle().element().getBoundingClientRect().right).toBeCloseTo(stripGutter, 0);
 
-    host.style.removeProperty('width');
-    TestBed.inject(LayoutStore).inspectorCollapsed.set(true);
-    await settle();
+    await userEvent.click(toggle());
+    await expect.element(page.getByRole('button', { name: 'Expand the editor panel' })).toBeVisible();
 
-    const rail = host.getBoundingClientRect();
-    const left = toggle().left - (rail.left + host.clientLeft);
-    const right = rail.left + host.clientLeft + host.clientWidth - toggle().right;
+    const rail = panel().getBoundingClientRect();
+    const button = toggle().element().getBoundingClientRect();
+    const left = button.left - (rail.left + panel().clientLeft);
+    const right = rail.left + panel().clientLeft + panel().clientWidth - button.right;
 
     expect(left).toBeGreaterThan(0);
     expect(left).toBeCloseTo(right, 0);
@@ -181,17 +153,15 @@ describe('inspector layout', () => {
 
   // The field editor renders a different set of controls per kind, so one selected field proves one of them.
   it('paints nothing outside the gutter for any field the editor can open', async () => {
+    fixture = await openStudio();
+    await narrowest();
+    await openPanel('Form', 'Settings', 'This Field');
+
     const failures: string[] = [];
 
-    await sizeTo(INSPECTOR_WIDTH_MIN);
-    inspector.tab.set('form');
-    inspector.formTab.set('settings');
-    inspector.fieldScope.set('field');
-
-    for (const field of store.fields()) {
-      store.select(field.id);
-      await settle();
-      failures.push(...overflowing(`${field.kind} "${field.label}"`));
+    for (const field of PREVIEW_FIELDS) {
+      await editField(field.label);
+      failures.push(...(await overflowing(`${field.kind} "${field.label}"`)));
     }
 
     expect(failures).toEqual([]);

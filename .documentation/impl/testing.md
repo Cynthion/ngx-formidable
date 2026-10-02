@@ -19,7 +19,7 @@ Both `test` targets use `@angular/build:unit-test` with `browsers: ["ChromiumHea
 - **Portal**: builds from its own `build` target's `development` configuration, with the app's styles, assets and loaders.
 - **Library**: an ng-packagr target carries no `styles`, so the library's `test` target builds from `test-build`, an `@angular/build:application` target that exists only for the tests. It loads `test-styles.scss`, which is the shipped theme, so specs measure the real `:root` variables.
 - **AOT**: both compile their specs AOT, so a spec host's template is type-checked as the app's are. A template no build reaches, such as the Studio's golden export, is checked that way.
-- **Zoneless**: both projects run zoneless, as the app does. zone.js is not installed, so `fakeAsync`, `tick` and `flush` do not exist. Library specs wait on real timers; portal specs use Vitest's fake timers, `vi.useFakeTimers()` and `await vi.advanceTimersByTimeAsync(ms)`, and a spec that waits for a real frame, such as a `ResizeObserver`'s, switches back with `vi.useRealTimers()`.
+- **Zoneless**: both projects run zoneless, as the app does. zone.js is not installed, so `fakeAsync`, `tick` and `flush` do not exist. Library specs and the Studio's specs wait on real timers, since a page that repaints from timers a fake clock holds back never satisfies a retrying assertion. The other portal specs use Vitest's fake timers, `vi.useFakeTimers()` and `await vi.advanceTimersByTimeAsync(ms)`, and one that waits for a real frame, such as a `ResizeObserver`'s, switches back with `vi.useRealTimers()`.
 - **Failure Screenshots**: a failing spec leaves a screenshot of the page under `.vitest/`.
 
 Two things behave differently in a zoneless `TestBed`, and both mislead if they are not known. `fixture.detectChanges()` refreshes only what something marked, so an `OnPush` host holding plain fields is skipped: a spec host that changes its own state holds it in signals. And a spec proving that a repaint arrives on its own never calls `detectChanges()` after the act, since that ticks the whole application and would pass either way.
@@ -61,6 +61,25 @@ Every library spec is built on the helpers in `lib/testing/`. `public-api.ts` do
 | `theme()`, `corners()`         | A `:root` override, the four resolved corner radii                                                                                     |
 
 `bindField` with `decorated: true` and `decoration: '<div formidableFieldLabel>Colour</div>'` gives a field the accessible name `page.getByRole` finds it by, and a `formidableFieldLabelAdornment`, `formidableFieldPrefix`, `formidableFieldSuffix` or `formidableFieldHint` projects the same way. With `after: '<button type="button">Next</button>'` focus has somewhere to leave to by `Tab` and come back from by `Shift` + `Tab`: a field alone in the test frame would hand focus to the page around it, which does not reliably hand it back. `before` puts markup ahead of the field, such as a spacer that moves it to the fold. `state` has the forms API hold a field `disabled`, `readonly`, `required` or `invalid` from its first render, as `state()` does later; under `ngModel`, whose control registers after that render, only `readonly` and `required`.
+
+---
+
+## Portal Helpers
+
+The Studio's specs are built on `src/app/portal/testing/studio.ts`. No build of the app reaches it.
+
+| Helper                                | Does                                                                                                                   |
+| :------------------------------------ | :--------------------------------------------------------------------------------------------------------------------- |
+| `openPage(component)`, `openStudio()` | A portal page as a visitor lands on it: nothing remembered, the two-column layout at `WIDE`. Clears `:root` afterwards |
+| `settle(fixture, ms)`                 | As the library's: timers of up to `ms`, a frame, the change detection they scheduled                                   |
+| `tab()`, `openPanel()`                | The editor panel's tabs by label, and the way through them to one area, half and scope                                 |
+| `openSection(heading)`                | Opens an accordion section, and leaves an open one alone                                                               |
+| `editField(label)`                    | Picks a field on the `Settings` half's field picker                                                                    |
+| `model()`, `errors()`                 | The model and its messages, read off the model drawer's `Raw` and `Errors` views                                       |
+
+- **Clipboard**: the runner's frame refuses `navigator.clipboard.writeText`, and a copy confirms only a write that took, so a spec of a copy stubs it with `vi.spyOn`.
+- **Routes**: the test bed routes on a mock of the browser's location, so `Location.path()` reads the route, and nothing performs the initial navigation.
+- **The Divider**: it cancels its `pointerdown`, so a click does not focus it. `Shift` + `Tab` from the panel's first tab does.
 
 ---
 

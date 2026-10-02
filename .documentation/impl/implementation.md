@@ -121,7 +121,8 @@ Phases 32 to 37 rewrite the specs Vitest inherited to the rules in **Writing A S
 
 **Depends On**: nothing.
 
-- **Scope**: every spec under `src/`. The Studio is reached through its own controls, by role and label, rather than through store calls and CSS selectors.
+- **Scope**: the portal specs outside the Studio: the example counter field and tooltip, `portalSelectedValue`, the golden export, the Vest and Zod integrations, the layout store, and the pure helpers, whose rules become properties. The Studio's specs and `portal/testing/` are the pattern.
+- **Timers**: they move to real timers, as the Studio's specs did, and **Zoneless** in [`impl/testing.md`](testing.md) drops the fake ones.
 
 ### Phase 38: Release
 

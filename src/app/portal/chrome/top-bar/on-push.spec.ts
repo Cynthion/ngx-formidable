@@ -1,8 +1,10 @@
 import { Location } from '@angular/common';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
-import { PORTAL_ROUTES } from '../../portal.routes';
-import { ThemeStore } from '../../state/theme.store';
+import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
+import { onTestFinished } from 'vitest';
+import { page, userEvent } from 'vitest/browser';
+import { App } from '../../../app';
+import { openPage, openPanel, openSection, openStudio } from '../../testing/studio';
 import { TopBar } from './top-bar';
 
 /**
@@ -15,110 +17,69 @@ import { TopBar } from './top-bar';
  * and nothing else would notice.
  */
 describe('top bar OnPush contract', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-  let fixture: ComponentFixture<TopBar>;
-  let root: HTMLElement;
-  let theme: ThemeStore;
-
-  async function settle(): Promise<void> {
-    fixture.detectChanges();
-    await vi.advanceTimersByTimeAsync(50);
-    fixture.detectChanges();
-  }
-
-  function copyButton(): HTMLButtonElement {
-    return root.querySelector('.copy-button') as HTMLButtonElement;
-  }
-
-  function count(): HTMLElement {
-    return root.querySelector('.count') as HTMLElement;
-  }
-
-  beforeEach(() => {
-    localStorage.clear();
-
-    TestBed.configureTestingModule({ providers: [provideRouter(PORTAL_ROUTES)] });
-
-    theme = TestBed.inject(ThemeStore);
-    theme.reset();
-
-    fixture = TestBed.createComponent(TopBar);
-    root = fixture.nativeElement as HTMLElement;
-  });
-
-  afterEach(() => {
-    document.documentElement.removeAttribute('style');
-    localStorage.clear();
-  });
+  const copy = () => page.getByRole('button', { name: /^(Copy Theme|Copied) \d+$/ });
+  const count = () => Number(copy().element().querySelector('.count')!.textContent);
 
   it('clears the copied confirmation on its own, from a callback nothing ticks', async () => {
-    await settle();
-    expect(copyButton().textContent).toContain('Copy Theme');
+    // The runner's frame may not write to the clipboard, and the confirmation only follows a write that took.
+    const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    onTestFinished(() => write.mockRestore());
 
-    copyButton().click();
-    await settle();
-    await vi.advanceTimersByTimeAsync(2000);
-    fixture.detectChanges();
+    await openPage(TopBar);
+    await userEvent.click(copy());
 
-    expect(copyButton().textContent).toContain('Copy Theme');
-    expect(copyButton().classList).not.toContain('copied');
+    await expect.poll(() => copy().element().textContent).toContain('Copied');
+    await expect.poll(() => /Copy\s*Theme/.test(copy().element().textContent!), { timeout: 3000 }).toBe(true);
+    expect(copy().element().classList).not.toContain('copied');
   });
 
   it('repaints the change count from the store, with nothing pumping the view', async () => {
-    await settle();
-    const before = theme.changeCount();
+    await openStudio();
 
-    expect(count().textContent?.trim()).toBe(String(before));
+    // The sample opens on a preset that is not the shipped one, and the shipped one changes nothing.
+    expect(count()).toBeGreaterThan(0);
 
-    // A variable no scheme sets, so the count has to move.
-    theme.setVariable('--formidable-panel-max-height', '42dvh');
-    await settle();
+    await openPanel('Theme', 'Design');
+    await openSection('Presets');
+    await userEvent.click(page.getByRole('button').filter({ has: page.getByText('Enterprise', { exact: true }) }));
 
-    expect(theme.changeCount()).toBe(before + 1);
-    expect(count().textContent?.trim()).toBe(String(before + 1));
+    await expect.poll(count).toBe(0);
   });
 
   // The theme is the one thing to take away that stands on its own. The template binds names only its
   // component defines, so a one-click copy of it alone would hand over code that does not compile.
   it('offers one copy, and it is the theme', async () => {
-    await settle();
+    const write = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    onTestFinished(() => write.mockRestore());
 
-    const labels = Array.from(root.querySelectorAll('.copy-button')).map((el) => (el.textContent ?? '').trim());
+    await openPage(TopBar);
 
-    expect(labels.length).toBe(1);
-    expect(labels[0]).toContain('Copy Theme');
+    expect(page.getByRole('button', { name: /^Cop(y|ied)/ }).elements()).toEqual([copy().element()]);
+
+    await userEvent.click(copy());
+
+    expect(write).toHaveBeenCalledWith(expect.stringMatching(/^:root \{/m));
   });
 
   // `exact` is right for `/` and wrong for `/docs`, which is only ever seen with a document open.
-  //
-  // Not `fakeAsync`: the routes are `loadComponent`, and a real dynamic `import()` is not something `tick()`
-  // can flush. Nothing performs the initial navigation in a bare component test either, so `/` is explicit.
   it('keeps the Docs tab lit on a document route', async () => {
-    const router = TestBed.inject(Router);
-    const location = TestBed.inject(Location);
+    await openPage(App);
 
-    const tabFor = (label: string) =>
-      Array.from(root.querySelectorAll('.tab')).find((el) => (el.textContent ?? '').trim() === label)!;
+    const tab = (label: string) => page.getByRole('navigation', { name: 'Portal' }).getByRole('link', { name: label });
 
-    // The bar has to exist before it can follow a navigation: `routerLinkActive` subscribes on init.
-    fixture.detectChanges();
+    // What the browser does on load; nothing performs the initial navigation in a test.
+    await TestBed.inject(Router).navigateByUrl('/');
 
-    await router.navigateByUrl('/');
-    fixture.detectChanges();
+    await expect.element(tab('Studio')).toHaveClass('active');
+    await expect.element(tab('Docs')).not.toHaveClass('active');
 
-    expect(tabFor('Studio').classList).toContain('active');
-    expect(tabFor('Docs').classList).not.toContain('active');
+    await userEvent.click(tab('Docs'));
+    // The contents rail is the first of the page's asides.
+    await userEvent.click(page.getByRole('complementary').first().getByRole('link', { name: 'Theming', exact: true }));
 
-    await router.navigateByUrl('/docs/theming');
-    fixture.detectChanges();
-
-    expect(location.path()).toBe('/docs/theming');
-    expect(tabFor('Docs').classList).toContain('active');
-    expect(tabFor('Studio').classList).not.toContain('active');
+    // The test bed routes on a mock of the browser's location, so the path is Angular's to read.
+    await expect.poll(() => TestBed.inject(Location).path()).toBe('/docs/theming');
+    await expect.element(tab('Docs')).toHaveClass('active');
+    await expect.element(tab('Studio')).not.toHaveClass('active');
   });
 });
