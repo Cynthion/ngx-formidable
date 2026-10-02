@@ -1,173 +1,110 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
-import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
-import { FieldHintDirective } from '../../directives/field-hint.directive';
-import { NgxFormidableFormDirective } from '../../forms/form.directive';
-import { FieldHintAlignment } from '../../models/formidable.model';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { Component, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { page } from 'vitest/browser';
+import { FieldHint } from '../../directives/field-hint';
+import { FieldLabel } from '../../directives/field-label';
+import { bindField, BindFieldOptions } from '../../testing/bind-field';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { InputField } from '../fields/input-field/input-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
- * Contract of the decorator's hint slot: hints render below the field and above the errors, they share one
- * row in equal parts, and each aligns its own text.
- *
- * Alignment is asserted geometrically rather than through the computed `text-align`, because the rule that
- * sets it lives in `_globals.scss` — the hint element is projected by the consumer, so the decorator's own
- * stylesheet cannot reach it. Measuring where the text lands proves the global rule actually applies.
+ * Per **Hints** in `user/decoration.md`: hints sit on a row below the field and above the messages, share it
+ * in equal parts and each align their own text. The row is sized by its content, collapses while nothing is
+ * projected, and leaves the spacing below the decorator to the consumer.
  */
 
-interface Model {
-  field?: string;
-}
-
-const shape = { field: '' };
-
-/** Two hints that come and go, the way a consumer's own `*ngIf` moves them. */
+/** A hint that comes and goes, the way a consumer's own `@if` moves it. */
 @Component({
-  imports: [
-    FormsModule,
-    NgxFormidableFormDirective,
-    StubValidatorDirective,
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    FieldErrorsDirective,
-    FieldHintDirective
-  ],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FieldDecorator, InputField, FieldLabel, FieldHint],
   template: `
-    <form
-      formidableForm
-      [formValue]="value"
-      [formShape]="shape"
-      [stubValidator]="required">
-      <formidable-field-decorator>
-        <formidable-input-field
-          formidableFieldErrors
-          name="field"
-          [ngModel]="value.field" />
-        @if (showHints) {
-          <div formidableFieldHint>Note</div>
-        }
-        @if (showHints && showCounter) {
-          <div
-            formidableFieldHint
-            [align]="counterAlign">
-            3 / 150
-          </div>
-        }
-      </formidable-field-decorator>
-    </form>
+    <formidable-field-decorator>
+      <formidable-input-field />
+      <div formidableFieldLabel>Name</div>
+      @if (showHint()) {
+        <div formidableFieldHint>Note</div>
+      }
+    </formidable-field-decorator>
   `
 })
-class HintHostComponent {
-  value: Model = {};
-  shape = shape;
-  required = { field: 'Required.' };
-  showHints = true;
-  showCounter = true;
-  counterAlign: FieldHintAlignment = 'end';
+class HintHost {
+  readonly showHint = signal(false);
 }
 
-describe('FieldDecoratorComponent hint slot', () => {
-  let fixture: ComponentFixture<HintHostComponent>;
-  let host: HintHostComponent;
-  let root: HTMLElement;
+const rect = (text: string) => page.getByText(text).element().getBoundingClientRect();
+const field = () => page.getByRole('textbox', { name: 'Name' }).element().getBoundingClientRect();
+const decorator = () => document.querySelector('formidable-field-decorator')!.getBoundingClientRect();
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+/** Where a hint's text sits, which is what alignment means to a reader. */
+function textRect(text: string): DOMRect {
+  const range = document.createRange();
+  range.selectNodeContents(page.getByText(text).element());
 
-    fixture = TestBed.createComponent(HintHostComponent);
-    host = fixture.componentInstance;
-    fixture.detectChanges();
-    root = fixture.nativeElement as HTMLElement;
+  return range.getBoundingClientRect();
+}
+
+/** Binds a decorated field labelled `Name`, with `hints` projected beside it. */
+const bind = (hints: string, options: BindFieldOptions = {}) =>
+  bindField('input', 'signal', {
+    decorated: true,
+    decoration: `<div formidableFieldLabel>Name</div>${hints}`,
+    ...options
   });
 
-  function wrapper(): HTMLElement {
-    return root.querySelector('.hint-wrapper') as HTMLElement;
-  }
+describe('field hint', () => {
+  beforeEach(() => configureFormidableTestBed());
 
-  function hints(): HTMLElement[] {
-    return Array.from(root.querySelectorAll('[formidableFieldHint]'));
-  }
+  it('renders below the field and above the messages', async () => {
+    await bind('<div formidableFieldHint>Note</div>', { inputs: { revealOn: 'always' }, state: { invalid: true } });
 
-  /** Where the hint's text actually sits, which is what alignment means to a reader. */
-  function textRect(hint: HTMLElement): DOMRect {
-    const range = document.createRange();
-    range.selectNodeContents(hint);
-
-    return range.getBoundingClientRect();
-  }
-
-  it('renders the hints after the field container and before the errors', () => {
-    const container = root.querySelector('.container-horizontal') as HTMLElement;
-    const errors = root.querySelector('formidable-field-errors') as HTMLElement;
-
-    expect(container.contains(wrapper())).toBe(false);
-    expect(container.compareDocumentPosition(wrapper()) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(wrapper().compareDocumentPosition(errors) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(rect('Note').top).toBeGreaterThanOrEqual(field().bottom);
+    expect(rect('invalid').top).toBeGreaterThanOrEqual(rect('Note').bottom);
   });
 
-  it('hides the row when no hint is projected, and shows it again when one returns', () => {
-    expect(wrapper().classList.contains('hidden')).toBe(false);
+  it('shares one row evenly between two hints', async () => {
+    await bind('<div formidableFieldHint>Note</div><div formidableFieldHint align="end">3 / 150</div>');
 
-    host.showHints = false;
-    fixture.detectChanges();
-
-    expect(wrapper().classList.contains('hidden')).toBe(true);
-    expect(getComputedStyle(wrapper()).display).toBe('none');
-    expect(wrapper().getBoundingClientRect().height).toBe(0);
-
-    host.showHints = true;
-    fixture.detectChanges();
-
-    expect(wrapper().classList.contains('hidden')).toBe(false);
-    expect(wrapper().getBoundingClientRect().height).toBeGreaterThan(0);
+    expect(rect('Note').top).toBeCloseTo(rect('3 / 150').top, 1);
+    expect(rect('Note').width).toBeCloseTo(rect('3 / 150').width, 1);
+    expect(rect('Note').right).toBeLessThanOrEqual(rect('3 / 150').left + 0.5);
   });
 
-  it('splits the row evenly between two hints', () => {
-    const [note, counter] = hints();
+  it('aligns each hint on its own', async () => {
+    await bind(
+      '<div formidableFieldHint>Start</div>' +
+        '<div formidableFieldHint align="center">Centre</div>' +
+        '<div formidableFieldHint align="end">End</div>'
+    );
 
-    expect(note!.getBoundingClientRect().width).toBeCloseTo(counter!.getBoundingClientRect().width, 1);
+    expect(textRect('Start').left).toBeCloseTo(rect('Start').left, 1);
+    expect(textRect('Centre').left - rect('Centre').left).toBeCloseTo(
+      rect('Centre').right - textRect('Centre').right,
+      1
+    );
+    expect(textRect('End').right).toBeCloseTo(rect('End').right, 1);
   });
 
-  it('aligns each hint on its own', () => {
-    const [note, counter] = hints();
+  it('sizes the row to its hint, and collapses it while none is projected', async () => {
+    const fixture = TestBed.createComponent(HintHost);
+    await settle(fixture);
 
-    // The note takes the inherited `start`: its text begins at its own left edge.
-    expect(textRect(note!).left).toBeCloseTo(note!.getBoundingClientRect().left, 1);
-    // The counter is `end`: its text finishes at its own right edge.
-    expect(textRect(counter!).right).toBeCloseTo(counter!.getBoundingClientRect().right, 1);
+    expect(decorator().bottom).toBeCloseTo(field().bottom, 1);
 
-    host.counterAlign = 'center';
-    fixture.detectChanges();
+    fixture.componentInstance.showHint.set(true);
+    await settle(fixture);
 
-    const box = counter!.getBoundingClientRect();
-    const text = textRect(counter!);
+    expect(rect('Note').height).toBeGreaterThan(0);
+    expect(decorator().bottom).toBeCloseTo(rect('Note').bottom, 1);
 
-    expect(text.left - box.left).toBeCloseTo(box.right - text.right, 1);
+    fixture.componentInstance.showHint.set(false);
+    await settle(fixture);
 
-    host.counterAlign = 'start';
-    fixture.detectChanges();
-
-    expect(textRect(counter!).left).toBeCloseTo(counter!.getBoundingClientRect().left, 1);
+    expect(decorator().bottom).toBeCloseTo(field().bottom, 1);
   });
 
-  it('sizes the row to the hint and reserves nothing beyond it', () => {
-    host.showCounter = false;
-    fixture.detectChanges();
+  it('leaves the spacing below the decorator to the consumer', async () => {
+    await bind('<div formidableFieldHint>Note</div>', { after: '<div>Next</div>' });
 
-    const lineHeight = parseFloat(getComputedStyle(wrapper()).lineHeight);
-
-    expect(getComputedStyle(wrapper()).minHeight).toBe('0px');
-    expect(wrapper().getBoundingClientRect().height).toBeCloseTo(lineHeight, 0);
-  });
-
-  it('leaves spacing below the decorator to the consumer', () => {
-    const decorator = root.querySelector('formidable-field-decorator') as HTMLElement;
-
-    expect(getComputedStyle(decorator).marginBottom).toBe('0px');
+    expect(rect('Next').top).toBeCloseTo(decorator().bottom, 1);
   });
 });

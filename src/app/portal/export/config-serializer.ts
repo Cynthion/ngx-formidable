@@ -7,8 +7,7 @@ const ORDER: readonly (keyof FormidableDefaults)[] = [
   'suffixAlign',
   'panelPosition',
   'revealOn',
-  'hideRequiredMarkers',
-  'debounceMs'
+  'hideRequiredMarkers'
 ];
 
 /**
@@ -35,7 +34,7 @@ export function serializeAppConfig(defaults: FormidableDefaults): string {
     : ["    // No defaults set: every field keeps the library's own.", '    ...provideNgxFormidable()'];
 
   return [
-    '// app.config.ts — an NgModule app passes the same object to NgxFormidableModule.forRoot().',
+    '// app.config.ts — an NgModule app lists the same providers in its root module.',
     "import { ApplicationConfig } from '@angular/core';",
     "import { provideNgxFormidable } from '@cynthion/ngx-formidable';",
     '',

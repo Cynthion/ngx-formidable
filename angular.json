@@ -34,7 +34,14 @@
               "includePaths": ["projects/ngx-formidable/src/lib/styles"]
             },
             "scripts": [],
-            "allowedCommonJsDependencies": ["pikaday"],
+            "allowedCommonJsDependencies": [
+              "pikaday",
+              "@braintree/sanitize-url",
+              "cytoscape-cose-bilkent",
+              "cytoscape-fcose",
+              "dayjs",
+              "fastdom"
+            ],
             "browser": "src/main.ts",
             "loader": {
               ".md": "text"
@@ -80,26 +87,9 @@
           "builder": "@angular/build:extract-i18n"
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
-            "karmaConfig": "karma.conf.cjs",
-            "polyfills": ["zone.js", "zone.js/testing"],
-            "tsConfig": "tsconfig.spec.json",
-            "inlineStyleLanguage": "scss",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
-            ],
-            "styles": ["src/styles.scss"],
-            "scripts": [],
-            "stylePreprocessorOptions": {
-              "includePaths": ["projects/ngx-formidable/src/lib/styles"]
-            },
-            "loader": {
-              ".md": "text"
-            }
+            "browsers": ["ChromiumHeadless"]
           }
         }
       }
@@ -126,15 +116,21 @@
           "defaultConfiguration": "production"
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "ngx-formidable:test-build",
+            "browsers": ["ChromiumHeadless"]
+          }
+        },
+        "test-build": {
+          "builder": "@angular/build:application",
           "options": {
             "tsConfig": "projects/ngx-formidable/tsconfig.spec.json",
-            "polyfills": ["zone.js", "zone.js/testing"],
+            "polyfills": [],
             "stylePreprocessorOptions": {
               "includePaths": ["projects/ngx-formidable/src/lib/styles"]
             },
-            "styles": ["projects/ngx-formidable/src/test-styles.scss"],
-            "include": ["**/*.spec.ts", "../vest/**/*.spec.ts"]
+            "styles": ["projects/ngx-formidable/src/test-styles.scss"]
           }
         }
       }

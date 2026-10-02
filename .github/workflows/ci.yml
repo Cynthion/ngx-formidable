@@ -51,11 +51,15 @@ jobs:
       - name: Build Library
         run: npm run build:lib
 
+      # Both test projects run in Playwright's headless Chromium, which `npm ci` does not download.
+      - name: Install Test Browser
+        run: npx playwright install --with-deps --only-shell chromium
+
       - name: Test Library
-        run: npm test -- ngx-formidable --watch=false --browsers=ChromeHeadless
+        run: npx ng test ngx-formidable --watch=false
 
       - name: Test Portal
-        run: npm test -- ngx-formidable-portal --watch=false --browsers=ChromeHeadless
+        run: npx ng test ngx-formidable-portal --watch=false
 
       - name: Build Portal
         run: npm run build

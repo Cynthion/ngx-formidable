@@ -1,0 +1,59 @@
+<div class="brand">
+  <span class="brand-text">
+    <span class="name">ngx-formidable</span>
+    <span class="tagline">Angular form fields you can actually theme, configure and customize.</span>
+  </span>
+</div>
+
+<nav
+  class="tabs"
+  aria-label="Portal">
+  @for (entry of routes; track entry.path) {
+  <a
+    routerLinkActive="active"
+    class="tab"
+    [routerLink]="entry.path"
+    [routerLinkActiveOptions]="{ exact: entry.exact }"
+    [title]="entry.title">
+    {{ entry.label }}
+  </a>
+  }
+</nav>
+
+<div class="actions">
+  <a
+    target="_blank"
+    rel="noreferrer noopener"
+    class="link"
+    [href]="repositoryUrl">
+    <example-icon
+      class="github"
+      [svg]="githubSvg"
+      [size]="15" />
+    GitHub
+  </a>
+
+  <button
+    type="button"
+    class="icon-button"
+    [attr.aria-label]="'Portal appearance: ' + labelFor(theme.appearance())"
+    [title]="'Portal appearance: ' + labelFor(theme.appearance())"
+    (click)="cycleAppearance()">
+    {{ glyphFor(theme.appearance()) }}
+  </button>
+
+  <button
+    type="button"
+    title="Copy the theme as a :root block. The count is the variables you changed from the defaults."
+    class="copy-button"
+    [class.copied]="copiedTheme()"
+    (click)="copyTheme()">
+    <!-- One flex item, so the button's gap does not land between the verb and its noun. -->
+    <span>
+      @if (copiedTheme()) { Copied } @else { Copy
+      <span class="noun">Theme</span>
+      }
+    </span>
+    <span class="count">{{ theme.changeCount() }}</span>
+  </button>
+</div>

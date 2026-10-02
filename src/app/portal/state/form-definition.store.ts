@@ -31,6 +31,25 @@ export class FormDefinitionStore {
    */
   public readonly appDefaults = signal<FormidableDefaults>({});
 
+  private readonly formRevealOn = computed(() => this.options().revealOn);
+  private readonly formHidesRequiredMarkers = computed(() => this.options().hideRequiredMarkers);
+
+  /**
+   * The defaults the preview form's fields read: the app defaults, with the two the form states for itself
+   * over them. A form scopes them over its fields as `FORMIDABLE_DEFAULTS`, the way a consumer's component
+   * does, so they reach a field when it is created.
+   */
+  public readonly previewDefaults = computed<FormidableDefaults>(() => {
+    const revealOn = this.formRevealOn();
+    const hideRequiredMarkers = this.formHidesRequiredMarkers();
+
+    return {
+      ...this.appDefaults(),
+      ...(revealOn === undefined ? {} : { revealOn }),
+      ...(hideRequiredMarkers === undefined ? {} : { hideRequiredMarkers })
+    };
+  });
+
   /** Which field the inspector is editing. Followed from focus only while the Settings tab is showing. */
   public readonly selectedFieldId = signal<string | null>(PREVIEW_FORM_DEFINITION.fields[0]?.id ?? null);
 

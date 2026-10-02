@@ -6,16 +6,15 @@ import { FORMIDABLE_DEFAULTS, FORMIDABLE_MASK_DEFAULTS, FormidableDefaults } fro
 export interface NgxFormidableConfig {
   /** App-wide ngx-mask defaults, which any field's own `maskConfig` still overrides. */
   globalMaskConfig?: Partial<NgxMaskConfig>;
-  /** App-wide defaults for label position, adornment alignment, panel position and the form's options. */
+  /** App-wide defaults for label position, adornment alignment, panel position, reveal and required marker. */
   defaults?: FormidableDefaults;
 }
 
 /**
- * Registers the library's providers, ngx-mask included. Call it once in `bootstrapApplication`, or through
- * `NgxFormidableModule.forRoot()` in an NgModule app.
+ * Registers the library's providers, ngx-mask included. Call it once in `bootstrapApplication`, or list it
+ * in the root module's `providers` in an NgModule app.
  *
- * It provides no validator. Fields and forms work without one; to validate, provide `FORMIDABLE_VALIDATOR`
- * on the form — the Vest adapter from the `vest` entry point, or an `IFormidableValidator` of your own.
+ * It provides no validator. Rules belong to the forms API the fields are bound through.
  */
 export function provideNgxFormidable(config: NgxFormidableConfig = {}): Provider[] {
   return [

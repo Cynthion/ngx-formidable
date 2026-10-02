@@ -1,46 +1,28 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { SliderFieldComponent } from './slider-field.component';
+import { page } from 'vitest/browser';
+import { bindField } from '../../../testing/bind-field';
+import { configureFormidableTestBed } from '../../../testing/test-bed';
 
 /**
- * Contract of the slider's label row: the labels along the track are placed absolutely, so the row itself
- * is what has to carry their height. A row that measures zero leaves them hanging out of the field's box
- * and over whatever the consumer puts below it — and only their own line height says how tall they are.
+ * The slider's min and max labels stay inside the field's box, so they never run over what a consumer puts
+ * below it.
  */
-@Component({
-  imports: [SliderFieldComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <formidable-slider-field
-      [min]="0"
-      [max]="10"
-      [showMinMaxLabels]="true"
-      minLabel="Mild"
-      maxLabel="Volcanic" />
-  `
-})
-class SliderHostComponent {}
 
-describe('SliderFieldComponent geometry', () => {
-  let fixture: ComponentFixture<SliderHostComponent>;
-  let root: HTMLElement;
+const rect = (text: string) => page.getByText(text).element().getBoundingClientRect();
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(SliderHostComponent);
-    fixture.detectChanges();
-    root = fixture.nativeElement as HTMLElement;
-  });
+describe('SliderField geometry', () => {
+  beforeEach(() => configureFormidableTestBed());
 
-  it('gives the label row the height of its labels, so they stay inside the field', () => {
-    const field = root.querySelector('.field') as HTMLElement;
-    const row = root.querySelector('.slider-label-row') as HTMLElement;
-    const labels = Array.from(root.querySelectorAll<HTMLElement>('.slider-label-item'));
+  it('keeps its min and max labels inside the field, clear of what follows it', async () => {
+    const field = await bindField('slider', 'signal', {
+      inputs: { min: 0, max: 10, showMinMaxLabels: true, minLabel: 'Mild', maxLabel: 'Volcanic' },
+      after: '<div>Below</div>'
+    });
+    const box = field.element.querySelector('.field')!.getBoundingClientRect();
 
-    expect(labels.length).toBe(2);
-    expect(row.getBoundingClientRect().height).toBeCloseTo(labels[0]!.getBoundingClientRect().height, 0);
-
-    for (const label of labels) {
-      expect(label.getBoundingClientRect().bottom).toBeLessThanOrEqual(field.getBoundingClientRect().bottom);
+    for (const label of ['Mild', 'Volcanic']) {
+      expect(rect(label).height).toBeGreaterThan(0);
+      expect(rect(label).bottom).toBeLessThanOrEqual(box.bottom);
+      expect(rect(label).bottom).toBeLessThanOrEqual(rect('Below').top);
     }
   });
 });

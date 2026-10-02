@@ -1,0 +1,35 @@
+@let current = shown();
+
+<portal-sub-tabs
+  ariaLabel="Export and import sections"
+  [tabs]="directions"
+  [active]="inspector.exportDirection()"
+  [strapline]="straplines[inspector.exportDirection()]"
+  (selected)="selectDirection($event)" />
+
+<div class="content">
+  <div
+    role="tablist"
+    class="files"
+    aria-label="Files">
+    @for (entry of files(); track entry.id) {
+    <button
+      type="button"
+      role="tab"
+      class="file"
+      [class.active]="current.id === entry.id"
+      [attr.aria-selected]="current.id === entry.id"
+      (click)="selectFile(entry.id)">
+      {{ entry.label }}
+    </button>
+    }
+  </div>
+
+  <p class="pc-help">{{ current.help }}</p>
+
+  @if (isExport()) {
+  <portal-export-panel [file]="exported()" />
+  } @else {
+  <portal-import-panel [file]="imported()" />
+  }
+</div>

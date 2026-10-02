@@ -1,0 +1,74 @@
+<portal-top-bar />
+
+<div
+  class="docs"
+  [style.--docs-nav-width.px]="layout.docsNavWidth()"
+  [style.--docs-contents-width.px]="layout.docsContentsWidth()">
+  <aside class="nav">
+    <p class="nav-head">Guides</p>
+    @for (entry of guides; track entry.slug) {
+    <a
+      class="nav-link"
+      [class.active]="page().slug === entry.slug"
+      [routerLink]="['/docs', entry.slug]"
+      [title]="entry.purpose">
+      {{ entry.title }}
+    </a>
+    }
+
+    <p class="nav-head">References</p>
+    @for (entry of references; track entry.slug) {
+    <a
+      class="nav-link"
+      [class.active]="page().slug === entry.slug"
+      [routerLink]="['/docs', entry.slug]"
+      [title]="entry.purpose">
+      {{ entry.title }}
+    </a>
+    }
+  </aside>
+
+  <div
+    portalResizeHandle
+    axis="x"
+    handleLabel="Resize the navigation"
+    class="divider nav-divider"
+    (moved)="layout.setDocsNavWidth($event)"
+    (nudged)="layout.setDocsNavWidth(layout.docsNavWidth() + $event)"
+    (resetRequested)="layout.resetDocsNavWidth()"></div>
+
+  <main class="content">
+    <header class="doc-head">
+      <p class="doc-kind">{{ page().kind }}</p>
+      <h1 class="doc-title">{{ page().title }}</h1>
+      <p class="doc-purpose">{{ page().purpose }}</p>
+    </header>
+
+    <article
+      class="doc-body"
+      [innerHTML]="body()"
+      (click)="onBodyClick($event)"></article>
+  </main>
+
+  <div
+    portalResizeHandle
+    axis="x"
+    handleLabel="Resize the contents"
+    class="divider contents-divider"
+    (moved)="onContentsDividerMoved($event)"
+    (nudged)="layout.setDocsContentsWidth(layout.docsContentsWidth() - $event)"
+    (resetRequested)="layout.resetDocsContentsWidth()"></div>
+
+  <aside class="contents">
+    @if (headings().length) {
+    <p class="nav-head">On This Page</p>
+    @for (heading of headings(); track heading.id) {
+    <button
+      type="button"
+      class="contents-link"
+      (click)="scrollTo(heading.id)">
+      {{ heading.text }}
+    </button>
+    } }
+  </aside>
+</div>

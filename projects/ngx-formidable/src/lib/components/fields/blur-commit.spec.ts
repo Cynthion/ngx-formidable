@@ -1,180 +1,61 @@
-import { Component, ElementRef, forwardRef, ChangeDetectionStrategy, viewChild } from '@angular/core';
-import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
-import { FormsModule, NG_VALUE_ACCESSOR, NgForm } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
-import { FieldDecoratorLayout } from '../../models/formidable.model';
-import { BaseFieldDirective } from './base-field.directive';
-import { DateFieldComponent } from './date-field/date-field.component';
+import { page, userEvent } from 'vitest/browser';
+import { bindField, BoundField } from '../../testing/bind-field';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
- * Contract of a blur: `onTouched()` is its last act. Under `updateOn: 'blur'` Angular commits the value from
- * inside `onTouched`, and only when a change is already pending — so a field that writes its value in
- * `doOnFocusChange` commits nothing if the touch went first.
- *
- * And a blur the field caused itself is not a blur at all: `date-field` hands focus to its own panel so a
- * nested control stays clickable, which must leave the control neither committed nor touched.
+ * Contract of focus moving onto `date-field`'s own calendar, which is not a blur at all: its month select
+ * takes focus to open, and that must leave what was typed neither committed nor touched — until focus leaves
+ * the field from there. Per **Typed Text Commits On Blur** in `user/fields.md`.
  */
 
-/** Defers its value to the blur, the way `date-field` and `time-field` do. */
-@Component({
-  selector: 'formidable-blur-commit-field',
-  standalone: true,
-  template: `<input
-    #inputRef
-    (blur)="onFocusChange(false)"
-    (focus)="onFocusChange(true)" />`,
-  changeDetection: ChangeDetectionStrategy.Eager,
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => BlurCommitFieldComponent),
-      multi: true
-    }
-  ]
-})
-class BlurCommitFieldComponent extends BaseFieldDirective<string> {
-  protected keyboardCallback = null;
-  protected externalClickCallback = null;
-  protected windowResizeScrollCallback = null;
-  protected registeredKeys: string[] = [];
+/**
+ * A `date-field` inside a `<form>` with a date typed but not yet committed, which happens on the blur, and
+ * focus on its calendar's month select. Typed rather than written, because only an edit of the user's fires
+ * the native `change` as the input loses focus.
+ */
+async function setup(): Promise<BoundField & { month: HTMLSelectElement }> {
+  const field = await bindField('date', 'template-driven', {
+    inputs: { unicodeTokenFormat: 'dd . MM . yyyy' },
+    decorated: true,
+    decoration: '<div formidableFieldLabel>Date</div>'
+  });
 
-  readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
+  await userEvent.tab();
+  await userEvent.keyboard('12052024');
+  await expect.element(page.getByRole('combobox', { name: 'Date' })).toHaveValue('12 . 05 . 2024');
+  await userEvent.click(field.element.querySelector('.toggle')!);
 
-  decoratorLayout: FieldDecoratorLayout = 'horizontal';
+  const month = field.element.querySelector<HTMLSelectElement>('.pika-select-month')!;
 
-  private committed = '';
+  await userEvent.click(month);
+  await expect.element(month).toHaveFocus();
 
-  get value(): string {
-    return this.committed;
-  }
-
-  get fieldRef(): ElementRef<HTMLElement> {
-    return this.inputRef() as ElementRef<HTMLElement>;
-  }
-
-  protected doOnValueChange(): void {
-    // Nothing: this field commits on blur, not on input.
-  }
-
-  protected doWriteValue(value: string): void {
-    this.committed = value ?? '';
-    this.inputRef().nativeElement.value = this.committed;
-  }
-
-  protected doOnFocusChange(isFocused: boolean): void {
-    if (isFocused) return;
-
-    this.committed = this.inputRef().nativeElement.value;
-    this.onChange(this.committed);
-  }
-}
-
-@Component({
-  imports: [FormsModule, BlurCommitFieldComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <form [ngFormOptions]="{ updateOn: 'blur' }">
-      <formidable-blur-commit-field
-        name="name"
-        [ngModel]="value" />
-    </form>
-  `
-})
-class BlurCommitHostComponent {
-  value = '';
-}
-
-@Component({
-  imports: [FormsModule, DateFieldComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <form>
-      <formidable-date-field
-        name="date"
-        unicodeTokenFormat="dd . MM . yyyy"
-        [ngModel]="value" />
-    </form>
-  `
-})
-class DateHostComponent {
-  value: Date | null = null;
+  return { ...field, month };
 }
 
 describe('blur contract', () => {
-  let fixture: ComponentFixture<BlurCommitHostComponent | DateHostComponent>;
-
-  function control() {
-    return fixture.debugElement.children[0]!.injector.get(NgForm).form.get(
-      fixture.componentInstance instanceof DateHostComponent ? 'date' : 'name'
-    );
-  }
-
-  function input(): HTMLInputElement {
-    return fixture.nativeElement.querySelector('input') as HTMLInputElement;
-  }
-
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+    configureFormidableTestBed();
+    (document.activeElement as HTMLElement | null)?.blur();
   });
 
-  afterEach(fakeAsync(() => flush()));
+  it('leaves the model uncommitted and untouched while focus is on its own calendar', async () => {
+    const { fixture, touched, value } = await setup();
+    await settle(fixture);
 
-  // Fails while `onTouched()` runs before `doOnFocusChange()`: the commit inside the touch finds no pending
-  // change, and the value the field wrote a moment later never reaches the model.
-  it('commits a value written during the blur, under updateOn blur', fakeAsync(() => {
-    fixture = TestBed.createComponent(BlurCommitHostComponent);
-    fixture.detectChanges();
-    tick();
+    expect(touched()).toBe(false);
+    expect(value()).toBeNull();
+  });
 
-    input().focus();
-    input().value = 'written on blur';
-    input().dispatchEvent(new FocusEvent('blur'));
-    tick();
+  it('commits and touches once focus leaves the field from its calendar', async () => {
+    const { touched, value } = await setup();
 
-    expect(control()?.value).toBe('written on blur');
-    expect(control()?.touched).toBe(true);
-  }));
+    // A click on the page, well away from the field.
+    await userEvent.click(page.elementLocator(document.documentElement), {
+      position: { x: 1, y: innerHeight - 1 }
+    });
 
-  it('leaves the control untouched and uncommitted when the field takes its own blur', fakeAsync(() => {
-    fixture = TestBed.createComponent(DateHostComponent);
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-
-    const panel = fixture.nativeElement.querySelector('.panel') as HTMLElement;
-
-    input().focus();
-    input().value = '12 . 05 . 2024';
-
-    // Focus moves onto the panel, so a nested control stays clickable. That is not the user leaving.
-    panel.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    input().dispatchEvent(new FocusEvent('blur'));
-    tick();
-
-    expect(control()?.touched).toBe(false);
-    expect(control()?.value).toBeNull();
-  }));
-
-  it('commits and touches on the blur after the one it took', fakeAsync(() => {
-    fixture = TestBed.createComponent(DateHostComponent);
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-
-    const panel = fixture.nativeElement.querySelector('.panel') as HTMLElement;
-
-    input().focus();
-    panel.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    input().dispatchEvent(new FocusEvent('blur'));
-    tick();
-
-    // The flag is one-shot, so this blur counts.
-    input().focus();
-    input().value = '12 . 05 . 2024';
-    input().dispatchEvent(new FocusEvent('blur'));
-    tick();
-
-    expect(control()?.touched).toBe(true);
-    expect(control()?.value).toEqual(new Date(2024, 4, 12));
-  }));
+    await expect.poll(touched).toBe(true);
+    expect(value()).toEqual(new Date(2024, 4, 12));
+  });
 });

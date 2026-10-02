@@ -1,0 +1,164 @@
+<!-- Before -->
+@if (decoratorLayout !== 'inline') {
+<div
+  class="before-wrapper"
+  [class.hidden]="!showsBeforeWrapper">
+  <ng-container [ngTemplateOutlet]="labelRow" />
+</div>
+}
+
+<!-- Layout -->
+<div
+  [class]="'container-' + decoratorLayout"
+  [class.value-top]="valueAlignment === 'top'">
+  @if (decoratorLayout === 'inline') {
+  <div class="inline-wrapper">
+    <!-- Label & Adornment -->
+    <ng-container [ngTemplateOutlet]="labelRow" />
+
+    <div class="inline-prefix-content-suffix-wrapper">
+      <!-- Prefix -->
+      <ng-container [ngTemplateOutlet]="prefix" />
+
+      <!-- Content -->
+      <ng-container [ngTemplateOutlet]="content" />
+
+      <!-- Suffix -->
+      <ng-container [ngTemplateOutlet]="suffix" />
+    </div>
+  </div>
+  } @else {
+  <!-- Label, when it renders over the field: this container is its positioning context -->
+  @if (isLabelOverField) {
+  <ng-container [ngTemplateOutlet]="label" />
+  }
+
+  <!-- Prefix, `horizontal` only -->
+  @if (decoratorLayout !== 'vertical') {
+  <ng-container [ngTemplateOutlet]="prefix" />
+  }
+
+  <!-- Content -->
+  <ng-container [ngTemplateOutlet]="content" />
+
+  <!-- Suffix -->
+  @if (decoratorLayout !== 'vertical') {
+  <ng-container [ngTemplateOutlet]="suffix" />
+  } }
+</div>
+
+<!-- Hint -->
+<div
+  class="hint-wrapper"
+  [class.hidden]="!hasHint"
+  [id]="hintId">
+  <ng-content select="[formidableFieldHint]" />
+</div>
+
+<!-- The field's messages. Always rendered, so its live region is in place before the first one arrives. -->
+<formidable-field-errors
+  [id]="errorsId"
+  [errors]="shownErrors" />
+
+<!-- Label & Adornment Template -->
+<!-- The label is only here while it renders in normal flow; over the field it lives in the container above,
+     so exactly one of the two outlets exists and the single `ng-content` below still projects once. -->
+<ng-template #labelRow>
+  <div class="label-row">
+    <!-- Label -->
+    @if (!isLabelOverField) {
+    <ng-container [ngTemplateOutlet]="label" />
+    }
+    <!-- Label Adornment -->
+    <ng-container [ngTemplateOutlet]="labelAdornment" />
+  </div>
+</ng-template>
+
+<!-- Label Template -->
+<ng-template #label>
+  @if (decoratorLayout === 'vertical') {
+  <div
+    class="label-wrapper"
+    [class]="'label-' + labelState"
+    [class.hidden]="!hasLabel"
+    [class.label-animated]="isLabelAnimated()"
+    [id]="labelId">
+    <ng-container [ngTemplateOutlet]="labelContent" />
+    <ng-container [ngTemplateOutlet]="requiredMarker" />
+  </div>
+  } @else {
+  <label
+    class="label-wrapper"
+    [class]="'label-' + labelState"
+    [class.hidden]="!hasLabel"
+    [class.label-animated]="isLabelAnimated()"
+    [attr.for]="fieldId"
+    [id]="labelId">
+    <ng-container [ngTemplateOutlet]="labelContent" />
+    <ng-container [ngTemplateOutlet]="requiredMarker" />
+  </label>
+  }
+
+  <ng-template #labelContent>
+    <ng-content select="[formidableFieldLabel]" />
+  </ng-template>
+
+  <!-- Sibling of the projected label, not part of it, so a label long enough to ellipsize loses its own
+       text and never the marker. Hidden from assistive tech: a glyph is no way to say "required". -->
+  <ng-template #requiredMarker>
+    @if (showRequiredMarker) {
+    <span
+      class="required-marker"
+      aria-hidden="true"></span>
+    }
+  </ng-template>
+</ng-template>
+
+<!-- Label Adornment Template -->
+<ng-template #labelAdornment>
+  <div
+    class="label-adornment-wrapper"
+    [class.hidden]="!hasLabelAdornment">
+    <ng-content select="[formidableFieldLabelAdornment]" />
+  </div>
+</ng-template>
+
+<!-- Content Template -->
+<ng-template #content>
+  @if (decoratorLayout === 'vertical') {
+  <fieldset class="fieldset">
+    <ng-container [ngTemplateOutlet]="projectedContent" />
+  </fieldset>
+  } @else {
+  <ng-container [ngTemplateOutlet]="projectedContent" />
+  }
+</ng-template>
+
+<!-- Prefix Template -->
+<ng-template #prefix>
+  <div
+    #prefixWrapperRef
+    class="adornment-wrapper"
+    [class]="'prefix-wrapper-' + decoratorLayout"
+    [class.align-value]="prefixAlignment === 'value'"
+    [class.hidden]="!hasPrefix">
+    <ng-content select="[formidableFieldPrefix]" />
+  </div>
+</ng-template>
+
+<!-- Suffix Template -->
+<ng-template #suffix>
+  <div
+    #suffixWrapperRef
+    class="adornment-wrapper"
+    [class]="'suffix-wrapper-' + decoratorLayout"
+    [class.align-value]="suffixAlignment === 'value'"
+    [class.hidden]="!hasSuffix">
+    <ng-content select="[formidableFieldSuffix]" />
+  </div>
+</ng-template>
+
+<!-- Projected Content Template -->
+<ng-template #projectedContent>
+  <ng-content />
+</ng-template>

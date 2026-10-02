@@ -1,5 +1,5 @@
 import { FieldDecoratorLayout, FormidablePanelPosition } from '@cynthion/ngx-formidable';
-import { PortalFieldKind } from './field-spec.model';
+import { PortalFieldKind, PortalFieldSpec } from './field-spec.model';
 
 /**
  * What one field kind can actually be configured with. `decoratorLayout` is fixed per field component and is
@@ -104,24 +104,56 @@ export const FIELD_KIND_SELECTORS: Readonly<Record<PortalFieldKind, string>> = {
   'counter': 'example-counter-field'
 };
 
-/** A field's value type, as TypeScript spells it. `user/components.md` states each one beside its selector. */
-export type PortalValueType = 'string' | 'string[]' | 'Date' | 'boolean' | 'number';
+/** The class a field kind's component is exported as, which the exported component imports. */
+export const FIELD_KIND_CLASSES: Readonly<Record<PortalFieldKind, string>> = {
+  'input': 'InputField',
+  'textarea': 'TextareaField',
+  'select': 'SelectField',
+  'dropdown': 'DropdownField',
+  'autocomplete': 'AutocompleteField',
+  'date': 'DateField',
+  'time': 'TimeField',
+  'toggle': 'ToggleField',
+  'slider': 'SliderField',
+  'radio-group': 'RadioGroupField',
+  'checkbox-group': 'CheckboxGroupField',
+  'counter': 'ExampleCounterField'
+};
 
-/** What each kind writes into the model. The preview's shape and the exported component both read it. */
+/** A field's value type, as TypeScript spells it. `user/components.md` states each one beside its selector. */
+export type PortalValueType = 'string' | 'string | null' | 'string[]' | 'Date | null' | 'boolean' | 'number';
+
+/** What each kind writes into the model. The exported schema file types its model with it. */
 export const FIELD_KIND_VALUE_TYPES: Readonly<Record<PortalFieldKind, PortalValueType>> = {
   'input': 'string',
   'textarea': 'string',
-  'select': 'string',
-  'dropdown': 'string',
-  'autocomplete': 'string',
-  'date': 'Date',
-  'time': 'Date',
+  'select': 'string | null',
+  'dropdown': 'string | null',
+  'autocomplete': 'string | null',
+  'date': 'Date | null',
+  'time': 'Date | null',
   'toggle': 'boolean',
   'slider': 'number',
-  'radio-group': 'string',
+  'radio-group': 'string | null',
   'checkbox-group': 'string[]',
   'counter': 'number'
 };
+
+/** What a field's key starts as: its value type's empty value, and a number its field's `min`. */
+export function emptyValueOf(field: PortalFieldSpec): string | string[] | boolean | number | null {
+  switch (FIELD_KIND_VALUE_TYPES[field.kind]) {
+    case 'string':
+      return '';
+    case 'string[]':
+      return [];
+    case 'boolean':
+      return false;
+    case 'number':
+      return field.min ?? 0;
+    default:
+      return null;
+  }
+}
 
 /** The reverse lookup the markup parser needs. */
 export const FIELD_KIND_BY_SELECTOR: ReadonlyMap<string, PortalFieldKind> = new Map(

@@ -3,28 +3,131 @@ import { slugify } from '../helpers/slug.helpers';
 import { FIELD_CAPABILITIES } from './field-capabilities';
 import { PortalFieldKind, PortalFieldSpec, PortalFormOptions } from './field-spec.model';
 import { PREVIEW_FIELDS, PREVIEW_FORM_DEFINITION, PREVIEW_INITIAL_MODEL } from './preview-form.definition';
-import { FONT_FAMILY_TOKEN } from './presets';
+import { FONT_FAMILY_TOKEN, PageSurface, PRESETS_BY_KEY, presetVars } from './presets';
 
-/** One declaration of the ladder, added on top of every step before it. */
-export interface LadderStep {
+/** One declaration of the ladder. */
+export interface LadderDeclaration {
   readonly name: string;
   readonly value: string;
 }
 
+/** One step of the ladder: the declarations of one concern, added on top of every step before it. */
+export interface LadderStep {
+  readonly title: string;
+  readonly caption: string;
+  readonly declarations: readonly LadderDeclaration[];
+  /** The page behind the form from this step on. The step that darkens the fill takes the preset's own. */
+  readonly page?: PageSurface;
+}
+
+/** Where the ladder ends: a whole preset, so its last step is what picking that preset paints. */
+const LADDER_PRESET = PRESETS_BY_KEY.get('midnight')!;
+
+const LADDER_VARS = presetVars(LADDER_PRESET);
+
 /**
- * From the library's defaults to a finished theme, one declaration at a time. Each step sets a base rather than
- * a derived variable, so every step also moves whatever derives from it — the radius reaches the panel too.
+ * From the library's defaults to Midnight, one variable per step wherever one variable leaves a readable frame. The
+ * fill and the ink change together, since a dark fill under dark ink, or light ink on a light fill, is unreadable;
+ * every step a light page can show comes before them. Each step sets a base rather than a derived variable, so it
+ * also moves whatever derives from it — the radius reaches the panel too. The values are read off the preset
+ * rather than restated, so the two cannot disagree.
  */
-export const LADDER_STEPS: readonly LadderStep[] = [
-  { name: '--formidable-color-field-border-focus', value: '#0f766e' },
-  { name: '--formidable-color-field-label-floating', value: '#115e59' },
-  { name: '--formidable-color-field-background', value: '#f0fdfa' },
-  { name: '--formidable-color-field-border', value: '#5eead4' },
-  { name: '--formidable-border-radius', value: '20px' },
-  { name: '--formidable-field-height', value: '72px' },
-  { name: '--formidable-field-border-thickness', value: '2px' },
-  { name: FONT_FAMILY_TOKEN, value: "'Avenir Next', Avenir, sans-serif" }
-];
+export const LADDER_STEPS: readonly LadderStep[] = (
+  [
+    {
+      title: 'Height',
+      caption: 'Taller fields; the inner height and the label offsets follow. The padding restates the library’s own.',
+      names: ['--formidable-field-height', '--formidable-field-padding-x']
+    },
+    {
+      title: 'Radius',
+      caption: 'Rounder corners. The groups and the open panel round with the fields.',
+      names: ['--formidable-border-radius']
+    },
+    {
+      title: 'Type',
+      caption: 'One family for every field, its panel and its messages.',
+      names: [FONT_FAMILY_TOKEN]
+    },
+    {
+      title: 'Ring Width',
+      caption: 'A wider focus ring, on the dropdown that has focus.',
+      names: ['--formidable-field-focus-ring-width']
+    },
+    {
+      title: 'Soft Ring',
+      caption: 'The ring turns translucent: one composite for a field, one for a group, one for an invalid field.',
+      names: [
+        '--formidable-color-field-focus-box-shadow',
+        '--formidable-color-field-group-focus-box-shadow',
+        '--formidable-color-field-focus-box-shadow-invalid'
+      ]
+    },
+    {
+      title: 'Dark Fill',
+      caption: 'A dark fill and light ink, on a dark page. Either alone is unreadable, so they change together.',
+      names: ['--formidable-color-field-background', '--formidable-color-field-text'],
+      page: LADDER_PRESET.page
+    },
+    {
+      title: 'Placeholder',
+      caption: 'A lighter placeholder. The hints are drawn in it too.',
+      names: ['--formidable-color-field-placeholder']
+    },
+    {
+      title: 'Border',
+      caption: 'A quieter border, which the groups, the toggle and the slider share.',
+      names: ['--formidable-color-field-border']
+    },
+    {
+      title: 'Tints',
+      caption:
+        'The selection colour, and the tints a dark fill restates: the open panel’s rows, the readonly and disabled fills.',
+      names: [
+        '--formidable-color-field-selection',
+        '--formidable-color-field-option-background-selected',
+        '--formidable-color-field-option-background-highlighted',
+        '--formidable-color-field-background-readonly',
+        '--formidable-color-field-background-disabled'
+      ]
+    },
+    {
+      title: 'Focus',
+      caption: 'Teal for focus. The ring is mixed from it, so the ring turns teal too.',
+      names: ['--formidable-color-field-border-focus']
+    },
+    {
+      title: 'Label',
+      caption: 'Teal for the label inside a field.',
+      names: ['--formidable-color-field-label-floating']
+    },
+    {
+      title: 'Error',
+      caption: 'Rose for errors: the invalid border, label and message.',
+      names: ['--formidable-color-validation-error']
+    },
+    {
+      title: 'No Border',
+      caption: 'No outline on any field. The groups, the toggle and the slider fall back to it, so theirs go too.',
+      names: ['--formidable-field-border-thickness']
+    },
+    {
+      title: 'Groups',
+      caption: 'The radio and checkbox groups get their outline back.',
+      names: ['--formidable-field-group-border-thickness']
+    },
+    {
+      title: 'Toggle',
+      caption: 'The toggle’s track, which is drawn by its border, gets it back.',
+      names: ['--formidable-toggle-field-track-border-thickness']
+    },
+    {
+      title: 'Slider',
+      caption: 'The slider’s track gets its outline back. This is Midnight.',
+      names: ['--formidable-slider-track-border-thickness']
+    }
+  ] satisfies readonly (Omit<LadderStep, 'declarations'> & { readonly names: readonly string[] })[]
+).map(({ names, ...step }) => ({ ...step, declarations: names.map((name) => ({ name, value: LADDER_VARS[name]! })) }));
 
 /**
  * One labelled part of the anatomy: the element it points at, where on that element's box, and the variable
@@ -109,15 +212,15 @@ const SAMPLE_VALUES: Readonly<Record<string, unknown>> = Object.entries(PREVIEW_
   {}
 );
 
-/** The sample field of a kind, reduced to one cell: no span, no hint, no condition, a short list. */
-export function sampleSpec(kind: PortalFieldKind): PortalFieldSpec {
+/** The sample field of a kind, reduced to one cell: no span, no condition, a short list, and no hint unless asked. */
+export function sampleSpec(kind: PortalFieldKind, keepHint = false): PortalFieldSpec {
   const { visibleWhen: _visibleWhen, ...spec } = PREVIEW_FIELDS.find((field) => field.id === SAMPLE_IDS[kind])!;
 
   return {
     ...spec,
     span: 1,
     options: spec.options?.slice(0, MATRIX_OPTION_COUNT),
-    decoration: { ...spec.decoration, hint: '', labelPosition: undefined }
+    decoration: { ...spec.decoration, hint: keepHint ? spec.decoration?.hint : '', labelPosition: undefined }
   };
 }
 
@@ -143,11 +246,11 @@ export interface MatrixColumn {
   readonly title: string;
   readonly value: (kind: PortalFieldKind) => unknown;
   readonly spec?: (spec: PortalFieldSpec) => PortalFieldSpec;
-  /** Rendered in a form whose validator reports the field as required, so the library shows it invalid. */
+  /** Rendered with a rule reporting the field as required, so the library shows it invalid. */
   readonly invalid?: boolean;
 }
 
-function withState(state: 'readonly' | 'disabled'): (spec: PortalFieldSpec) => PortalFieldSpec {
+export function withState(state: 'readonly' | 'disabled'): (spec: PortalFieldSpec) => PortalFieldSpec {
   return (spec) => ({ ...spec, state: { ...spec.state, [state]: true } });
 }
 

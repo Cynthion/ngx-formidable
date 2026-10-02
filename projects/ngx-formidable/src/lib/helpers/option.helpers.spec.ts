@@ -1,13 +1,14 @@
-import { IFormidableOption } from '../models/formidable.model';
+import fc from 'fast-check';
+import { FormidableOption } from '../models/formidable.model';
 import { applyDefaultOption, combineFieldOptions, getNextAvailableOptionIndex } from './option.helpers';
 
-const option = (value: string, extra: Partial<IFormidableOption> = {}): IFormidableOption => ({
+const option = (value: string, extra: Partial<FormidableOption> = {}): FormidableOption => ({
   value,
   label: value.toUpperCase(),
   ...extra
 });
 
-const byValue = (a: IFormidableOption, b: IFormidableOption) => a.value.localeCompare(b.value);
+const byValue = (a: FormidableOption, b: FormidableOption) => a.value.localeCompare(b.value);
 
 describe('option.helpers', () => {
   describe('combineFieldOptions', () => {
@@ -68,17 +69,62 @@ describe('option.helpers', () => {
   });
 
   describe('getNextAvailableOptionIndex', () => {
-    it('skips disabled and readonly options and wraps around', () => {
-      const options = [option('a'), option('b', { disabled: true }), option('c', { readonly: true }), option('d')];
+    /** Up to a dozen options, any of which may be disabled or readonly. */
+    const optionLists = fc
+      .array(fc.record({ disabled: fc.boolean(), readonly: fc.boolean() }), { maxLength: 12 })
+      .map((states) => states.map((state, index) => option(`o${index}`, state)));
 
-      expect(getNextAvailableOptionIndex(0, options, 'down')).toBe(3);
-      expect(getNextAvailableOptionIndex(3, options, 'down')).toBe(0);
-      expect(getNextAvailableOptionIndex(0, options, 'up')).toBe(3);
+    const canHighlight = (o: FormidableOption) => !o.disabled && !o.readonly;
+    const highlightable = (options: FormidableOption[]) =>
+      options.flatMap((o, index) => (canHighlight(o) ? [index] : []));
+
+    /** Where the highlight lands on each of `steps` presses in `direction`, starting from nothing highlighted. */
+    function walk(options: FormidableOption[], direction: 'up' | 'down', steps: number): number[] {
+      const landed: number[] = [];
+      let index = -1;
+
+      for (let step = 0; step < steps; step++) {
+        index = getNextAvailableOptionIndex(index, options, direction);
+        landed.push(index);
+      }
+
+      return landed;
+    }
+
+    it('lands on an option that can take the highlight, or on none when no option can', () => {
+      fc.assert(
+        fc.property(
+          optionLists,
+          fc.integer({ min: -1, max: 12 }),
+          fc.constantFrom('up' as const, 'down' as const),
+          (options, current, direction) => {
+            const next = getNextAvailableOptionIndex(current, options, direction);
+
+            if (highlightable(options).length) expect(canHighlight(options[next]!)).toBe(true);
+            else expect(next).toBe(-1);
+          }
+        )
+      );
     });
 
-    it('returns -1 when nothing is selectable', () => {
-      expect(getNextAvailableOptionIndex(-1, [], 'down')).toBe(-1);
-      expect(getNextAvailableOptionIndex(-1, [option('a', { disabled: true })], 'down')).toBe(-1);
+    it('walks down through every option it can highlight, in order, and wraps to the first', () => {
+      fc.assert(
+        fc.property(optionLists, (options) => {
+          const lap = highlightable(options);
+
+          expect(walk(options, 'down', lap.length * 2)).toEqual([...lap, ...lap]);
+        })
+      );
+    });
+
+    it('walks up through the same options in reverse, starting from the last', () => {
+      fc.assert(
+        fc.property(optionLists, (options) => {
+          const lap = highlightable(options).reverse();
+
+          expect(walk(options, 'up', lap.length * 2)).toEqual([...lap, ...lap]);
+        })
+      );
     });
   });
 });

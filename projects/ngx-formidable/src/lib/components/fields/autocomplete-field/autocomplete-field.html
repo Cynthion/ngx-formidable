@@ -1,0 +1,69 @@
+<div
+  #autocompleteRef
+  class="field"
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
+  [class.focused]="isFieldFocused()"
+  (focusin)="onFocusChange(true, $event)"
+  (focusout)="onFocusChange(false, $event)">
+  <div class="input-wrapper">
+    <!-- Input Field -->
+    <input
+      #inputRef
+      type="text"
+      autocomplete="off"
+      role="combobox"
+      class="wrapped-input"
+      aria-autocomplete="list"
+      [id]="fieldId"
+      [placeholder]="placeholder()"
+      [attr.name]="name()"
+      [attr.readonly]="readonly() ? '' : null"
+      [attr.disabled]="disabled() ? '' : null"
+      [attr.tabindex]="canEdit() ? null : -1"
+      [attr.aria-required]="required() || null"
+      [attr.aria-invalid]="showErrors() || null"
+      [attr.aria-describedby]="describedBy"
+      [attr.aria-readonly]="readonly() || null"
+      [attr.aria-expanded]="isPanelOpen()"
+      [attr.aria-controls]="panelId"
+      [attr.aria-activedescendant]="optionId(highlightedOptionIndex())"
+      (mousedown)="onEditorMouseDown()"
+      (input)="onInput($event)" />
+  </div>
+
+  <!-- Panel -->
+  <div
+    #panelRef
+    tabindex="-1"
+    class="panel panel-{{ panelPosition() }}"
+    [class.open]="isPanelOpen()"
+    (mousedown)="onPanelMouseDown($event)">
+    <!-- The role sits here rather than on the panel, so the options it owns are its direct children. -->
+    <div
+      role="listbox"
+      class="panel-scrollcontainer"
+      [id]="panelId">
+      <!-- Empty State -->
+      @if (!hasSelectableOptions()) {
+      <div class="no-option">{{ noOptionsText() }}</div>
+      }
+
+      <!-- Options -->
+      <!-- Option components are re-created in order to control and filter them. -->
+      @for (option of activeOptions(); track option.value; let i = $index) {
+      <formidable-field-option
+        #optionRef
+        [attr.id]="optionId(i)"
+        [value]="option.value"
+        [label]="option.label"
+        [content]="option.template"
+        [match]="option.match"
+        [readonly]="option.readonly || false"
+        [disabled]="option.disabled || false"
+        [selected]="option.value === selectedOption()?.value"
+        [highlighted]="i === highlightedOptionIndex()" />
+      }
+    </div>
+  </div>
+</div>

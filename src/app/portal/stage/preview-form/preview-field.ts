@@ -1,0 +1,233 @@
+import { Component, computed, ElementRef, inject, input, output, signal } from '@angular/core';
+import { FieldTree, FormField } from '@angular/forms/signals';
+import {
+  AutocompleteField,
+  CheckboxGroupField,
+  DateField,
+  DropdownField,
+  FieldDecorator,
+  FieldHint,
+  FieldLabelAdornment,
+  FieldLabel,
+  FieldLabelPosition,
+  FieldOption,
+  FieldPrefix,
+  FieldSuffix,
+  FieldToggleIcon,
+  FormidableActionOption,
+  FormidableOption,
+  InputField,
+  RadioGroupField,
+  SelectField,
+  SliderField,
+  TextareaField,
+  TimeField,
+  ToggleField
+} from '@cynthion/ngx-formidable';
+import { ExampleCounterField } from '../../../example-counter-field/example-counter-field';
+import { ExampleFuzzyOption } from '../../../example-fuzzy-option/example-fuzzy-option';
+import { ExampleIcon } from '../../../example-icon/example-icon';
+import { ExampleTooltip } from '../../../example-tooltip/example-tooltip';
+import { describeFieldSettings } from '../../helpers/field-summary';
+import { filterOptions } from '../../helpers/fuzzy.helpers';
+import { AccessibilityReadout } from '../accessibility/accessibility-readout';
+import { CALENDAR_SVG, MARKER_SVG, SPARK_SVG } from './preview-icons';
+import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabilities';
+import { PortalFieldSpec, PortalFormOptions, PortalOptionSpec } from '../../model/field-spec.model';
+import { localeOf } from '../../model/locales';
+
+/** What a picked `actionOption` hands to the form: which field asked, and the text typed into it so far. */
+export interface PortalActionRequest {
+  readonly fieldId: string;
+  readonly prefill: string;
+}
+
+/** The named formatters offered in place of a code editor for a slider's function-typed inputs. */
+const FORMATTERS: Readonly<Record<string, (value: number) => string>> = {
+  percent: (value) => `${value}%`,
+  years: (value) => `${value} years`,
+  currency: (value) => `€${value.toLocaleString('en-GB')}`,
+  ordinal: (value) => `#${value}`
+};
+
+/**
+ * One field of the preview form, rendered from its specification and bound to its field in a field tree.
+ *
+ * The specification arrives as an input, so a change to one field marks only this view — which is what makes
+ * one signal over the whole definition tree workable. Its state — readonly, disabled, required, the limits —
+ * arrives through `[formField]` from the schema, which is the only way a field bound by it takes any.
+ */
+@Component({
+  selector: 'portal-preview-field',
+  templateUrl: './preview-field.html',
+  styleUrl: './preview-field.scss',
+  imports: [
+    FormField,
+    FieldDecorator,
+    FieldHint,
+    FieldLabelAdornment,
+    FieldLabel,
+    FieldOption,
+    FieldPrefix,
+    FieldSuffix,
+    FieldToggleIcon,
+    InputField,
+    TextareaField,
+    SelectField,
+    DropdownField,
+    AutocompleteField,
+    DateField,
+    TimeField,
+    ToggleField,
+    SliderField,
+    RadioGroupField,
+    CheckboxGroupField,
+    ExampleCounterField,
+    ExampleFuzzyOption,
+    ExampleIcon,
+    ExampleTooltip,
+    AccessibilityReadout
+  ],
+  host: {
+    '[class.is-selected]': 'selected()',
+    '[style.grid-column]': "spec().span === 2 ? '1 / -1' : null"
+  }
+})
+export class PreviewField {
+  public readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  public readonly spec = input.required<PortalFieldSpec>();
+  public readonly formOptions = input.required<PortalFormOptions>();
+  /** The field in the tree this one is bound to. Its value's type is the kind's, which the tree cannot state. */
+  public readonly fieldTree = input.required<FieldTree<unknown>>();
+  public readonly selected = input(false);
+  public readonly showAccessibility = input(false);
+  public readonly showFieldTypes = input(true);
+
+  /** Selection follows focus, so clicking a field uses it rather than only selecting it. */
+  public readonly focused = output<string>();
+  /** The chip is a control: it opens the editor panel at the field it names. */
+  public readonly chipActivated = output<string>();
+  /** An `actionOption` was picked. The form owns what happens next, because it owns the model. */
+  public readonly actionRequested = output<PortalActionRequest>();
+  /** The user chose an option, which is what a preset answers. Never emitted for a write to the model. */
+  public readonly picked = output<unknown>();
+
+  protected readonly host = this.elementRef.nativeElement;
+
+  protected readonly calendarSvg = CALENDAR_SVG;
+  protected readonly markerSvg = MARKER_SVG;
+  protected readonly sparkSvg = SPARK_SVG;
+
+  protected readonly capabilities = computed(() => FIELD_CAPABILITIES[this.spec().kind]);
+
+  /** The chip states which component this is, so it cannot disagree with the field it sits under. */
+  protected readonly kindLabel = computed(() => FIELD_KIND_LABELS[this.spec().kind]);
+
+  /**
+   * The chip's tooltip: what this field is set to, read off the specification rather than written by hand.
+   * A hand-written description survives neither an edit on the Settings tab nor a field added in the
+   * structure editor.
+   */
+  protected readonly settingsTitle = computed(() => {
+    const spec = this.spec();
+    const settings = describeFieldSettings(spec);
+    const heading = `${spec.label} — ${this.kindLabel()}`;
+
+    if (!settings.length) return `${heading}\nEvery input at its default.`;
+
+    return [heading, ...settings.map((setting) => `${setting.name}: ${setting.value}`)].join('\n');
+  });
+
+  /** Bumped whenever this field may have repainted, so the accessibility readout re-reads the DOM. */
+  protected readonly revision = computed(() => {
+    this.spec();
+    this.fieldTree()().value();
+    this.formOptions();
+
+    return Date.now();
+  });
+
+  protected readonly locale = computed(() => localeOf(this.spec().locale ?? this.formOptions().locale));
+
+  protected readonly showLabel = computed(() => this.formOptions().showLabels && this.spec().decoration.showLabel);
+
+  // `undefined` binds as "state nothing", so the library resolves the app default exactly as it would for a
+  // template that leaves the attribute out.
+  protected readonly labelPosition = computed<FieldLabelPosition | undefined>(() =>
+    this.capabilities().labelPositions ? this.spec().decoration.labelPosition : 'outside'
+  );
+
+  protected readonly showHint = computed(() => this.formOptions().showHints && !!this.spec().decoration.hint);
+
+  protected readonly showAdornments = computed(
+    () => this.formOptions().showAdornments && this.capabilities().adornments
+  );
+
+  protected readonly panelPosition = computed(() => this.spec().panelPosition);
+
+  protected readonly options = computed<PortalOptionSpec[]>(() => [...(this.spec().options ?? [])]);
+
+  /** An `always` default is pinned first, exempt from both the sort and the autocomplete filter. */
+  protected readonly defaultOption = computed(() => {
+    const option = this.spec().defaultOption;
+
+    return option ? { value: option.value, label: option.label } : undefined;
+  });
+
+  /**
+   * The action entry, folded out of the specification with the handler the specification cannot hold.
+   *
+   * `filterText` is read inside the closure rather than in the computed, so typing does not rebuild the
+   * entry on every keystroke — which would move the option list under the panel the visitor is reading.
+   */
+  protected readonly actionOption = computed<FormidableActionOption | undefined>(() => {
+    const option = this.spec().actionOption;
+    if (!option) return undefined;
+
+    return {
+      value: option.value,
+      label: option.label,
+      action: () => this.actionRequested.emit({ fieldId: this.spec().id, prefill: this.filterText() })
+    };
+  });
+
+  protected readonly sortFn = computed(() =>
+    this.spec().sortAlphabetically
+      ? (a: FormidableOption, b: FormidableOption) => (a.label ?? a.value).localeCompare(b.label ?? b.value)
+      : undefined
+  );
+
+  protected readonly thumbLabelFn = computed(() => this.formatter(this.spec().thumbLabelFormat));
+  protected readonly tickLabelFn = computed(() => this.formatter(this.spec().tickLabelFormat));
+
+  /** An autocomplete emits its filter text and the consumer supplies the filtered list. */
+  protected readonly filterText = signal('');
+
+  /**
+   * The narrowed list the autocomplete renders, with the match runs its projected option marks.
+   *
+   * The strategy is the consumer's choice, not the field's — which is the point of offering it as a setting:
+   * the same typed text finds a typo under `fuzzy` and nothing under the two literal strategies, with no
+   * input on the field having moved.
+   */
+  protected readonly fuzzyMatches = computed(() =>
+    filterOptions(this.options(), this.filterText(), this.spec().filterStrategy ?? 'fuzzy')
+  );
+
+  // Each option's `match`. The list is already the strategy's result, and the field's default substring test
+  // would drop whatever it found beyond a substring of the label: a typo, a subtitle.
+  protected readonly matchesEveryFilter = (): boolean => true;
+
+  protected onFocus(): void {
+    this.focused.emit(this.spec().id);
+  }
+
+  protected onChip(): void {
+    this.chipActivated.emit(this.spec().id);
+  }
+
+  private formatter(id: string | undefined): ((value: number) => string) | undefined {
+    return id && id !== 'none' ? FORMATTERS[id] : undefined;
+  }
+}

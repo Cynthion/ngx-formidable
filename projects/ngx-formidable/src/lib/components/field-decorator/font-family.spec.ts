@@ -1,67 +1,62 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideNgxMask } from 'ngx-mask';
-import { FieldHintDirective } from '../../directives/field-hint.directive';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { TextareaFieldComponent } from '../fields/textarea-field/textarea-field.component';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { page } from 'vitest/browser';
+import { FieldHint } from '../../directives/field-hint';
+import { FieldLabel } from '../../directives/field-label';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { InputField } from '../fields/input-field/input-field';
+import { TextareaField } from '../fields/textarea-field/textarea-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
- * Contract of `--formidable-font-family`: set, it reaches every text the library renders, decorated or not;
- * unset, the library takes the page's family exactly as before.
+ * Per `--formidable-font-family` in `user/theme-reference.md`: set, it reaches every text the library renders,
+ * decorated or not; unset, the library takes the page's family.
  */
 @Component({
-  imports: [
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    TextareaFieldComponent,
-    FieldLabelDirective,
-    FieldHintDirective
-  ],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FieldDecorator, InputField, TextareaField, FieldLabel, FieldHint],
   template: `
     <div
       style="font-family: serif"
-      [style.--formidable-font-family]="family">
+      [style.--formidable-font-family]="family()">
       <formidable-field-decorator>
-        <formidable-input-field name="decorated" />
+        <formidable-input-field />
         <div formidableFieldLabel>Label</div>
         <div formidableFieldHint>Hint</div>
       </formidable-field-decorator>
-      <formidable-textarea-field name="bare" />
+      <formidable-textarea-field />
     </div>
   `
 })
-class FontHostComponent {
-  family: string | null = 'monospace';
+class FontHost {
+  readonly family = signal<string | null>('monospace');
 }
 
 describe('--formidable-font-family', () => {
-  let fixture: ComponentFixture<FontHostComponent>;
-  let root: HTMLElement;
+  let fixture: ComponentFixture<FontHost>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+  beforeEach(async () => {
+    configureFormidableTestBed();
 
-    fixture = TestBed.createComponent(FontHostComponent);
-    fixture.detectChanges();
-    root = fixture.nativeElement as HTMLElement;
+    fixture = TestBed.createComponent(FontHost);
+    await settle(fixture);
   });
 
+  /** The family of the decorated input and the bare textarea, then of the label and the hint. */
   function families(): string[] {
-    return ['input', '[formidableFieldLabel]', '[formidableFieldHint]', 'textarea'].map(
-      (selector) => getComputedStyle(root.querySelector(selector) as HTMLElement).fontFamily
-    );
+    return [
+      ...page.getByRole('textbox').elements(),
+      page.getByText('Label').element(),
+      page.getByText('Hint').element()
+    ].map((element) => getComputedStyle(element).fontFamily);
   }
 
   it('reaches the field, its label, its hint and an undecorated field', () => {
     expect(families()).toEqual(['monospace', 'monospace', 'monospace', 'monospace']);
   });
 
-  it('leaves the page family in force when unset', () => {
-    fixture.componentInstance.family = null;
-    fixture.detectChanges();
+  it('leaves the page family in force when unset', async () => {
+    fixture.componentInstance.family.set(null);
+    await settle(fixture);
 
     expect(families()).toEqual(['serif', 'serif', 'serif', 'serif']);
   });

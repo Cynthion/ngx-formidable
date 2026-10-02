@@ -1,348 +1,388 @@
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { provideNgxMask } from 'ngx-mask';
-import { DEFAULT_EXPORT_OPTIONS } from './export/theme-export';
+import { Locator, page, userEvent } from 'vitest/browser';
 import { importTheme } from './export/theme-import';
 import { FIELD_KIND_LABELS } from './model/field-capabilities';
 import { PREVIEW_FIELDS } from './model/preview-form.definition';
 import { THEME_PRESETS } from './model/presets';
-import { PortalComponent } from './portal.component';
-import { PORTAL_ROUTES } from './portal.routes';
-import { FormDefinitionStore } from './state/form-definition.store';
-import { FormValueStore } from './state/form-value.store';
-import { FormSubTab, InspectorStore, InspectorTab, ThemeSubTab } from './state/inspector.store';
-import { LayoutStore } from './state/layout.store';
-import { ThemeStore } from './state/theme.store';
+import { THEME_TOKENS_BY_NAME } from './model/token-manifest';
+import { editField, errors, model, openPanel, openSection, openStudio, tab } from './testing/studio';
+
+/** **A Following Variable States Its Default** in `impl/backlog.md`. */
+const FOLLOWER_STATES_DEFAULT = 'a following variable states the library default rather than the value in force';
 
 /**
- * The portal renders, the theme reaches the page, and the chrome does not follow it.
+ * The Studio as a visitor uses it: every act goes through the page's own controls, and every claim is read
+ * off what the page shows — the stage, the editor panel, the model drawer, the top bar's count.
  *
  * The insulation check is the one that cannot be read off the code: a custom property's `var()` is
  * substituted where the property is **declared**, so a theme scoped to a subtree half-applies. This asserts
  * that the chrome's re-emitted block really does recompute the derived values against its own bases.
  */
 describe('portal', () => {
-  let fixture: ComponentFixture<PortalComponent>;
-  let root: HTMLElement;
-  let theme: ThemeStore;
+  const KINDS = Object.values(FIELD_KIND_LABELS);
 
-  function settle(): void {
-    for (let i = 0; i < 3; i++) {
-      fixture.detectChanges();
-      tick(100);
-    }
-    fixture.detectChanges();
+  /** The run of chips under the fields, by the component each names. */
+  function chipKinds(): string[] {
+    return page
+      .getByRole('button', { name: / — edit / })
+      .elements()
+      .map((chip) => chip.getAttribute('aria-label')!.split(' — edit ')[0]!);
   }
 
-  beforeEach(() => {
-    localStorage.clear();
+  function chip(field: string): Locator {
+    return page.getByRole('button', { name: new RegExp(` — edit ${field}$`) });
+  }
 
-    TestBed.configureTestingModule({
-      providers: [provideNgxMask(), provideRouter(PORTAL_ROUTES)]
-    });
+  /** Opens a panel field and picks one of its options, the way a user does: a click on each. */
+  async function pick(field: string, option: string | RegExp): Promise<void> {
+    // The display input takes no pointer events, so a user's click lands on the field around it.
+    await userEvent.click(page.getByRole('combobox', { name: field }), { force: true });
+    await userEvent.click(page.getByRole('option', { name: option }));
+  }
 
-    theme = TestBed.inject(ThemeStore);
-    theme.reset();
+  /** The number the top bar's copy button states, the variables the user has changed. */
+  function changeCount(): number {
+    return Number(
+      page
+        .getByRole('button', { name: /^Copy Theme \d+$/ })
+        .element()
+        .querySelector('.count')!.textContent
+    );
+  }
 
-    fixture = TestBed.createComponent(PortalComponent);
-    root = fixture.nativeElement as HTMLElement;
+  async function applyPreset(key: string): Promise<void> {
+    const preset = THEME_PRESETS.find((candidate) => candidate.key === key)!;
+
+    await openPanel('Theme', 'Design');
+    await openSection('Presets');
+    await userEvent.click(page.getByRole('button').filter({ has: page.getByText(preset.label, { exact: true }) }));
+  }
+
+  /**
+   * Sets one variable on its own control in `Variables`, found by its name in the filter. A length takes its
+   * unit, then its amount; a colour goes into its well; anything else is typed and committed.
+   */
+  async function setVariable(name: string, value: string): Promise<void> {
+    const token = THEME_TOKENS_BY_NAME.get(name)!;
+    const label = new RegExp(`^${name.replace('--formidable-', '')}( reset)?$`);
+
+    await openPanel('Theme', 'Variables');
+    await userEvent.fill(page.getByRole('searchbox'), name);
+    await openSection(token.group);
+
+    if (token.control === 'color') {
+      await userEvent.fill(page.getByLabelText(name, { exact: true }), value);
+    } else if (token.control === 'length') {
+      const [, amount, unit] = /^(-?[\d.]+)([a-z%]+)$/.exec(value)!;
+
+      await userEvent.selectOptions(page.getByRole('combobox', { name: `${name} unit` }), unit!);
+      await userEvent.fill(page.getByRole('spinbutton', { name: label }), amount!);
+    } else {
+      await userEvent.fill(page.getByRole('textbox', { name: label }), value);
+      await userEvent.keyboard('{Enter}');
+    }
+  }
+
+  /** The `:root` block `Export & Import` states for the theme on screen. */
+  async function exportedTheme(): Promise<string> {
+    await openPanel('Export & Import', 'Export', 'Theme');
+
+    return document.querySelector('portal-export-panel pre')!.textContent!;
+  }
+
+  async function importBlock(block: string, ontoDefaults: boolean): Promise<void> {
+    await openPanel('Export & Import', 'Import', 'Theme');
+    await userEvent.fill(page.getByPlaceholder(':root { --formidable-field-height: 48px; }'), block);
+
+    const onto = page.getByRole('checkbox', { name: 'Onto The Defaults' });
+    if ((onto.element() as HTMLInputElement).checked !== ontoDefaults) await userEvent.click(onto);
+
+    await userEvent.click(page.getByRole('button', { name: 'Apply', exact: true }));
+  }
+
+  // #region The stage
+
+  it('renders the top bar, the stage and the editor panel', async () => {
+    await openStudio();
+
+    await expect.element(page.getByRole('navigation', { name: 'Portal' })).toBeVisible();
+    await expect.element(page.getByRole('heading', { name: 'Order A Pizza', level: 1 })).toBeVisible();
+    await expect.element(page.getByRole('tablist', { name: 'Editor panel' })).toBeVisible();
   });
 
-  afterEach(() => {
-    document.documentElement.removeAttribute('style');
-    localStorage.clear();
+  // Every field except the one its condition is currently holding back, which `hidden()` marks and `@if`
+  // takes off the page. Each is named by its decorator's label, which is where its accessible name comes from.
+  it('renders every unconditional field of the preview form, each named by its label', async () => {
+    await openStudio();
+
+    const shown = PREVIEW_FIELDS.filter((field) => field.id !== 'branch');
+
+    expect(chipKinds().length).toBe(shown.length);
+
+    for (const field of shown) {
+      await expect.element(page.getByLabelText(field.label, { exact: true }).first()).toBeVisible();
+    }
+
+    expect(page.getByLabelText('Pick Up From').elements()).toEqual([]);
   });
-
-  it('renders the three regions', fakeAsync(() => {
-    settle();
-
-    expect(root.querySelector('portal-top-bar')).toBeTruthy();
-    expect(root.querySelector('portal-stage')).toBeTruthy();
-    expect(root.querySelector('portal-inspector')).toBeTruthy();
-  }));
-
-  // Every field except the one its condition is currently holding back. That field is not hidden but
-  // destroyed, which is the whole point of the pair — see `user/validation.md`, Conditional Fields.
-  it('renders every unconditional field of the preview form, each in a decorator', fakeAsync(() => {
-    settle();
-
-    const rendered = PREVIEW_FIELDS.length - 1;
-
-    expect(root.querySelectorAll('portal-preview-field').length).toBe(rendered);
-    expect(root.querySelectorAll('formidable-field-decorator').length).toBeGreaterThanOrEqual(rendered);
-  }));
 
   // The rule the layout cannot trade away: a component reachable only by flipping a switch is a component a
   // visitor never finds. It is what decides that the branch dropdown has a second, unconditional sibling.
-  it('has every field kind on screen in the form’s default state', fakeAsync(() => {
-    settle();
+  it('has every field kind on screen in the form’s default state', async () => {
+    await openStudio();
 
-    const onScreen = new Set(
-      Array.from(root.querySelectorAll('portal-preview-field .chip-text')).map((element) =>
-        (element.textContent ?? '').trim()
-      )
-    );
+    expect([...new Set(chipKinds())].sort()).toEqual([...KINDS].sort());
+  });
 
-    expect(Array.from(onScreen).sort()).toEqual(Object.values(FIELD_KIND_LABELS).sort());
-  }));
+  it('starts pre-filled, so the filled and floating-label states are on screen from the first frame', async () => {
+    await openStudio();
 
-  // The group is the one place the model is not flat, and it is flat unless every field registers on the
-  // group rather than on the form — which the per-field component's own `ControlContainer` decides.
-  it('nests a grouped section’s fields under its group name in the model', fakeAsync(() => {
-    settle();
+    const [, filled, total] = /(\d+) of (\d+) filled/.exec(
+      page.getByRole('button', { name: /^Model / }).element().textContent!
+    )!;
 
-    const model = TestBed.inject(FormValueStore).model() as Record<string, unknown>;
-    const when = model['when'] as Record<string, unknown>;
+    expect(Number(filled)).toBeGreaterThan(Number(total) / 2);
+  });
 
-    expect(when).toBeTruthy();
-    expect(when['date'] instanceof Date).toBeTrue();
-    expect(when['time'] instanceof Date).toBeTrue();
-    expect(model['date']).toBeUndefined();
-  }));
+  // #endregion
+
+  // #region The model
+
+  // The group is the one place the model is not flat, and the field tree follows it: a grouped field is bound
+  // to the field under its group.
+  it('nests a grouped section’s fields under its group name in the model', async () => {
+    await openStudio();
+
+    const values = await model();
+    const when = values['when'] as Record<string, unknown>;
+
+    expect(Date.parse(when['date'] as string)).not.toBeNaN();
+    expect(Date.parse(when['time'] as string)).not.toBeNaN();
+    expect(values['date']).toBeUndefined();
+    expect(page.getByRole('combobox', { name: 'Date' }).element().getAttribute('name')).toMatch(/\.when\.date$/);
+  });
 
   // The group rule reads both members and reports on neither, so its message has to land on the group.
-  it('reports a group rule under the group rather than under either field', fakeAsync(() => {
-    settle();
+  it('reports a group rule under the group rather than under either field', async () => {
+    await openStudio();
 
-    const values = TestBed.inject(FormValueStore);
+    // 02:00 is outside the opening hours the group rule states; neither field is wrong on its own. Typed over
+    // the time the way the field takes typing: a keyboard focus entry selects it.
+    await userEvent.click(page.getByRole('textbox', { name: 'Time' }));
+    await userEvent.tab({ shift: true });
+    await userEvent.tab();
+    await userEvent.keyboard('0200');
+    await userEvent.keyboard('{Enter}');
 
-    // 02:00 is outside the opening hours the group rule states; neither field is wrong on its own.
-    const when = values.model()['when'] as Record<string, unknown>;
-    values.setModel({ ...values.model(), when: { ...when, time: new Date(2000, 0, 1, 2, 0) } });
-    settle();
+    await expect.poll(async () => (await errors())['when']).toEqual(['We are open from 11:00 to 23:00.']);
+    expect((await errors())['when.time']).toBeUndefined();
+  });
 
-    expect(values.errors()['when']).toEqual(['We are open from 11:00 to 23:00.']);
-    expect(values.errors()['when.time']).toBeUndefined();
-  }));
+  // One toggle, two fields, one each way. The hidden one keeps its key, and nothing validates it: the branch
+  // is empty and required from the start, and reports only once it is on the form.
+  it('swaps the two conditional fields when the toggle moves, and validates only the one showing', async () => {
+    await openStudio();
 
-  // One toggle, two fields, one each way. The hidden one is destroyed with its control, so its key leaves
-  // the model entirely — which is what the rules have to survive and what `omitWhen` is there for.
-  it('swaps the two conditional fields when the toggle moves, and moves the key with them', fakeAsync(() => {
-    settle();
+    const address = page.getByRole('combobox', { name: 'Delivery Address' });
 
-    const values = TestBed.inject(FormValueStore);
-    const names = (): string[] =>
-      Array.from(root.querySelectorAll('portal-preview-field')).map(
-        (element) => element.querySelector('[name]')?.getAttribute('name') ?? ''
-      );
+    expect((await errors())['branch']).toBeUndefined();
 
-    expect(names()).toContain('address');
-    expect(names()).not.toContain('branch');
-    expect(values.model()['address']).toBe('langstrasse');
-    expect(values.model()['branch']).toBeUndefined();
+    // Typed away: the address is required, so it reports while it is on the form.
+    await userEvent.fill(address, '');
+    await expect.poll(async () => (await errors())['address']).toBeTruthy();
+    expect((await model())['branch']).toBeNull();
 
-    values.setModel({ ...values.model(), pickup: true });
-    settle();
+    await userEvent.click(page.getByRole('switch', { name: 'How To Get It' }));
 
-    expect(names()).toContain('branch');
-    expect(names()).not.toContain('address');
-    expect(values.model()['address']).toBeUndefined();
+    await expect.element(page.getByRole('combobox', { name: 'Pick Up From' })).toBeVisible();
+    await expect.element(address).not.toBeInTheDocument();
+    expect(await model()).toHaveProperty('address', null);
+    expect((await errors())['address']).toBeUndefined();
+    expect((await errors())['branch']).toEqual(['Pick a branch to collect from.']);
 
     // The crust is the reason the swap is workable: the dropdown never leaves the form with the branch.
-    expect(names()).toContain('crust');
-  }));
+    await expect.element(page.getByRole('combobox', { name: 'Pizza' })).toBeVisible();
+  });
+
+  // The Studio filters the address options itself, so the field must render what that filter finds: a typo
+  // fuse.js forgives, and a match on the subtitle, are both lost to a substring test of the label.
+  it('renders what the fuzzy filter finds, beyond what a substring test of the label would', async () => {
+    await openStudio();
+
+    for (const typed of ['bahnhfo', '8001']) {
+      await userEvent.fill(page.getByRole('combobox', { name: 'Delivery Address' }), typed);
+
+      await expect.element(page.getByRole('option', { name: /^Bahnhofstrasse 12/ })).toBeVisible();
+    }
+  });
 
   // The template picker: choosing a pizza writes the two fields it stands for and leaves every other alone,
   // and a later edit to one of those fields is not undone — a pizza is a starting point, not a lock.
-  it('applies a pizza’s preset when the picker moves, and does not re-apply it afterwards', fakeAsync(() => {
-    settle();
+  it('applies a pizza’s preset when the user picks it, and does not re-apply it afterwards', async () => {
+    await openStudio();
 
-    const values = TestBed.inject(FormValueStore);
+    expect(await model()).toMatchObject({ sauce: 'tomato', toppings: ['mozzarella', 'basil'] });
 
-    expect(values.model()['sauce']).toBe('tomato');
-    expect(values.model()['toppings']).toEqual(['mozzarella', 'basil']);
+    await pick('Pizza', 'Diavola');
 
-    values.setModel({ ...values.model(), pizza: 'diavola' });
-    settle();
-
-    expect(values.model()['sauce']).toBe('arrabbiata');
-    expect(values.model()['toppings']).toEqual(['mozzarella', 'salami', 'chilli']);
     // Untouched by the preset, which patches only the keys it names.
-    expect(values.model()['size']).toBe('large');
+    await expect.poll(model).toMatchObject({
+      pizza: 'diavola',
+      sauce: 'arrabbiata',
+      toppings: ['mozzarella', 'salami', 'chilli'],
+      size: 'large'
+    });
 
-    values.setModel({ ...values.model(), sauce: 'pesto' });
-    settle();
+    await userEvent.click(page.getByRole('radio', { name: 'Pesto' }));
 
-    expect(values.model()['sauce']).toBe('pesto');
-  }));
+    await expect.poll(model).toMatchObject({ pizza: 'diavola', sauce: 'pesto' });
+  });
 
-  it('leaves the model alone for an option that carries no preset', fakeAsync(() => {
-    settle();
+  // `Custom` carries no preset, so picking it keeps what the user already chose rather than restoring a pizza.
+  it('leaves the model alone for an option that carries no preset', async () => {
+    await openStudio();
 
-    const values = TestBed.inject(FormValueStore);
+    await userEvent.click(page.getByRole('radio', { name: 'Pesto' }));
+    await expect.poll(model).toMatchObject({ sauce: 'pesto' });
 
-    values.setModel({ ...values.model(), sauce: 'bbq', pizza: 'custom' });
-    settle();
+    await pick('Pizza', /^Custom/);
 
-    expect(values.model()['sauce']).toBe('bbq');
-    expect(values.model()['toppings']).toEqual(['mozzarella', 'basil']);
-  }));
+    await expect.poll(model).toMatchObject({ pizza: 'custom', sauce: 'pesto', toppings: ['mozzarella', 'basil'] });
+  });
 
   // The second group, and a condition reading into it: `visibleWhen` names `method`, which the model holds
   // at `payment.method`.
-  it('nests the payment group and resolves its conditional field through it', fakeAsync(() => {
-    settle();
+  it('nests the payment group and resolves its conditional field through it', async () => {
+    await openStudio();
 
-    const values = TestBed.inject(FormValueStore);
-    const payment = (): Record<string, unknown> => values.model()['payment'] as Record<string, unknown>;
-    const names = (): string[] =>
-      Array.from(root.querySelectorAll('portal-preview-field')).map(
-        (element) => element.querySelector('[name]')?.getAttribute('name') ?? ''
-      );
+    expect((await model())['payment']).toMatchObject({ method: 'card', cardNumber: '4242 4242 4242 4242' });
+    await expect.element(page.getByRole('textbox', { name: 'Card Number' })).toBeVisible();
 
-    expect(payment()['method']).toBe('card');
-    expect(payment()['cardNumber']).toBe('4242 4242 4242 4242');
-    expect(names()).toContain('cardNumber');
+    await userEvent.click(page.getByRole('radio', { name: 'Twint' }));
 
-    values.setModel({ ...values.model(), payment: { ...payment(), method: 'twint' } });
-    settle();
+    await expect.element(page.getByRole('textbox', { name: 'Card Number' })).not.toBeInTheDocument();
+    expect((await model())['payment']).toMatchObject({ method: 'twint', cardNumber: '4242 4242 4242 4242' });
+  });
 
-    expect(names()).not.toContain('cardNumber');
-    expect(payment()['cardNumber']).toBeUndefined();
-  }));
+  // #endregion
 
-  it('starts pre-filled, so the filled and floating-label states are on screen from the first frame', fakeAsync(() => {
-    settle();
+  // #region The theme
 
-    const values = TestBed.inject(FormValueStore);
+  it('renders a live miniature of a real field for every preset', async () => {
+    await openStudio();
 
-    expect(values.filledCount()).toBeGreaterThan(values.fieldCount() / 2);
-  }));
+    const gallery = page.getByRole('region', { name: /^Presets/ });
 
-  it('renders a live miniature of a real field for every preset', fakeAsync(() => {
-    settle();
+    for (const preset of THEME_PRESETS) {
+      await expect.element(gallery.getByText(preset.label, { exact: true })).toBeVisible();
+    }
 
-    const thumbnails = root.querySelectorAll('.portal-theme-scope');
+    const samples = Array.from(gallery.element().querySelectorAll('formidable-input-field input'), (input) => {
+      return (input as HTMLInputElement).value;
+    });
 
-    expect(thumbnails.length).toBe(THEME_PRESETS.length);
-    expect(thumbnails[0]?.querySelector('formidable-input-field')).toBeTruthy();
-    expect(thumbnails[0]?.querySelector('input')?.value).toBe('Sample');
-  }));
+    expect(samples).toEqual(THEME_PRESETS.map(() => 'Sample'));
+  });
 
   /**
    * The variables `USE_SITE_VARS` names are declared nowhere, so nothing masks them by inheritance and the
    * `:root` theme reaches straight into every thumbnail. Applying a preset that sets one used to repaint
    * the other eleven with it.
    */
-  it('keeps every preset thumbnail on its own theme when another preset is applied', fakeAsync(() => {
-    settle();
+  it('keeps every preset thumbnail on its own theme when another preset is applied', async () => {
+    await openStudio();
 
-    const radius = (index: number): string => {
-      const thumbnail = root.querySelectorAll('.portal-theme-scope')[index] as HTMLElement;
-      const field = thumbnail.querySelector('formidable-input-field .field') as HTMLElement;
+    const radius = (key: string): string => {
+      const index = THEME_PRESETS.findIndex((preset) => preset.key === key);
+      const thumbnail = document.querySelectorAll('.portal-theme-scope')[index]!;
 
-      return getComputedStyle(field).borderStartStartRadius;
+      return getComputedStyle(thumbnail.querySelector('formidable-input-field .field')!).borderStartStartRadius;
     };
 
     // `outlined`, which says nothing about its corners, next to `tab`, which rounds the top two to 18px.
-    const outlined = THEME_PRESETS.findIndex((preset) => preset.geometry === 'outlined');
-    const tab = THEME_PRESETS.findIndex((preset) => preset.geometry === 'tab');
+    const outlined = THEME_PRESETS.find((preset) => preset.geometry === 'outlined')!.key;
+    const tabbed = THEME_PRESETS.find((preset) => preset.geometry === 'tab')!.key;
 
-    theme.applyPreset(THEME_PRESETS.find((preset) => preset.geometry === 'pill')!);
-    settle();
+    await applyPreset(THEME_PRESETS.find((preset) => preset.geometry === 'pill')!.key);
     const before = radius(outlined);
 
-    theme.applyPreset(THEME_PRESETS[tab]!);
-    settle();
+    await applyPreset(tabbed);
 
-    expect(radius(tab)).toBe('18px');
+    await expect.poll(() => radius(tabbed)).toBe('18px');
     expect(radius(outlined)).toBe(before);
     expect(radius(outlined)).not.toBe('18px');
-  }));
+  });
 
-  it('writes the theme to `:root`, where the derived variables are declared', fakeAsync(() => {
-    settle();
+  it('writes the theme to `:root`, where the derived variables are declared', async () => {
+    await openStudio();
 
-    theme.setVariable('--formidable-field-height', '80px');
-    settle();
+    await setVariable('--formidable-field-height', '80px');
 
-    expect(document.documentElement.style.getPropertyValue('--formidable-field-height')).toBe('80px');
-  }));
+    await expect.poll(() => document.documentElement.style.getPropertyValue('--formidable-field-height')).toBe('80px');
+  });
 
-  it('recomputes a derived variable from the theme on the page', fakeAsync(() => {
-    settle();
+  it('recomputes a derived variable from the theme on the page', async () => {
+    await openStudio();
 
-    theme.setVariable('--formidable-field-height', '80px');
-    theme.setVariable('--formidable-field-border-thickness', '5px');
-    settle();
+    await setVariable('--formidable-field-height', '80px');
+    await setVariable('--formidable-field-border-thickness', '5px');
 
     // Declared once in `:root` as `height - 2 * border`, so it only follows if the theme is written there.
-    const inner = getComputedStyle(document.documentElement).getPropertyValue('--formidable-field-inner-height');
+    const inner = () => getComputedStyle(document.documentElement).getPropertyValue('--formidable-field-inner-height');
 
-    expect(inner).toContain('80px');
-    expect(inner).toContain('5px');
-  }));
+    await expect.poll(inner).toContain('80px');
+    expect(inner()).toContain('5px');
+  });
 
-  it('insulates the chrome from the theme, derived variables included', fakeAsync(() => {
-    settle();
+  it('insulates the chrome from the theme, derived variables included', async () => {
+    await openStudio();
 
-    theme.setVariable('--formidable-field-height', '80px');
-    settle();
+    await setVariable('--formidable-field-height', '80px');
+    await expect
+      .poll(() => getComputedStyle(document.documentElement).getPropertyValue('--formidable-field-height'))
+      .toBe('80px');
 
-    const chrome = root.querySelector('.portal-chrome') as HTMLElement;
-    const chromeInner = getComputedStyle(chrome).getPropertyValue('--formidable-field-inner-height');
+    const chrome = getComputedStyle(document.querySelector('.portal-chrome')!);
 
-    expect(chrome).toBeTruthy();
-    expect(getComputedStyle(chrome).getPropertyValue('--formidable-field-height')).not.toContain('80px');
-    expect(chromeInner).not.toContain('80px');
-  }));
+    expect(chrome.getPropertyValue('--formidable-field-height')).not.toContain('80px');
+    expect(chrome.getPropertyValue('--formidable-field-inner-height')).not.toContain('80px');
+  });
 
-  it('removes a variable that leaves the theme instead of leaving it applied', fakeAsync(() => {
-    settle();
+  it('removes a variable that leaves the theme instead of leaving it applied', async () => {
+    await openStudio();
 
-    theme.setVariable('--formidable-field-padding-x', '40px');
-    settle();
-    expect(document.documentElement.style.getPropertyValue('--formidable-field-padding-x')).toBe('40px');
+    const applied = () => document.documentElement.style.getPropertyValue('--formidable-field-padding-x');
 
-    theme.clearVariable('--formidable-field-padding-x');
-    settle();
+    await setVariable('--formidable-field-padding-x', '40px');
+    await expect.poll(applied).toBe('40px');
 
-    expect(document.documentElement.style.getPropertyValue('--formidable-field-padding-x')).not.toBe('40px');
-  }));
+    await userEvent.click(page.getByRole('button', { name: 'reset' }));
 
-  it('reads the library default at runtime rather than storing one', fakeAsync(() => {
-    settle();
+    await expect.poll(applied).not.toBe('40px');
+  });
 
-    // The shipped default, straight off the probe that re-emits the library's own block. The token is
-    // authored in `rem`, so this is the value the stylesheet actually emits rather than a restatement of it.
-    expect(theme.defaultOf('--formidable-field-height')).toBe('3.5rem');
+  it('counts exactly the variables the export carries', async () => {
+    await openStudio();
 
-    theme.setVariable('--formidable-field-height', '80px');
-    settle();
+    await openPanel('Export & Import', 'Export', 'Theme');
+    await userEvent.click(page.getByRole('checkbox', { name: 'Page Surface' }));
+    await applyPreset(THEME_PRESETS[2]!.key);
 
-    expect(theme.defaultOf('--formidable-field-height')).toBe('3.5rem');
-    expect(theme.valueOf('--formidable-field-height')).toBe('80px');
-  }));
+    // The page surface counts as one, beside the variables.
+    const exported = importTheme(await exportedTheme());
+    const carried = Object.keys(exported.vars).length + (exported.page ? 1 : 0);
 
-  it('resolves the default of a variable that is declared nowhere through the one it follows', fakeAsync(() => {
-    settle();
-
-    expect(theme.defaultOf('--formidable-field-border-start-start-radius')).toBe(
-      theme.defaultOf('--formidable-field-border-radius')
-    );
-  }));
-
-  it('counts exactly the variables the export carries', fakeAsync(() => {
-    settle();
-
-    theme.applyPreset(THEME_PRESETS[2]!);
-    settle();
-
-    const exported = importTheme(theme.exportText());
-
-    expect(Object.keys(exported.vars).length).toBe(Object.keys(theme.changedVars()).length);
-    expect(theme.changeCount()).toBeGreaterThanOrEqual(Object.keys(exported.vars).length);
-  }));
+    expect(changeCount()).toBe(carried);
+  });
 
   /**
-   * What the stage's own field paints. Measured rather than compared as declarations, because the export
-   * drops what only restates a default and the two can say the same thing differently — `1px` against the
-   * shipped `0.0625rem`, a hex against an `rgb()`. Those are not a difference in the view, and the view is
-   * the claim.
+   * What the stage paints: its own input field, and the page surface behind the form. Measured rather than
+   * compared as declarations, because the export drops what only restates a default and the two can say the
+   * same thing differently — `1px` against the shipped `0.0625rem`, a hex against an `rgb()`. Those are not a
+   * difference in the view, and the view is the claim.
    */
   function painted(): Record<string, string> {
-    const field = root.querySelector('portal-stage formidable-input-field .field') as HTMLElement;
-    const style = getComputedStyle(field);
+    const field = getComputedStyle(document.querySelector('portal-stage formidable-input-field .field')!);
+    const surface = getComputedStyle(document.querySelector('portal-stage .page-surface')!);
     const properties = [
       'height',
       'backgroundColor',
@@ -353,662 +393,557 @@ describe('portal', () => {
       'borderStartStartRadius',
       'boxShadow',
       'paddingLeft'
-    ];
+    ] as const;
 
-    return Object.fromEntries(properties.map((property) => [property, String(style[property as never])]));
+    // A family name matches regardless of case, so a stack that only changed case paints the same.
+    return {
+      ...Object.fromEntries(properties.map((property) => [property, field[property]])),
+      fontFamily: field.fontFamily.toLowerCase(),
+      surfaceBackground: surface.backgroundColor,
+      surfaceText: surface.color
+    };
   }
 
-  it('reproduces the theme when the delta is read back onto the defaults', fakeAsync(() => {
-    settle();
+  it('reproduces the theme when the delta is read back onto the defaults', async () => {
+    await openStudio();
 
-    theme.exportOptions.set({ ...DEFAULT_EXPORT_OPTIONS, includePageSurface: true });
-    theme.applyPreset(THEME_PRESETS.find((preset) => preset.key === 'consumer')!);
-    settle();
+    await openPanel('Export & Import', 'Export', 'Theme');
+    await userEvent.click(page.getByRole('checkbox', { name: 'Page Surface' }));
+    await applyPreset('consumer');
 
-    const block = theme.exportText();
+    const block = await exportedTheme();
     const before = painted();
 
-    theme.applyPreset(THEME_PRESETS.find((preset) => preset.key === 'brutalist')!);
-    settle();
-    expect(painted()).not.toEqual(before);
+    await applyPreset('brutalist');
+    await expect.poll(painted).not.toEqual(before);
 
     // The bug this pins: the delta states only what differs from the library's defaults, so merged onto
     // another scheme every value that scheme sets and the delta does not restate survives into the result.
-    theme.importFrom(block, false);
-    settle();
+    await importBlock(block, false);
+    await expect.element(page.getByText(/^Applied \d+ variables\.$/)).toBeVisible();
     expect(painted()).not.toEqual(before);
 
-    theme.importFrom(block, true);
-    settle();
+    await importBlock(block, true);
 
-    expect(painted()).toEqual(before);
-    expect(theme.page()).toEqual(THEME_PRESETS.find((preset) => preset.key === 'consumer')!.page);
-    expect(theme.valueOf('--formidable-font-family')).toBe(
-      THEME_PRESETS.find((preset) => preset.key === 'consumer')!.fontFamily!
-    );
-  }));
+    await expect.poll(painted).toEqual(before);
+  });
 
   // The other half of the pair: a block that states the defaults outright needs no help on the way in. Every
   // preset, because the hazard is per-variable — a scheme states a base and leaves what follows it unsaid,
   // and a default written over that base would contradict it.
-  it('reproduces every preset when the block states the defaults and is merged in', fakeAsync(() => {
-    settle();
+  it('reproduces every preset when the block states the defaults and is merged in', async () => {
+    await openStudio();
 
-    theme.exportOptions.set({ ...DEFAULT_EXPORT_OPTIONS, includeDefaults: true, includePageSurface: true });
+    await openPanel('Export & Import', 'Export', 'Theme');
+    await userEvent.click(page.getByRole('checkbox', { name: 'Explicit Defaults' }));
+    await userEvent.click(page.getByRole('checkbox', { name: 'Page Surface' }));
 
     for (const preset of THEME_PRESETS) {
-      theme.applyPreset(preset);
-      settle();
+      await applyPreset(preset.key);
 
-      const block = theme.exportText();
+      const block = await exportedTheme();
       const before = painted();
 
-      theme.applyPreset(THEME_PRESETS.find((other) => other.key !== preset.key)!);
-      settle();
+      await applyPreset(THEME_PRESETS.find((other) => other.key !== preset.key)!.key);
+      await importBlock(block, false);
 
-      theme.importFrom(block, false);
-      settle();
-
-      expect(painted()).withContext(preset.key).toEqual(before);
+      await expect.poll(() => ({ preset: preset.key, ...painted() })).toEqual({ preset: preset.key, ...before });
     }
-  }));
+  });
 
   // The counter is the page's primary claim: eight to twelve variables are enough. It has to start at the
   // bottom, or it says the opposite the moment the page paints.
-  it('counts nothing for a theme that only restates the library defaults', fakeAsync(() => {
-    settle();
+  it('counts nothing for a theme that only restates the library defaults', async () => {
+    await openStudio();
 
-    const shipped = THEME_PRESETS.find((preset) => preset.key === 'enterprise')!;
-    theme.applyPreset(shipped);
-    settle();
+    expect(changeCount()).toBeGreaterThan(0);
 
-    expect(theme.changedVars()).toEqual({});
-    expect(theme.changeCount()).toBe(0);
-  }));
+    await applyPreset('enterprise');
 
-  it('compares against the default through the browser, not as text', fakeAsync(() => {
-    settle();
+    await expect.poll(changeCount).toBe(0);
+  });
 
-    // The shipped height is `3.5rem` in the stylesheet and `56px` in the scheme. Same length, same theme.
-    theme.setVariable('--formidable-field-height', '56px');
-    settle();
-    expect(theme.changedVars()['--formidable-field-height']).toBeUndefined();
+  // The shipped height is `3.5rem` in the stylesheet and `56px` in the scheme: the same length, so the same
+  // theme. The default is the stylesheet's, read at runtime, so an override does not become the new default.
+  it('compares against the default through the browser, not as text', async () => {
+    await openStudio();
+    await applyPreset('enterprise');
 
-    theme.setVariable('--formidable-field-height', '57px');
-    settle();
-    expect(theme.changedVars()['--formidable-field-height']).toBe('57px');
-  }));
+    await setVariable('--formidable-field-height', '57px');
+    await expect.poll(changeCount).toBe(1);
 
-  it('counts the page surface and the family alongside the variables', fakeAsync(() => {
-    settle();
+    await setVariable('--formidable-field-height', '56px');
+    await expect.poll(changeCount).toBe(0);
+  });
 
-    theme.applyPreset(THEME_PRESETS.find((preset) => preset.key === 'enterprise')!);
-    settle();
-    expect(theme.changeCount()).toBe(0);
+  // A variable the library declares nowhere has no default of its own; it has the one of the variable it
+  // follows, so its control states a length rather than nothing.
+  it('resolves the default of a variable that is declared nowhere through the one it follows', async () => {
+    await openStudio();
+    await applyPreset('enterprise');
 
-    theme.page.set({ background: '#101010', text: '#f0f0f0' });
-    settle();
+    const amount = (name: string) => page.getByRole('spinbutton', { name: new RegExp(`^${name}$`) });
 
-    expect(theme.changeCount()).toBe(1);
+    await openPanel('Theme', 'Variables');
+    await userEvent.fill(page.getByRole('searchbox'), 'radius');
+    await openSection(THEME_TOKENS_BY_NAME.get('--formidable-field-border-start-start-radius')!.group);
 
-    theme.setVariable('--formidable-font-family', 'monospace');
-    settle();
+    await expect.element(page.getByText(/Follows\s+field-border-radius/).first()).toBeVisible();
+    expect((amount('field-border-start-start-radius').element() as HTMLInputElement).value).toBe(
+      (amount('field-border-radius').element() as HTMLInputElement).value
+    );
+  });
 
-    expect(theme.changeCount()).toBe(2);
-  }));
+  // The starting preset rounds the field through `border-radius`, which the field's own radius and its four
+  // corners follow. Unpinned, each still has to state the value in force: what the field paints.
+  it('states the value a following variable paints', async ({ skip }) => {
+    skip(FOLLOWER_STATES_DEFAULT);
 
-  it('measures contrast against what the page actually paints', fakeAsync(() => {
-    settle();
+    await openStudio();
 
-    theme.setVariables({
-      '--formidable-color-field-background': '#ffffff',
-      '--formidable-color-field-text': '#000000'
-    });
-    settle();
+    const corner = '--formidable-field-border-start-start-radius';
+    const painted = getComputedStyle(document.querySelector('portal-stage formidable-input-field .field')!);
 
-    const text = theme.contrastChecks().find((check) => check.token === '--formidable-color-field-text');
+    await openPanel('Theme', 'Variables');
+    await userEvent.fill(page.getByRole('searchbox'), 'radius');
+    await openSection(THEME_TOKENS_BY_NAME.get(corner)!.group);
 
-    expect(text?.ratio).toBeGreaterThan(20);
-    expect(text?.passes).toBe(true);
-  }));
+    const amount = page.getByRole('spinbutton', { name: /^field-border-start-start-radius$/ }).element();
+    const unit = page.getByRole('combobox', { name: `${corner} unit` }).element();
 
-  it('fails the badge for a fill the text cannot be read on', fakeAsync(() => {
-    settle();
+    expect(`${(amount as HTMLInputElement).value}${(unit as HTMLSelectElement).value}`).toBe(
+      painted.borderStartStartRadius
+    );
+  });
 
-    theme.setVariables({
-      '--formidable-color-field-background': '#ffffff',
-      '--formidable-color-field-text': '#f2f2f2'
-    });
-    settle();
+  it('counts the page surface and the family alongside the variables', async () => {
+    await openStudio();
+    await applyPreset('enterprise');
+    await expect.poll(changeCount).toBe(0);
 
-    const text = theme.contrastChecks().find((check) => check.token === '--formidable-color-field-text');
+    await openSection('The Page Behind The Form');
+    await userEvent.fill(page.getByLabelText('background', { exact: true }), '#101010');
 
-    expect(text?.passes).toBe(false);
-  }));
+    await expect.poll(changeCount).toBe(1);
+
+    await openSection('Fonts');
+    await userEvent.click(page.getByRole('button', { name: /^Monospace/ }));
+
+    await expect.poll(changeCount).toBe(2);
+  });
+
+  /** The badge of the field text against the field fill, on the Repaint step. */
+  async function textBadge(fill: string, text: string): Promise<HTMLElement> {
+    await openPanel('Theme', 'Design');
+    await openSection('Repaint');
+    await userEvent.fill(page.getByLabelText('--formidable-color-field-background', { exact: true }), fill);
+    await userEvent.fill(page.getByLabelText('--formidable-color-field-text', { exact: true }), text);
+
+    return page.getByRole('listitem').filter({ hasText: 'Field text' }).element() as HTMLElement;
+  }
+
+  it('measures contrast against what the page actually paints', async () => {
+    await openStudio();
+
+    const badge = await textBadge('#ffffff', '#000000');
+
+    await expect.poll(() => Number(badge.querySelector('.ratio')!.textContent)).toBeGreaterThan(20);
+    expect(badge.classList).not.toContain('fails');
+  });
+
+  it('fails the badge for a fill the text cannot be read on', async () => {
+    await openStudio();
+
+    const badge = await textBadge('#ffffff', '#f2f2f2');
+
+    await expect.poll(() => badge.classList.contains('fails')).toBe(true);
+  });
+
+  // #endregion
+
+  // #region Chips
 
   // A chip names one field, so it has to land on that field's own scope — the two wider ones would answer
   // a question the chip did not ask.
-  it('opens the editor panel at the Settings tab, at the field’s own scope, when a chip is used', fakeAsync(() => {
-    settle();
+  it('opens the editor panel at the Settings tab, at the field’s own scope, when a chip is used', async () => {
+    await openStudio();
 
-    const inspector = TestBed.inject(InspectorStore);
-    inspector.tab.set('theme');
-    inspector.fieldScope.set('form');
+    await openPanel('Form', 'Settings', 'The Form');
+    await userEvent.click(tab('Theme'));
+    await userEvent.click(chip('Crust'));
 
-    const chip = root.querySelector('portal-preview-field .chip') as HTMLElement;
-    chip.click();
-    settle();
-
-    expect(inspector.tab()).toBe('form');
-    expect(inspector.formTab()).toBe('settings');
-    expect(inspector.fieldScope()).toBe('field');
-    expect(root.querySelector('portal-field-editor')).toBeTruthy();
-  }));
+    await expect.element(tab('Form')).toHaveAttribute('aria-selected', 'true');
+    await expect.element(tab('Settings', 'Form sections')).toHaveAttribute('aria-selected', 'true');
+    await expect.element(page.getByRole('button', { name: /^This Field/ })).toHaveAttribute('aria-pressed', 'true');
+    await expect.element(page.getByRole('combobox', { name: 'Field', exact: true })).toHaveDisplayValue(/^Crust — /);
+  });
 
   // Tabbing through the sample form is the thing being tested; a chip between every two fields doubles the
   // presses it takes and puts portal chrome in the middle of the run.
-  it('keeps the chips out of the tab order', fakeAsync(() => {
-    settle();
+  it('keeps the chips out of the tab order', async () => {
+    await openStudio();
 
-    const chips = Array.from(root.querySelectorAll('portal-preview-field .chip'));
+    await userEvent.click(page.getByRole('textbox', { name: 'Name On The Order' }));
+    await userEvent.tab();
+    await expect.element(page.getByRole('spinbutton', { name: 'How Many' })).toHaveFocus();
 
-    expect(chips.length).toBeGreaterThan(0);
-    expect(chips.every((chip) => chip.getAttribute('tabindex') === '-1')).toBeTrue();
-  }));
+    await userEvent.tab();
+    await expect.element(page.getByRole('textbox', { name: 'Phone Number' })).toHaveFocus();
+  });
 
   // Moving to a tab behind a collapsed panel changes nothing the user can see, so the move has to open it.
-  it('expands a collapsed editor panel rather than moving a tab behind it', fakeAsync(() => {
-    settle();
+  it('expands a collapsed editor panel rather than moving a tab behind it', async () => {
+    await openStudio();
 
-    const inspector = TestBed.inject(InspectorStore);
-    const layout = TestBed.inject(LayoutStore);
+    await userEvent.click(page.getByRole('button', { name: 'Collapse the editor panel' }));
+    await expect.element(page.getByRole('tablist', { name: 'Editor panel' })).not.toBeInTheDocument();
 
-    inspector.tab.set('theme');
-    layout.inspectorCollapsed.set(true);
-    settle();
+    await userEvent.click(chip('Crust'));
 
-    const chip = root.querySelector('portal-preview-field .chip') as HTMLElement;
-    chip.click();
-    settle();
-
-    expect(layout.inspectorCollapsed()).toBeFalse();
-    expect(inspector.formTab()).toBe('settings');
-    expect(root.querySelector('portal-field-editor')).toBeTruthy();
-  }));
+    await expect.element(tab('Settings', 'Form sections')).toHaveAttribute('aria-selected', 'true');
+    await expect.element(page.getByRole('button', { name: 'Collapse the editor panel' })).toBeVisible();
+    await expect.element(page.getByRole('combobox', { name: 'Field', exact: true })).toHaveDisplayValue(/^Crust — /);
+  });
 
   // The chip names the component rather than describing the configuration, because a description written
   // once cannot survive the field being edited — and says nothing at all about a field added later.
-  it('names the component under every field, including one added in the structure editor', fakeAsync(() => {
-    settle();
+  it('names the component under every field, including one added in the structure editor', async () => {
+    await openStudio();
 
-    const texts = Array.from(root.querySelectorAll('portal-preview-field .chip-text')).map((element) =>
-      (element.textContent ?? '').trim()
-    );
+    expect(chipKinds().length).toBe(PREVIEW_FIELDS.length - 1);
+    expect(chipKinds()).toContain('Date');
+    expect(chipKinds().every((kind) => KINDS.includes(kind))).toBe(true);
 
-    expect(texts.length).toBe(PREVIEW_FIELDS.length - 1);
-    expect(texts).toContain('Date');
-    expect(texts.every((text) => Object.values(FIELD_KIND_LABELS).includes(text))).toBeTrue();
+    await openPanel('Form', 'Structure');
+    await openSection('Add');
+    await userEvent.selectOptions(page.getByRole('combobox', { name: 'Field Type To Add' }), 'radio-group');
+    await userEvent.click(page.getByRole('button', { name: 'Add', exact: true }).first());
 
-    TestBed.inject(FormDefinitionStore).addField('radio-group', 'pizza');
-    settle();
-
-    const added = Array.from(root.querySelectorAll('portal-preview-field .chip-text')).map((element) =>
-      (element.textContent ?? '').trim()
-    );
-
-    expect(added.length).toBe(PREVIEW_FIELDS.length);
-    expect(added.every((text) => Object.values(FIELD_KIND_LABELS).includes(text))).toBeTrue();
-  }));
+    await expect.poll(() => chipKinds().length).toBe(PREVIEW_FIELDS.length);
+    expect(chipKinds().every((kind) => KINDS.includes(kind))).toBe(true);
+  });
 
   // The defect this replaces: the chip held a string, so editing the field left it stating the old value.
-  it('restates what a field is set to once the field has been edited', fakeAsync(() => {
-    settle();
-
-    const store = TestBed.inject(FormDefinitionStore);
-    const tipFor = (id: string): string => {
-      const tip = root.querySelector(`#chip-tip-${id}`) as HTMLElement;
-
-      return (tip.textContent ?? '').trim();
-    };
-
-    // The chip names it as its accessible description, exactly as the `title` it replaced did. No `title`
-    // anywhere on the run of them: the browser holds one back about a second, which is what this is not.
-    const chip = root.querySelector('portal-preview-field .chip') as HTMLElement;
-    expect(chip.getAttribute('aria-describedby')).toBe('chip-tip-pizza');
-    expect(Array.from(root.querySelectorAll('portal-preview-field .chip[title]')).length).toBe(0);
-
-    // The sample's date states no panel position of its own, so it has none to state.
-    expect(tipFor('date')).not.toContain('panelPosition');
-
-    store.updateField('date', { panelPosition: 'sheet' });
-    settle();
-
-    expect(tipFor('date')).toContain('panelPosition: sheet');
-  }));
-
-  // The two column headers sit side by side, so a difference between them reads as a step in the rule under
-  // them. Read off the rules rather than the layout: the runner's viewport is below the two-column
-  // breakpoint, where the stage bar wraps to two rows and the columns are stacked, so measuring there would
-  // be measuring the wrong mode.
-  it('gives the two column headers one height', fakeAsync(() => {
-    settle();
-
-    const declaredHeights = (selector: string): string[] =>
-      Array.from(document.styleSheets)
-        .flatMap((sheet) => Array.from(sheet.cssRules))
-        .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule)
-        .filter((rule) => rule.selectorText.includes(selector))
-        .map((rule) => rule.style.height)
-        .filter(Boolean);
+  // The chip states it as its accessible description, exactly as the `title` it replaced did. No `title` on
+  // the run of them: the browser holds one back about a second, which is what this is not.
+  it('restates what a field is set to once the field has been edited', async () => {
+    await openStudio();
 
     expect(
-      getComputedStyle(document.documentElement).getPropertyValue('--portal-section-header-height').trim()
-    ).toBeTruthy();
+      page
+        .getByRole('button', { name: / — edit / })
+        .elements()
+        .filter((el) => el.hasAttribute('title'))
+    ).toEqual([]);
+    // The sample's date states no panel position of its own, so it has none to state.
+    await expect.element(chip('Date')).toHaveAccessibleDescription(/^Date — Date/);
+    await expect.element(chip('Date')).not.toHaveAccessibleDescription(/panelPosition/);
 
-    for (const selector of ['.stage-bar', '.head']) {
-      expect(declaredHeights(selector)).withContext(selector).toContain('var(--portal-section-header-height)');
-    }
-  }));
+    await openPanel('Form', 'Settings', 'This Field');
+    await editField('Date');
+    await userEvent.selectOptions(page.getByRole('combobox', { name: 'Panel Position' }), 'sheet');
+
+    await expect.element(chip('Date')).toHaveAccessibleDescription(/panelPosition: sheet/);
+  });
+
+  it('hides the chips when the stage says so', async () => {
+    await openStudio();
+
+    const toggle = page.getByRole('button', { name: 'Field Types' });
+
+    await expect.element(toggle).toHaveAttribute('aria-pressed', 'true');
+    expect(chipKinds().length).toBeGreaterThan(0);
+
+    await userEvent.click(toggle);
+
+    await expect.poll(() => chipKinds().length).toBe(0);
+  });
+
+  // #endregion
+
+  // #region The editor panel
 
   // The tabs say what the panel is, so a title row over them would only add the word "Inspector" — which
   // names a panel that edits rather than inspects, and costs a row of the height the bottom sheet is short of.
-  it('makes the tab strip the editor panel’s header', fakeAsync(() => {
-    settle();
+  it('makes the tab strip the editor panel’s header', async () => {
+    await openStudio();
 
-    const head = root.querySelector('portal-inspector .head') as HTMLElement;
+    const head = page.getByRole('banner').filter({ has: page.getByRole('tablist', { name: 'Editor panel' }) });
 
-    expect(head.querySelector('[role="tablist"]')).toBeTruthy();
-    expect(head.textContent).not.toContain('Inspector');
-    expect(head.querySelector('.collapse')).toBeTruthy();
-  }));
+    await expect.element(head.getByRole('button', { name: 'Collapse the editor panel' })).toBeVisible();
+    expect(head.element().textContent).not.toContain('Inspector');
+  });
 
-  // Four tabs and three sub-tabs is the navigation a visitor has to learn, so every one of them has to
-  // actually render something — an empty tab is worse than no tab.
-  it('renders each inspector tab', fakeAsync(() => {
-    settle();
+  // Every area carries the same second level, so the strip is learned once rather than per tab. Each half
+  // has to render something of its own — an empty tab is worse than no tab.
+  it('gives every area two halves, each of which renders its own view', async () => {
+    await openStudio();
 
-    const inspector = TestBed.inject(InspectorStore);
-    const expected: [InspectorTab, string][] = [
-      ['theme', 'portal-theme-tab'],
-      ['form', 'portal-form-tab'],
-      ['export', 'portal-export-tab']
-    ];
+    const tabs = (strip: string) =>
+      page
+        .getByRole('tablist', { name: strip })
+        .getByRole('tab')
+        .elements()
+        .map((element) => element.textContent!.trim());
 
-    for (const [tab, selector] of expected) {
-      inspector.tab.set(tab);
-      settle();
+    expect(tabs('Editor panel')).toEqual(['Theme', 'Form', 'Export & Import']);
 
-      expect(root.querySelector(selector)).withContext(tab).toBeTruthy();
+    const views: [area: 'Theme' | 'Form' | 'Export & Import', strip: string, halves: Record<string, () => Locator>][] =
+      [
+        [
+          'Theme',
+          'Theme sections',
+          {
+            Design: () => page.getByRole('button', { name: 'Randomize' }),
+            Variables: () => page.getByRole('searchbox')
+          }
+        ],
+        [
+          'Form',
+          'Form sections',
+          {
+            Structure: () => page.getByRole('heading', { name: /^1 Start/ }),
+            Settings: () => page.getByRole('group', { name: 'Applies to' })
+          }
+        ],
+        [
+          'Export & Import',
+          'Export and import sections',
+          {
+            Export: () => page.getByRole('button', { name: 'Copy Theme', exact: true }),
+            Import: () => page.getByRole('button', { name: 'Apply', exact: true })
+          }
+        ]
+      ];
+
+    for (const [area, strip, halves] of views) {
+      await userEvent.click(tab(area));
+      expect(tabs(strip), area).toEqual(Object.keys(halves));
+
+      for (const [half, view] of Object.entries(halves)) {
+        await userEvent.click(tab(half, strip));
+        await expect.element(view()).toBeVisible();
+      }
     }
-  }));
+  });
 
-  it('renders each of the theme sub-tabs', fakeAsync(() => {
-    settle();
+  // Structure before Settings: which fields exist has to be settled before what one of them is is worth saying.
+  it('opens the form area on Structure', async () => {
+    await openStudio();
 
-    const inspector = TestBed.inject(InspectorStore);
-    const expected: [ThemeSubTab, string][] = [
-      ['design', 'portal-preset-gallery'],
-      ['variables', 'portal-all-variables']
-    ];
+    await userEvent.click(tab('Form'));
 
-    for (const [subTab, selector] of expected) {
-      inspector.tab.set('theme');
-      inspector.themeTab.set(subTab);
-      settle();
-
-      expect(root.querySelector(selector)).withContext(subTab).toBeTruthy();
-    }
-  }));
-
-  // Structure before Fields: which fields exist has to be settled before what one of them is is worth saying.
-  it('offers the form sub-tabs in build order, starting on Structure', fakeAsync(() => {
-    settle();
-
-    TestBed.inject(InspectorStore).tab.set('form');
-    settle();
-
-    const labels = Array.from(root.querySelectorAll('portal-form-tab .sub-tab')).map((el) =>
-      (el.textContent ?? '').trim()
-    );
-
-    expect(labels).toEqual(['Structure', 'Settings']);
-    expect(root.querySelector('portal-structure-tab')).toBeTruthy();
-  }));
-
-  it('renders each of the form sub-tabs', fakeAsync(() => {
-    settle();
-
-    const inspector = TestBed.inject(InspectorStore);
-    const expected: [FormSubTab, string][] = [
-      ['settings', 'portal-settings-tab'],
-      ['structure', 'portal-structure-tab']
-    ];
-
-    for (const [subTab, selector] of expected) {
-      inspector.tab.set('form');
-      inspector.formTab.set(subTab);
-      settle();
-
-      expect(root.querySelector(selector)).withContext(subTab).toBeTruthy();
-    }
-  }));
+    await expect.element(tab('Structure', 'Form sections')).toHaveAttribute('aria-selected', 'true');
+  });
 
   /**
    * Scope is a control, not the wording of three headings. Each position has to render its own editor and
    * only its own — the defect the three sibling accordions had was the same Decoration group on screen
-   * twice, under names that had to be read to be told apart.
+   * twice, under names that had to be read to be told apart. The field picker governs one scope, so it is
+   * inside it: above the switch it was the first control on the page and reached nothing a visitor could see.
    */
-  it('gives the Settings half one editor per scope, and only one', fakeAsync(() => {
-    settle();
+  it('gives the Settings half one editor per scope, and only one', async () => {
+    await openStudio();
+    await openPanel('Form', 'Settings');
 
-    const inspector = TestBed.inject(InspectorStore);
-    inspector.tab.set('form');
-    inspector.formTab.set('settings');
-    settle();
+    const scopes = page.getByRole('group', { name: 'Applies to' }).getByRole('button');
 
-    const labels = Array.from(root.querySelectorAll('portal-settings-tab .scope-option-label')).map((el) =>
-      (el.textContent ?? '').trim()
-    );
+    expect(scopes.elements().map((scope) => scope.querySelector('.scope-option-label')!.textContent!.trim())).toEqual([
+      'App Defaults',
+      'The Form',
+      'This Field'
+    ]);
 
-    expect(labels).toEqual(['App Defaults', 'The Form', 'This Field']);
+    const editors = {
+      'App Defaults': page.getByRole('heading', { name: 'Take It Away' }),
+      'The Form': page.getByRole('combobox', { name: 'Validator' }),
+      'This Field': page.getByRole('combobox', { name: 'Field', exact: true })
+    };
 
-    const panels = ['portal-app-defaults', 'portal-form-settings', 'portal-field-editor'];
+    for (const scope of Object.keys(editors) as (keyof typeof editors)[]) {
+      await userEvent.click(page.getByRole('button', { name: new RegExp(`^${scope}`) }));
 
-    for (const [index, scope] of (['app', 'form', 'field'] as const).entries()) {
-      (root.querySelectorAll<HTMLElement>('portal-settings-tab .scope-option')[index] as HTMLElement).click();
-      settle();
-
-      expect(inspector.fieldScope()).withContext(scope).toBe(scope);
-      expect(panels.filter((selector) => root.querySelector(selector)))
-        .withContext(scope)
-        .toEqual([panels[index]!]);
+      await expect
+        .element(page.getByRole('button', { name: new RegExp(`^${scope}`) }))
+        .toHaveAttribute('aria-pressed', 'true');
+      for (const [other, editor] of Object.entries(editors)) {
+        expect(editor.elements().length, `${scope} ▸ ${other}`).toBe(other === scope ? 1 : 0);
+      }
     }
-  }));
-
-  // The picker governs one scope, so it belongs inside it. Above the switch it was the first control on the
-  // page and reached nothing a visitor could see.
-  it('shows the field picker only at the field scope', fakeAsync(() => {
-    settle();
-
-    const inspector = TestBed.inject(InspectorStore);
-    inspector.tab.set('form');
-    inspector.formTab.set('settings');
-
-    inspector.fieldScope.set('app');
-    settle();
-    expect(root.querySelector('#ft-select')).toBeNull();
-
-    inspector.fieldScope.set('field');
-    settle();
-    expect(root.querySelector('#ft-select')).toBeTruthy();
-  }));
+  });
 
   // The three steps are the answer to "how do I make my own form?", which the old one-accordion-per-section
   // list never asked, let alone answered.
-  it('walks Structure from where a form starts to how it grows', fakeAsync(() => {
-    settle();
+  it('walks Structure from where a form starts to how it grows', async () => {
+    await openStudio();
+    await openPanel('Form', 'Structure');
 
-    const inspector = TestBed.inject(InspectorStore);
-    inspector.tab.set('form');
-    inspector.formTab.set('structure');
-    settle();
+    await expect.element(page.getByRole('heading', { name: /^1 Start/ })).toBeVisible();
+    await expect.element(page.getByRole('heading', { name: /^2 Sections And Fields/ })).toBeVisible();
+    await expect.element(page.getByRole('heading', { name: /^3 Add/ })).toBeVisible();
+  });
 
-    const headings = Array.from(root.querySelectorAll('portal-structure-tab portal-accordion .title')).map((el) =>
-      (el.textContent ?? '').trim()
-    );
+  it('starts a blank form and lands on the step that can fill it', async () => {
+    await openStudio();
+    await openPanel('Form', 'Structure');
 
-    expect(headings).toEqual(['Start', 'Sections And Fields', 'Add']);
-  }));
+    expect(chipKinds().length).toBe(PREVIEW_FIELDS.length - 1);
 
-  it('starts a blank form and lands on the step that can fill it', fakeAsync(() => {
-    settle();
+    await openSection('Start');
+    await userEvent.click(page.getByRole('button', { name: /^Blank Form/ }));
 
-    const inspector = TestBed.inject(InspectorStore);
-    const definition = TestBed.inject(FormDefinitionStore);
-    inspector.tab.set('form');
-    inspector.formTab.set('structure');
-    settle();
-
-    expect(definition.fields().length).toBe(PREVIEW_FIELDS.length);
-
-    // Step 1 is closed on arrival, so open it the way a visitor would.
-    (root.querySelectorAll<HTMLElement>('portal-structure-tab portal-accordion .trigger')[0] as HTMLElement).click();
-    settle();
-    (root.querySelector('portal-structure-tab .start') as HTMLElement).click();
-    settle();
-
-    expect(definition.fields()).toEqual([]);
-    // One section, not none: every add needs somewhere to add into.
-    expect(definition.sections().length).toBe(1);
-    // Adding is the only thing left to do, so that is the step that is open.
-    expect(root.querySelector('portal-structure-tab .add-row')).toBeTruthy();
-
-    const addField = () =>
-      (root.querySelectorAll<HTMLElement>('portal-structure-tab .add-row .pc-button')[0] as HTMLElement).click();
+    await expect.poll(() => chipKinds().length).toBe(0);
+    // Adding is the only thing left to do, so that is the step that is open. One section, not none: every add
+    // needs somewhere to add into.
+    await expect
+      .element(page.getByRole('heading', { name: /^3 Add/ }).getByRole('button'))
+      .toHaveAttribute('aria-expanded', 'true');
 
     // Twice: building a form is a run of adds, so the step has to survive the first one.
-    addField();
-    settle();
-    addField();
-    settle();
+    const add = page.getByRole('button', { name: 'Add', exact: true }).first();
 
-    expect(definition.fields().length).toBe(2);
+    await userEvent.click(add);
+    await userEvent.click(add);
+
+    await expect.poll(() => chipKinds().length).toBe(2);
     // The stage stops claiming to be the sample: heading, intro and submit label all come from the form.
-    expect((root.querySelector('.form-header h1') as HTMLElement).textContent?.trim()).toBe('Your Form');
-    expect(root.querySelector('.form-header p')).toBeNull();
-    expect((root.querySelector('.submit') as HTMLElement).textContent?.trim()).toBe('Submit');
-  }));
+    await expect.element(page.getByRole('heading', { level: 1 })).toHaveTextContent('Your Form');
+    await expect.element(page.getByText(/^Start from a pizza/)).not.toBeInTheDocument();
+    await expect.element(page.getByRole('button', { name: 'Submit', exact: true })).toBeVisible();
+  });
 
-  it('sends the third way to start to the box a form is pasted into', fakeAsync(() => {
-    settle();
+  it('sends the third way to start to the box a form is pasted into', async () => {
+    await openStudio();
+    await openPanel('Form', 'Structure');
 
-    const inspector = TestBed.inject(InspectorStore);
-    inspector.tab.set('form');
-    inspector.formTab.set('structure');
-    settle();
+    await openSection('Start');
+    await userEvent.click(page.getByRole('button', { name: /^Paste Template/ }));
 
-    (root.querySelectorAll<HTMLElement>('portal-structure-tab portal-accordion .trigger')[0] as HTMLElement).click();
-    settle();
-    (root.querySelectorAll<HTMLElement>('portal-structure-tab .start')[2] as HTMLElement).click();
-    settle();
+    // Not merely the import: the box a template goes into, rather than the theme's.
+    await expect.element(tab('Export & Import')).toHaveAttribute('aria-selected', 'true');
+    await expect.element(tab('Import', 'Export and import sections')).toHaveAttribute('aria-selected', 'true');
+    await expect.element(tab('Template', 'Files')).toHaveAttribute('aria-selected', 'true');
+    await expect.element(page.getByPlaceholder('<form [formRoot]="form"> … </form>')).toBeVisible();
+  });
 
-    // Not merely the form half: the box a form goes into, rather than the block that comes out of it.
-    expect(inspector.tab()).toBe('export');
-    expect(inspector.exportSection()).toBe('form');
+  it('sends App Defaults to the app config it exports', async () => {
+    await openStudio();
+    await openPanel('Form', 'Settings', 'App Defaults');
 
-    const open = Array.from(root.querySelectorAll('portal-export-tab portal-accordion .trigger')).filter(
-      (el) => el.getAttribute('aria-expanded') === 'true'
-    );
+    await userEvent.click(page.getByRole('button', { name: 'Export ↗' }));
 
-    expect(open.length).toBe(1);
-    expect((open[0]?.textContent ?? '').trim()).toContain('Import');
-    expect(root.querySelector('portal-markup-panel .pc-textarea')).toBeTruthy();
-  }));
+    await expect.element(tab('Export', 'Export and import sections')).toHaveAttribute('aria-selected', 'true');
+    await expect.element(tab('App Config', 'Files')).toHaveAttribute('aria-selected', 'true');
+    expect(document.querySelector('portal-export-panel pre')!.textContent).toContain('provideNgxFormidable');
+  });
 
-  it('names the tab for both directions it goes in', fakeAsync(() => {
-    settle();
+  // Direction first, then the file: everything goes out, and only what the Studio can read comes back in.
+  it('offers every file under Export and only the theme and the template under Import', async () => {
+    await openStudio();
 
-    const labels = Array.from(root.querySelectorAll('portal-inspector .tab')).map((el) =>
-      (el.textContent ?? '').trim()
-    );
+    const files = () =>
+      page
+        .getByRole('tablist', { name: 'Files' })
+        .getByRole('tab')
+        .elements()
+        .map((file) => file.textContent!.trim());
 
-    expect(labels).toEqual(['Theme', 'Form', 'Import & Export']);
-  }));
+    await openPanel('Export & Import', 'Export');
+    expect(files()).toEqual(['Theme', 'Template', 'Component', 'Schema', 'App Config']);
 
-  // Two halves, navigated the way the other two areas are: the same strip in the same place on all three.
-  it('splits the two round trips into sub-tabs, one showing at a time', fakeAsync(() => {
-    settle();
+    await openPanel('Export & Import', 'Import');
+    expect(files()).toEqual(['Theme', 'Template']);
+  });
 
-    const inspector = TestBed.inject(InspectorStore);
-    inspector.tab.set('export');
-    settle();
+  // The template binds names only the component and its schema define, and leaves out what the app config
+  // supplies, so all of them sit beside it — as tabs, one file on screen at a time.
+  it('exports each file as a tab of its own, one at a time', async () => {
+    await openStudio();
+    await openPanel('Export & Import', 'Export');
 
-    const labels = Array.from(root.querySelectorAll('portal-export-tab .sub-tab')).map((el) =>
-      (el.textContent ?? '').trim()
-    );
+    const files = page.getByRole('tablist', { name: 'Files' }).getByRole('tab');
+    const shown = () => document.querySelector('portal-export-panel pre')!.textContent!;
 
-    expect(labels).toEqual(['Theme', 'Form']);
-
-    expect(root.querySelector('portal-theme-panel')).toBeTruthy();
-    expect(root.querySelector('portal-markup-panel')).toBeNull();
-
-    (root.querySelectorAll<HTMLElement>('portal-export-tab .sub-tab')[1] as HTMLElement).click();
-    settle();
-
-    expect(inspector.exportSection()).toBe('form');
-    expect(root.querySelector('portal-markup-panel')).toBeTruthy();
-    expect(root.querySelector('portal-theme-panel')).toBeNull();
-  }));
-
-  // Both halves are a round trip, so both say so the same way: the pair of headings is the same on each and
-  // a reader who has learned one half has learned the other.
-  it('gives both halves the same two directions', fakeAsync(() => {
-    settle();
-
-    const inspector = TestBed.inject(InspectorStore);
-    const headings = () =>
-      Array.from(root.querySelectorAll('portal-export-tab portal-accordion .title')).map((el) =>
-        (el.textContent ?? '').trim()
-      );
-
-    inspector.openExport('theme');
-    settle();
-    expect(headings()).toEqual(['Export', 'Import']);
-
-    inspector.openExport('form');
-    settle();
-    expect(headings()).toEqual(['Export', 'Import']);
-  }));
-
-  // The template binds names only a component defines, and leaves out what the app config supplies, so both
-  // sit beside it — as tabs, one file on screen at a time, because stacked they buried the import under three
-  // screens of code.
-  it('offers the template, the component and the app config as tabs, one at a time', fakeAsync(() => {
-    settle();
-
-    TestBed.inject(InspectorStore).openExport('form');
-    settle();
-
-    const tabs = () => Array.from(root.querySelectorAll<HTMLElement>('portal-markup-panel .output'));
-    const shown = () => {
-      const blocks = root.querySelectorAll('portal-markup-panel pre.markup');
-      const copy = root.querySelector('portal-markup-panel .pc-button.is-primary');
-
-      return { count: blocks.length, text: blocks[0]?.textContent ?? '', copy: (copy?.textContent ?? '').trim() };
-    };
-
-    expect(tabs().map((el) => (el.textContent ?? '').trim())).toEqual(['Template', 'Component', 'App Config']);
-    expect(shown().count).toBe(1);
-    expect(shown().text).toContain('<form');
-    expect(shown().copy).toBe('Copy Template');
-
-    tabs()[1]!.click();
-    settle();
-    expect(shown().count).toBe(1);
-    expect(shown().text).toContain('export class MyFormComponent');
-    expect(shown().copy).toBe('Copy Component');
-
-    tabs()[2]!.click();
-    settle();
-    expect(shown().count).toBe(1);
-    expect(shown().text).toContain('provideNgxFormidable');
-    expect(shown().copy).toBe('Copy App Config');
-    expect(tabs()[2]!.getAttribute('aria-selected')).toBe('true');
-  }));
-
-  // A reset beside the copy is one misclick from wiping the work being exported, and each already lives where
-  // its half is built: the preset gallery, and Structure's first step.
-  it('keeps resets out of Import & Export', fakeAsync(() => {
-    settle();
-
-    const inspector = TestBed.inject(InspectorStore);
-
-    for (const section of ['theme', 'form'] as const) {
-      inspector.openExport(section);
-      settle();
-
-      const labels = Array.from(root.querySelectorAll('portal-export-tab .pc-button')).map((el) =>
-        (el.textContent ?? '').trim()
-      );
-
-      expect(labels.filter((label) => /reset/i.test(label)))
-        .withContext(section)
-        .toEqual([]);
-    }
-  }));
-
-  // All three areas carry the same second level, so the strip is learned once rather than per tab.
-  it('gives every area the same two-half strip', fakeAsync(() => {
-    settle();
-
-    const inspector = TestBed.inject(InspectorStore);
-    const expected: [InspectorTab, string[]][] = [
-      ['theme', ['Design', 'Variables']],
-      ['form', ['Structure', 'Settings']],
-      ['export', ['Theme', 'Form']]
+    const expected: [file: string, text: string][] = [
+      ['Theme', ':root'],
+      ['Template', '<form [formRoot]="form">'],
+      ['Component', 'export class MyForm {'],
+      ['Schema', 'export const myFormSchema = schema<MyFormModel>'],
+      ['App Config', 'provideNgxFormidable']
     ];
 
-    for (const [tab, labels] of expected) {
-      inspector.tab.set(tab);
-      settle();
+    for (const [file, text] of expected) {
+      await userEvent.click(files.filter({ hasText: file }));
 
-      const rendered = Array.from(root.querySelectorAll('portal-inspector .sub-tab')).map((el) =>
-        (el.textContent ?? '').trim()
-      );
-
-      expect(rendered).withContext(tab).toEqual(labels);
+      await expect.element(files.filter({ hasText: file })).toHaveAttribute('aria-selected', 'true');
+      expect(document.querySelectorAll('portal-export-panel pre').length, file).toBe(1);
+      expect(shown(), file).toContain(text);
+      await expect.element(page.getByRole('button', { name: `Copy ${file}`, exact: true })).toBeVisible();
+      // The theme's options are the theme's alone.
+      expect(page.getByRole('radio', { name: 'CSS' }).elements().length, file).toBe(file === 'Theme' ? 1 : 0);
     }
-  }));
+  });
 
-  it('opens one accordion section at a time', fakeAsync(() => {
-    settle();
+  // A reset beside the copy is one misclick from wiping the work being exported, and each already lives where
+  // its file is built: the preset gallery, and Structure's first step.
+  it('keeps resets out of Export & Import', async () => {
+    await openStudio();
 
-    const headers = () => Array.from(root.querySelectorAll<HTMLElement>('portal-accordion .trigger'));
-    const openCount = () => headers().filter((header) => header.getAttribute('aria-expanded') === 'true').length;
+    for (const [direction, files] of [
+      ['Export', ['Theme', 'Template', 'Component', 'Schema', 'App Config']],
+      ['Import', ['Theme', 'Template']]
+    ] as const) {
+      for (const file of files) {
+        await openPanel('Export & Import', direction, file);
 
-    expect(openCount()).toBe(1);
+        expect(page.getByRole('button', { name: /reset/i }).elements(), `${direction} ▸ ${file}`).toEqual([]);
+      }
+    }
+  });
 
-    headers()[2]!.click();
-    settle();
+  it('opens one accordion section at a time', async () => {
+    await openStudio();
 
-    expect(openCount()).toBe(1);
-  }));
+    const open = () =>
+      page.getByRole('heading', { level: 3 }).getByRole('button', { expanded: true }).elements().length;
 
-  it('hides the chips when the stage says so', fakeAsync(() => {
-    settle();
-    const layout = TestBed.inject(LayoutStore);
+    expect(open()).toBe(1);
 
-    layout.showFieldTypes.set(true);
-    settle();
-    expect(root.querySelectorAll('portal-preview-field .chip').length).toBeGreaterThan(0);
+    await openSection('Reshape');
 
-    layout.showFieldTypes.set(false);
-    settle();
-    expect(root.querySelectorAll('portal-preview-field .chip').length).toBe(0);
-  }));
+    expect(open()).toBe(1);
+  });
+
+  // #endregion
+
+  // #region Layout
+
+  // The two column headers sit side by side, so a difference between them reads as a step in the rule under
+  // them.
+  it('gives the two column headers one height', async () => {
+    await openStudio();
+
+    const stage = document.querySelector('portal-stage .stage-bar')!.getBoundingClientRect();
+    const panel = document.querySelector('portal-inspector .head')!.getBoundingClientRect();
+
+    expect(panel.left).toBeGreaterThan(stage.right - 1);
+    expect(stage.top).toBeCloseTo(panel.top, 0);
+    expect(stage.height).toBeCloseTo(panel.height, 0);
+  });
 
   // Two fields sharing a grid row are rarely the same height — one carries a hint or an error and the other
   // does not — and the annotations under them are what a reader compares across the row. They line up
   // because each field lays its three rows out as a subgrid of the field grid, not because anything pushes
   // them to the bottom of the row, which staggers them again as soon as one readout is taller.
-  it('starts the chip and the accessibility readout of a pair on the same line', fakeAsync(() => {
-    settle();
-    const layout = TestBed.inject(LayoutStore);
+  it('starts the chip and the accessibility readout of a pair on the same line', async () => {
+    await openStudio();
 
-    layout.showFieldTypes.set(true);
-    layout.showAccessibility.set(true);
-    settle();
-
-    // Below 900px the grid is one column, where a pair has no row to share. The banding is what is under
-    // test, not the breakpoint that suspends it, so the columns are stated here.
-    for (const grid of Array.from(root.querySelectorAll<HTMLElement>('.field-grid'))) {
-      grid.style.gridTemplateColumns = 'repeat(2, minmax(0, 1fr))';
-    }
-    settle();
+    await userEvent.click(page.getByRole('button', { name: 'Accessibility' }));
+    await expect.poll(() => document.querySelectorAll('portal-accessibility-readout').length).toBeGreaterThan(0);
 
     const top = (element: Element) => element.getBoundingClientRect().top;
     const hasHint = (host: Element) => !host.querySelector('.hint-wrapper')?.classList.contains('hidden');
-    const hosts = Array.from(root.querySelectorAll('portal-preview-field'));
+    const hosts = Array.from(document.querySelectorAll('portal-preview-field'));
 
     // The pair has to be uneven, or they would line up by accident and prove nothing. Their rendered
     // heights cannot say so — the bands equalize them, which is the thing under test — so the hint one of
@@ -1019,7 +954,7 @@ describe('portal', () => {
       return top(host) === top(previous) && hasHint(host) !== hasHint(previous);
     });
 
-    expect(pair).withContext('a row holding two fields of unequal height').toBeTruthy();
+    expect(pair, 'a row holding two fields of unequal height').toBeTruthy();
 
     const first = hosts[hosts.indexOf(pair!) - 1]!;
 
@@ -1028,112 +963,121 @@ describe('portal', () => {
       top(first.querySelector('portal-accessibility-readout')!),
       0
     );
-  }));
+  });
 
   // The stage is a fixed three-row grid, so an optional child of it shifts every row below — which once
-  // pushed the drawer off the bottom of the viewport. Whatever the switches add has to stay inside the
-  // head, leaving the head, the preview viewport and the drawer as the only three rows.
-  it('keeps the model drawer in the last row whatever the stage is showing', fakeAsync(() => {
-    settle();
-    const layout = TestBed.inject(LayoutStore);
+  // pushed the drawer off the bottom of the viewport. Whatever the switches add has to stay inside the head.
+  it('keeps the model drawer at the foot of the stage whatever the stage is showing', async () => {
+    await openStudio();
 
-    for (const chips of [false, true]) {
-      for (const accessibility of [false, true]) {
-        layout.showFieldTypes.set(chips);
-        layout.showAccessibility.set(accessibility);
-        settle();
+    const fieldTypes = page.getByRole('button', { name: 'Field Types' });
+    const accessibility = page.getByRole('button', { name: 'Accessibility' });
+    const drawer = page.getByRole('button', { name: /^Model / });
 
-        const stage = root.querySelector('portal-stage') as HTMLElement;
-        const children = Array.from(stage.children);
-        const context = `chips ${chips}, accessibility ${accessibility}`;
+    for (const [switched, context] of [
+      [fieldTypes, 'chips off'],
+      [accessibility, 'chips off, accessibility on'],
+      [fieldTypes, 'chips on, accessibility on'],
+      [accessibility, 'chips on']
+    ] as const) {
+      await userEvent.click(switched);
 
-        expect(children.length).withContext(context).toBe(3);
-        expect(children[0]?.classList).withContext(context).toContain('stage-head');
-        expect(children[1]?.classList).withContext(context).toContain('stage-viewport');
-        expect(children[2]?.tagName.toLowerCase()).withContext(context).toBe('portal-model-drawer');
-      }
+      const stage = document.querySelector('portal-stage')!.getBoundingClientRect();
+      const bar = drawer.element().getBoundingClientRect();
+
+      expect(bar.bottom, context).toBeCloseTo(stage.bottom, 0);
+      expect(stage.bottom, context).toBeLessThanOrEqual(window.innerHeight);
     }
-  }));
+  });
 
-  it('states each annotation on its own line, and only while it is on', fakeAsync(() => {
-    settle();
-    const layout = TestBed.inject(LayoutStore);
-    const lines = () => root.querySelectorAll('portal-stage .stage-status').length;
+  it('states each annotation on its own line, and only while it is on', async () => {
+    await openStudio();
 
-    layout.showFieldTypes.set(false);
-    layout.showAccessibility.set(false);
-    settle();
-    expect(lines()).toBe(0);
+    const lines = () =>
+      ['Click one to edit that field.', 'Verify with a real screen reader.'].map(
+        (line) => page.getByText(line, { exact: false }).elements().length
+      );
 
-    layout.showFieldTypes.set(true);
-    settle();
-    expect(lines()).toBe(1);
+    expect(lines()).toEqual([1, 0]);
 
-    layout.showAccessibility.set(true);
-    settle();
-    expect(lines()).toBe(2);
-  }));
+    await userEvent.click(page.getByRole('button', { name: 'Accessibility' }));
+    await expect.poll(lines).toEqual([1, 1]);
 
-  it('takes the inspector width from the layout store', fakeAsync(() => {
-    settle();
+    await userEvent.click(page.getByRole('button', { name: 'Field Types' }));
+    await expect.poll(lines).toEqual([0, 1]);
+  });
 
-    const layout = TestBed.inject(LayoutStore);
-    layout.setInspectorWidth(640);
-    settle();
+  // The divider takes the keyboard as well as the pointer: an arrow moves it one step, wider to the left.
+  it('resizes the editor panel from its divider', async () => {
+    await openStudio();
 
-    const inspector = root.querySelector('portal-inspector') as HTMLElement;
+    const width = () => document.querySelector('portal-inspector')!.getBoundingClientRect().width;
+    const before = width();
 
-    expect(inspector.style.width).toBe('640px');
-  }));
+    // A pointer on the divider drags rather than focuses it, so the keyboard reaches it the way it reaches
+    // anything: it comes just before the panel's tabs.
+    await userEvent.click(tab('Theme'));
+    await userEvent.tab({ shift: true });
+    await expect.element(page.getByRole('separator', { name: 'Resize the inspector' })).toHaveFocus();
+    await userEvent.keyboard('{ArrowLeft}');
+
+    await expect.poll(width).toBeGreaterThan(before);
+  });
 
   // A `sheet` panel is `position: fixed`, and the page it belongs to ends at the preview's edges. Without a
   // containing block on the preview viewport it spans the browser window instead, which puts it off-centre
-  // and half under the inspector.
-  it('pins a fixed child of the preview to the stage rather than to the window', fakeAsync(() => {
-    settle();
+  // and half under the editor panel.
+  it('pins a sheet panel to the stage rather than to the window', async () => {
+    await openStudio();
 
-    const viewport = root.querySelector('.stage-viewport') as HTMLElement;
-    const probe = document.createElement('div');
+    await openPanel('Form', 'Settings', 'This Field');
+    await editField('Date');
+    await userEvent.selectOptions(page.getByRole('combobox', { name: 'Panel Position' }), 'sheet');
+    await userEvent.click(page.getByRole('combobox', { name: 'Date' }));
+    await userEvent.keyboard('{Alt>}{ArrowDown}{/Alt}');
 
-    probe.style.cssText = 'position: fixed; inset: auto 0 0; height: 10px';
-    viewport.appendChild(probe);
+    const date = page.getByRole('combobox', { name: 'Date' }).element();
+    await expect.poll(() => date.getAttribute('aria-expanded')).toBe('true');
 
-    const stage = viewport.getBoundingClientRect();
-    const pinned = probe.getBoundingClientRect();
+    const panel = document.getElementById(date.getAttribute('aria-controls')!)!.closest('.panel')!;
+    const stage = document.querySelector('.stage-viewport')!.getBoundingClientRect();
+    // Rounded to the pixel, and polled: the sheet slides in from below.
+    const offsets = () => {
+      const sheet = panel.getBoundingClientRect();
 
-    probe.remove();
+      return [sheet.left - stage.left, sheet.right - stage.right, sheet.bottom - stage.bottom].map(Math.round);
+    };
 
     // Guards the assertions below against passing on a preview that happens to fill the window.
-    expect(stage.bottom).toBeLessThan(window.innerHeight);
+    expect(stage.right).toBeLessThan(window.innerWidth - 100);
 
-    expect(pinned.left).toBeCloseTo(stage.left, 0);
-    expect(pinned.right).toBeCloseTo(stage.right, 0);
-    expect(pinned.bottom).toBeCloseTo(stage.bottom, 0);
-  }));
+    await expect.poll(offsets).toEqual([0, 0, 0]);
+  });
 
-  it('keeps the inspector above the library’s own sheet z-index', fakeAsync(() => {
-    settle();
+  it('keeps the editor panel above the library’s own sheet z-index', async () => {
+    await openStudio();
 
-    const inspector = root.querySelector('portal-inspector') as HTMLElement;
-    const sheet = Number(
-      getComputedStyle(document.documentElement).getPropertyValue('--formidable-sheet-z-index').trim()
-    );
+    const sheet = Number(getComputedStyle(document.documentElement).getPropertyValue('--formidable-sheet-z-index'));
 
-    expect(Number(getComputedStyle(inspector).zIndex)).toBeGreaterThan(sheet);
-  }));
+    expect(Number(getComputedStyle(document.querySelector('portal-inspector')!).zIndex)).toBeGreaterThan(sheet);
+  });
 
-  it('applies the mask the settings give a textarea', fakeAsync(() => {
-    settle();
+  // #endregion
 
-    TestBed.inject(FormDefinitionStore).updateField('notes', { mask: '000-000' });
-    settle();
+  it('applies the mask the settings give a textarea', async () => {
+    await openStudio();
 
-    const textarea = root.querySelector('formidable-textarea-field textarea') as HTMLTextAreaElement;
+    const notes = page.getByRole('textbox', { name: 'Notes For The Kitchen' });
 
-    textarea.value = '123456';
-    textarea.dispatchEvent(new Event('input'));
-    settle();
+    await userEvent.clear(notes);
+    await openPanel('Form', 'Settings', 'This Field');
+    await editField('Notes For The Kitchen');
+    await userEvent.fill(page.getByRole('textbox', { name: 'Mask' }), '000-000');
+    await userEvent.keyboard('{Enter}');
 
-    expect(textarea.value).toBe('123-456');
-  }));
+    await userEvent.click(notes);
+    await userEvent.keyboard('123456');
+
+    await expect.element(notes).toHaveValue('123-456');
+  });
 });

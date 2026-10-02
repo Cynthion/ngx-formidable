@@ -1,190 +1,33 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule, NgModel } from '@angular/forms';
-import { By } from '@angular/platform-browser';
-import { provideNgxMask } from 'ngx-mask';
-import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { FieldPrefixDirective } from '../../directives/field-prefix.directive';
-import { FieldSuffixDirective } from '../../directives/field-suffix.directive';
-import { NgxFormidableFormDirective } from '../../forms/form.directive';
-import { FieldAdornmentAlignment, FieldLabelPosition } from '../../models/formidable.model';
-import { FieldErrorsComponent } from '../field-errors/field-errors.component';
-import { AutocompleteFieldComponent } from '../fields/autocomplete-field/autocomplete-field.component';
-import { DateFieldComponent } from '../fields/date-field/date-field.component';
-import { DropdownFieldComponent } from '../fields/dropdown-field/dropdown-field.component';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
-import { TextareaFieldComponent } from '../fields/textarea-field/textarea-field.component';
-import { TimeFieldComponent } from '../fields/time-field/time-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { Component, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { page, userEvent } from 'vitest/browser';
+import { FieldLabel } from '../../directives/field-label';
+import { FieldPrefix } from '../../directives/field-prefix';
+import { bindField, BindFieldOptions, BoundField, FieldKind } from '../../testing/bind-field';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { InputField } from '../fields/input-field/input-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
- * Contract of the decorator's own layout: where a projected prefix/suffix sits, and where the validation
- * errors render.
- *
- * These two are coupled, which is the whole reason this file exists. `.container-horizontal` is the
- * positioning context for the label and for the prefix/suffix, so it has to be exactly the field's box.
- * `FieldErrorsDirective` used to insert its component beside the field — which content projection put
- * *inside* that container — inflating it by a reserved error line and dragging the prefix down with it.
- *
- * The prefix is centered in the field's own box and is deliberately independent of the label: an inside
- * label pushes the value down while the prefix stays put. A `textarea` is the exception, top-aligning its
- * prefix with the first line rather than centering it in a box that grows as you type.
+ * Per **Prefixes And Suffixes** in `user/decoration.md`: a prefix sits at the field's leading edge and a suffix
+ * at its trailing one, both insetting the value. They centre on the field's box, or follow the value with
+ * `align="value"`, except in a field that top-aligns its value. They are click-through, but a projected
+ * `button` takes the click, and the field is re-inset whenever one comes or goes. The vertical layout has
+ * none. Per **A Label Over The Field Stays On One Line And Ellipsizes**, a panel toggle drawn inside the field
+ * pushes the label in as a suffix does. The messages render below the field, never inside its box.
  */
 
-interface Model {
-  field?: string;
-}
+/** **Value-Top Adornment Above The First Line** in `impl/backlog.md`. */
+const VALUE_TOP_ABOVE_FIRST_LINE = 'a textarea prefix sits one field border above the first line';
 
-const shape = { field: '' };
-
+/** A prefix that comes and goes, the way a consumer's own `@if` moves it. */
 @Component({
-  imports: [
-    FormsModule,
-    NgxFormidableFormDirective,
-    StubValidatorDirective,
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    FieldErrorsDirective,
-    FieldPrefixDirective,
-    FieldSuffixDirective
-  ],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <form
-      formidableForm
-      [formValue]="value"
-      [formShape]="shape"
-      [stubValidator]="required">
-      <formidable-field-decorator>
-        <formidable-input-field
-          formidableFieldErrors
-          name="field"
-          [ngModel]="value.field" />
-        <div formidableFieldPrefix>Prefix</div>
-        <div formidableFieldSuffix>Suffix</div>
-      </formidable-field-decorator>
-    </form>
-  `
-})
-class PrefixWithErrorsHostComponent {
-  value: Model = {};
-  shape = shape;
-  required = { field: 'Required.' };
-}
-
-/** The same field with no decorator around it — the shape a consumer's custom field uses. */
-@Component({
-  imports: [FormsModule, NgxFormidableFormDirective, StubValidatorDirective, InputFieldComponent, FieldErrorsDirective],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <form
-      formidableForm
-      [formValue]="value"
-      [formShape]="shape"
-      [stubValidator]="required">
-      <formidable-input-field
-        formidableFieldErrors
-        name="field"
-        [ngModel]="value.field" />
-    </form>
-  `
-})
-class NoDecoratorHostComponent {
-  value: Model = {};
-  shape = shape;
-  required = { field: 'Required.' };
-}
-
-@Component({
-  imports: [FormsModule, TextareaFieldComponent, FieldDecoratorComponent, FieldPrefixDirective],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FieldDecorator, InputField, FieldLabel, FieldPrefix],
   template: `
     <formidable-field-decorator>
-      <formidable-textarea-field
-        name="field"
-        [ngModel]="value" />
-      <div
-        formidableFieldPrefix
-        [align]="align">
-        Prefix
-      </div>
-    </formidable-field-decorator>
-  `
-})
-class TextareaPrefixHostComponent {
-  value = '';
-  align: FieldAdornmentAlignment = 'center';
-}
-
-/** An adornment over a label that pushes the value down, so the two alignments visibly disagree. */
-@Component({
-  imports: [
-    InputFieldComponent,
-    FieldDecoratorComponent,
-    FieldLabelDirective,
-    FieldPrefixDirective,
-    FieldSuffixDirective
-  ],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <formidable-field-decorator>
-      <formidable-input-field name="field" />
-      <div
-        formidableFieldLabel
-        [position]="labelPosition">
-        Label
-      </div>
-      <div
-        formidableFieldPrefix
-        [align]="align">
-        Prefix
-      </div>
-      <div
-        formidableFieldSuffix
-        [align]="align">
-        Suffix
-      </div>
-    </formidable-field-decorator>
-  `
-})
-class AdornmentAlignmentHostComponent {
-  align: FieldAdornmentAlignment = 'center';
-  labelPosition: FieldLabelPosition = 'inside';
-}
-
-/** An action in one slot and plain text in the other — the two have to answer a click differently. */
-@Component({
-  imports: [InputFieldComponent, FieldDecoratorComponent, FieldPrefixDirective, FieldSuffixDirective],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <formidable-field-decorator>
-      <formidable-input-field name="field" />
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>
-        <button
-          type="button"
-          (click)="clicks = clicks + 1">
-          Clear
-        </button>
-      </div>
-    </formidable-field-decorator>
-  `
-})
-class AdornmentActionHostComponent {
-  clicks = 0;
-}
-
-/** A prefix and a suffix that come and go, the way a consumer's own `*ngIf` moves them. */
-@Component({
-  imports: [InputFieldComponent, FieldDecoratorComponent, FieldPrefixDirective],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <formidable-field-decorator>
-      <formidable-input-field name="field" />
-      @if (showPrefix) {
+      <formidable-input-field />
+      <div formidableFieldLabel>Name</div>
+      @if (showPrefix()) {
         <div
           formidableFieldPrefix
           style="width: 4rem">
@@ -194,432 +37,229 @@ class AdornmentActionHostComponent {
     </formidable-field-decorator>
   `
 })
-class TogglablePrefixHostComponent {
-  showPrefix = true;
+class TogglablePrefixHost {
+  readonly showPrefix = signal(false);
 }
 
-/** A group field, whose decorator lays out vertically. */
-@Component({
-  imports: [RadioGroupFieldComponent, FieldDecoratorComponent, FieldPrefixDirective, FieldSuffixDirective],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <formidable-field-decorator>
-      <formidable-radio-group-field name="field" />
-      <div formidableFieldPrefix>Prefix</div>
-      <div formidableFieldSuffix>Suffix</div>
-    </formidable-field-decorator>
-  `
-})
-class VerticalPrefixHostComponent {}
+const rect = (element: Element) => element.getBoundingClientRect();
+const centreY = (element: Element) => rect(element).top + rect(element).height / 2;
+const text = (content: string) => page.getByText(content).element();
+const textbox = () => page.getByRole('textbox', { name: 'Name' }).element();
 
-/** A field that renders its own panel toggle, with an inside label and an optional suffix beside it. */
-@Component({
-  imports: [DropdownFieldComponent, FieldDecoratorComponent, FieldLabelDirective, FieldSuffixDirective],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <formidable-field-decorator>
-      <formidable-dropdown-field
-        name="field"
-        [readonly]="readonly" />
-      <div
-        formidableFieldLabel
-        [position]="'inside'">
-        Label
-      </div>
-      @if (showSuffix) {
-        <div formidableFieldSuffix>Suffix</div>
-      }
-    </formidable-field-decorator>
-  `
-})
-class ToggleFieldHostComponent {
-  readonly = false;
-  showSuffix = false;
-}
+/** Binds a decorated field labelled `Name`, with `decoration` projected beside the label. */
+const bind = (kind: FieldKind, decoration: string, options: BindFieldOptions = {}): Promise<BoundField> =>
+  bindField(kind, 'signal', {
+    decorated: true,
+    decoration: `<div formidableFieldLabel position="outside">Name</div>${decoration}`,
+    ...options
+  });
 
-/** The four panel-ish fields: only two of them draw a toggle inside the field. */
-@Component({
-  imports: [
-    FieldDecoratorComponent,
-    DropdownFieldComponent,
-    DateFieldComponent,
-    AutocompleteFieldComponent,
-    TimeFieldComponent
-  ],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <formidable-field-decorator><formidable-dropdown-field name="a" /></formidable-field-decorator>
-    <formidable-field-decorator><formidable-date-field name="b" /></formidable-field-decorator>
-    <formidable-field-decorator><formidable-autocomplete-field name="c" /></formidable-field-decorator>
-    <formidable-field-decorator><formidable-time-field name="d" /></formidable-field-decorator>
-  `
-})
-class EveryPanelFieldHostComponent {}
-
-/** px per rem, so the expectations stay written in the tokens' own unit. */
-function rem(value: number): number {
-  return value * parseFloat(getComputedStyle(document.documentElement).fontSize);
-}
-
-/** Vertical centre of an element, in viewport coordinates. */
-function centreY(element: Element): number {
-  const rect = element.getBoundingClientRect();
-
-  return rect.top + rect.height / 2;
-}
-
-/** Lets the decorator's `ResizeObserver` deliver and the resulting inset reach the layout. */
-async function settle(fixture: ComponentFixture<unknown>): Promise<HTMLElement> {
-  fixture.detectChanges();
-
-  await new Promise(requestAnimationFrame);
-  await new Promise(requestAnimationFrame);
-  fixture.detectChanges();
-
-  return fixture.nativeElement as HTMLElement;
-}
+/** Where a value-top field's first line begins: inside its top border and padding. */
+const contentTop = (editor: Element) =>
+  rect(editor).top +
+  parseFloat(getComputedStyle(editor).borderTopWidth) +
+  parseFloat(getComputedStyle(editor).paddingTop);
 
 describe('formidable-field-decorator layout', () => {
-  beforeEach(() => TestBed.configureTestingModule({ providers: [provideNgxMask()] }));
+  beforeEach(() => configureFormidableTestBed());
 
-  describe('with projected validation errors', () => {
-    let fixture: ComponentFixture<PrefixWithErrorsHostComponent>;
-    let root: HTMLElement;
+  const adornments = '<div formidableFieldPrefix>Prefix</div><div formidableFieldSuffix>Suffix</div>';
 
-    beforeEach(() => {
-      fixture = TestBed.createComponent(PrefixWithErrorsHostComponent);
-      fixture.detectChanges();
-      root = fixture.nativeElement as HTMLElement;
-    });
+  it('centres the prefix and the suffix on the field while its messages show below it', async () => {
+    await bind('input', adornments, { inputs: { revealOn: 'always' }, state: { invalid: true } });
 
-    function container(): HTMLElement {
-      return root.querySelector('.container-horizontal') as HTMLElement;
-    }
-
-    function field(): HTMLInputElement {
-      return root.querySelector('input') as HTMLInputElement;
-    }
-
-    // The regression: the errors component reserves an error line, and while it lived inside the
-    // container the prefix's `top: 50%` measured against that inflated height and sat ~14px too low.
-    it('centers the prefix and the suffix in the field, not in the container', () => {
-      const fieldCentre = centreY(field());
-
-      expect(centreY(root.querySelector('.prefix-wrapper-horizontal')!)).toBeCloseTo(fieldCentre, 0);
-      expect(centreY(root.querySelector('.suffix-wrapper-horizontal')!)).toBeCloseTo(fieldCentre, 0);
-    });
-
-    it('keeps the container the size of the field, so it can position the label and prefix', () => {
-      expect(container().getBoundingClientRect().height).toBeCloseTo(field().getBoundingClientRect().height, 0);
-    });
-
-    it('renders the errors after the container rather than inside it', () => {
-      const errors = root.querySelector('formidable-field-errors') as HTMLElement;
-
-      expect(errors).toBeTruthy();
-      expect(container().contains(errors)).toBe(false);
-      expect(errors.compareDocumentPosition(container()) & Node.DOCUMENT_POSITION_PRECEDING).toBeTruthy();
-    });
-
-    it('takes no space while the field is valid, so a field that never fails costs nothing below it', () => {
-      const errors = root.querySelector('formidable-field-errors') as HTMLElement;
-
-      expect(root.querySelector('.errors')).toBeNull();
-      expect(errors.getBoundingClientRect().height).toBe(0);
-    });
-
-    // Angular's own form state is not signal-backed, so the component only re-reads the control when the
-    // directive pumps `refresh()`. Rendering it from the decorator's view rather than beside the field must
-    // leave both halves working: it still reads the field's control, and a pump still repaints it.
-    it('shows the messages once the control is touched and invalid', () => {
-      const errors = fixture.debugElement.query(By.directive(FieldErrorsComponent));
-      const control = fixture.debugElement.query(By.css('formidable-input-field')).injector.get(NgModel).control;
-
-      expect(errors).toBeTruthy();
-      expect((errors.componentInstance as FieldErrorsComponent).control).toBe(control);
-
-      control.markAsTouched();
-      control.setErrors({ errors: ['Required.'] });
-      (errors.componentInstance as FieldErrorsComponent).refresh();
-      fixture.detectChanges();
-
-      const messages = Array.from(root.querySelectorAll('.error')).map((e) => e.textContent?.trim());
-
-      expect(messages).toEqual(['Required.']);
-    });
+    expect(centreY(text('Prefix'))).toBeCloseTo(centreY(textbox()), 0);
+    expect(centreY(text('Suffix'))).toBeCloseTo(centreY(textbox()), 0);
+    expect(rect(text('invalid')).top).toBeGreaterThanOrEqual(rect(textbox()).bottom);
   });
 
-  // A field can carry `formidableFieldErrors` with no decorator at all — consumers do this for custom
-  // fields, so the directive has to keep rendering the component itself in that case.
-  it('renders the errors beside the control when there is no decorator', () => {
-    const fixture = TestBed.createComponent(NoDecoratorHostComponent);
-    fixture.detectChanges();
+  it('takes no space below the field while it is valid', async () => {
+    await bind('input', adornments);
 
-    const root = fixture.nativeElement as HTMLElement;
-    const errors = root.querySelector('formidable-field-errors');
-
-    expect(errors).toBeTruthy();
-    expect(errors!.previousElementSibling?.tagName.toLowerCase()).toBe('formidable-input-field');
+    expect(rect(document.querySelector('formidable-field-decorator')!).bottom).toBeCloseTo(rect(textbox()).bottom, 1);
   });
 
-  // A textarea grows as you type, so centering would drift the prefix downwards. It sits on the first
-  // line instead, like the label.
-  it('top-aligns a textarea prefix with its first line and keeps it there as the field grows', () => {
-    const fixture = TestBed.createComponent(TextareaPrefixHostComponent);
-    fixture.detectChanges();
-
-    const root = fixture.nativeElement as HTMLElement;
-    const textarea = root.querySelector('textarea') as HTMLTextAreaElement;
-    const prefix = root.querySelector('.prefix-wrapper-horizontal') as HTMLElement;
-
-    const valueTop = textarea.getBoundingClientRect().top + parseFloat(getComputedStyle(textarea).paddingTop);
-
-    expect(prefix.getBoundingClientRect().top).toBeCloseTo(valueTop, 0);
-
-    // grow the box; the prefix must not follow the middle downwards
-    const before = prefix.getBoundingClientRect().top;
-
-    textarea.style.height = '12rem';
-
-    expect(prefix.getBoundingClientRect().top).toBeCloseTo(before, 0);
-  });
-
-  /**
-   * `align` lets the consumer pick what the adornment follows: the field's box, or the value inside it.
-   * The two only differ where something pushes the value off the box's centre, which today is an inside
-   * label. A centred value takes the label's line-box as top padding, so its text sits half that padding
-   * below the box's middle — and an adornment given the same padding lands on it.
-   */
+  // The two alignments differ only where something pushes the value off the box's centre: an inside label.
   describe('adornment alignment', () => {
-    let fixture: ComponentFixture<AdornmentAlignmentHostComponent>;
-    let root: HTMLElement;
+    const bindUnder = (position: string, align: string) =>
+      bindField('input', 'signal', {
+        decorated: true,
+        decoration:
+          `<div formidableFieldLabel position="${position}">Name</div>` +
+          `<div formidableFieldPrefix align="${align}">Prefix</div>` +
+          `<div formidableFieldSuffix align="${align}">Suffix</div>`
+      });
+    const paddingTop = () => parseFloat(getComputedStyle(textbox()).paddingTop);
 
-    beforeEach(() => {
-      fixture = TestBed.createComponent(AdornmentAlignmentHostComponent);
-      fixture.detectChanges();
-      root = fixture.nativeElement as HTMLElement;
+    it('centres on the field, not on the value, by default', async () => {
+      await bindUnder('inside', 'center');
+
+      expect(paddingTop()).toBeGreaterThan(0);
+      expect(centreY(text('Prefix'))).toBeCloseTo(centreY(textbox()), 0);
+      expect(centreY(text('Suffix'))).toBeCloseTo(centreY(textbox()), 0);
     });
 
-    function field(): HTMLInputElement {
-      return root.querySelector('input') as HTMLInputElement;
-    }
+    // The value is centred in a content box the label's padding has already shortened.
+    it('follows the value once asked to, prefix and suffix alike', async () => {
+      await bindUnder('inside', 'value');
 
-    // The wrapper's own box is pinned by `translateY(-50%)`, so what moves is the content inside it.
-    function prefix(): HTMLElement {
-      return root.querySelector('[formidableFieldPrefix]') as HTMLElement;
-    }
-
-    function suffix(): HTMLElement {
-      return root.querySelector('[formidableFieldSuffix]') as HTMLElement;
-    }
-
-    /** Where the field's text sits: centred in a content box an inside label has already shortened. */
-    function valueCentreY(): number {
-      return centreY(field()) + parseFloat(getComputedStyle(field()).paddingTop) / 2;
-    }
-
-    it('centers on the field, not on the value, by default', () => {
-      // the label has to be pushing the value down, or the two alignments are the same test
-      expect(parseFloat(getComputedStyle(field()).paddingTop)).toBeGreaterThan(0);
-
-      expect(centreY(prefix())).toBeCloseTo(centreY(field()), 0);
-      expect(centreY(suffix())).toBeCloseTo(centreY(field()), 0);
+      expect(centreY(text('Prefix'))).toBeCloseTo(centreY(textbox()) + paddingTop() / 2, 0);
+      expect(centreY(text('Suffix'))).toBeCloseTo(centreY(textbox()) + paddingTop() / 2, 0);
     });
 
-    it('follows the value once asked to, prefix and suffix alike', () => {
-      fixture.componentInstance.align = 'value';
-      fixture.detectChanges();
+    it('changes nothing where no label pushes the value down', async () => {
+      await bindUnder('outside', 'value');
 
-      expect(centreY(prefix())).toBeCloseTo(valueCentreY(), 0);
-      expect(centreY(suffix())).toBeCloseTo(valueCentreY(), 0);
-    });
-
-    // With the label in normal flow the value is already centred, so there is nothing to follow.
-    it('is a no-op where no label pushes the value down', () => {
-      fixture.componentInstance.labelPosition = 'outside';
-      fixture.componentInstance.align = 'value';
-      fixture.detectChanges();
-
-      expect(parseFloat(getComputedStyle(field()).paddingTop)).toBe(0);
-      expect(centreY(prefix())).toBeCloseTo(centreY(field()), 0);
+      expect(paddingTop()).toBe(0);
+      expect(centreY(text('Prefix'))).toBeCloseTo(centreY(textbox()), 0);
     });
   });
 
-  /**
-   * A prefix/suffix wrapper is click-through, so a text adornment over the field's edge still focuses the
-   * field rather than swallowing the click. That is what made a clear/copy action impossible, so `button`
-   * and `a` inside one are excepted — a hit test is the assertion, not the computed property.
-   */
+  describe('in a field that top-aligns its value', () => {
+    it('sits on the first line', async ({ skip }) => {
+      skip(VALUE_TOP_ABOVE_FIRST_LINE);
+
+      await bind('textarea', '<div formidableFieldPrefix>Prefix</div>');
+
+      expect(rect(text('Prefix')).top).toBeCloseTo(contentTop(textbox()), 0);
+    });
+
+    it('stays where it is as the field grows', async () => {
+      await bind('textarea', '<div formidableFieldPrefix>Prefix</div>');
+      const height = rect(textbox()).height;
+      const offset = () => rect(text('Prefix')).top - rect(textbox()).top;
+      const before = offset();
+
+      await userEvent.type(textbox(), 'one{Enter}two{Enter}three{Enter}four{Enter}five');
+
+      await expect.poll(() => rect(textbox()).height).toBeGreaterThan(height);
+      expect(offset()).toBeCloseTo(before, 1);
+    });
+
+    // An inside label is what gives `align="value"` something to follow in a centred field.
+    it('keeps its own alignment whatever the adornment asks for', async () => {
+      await bindField('textarea', 'signal', {
+        decorated: true,
+        decoration:
+          '<div formidableFieldLabel>Name</div>' +
+          '<div formidableFieldPrefix align="value">Prefix</div>' +
+          '<div formidableFieldSuffix>Suffix</div>'
+      });
+
+      expect(rect(text('Prefix')).top).toBeCloseTo(rect(text('Suffix')).top, 1);
+    });
+  });
+
   describe('with a projected action', () => {
-    let fixture: ComponentFixture<AdornmentActionHostComponent>;
-    let root: HTMLElement;
+    // A click Playwright would land on anything else does not count: it fails unless the button takes it.
+    it('lets a click reach a button in the suffix', async () => {
+      await bind('input', '<div formidableFieldSuffix><button type="button">Clear</button></div>');
 
-    beforeEach(async () => {
-      fixture = TestBed.createComponent(AdornmentActionHostComponent);
-      root = await settle(fixture);
+      await userEvent.click(page.getByRole('button', { name: 'Clear' }));
+
+      await expect.element(page.getByRole('button', { name: 'Clear' })).toHaveFocus();
     });
 
-    /** What a click at an element's centre would actually land on. */
-    function hit(element: Element): Element | null {
-      const rect = element.getBoundingClientRect();
+    // Forced, so the click lands where the prefix is drawn, whatever takes it.
+    it('keeps a text prefix click-through, so the field takes the click', async () => {
+      await bind('input', '<div formidableFieldPrefix>Prefix</div>');
 
-      return document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
-    }
+      await userEvent.click(page.getByText('Prefix'), { force: true });
 
-    it('lets a click reach a button in the suffix', () => {
-      const button = root.querySelector('button') as HTMLButtonElement;
-
-      expect(hit(button)).toBe(button);
-
-      button.click();
-      fixture.detectChanges();
-
-      expect(fixture.componentInstance.clicks).toBe(1);
-    });
-
-    it('keeps a text prefix click-through, so the field still takes the click', () => {
-      const prefix = root.querySelector('[formidableFieldPrefix]') as HTMLElement;
-
-      expect(hit(prefix)).toBe(root.querySelector('input'));
+      await expect.element(page.getByRole('textbox', { name: 'Name' })).toHaveFocus();
     });
   });
 
-  // A field that top-aligns its value already aligns with it, so it owns the decision — otherwise the
-  // value's padding would be added on top of the first-line offset and push the prefix past the text.
-  it('lets a value-top field keep its own alignment whatever the adornment asks for', () => {
-    const fixture = TestBed.createComponent(TextareaPrefixHostComponent);
-    fixture.detectChanges();
+  it('insets the field for a prefix, and gives it back its own padding once the prefix goes', async () => {
+    const fixture = TestBed.createComponent(TogglablePrefixHost);
+    await settle(fixture);
+    const paddingLeft = () => parseFloat(getComputedStyle(textbox()).paddingLeft);
+    const own = paddingLeft();
 
-    const root = fixture.nativeElement as HTMLElement;
-    const prefix = root.querySelector('[formidableFieldPrefix]') as HTMLElement;
-    const firstLine = prefix.getBoundingClientRect().top;
-
-    fixture.componentInstance.align = 'value';
-    fixture.detectChanges();
-
-    expect(prefix.getBoundingClientRect().top).toBeCloseTo(firstLine, 0);
-  });
-
-  // The bug this replaced: the measurement ran once and wrote inline padding only when it found a
-  // non-zero width, so a prefix that went away later left its inset on the field forever.
-  it('gives the field back its own padding once the prefix goes away', async () => {
-    const fixture = TestBed.createComponent(TogglablePrefixHostComponent);
-    const root = await settle(fixture);
-    const field = root.querySelector('input') as HTMLInputElement;
-    const host = root.querySelector('formidable-field-decorator') as HTMLElement;
-
-    expect(parseFloat(getComputedStyle(field).paddingLeft)).toBeGreaterThan(rem(4));
-    expect(host.style.getPropertyValue('--formidable-field-prefix-inset')).not.toBe('');
-
-    fixture.componentInstance.showPrefix = false;
+    fixture.componentInstance.showPrefix.set(true);
     await settle(fixture);
 
-    expect(parseFloat(getComputedStyle(field).paddingLeft)).toBeCloseTo(rem(1), 1);
-    expect(host.style.getPropertyValue('--formidable-field-prefix-inset')).toBe('');
+    expect(paddingLeft()).toBeGreaterThanOrEqual(rect(text('Prefix')).width);
+
+    fixture.componentInstance.showPrefix.set(false);
+    await settle(fixture);
+
+    expect(paddingLeft()).toBe(own);
   });
 
-  // A prefix/suffix insets the field's value, which a vertical layout has no value to inset — it stacks a
-  // group inside a fieldset. The slots are not rendered there at all, rather than rendered and ignored.
-  it('drops a projected prefix and suffix in the vertical layout', () => {
-    const fixture = TestBed.createComponent(VerticalPrefixHostComponent);
-    fixture.detectChanges();
+  // A vertical layout stacks a group, which has no value to inset.
+  it('drops a projected prefix and suffix in the vertical layout', async () => {
+    await bindField('radio-group', 'signal', {
+      inputs: { options: [{ value: 'a', label: 'Alpha' }] },
+      decorated: true,
+      decoration: `<div formidableFieldLabel>Name</div>${adornments}`
+    });
 
-    const root = fixture.nativeElement as HTMLElement;
-
-    expect(root.querySelector('.container-vertical')).toBeTruthy();
-    expect(root.querySelector('[formidableFieldPrefix]')).toBeNull();
-    expect(root.querySelector('[formidableFieldSuffix]')).toBeNull();
-    expect(root.querySelector('[class^="prefix-wrapper"]')).toBeNull();
-    expect(root.querySelector('[class^="suffix-wrapper"]')).toBeNull();
+    await expect.element(page.getByRole('radiogroup', { name: 'Name' })).toBeInTheDocument();
+    expect(page.getByText('Prefix').elements()).toEqual([]);
+    expect(page.getByText('Suffix').elements()).toEqual([]);
   });
 
   /**
-   * A `dropdown-field` and a `date-field` render a panel toggle inside their own box. It is not projected
-   * content, so nothing measures it — the value inset has to account for it, or a label spans the field
-   * right up to the border and disappears behind the toggle, and a projected suffix lands on top of it.
+   * A dropdown and a date field draw a panel toggle inside their own box. The label follows the value's
+   * insets, so the value has to stop short of the toggle, or the label runs underneath it and a suffix
+   * lands on top of it.
    */
   describe('with an in-field panel toggle', () => {
-    let fixture: ComponentFixture<ToggleFieldHostComponent>;
-    let root: HTMLElement;
+    const combobox = () => page.getByRole('combobox', { name: 'Name' }).element() as HTMLInputElement;
+    const label = () => rect(combobox().labels![0]!);
+    const toggle = (bound: BoundField) => bound.element.querySelector('.dropdown-toggle, .toggle');
 
-    /** The distance the toggle and the field's own padding together claim: `2rem` plus `1rem`. */
-    const insetWithToggle = rem(3);
+    /** Binds a panel field under an inside label, with `decoration` beside it. */
+    const bindPanel = (kind: FieldKind, decoration = '', options: BindFieldOptions = {}) =>
+      bindField(kind, 'signal', {
+        inputs: kind === 'dropdown' || kind === 'autocomplete' ? { options: [] } : {},
+        decorated: true,
+        decoration: `<div formidableFieldLabel>Name</div>${decoration}`,
+        ...options
+      });
 
-    beforeEach(async () => {
-      fixture = TestBed.createComponent(ToggleFieldHostComponent);
-      root = await settle(fixture);
-    });
+    /** How far the value stays from the field's right edge, beyond what it stays from its left one. */
+    const reserved = (bound: BoundField, value: Element) =>
+      rect(bound.element).right - rect(value).right - (rect(value).left - rect(bound.element).left);
 
-    function field(): HTMLElement {
-      return root.querySelector('.field') as HTMLElement;
+    for (const kind of ['dropdown', 'date'] as FieldKind[]) {
+      it(`keeps the label clear of the ${kind} toggle`, async () => {
+        const bound = await bindPanel(kind);
+
+        expect(label().right).toBeCloseTo(rect(combobox()).right, 1);
+        expect(label().right).toBeLessThanOrEqual(rect(toggle(bound)!).left + 0.5);
+      });
     }
 
-    function toggle(): HTMLElement {
-      return root.querySelector('.dropdown-toggle') as HTMLElement;
+    // Reserving the width where nothing is drawn would leave a visible gap at the right edge.
+    for (const kind of ['autocomplete', 'time'] as FieldKind[]) {
+      it(`reserves nothing in the ${kind} field, which draws no toggle`, async () => {
+        const bound = await bindPanel(kind);
+        const value = page.getByRole(kind === 'time' ? 'textbox' : 'combobox', { name: 'Name' }).element();
+
+        expect(reserved(bound, value)).toBeCloseTo(0, 1);
+        expect(rect((value as HTMLInputElement).labels![0]!).right).toBeCloseTo(rect(value).right, 1);
+      });
     }
-
-    /**
-     * Where the value's band ends: the field's padding is measured from its content box, so the border sits
-     * between it and the border-box edge the label is positioned from.
-     */
-    function innerRight(): number {
-      return field().getBoundingClientRect().right - parseFloat(getComputedStyle(field()).borderRightWidth);
-    }
-
-    it('keeps the label clear of the toggle instead of running it underneath', () => {
-      const label = root.querySelector('.label-wrapper') as HTMLElement;
-
-      expect(innerRight() - label.getBoundingClientRect().right).toBeCloseTo(insetWithToggle, 1);
-    });
 
     it('hands the width back when readonly takes the toggle away', async () => {
-      const host = root.querySelector('formidable-field-decorator') as HTMLElement;
+      const bound = await bindPanel('dropdown');
 
-      expect(host.classList.contains('has-in-field-toggle')).toBe(true);
+      expect(reserved(bound, combobox())).toBeGreaterThan(0);
 
-      fixture.componentInstance.readonly = true;
-      await settle(fixture);
+      await bound.state({ readonly: true });
 
-      const label = root.querySelector('.label-wrapper') as HTMLElement;
-
-      expect(host.classList.contains('has-in-field-toggle')).toBe(false);
-      expect(toggle()).toBeNull();
-      expect(innerRight() - label.getBoundingClientRect().right).toBeCloseTo(rem(1), 1);
+      expect(toggle(bound)).toBeNull();
+      expect(reserved(bound, combobox())).toBeCloseTo(0, 1);
+      expect(label().right).toBeCloseTo(rect(combobox()).right, 1);
     });
 
-    // The toggle is a flex item inside the field's padding, so reserving the suffix's width there is
-    // what moves the two apart. The suffix itself stays anchored to the field's right edge.
-    it('stacks a projected suffix beside the toggle rather than over it', async () => {
-      expect(parseFloat(getComputedStyle(field()).paddingRight)).toBeCloseTo(rem(1), 1);
+    it('stacks a projected suffix beside the toggle, with the label clear of both', async () => {
+      const bound = await bindPanel('dropdown', '<div formidableFieldSuffix>Suffix</div>');
 
-      fixture.componentInstance.showSuffix = true;
-      await settle(fixture);
-
-      const suffix = root.querySelector('[formidableFieldSuffix]') as HTMLElement;
-
-      expect(parseFloat(getComputedStyle(field()).paddingRight)).toBeGreaterThan(rem(2));
-      expect(suffix.getBoundingClientRect().left).toBeGreaterThanOrEqual(toggle().getBoundingClientRect().right);
-    });
-
-    // `autocomplete-field` and `time-field` have a panel and a mask but draw nothing in the field, so
-    // reserving the width for them would leave a visible gap at the right edge.
-    it('is claimed by the two fields that draw one and by no others', async () => {
-      const every = await settle(TestBed.createComponent(EveryPanelFieldHostComponent));
-      const claims = Array.from(every.querySelectorAll('formidable-field-decorator')).map((host) =>
-        host.classList.contains('has-in-field-toggle')
-      );
-
-      expect(claims).toEqual([true, true, false, false]); // dropdown, date, autocomplete, time
-    });
-
-    it('keeps the label clear of a suffix and the toggle together', async () => {
-      fixture.componentInstance.showSuffix = true;
-      await settle(fixture);
-
-      const label = root.querySelector('.label-wrapper') as HTMLElement;
-      const suffixInset = parseFloat(getComputedStyle(field()).paddingRight);
-
-      expect(innerRight() - label.getBoundingClientRect().right).toBeCloseTo(suffixInset + rem(2), 1);
+      expect(rect(text('Suffix')).left).toBeGreaterThanOrEqual(rect(toggle(bound)!).right - 0.5);
+      expect(label().right).toBeLessThanOrEqual(rect(toggle(bound)!).left + 0.5);
     });
   });
 });

@@ -345,7 +345,7 @@
 }
 
 // The decorator is normally the atom. A field used without one has nothing above it to be one, so its own
-// host takes the job — same three rules, keyed off the class `BaseFieldDirective` sets in that case. Only
+// host takes the job — same three rules, keyed off the class `BaseField` sets in that case. Only
 // the fields with a panel need it: nothing else a bare field renders leaves its box.
 @mixin field-atom-undecorated {
   :host(.is-undecorated) {
@@ -953,11 +953,12 @@
   color: var(--formidable-color-field-hint, #{tokens.$formidable-color-field-hint});
 }
 
-// A textarea's character counter, pinned to its bottom right.
+// A textarea's character counter, pinned to its bottom right. It keeps the value's right padding, which a
+// suffix widens, so it never runs under one.
 @mixin length-indicator {
   position: absolute;
   bottom: utils.rem(8);
-  right: 0;
+  right: field-padding-right();
   color: var(--formidable-color-length-indicator, #{tokens.$formidable-color-length-indicator});
   pointer-events: none;
   user-select: none;

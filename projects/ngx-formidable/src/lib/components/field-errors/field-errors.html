@@ -1,0 +1,9 @@
+@if (errors().length) {
+<div class="errors">
+  <ul>
+    @for (error of errors(); track $index) {
+    <li class="error">{{ message(error) }}</li>
+    }
+  </ul>
+</div>
+}

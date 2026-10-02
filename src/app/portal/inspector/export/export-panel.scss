@@ -1,0 +1,25 @@
+:host {
+  display: block;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 10px;
+  margin-bottom: 10px;
+}
+
+.preview {
+  max-height: 44dvh;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-sm);
+  background: var(--portal-surface-sunken);
+  font-family: var(--portal-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow: auto;
+}

@@ -1,0 +1,153 @@
+@let options = store.options();
+
+<h3 class="pc-group-title">Across The Form</h3>
+
+<div class="pc-checks">
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="options.showLabels"
+      (change)="set('showLabels', $any($event.target).checked)" />
+    Labels
+  </label>
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="options.showHints"
+      (change)="set('showHints', $any($event.target).checked)" />
+    Hints
+  </label>
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="options.showAdornments"
+      (change)="set('showAdornments', $any($event.target).checked)" />
+    Adornments
+  </label>
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="options.readonly"
+      (change)="set('readonly', $any($event.target).checked)" />
+    All Readonly
+  </label>
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="options.disabled"
+      (change)="set('disabled', $any($event.target).checked)" />
+    All Disabled
+  </label>
+</div>
+
+<p class="pc-help">Master switches. A field that is set to show a label still shows none while <strong>Labels</strong> is off.</p>
+
+<div class="pc-field">
+  <label
+    for="fs-required-markers"
+    class="pc-label">
+    <span class="pc-label-name">Required Markers</span>
+  </label>
+  <select
+    id="fs-required-markers"
+    class="pc-select"
+    [portalSelectedValue]="stated(options.hideRequiredMarkers)"
+    (change)="setRequiredMarkers($any($event.target).value)">
+    <option value="">App Default ({{ defaultMarkers() }})</option>
+    <option value="false">Shown</option>
+    <option value="true">Hidden</option>
+  </select>
+  <p class="pc-help">A master switch too, but one the app default covers, so the form can also state nothing.</p>
+</div>
+
+<div class="pc-field">
+  <label
+    for="fs-locale"
+    class="pc-label">
+    <span class="pc-label-name">Locale</span>
+  </label>
+  <select
+    id="fs-locale"
+    class="pc-select"
+    [portalSelectedValue]="options.locale"
+    (change)="setLocale($any($event.target).value)">
+    @for (locale of locales; track locale.id) {
+    <option [value]="locale.id">{{ locale.label }}</option>
+    }
+  </select>
+  <p class="pc-help">One control: the calendar's translations, its first day and the token format move together, on every date and time field.</p>
+</div>
+
+<h3 class="pc-group-title">Adornment Examples</h3>
+
+<portal-adornment-examples />
+
+<p class="pc-help">
+  Projected content is markup you write per field, so no app default can supply it. These fill every field with a sample, shown while
+  <strong>Adornments</strong> is on; the template export marks where yours goes.
+</p>
+
+<h3 class="pc-group-title">Validation</h3>
+
+<div class="pc-field">
+  <label
+    for="fs-validator"
+    class="pc-label">
+    <span class="pc-label-name">Validator</span>
+  </label>
+  <select
+    id="fs-validator"
+    class="pc-select"
+    [portalSelectedValue]="options.validator"
+    (change)="set('validator', $any($event.target).value)">
+    @for (entry of validators; track entry[0]) {
+    <option [value]="entry[0]">{{ entry[1] }}</option>
+    }
+  </select>
+  <p class="pc-help">
+    <code class="pc-code">my-form.form.ts</code> always holds the form's rules; the validator decides who writes the checks. Angular's own rules mark a field
+    required as they check it. Vest and Zod cannot, so the schema adds <code class="pc-code">REQUIRED</code> beside them. With none, nothing checks, and only
+    the fields' own limits apply.
+  </p>
+</div>
+
+<div class="pc-row">
+  <div class="pc-field">
+    <label
+      for="fs-debounce"
+      class="pc-label">
+      <span class="pc-label-name">Debounce</span>
+    </label>
+    <select
+      id="fs-debounce"
+      class="pc-select"
+      [portalSelectedValue]="stated(options.debounce)"
+      (change)="setDebounce($any($event.target).value)">
+      @for (entry of debounces; track entry[0]) {
+      <option [value]="entry[0]">{{ entry[1] }}</option>
+      }
+    </select>
+    <p class="pc-help">When an edit reaches the model, and so when the rules run. Signal Forms' axis.</p>
+  </div>
+
+  <div class="pc-field">
+    <label
+      for="fs-reveal-on"
+      class="pc-label">
+      <span class="pc-label-name">Reveal On</span>
+    </label>
+    <select
+      id="fs-reveal-on"
+      class="pc-select"
+      [portalSelectedValue]="stated(options.revealOn)"
+      (change)="setRevealOn($any($event.target).value)">
+      <option value="">App Default ({{ defaultReveal() }})</option>
+      @for (entry of reveals; track entry[0]) {
+      <option [value]="entry[0]">{{ entry[1] }}</option>
+      }
+    </select>
+    <p class="pc-help">When the messages appear. The library's axis.</p>
+  </div>
+</div>
+
+<p class="pc-help">Changing the validator or the debounce rebuilds the form, because a schema is fixed once its form exists.</p>

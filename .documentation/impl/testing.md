@@ -1,68 +1,117 @@
 # Testing Strategy
 
-Prioritize testing **logic** over Angular rendering: fast, reliable tests that catch real bugs, not tests that re-verify framework binding. See [`impl/definition-of-done.md`](definition-of-done.md) for the Definition of Done.
+A spec pins behaviour a user or a consumer can observe: what the field shows and announces, where focus and the caret go, and what reaches the model. It does not pin how the code gets there, so a refactor that keeps the behaviour keeps every spec green, and a change that breaks the behaviour fails one. See [`impl/definition-of-done.md`](definition-of-done.md) for the Definition of Done.
 
 ---
 
 ## Test Stack
 
-| Tool             | Role                                       |
-| :--------------- | :----------------------------------------- |
-| Karma            | Test runner (browser)                      |
-| Jasmine          | Assertion + spec framework                 |
-| ng-packagr build | Type + template checking (via `build:lib`) |
+| Tool                           | Role                                                                         |
+| :----------------------------- | :--------------------------------------------------------------------------- |
+| Vitest                         | Runner and assertions, through `@angular/build:unit-test`                    |
+| Vitest Browser Mode            | Runs every spec in a real browser: layout, computed styles, focus, the caret |
+| Playwright                     | Drives headless Chromium for Vitest, and dispatches trusted input            |
+| fast-check                     | Generates inputs for property-based specs                                    |
+| ng-packagr build (`build:lib`) | Type and template check                                                      |
 
-`@angular/build:karma` is configured for both projects and there is no `test.ts` in either. The library runs on the builder's defaults; the portal names a `karma.conf.cjs`, which raises Karma's inactivity timeouts and, because supplying a config stops the builder contributing its own, redeclares the frameworks and plugins. No current spec needs the raised timeouts — `portal.spec.ts` runs in seconds. The file sets no `browsers` either, so a portal run needs `--browsers=ChromeHeadless`, or Karma starts and idles without launching one. Type errors are caught by `build:lib`, so there is no separate typecheck spec.
+Both `test` targets use `@angular/build:unit-test` with `browsers: ["ChromiumHeadless"]`. There is no Vitest configuration file: the builder builds the configuration in memory, with Vitest's globals on. The browser is installed once per machine, see [`impl/developer-onboarding.md`](developer-onboarding.md).
 
-Not the newer `@angular/build:unit-test`. It is marked experimental, and its `migrate-karma-to-vitest` migration skips the library — it rewrites only an `application` project whose `build` target is `@angular/build:application`. The builder itself accepts an `@angular/build:ng-packagr` `buildTarget`, so a library is not excluded outright. What the library cannot get that way is `polyfills`, `styles` and `stylePreprocessorOptions`: the builder takes no options of its own for them and reads them from the build target, and an ng-packagr target carries none. The library's specs need all three — `zone.js/testing` for `fakeAsync`, and `test-styles.scss` for the geometry specs that measure computed CSS. Whether `setupFiles` and a `runnerConfig` close that gap is untested.
+- **Portal**: builds from its own `build` target's `development` configuration, with the app's styles, assets and loaders.
+- **Library**: an ng-packagr target carries no `styles`, so the library's `test` target builds from `test-build`, an `@angular/build:application` target that exists only for the tests. It loads `test-styles.scss`, which is the shipped theme, so specs measure the real `:root` variables.
+- **AOT**: both compile their specs AOT, so a spec host's template is type-checked as the app's are. A template no build reaches, such as the Studio's golden export, is checked that way.
+- **Zoneless**: both projects run zoneless, as the app does. zone.js is not installed, so `fakeAsync`, `tick` and `flush` do not exist. Every spec waits on real timers, since a page that repaints from timers a fake clock holds back never satisfies a retrying assertion.
+- **Failure Screenshots**: a failing spec leaves a screenshot of the page under `.vitest/`.
 
-**Both test targets run under zone change detection, and the app does not.** `@angular/build:karma` writes the test environment module itself, and it puts `provideZoneChangeDetection()` in it whenever `zone.js` is one of the target's `polyfills`. Removing that entry does not buy zoneless specs, because `zone.js/testing` carries no copy of zone.js and `fakeAsync` needs one. A spec that must run the way the app does provides `provideZonelessChangeDetection()` in its own `TestBed`, which overrides the environment's; `zoneless.spec.ts` is the one that does, and its header says why the NG0914 warning it logs is expected.
-
-Two things behave differently in a zoneless `TestBed`, and both mislead if they are not known. `fixture.detectChanges()` refreshes only what something marked, so a host holding plain fields is skipped where it would have been checked under zones — a spec host that mutates its own state needs signals. And a spec proving that a repaint arrives on its own must not call `detectChanges()` after the act at all, since it ticks the whole application and would pass either way.
-
-The library's `test` target sets `include` explicitly, as `['**/*.spec.ts', '../vest/**/*.spec.ts']`. The builder resolves those globs against `sourceRoot` and not, as its schema says, the project root — so the default glob covers `src/` only and the `vest/` entry point's spec is silently skipped. The second glob is what runs it.
-
----
-
-## What To Test — Helpers First
-
-The `helpers/` modules are pure functions and the highest-value, lowest-cost target. Test them directly with a colocated `*.helpers.spec.ts`.
-
-| Area                  | Where                      | What To Assert                                                                                 |
-| :-------------------- | :------------------------- | :--------------------------------------------------------------------------------------------- |
-| Formatting/parsing    | `format.helpers.ts`        | date/time format + parse round-trips, edge tokens                                              |
-| Masking               | `mask.helpers.ts`          | mask config resolution, min/max-length validation                                              |
-| Field-path resolution | `form.helpers.ts`          | control/group path resolution in a form tree                                                   |
-| Model shape checking  | `form-validate.helpers.ts` | dev-mode mismatch detection: nested keys, array index-0 rule, record wildcards                 |
-| Options               | `option.helpers.ts`        | sorting, matching, selection                                                                   |
-| Panel placement       | `position.helpers.ts`      | side chosen from available space, the flip it marks the panel with, and that a sheet is exempt |
-| Utilities             | `utility.helpers.ts`       | `cloneDeep`, `set`, `mergeValuesAndRawValues`, `getAllFormErrors`                              |
+Two things behave differently in a zoneless `TestBed`, and both mislead if they are not known. `fixture.detectChanges()` refreshes only what something marked, so an `OnPush` host holding plain fields is skipped: a spec host that changes its own state holds it in signals. And a spec proving that a repaint arrives on its own never calls `detectChanges()` after the act, since that ticks the whole application and would pass either way.
 
 ---
 
-## What To Test Selectively
+## Writing A Spec
 
-Behavior that carries real risk, tested through a minimal host — not the framework around it:
-
-- **ControlValueAccessor**: a field writes an external value and emits on user change.
-- **NgxFormidableFormDirective ↔ the validator**: `createAsyncValidator` debounces per the form's `debounceMs` and maps a validator's messages to Angular errors for one target. Specs drive it through a stub validator, so the library's own tests need no validation library.
-- **Directive attach behavior**: `NgxFormidableFieldValidateDirective`/`NgxFormidableGroupValidateDirective` attach to `[ngModel]`/`[ngModelGroup]` and **no-op outside a formidable form** (they inject `NgxFormidableFormDirective` optionally) — a regression here breaks any consuming app.
-- **Keyboard navigation**: option/panel fields respond to the registered keys.
+- **Behaviour, Not Mechanism**: a spec names the documented rule it pins, such as **Keyboard** in [`user/fields.md`](../user/fields.md), and asserts on the DOM, ARIA, focus and the model. A doc comment that explains the implementation's internal order describes the code, not the behaviour.
+- **Real Input**: a spec drives a field with `userEvent` from `vitest/browser`. Playwright dispatches trusted clicks, `Tab`, keys and typing, so the browser's own default actions happen: focus moves, a click places the caret, a keyboard focus entry selects the text.
+- **Forced Clicks**: Playwright refuses two clicks a user can make: on a dropdown's display input, which takes no pointer events, and on an option marked `aria-disabled`. `{ force: true }` still clicks at the element's place, so the field around it takes the click.
+- **Find By Role And Label**: a spec finds a field the way assistive technology does, `page.getByRole('combobox', { name: 'Colour' })`. A decorated field takes its accessible name from its `formidableFieldLabel`. A CSS selector is for what has no role.
+- **Retrying Assertions**: after real input, `await expect.element(locator)` or `await expect.poll(read)` waits for the repaint without calling `detectChanges()`. A poll proves a change; to prove that something stayed as it was, `settle()` first and assert once.
+- **Properties For Rules**: a rule of a pure helper is a property over generated inputs, `fc.assert(fc.property(...))`. Examples stay for the documented special cases. A failing property prints its counterexample, shrunk to the smallest one, and the seed that reproduces it with `fc.assert(property, { seed, path })`. It is a defect, not a flake.
+- **Deterministic**: what a property depends on but does not generate is pinned, such as today's date with `vi.setSystemTime()`.
+- **Examples That Can Fail**: example data is chosen so the defect a spec guards against can show. A readonly last option once let a walk up that started one short of it land right. A new spec is proven by breaking the code it guards once and watching it fail.
+- **Relational Geometry**: a layout spec asserts relations that hold under any theme: the label never overlaps the value, label and value are centred as one block within half a pixel, two edges align. It does not assert pixel values computed by hand from the default theme.
+- **No Reaching In**: a spec writes a value through its host's forms API. It never uses `writeValue`, `componentInstance.value`, a protected member or a test subclass of the field base.
+- **Named For Behaviour**: a test is named for what it proves, not after the bug that prompted it, and a file is not named after a framework mechanism.
+- **Upstream Defects**: a spec pinning another project's defect asserts today's behaviour and links the upstream issue, so it fails once the fix ships; its entry in [`impl/backlog.md`](backlog.md) says what to undo then. A spec that needs the fix calls `skip(reason)` from its test context.
 
 ---
 
-## What NOT To Test
+## Library Helpers
 
-- Angular binding mechanics (that `@Input()` receives a value, that `OnPush` renders).
-- Third-party internals — Pikaday, ngx-mask, fuse.js, Vest. Test how the library _uses_ them, not their behavior.
-- Exact rendered markup/pixels.
+Every library spec is built on the helpers in `lib/testing/`. `public-api.ts` does not reach it, so ng-packagr never compiles it.
+
+| Helper                         | Does                                                                                                                                   |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| `configureFormidableTestBed()` | Zoneless change detection and ngx-mask, plus the spec's own metadata. Clears `theme()` overrides and the scroll first                  |
+| `settle(fixture, ms)`          | Awaits timers of up to `ms`, one frame, and the change detection they scheduled. Never calls `detectChanges()`                         |
+| `bindField(kind, api)`         | A host binding one field through any forms API: its model, touched, dirty and events; `write()`, `set()`, `state()`, `markAsTouched()` |
+| `clickAt(editor, index)`       | A trusted click where the caret before `index` sits, so the browser places it; `Shift` extends the selection                           |
+| `DATE_FORMATS`, `TIME_FORMATS` | fast-check arbitraries of every `unicodeTokenFormat` a date or time field accepts, and `DATES` of any date its mask holds              |
+| `referenced()`                 | What an id-reference attribute such as `aria-activedescendant` resolves to                                                             |
+| `keptKeys()`                   | Records the `keydown`s that reach the window, and whether the field kept each one from the browser                                     |
+| `theme()`, `corners()`         | A `:root` override, the four resolved corner radii                                                                                     |
+
+`bindField` with `decorated: true` and `decoration: '<div formidableFieldLabel>Colour</div>'` gives a field the accessible name `page.getByRole` finds it by, and a `formidableFieldLabelAdornment`, `formidableFieldPrefix`, `formidableFieldSuffix` or `formidableFieldHint` projects the same way. With `after: '<button type="button">Next</button>'` focus has somewhere to leave to by `Tab` and come back from by `Shift` + `Tab`: a field alone in the test frame would hand focus to the page around it, which does not reliably hand it back. `before` puts markup ahead of the field, such as a spacer that moves it to the fold. `state` has the forms API hold a field `disabled`, `readonly`, `required` or `invalid` from its first render, as `state()` does later; under `ngModel`, whose control registers after that render, only `readonly` and `required`.
+
+---
+
+## Portal Helpers
+
+Every portal spec that renders is built on `src/app/portal/testing/studio.ts`. No build of the app reaches it.
+
+| Helper                                | Does                                                                                                                                      |
+| :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------- |
+| `openPage(component)`, `openStudio()` | A portal page, or a spec's host, as a visitor lands on it: nothing remembered, the two-column layout at `WIDE`. Clears `:root` afterwards |
+| `settle(fixture, ms)`                 | As the library's: timers of up to `ms`, a frame, the change detection they scheduled                                                      |
+| `tab()`, `openPanel()`                | The editor panel's tabs by label, and the way through them to one area, half and scope                                                    |
+| `openSection(heading)`                | Opens an accordion section, and leaves an open one alone                                                                                  |
+| `editField(label)`                    | Picks a field on the `Settings` half's field picker                                                                                       |
+| `model()`, `errors()`                 | The model and its messages, read off the model drawer's `Raw` and `Errors` views                                                          |
+
+- **Clipboard**: the runner's frame refuses `navigator.clipboard.writeText`, and a copy confirms only a write that took, so a spec of a copy stubs it with `vi.spyOn`.
+- **Routes**: the test bed routes on a mock of the browser's location, so `Location.path()` reads the route, and nothing performs the initial navigation.
+- **The Divider**: it cancels its `pointerdown`, so a click does not focus it. `Shift` + `Tab` from the panel's first tab does.
+
+---
+
+## What To Test
+
+The `helpers/` modules are pure functions and the cheapest place to find an edge case. Each has a colocated `*.helpers.spec.ts`.
+
+| Area               | Where                 | What To Assert                                                                                                                |
+| :----------------- | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------- |
+| Formatting/parsing | `format.helpers.ts`   | Over every accepted format and any date: the text fits the mask, parses back to itself, and no half-typed prefix of it parses |
+| Masking            | `mask.helpers.ts`     | Over any mask of the built-in tokens: its display length range, and that the default placeholder is never taken for content   |
+| Caret              | `input.helpers.ts`    | Over any mask filled from the front: where its value ends; and that writing the text already shown keeps the selection        |
+| Options            | `option.helpers.ts`   | Over any list of options: the arrows land only on options a user can pick, visit all of them in order, and wrap at both ends  |
+| Panel placement    | `position.helpers.ts` | Over any field, panel height and clipping panes: the side it opens on, the field left alone, no sheet ever flipped            |
+
+Behaviour that carries real risk is tested through a minimal host rather than the framework around it:
+
+- **The Field Contract**: `field-contract.spec.ts` runs every field through all three forms APIs: model to display, edit to model, the touch, a pristine programmatic write, the forwarded state. A field-wide change proves itself there.
+- **Keyboard**: every key in **Keyboard** in [`user/fields.md`](../user/fields.md), pressed for real.
+
+Not tested:
+
+- Angular binding mechanics: that an input receives a value, that `OnPush` renders.
+- Third-party internals: Pikaday, ngx-mask, fuse.js. A spec tests how the library uses them.
+- Exact markup or pixel values.
 
 ---
 
 ## Running Tests
 
-- **Library**: `npx ng test ngx-formidable --watch=false --browsers=ChromeHeadless`. `npm test` resolves to the same project.
-- **Portal**: `npx ng test ngx-formidable-portal --watch=false --browsers=ChromeHeadless`, which has to be named.
+- **Library**: `npx ng test ngx-formidable --watch=false`. `npm test` runs the same project.
+- **Portal**: `npx ng test ngx-formidable-portal --watch=false`, which has to be named.
+- **One File**: `--include='**/option-highlight.spec.ts'`, relative to the project's root.
+- **Watch Mode**: in a terminal, `ng test` watches unless `--watch=false` is given.
 
 When each run is a gate is in [`impl/definition-of-done.md`](definition-of-done.md).
 
@@ -70,4 +119,4 @@ When each run is a gate is in [`impl/definition-of-done.md`](definition-of-done.
 
 ## Visual Testing
 
-There is no Storybook or visual-regression layer yet; it is Phase 18 in [`impl/implementation.md`](implementation.md). Until then, the portal is the manual visual check — run `npm start` and exercise the changed field in its preview form, by hand or through the `playwright` MCP server described in [`impl/ai-harness.md`](ai-harness.md). Turning the `Field Types` switch off leaves that form without the portal's own annotations.
+There is no Storybook or visual-regression layer yet; it is Phase 39 in [`impl/implementation.md`](implementation.md). Until then, the portal is the manual visual check: run `npm start` and exercise the changed field in its preview form, by hand or through the `playwright` MCP server described in [`impl/ai-harness.md`](ai-harness.md). Turning the `Field Types` switch off leaves that form without the portal's own annotations.

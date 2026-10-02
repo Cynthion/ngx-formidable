@@ -1,21 +1,19 @@
-import { ElementRef, InjectionToken, OutputEmitterRef, Signal, TemplateRef } from '@angular/core';
+import { ElementRef, InjectionToken, Signal, TemplateRef } from '@angular/core';
+import { ValidationError } from '@angular/forms/signals';
 import { NgxMaskConfig } from 'ngx-mask';
-import { PikadayOptions } from 'pikaday';
-import { Observable } from 'rxjs';
-import { SignalsOf } from './utility-types';
 import { FormidableReveal } from './validation.model';
 
 /**
  * Provide this from a custom field, as `{ provide: FORMIDABLE_FIELD, useExisting: forwardRef(() => MyField) }`,
  * and `formidable-field-decorator` will decorate it like any built-in field. Without it, nothing happens.
  */
-export const FORMIDABLE_FIELD = new InjectionToken<IFormidableField>('FORMIDABLE_FIELD');
+export const FORMIDABLE_FIELD = new InjectionToken<FormidableField>('FORMIDABLE_FIELD');
 
-/** What an option field provides so a projected `FieldOptionComponent` can reach the field that owns it. */
-export const FORMIDABLE_OPTION_FIELD = new InjectionToken<IFormidableOptionField>('FORMIDABLE_OPTION_FIELD');
+/** What an option field provides so a projected `FieldOption` can reach the field that owns it. */
+export const FORMIDABLE_OPTION_FIELD = new InjectionToken<FormidableOptionField>('FORMIDABLE_OPTION_FIELD');
 
 /** What an option provides so its field's `contentChildren` query finds it, whatever component it is. */
-export const FORMIDABLE_OPTION = new InjectionToken<IFormidableOptionSource>('FORMIDABLE_OPTION');
+export const FORMIDABLE_OPTION = new InjectionToken<FormidableOptionSource>('FORMIDABLE_OPTION');
 
 /** App-wide ngx-mask defaults, which a field's own `maskConfig` overrides. Set via `provideNgxFormidable`. */
 export const FORMIDABLE_MASK_DEFAULTS = new InjectionToken<Partial<NgxMaskConfig>>('FORMIDABLE_MASK_DEFAULTS');
@@ -104,24 +102,22 @@ export type FormidableEmptyHint = 'underscores' | 'format';
 /**
  * App-wide defaults for the inputs every template would otherwise repeat. Set via `provideNgxFormidable`, or
  * provide `FORMIDABLE_DEFAULTS` in a component's `providers` to scope them to that subtree. A binding still
- * wins, and binding `undefined` falls back to the default. Each is read once, when its field or form is
- * created, so changing one afterwards reaches only what is created afterwards.
+ * wins, and binding `undefined` falls back to the default. Each is read once, when its field is created, so
+ * changing one afterwards reaches only what is created afterwards.
  */
 export interface FormidableDefaults {
-  /** `FieldLabelDirective.position`. The library's own: `inside`. */
+  /** `FieldLabel.position`. The library's own: `inside`. */
   labelPosition?: FieldLabelPosition;
-  /** `FieldPrefixDirective.align`. The library's own: `center`. */
+  /** `FieldPrefix.align`. The library's own: `center`. */
   prefixAlign?: FieldAdornmentAlignment;
-  /** `FieldSuffixDirective.align`. The library's own: `center`. */
+  /** `FieldSuffix.align`. The library's own: `center`. */
   suffixAlign?: FieldAdornmentAlignment;
   /** `panelPosition` on the dropdown, autocomplete and date fields, which otherwise each keep their own. */
   panelPosition?: FormidablePanelPosition;
-  /** The form's `revealOn`, and a field's without a form. The library's own: `touched`. */
+  /** A field's `revealOn`. The library's own: `touched`. */
   revealOn?: FormidableReveal;
-  /** The form's `hideRequiredMarkers`, and a field's without a form. The library's own: `false`. */
+  /** Hides every field's required marker, the glyph only. The library's own: `false`. */
   hideRequiredMarkers?: boolean;
-  /** The form's `debounceMs`. The library's own: `0`. */
-  debounceMs?: number;
 }
 
 /** The app-wide defaults. Empty unless `provideNgxFormidable({ defaults })` or a component provides it. */
@@ -131,54 +127,54 @@ export const FORMIDABLE_DEFAULTS = new InjectionToken<FormidableDefaults>('FORMI
 });
 
 /**
- * What every field exposes to its decorator, and the contract a custom field satisfies. `BaseFieldDirective`
+ * What every field exposes to its decorator, and the contract a custom field satisfies. `BaseField`
  * implements all of it; a field is only discovered once it also provides `FORMIDABLE_FIELD`.
  */
-export interface IFormidableField<T = string | null> {
+export interface FormidableField<T = string | null> {
   /** The field's outer element, which the decorator measures and the global listeners are scoped to. */
   fieldRef: ElementRef<HTMLElement>;
   /** Unique per instance, and the stem every ARIA id around and inside the field is derived from. */
   fieldId: string;
+  /** What the field holds — the model, which the forms API binds two-way. */
+  value: Signal<T>;
   name: Signal<string>;
   placeholder: Signal<string>;
   readonly: Signal<boolean>;
   disabled: Signal<boolean>;
-  /**
-   * Marks the field required: suffixes the marker to its label and sets `aria-required`. Validates nothing.
-   */
-  markRequired: Signal<boolean>;
-  value: T;
+  /** Suffixes the marker to its label and sets `aria-required`. Validates nothing. */
+  required: Signal<boolean>;
+  /** Whether the field shows its errors: it is invalid and its reveal has come. Drives `aria-invalid`. */
+  showErrors: Signal<boolean>;
+  /** The errors the decorator renders as messages: none until `showErrors`, and the last ones while pending. */
+  shownErrors: Signal<readonly ValidationError[]>;
+  /** Whether focus is inside the field, which the decorator's own focus state follows. */
+  isFieldFocused: Signal<boolean>;
   /** Whether nothing is rendered where the value goes, so a label may rest there like a placeholder. */
   canLabelRest: Signal<boolean>;
   /** Whether the field renders a panel toggle inside its own box, which the value and a label must clear. */
   hasInFieldToggle?: Signal<boolean>;
   valueAlignment?: FieldValueAlignment;
-  /** For the decorator, which subscribes on the way in. `valueChanged` is the same signal for a consumer. */
-  valueChange$: Observable<T>;
-  focusChange$: Observable<boolean>;
-  valueChanged: OutputEmitterRef<T>;
-  focusChanged: OutputEmitterRef<boolean>;
   decoratorLayout: FieldDecoratorLayout;
 }
 
 /** What a field walking a list of options adds to the contract. Provided as `FORMIDABLE_OPTION_FIELD`. */
-export interface IFormidableOptionField {
-  options: Signal<IFormidableOption[] | undefined>;
+export interface FormidableOptionField {
+  options: Signal<FormidableOption[] | undefined>;
   /** An option pinned to the top of the list — see `defaultOptionMode` for when it renders. */
-  defaultOption: Signal<IFormidableOption | undefined>;
+  defaultOption: Signal<FormidableOption | undefined>;
   defaultOptionMode: Signal<FieldDefaultOptionMode>;
   /** Called by an option that was activated, so the field commits it and closes any panel. */
-  selectOption(option: IFormidableOption): void;
-  sortFn: Signal<((a: IFormidableOption, b: IFormidableOption) => number) | undefined>;
+  selectOption(option: FormidableOption): void;
+  sortFn: Signal<((a: FormidableOption, b: FormidableOption) => number) | undefined>;
   /** The ARIA role its options take. Optional — an option falls back to `option` when its parent says nothing. */
   optionRole?: FieldOptionRole;
 }
 
 /**
  * One option as plain data. This is what a consumer writes into an option field's `options` input, and what
- * every field works with internally — an option **component** hands one over as `IFormidableOptionSource`.
+ * every field works with internally — an option **component** hands one over as `FormidableOptionSource`.
  */
-export interface IFormidableOption<T = unknown> {
+export interface FormidableOption<T = unknown> {
   /** What reaches the model, and the identity the field compares selection against. */
   value: string;
   /** Display text. Falls back to `value` when absent. */
@@ -195,185 +191,24 @@ export interface IFormidableOption<T = unknown> {
  * An entry that runs an action instead of becoming a value. The two panel fields take one as `actionOption`:
  * it renders last, the keyboard walks it like any option, and picking it closes the panel and commits nothing.
  */
-export interface IFormidableActionOption<T = unknown> extends IFormidableOption<T> {
+export interface FormidableActionOption<T = unknown> extends FormidableOption<T> {
   /** Runs when the entry is picked. */
   action: () => void;
 }
 
 /**
  * What a component that **is** an option exposes, so the field that owns it can read one option out of it.
- * Provided as `FORMIDABLE_OPTION`; `FieldOptionComponent` implements it, and so does anything extending it.
+ * Provided as `FORMIDABLE_OPTION`; `FieldOption` implements it, and so does anything extending it.
  */
-export interface IFormidableOptionSource {
+export interface FormidableOptionSource {
   /** The plain option this component stands for, folded out of its inputs and its projected content. */
-  readonly option: Signal<IFormidableOption>;
+  readonly option: Signal<FormidableOption>;
 }
 
 /** What a field that opens a panel adds to the contract, and what the panel positioning helpers read. */
-export interface IFormidablePanelField {
+export interface FormidablePanelField {
   panelRef: Signal<ElementRef<HTMLElement> | undefined>;
   isPanelOpen: Signal<boolean>;
   togglePanel(isOpen: boolean): void;
   panelPosition: Signal<FormidablePanelPosition>;
-}
-
-/** What a field that masks its text input adds to the contract. */
-export interface IFormidableMaskField {
-  /** Must be a valid ngx-mask (see https://github.com/JsDaddy/ngx-mask). */
-  mask: Signal<string | undefined>;
-  /** Per-field overrides for ngx-mask. */
-  maskConfig: Signal<Partial<NgxMaskConfig> | undefined>;
-}
-
-type FormidableInputFieldsKeys = 'name' | 'placeholder' | 'autocomplete' | 'minLength' | 'maxLength';
-
-type FormidableTextareaFieldsKeys = FormidableInputFieldsKeys;
-
-type FormidableSelectFieldsKeys = 'name' | 'disabled';
-
-/** The subset of `<input/>` properties that are supported. */
-export interface IFormidableInputField
-  extends SignalsOf<Pick<HTMLInputElement, FormidableInputFieldsKeys>>, IFormidableField, IFormidableMaskField {}
-
-type FormidableGroupFieldsKeys = 'name' | 'disabled';
-
-/** The subset of `<input type="radio"/> properties that are supported.` */
-export interface IFormidableRadioGroupField
-  extends SignalsOf<Pick<HTMLInputElement, FormidableGroupFieldsKeys>>, IFormidableField, IFormidableOptionField {}
-
-/** The subset of `<input type="checkbox"/> properties that are supported.` */
-export interface IFormidableCheckboxGroupField
-  extends
-    SignalsOf<Pick<HTMLInputElement, FormidableGroupFieldsKeys>>,
-    IFormidableField<string[]>,
-    IFormidableOptionField {}
-
-/** The subset of `<textarea/>` properties that are supported. */
-export interface IFormidableTextareaField
-  extends SignalsOf<Pick<HTMLTextAreaElement, FormidableTextareaFieldsKeys>>, IFormidableField, IFormidableMaskField {
-  /**
-   * Enable or disable autosizing of the textarea.
-   * If true, the textarea will automatically adjust its height based on the content.
-   */
-  enableAutosize: Signal<boolean>;
-  showLengthIndicator: Signal<boolean>;
-}
-
-/** The subset of `<select/>` properties that are supported. */
-export interface IFormidableSelectField
-  extends SignalsOf<Pick<HTMLSelectElement, FormidableSelectFieldsKeys>>, IFormidableField, IFormidableOptionField {}
-
-/** A dropdown adds nothing of its own: it is an option field whose list lives in a panel. */
-export interface IFormidableDropdownField extends IFormidableField, IFormidableOptionField {}
-
-/** A dropdown whose panel is filtered by what is typed into the field. */
-export interface IFormidableAutocompleteField extends IFormidableDropdownField {
-  /** The filter text, so a consumer can fetch options for it rather than filtering a list it already has. */
-  filterChange$: Observable<string>;
-  filterChanged: OutputEmitterRef<string>;
-}
-
-/** The subset of `PikadayOptions` that are supported, each as the input the date field declares for it. */
-export type IFormidablePikadayOptions = SignalsOf<
-  Pick<
-    PikadayOptions,
-    | 'ariaLabel'
-    | 'format'
-    | 'defaultDate'
-    | 'setDefaultDate'
-    | 'firstDay'
-    | 'minDate'
-    | 'maxDate'
-    | 'disableWeekends'
-    | 'disableDayFn'
-    | 'yearRange'
-    | 'i18n'
-    | 'yearSuffix'
-    | 'showMonthAfterYear'
-    | 'showDaysInNextAndPreviousMonths'
-    | 'enableSelectionDaysInNextAndPreviousMonths'
-    | 'numberOfMonths'
-  >
->;
-
-/** A date value entered through a mask, a calendar panel, or the arrow keys. */
-export interface IFormidableDateField extends IFormidableField<Date | null>, IFormidablePikadayOptions {
-  /** Must be a valid Unicode format (e.g. yyyy-MM-dd). Supported tokens: y, yy, yyy, yyyy, M, MM, MMM, MMMM, d, dd */
-  unicodeTokenFormat: Signal<string>;
-  /** What an empty field displays in its mask slots. Defaults to `'underscores'`. */
-  emptyHint: Signal<FormidableEmptyHint>;
-  /** Commits a date from outside the field, as the calendar and the arrow keys do. */
-  selectDate(date: Date | null): void;
-}
-
-/** A time of day entered through a mask or the arrow keys. Carries a full `Date` whose date part is fixed. */
-export interface IFormidableTimeField extends IFormidableField<Date | null> {
-  /** Must be a valid Unicode format (e.g. HH:mm:ss). Supported tokens: H, HH, h, hh, m, mm, s, ss, a, aa */
-  unicodeTokenFormat: Signal<string>;
-  /** What an empty field displays in its mask slots. Defaults to `'underscores'`. */
-  emptyHint: Signal<FormidableEmptyHint>;
-  /** Commits a time from outside the field, as the arrow keys do. */
-  selectTime(time: Date | null): void;
-}
-
-/** A boolean rendered as a switch. `inline` is the only decorator layout it fits. */
-export interface IFormidableToggleField extends IFormidableField<boolean | null> {
-  labelPosition: Signal<FormidableToggleFieldLabelPosition | undefined>;
-  /** Text shown beside the switch while on. The field's own label, not a projected one. */
-  onLabel: Signal<string | undefined>;
-  /** Text shown beside the switch while off. Falls back to `onLabel` when absent. */
-  offLabel: Signal<string | undefined>;
-  /** Flips the value, as clicking the switch does. */
-  toggle(): void;
-}
-
-/** A number picked from a bounded range, over a native range input. */
-export interface IFormidableSliderField extends IFormidableField<number | null> {
-  /** Minimum numeric value of the slider (inclusive). */
-  min: Signal<number>;
-  /** Maximum numeric value of the slider (inclusive). */
-  max: Signal<number>;
-  /** Step between slider values. */
-  step: Signal<number>;
-
-  /** Optional label for the minimum value (fallback: min as string). */
-  minLabel: Signal<string | undefined>;
-  /** Optional label for the maximum value (fallback: max as string). */
-  maxLabel: Signal<string | undefined>;
-
-  /** Whether to display the thumb label. */
-  showThumbLabel: Signal<boolean>;
-
-  /** Whether to show tick marks with labels along the track. */
-  showTickMarks: Signal<boolean>;
-
-  /** Whether to display the min/max labels below the track. */
-  showMinMaxLabels: Signal<boolean>;
-
-  /** Whether to display labels for tick marks along the track. */
-  showTickLabels: Signal<boolean>;
-
-  /**
-   * Interval between tick marks. If omitted, `step` is used.
-   * Only relevant if `showTickMarks === true`.
-   */
-  tickInterval: Signal<number | undefined>;
-
-  /**
-   * Imperatively select a value from outside (e.g. via template reference).
-   * Should clamp & snap to min/max/step.
-   */
-  selectValue(value: number): void;
-
-  /**
-   * Optional value → thumb label transform for value labels.
-   * E.g., `value => value + ' %'` or map to named categories.
-   */
-  transformValueToThumbLabel: Signal<((value: number) => string) | undefined>;
-
-  /**
-   * Optional tick → tick label transform for tick labels.
-   * E.g., `value => value + ' %'` or map to named categories.
-   */
-  transformTickToTickLabel: Signal<((value: number) => string) | undefined>;
 }

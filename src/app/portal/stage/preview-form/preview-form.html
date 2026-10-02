@@ -1,0 +1,78 @@
+<!-- A field reads its defaults once, so new defaults rebuild the form, and so does a new field tree. -->
+@for (built of [build()]; track built) { @let tree = built.form;
+<form
+  portalAppDefaults
+  class="preview-form"
+  [formRoot]="tree">
+  <header class="form-header">
+    <h1>{{ heading() }}</h1>
+    @if (intro(); as text) {
+    <p>{{ text }}</p>
+    }
+  </header>
+
+  @if (valueStore.wholeFormMessages().length) {
+  <div
+    role="alert"
+    class="whole-form-errors">
+    @for (message of valueStore.wholeFormMessages(); track message) {
+    <p>{{ message }}</p>
+    }
+  </div>
+  } @for (entry of sections(); track entry.section.id) {
+  <section class="form-section">
+    <h2>{{ entry.section.title }}</h2>
+
+    <!--
+          A section carrying a `groupName` nests its fields under that name in the model, which gives a rule
+          reading two of them somewhere to report. The `formidable-field-errors` after the grid draws that
+          rule's messages, under the group rather than under either field.
+        -->
+    <div [class.form-group]="!!entry.section.groupName">
+      <div class="field-grid">
+        @for (field of entry.fields; track field.id) { @let control = fieldAt(tree, pathOf(field.id));
+        <!-- `hidden()` takes the field out of validation; `@if` takes it off the page. -->
+        @if (!control().hidden()) {
+        <portal-preview-field
+          [spec]="field"
+          [formOptions]="options()"
+          [fieldTree]="control"
+          [selected]="definitionStore.selectedFieldId() === field.id"
+          [showFieldTypes]="showFieldTypes()"
+          [showAccessibility]="showAccessibility()"
+          (focused)="onFieldFocused($event)"
+          (chipActivated)="openInInspector($event)"
+          (actionRequested)="onActionRequested($event)"
+          (picked)="valueStore.applyPreset(field, $event)" />
+        } }
+      </div>
+      @if (entry.section.groupName; as groupName) {
+      <formidable-field-errors [errors]="fieldAt(tree, groupName)().errors()" />
+      }
+    </div>
+  </section>
+  }
+
+  <footer class="form-footer">
+    <button
+      type="submit"
+      class="submit">
+      {{ submit().label }}
+    </button>
+    <span class="footer-note">
+      @if (valueStore.submitted() && valueStore.valid()) { {{ submit().accepted }} } @else if (valueStore.submitted()) { {{ submit().rejected }} } @else {
+      Nothing leaves this page. }
+    </span>
+  </footer>
+</form>
+}
+
+<!--
+  Outside the form on purpose: it carries a form of its own, and a rebuild of the preview form must not take
+  an open dialog down with it.
+-->
+<portal-create-option-dialog
+  title="Add A New Address"
+  [prefill]="actionPrefill()"
+  (created)="onOptionCreated($event)"
+  (dismissed)="closeActionDialog()" />

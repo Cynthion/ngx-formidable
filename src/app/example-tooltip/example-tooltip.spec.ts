@@ -1,63 +1,48 @@
-import { provideZonelessChangeDetection } from '@angular/core';
-import { ComponentFixture, fakeAsync, flush, TestBed } from '@angular/core/testing';
-import { ExampleTooltipComponent } from './example-tooltip.component';
+import { Component } from '@angular/core';
+import { page, userEvent } from 'vitest/browser';
+import { openPage } from '../portal/testing/studio';
+import { ExampleTooltip } from './example-tooltip';
+
+@Component({
+  imports: [ExampleTooltip],
+  template: `
+    <example-tooltip text="Arrow keys step it." />
+    <button type="button">Elsewhere</button>
+  `
+})
+class TooltipHost {}
 
 /**
- * The tooltip closes itself from capture-phase `document` listeners it registers in `ngOnInit`, so nothing
- * Angular owns is on that stack. Its `open` flag is a signal, which is what marks the view there; make it a
- * plain field again and the panel stays on screen while the component believes it is closed — after which
- * the next trigger click opens it again and it can never be dismissed.
- *
- * Zoneless on purpose, because the demo is: see `zoneless.spec.ts` in the library for why the rest of the
- * suite is not, and why the NG0914 warning is expected.
+ * The tooltip a decorator's label adornment projects in the portal. It closes from listeners on the document,
+ * outside anything Angular ticks, so a close that never repaints leaves it on screen.
  */
-describe('example-tooltip outside dismissal', () => {
-  let fixture: ComponentFixture<ExampleTooltipComponent>;
-  let root: HTMLElement;
+describe('example-tooltip', () => {
+  const trigger = () => page.getByRole('button', { name: 'Help' });
+  const tooltip = () => page.getByRole('tooltip');
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideZonelessChangeDetection()] });
+  const shown = () => expect.element(tooltip()).toHaveStyle({ opacity: '1' });
+  const hidden = () => expect.element(tooltip()).toHaveStyle({ opacity: '0' });
 
-    fixture = TestBed.createComponent(ExampleTooltipComponent);
-    fixture.componentRef.setInput('text', 'Help');
-    fixture.componentRef.setInput('trigger', 'click');
-    fixture.detectChanges();
-
-    root = fixture.nativeElement as HTMLElement;
+  beforeEach(async () => {
+    await openPage(TooltipHost);
   });
 
-  afterEach(() => fixture.destroy());
+  it('opens on its trigger, closes on a click elsewhere, and opens again', async () => {
+    await userEvent.click(trigger());
+    await shown();
 
-  function panel(): HTMLElement {
-    return root.querySelector('.tooltip-panel') as HTMLElement;
-  }
+    await userEvent.click(page.getByRole('button', { name: 'Elsewhere' }));
+    await hidden();
 
-  function open(): void {
-    (root.querySelector('.tooltip-trigger') as HTMLElement).click();
-    flush();
-  }
+    await userEvent.click(trigger());
+    await shown();
+  });
 
-  it('closes on a click outside, and reopens afterwards', fakeAsync(() => {
-    open();
-    expect(panel().classList.contains('open')).toBe(true);
+  it('closes on Escape', async () => {
+    await userEvent.click(trigger());
+    await shown();
 
-    document.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    flush();
-
-    expect(panel().classList.contains('open')).toBe(false);
-
-    // The flag and the DOM agreed, so the trigger opens it again rather than closing something already shut.
-    open();
-    expect(panel().classList.contains('open')).toBe(true);
-  }));
-
-  it('closes on Escape', fakeAsync(() => {
-    open();
-    expect(panel().classList.contains('open')).toBe(true);
-
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    flush();
-
-    expect(panel().classList.contains('open')).toBe(false);
-  }));
+    await userEvent.keyboard('{Escape}');
+    await hidden();
+  });
 });

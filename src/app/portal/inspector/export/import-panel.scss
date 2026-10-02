@@ -1,0 +1,40 @@
+:host {
+  display: block;
+}
+
+// The theme's one option follows its textarea rather than leading a block, so it needs the room above.
+.options {
+  margin: 8px 0 10px;
+}
+
+.report {
+  margin-top: 10px;
+  font-size: 11px;
+}
+
+.applied {
+  margin: 0 0 4px;
+  color: var(--portal-ok);
+}
+
+.notes-head {
+  margin: 0 0 3px;
+  color: var(--portal-text-muted);
+}
+
+.notes {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    gap: 1px;
+  }
+}
+
+.reason {
+  color: var(--portal-warn);
+}

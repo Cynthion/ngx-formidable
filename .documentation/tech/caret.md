@@ -25,7 +25,7 @@ Headless Firefox dispatches no focus events at all, and Safari's driver needs Re
 
 ## The One Thing The DOM Does Not Say
 
-A field cannot ask whether focus came from the keyboard or a pointer. `:focus-visible` is not the answer: it matches a text input on a pointer focus too, because the input takes keyboard input either way. So `BaseFieldDirective` records a `mousedown` on the editor and clears it from a timer, which is the first point after the whole press.
+A field cannot ask whether focus came from the keyboard or a pointer. `:focus-visible` is not the answer: it matches a text input on a pointer focus too, because the input takes keyboard input either way. So `BaseField` records a `mousedown` on the editor and clears it from a timer, which is the first point after the whole press.
 
 That flag is what `selectOnKeyboardFocus` checks. It is deliberately ordering-independent: it does not matter whether a browser places the click caret before or after it dispatches `focus`, because the selection is never made for a press in the first place.
 
@@ -42,12 +42,12 @@ sequenceDiagram
     participant B as Browser
     participant F as Field
     participant M as NgxMask
-    B->>F: mousedown — the press is recorded
-    B->>F: focus — the keyboard selection is skipped
+    B->>F: mousedown: the press is recorded
+    B->>F: focus: the keyboard selection is skipped
     B->>B: the caret is placed from the click
-    B->>F: mouseup — the chosen position is read
-    B->>M: click — the caret is pulled to the end of the typed text
-    B->>F: click — the chosen position is written back
+    B->>F: mouseup: the chosen position is read
+    B->>M: click: the caret is pulled to the end of the typed text
+    B->>F: click: the chosen position is written back
 ```
 
 Angular registers a directive's host listeners before a template's on the same element, so the field's `(click)` runs after ngx-mask's and has the last word. Reading on `mouseup` and writing on `click` therefore needs no timer, and nothing is ever left queued to reach back over what the user does next.
@@ -60,9 +60,9 @@ Angular registers a directive's host listeners before a template's on the same e
 
 `endOfMaskedValue` in `helpers/input.helpers.ts` is the only rule with any arithmetic in it, and both jobs use it: the keyboard selection stops there, and a click is clamped to it.
 
-A display with no placeholder left is all content, trailing literals included. One with placeholders left ends after the last filled position — and the separator drawn between that position and the first empty slot belongs to the unused area, so `079 123 __ __` ends at 7, not 8 or 13.
+A display with no placeholder left is all content, trailing literals included. One with placeholders left ends after the last filled position, and the separator drawn between that position and the first empty slot belongs to the unused area, so `079 123 __ __` ends at 7, not 8 or 13.
 
-Which character marks an empty slot is ngx-mask's `placeHolderCharacter`, and it is settable. Every masked field therefore **binds** it rather than inheriting it, so a global `provideNgxMask` cannot change what the library reads its values out of while the library carries on looking for `_`. `BaseFieldDirective.maskPlaceholderCharacter` is what the caret rules ask; `input-field` and `textarea-field` override it from their merged config, and the date and time fields pin it.
+Which character marks an empty slot is ngx-mask's `placeHolderCharacter`, and it is settable. Every masked field therefore **binds** it rather than inheriting it, so a global `provideNgxMask` cannot change what the library reads its values out of while the library carries on looking for `_`. `BaseField.maskPlaceholderCharacter` is what the caret rules ask; `BaseTextField` overrides it for `input-field` and `textarea-field` from their merged config, and the date and time fields pin it.
 
 One combination cannot be made to work: a placeholder the mask can also produce as content, through a token pattern that accepts it or a literal in the mask. The rendered text is then genuinely ambiguous, and no reading of it can be right. `isPlaceholderAmbiguous` detects exactly that and the two mask fields warn, naming the field and the character.
 
@@ -72,5 +72,5 @@ One combination cannot be made to work: a placeholder the mask can also produce 
 
 - The rules run on focus entry and never again. Nothing re-applies them on a repaint, a value change or a second click.
 - A caret never lands behind the value. A click aimed into the unused slots collapses at the end of what is filled.
-- Focusing a field does not change its value. `date-field` hands its display to ngx-mask only while nothing has been typed, because a half-typed date survives a blur onto the field's own panel and is there to come back to.
+- Focusing a field does not change its value. `date-field` hands its display to ngx-mask only while nothing has been typed, because a half-typed date survives focus moving onto the field's own calendar and back.
 - `dropdown-field` and `select-field` are out of scope: their editors are `readonly`, so there is no caret to place.

@@ -1,10 +1,13 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { provideNgxMask } from 'ngx-mask';
-import { FieldOptionComponent } from '../field-option/field-option.component';
-import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.component';
+import { Component } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { page } from 'vitest/browser';
+import { NO_OPTIONS_TEXT } from '../../models/formidable.model';
+import { theme } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { FieldOption } from '../field-option/field-option';
+import { CheckboxGroupField } from './checkbox-group-field/checkbox-group-field';
+import { InputField } from './input-field/input-field';
+import { RadioGroupField } from './radio-group-field/radio-group-field';
 
 /**
  * Contract of a group option's horizontal inset.
@@ -26,8 +29,7 @@ import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.
  */
 
 @Component({
-  imports: [InputFieldComponent, RadioGroupFieldComponent, CheckboxGroupFieldComponent, FieldOptionComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [InputField, RadioGroupField, CheckboxGroupField, FieldOption],
   template: `
     <formidable-input-field name="text" />
 
@@ -39,53 +41,31 @@ import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.
     <formidable-checkbox-group-field name="empty" />
   `
 })
-class HostComponent {}
+class TestHost {}
 
 describe('group option alignment', () => {
-  let fixture: ComponentFixture<HostComponent>;
-  let root: HTMLElement;
-  const themed = new Set<string>();
+  // A group collects its options in a microtask after content init, so the rows need the render to settle.
+  beforeEach(async () => {
+    configureFormidableTestBed();
 
-  // A group collects its options in a microtask after content init, so the rows need a second pass.
-  beforeEach(fakeAsync(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
-
-    fixture = TestBed.createComponent(HostComponent);
-    root = fixture.nativeElement;
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-  }));
-
-  afterEach(() => {
-    themed.forEach((property) => document.documentElement.style.removeProperty(property));
-    themed.clear();
+    await settle(TestBed.createComponent(TestHost));
   });
 
-  function set(property: string, value: string): void {
-    document.documentElement.style.setProperty(property, value);
-    themed.add(property);
-  }
-
-  function padding(selector: string): { left: string; right: string } {
-    const style = getComputedStyle(root.querySelector(selector) as HTMLElement);
+  function padding(element: Element): { left: string; right: string } {
+    const style = getComputedStyle(element);
 
     return { left: style.paddingLeft, right: style.paddingRight };
   }
 
   // Where a field's value starts.
-  const fieldText = (): string => padding('formidable-input-field .field').left;
+  const fieldText = (): string => padding(page.getByRole('textbox').element()).left;
 
-  // Where a group's marker starts, and the gap it leaves before the label.
-  const marker = (): { left: string; right: string } => padding('formidable-radio-group-field .field-option-prefix');
+  // Where a group's marker starts, and the gap it leaves before the label. The marker has no role of its own.
+  const marker = (): { left: string; right: string } =>
+    padding(page.getByRole('radiogroup').element().querySelector('.field-option-prefix')!);
 
   // Where a group's empty state starts.
-  const emptyState = (): string => padding('formidable-checkbox-group-field .no-option').left;
-
-  it('renders the three elements the assertions read', () => {
-    expect(root.querySelector('formidable-radio-group-field .field-option-prefix')).toBeTruthy();
-    expect(root.querySelector('formidable-checkbox-group-field .no-option')).toBeTruthy();
-  });
+  const emptyState = (): string => padding(page.getByText(NO_OPTIONS_TEXT).element()).left;
 
   describe('derivation', () => {
     it('starts a marker where a field starts its value', () => {
@@ -95,8 +75,7 @@ describe('group option alignment', () => {
     // The point of the phase: the two agreed at defaults before this change too, but only because both
     // tokens happened to be 16px. Moving the field's padding is what tells the two apart.
     it('moves the marker with the field padding it derives from', () => {
-      set('--formidable-field-padding-x', '40px');
-      fixture.detectChanges();
+      theme('--formidable-field-padding-x', '40px');
 
       expect(fieldText()).toBe('40px');
       expect(marker().left).toBe('40px');
@@ -107,8 +86,7 @@ describe('group option alignment', () => {
     it('zeroes the inset without collapsing the gap', () => {
       const gap = marker().right;
 
-      set('--formidable-option-prefix-inset', '0px');
-      fixture.detectChanges();
+      theme('--formidable-option-prefix-inset', '0px');
 
       expect(marker().left).toBe('0px');
       expect(marker().right).toBe(gap);
@@ -117,8 +95,7 @@ describe('group option alignment', () => {
     it('leaves a field padding of its own alone', () => {
       const text = fieldText();
 
-      set('--formidable-option-prefix-inset', '0px');
-      fixture.detectChanges();
+      theme('--formidable-option-prefix-inset', '0px');
 
       expect(fieldText()).toBe(text);
     });
@@ -130,8 +107,7 @@ describe('group option alignment', () => {
     });
 
     it('moves out with the options', () => {
-      set('--formidable-option-prefix-inset', '0px');
-      fixture.detectChanges();
+      theme('--formidable-option-prefix-inset', '0px');
 
       expect(emptyState()).toBe('0px');
     });

@@ -1,144 +1,114 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { provideNgxMask } from 'ngx-mask';
+import { Component, signal } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { page, userEvent } from 'vitest/browser';
+import { FieldLabel } from '../../directives/field-label';
 import { FormidablePanelPosition } from '../../models/formidable.model';
-import { DateFieldComponent } from './date-field/date-field.component';
+import { corners, theme } from '../../testing/dom';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { FieldDecorator } from '../field-decorator/field-decorator';
+import { DateField } from './date-field/date-field';
 
 /**
- * Contract of the date panel's responsiveness.
+ * Contract of the date panel's responsiveness, per **Panels** in `user/fields.md`.
  *
  * Two claims:
  *
  * 1. `--formidable-date-field-panel-width` is what the calendar *prefers*, not what it is fixed at. Given
  *    room it takes that width; given a narrower panel it scales into it, because the panel clips its
  *    content and a calendar wider than its panel simply loses its right-hand columns.
- * 2. A `bottom` sheet is pinned to the viewport rather than to the field, so it keeps its own top corners
- *    and squares off at the screen edge instead of mirroring the field the way an anchored panel does.
+ * 2. A `sheet` is pinned to the viewport rather than to the field, so it keeps its own top corners and
+ *    squares off at the screen edge instead of mirroring the field the way an anchored panel does.
  *
  * Widths are compared between two live fields rather than against a number, so the assertions hold
- * whatever the root font size resolves the token to.
+ * whatever the root font size resolves the token to. Each calendar opens from a trusted click on its toggle.
  */
 
 @Component({
-  imports: [DateFieldComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [DateField, FieldDecorator, FieldLabel],
   template: `
-    <div [style.width.px]="narrowWidth">
-      <formidable-date-field
-        name="narrow"
-        [panelPosition]="'full'" />
+    <div style="width: 250px">
+      <formidable-field-decorator>
+        <formidable-date-field [panelPosition]="'full'" />
+        <div formidableFieldLabel>Narrow</div>
+      </formidable-field-decorator>
     </div>
     <div style="width: 600px">
-      <formidable-date-field
-        name="roomy"
-        [panelPosition]="roomyPosition" />
+      <formidable-field-decorator>
+        <formidable-date-field [panelPosition]="roomyPosition()" />
+        <div formidableFieldLabel>Roomy</div>
+      </formidable-field-decorator>
     </div>
   `
 })
-class HostComponent {
-  narrowWidth = 250;
-  roomyPosition: FormidablePanelPosition = 'right';
+class TestHost {
+  readonly roomyPosition = signal<FormidablePanelPosition>('right');
 }
 
 describe('date panel responsiveness', () => {
-  let fixture: ComponentFixture<HostComponent>;
-  let root: HTMLElement;
-  const themed = new Set<string>();
+  let fixture: ComponentFixture<TestHost>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+  beforeEach(async () => {
+    configureFormidableTestBed();
 
-    fixture = TestBed.createComponent(HostComponent);
-    root = fixture.nativeElement;
-    fixture.detectChanges(); // ngAfterViewInit builds the calendar
+    fixture = TestBed.createComponent(TestHost);
+    await settle(fixture);
   });
 
-  afterEach(() => {
-    themed.forEach((property) => document.documentElement.style.removeProperty(property));
-    themed.clear();
-  });
+  /** Opens the calendar of the field labelled `name`, and returns the panel it opens in. */
+  async function open(name: string): Promise<HTMLElement> {
+    const field = page.getByRole('combobox', { name }).element().closest('formidable-date-field')!;
 
-  function set(property: string, value: string): void {
-    document.documentElement.style.setProperty(property, value);
-    themed.add(property);
+    await userEvent.click(field.querySelector('.toggle')!);
+    await expect.element(page.getByRole('dialog', { name })).toBeVisible();
+
+    return field.querySelector<HTMLElement>('.panel')!;
   }
 
-  function field(name: string): HTMLElement {
-    return root.querySelector(`formidable-date-field[name='${name}']`) as HTMLElement;
-  }
-
-  function open(name: string): void {
-    (field(name).querySelector('.toggle') as HTMLElement).dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
-    fixture.detectChanges();
-    tick();
-  }
-
-  function panel(name: string): HTMLElement {
-    return field(name).querySelector('.panel') as HTMLElement;
-  }
-
-  function calendar(name: string): HTMLElement {
-    return field(name).querySelector('.pika-lendar') as HTMLElement;
-  }
-
-  function corners(element: HTMLElement): string[] {
-    const style = getComputedStyle(element);
-
-    return [
-      style.borderTopLeftRadius,
-      style.borderTopRightRadius,
-      style.borderBottomRightRadius,
-      style.borderBottomLeftRadius
-    ];
-  }
+  const calendar = (panel: HTMLElement) => panel.querySelector<HTMLElement>('.pika-lendar')!;
 
   describe('fluid calendar', () => {
     // The panel is `overflow: hidden`, so a calendar that will not shrink is not merely cramped — the days
     // past the panel's right edge are gone, and the last column of every week with them.
-    it('scales the calendar into a panel narrower than its preferred width', fakeAsync(() => {
-      open('narrow');
+    it('scales the calendar into a panel narrower than its preferred width', async () => {
+      const narrow = await open('Narrow');
 
-      expect(calendar('narrow').offsetWidth).toBeGreaterThan(0);
-      expect(calendar('narrow').offsetWidth).toBeLessThanOrEqual(panel('narrow').clientWidth);
-    }));
+      expect(calendar(narrow).offsetWidth).toBeGreaterThan(0);
+      expect(calendar(narrow).offsetWidth).toBeLessThanOrEqual(narrow.clientWidth);
+    });
 
-    it('keeps the preferred width where there is room for it', fakeAsync(() => {
-      open('narrow');
-      open('roomy');
+    it('keeps the preferred width where there is room for it', async () => {
+      const narrow = await open('Narrow');
+      const roomy = await open('Roomy');
 
-      expect(calendar('roomy').offsetWidth).toBeGreaterThan(calendar('narrow').offsetWidth);
-    }));
+      expect(calendar(roomy).offsetWidth).toBeGreaterThan(calendar(narrow).offsetWidth);
+    });
   });
 
   describe('bottom sheet', () => {
     // Distinct radii throughout, so an assertion cannot pass by the two happening to agree.
-    beforeEach(() => {
-      set('--formidable-field-border-radius', '8px');
-      set('--formidable-panel-border-radius', '2px');
+    beforeEach(async () => {
+      theme('--formidable-field-border-radius', '8px');
+      theme('--formidable-panel-border-radius', '2px');
 
-      fixture.componentInstance.roomyPosition = 'sheet';
-      fixture.detectChanges();
+      fixture.componentInstance.roomyPosition.set('sheet');
+      await settle(fixture);
     });
 
     // `top` is not asserted: it is `auto` here, but `getComputedStyle` resolves an inset on a positioned
     // element to its used value, so it reads back as the static position in pixels either way.
-    it('pins itself across the bottom of the viewport instead of to the field', fakeAsync(() => {
-      open('roomy');
-
-      const style = getComputedStyle(panel('roomy'));
+    it('pins itself across the bottom of the viewport instead of to the field', async () => {
+      const style = getComputedStyle(await open('Roomy'));
 
       expect(style.position).toBe('fixed');
       expect(style.bottom).toBe('0px');
       expect(style.left).toBe('0px');
       expect(style.right).toBe('0px');
-    }));
+    });
 
     // An anchored panel mirrors the two corners of the field it sits against. A sheet sits against the
     // screen, so it mirrors nothing: its own radius on top, square where it meets the edge.
-    it('keeps its own top corners and squares off at the screen edge', fakeAsync(() => {
-      open('roomy');
-
-      expect(corners(panel('roomy'))).toEqual(['2px', '2px', '0px', '0px']);
-    }));
+    it('keeps its own top corners and squares off at the screen edge', async () => {
+      expect(corners(await open('Roomy'))).toEqual(['2px', '2px', '0px', '0px']);
+    });
   });
 });

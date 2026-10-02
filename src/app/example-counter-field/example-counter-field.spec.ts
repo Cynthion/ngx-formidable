@@ -1,141 +1,101 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import {
-  FieldDecoratorComponent,
-  FieldLabelDirective,
-  NgxFormidableFieldValidateDirective,
-  NgxFormidableFormDirective
-} from '@cynthion/ngx-formidable';
-import { ExampleCounterFieldComponent } from './example-counter-field.component';
-
-/**
- * The contract a custom field on `BaseFieldDirective` must hold, proven on the demo's own reference
- * implementation — which is what `user/custom-fields.md` quotes. It is decorated, bound and stepped exactly
- * like a library field, so if any of this breaks, that guide is wrong.
- */
+import { Component, signal } from '@angular/core';
+import { ComponentFixture } from '@angular/core/testing';
+import { form, FormField, max, min, readonly } from '@angular/forms/signals';
+import { FieldDecorator, FieldLabel } from '@cynthion/ngx-formidable';
+import { page, userEvent } from 'vitest/browser';
+import { openPage, settle } from '../portal/testing/studio';
+import { ExampleCounterField } from './example-counter-field';
 
 @Component({
-  imports: [
-    FormsModule,
-    NgxFormidableFormDirective,
-    NgxFormidableFieldValidateDirective,
-    FieldDecoratorComponent,
-    FieldLabelDirective,
-    ExampleCounterFieldComponent
-  ],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FormField, FieldDecorator, FieldLabel, ExampleCounterField],
   template: `
-    <form
-      formidableForm
-      [formValue]="formValue"
-      (formValueChange)="formValue = $event">
-      <formidable-field-decorator>
-        <example-counter-field
-          name="pets"
-          [min]="0"
-          [max]="3"
-          [readonly]="readonly"
-          [ngModel]="formValue.pets" />
-        <div formidableFieldLabel>Pets</div>
-      </formidable-field-decorator>
-    </form>
+    <formidable-field-decorator>
+      <example-counter-field [formField]="form.pets" />
+      <div formidableFieldLabel>Pets</div>
+    </formidable-field-decorator>
   `
 })
-class CounterHostComponent {
-  formValue: { pets?: number } = { pets: 1 };
-  readonly = false;
+class CounterHost {
+  readonly model = signal({ pets: 1 });
+  readonly readonly = signal(false);
+  readonly form = form(this.model, (path) => {
+    min(path.pets, 0);
+    max(path.pets, 3);
+    readonly(path.pets, () => this.readonly());
+  });
 }
 
+/**
+ * The custom field `user/custom-fields.md` quotes as it ships, held to what a library field holds: named by
+ * its decorator, stepped from the keyboard and its buttons, and **The Clamp Is On The Step**. If any of this
+ * breaks, that guide is wrong.
+ */
 describe('custom field contract: example-counter-field', () => {
-  let fixture: ComponentFixture<CounterHostComponent>;
-  let host: CounterHostComponent;
-  let root: HTMLElement;
+  let fixture: ComponentFixture<CounterHost>;
 
-  function settle(): void {
-    fixture.detectChanges();
-    tick(50);
-    fixture.detectChanges();
+  const counter = () => page.getByRole('spinbutton', { name: 'Pets' });
+
+  /** The value as the counter states it, to assistive technology and on screen, and as the model holds it. */
+  async function expectValue(value: number): Promise<void> {
+    await expect.element(counter()).toHaveAttribute('aria-valuenow', String(value));
+    await expect.element(counter().getByText(String(value), { exact: true })).toBeVisible();
+    expect(fixture.componentInstance.model().pets).toBe(value);
   }
 
-  function counter(): HTMLElement {
-    return root.querySelector('.counter') as HTMLElement;
-  }
+  beforeEach(async () => {
+    fixture = await openPage(CounterHost);
+  });
 
-  function displayedValue(): string {
-    return (root.querySelector('.counter-value') as HTMLElement).textContent!.trim();
-  }
+  it('is named by its decorator, and states the value the model holds', async () => {
+    await expectValue(1);
+  });
 
-  function press(key: string): void {
-    counter().dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
-    settle();
-  }
+  it('steps up on ArrowUp and down on ArrowDown', async () => {
+    await userEvent.click(counter());
 
-  beforeEach(fakeAsync(() => {
-    TestBed.configureTestingModule({ imports: [CounterHostComponent] });
-    fixture = TestBed.createComponent(CounterHostComponent);
-    host = fixture.componentInstance;
-    root = fixture.nativeElement as HTMLElement;
-    settle();
-  }));
+    await userEvent.keyboard('{ArrowUp}');
+    await expectValue(2);
 
-  it('renders the value the form wrote into it', fakeAsync(() => {
-    expect(displayedValue()).toBe('1');
-  }));
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+    await expectValue(0);
+  });
 
-  it('is found by the decorator, which names it', fakeAsync(() => {
-    // The decorator mints the label's id; the field binds it back. Resolving it proves the two agree.
-    const labelId = counter().getAttribute('aria-labelledby');
+  it('steps on a press of its buttons, and keeps the focus on the field', async () => {
+    await userEvent.click(counter().getByText('+'));
 
-    expect(labelId).toBeTruthy();
-    // An attribute selector, not `#id`: the assertion is about the idref, never the id's spelling.
-    expect(root.querySelector(`[id="${labelId}"]`)?.textContent?.trim()).toBe('Pets');
-  }));
+    await expectValue(2);
+    await expect.element(counter()).toHaveFocus();
 
-  it('steps up on ArrowUp and reports the new value to the model', fakeAsync(() => {
-    counter().dispatchEvent(new Event('focus'));
-    settle();
+    await userEvent.click(counter().getByText('−'));
 
-    press('ArrowUp');
+    await expectValue(1);
+    await expect.element(counter()).toHaveFocus();
+  });
 
-    expect(displayedValue()).toBe('2');
-    expect(host.formValue.pets).toBe(2);
-  }));
+  it('stops a step at both ends rather than running past them', async () => {
+    await userEvent.click(counter());
 
-  it('steps down on ArrowDown', fakeAsync(() => {
-    counter().dispatchEvent(new Event('focus'));
-    settle();
+    await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+    await expectValue(0);
 
-    press('ArrowDown');
+    await userEvent.keyboard('{ArrowUp}{ArrowUp}{ArrowUp}{ArrowUp}');
+    await expectValue(3);
+  });
 
-    expect(displayedValue()).toBe('0');
-    expect(host.formValue.pets).toBe(0);
-  }));
+  it('renders a value the forms API writes outside its limits as it is', async () => {
+    fixture.componentInstance.model.set({ pets: 7 });
 
-  it('clamps at both ends rather than running past them', fakeAsync(() => {
-    counter().dispatchEvent(new Event('focus'));
-    settle();
+    await expectValue(7);
+  });
 
-    press('ArrowDown');
-    press('ArrowDown');
-    expect(displayedValue()).toBe('0');
+  it('ignores the keys while readonly', async () => {
+    fixture.componentInstance.readonly.set(true);
+    await expect.element(counter()).toHaveAttribute('aria-readonly', 'true');
 
-    press('ArrowUp');
-    press('ArrowUp');
-    press('ArrowUp');
-    press('ArrowUp');
-    expect(displayedValue()).toBe('3');
-  }));
+    await userEvent.click(counter());
+    await userEvent.keyboard('{ArrowUp}');
+    await settle(fixture);
 
-  it('ignores the keys while readonly', fakeAsync(() => {
-    host.readonly = true;
-    settle();
-
-    counter().dispatchEvent(new Event('focus'));
-    settle();
-
-    press('ArrowUp');
-
-    expect(displayedValue()).toBe('1');
-  }));
+    await expectValue(1);
+  });
 });

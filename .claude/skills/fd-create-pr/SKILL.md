@@ -9,7 +9,7 @@ effort: low
 
 Open one pull request against `main` for the current branch.
 
-Template: `.claude/skills/fd-create-pr/pr.template.md`
+Template: [`.claude/skills/fd-create-pr/pr.template.md`](pr.template.md)
 
 ## Prerequisite
 
@@ -17,7 +17,7 @@ Template: `.claude/skills/fd-create-pr/pr.template.md`
 
 ## Pushing
 
-Remote changes stay manual, so this skill never pushes — whether or not a local deny rule would stop it. It prepares everything, then stops and asks for the push:
+Remote changes stay manual, so this skill never pushes, whether or not a local deny rule would stop it. It prepares everything, then stops and asks for the push:
 
 ```zsh
 git push
@@ -32,7 +32,7 @@ Once the branch is on the remote, continue and open the request.
 3. Collect the change: `git fetch origin main:refs/remotes/origin/main`, then the diff summary against `origin/main` and the plan artifact if one exists.
 4. Draft the title and description from the template. Show the draft for review before anything is opened.
 5. Ask for the push. Wait for confirmation that it happened.
-6. Open the request. Write the description to a file and pass it by path — a multi-line description inlined into the shell breaks on quoting.
+6. Open the request. Write the description to a file and pass it by path: a multi-line description inlined into the shell breaks on quoting.
 7. Report the URL.
 
 ```zsh
@@ -48,7 +48,7 @@ gh pr edit <number> --body-file <file>
 - **Name The Risk**: Call out anything a reviewer should look at closely.
 - **Name The Breaking Change**: A renamed or removed public input, output, token, type or `--formidable-*` variable is stated as breaking, with what a consumer changes.
 - **Name What Others Must Do**: Local setup a puller has to run, and anything to exercise by hand in the portal, belongs in `Developer Actions`. A change that silently expects new tooling costs everyone who pulls it.
-- **Style**: Follow `.documentation/impl/documentation.md`. Run `npx prettier --write` on the description file so its tables align.
+- **Style**: Follow [`.documentation/impl/documentation.md`](../../../.documentation/impl/documentation.md). Run `npx prettier --write` on the description file so its tables align.
 
 ## Rules
 

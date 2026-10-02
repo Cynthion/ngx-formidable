@@ -1,0 +1,49 @@
+<div
+  #toggleRef
+  role="switch"
+  class="field"
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
+  [class.focused]="isFieldFocused()"
+  [class.checked]="value()"
+  [tabindex]="canEdit() ? null : -1"
+  [attr.aria-checked]="!!value()"
+  [attr.aria-labelledby]="labelledBy"
+  [attr.aria-required]="required() || null"
+  [attr.aria-invalid]="showErrors() || null"
+  [attr.aria-describedby]="describedBy"
+  [attr.aria-readonly]="readonly() || null"
+  [attr.aria-disabled]="disabled() || null"
+  (click)="onToggleClick($event)"
+  (focus)="onFocusChange(true)"
+  (blur)="onFocusChange(false)">
+  <input
+    hidden
+    type="checkbox"
+    [id]="fieldId"
+    [tabindex]="-1"
+    [attr.name]="name()"
+    [attr.readonly]="readonly() ? '' : null"
+    [attr.disabled]="disabled() ? '' : null"
+    [checked]="value()" />
+
+  @if (labelPosition() === 'before') {
+  <ng-container [ngTemplateOutlet]="label" />
+  }
+
+  <div class="toggle-track">
+    <div class="toggle-thumb"></div>
+  </div>
+
+  @if (labelPosition() === 'after') {
+  <ng-container [ngTemplateOutlet]="label" />
+  }
+</div>
+
+<ng-template #label>
+  <div class="toggle-label toggle-label-{{ labelPosition() }}">
+    @if (internalLabel) { {{ internalLabel }} } @else {
+    <ng-content />
+    }
+  </div>
+</ng-template>

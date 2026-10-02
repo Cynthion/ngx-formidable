@@ -6,7 +6,7 @@ The AI setup of this repository. It serves Claude Code only. Every artifact has 
 
 | Artifact          | Path                                     |
 | :---------------- | :--------------------------------------- |
-| Instructions      | `CLAUDE.md`                              |
+| Instructions      | [`CLAUDE.md`](../../CLAUDE.md)           |
 | Path-scoped Rules | `.claude/rules/*.md`                     |
 | Agents            | `.claude/agents/*.md`                    |
 | Skills            | `.claude/skills/*/SKILL.md`              |
@@ -14,7 +14,7 @@ The AI setup of this repository. It serves Claude Code only. Every artifact has 
 | MCP Approval      | `.claude/settings.json`                  |
 | MCP Servers       | `.mcp.json`                              |
 
-`CLAUDE.md` is intentionally minimal — behavioral directives only. Project knowledge stays in its documented home and is reached through [`README.md`](../README.md), which `CLAUDE.md` links. That link is the only always-on hop in the harness.
+[`CLAUDE.md`](../../CLAUDE.md) is intentionally minimal: behavioral directives only. Project knowledge stays in its documented home and is reached through [`README.md`](../README.md), which [`CLAUDE.md`](../../CLAUDE.md) links. That link is the only always-on hop in the harness.
 
 ### Naming
 
@@ -28,19 +28,19 @@ A skill's directory name and its frontmatter `name` are the same string. A skill
 
 Rules are pointers, not content. Each one names the document to read and nothing else, so a convention exists in exactly one place, and a rule pulls in only the document its own area needs.
 
-| File                            | Applies To                                                                         | Points At                                                                                                                             |
-| :------------------------------ | :--------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
-| `.claude/rules/angular.md`      | `projects/ngx-formidable/**` and `src/**`, `*.ts` and `*.html`                     | [`impl/components.md`](components.md), [`impl/typescript.md`](typescript.md), [`impl/ubiquitous-language.md`](ubiquitous-language.md) |
-| `.claude/rules/dependencies.md` | Both `package.json`, `renovate.json`                                               | [`impl/renovate.md`](renovate.md)                                                                                                     |
-| `.claude/rules/markdown.md`     | `**/*.md`                                                                          | [`impl/documentation.md`](documentation.md)                                                                                           |
-| `.claude/rules/portal.md`       | `src/app/portal/**`                                                                | [`tech/portal.md`](../tech/portal.md)                                                                                                 |
-| `.claude/rules/public-api.md`   | Library `components/`, `directives/`, `forms/`, `public-api.ts`, `vest/`           | [`user/components.md`](../user/components.md), `Library Obligations` of [`impl/definition-of-done.md`](definition-of-done.md)         |
-| `.claude/rules/repository.md`   | Everything                                                                         | Invariants, stated inline                                                                                                             |
-| `.claude/rules/styling.md`      | `**/*.scss`                                                                        | [`impl/styling.md`](styling.md)                                                                                                       |
-| `.claude/rules/testing.md`      | `**/*.spec.ts`                                                                     | [`impl/testing.md`](testing.md)                                                                                                       |
-| `.claude/rules/theme-tokens.md` | `_formidable-vars.scss`, `_tokens.scss`, `token-manifest.ts`, `theme-reference.md` | `Theme Tokens` of [`impl/definition-of-done.md`](definition-of-done.md)                                                               |
+| File                                                                   | Applies To                                                                         | Points At                                                                                                                             |
+| :--------------------------------------------------------------------- | :--------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
+| [`.claude/rules/angular.md`](../../.claude/rules/angular.md)           | `projects/ngx-formidable/**` and `src/**`, `*.ts` and `*.html`                     | [`impl/components.md`](components.md), [`impl/typescript.md`](typescript.md), [`impl/ubiquitous-language.md`](ubiquitous-language.md) |
+| [`.claude/rules/dependencies.md`](../../.claude/rules/dependencies.md) | Both `package.json`, `renovate.json`                                               | [`impl/renovate.md`](renovate.md)                                                                                                     |
+| [`.claude/rules/markdown.md`](../../.claude/rules/markdown.md)         | `**/*.md`                                                                          | [`impl/documentation.md`](documentation.md)                                                                                           |
+| [`.claude/rules/portal.md`](../../.claude/rules/portal.md)             | `src/app/portal/**`                                                                | [`tech/portal.md`](../tech/portal.md)                                                                                                 |
+| [`.claude/rules/public-api.md`](../../.claude/rules/public-api.md)     | Library `components/`, `directives/`, `public-api.ts`                              | [`user/components.md`](../user/components.md), `Library Obligations` of [`impl/definition-of-done.md`](definition-of-done.md)         |
+| [`.claude/rules/repository.md`](../../.claude/rules/repository.md)     | Everything                                                                         | Invariants, stated inline                                                                                                             |
+| [`.claude/rules/styling.md`](../../.claude/rules/styling.md)           | `**/*.scss`                                                                        | [`impl/styling.md`](styling.md)                                                                                                       |
+| [`.claude/rules/testing.md`](../../.claude/rules/testing.md)           | `**/*.spec.ts`                                                                     | [`impl/testing.md`](testing.md)                                                                                                       |
+| [`.claude/rules/theme-tokens.md`](../../.claude/rules/theme-tokens.md) | `_formidable-vars.scss`, `_tokens.scss`, `token-manifest.ts`, `theme-reference.md` | `Theme Tokens` of [`impl/definition-of-done.md`](definition-of-done.md)                                                               |
 
-Scoping uses `paths` frontmatter. A rule without `paths` loads in every session, so `repository.md` stays short.
+Scoping uses `paths` frontmatter. A rule without `paths` loads in every session, so [`.claude/rules/repository.md`](../../.claude/rules/repository.md) stays short.
 
 Conventions are split per area for the same reason. One file per rule means an SCSS edit does not load the component conventions, and a spec edit does not load the portal design.
 
@@ -61,12 +61,12 @@ MCP servers are not invoked. Their tools are model-invoked, so there is nothing 
 
 ## Agents
 
-| Agent          | Input                                                       | Effort  | Output                                     |
-| :------------- | :---------------------------------------------------------- | :-----: | :----------------------------------------- |
-| `fd-research`  | Requirement, repository, `implementation.md`, `backlog.md`  | Inherit | `.research/<slug>.md`                      |
-| `fd-plan`      | `.research/<slug>.md`                                       | Inherit | `.plan/<slug>.md`                          |
-| `fd-implement` | `.plan/<slug>.md`                                           | Inherit | Source code, progress appended to the plan |
-| `fd-review`    | Diff, [`impl/definition-of-done.md`](definition-of-done.md) |  High   | Findings                                   |
+| Agent          | Input                                                                                                   | Effort  | Output                                     |
+| :------------- | :------------------------------------------------------------------------------------------------------ | :-----: | :----------------------------------------- |
+| `fd-research`  | Requirement, repository, [`impl/implementation.md`](implementation.md), [`impl/backlog.md`](backlog.md) | Inherit | `.research/<slug>.md`                      |
+| `fd-plan`      | `.research/<slug>.md`                                                                                   | Inherit | `.plan/<slug>.md`                          |
+| `fd-implement` | `.plan/<slug>.md`                                                                                       | Inherit | Source code, progress appended to the plan |
+| `fd-review`    | Diff, [`impl/definition-of-done.md`](definition-of-done.md)                                             |  High   | Findings                                   |
 
 An agent body stands alone and never assumes who invoked it.
 
@@ -93,7 +93,7 @@ An agent body stands alone and never assumes who invoked it.
 
 The harness supports Spec Driven Development. Each phase reads the previous phase's artifact from disk rather than from the conversation, so any phase can be resumed in a fresh session.
 
-There is no issue tracker. [`impl/implementation.md`](implementation.md) is the source of truth for outstanding work — check it before starting. [`impl/backlog.md`](backlog.md) is the intake buffer for ideas that have not been triaged into a phase yet.
+There is no issue tracker. [`impl/implementation.md`](implementation.md) is the source of truth for outstanding work. Check it before starting. [`impl/backlog.md`](backlog.md) is the intake buffer for ideas that have not been triaged into a phase yet.
 
 ### Planning
 
@@ -133,7 +133,7 @@ flowchart LR
 | Pull Request     | Verified change       | Pull request                   | `/fd-create-pr`                                     |
 | Release          | Merge to `main`       | Deployed portal, npm package   | `deploy.yml`, then `publish:lib` by hand            |
 
-`.research/` and `.plan/` are untracked. Implementation progress is appended to the plan file rather than written to a third artifact, so a work item has exactly two files. Templates live in `.claude/skills/fd-drive-sdd/`. For a small task, skip SDD — edit directly and run `fd-review-change`.
+`.research/` and `.plan/` are untracked. Implementation progress is appended to the plan file rather than written to a third artifact, so a work item has exactly two files. Templates live in `.claude/skills/fd-drive-sdd/`. For a small task, skip SDD: edit directly and run `fd-review-change`.
 
 ### Maintenance
 
@@ -143,7 +143,7 @@ flowchart LR
   Backlog --> Branch[Branch]
 ```
 
-A defect reported by a consumer becomes a backlog item and then follows the development flow; bugs lead the roadmap. Dependency updates arrive as Renovate pull requests, see [`impl/renovate.md`](renovate.md). There is no separate hotfix path — `main` is the only release branch.
+A defect reported by a consumer becomes a backlog item and then follows the development flow; bugs lead the roadmap. Dependency updates arrive as Renovate pull requests, see [`impl/renovate.md`](renovate.md). There is no separate hotfix path: `main` is the only release branch.
 
 ---
 
@@ -172,7 +172,7 @@ The recommended baseline denies what must stay manual. `deny` outranks `allow`, 
 | `git commit/push/merge/rebase/reset/revert/cherry-pick/tag` | History and remote changes stay manual |
 | `git clean`, `git filter-branch`, `rm -rf`, `sudo`          | Irreversible                           |
 | `gh pr merge`, `gh release`, `npm publish`                  | Outward facing                         |
-| `npm run publish:lib`                                       | Outward facing — see below             |
+| `npm run publish:lib`                                       | Outward facing, see below              |
 
 - **Match On The Command String**: a `Bash` rule matches what is typed, not what runs. `npm run publish:lib` calls `npm publish` inside a script, so `npm publish` alone does not deny it.
 - **Allow Rules Are Personal**: anything not allowed prompts. The allow list is a guardrail against routine mistakes, not a sandbox.
@@ -191,7 +191,9 @@ The recommended baseline denies what must stay manual. `deny` outranks `allow`, 
 | `playwright`  |  `stdio`  | Browser automation against the served portal                  | Nothing            |
 | `ux-patterns` |  `http`   | UX pattern guidance and accessibility review for fields       | Nothing            |
 
-`playwright` runs headless and isolated, so it never touches a real browser profile. It is a client and never starts or stops a server: reuse whatever is already listening on the portal's port, and ask rather than starting one. That contract is stated in `.claude/rules/repository.md`, because the risk applies to every task and not only to portal files. The portal routes on the hash, so a deep link is `http://localhost:4200/#/docs`, not `/docs`.
+`playwright` runs headless and isolated, so it never touches a real browser profile. It is a client and never starts or stops a server: reuse whatever is already listening on the portal's port, and ask rather than starting one. That contract is stated in [`.claude/rules/repository.md`](../../.claude/rules/repository.md), because the risk applies to every task and not only to portal files. The portal routes on the hash, so a deep link is `http://localhost:4200/#/docs`, not `/docs`.
+
+The `npx` servers run the exact version pinned in `.mcp.json`, never `@latest`, so a server only changes when its pin is bumped. `playwright` drives the Chromium build of the Playwright it brings, separate from any installed Google Chrome, so bumping its pin also means installing the new version's build.
 
 `angular-cli` runs the workspace's own Angular CLI through `npx ng`, so the server version always matches the installed CLI and its version-specific coding standards. It runs `--read-only`, which drops the tools that would otherwise start, stop or run a project target. That is the same Running Servers invariant `playwright` is held to, enforced by configuration rather than by instruction. The remaining tools cover project discovery, Angular best practices, documentation search, OnPush and zoneless migration planning, a tutor, and waiting on the build of a dev server that is already running.
 

@@ -1,28 +1,76 @@
+import fc from 'fast-check';
+import { page } from 'vitest/browser';
+import { slugify } from '../helpers/slug.helpers';
 import { DOC_PAGES } from './doc-pages';
-import { renderDoc, rewriteDocHref } from './markdown.helpers';
+import { drawDiagrams, renderDoc, rewriteDocHref } from './markdown.helpers';
 
 const SLUGS = new Set(DOC_PAGES.map((page) => page.slug));
 
-describe('rewriteDocHref', () => {
-  it('turns a sibling user document into a route', () => {
-    expect(rewriteDocHref('user/theming.md', SLUGS)).toEqual({ href: '#/docs/theming', external: false });
-    expect(rewriteDocHref('theming.md', SLUGS)).toEqual({ href: '#/docs/theming', external: false });
-  });
+/** A document's file name or an anchor, as the documents spell them. */
+const NAME = fc.stringMatching(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+/** No fragment, or any. */
+const FRAGMENT = fc.option(
+  NAME.map((anchor) => `#${anchor}`),
+  { nil: '' }
+);
 
-  it('drops a fragment, because the portal already routes on the hash', () => {
-    expect(rewriteDocHref('theming.md#4-five-things', SLUGS).href).toBe('#/docs/theming');
+const FLOWCHART = '```mermaid\nflowchart LR\n  Field --> Decorator\n```';
+
+/** A document rendered into the page, as the `Docs` route puts it there. */
+function mount(markdown: string): HTMLElement {
+  const host = document.createElement('div');
+
+  host.innerHTML = renderDoc(markdown, SLUGS).html;
+  document.body.append(host);
+  return host;
+}
+
+describe('rewriteDocHref', () => {
+  // A fragment is dropped, because the portal already routes on the hash.
+  it('turns a user document it mirrors into a route, from wherever it is linked', () => {
+    fc.assert(
+      fc.property(fc.constantFrom(...SLUGS), fc.constantFrom('', 'user/', '../user/'), FRAGMENT, (slug, at, anchor) => {
+        expect(rewriteDocHref(`${at}${slug}.md${anchor}`, SLUGS)).toEqual({ href: `#/docs/${slug}`, external: false });
+      })
+    );
   });
 
   it('sends a maintainer document to the repository, since the portal does not mirror it', () => {
-    const result = rewriteDocHref('tech/layering.md', SLUGS);
+    fc.assert(
+      fc.property(
+        NAME,
+        fc.constantFrom('tech', 'impl'),
+        fc.constantFrom('', '../'),
+        FRAGMENT,
+        (name, bucket, up, anchor) => {
+          const { href, external } = rewriteDocHref(`${up}${bucket}/${name}.md${anchor}`, SLUGS);
 
-    expect(result.external).toBe(true);
-    expect(result.href).toContain('/tech/layering.md');
+          expect(external).toBe(true);
+          expect(href).toMatch(/^https:\/\//);
+          expect(href.endsWith(`/.documentation/${bucket}/${name}.md`)).toBe(true);
+        }
+      )
+    );
   });
 
-  it('leaves an in-page anchor and an absolute URL alone', () => {
-    expect(rewriteDocHref('#underline', SLUGS)).toEqual({ href: '#underline', external: false });
-    expect(rewriteDocHref('https://angular.dev', SLUGS)).toEqual({ href: 'https://angular.dev', external: true });
+  it('leaves an absolute URL alone', () => {
+    fc.assert(
+      fc.property(fc.webUrl({ withFragments: true, withQueryParameters: true }), (url) => {
+        expect(rewriteDocHref(url, SLUGS)).toEqual({ href: url, external: true });
+      })
+    );
+  });
+
+  // A bare fragment would replace the route the portal holds on the hash, and land on the Studio.
+  it('turns an in-page anchor into a route to that anchor in the same document', () => {
+    fc.assert(
+      fc.property(NAME, fc.constantFrom(...SLUGS), (anchor, slug) => {
+        expect(rewriteDocHref(`#${anchor}`, SLUGS, slug)).toEqual({
+          href: `#/docs/${slug}/${anchor}`,
+          external: false
+        });
+      })
+    );
   });
 
   it('leaves a document it does not mirror as written', () => {
@@ -54,6 +102,22 @@ describe('renderDoc', () => {
     expect(headings.map((heading) => heading.id)).toEqual(['slider', 'slider-2']);
   });
 
+  // `Slider 2` slugs to the id a second `Slider` would take, so the names are drawn to collide.
+  it('gives every heading an id of its own, made from its text', () => {
+    const titles = fc.array(fc.constantFrom('Slider', 'Slider 2', 'Date Field', 'Date Field 3'), { minLength: 1 });
+
+    fc.assert(
+      fc.property(titles, (texts) => {
+        const { headings } = renderDoc(texts.map((text) => `## ${text}`).join('\n\n'), SLUGS);
+        const ids = headings.map((heading) => heading.id);
+
+        expect(headings.map((heading) => heading.text)).toEqual(texts);
+        expect(new Set(ids).size).toBe(ids.length);
+        texts.forEach((text, index) => expect(ids[index]!.startsWith(slugify(text))).toBe(true));
+      })
+    );
+  });
+
   // The Specimen links to a component's entry and to a variable's row, neither of which is in the contents.
   it('gives third-level headings and variable rows an id, and lists neither', () => {
     const { html, headings } = renderDoc(
@@ -81,7 +145,7 @@ describe('renderDoc', () => {
     for (const page of DOC_PAGES) {
       const { html } = renderDoc(page.markdown, SLUGS);
 
-      expect(html.length).withContext(page.slug).toBeGreaterThan(200);
+      expect(html.length, page.slug).toBeGreaterThan(200);
     }
   });
 
@@ -89,7 +153,7 @@ describe('renderDoc', () => {
   // level, like the source the samples are drawn from — `.editorconfig` sets it, this notices if it stops.
   it('indents its code samples the way the repository indents code', () => {
     for (const page of DOC_PAGES) {
-      expect(page.markdown).withContext(page.slug).not.toContain('\t');
+      expect(page.markdown, page.slug).not.toContain('\t');
     }
   });
 
@@ -97,8 +161,94 @@ describe('renderDoc', () => {
   // is a path string rather than a document, and every page would render as one short line.
   it('has the real documents behind it, not their paths', () => {
     for (const page of DOC_PAGES) {
-      expect(page.markdown.length).withContext(page.slug).toBeGreaterThan(1000);
-      expect(page.markdown).withContext(page.slug).toContain('#');
+      expect(page.markdown.length, page.slug).toBeGreaterThan(1000);
+      expect(page.markdown, page.slug).toContain('#');
+    }
+  });
+
+  it('gives every in-page link a target the page renders', () => {
+    for (const page of DOC_PAGES) {
+      const { html } = renderDoc(page.markdown, SLUGS, page.slug);
+      const prefix = `#/docs/${page.slug}/`;
+      const anchors = Array.from(html.matchAll(/href="([^"]+)"/g), (match) => match[1]!).filter((href) =>
+        href.startsWith(prefix)
+      );
+
+      for (const anchor of anchors) {
+        expect(html, `${page.slug}: ${anchor}`).toContain(` id="${anchor.slice(prefix.length)}"`);
+      }
+    }
+  });
+
+  it('marks a Mermaid block as a diagram, and keeps the block to show until it is drawn', () => {
+    const host = mount(FLOWCHART);
+    const diagram = host.querySelector<HTMLElement>('.doc-diagram')!;
+
+    expect(diagram.dataset['diagram']).toBe('flowchart LR\n  Field --> Decorator\n');
+    expect(diagram.querySelector('pre code')?.textContent).toContain('Field --> Decorator');
+    expect(diagram.querySelector('.doc-code-bar')).toBeNull();
+    host.remove();
+  });
+
+  it('highlights a code block under a bar naming its language and copying it', () => {
+    const host = mount('```ts\nconst answer = 42;\n```');
+    const frame = host.querySelector('.doc-code')!;
+
+    expect(frame.querySelector('.doc-code-bar')?.firstChild?.textContent).toBe('ts');
+    expect(
+      page.elementLocator(frame).getByRole('button', { name: 'Copy' }).element().querySelector('svg')
+    ).not.toBeNull();
+    expect(frame.querySelector('pre code .hljs-keyword')?.textContent).toBe('const');
+    expect(frame.querySelector('pre code')?.textContent).toBe('const answer = 42;\n');
+    host.remove();
+  });
+
+  it('shows a block in a language it does not highlight as written', () => {
+    const host = mount('```text\n<b>as is</b>\n```');
+    const code = host.querySelector('.doc-code pre code')!;
+
+    expect(code.textContent).toBe('<b>as is</b>\n');
+    expect(code.children.length).toBe(0);
+    host.remove();
+  });
+});
+
+describe('drawDiagrams', () => {
+  it('draws a diagram as an SVG in place of its code block', async () => {
+    const host = mount(FLOWCHART);
+
+    await drawDiagrams(host, false);
+
+    expect(host.querySelector('.doc-diagram pre')).toBeNull();
+    expect(host.querySelector('.doc-diagram svg')?.textContent).toContain('Decorator');
+    host.remove();
+  });
+
+  // Mermaid bakes its theme into the drawing, so the dark one is a drawing of its own.
+  it('draws the diagram again, in the dark theme, from the source it keeps', async () => {
+    const host = mount(FLOWCHART);
+    const style = (): string => host.querySelector('.doc-diagram svg style')?.textContent?.toLowerCase() ?? '';
+
+    await drawDiagrams(host, false);
+    expect(style()).toContain('#ececff');
+
+    await drawDiagrams(host, true);
+    expect(style()).toContain('#1f2020');
+    expect(host.querySelector('.doc-diagram svg')?.textContent).toContain('Decorator');
+    host.remove();
+  });
+
+  // Each checked-in diagram is drawn by the real Mermaid, so one it cannot parse fails here and not on the page.
+  it('draws every checked-in diagram', async () => {
+    for (const page of DOC_PAGES) {
+      const host = mount(page.markdown);
+
+      await drawDiagrams(host, false);
+
+      expect(host.querySelectorAll('.doc-diagram svg').length, page.slug).toBe(
+        page.markdown.split('```mermaid').length - 1
+      );
+      host.remove();
     }
   });
 });

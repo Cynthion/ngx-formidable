@@ -1,114 +1,67 @@
-import { ChangeDetectionStrategy, Component, viewChild } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { FormsModule, NgForm } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
-import { NgxFormidableFormDirective } from '../../forms/form.directive';
-import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
-import { InputFieldComponent } from './input-field/input-field.component';
+import { page } from 'vitest/browser';
+import { bindField, BoundField } from '../../testing/bind-field';
+import { configureFormidableTestBed } from '../../testing/test-bed';
 
 /**
- * Contract of the field's `disabled`: it has **two** writers, and the field has to report whichever wrote
- * last. A consumer binds `[disabled]`, and Angular's own forms call `setDisabledState` when the control is
- * disabled programmatically — neither goes through the other.
- *
- * That is why `disabled` is a `model` and not an `input`: a signal input cannot be written from inside, so
- * `setDisabledState` would have nowhere to put Angular's half and a `control.disable()` would render
- * nothing. Both paths are pinned below, and so is the state class the decorator hangs its styling off.
+ * Contract of a field's `disabled` under `ngModel`, where it has **two** writers: a consumer's `[disabled]`
+ * binding, and `ngModel` writing its control's state when code disables the control. The field follows
+ * whichever changed last. Each writes only when its own value changes, so a check of the host that changes
+ * nothing undoes neither. The decorator's state class follows the field.
  */
 
-@Component({
-  imports: [FormsModule, NgxFormidableFormDirective, FieldDecoratorComponent, InputFieldComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <form formidableForm>
-      <formidable-field-decorator>
-        <formidable-input-field
-          name="name"
-          [disabled]="disabled"
-          [ngModel]="value" />
-      </formidable-field-decorator>
-    </form>
-  `
-})
-class DisabledHostComponent {
-  readonly ngForm = viewChild.required(NgForm);
+const textbox = () => page.getByRole('textbox', { name: 'Name' });
 
-  value = '';
-  disabled = false;
+/** An input under `ngModel`, its `[disabled]` bound `false`. */
+const bind = () =>
+  bindField('input', 'template-driven', {
+    inputs: { disabled: false },
+    decorated: true,
+    decoration: '<div formidableFieldLabel>Name</div>'
+  });
+
+/** That the field's input, and the decorator around it, show it disabled or not. */
+function expectDisabled({ element }: BoundField, disabled: boolean): void {
+  expect((textbox().element() as HTMLInputElement).disabled).toBe(disabled);
+  expect(element.closest('formidable-field-decorator')!.classList.contains('is-disabled')).toBe(disabled);
 }
 
 describe('field disabled state', () => {
-  let fixture: ComponentFixture<DisabledHostComponent>;
-  let host: DisabledHostComponent;
+  beforeEach(() => configureFormidableTestBed());
 
-  beforeEach(fakeAsync(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+  it('starts enabled', async () => {
+    const bound = await bind();
 
-    fixture = TestBed.createComponent(DisabledHostComponent);
-    host = fixture.componentInstance;
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-  }));
-
-  function input(): HTMLInputElement {
-    return fixture.nativeElement.querySelector('input') as HTMLInputElement;
-  }
-
-  function decorator(): HTMLElement {
-    return fixture.nativeElement.querySelector('formidable-field-decorator') as HTMLElement;
-  }
-
-  function settle(): void {
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-  }
-
-  it('starts enabled', () => {
-    expect(input().hasAttribute('disabled')).toBe(false);
-    expect(decorator().classList.contains('is-disabled')).toBe(false);
+    expectDisabled(bound, false);
   });
 
-  it('follows the bound input', fakeAsync(() => {
-    host.disabled = true;
-    settle();
+  it('follows the bound input', async () => {
+    const bound = await bind();
 
-    expect(input().hasAttribute('disabled')).toBe(true);
-    expect(decorator().classList.contains('is-disabled')).toBe(true);
+    await bound.set('disabled', true);
+    expectDisabled(bound, true);
 
-    host.disabled = false;
-    settle();
+    await bound.set('disabled', false);
+    expectDisabled(bound, false);
+  });
 
-    expect(input().hasAttribute('disabled')).toBe(false);
-    expect(decorator().classList.contains('is-disabled')).toBe(false);
-  }));
+  // The binding does not change here, so the only writer is `ngModel`, writing its control's state.
+  it('follows a control disabled through the forms API', async () => {
+    const bound = await bind();
 
-  // The claim the `model` exists for: nothing binds the input here, so the only writer is Angular's
-  // `setDisabledState`. With a plain `input()` the field could not take this at all.
-  it('follows a control disabled through Angular’s own forms', fakeAsync(() => {
-    host.ngForm().control.get('name')!.disable();
-    settle();
+    await bound.state({ disabled: true });
+    expectDisabled(bound, true);
 
-    expect(input().hasAttribute('disabled')).toBe(true);
-    expect(decorator().classList.contains('is-disabled')).toBe(true);
+    await bound.state({ disabled: false });
+    expectDisabled(bound, false);
+  });
 
-    host.ngForm().control.get('name')!.enable();
-    settle();
+  it('does not let an unchanged binding undo the control', async () => {
+    const bound = await bind();
 
-    expect(input().hasAttribute('disabled')).toBe(false);
-    expect(decorator().classList.contains('is-disabled')).toBe(false);
-  }));
+    await bound.state({ disabled: true });
+    // A pass that checks the host, and with it the unchanged `[disabled]="false"`.
+    await bound.set('disabled', false);
 
-  // Last writer wins, and a binding that does not change is not a writer — so a change detection pass
-  // does not hand the field back its own `[disabled]="false"` and undo the control. The rule the old
-  // plain property followed, and the reason this is a `model` rather than a computed over both writers.
-  it('does not let an unchanged binding undo the control', fakeAsync(() => {
-    host.ngForm().control.get('name')!.disable();
-    settle();
-    settle();
-
-    expect(input().hasAttribute('disabled')).toBe(true);
-    expect(decorator().classList.contains('is-disabled')).toBe(true);
-  }));
+    expectDisabled(bound, true);
+  });
 });

@@ -1,0 +1,42 @@
+<div
+  [class]="'field-option-' + layout()"
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
+  [class.is-selected]="selected()"
+  [class.is-highlighted]="highlighted()"
+  (click)="onClick()">
+  <!-- Option Prefix for Radio Group -->
+  @if (layout() === 'radio-group') {
+  <span class="field-option-prefix">
+    <span class="radio-outer">
+      @if (selected()) {
+      <span class="radio-inner"></span>
+      }
+    </span>
+  </span>
+  }
+
+  <!-- Option Prefix for Checkbox Group -->
+  @if (layout() === 'checkbox-group') {
+  <span class="field-option-prefix">
+    <span class="checkbox-outer">
+      @if (selected()) {
+      <span class="checkbox-inner"></span>
+      }
+    </span>
+  </span>
+  }
+
+  <!-- Content -->
+  <div class="content">
+    @if (content(); as content) {
+    <ng-container [ngTemplateOutlet]="content" />
+    } @else { {{ label() || value() }} }
+  </div>
+</div>
+
+<!-- A projected option's content, handed to its field as `option().template` and rendered only where the
+     field renders the option — never here, so the content lives in exactly one place. -->
+<ng-template #contentTemplate>
+  <ng-content />
+</ng-template>

@@ -1,0 +1,36 @@
+<div
+  #timeRef
+  class="field"
+  [class.is-readonly]="readonly()"
+  [class.is-disabled]="disabled()"
+  [class.focused]="isFieldFocused()">
+  <div class="input-wrapper">
+    <!-- Input Field -->
+    <input
+      #inputRef
+      type="text"
+      autocomplete="off"
+      class="wrapped-input"
+      [id]="fieldId"
+      [placeholder]="placeholder()"
+      [attr.name]="name()"
+      [attr.readonly]="readonly() ? '' : null"
+      [attr.disabled]="disabled() ? '' : null"
+      [attr.tabindex]="canEdit() ? null : -1"
+      [attr.aria-required]="required() || null"
+      [attr.aria-invalid]="showErrors() || null"
+      [attr.aria-describedby]="describedBy"
+      [attr.aria-readonly]="readonly() || null"
+      [mask]="ngxMask()"
+      [showMaskTyped]="ngxMaskConfig.showMaskTyped"
+      [placeHolderCharacter]="ngxMaskConfig.placeHolderCharacter"
+      [leadZeroDateTime]="ngxMaskConfig.leadZeroDateTime"
+      [dropSpecialCharacters]="ngxMaskConfig.dropSpecialCharacters"
+      (mousedown)="onEditorMouseDown()"
+      (mouseup)="rememberClickedCaret(inputRef)"
+      (click)="restoreClickedCaret(inputRef)"
+      (input)="onInput()"
+      (focus)="onFocusChange(true)"
+      (blur)="onFocusChange(false)" />
+  </div>
+</div>

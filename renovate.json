@@ -6,7 +6,7 @@
   "packageRules": [
     {
       "description": "Angular majors move with ng update, whose migrations Renovate cannot run",
-      "matchPackageNames": ["@angular/*", "angular-eslint", "ng-packagr", "ngx-mask", "typescript", "zone.js"],
+      "matchPackageNames": ["@angular/*", "angular-eslint", "ng-packagr", "ngx-mask", "typescript"],
       "matchUpdateTypes": ["major"],
       "groupName": "Angular",
       "dependencyDashboardApproval": true
@@ -33,9 +33,9 @@
       "groupName": "Prettier"
     },
     {
-      "matchPackageNames": ["karma", "karma-*", "jasmine-core", "@types/jasmine", "istanbul-lib-instrument"],
+      "matchPackageNames": ["vitest", "@vitest/*"],
       "matchUpdateTypes": ["major"],
-      "groupName": "Karma"
+      "groupName": "Vitest"
     },
     {
       "matchManagers": ["github-actions"],
@@ -48,9 +48,9 @@
       "allowedVersions": "<6.1"
     },
     {
-      "description": "Ceiling: Jasmine 7 makes describe and it read-only, which breaks every fakeAsync spec",
-      "matchPackageNames": ["jasmine-core", "@types/jasmine"],
-      "allowedVersions": "<7"
+      "description": "Ceiling: @angular/build peers vitest ^4.0.8 || ^5.0.0",
+      "matchPackageNames": ["vitest", "@vitest/*"],
+      "allowedVersions": "<6"
     }
   ]
 }

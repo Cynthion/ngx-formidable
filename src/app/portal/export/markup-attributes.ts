@@ -6,10 +6,14 @@ import { PortalFieldSpec } from '../model/field-spec.model';
  *
  * `binding` decides the syntax: a plain attribute for a string, a one-way binding with a literal for anything
  * that is not one. `read` returns `null` where the attribute is omitted.
+ *
+ * `rule` marks an input `[formField]` owns, which the compiler rejects beside it: the schema states it as the
+ * rule of the same name instead, and the template leaves it out.
  */
 interface MarkupAttribute {
   readonly name: string;
   readonly binding: boolean;
+  readonly rule?: true;
   readonly read: (spec: PortalFieldSpec) => string | null;
   readonly write: (raw: string) => Partial<PortalFieldSpec>;
 }
@@ -28,17 +32,28 @@ export const unquote = (raw: string): string =>
     .replace(/^'(.*)'$/s, '$1')
     .replace(/^"(.*)"$/s, '$1');
 
-/** The attributes every field carries, whatever its kind. */
+/** The attributes every field carries, whatever its kind. `[formField]` names the field, so `name` is not one. */
 const COMMON_ATTRIBUTES: readonly MarkupAttribute[] = [
-  { name: 'name', binding: false, read: (s) => s.name, write: (raw) => ({ name: raw }) },
   { name: 'placeholder', binding: false, read: (s) => text(s.placeholder), write: (raw) => ({ placeholder: raw }) }
 ];
 
 /** The kind-specific inputs, keyed by the member they map to. */
 const FIELD_ATTRIBUTES: readonly MarkupAttribute[] = [
   { name: 'mask', binding: false, read: (s) => text(s.mask), write: (raw) => ({ mask: raw }) },
-  { name: 'minLength', binding: true, read: (s) => num(s.minLength), write: (raw) => ({ minLength: parseNum(raw) }) },
-  { name: 'maxLength', binding: true, read: (s) => num(s.maxLength), write: (raw) => ({ maxLength: parseNum(raw) }) },
+  {
+    name: 'minLength',
+    binding: true,
+    rule: true,
+    read: (s) => num(s.minLength),
+    write: (raw) => ({ minLength: parseNum(raw) })
+  },
+  {
+    name: 'maxLength',
+    binding: true,
+    rule: true,
+    read: (s) => num(s.maxLength),
+    write: (raw) => ({ maxLength: parseNum(raw) })
+  },
   {
     name: 'enableAutosize',
     binding: true,
@@ -95,8 +110,8 @@ const FIELD_ATTRIBUTES: readonly MarkupAttribute[] = [
   },
   { name: 'onLabel', binding: false, read: (s) => text(s.onLabel), write: (raw) => ({ onLabel: raw }) },
   { name: 'offLabel', binding: false, read: (s) => text(s.offLabel), write: (raw) => ({ offLabel: raw }) },
-  { name: 'min', binding: true, read: (s) => num(s.min), write: (raw) => ({ min: parseNum(raw) }) },
-  { name: 'max', binding: true, read: (s) => num(s.max), write: (raw) => ({ max: parseNum(raw) }) },
+  { name: 'min', binding: true, rule: true, read: (s) => num(s.min), write: (raw) => ({ min: parseNum(raw) }) },
+  { name: 'max', binding: true, rule: true, read: (s) => num(s.max), write: (raw) => ({ max: parseNum(raw) }) },
   { name: 'step', binding: true, read: (s) => num(s.step), write: (raw) => ({ step: parseNum(raw) }) },
   { name: 'minLabel', binding: false, read: (s) => text(s.minLabel), write: (raw) => ({ minLabel: raw }) },
   { name: 'maxLabel', binding: false, read: (s) => text(s.maxLabel), write: (raw) => ({ maxLabel: raw }) },

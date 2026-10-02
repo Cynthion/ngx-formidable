@@ -32,6 +32,14 @@ module.exports = tseslint.config(
     // and treated as if they are HTML files (and therefore have the .html config below applied to them)
     processor: angulareslint.processInlineTemplates,
     rules: {
+      '@angular-eslint/no-uncalled-signals': 'error',
+      '@angular-eslint/prefer-host-metadata-property': 'error',
+      '@angular-eslint/prefer-on-push-component-change-detection': ['error', { allowExplicitOnPush: false }],
+      '@angular-eslint/prefer-output-emitter-ref': 'error',
+      '@angular-eslint/prefer-output-readonly': 'error',
+      '@angular-eslint/prefer-signal-model': 'error',
+      '@angular-eslint/prefer-signals': 'error',
+      '@angular-eslint/reactive-context-must-read-signal': 'error',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
@@ -78,7 +86,11 @@ module.exports = tseslint.config(
       ...angulareslint.configs.templateRecommended
       // ...angulareslint.configs.templateAccessibility
     ],
-    rules: {}
+    rules: {
+      '@angular-eslint/template/prefer-class-binding': 'error',
+      '@angular-eslint/template/prefer-self-closing-tags': 'error',
+      '@angular-eslint/template/prefer-style-binding': 'error'
+    }
   },
   {
     files: ['projects/ngx-formidable/src/lib/**/*.ts'],

@@ -6,8 +6,7 @@
     // implies `moduleResolution: bundler` and `esModuleInterop`
     "module": "preserve",
     "paths": {
-      "@cynthion/ngx-formidable": ["./projects/ngx-formidable/src/public-api.ts"],
-      "@cynthion/ngx-formidable/vest": ["./projects/ngx-formidable/vest/src/public-api.ts"]
+      "@cynthion/ngx-formidable": ["./projects/ngx-formidable/src/public-api.ts"]
     },
 
     /* Emit */
@@ -39,7 +38,7 @@
     "strict": true,
 
     /* Types */
-    "types": ["jasmine"]
+    "types": ["vitest/globals", "@vitest/browser-playwright"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

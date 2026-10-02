@@ -1,24 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
-import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { NgxFormidableFieldValidateDirective } from '../../forms/field-validate.directive';
-import { NgxFormidableFormDirective } from '../../forms/form.directive';
-import { StubValidatorDirective } from '../../forms/testing/stub-validator.directive';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
-import { RadioGroupFieldComponent } from '../fields/radio-group-field/radio-group-field.component';
-import { FieldDecoratorComponent } from './field-decorator.component';
+import { page, userEvent } from 'vitest/browser';
+import { bindField, BoundField, FieldFlags, FormsApi } from '../../testing/bind-field';
+import { theme } from '../../testing/dom';
+import { configureFormidableTestBed } from '../../testing/test-bed';
 
 /**
- * Contract of the field's state colours.
- *
- * Every state is a set of custom-property remaps rather than a set of property declarations, so the order
- * the state blocks are written in inside the `field` mixin *is* their precedence:
- * hovered < focused < invalid < readonly < disabled. These specs pin that chain down, and pin down that
- * the label follows the same states from the decorator's host — the label is not in the field, so it is
- * the one part that would silently keep the base colour.
+ * Per **Field State** in `user/decoration.md`: where states overlap, `disabled` beats `readonly`, which beats
+ * focused, which beats hovered; invalid shows through hover and focus and gives way to `readonly` and
+ * `disabled`. The label follows the same states, and `is-invalid` follows the field's `aria-invalid`.
  *
  * Colours are compared against the theme's own `:root` variables rather than against literals, so a
  * retheme cannot make these pass for the wrong reason.
@@ -36,247 +24,175 @@ function token(name: string): string {
   return value;
 }
 
-@Component({
-  imports: [FieldDecoratorComponent, InputFieldComponent, FieldLabelDirective],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <formidable-field-decorator>
-      <formidable-input-field
-        name="field"
-        [readonly]="readonly"
-        [disabled]="disabled" />
-      <div
-        formidableFieldLabel
-        position="outside">
-        Label
-      </div>
-    </formidable-field-decorator>
-  `
-})
-class InputHostComponent {
-  readonly = false;
-  disabled = false;
-}
+const input = () => page.getByRole('textbox', { name: 'Name' });
+const style = () => getComputedStyle(input().element());
+const labelColour = () => getComputedStyle(page.getByText('Name').element()).color;
 
-@Component({
-  imports: [FieldDecoratorComponent, RadioGroupFieldComponent, FieldLabelDirective],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <formidable-field-decorator>
-      <formidable-radio-group-field name="field" />
-      <div formidableFieldLabel>Label</div>
-    </formidable-field-decorator>
-  `
-})
-class RadioGroupHostComponent {}
-
-interface NameModel {
-  name?: string;
-}
-
-/** A real form, so the flag is proven to travel from a validator all the way to the host class. */
-@Component({
-  imports: [
-    FormsModule,
-    NgxFormidableFormDirective,
-    StubValidatorDirective,
-    NgxFormidableFieldValidateDirective,
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    FieldErrorsDirective,
-    FieldLabelDirective
-  ],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <form
-      formidableForm
-      [formValue]="formValue"
-      [formShape]="shape"
-      [stubValidator]="required"
-      (formValueChange)="formValue = $event">
-      <formidable-field-decorator>
-        <formidable-input-field
-          formidableFieldErrors
-          name="name"
-          [ngModel]="formValue.name" />
-        <div formidableFieldLabel>Name</div>
-      </formidable-field-decorator>
-    </form>
-  `
-})
-class ValidatedHostComponent {
-  formValue: NameModel = {};
-  shape: Required<NameModel> = { name: '' };
-  required = { name: 'Required' };
-}
-
-describe('field state colors', () => {
-  let fixture: ComponentFixture<InputHostComponent>;
-  let host: InputHostComponent;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
-
-    fixture = TestBed.createComponent(InputHostComponent);
-    host = fixture.componentInstance;
-
-    // The label transitions its colour, so a read straight after a state change would return a point
-    // part-way through the interpolation. These assertions are about where a state lands.
-    fixture.nativeElement.style.setProperty('--formidable-animation-duration', '0s');
-    fixture.detectChanges();
+/** Binds a decorated input that reveals at once, labelled `Name` outside the field. */
+const bind = (state: Partial<FieldFlags> = {}, api: FormsApi = 'signal'): Promise<BoundField> =>
+  bindField('input', api, {
+    inputs: { revealOn: 'always' },
+    decorated: true,
+    decoration: '<div formidableFieldLabel position="outside">Name</div>',
+    after: '<button type="button">Next</button>',
+    state
   });
 
-  function decorator(): HTMLElement {
-    return fixture.nativeElement.querySelector('formidable-field-decorator') as HTMLElement;
-  }
+/** Moves the pointer off every field, so a hover left over from an earlier spec cannot colour one. */
+const pointerAway = () =>
+  userEvent.hover(page.elementLocator(document.documentElement), { position: { x: 1, y: innerHeight - 1 } });
 
-  function field(): HTMLInputElement {
-    return fixture.nativeElement.querySelector('input') as HTMLInputElement;
-  }
-
-  function label(): HTMLElement {
-    return fixture.nativeElement.querySelector('.label-wrapper') as HTMLElement;
-  }
-
-  /** The states the decorator owns; hover is the browser's and cannot be simulated. */
-  function setState(state: 'is-focused' | 'is-invalid' | ''): void {
-    decorator().classList.remove('is-focused', 'is-invalid');
-    if (state) decorator().classList.add(state);
-  }
+describe('field state colours', () => {
+  beforeEach(async () => {
+    configureFormidableTestBed();
+    // The colours transition, so a read straight after a change would land part-way. These are about where
+    // a state lands.
+    theme('--formidable-animation-duration', '0s');
+    await pointerAway();
+  });
 
   describe('the field', () => {
-    it('takes the base colours with nothing going on', () => {
-      expect(getComputedStyle(field()).borderTopColor).toBe(token('--formidable-color-field-border'));
-      expect(getComputedStyle(field()).backgroundColor).toBe(token('--formidable-color-field-background'));
+    it('takes the base colours with nothing going on', async () => {
+      await bind();
+
+      expect(style().borderTopColor).toBe(token('--formidable-color-field-border'));
+      expect(style().backgroundColor).toBe(token('--formidable-color-field-background'));
     });
 
-    it('takes the invalid border and focus ring while invalid', () => {
-      setState('is-invalid');
+    it('takes the hovered border under the pointer', async () => {
+      // The default theme hovers in the base colour, which would let a hover that never applied pass.
+      theme('--formidable-color-field-border-hovered', 'rgb(1, 2, 3)');
+      await bind();
 
-      expect(getComputedStyle(field()).borderTopColor).toBe(token('--formidable-color-field-border-invalid'));
-      expect(getComputedStyle(field()).borderTopColor).not.toBe(token('--formidable-color-field-border'));
+      await userEvent.hover(input());
+
+      expect(style().borderTopColor).toBe(token('--formidable-color-field-border-hovered'));
     });
 
-    // The whole reason the states are remaps and not declarations: a focused field is touched by
-    // definition, so focused-and-invalid is the common case, not the corner one.
-    it('stays invalid while focused', () => {
-      setState('is-invalid');
-      field().classList.add('focused');
+    it('takes the invalid border while invalid', async () => {
+      await bind({ invalid: true });
 
-      expect(getComputedStyle(field()).borderTopColor).toBe(token('--formidable-color-field-border-invalid'));
-      expect(getComputedStyle(field()).boxShadow).toContain(token('--formidable-color-field-border-invalid'));
+      expect(style().borderTopColor).toBe(token('--formidable-color-field-border-invalid'));
+      expect(style().borderTopColor).not.toBe(token('--formidable-color-field-border'));
     });
 
-    // The states are variable remaps, so a field that hovers while invalid resolves the *hover* colour —
-    // which is why `invalid-colors` has to point that one at the invalid colour too, not just the base.
-    it('stays invalid while hovered', () => {
-      setState('is-invalid');
+    // A focused field is touched by definition, so focused-and-invalid is the common case, not the corner one.
+    it('stays invalid while focused', async () => {
+      await bind({ invalid: true });
 
-      // `:hover` cannot be simulated, so this reads the colour the hover rule would resolve to.
-      const style = getComputedStyle(field());
+      await userEvent.click(input());
+      await expect.element(input()).toHaveFocus();
 
-      expect(style.getPropertyValue('--formidable-color-field-border-hovered').trim()).toBe(
-        style.getPropertyValue('--formidable-color-field-border-invalid').trim()
-      );
+      expect(style().borderTopColor).toBe(token('--formidable-color-field-border-invalid'));
+      expect(style().boxShadow).toContain(token('--formidable-color-field-border-invalid'));
     });
 
-    it('lets readonly and disabled outrank invalid', () => {
-      setState('is-invalid');
-      host.readonly = true;
-      fixture.detectChanges();
+    it('stays invalid while hovered', async () => {
+      await bind({ invalid: true });
 
-      expect(getComputedStyle(field()).backgroundColor).toBe(token('--formidable-color-field-background-readonly'));
-      expect(getComputedStyle(field()).borderTopColor).toBe(token('--formidable-color-field-border-readonly'));
+      await userEvent.hover(input());
 
-      host.readonly = false;
-      host.disabled = true;
-      fixture.detectChanges();
+      expect(style().borderTopColor).toBe(token('--formidable-color-field-border-invalid'));
+    });
 
-      expect(getComputedStyle(field()).backgroundColor).toBe(token('--formidable-color-field-background-disabled'));
-      expect(getComputedStyle(field()).borderTopColor).toBe(token('--formidable-color-field-border-disabled'));
+    // Signal Forms validates no readonly field, and no API a disabled one, so only a classic API holds a
+    // readonly field invalid.
+    it('lets readonly outrank invalid', async () => {
+      const bound = await bind({ invalid: true }, 'reactive');
+
+      await bound.state({ readonly: true });
+
+      await expect.element(input()).toHaveAttribute('aria-invalid', 'true');
+      expect(style().backgroundColor).toBe(token('--formidable-color-field-background-readonly'));
+      expect(style().borderTopColor).toBe(token('--formidable-color-field-border-readonly'));
+    });
+
+    it('lets disabled outrank readonly', async () => {
+      const bound = await bind();
+
+      await bound.state({ readonly: true, disabled: true });
+
+      expect(style().backgroundColor).toBe(token('--formidable-color-field-background-disabled'));
+      expect(style().borderTopColor).toBe(token('--formidable-color-field-border-disabled'));
     });
   });
 
-  // The label is the decorator's own element, so none of the field's state rules reach it — it follows
-  // the same states from the host instead, and all three label colours move together.
+  // The label is the decorator's own element, so it follows the same states from there.
   describe('the label', () => {
-    it('takes the base colour with nothing going on', () => {
-      expect(getComputedStyle(label()).color).toBe(token('--formidable-color-field-label'));
+    it('takes the base colour with nothing going on', async () => {
+      await bind();
+
+      expect(labelColour()).toBe(token('--formidable-color-field-label'));
     });
 
-    it('takes the focus colour while focused', () => {
-      setState('is-focused');
+    it('takes the focus colour while focused', async () => {
+      await bind();
 
-      expect(getComputedStyle(label()).color).toBe(token('--formidable-color-field-label-focus'));
+      await userEvent.click(input());
+
+      await expect.poll(labelColour).toBe(token('--formidable-color-field-label-focus'));
     });
 
-    it('takes the invalid colour while invalid, and keeps it while focused', () => {
-      setState('is-invalid');
-      expect(getComputedStyle(label()).color).toBe(token('--formidable-color-field-label-invalid'));
+    it('takes the invalid colour while invalid, and keeps it while focused', async () => {
+      await bind({ invalid: true });
 
-      decorator().classList.add('is-focused');
-      expect(getComputedStyle(label()).color).toBe(token('--formidable-color-field-label-invalid'));
+      expect(labelColour()).toBe(token('--formidable-color-field-label-invalid'));
+
+      await userEvent.click(input());
+      await expect.element(input()).toHaveFocus();
+
+      expect(labelColour()).toBe(token('--formidable-color-field-label-invalid'));
     });
 
-    it('dims with the field when readonly or disabled', () => {
-      host.readonly = true;
-      fixture.detectChanges();
-      expect(getComputedStyle(label()).color).toBe(token('--formidable-color-field-label-readonly'));
+    it('dims with the field when readonly or disabled', async () => {
+      const bound = await bind();
 
-      host.readonly = false;
-      host.disabled = true;
-      fixture.detectChanges();
-      expect(getComputedStyle(label()).color).toBe(token('--formidable-color-field-label-disabled'));
+      await bound.state({ readonly: true });
+      expect(labelColour()).toBe(token('--formidable-color-field-label-readonly'));
+
+      await bound.state({ readonly: false, disabled: true });
+      expect(labelColour()).toBe(token('--formidable-color-field-label-disabled'));
     });
   });
 
-  // Everything above sets `.is-invalid` by hand. This is the claim that it gets there on its own: the
-  // errors component computes validity, the directive hands it to the decorator, and the decorator —
-  // deliberately not `OnPush` — turns it into the class the styling hangs off.
-  it('raises the class from the control’s own validity', fakeAsync(() => {
-    const formFixture = TestBed.createComponent(ValidatedHostComponent);
-    const decoratorEl = () => formFixture.nativeElement.querySelector('formidable-field-decorator') as HTMLElement;
-    const inputEl = () => formFixture.nativeElement.querySelector('input') as HTMLInputElement;
+  it('turns invalid once a required field is left empty, and valid once it is filled', async () => {
+    await bindField('input', 'signal', {
+      decorated: true,
+      decoration: '<div formidableFieldLabel>Name</div>',
+      after: '<button type="button">Next</button>',
+      state: { required: true }
+    });
+    const decorator = document.querySelector('formidable-field-decorator')!;
 
-    formFixture.detectChanges();
-    tick(100);
-    formFixture.detectChanges();
+    // Invalid, but untouched: nothing to report yet.
+    expect(decorator.classList).not.toContain('is-invalid');
 
-    // Invalid, but untouched — nothing to report yet.
-    expect(decoratorEl().classList.contains('is-invalid')).toBe(false);
+    await userEvent.click(input());
+    await userEvent.tab();
 
-    inputEl().dispatchEvent(new FocusEvent('focus'));
-    inputEl().dispatchEvent(new FocusEvent('blur'));
-    tick(100);
-    formFixture.detectChanges();
+    await expect.poll(() => decorator.classList).toContain('is-invalid');
+    expect(style().borderTopColor).toBe(token('--formidable-color-field-border-invalid'));
 
-    expect(decoratorEl().classList.contains('is-invalid')).toBe(true);
-    expect(getComputedStyle(inputEl()).borderTopColor).toBe(token('--formidable-color-field-border-invalid'));
+    await userEvent.type(input(), 'Chris');
 
-    // Satisfying the rule clears it again.
-    inputEl().value = 'Chris';
-    inputEl().dispatchEvent(new Event('input'));
-    tick(100);
-    formFixture.detectChanges();
+    await expect.poll(() => decorator.classList).not.toContain('is-invalid');
+    expect(style().borderTopColor).not.toBe(token('--formidable-color-field-border-invalid'));
+  });
 
-    expect(decoratorEl().classList.contains('is-invalid')).toBe(false);
-    expect(getComputedStyle(inputEl()).borderTopColor).toBe(token('--formidable-color-field-border'));
+  // A group's box is styled apart from the text fields', so its states are a separate claim.
+  it('gives a group field the same invalid border', async () => {
+    const options = [{ value: 'a', label: 'Alpha' }];
+    const bound = await bindField('radio-group', 'signal', {
+      inputs: { options, revealOn: 'always' },
+      decorated: true,
+      decoration: '<div formidableFieldLabel>Name</div>'
+    });
+    const box = () => getComputedStyle(page.getByRole('radiogroup', { name: 'Name' }).element()).borderTopColor;
 
-    formFixture.destroy();
-  }));
+    expect(box()).toBe(token('--formidable-color-field-group-border'));
 
-  // A group's box is styled by `group-field`, a separate mixin — so its states are a separate claim.
-  it('applies the same invalid colour to a group field', () => {
-    const groupFixture = TestBed.createComponent(RadioGroupHostComponent);
-    groupFixture.detectChanges();
+    await bound.state({ invalid: true });
 
-    const box = groupFixture.nativeElement.querySelector('.field') as HTMLElement;
-    const groupDecorator = groupFixture.nativeElement.querySelector('formidable-field-decorator') as HTMLElement;
-
-    expect(getComputedStyle(box).borderTopColor).toBe(token('--formidable-color-field-group-border'));
-
-    groupDecorator.classList.add('is-invalid');
-
-    expect(getComputedStyle(box).borderTopColor).toBe(token('--formidable-color-field-border-invalid'));
+    expect(box()).toBe(token('--formidable-color-field-border-invalid'));
   });
 });

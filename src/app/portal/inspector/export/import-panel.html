@@ -1,0 +1,79 @@
+@switch (file().id) { @case ('theme') {
+<textarea
+  rows="4"
+  spellcheck="false"
+  placeholder=":root &#123; --formidable-field-height: 48px; &#125;"
+  class="pc-textarea"
+  [value]="themeText()"
+  (input)="themeText.set($any($event.target).value)"></textarea>
+
+<div class="options">
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="applyDefaults()"
+      (change)="applyDefaults.set($any($event.target).checked)" />
+    Onto The Defaults
+  </label>
+</div>
+
+<div class="pc-buttons">
+  <button
+    type="button"
+    class="pc-button is-primary"
+    [disabled]="!themeText().trim()"
+    (click)="importTheme()">
+    Apply
+  </button>
+</div>
+
+@if (themeResult(); as result) {
+<div class="report">
+  <p class="applied">Applied {{ countOf(result) }} variables.</p>
+  @if (result.skipped.length) {
+  <p class="notes-head">Not applied:</p>
+  <ul class="notes">
+    @for (skip of result.skipped; track skip.text) {
+    <li>
+      <code class="pc-code">{{ skip.text }}</code>
+      <span class="reason">{{ skipLabels[skip.reason] }}</span>
+    </li>
+    }
+  </ul>
+  }
+</div>
+} } @case ('template') {
+<textarea
+  rows="4"
+  spellcheck="false"
+  placeholder='<form [formRoot]="form"> … </form>'
+  class="pc-textarea"
+  [value]="templateText()"
+  (input)="templateText.set($any($event.target).value)"></textarea>
+
+<div class="pc-buttons">
+  <button
+    type="button"
+    class="pc-button is-primary"
+    [disabled]="!templateText().trim()"
+    (click)="importTemplate()">
+    Replace The Form
+  </button>
+</div>
+
+@if (templateResult(); as result) {
+<div class="report">
+  <p class="applied">Read {{ result.fields.length }} fields in {{ result.sections.length }} sections.</p>
+  @if (result.notes.length) {
+  <p class="notes-head">Ignored:</p>
+  <ul class="notes">
+    @for (note of result.notes; track $index) {
+    <li>
+      <code class="pc-code">{{ note.text }}</code>
+      <span class="reason">{{ noteLabels[note.reason] }}</span>
+    </li>
+    }
+  </ul>
+  }
+</div>
+} } }

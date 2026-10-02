@@ -1,150 +1,71 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
-import { IFormidableOption } from '../../models/formidable.model';
-import { FieldOptionComponent } from '../field-option/field-option.component';
-import { InputFieldComponent } from './input-field/input-field.component';
-import { SelectFieldComponent } from './select-field/select-field.component';
-import { TextareaFieldComponent } from './textarea-field/textarea-field.component';
+import { page, userEvent } from 'vitest/browser';
+import { bindField, BoundField, FORMS_APIS, FormsApi } from '../../testing/bind-field';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
- * A value written before the field can hold it survives.
- *
- * Two fields cannot take a value at the moment the form writes it, and both used to read the element back
- * afterwards and so overwrite the value with what the element happened to hold: a native `<select>` drops a
- * value it has no `<option>` for, and a masked `<input>` reads back the empty mask until ngxMask has
- * initialised across a full task. Both now re-apply the value they were **given**.
+ * A value the form writes before the field can hold it survives: a select whose options are projected only
+ * after the write, and a masked field whose mask is not ready yet. The field shows the value it was given once
+ * it can, and never puts it back over a later pick or a clear.
  */
 
-@Component({
-  imports: [FormsModule, SelectFieldComponent, FieldOptionComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <form>
-      <formidable-select-field
-        name="era"
-        [options]="options"
-        [ngModel]="value">
-        <formidable-field-option
-          value="industrial"
-          label="Industrial Revolution" />
-        <formidable-field-option
-          value="renaissance"
-          label="Renaissance" />
-      </formidable-select-field>
-    </form>
-  `
-})
-class ProjectedSelectHostComponent {
-  // Deliberately not the first option: a native `<select>` selects that one on its own, so a value that
-  // happened to match it would pass whether or not the field ever applied what it was given.
-  value: string | null = 'renaissance';
-  options: IFormidableOption[] = [];
+// Deliberately not the first option: a native `<select>` selects that one on its own, so a value that happened
+// to match it would pass whether or not the field ever applied what it was given.
+const ERAS = `
+  <formidable-field-option value="industrial" label="Industrial Revolution" />
+  <formidable-field-option value="renaissance" label="Renaissance" />
+`;
+
+function bindSelect(api: FormsApi): Promise<BoundField> {
+  return bindField('select', api, { content: ERAS, inputs: { options: [] }, value: 'renaissance' });
 }
 
-@Component({
-  imports: [FormsModule, InputFieldComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <form>
-      <formidable-input-field
-        name="identifier"
-        mask="AAA-0000"
-        [maskConfig]="{ showMaskTyped: true }"
-        [ngModel]="value" />
-    </form>
-  `
-})
-class MaskedInputHostComponent {
-  value: string | null = 'TTA4417';
-}
-
-@Component({
-  imports: [FormsModule, TextareaFieldComponent],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <form>
-      <formidable-textarea-field
-        name="identifier"
-        mask="AAA-AAA"
-        [maskConfig]="{ showMaskTyped: true }"
-        [ngModel]="value" />
-    </form>
-  `
-})
-class MaskedTextareaHostComponent {
-  value: string | null = 'abcdef';
+function bindMasked(kind: 'input' | 'textarea', api: FormsApi, mask: string, value: string): Promise<BoundField> {
+  return bindField(kind, api, { inputs: { mask, maskConfig: { showMaskTyped: true } }, value });
 }
 
 describe('a value written before the field can hold it', () => {
-  function settle(fixture: ComponentFixture<unknown>): void {
-    for (let i = 0; i < 3; i++) {
-      fixture.detectChanges();
-      tick(100);
-    }
-    fixture.detectChanges();
+  beforeEach(() => configureFormidableTestBed());
+
+  for (const api of FORMS_APIS) {
+    describe(`bound ${api}`, () => {
+      it('survives on a select whose options are projected', async () => {
+        await bindSelect(api);
+
+        await expect.element(page.getByRole('combobox')).toHaveValue('renaissance');
+      });
+
+      it('does not revert a later pick when the option list changes', async () => {
+        const field = await bindSelect(api);
+
+        await userEvent.selectOptions(page.getByRole('combobox'), 'Industrial Revolution');
+        await expect.poll(field.value).toBe('industrial');
+        await field.set('options', [{ value: 'bronze', label: 'Bronze Age' }]);
+
+        await expect.element(page.getByRole('combobox')).toHaveValue('industrial');
+      });
+
+      it('survives on a masked input, formatted by its mask', async () => {
+        await bindMasked('input', api, 'AAA-0000', 'TTA4417');
+
+        await expect.element(page.getByRole('textbox')).toHaveValue('TTA-4417');
+      });
+
+      it('survives on a masked textarea, formatted by its mask', async () => {
+        await bindMasked('textarea', api, 'AAA-AAA', 'abcdef');
+
+        await expect.element(page.getByRole('textbox')).toHaveValue('abc-def');
+      });
+
+      it('does not resurrect a value the user has since cleared', async () => {
+        const field = await bindMasked('input', api, 'AAA-0000', 'TTA4417');
+        const textbox = page.getByRole('textbox');
+
+        await expect.element(textbox).toHaveValue('TTA-4417');
+        await userEvent.clear(textbox);
+        await settle(field.fixture, 50);
+
+        expect((textbox.element() as HTMLInputElement).value).not.toContain('TTA');
+      });
+    });
   }
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideNgxMask()] });
-  });
-
-  it('survives on a select whose options are projected', fakeAsync(() => {
-    const fixture = TestBed.createComponent(ProjectedSelectHostComponent);
-    settle(fixture);
-
-    const select = (fixture.nativeElement as HTMLElement).querySelector('select') as HTMLSelectElement;
-
-    expect(select.value).toBe('renaissance');
-  }));
-
-  // The risk the fallback carries: it must never outrank what the element already holds, or a later pick
-  // would be reverted to the value the form wrote at startup the next time the option list moves.
-  it('does not revert a later pick when the option list changes', fakeAsync(() => {
-    const fixture = TestBed.createComponent(ProjectedSelectHostComponent);
-    settle(fixture);
-
-    const select = (fixture.nativeElement as HTMLElement).querySelector('select') as HTMLSelectElement;
-
-    select.value = 'industrial';
-    select.dispatchEvent(new Event('change'));
-    settle(fixture);
-
-    fixture.componentInstance.options = [{ value: 'bronze', label: 'Bronze Age' }];
-    settle(fixture);
-
-    expect(select.value).toBe('industrial');
-  }));
-
-  it('survives on a masked input, formatted by its mask', fakeAsync(() => {
-    const fixture = TestBed.createComponent(MaskedInputHostComponent);
-    settle(fixture);
-
-    const input = (fixture.nativeElement as HTMLElement).querySelector('input') as HTMLInputElement;
-
-    expect(input.value).toBe('TTA-4417');
-  }));
-
-  it('survives on a masked textarea, formatted by its mask', fakeAsync(() => {
-    const fixture = TestBed.createComponent(MaskedTextareaHostComponent);
-    settle(fixture);
-
-    const textarea = (fixture.nativeElement as HTMLElement).querySelector('textarea') as HTMLTextAreaElement;
-
-    expect(textarea.value).toBe('abc-def');
-  }));
-
-  it('does not resurrect a value the user has since cleared', fakeAsync(() => {
-    const fixture = TestBed.createComponent(MaskedInputHostComponent);
-    settle(fixture);
-
-    const input = (fixture.nativeElement as HTMLElement).querySelector('input') as HTMLInputElement;
-
-    input.value = '';
-    input.dispatchEvent(new Event('input'));
-    settle(fixture);
-
-    expect(input.value).not.toContain('TTA');
-  }));
 });

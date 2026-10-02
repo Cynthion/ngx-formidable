@@ -2,13 +2,13 @@
 <!-- Save as .research/<slug>.md. Findings only: no chosen approach, no code. -->
 <!-- Every claim about the codebase carries a file path. A claim without one is an open question. -->
 
-# <slug> — <Requirement Summary>
+# <slug>: <Requirement Summary>
 
 ## Requirement
 
 <What is being asked for, in your own words. Note any contradiction with the code or the documentation.>
 
-Roadmap: `.documentation/impl/implementation.md`. Backlog: `.documentation/impl/backlog.md`
+Roadmap: [`.documentation/impl/implementation.md`](../.documentation/impl/implementation.md). Backlog: [`.documentation/impl/backlog.md`](../.documentation/impl/backlog.md)
 
 ## Current State
 

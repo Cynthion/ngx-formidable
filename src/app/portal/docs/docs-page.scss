@@ -1,0 +1,188 @@
+// One column no wider than the viewport, so the top bar cannot widen the page past it and clip the document.
+:host {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  background: var(--portal-bg);
+  color: var(--portal-text);
+  font-family: var(--portal-font);
+  overflow: hidden;
+}
+
+.docs {
+  display: grid;
+  grid-template-columns: var(--docs-nav-width) minmax(0, 1fr) var(--docs-contents-width);
+  position: relative;
+  min-height: 0;
+}
+
+// Each sits on its rail's border, overhanging it, so the hit area does not eat into the rail or the document.
+.divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 7px;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 1;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0 3px;
+    background: transparent;
+    transition: background var(--portal-hover-duration, 120ms) ease;
+  }
+
+  &:hover::after,
+  &.is-dragging::after,
+  &:focus-visible::after {
+    background: var(--portal-accent);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.nav-divider {
+  left: calc(var(--docs-nav-width) - 4px);
+}
+
+.contents-divider {
+  right: calc(var(--docs-contents-width) - 4px);
+}
+
+.nav,
+.contents {
+  padding: 16px 12px;
+  overflow: auto;
+  font-size: 12px;
+}
+
+.nav {
+  border-right: 1px solid var(--portal-border);
+}
+
+.contents {
+  border-left: 1px solid var(--portal-border);
+}
+
+.nav-head {
+  margin: 14px 0 4px;
+  color: var(--portal-text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.nav-link,
+.contents-link {
+  display: block;
+  width: 100%;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: var(--portal-radius-sm);
+  background: transparent;
+  color: var(--portal-text-muted);
+  font-family: var(--portal-font);
+  font-size: 12px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--portal-surface-sunken);
+    color: var(--portal-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--portal-accent);
+    outline-offset: -1px;
+  }
+}
+
+.nav-link.active {
+  background: var(--portal-accent-soft);
+  color: var(--portal-accent);
+  font-weight: 650;
+}
+
+.content {
+  min-height: 0;
+  padding: 24px 32px 80px;
+  overflow: auto;
+}
+
+// A readable measure, centred between the rails on a wide screen and reflowing below it.
+.doc-head,
+.doc-body {
+  max-width: 820px;
+  margin-inline: auto;
+}
+
+.doc-head {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.doc-kind {
+  margin: 0;
+  color: var(--portal-accent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.doc-title {
+  margin: 3px 0 4px;
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.doc-purpose {
+  margin: 0;
+  color: var(--portal-text-muted);
+  font-size: 13px;
+}
+
+@media (width <= 1100px) {
+  .docs {
+    grid-template-columns: var(--docs-nav-width) minmax(0, 1fr);
+  }
+
+  .contents,
+  .contents-divider {
+    display: none;
+  }
+}
+
+@media (width <= 760px) {
+  .docs {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .nav {
+    max-height: 26dvh;
+    border-right: 0;
+    border-bottom: 1px solid var(--portal-border);
+  }
+
+  .nav-divider {
+    display: none;
+  }
+
+  .content {
+    padding: 16px;
+  }
+}

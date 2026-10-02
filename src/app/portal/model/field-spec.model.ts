@@ -61,7 +61,6 @@ export const PANEL_POSITION_LABELS: Readonly<Record<FormidablePanelPosition, str
 export const REVEAL_LABELS: Readonly<Record<FormidableReveal, string>> = {
   touched: 'Touched',
   dirty: 'Dirty',
-  submitted: 'Submitted',
   always: 'Always'
 };
 
@@ -74,8 +73,7 @@ export const LIBRARY_DEFAULTS = {
   prefixAlign: 'center',
   suffixAlign: 'center',
   revealOn: 'touched',
-  hideRequiredMarkers: false,
-  debounceMs: 0
+  hideRequiredMarkers: false
 } as const satisfies Omit<Required<FormidableDefaults>, 'panelPosition'>;
 
 /** Display names for the adornment slots, exhaustive over `PortalSlotContent` for the same reason. */
@@ -95,8 +93,8 @@ export type PortalLocaleId = 'en-GB' | 'en-US' | 'de-CH' | 'fr-FR' | 'ja-JP';
 /**
  * How an autocomplete's consumer narrows the list.
  *
- * The field does not filter — it emits `filterChanged` and renders whatever it is handed back — so this is a
- * property of the portal's own filtering code, not of the component. Offering it as a setting is what makes
+ * The field filters by each option's `match`; the portal filters on `filterChange` instead and gives its options a
+ * `match` that keeps every one, so this is a property of the portal's own filtering code, not of the component. Offering it as a setting is what makes
  * that division visible rather than merely stated.
  */
 export type PortalFilterStrategy = 'fuzzy' | 'contains' | 'starts-with';
@@ -264,7 +262,7 @@ export interface PortalSectionSpec {
   readonly id: string;
   readonly title: string;
   /**
-   * Set, the section's fields are wrapped in an `ngModelGroup` of this name and their values nest under it.
+   * Set, the section's fields nest under this key in the model, as a group the rules can report on.
    *
    * The group sits on the section rather than on each field: a group is a run of adjacent controls, which is
    * exactly what a section already is, and one member per field would be a second ordering to keep in step
@@ -273,15 +271,18 @@ export interface PortalSectionSpec {
   readonly groupName?: string;
 }
 
-/** Which validator the form is wired to, and so what the errors under each field come from. */
-type PortalValidatorKind = 'vest' | 'angular' | 'none';
+/** Who writes the sample's rules into the schema, and so what the errors under each field come from. */
+export type PortalValidatorKind = 'angular' | 'vest' | 'zod' | 'none';
+
+/** Signal Forms' `debounce`: how long an edit waits before it reaches the model, and so before the rules run. */
+export type PortalDebounce = 0 | 300 | 'blur';
 
 /**
- * The form-level options: the portal's master switches, and the form directive's own inputs.
+ * The form-level options: the portal's master switches, the rules, and what the form scopes over its fields.
  *
  * A label position, an adornment alignment and a panel position are not here: the library has no form-level
- * value for them, only a field's own and the app default. The two optional members are inputs the app
- * default covers too — absent, the form states nothing and the default applies.
+ * value for them, only a field's own and the app default. The two optional members are defaults the form
+ * scopes over its own fields — absent, the form states nothing and the app default applies.
  */
 export interface PortalFormOptions {
   readonly showLabels: boolean;
@@ -291,7 +292,7 @@ export interface PortalFormOptions {
   readonly readonly: boolean;
   readonly disabled: boolean;
   readonly revealOn?: FormidableReveal;
-  readonly updateOn: 'change' | 'blur' | 'submit';
+  readonly debounce: PortalDebounce;
   readonly validator: PortalValidatorKind;
   readonly locale: PortalLocaleId;
 }

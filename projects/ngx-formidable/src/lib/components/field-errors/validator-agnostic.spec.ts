@@ -1,203 +1,127 @@
-import { Component, Type, ChangeDetectionStrategy } from '@angular/core';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { Component, Type } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { provideNgxMask } from 'ngx-mask';
-import { FieldErrorsDirective } from '../../directives/field-errors.directive';
-import { FieldLabelDirective } from '../../directives/field-label.directive';
-import { NgxFormidableFieldValidateDirective } from '../../forms/field-validate.directive';
-import { FORMIDABLE_ERROR_EXTRACTOR } from '../../models/validation.model';
-import { FieldDecoratorComponent } from '../field-decorator/field-decorator.component';
-import { InputFieldComponent } from '../fields/input-field/input-field.component';
+import { ValidationError } from '@angular/forms/signals';
+import { page, userEvent } from 'vitest/browser';
+import { FieldLabel } from '../../directives/field-label';
+import { FORMIDABLE_ERROR_MESSAGE } from '../../models/validation.model';
+import { configureFormidableTestBed, DIRECTIVE_VALIDATORS_UNATTACHED, settle } from '../../testing/test-bed';
+import { FieldDecorator } from '../field-decorator/field-decorator';
+import { InputField } from '../fields/input-field/input-field';
 
 /**
- * Contract of the library's independence from any one validation library.
+ * Per **Classic Validators** and **Messages** in `user/validation.md`: the decorator's invalid state, the field's
+ * `aria-invalid` and its messages need no validation library, Angular's built-in validators alone drive
+ * them. An Angular error reaches the field as its key, `{ kind: 'required' }`, which
+ * `FORMIDABLE_ERROR_MESSAGE` renders as it is by default and as a consumer's text once overridden.
  *
- * Errors reach the UI through Angular's own `AbstractControl.errors`, so the decorator's `.is-invalid`
- * state, the field's `aria-invalid` and the message list must all work with no formidable form directive,
- * no `FORMIDABLE_VALIDATOR` and no validation library — driven by Angular's built-in validators alone.
- *
- * `FORMIDABLE_ERROR_EXTRACTOR` is what makes that possible: it turns whatever shape wrote `control.errors`
- * into the messages a field displays. These specs pin down both its default and an override.
+ * Every spec here waits on **Directive Validators On A Custom Control** in `impl/backlog.md`.
  */
 
 @Component({
-  imports: [FormsModule, FieldDecoratorComponent, InputFieldComponent, FieldErrorsDirective, FieldLabelDirective],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FormsModule, FieldDecorator, InputField, FieldLabel],
   template: `
     <form>
       <formidable-field-decorator>
         <formidable-input-field
-          formidableFieldErrors
           name="name"
           [required]="true"
           [minlength]="3"
           [(ngModel)]="name" />
         <div formidableFieldLabel>Name</div>
       </formidable-field-decorator>
+      <button type="button">Next</button>
     </form>
   `
 })
-class AngularValidatorsHostComponent {
+class AngularValidatorsHost {
   name = '';
 }
 
-/** The same field with the `[ngModel]` hijack directive imported and no harness above it. */
-@Component({
-  imports: [
-    FormsModule,
-    NgxFormidableFieldValidateDirective,
-    FieldDecoratorComponent,
-    InputFieldComponent,
-    FieldErrorsDirective
-  ],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  template: `
-    <form>
-      <formidable-field-decorator>
-        <formidable-input-field
-          formidableFieldErrors
-          name="name"
-          [required]="true"
-          [(ngModel)]="name" />
-      </formidable-field-decorator>
-    </form>
-  `
-})
-class HijackWithoutHarnessHostComponent {
-  name = '';
+const input = () => page.getByRole('textbox', { name: 'Name' });
+const messages = () =>
+  page
+    .getByRole('listitem')
+    .elements()
+    .map((message) => message.textContent!.trim());
+const isInvalid = () => document.querySelector('formidable-field-decorator')!.classList.contains('is-invalid');
+
+async function mount(host: Type<unknown>): Promise<void> {
+  await settle(TestBed.createComponent(host));
+}
+
+/** Leaves the field as a user does, which touches it. */
+async function touch(): Promise<void> {
+  await userEvent.click(input());
+  await userEvent.tab();
 }
 
 describe('validator-agnostic error rendering', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let fixture: ComponentFixture<any>;
-  let root: HTMLElement;
+  describe('with Angular’s built-in validators', () => {
+    beforeEach(() => configureFormidableTestBed());
 
-  function decorator(): HTMLElement {
-    return root.querySelector('formidable-field-decorator') as HTMLElement;
-  }
+    // `required` writes `{ required: true }`, and its key is the message the default renders.
+    it('renders Angular’s error keys as messages once touched', async ({ skip }) => {
+      skip(DIRECTIVE_VALIDATORS_UNATTACHED);
 
-  function input(): HTMLInputElement {
-    return root.querySelector('input') as HTMLInputElement;
-  }
+      await mount(AngularValidatorsHost);
 
-  function messages(): (string | undefined)[] {
-    return Array.from(root.querySelectorAll('.error')).map((e) => e.textContent?.trim());
-  }
+      expect(messages()).toEqual([]);
 
-  /**
-   * Builds the fixture and settles it. Settling matters: the field renders its input through an `@if` whose
-   * branch flips once ngxMask initializes, replacing the element — so nothing may be dispatched before it.
-   * The fixture has to be built inside the `fakeAsync` zone for `tick()` to reach that timer at all.
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  function mount(host: Type<any>): void {
-    fixture = TestBed.createComponent(host);
-    root = fixture.nativeElement as HTMLElement;
+      await touch();
 
-    fixture.detectChanges();
-    tick();
-    fixture.detectChanges();
-  }
-
-  function touch(): void {
-    input().dispatchEvent(new FocusEvent('focus'));
-    input().dispatchEvent(new FocusEvent('blur'));
-  }
-
-  function type(value: string): void {
-    input().value = value;
-    input().dispatchEvent(new Event('input'));
-  }
-
-  function flush(): void {
-    tick();
-    fixture.detectChanges();
-  }
-
-  describe('with Angular’s built-in validators and no formidable form', () => {
-    beforeEach(() => {
-      TestBed.configureTestingModule({ providers: [provideNgxMask()] });
+      await expect.poll(messages).toEqual(['required']);
     });
 
-    it('mounts the errors component without a harness in the injector chain', fakeAsync(() => {
-      mount(AngularValidatorsHostComponent);
+    it('raises .is-invalid on the decorator and aria-invalid on the field', async ({ skip }) => {
+      skip(DIRECTIVE_VALIDATORS_UNATTACHED);
 
-      expect(root.querySelector('formidable-field-errors')).toBeTruthy();
-    }));
+      await mount(AngularValidatorsHost);
 
-    // The claim the whole phase rests on: `required` writes `{ required: true }`, not the harness's
-    // `{ errors: [...] }`, and the default extractor renders it anyway.
-    it('renders Angular’s error keys as messages once touched', fakeAsync(() => {
-      mount(AngularValidatorsHostComponent);
+      expect(isInvalid()).toBe(false);
+      await expect.element(input()).not.toHaveAttribute('aria-invalid');
 
-      expect(messages()).toEqual([]);
+      await touch();
 
-      touch();
-      flush();
+      await expect.element(input()).toHaveAttribute('aria-invalid', 'true');
+      expect(isInvalid()).toBe(true);
+    });
 
-      expect(messages()).toEqual(['required']);
-    }));
+    it('follows the failing validator, and clears as the value satisfies them all', async ({ skip }) => {
+      skip(DIRECTIVE_VALIDATORS_UNATTACHED);
 
-    it('raises .is-invalid on the decorator and aria-invalid on the field', fakeAsync(() => {
-      mount(AngularValidatorsHostComponent);
+      await mount(AngularValidatorsHost);
 
-      expect(decorator().classList.contains('is-invalid')).toBe(false);
-      expect(input().getAttribute('aria-invalid')).toBeNull();
+      await touch();
+      await userEvent.type(input(), 'ab');
 
-      touch();
-      flush();
+      await expect.poll(messages).toEqual(['minlength']);
 
-      expect(decorator().classList.contains('is-invalid')).toBe(true);
-      expect(input().getAttribute('aria-invalid')).toBe('true');
-    }));
+      await userEvent.type(input(), 'c');
 
-    it('follows the failing validator, and clears as the value satisfies them all', fakeAsync(() => {
-      mount(AngularValidatorsHostComponent);
-
-      touch();
-      type('ab');
-      flush();
-
-      expect(messages()).toEqual(['minlength']);
-
-      type('abc');
-      flush();
-
-      expect(messages()).toEqual([]);
-      expect(decorator().classList.contains('is-invalid')).toBe(false);
-      expect(input().getAttribute('aria-invalid')).toBeNull();
-    }));
-
-    // `[ngModel]` is hijacked by the harness's async-validator directive. A consumer who imports
-    // NgxFormidableModule gets it on every control, so it must not swallow Angular's own errors.
-    it('leaves Angular’s validators alone when the ngModel hijack has no harness', fakeAsync(() => {
-      mount(HijackWithoutHarnessHostComponent);
-
-      touch();
-      flush();
-
-      expect(messages()).toEqual(['required']);
-    }));
+      await expect.poll(messages).toEqual([]);
+      expect(isInvalid()).toBe(false);
+      await expect.element(input()).not.toHaveAttribute('aria-invalid');
+    });
   });
 
-  // A schema library reports its own shape. The extractor is the one place a consumer adapts it.
-  it('renders a custom error shape through an overridden extractor', fakeAsync(() => {
-    TestBed.configureTestingModule({
+  // An Angular error carries no message of its own, so the token is the one place a consumer gives it one.
+  it('renders an Angular error through an overridden FORMIDABLE_ERROR_MESSAGE', async ({ skip }) => {
+    skip(DIRECTIVE_VALIDATORS_UNATTACHED);
+
+    configureFormidableTestBed({
       providers: [
-        provideNgxMask(),
         {
-          provide: FORMIDABLE_ERROR_EXTRACTOR,
-          useValue: (errors: Record<string, unknown> | null) =>
-            errors?.['required'] ? ['Please tell us your name.'] : []
+          provide: FORMIDABLE_ERROR_MESSAGE,
+          useValue: (error: ValidationError) => (error.kind === 'required' ? 'Please tell us your name.' : error.kind)
         }
       ]
     });
 
-    mount(AngularValidatorsHostComponent);
+    await mount(AngularValidatorsHost);
 
-    touch();
-    flush();
+    await touch();
 
-    expect(messages()).toEqual(['Please tell us your name.']);
-  }));
+    await expect.poll(messages).toEqual(['Please tell us your name.']);
+  });
 });

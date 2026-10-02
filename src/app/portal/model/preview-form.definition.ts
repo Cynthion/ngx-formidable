@@ -30,8 +30,8 @@ import {
  * - **Two groups.** `When` and `Payment` each carry a `groupName`, so their fields nest in the model. `When`
  *   also carries a rule that reads both members and reports on the group rather than on either one.
  * - **Conditional fields.** One toggle decides whether the address or the branch is rendered, and the
- *   payment method decides whether the card number is. A field that is not rendered is destroyed, so its
- *   key leaves the model — which is what the rules have to survive.
+ *   payment method decides whether the card number is. A hidden field keeps its key in the model, and
+ *   Signal Forms leaves it out of validation.
  * - **A template picker.** `presets` on the pizza field, above.
  * - **Consumer-side filtering.** The autocomplete's `filterStrategy` is the portal's, not the field's.
  */
@@ -405,8 +405,8 @@ const PREVIEW_FORM_OPTIONS: PortalFormOptions = {
   showAdornments: false,
   readonly: false,
   disabled: false,
-  updateOn: 'change',
-  validator: 'vest',
+  debounce: 0,
+  validator: 'angular',
   locale: 'en-GB'
 };
 
@@ -427,8 +427,9 @@ export const PREVIEW_FORM_DEFINITION: PortalFormDefinition = {
  * What the form starts filled with: a Margherita, which is the picker's own preset applied once up front.
  * An empty form shows none of the filled, selected or floating-label states that a theme is judged by.
  *
- * `when` and `payment` are nested because their sections are `ngModelGroup`s, and `branch` is absent because
- * the toggle it waits on starts off — the model carries what the rendered form carries, and nothing else.
+ * `when` and `payment` are nested because their sections are groups. Every key is defined, `branch` too,
+ * although the toggle it waits on starts off: Signal Forms drops a key that is `undefined`, and a field with
+ * no key has nothing to bind to.
  */
 export const PREVIEW_INITIAL_MODEL: Readonly<Record<string, unknown>> = {
   pizza: 'margherita',
@@ -439,6 +440,7 @@ export const PREVIEW_INITIAL_MODEL: Readonly<Record<string, unknown>> = {
   spice: 2,
   pickup: false,
   address: 'langstrasse',
+  branch: null,
   when: { date: new Date(2026, 8, 25), time: new Date(2000, 0, 1, 19, 30) },
   payment: { method: 'card', cardNumber: '4242 4242 4242 4242' },
   orderName: 'Alex Moser',

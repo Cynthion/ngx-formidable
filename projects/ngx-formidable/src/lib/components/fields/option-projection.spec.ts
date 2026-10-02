@@ -1,47 +1,47 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, ChangeDetectionStrategy, viewChild } from '@angular/core';
-import { ComponentFixture, discardPeriodicTasks, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { Component, signal, Type } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { IFormidableOption } from '../../models/formidable.model';
-import { FieldOptionComponent } from '../field-option/field-option.component';
-import { AutocompleteFieldComponent } from './autocomplete-field/autocomplete-field.component';
-import { CheckboxGroupFieldComponent } from './checkbox-group-field/checkbox-group-field.component';
-import { RadioGroupFieldComponent } from './radio-group-field/radio-group-field.component';
-import { SelectFieldComponent } from './select-field/select-field.component';
+import { page, userEvent } from 'vitest/browser';
+import { FormidableOption } from '../../models/formidable.model';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { FieldOption } from '../field-option/field-option';
+import { AutocompleteField } from './autocomplete-field/autocomplete-field';
+import { CheckboxGroupField } from './checkbox-group-field/checkbox-group-field';
+import { RadioGroupField } from './radio-group-field/radio-group-field';
+import { SelectField } from './select-field/select-field';
 
 /**
- * Contract of the option content query: options declared inside a field are collected whatever wraps them.
+ * Options projected into a field, per **Options** in `user/fields.md`: they may sit anywhere inside it,
+ * including in a `@for`, an `@if`, an `<ng-template>` or a wrapping element, and the field follows each one as
+ * it changes in place. A projected option owns its content, which is also the label it is filtered by.
  *
- * Ivy's shallow (`descendants: false`) query already reaches into embedded views, so `@for`, `*ngIf` and
- * `<ng-template>` were never the problem. What it does not reach is an option nested inside an *element*
- * — a `<div>` grouping options, or a wrapper component projecting them on. That is what the
- * `{ descendants: true }` on every `@ContentChildren(FORMIDABLE_OPTION)` adds; remove it and the
- * `nested` case below is the one that drops out.
+ * Also covers `defaultOption`, which is pinned ahead of the sorted list rather than sorted into it, and which
+ * an autocomplete's filter leaves alone.
  *
- * Also covers `defaultOption`, which is pinned ahead of the sorted list rather than sorted into it.
+ * The options are read by their role, and picked with a trusted click or real typing.
  */
 
 @Component({
-  imports: [FormsModule, NgTemplateOutlet, RadioGroupFieldComponent, FieldOptionComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FormsModule, NgTemplateOutlet, RadioGroupField, FieldOption],
   template: `
     <formidable-radio-group-field
       name="wrapped"
-      ngModel
-      [defaultOption]="defaultOption"
-      [defaultOptionMode]="defaultOptionMode"
-      [sortFn]="sortFn">
+      [(ngModel)]="model"
+      [defaultOption]="defaultOption()"
+      [defaultOptionMode]="defaultOptionMode()"
+      [sortFn]="sortFn()">
       <formidable-field-option value="direct" />
 
-      @if (showConditional) {
+      @if (showConditional()) {
         <formidable-field-option value="conditional" />
       }
 
-      @for (value of loopedValues; track value) {
+      @for (value of loopedValues(); track value) {
         <formidable-field-option [value]="value" />
       }
 
-      <ng-container *ngTemplateOutlet="templated"></ng-container>
+      <ng-container [ngTemplateOutlet]="templated" />
       <ng-template #templated>
         <formidable-field-option value="templated" />
       </ng-template>
@@ -52,65 +52,57 @@ import { SelectFieldComponent } from './select-field/select-field.component';
     </formidable-radio-group-field>
   `
 })
-class WrappedOptionsHostComponent {
-  readonly field = viewChild.required(RadioGroupFieldComponent);
-
-  showConditional = true;
-  loopedValues = ['looped-a', 'looped-b'];
-  defaultOption?: IFormidableOption;
-  defaultOptionMode: 'always' | 'fallback' = 'always';
-  sortFn?: (a: IFormidableOption, b: IFormidableOption) => number;
+class WrappedOptionsHost {
+  readonly model = signal<string | null>(null);
+  readonly showConditional = signal(true);
+  readonly loopedValues = signal(['looped-a', 'looped-b']);
+  readonly defaultOption = signal<FormidableOption | undefined>(undefined);
+  readonly defaultOptionMode = signal<'always' | 'fallback'>('always');
+  readonly sortFn = signal<((a: FormidableOption, b: FormidableOption) => number) | undefined>(undefined);
 }
 
 @Component({
-  imports: [FormsModule, CheckboxGroupFieldComponent, FieldOptionComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FormsModule, CheckboxGroupField, FieldOption],
   template: `
     <formidable-checkbox-group-field
       name="looped"
       ngModel
       [noOptionsText]="noOptionsText">
-      @for (value of loopedValues; track value) {
+      @for (value of loopedValues(); track value) {
         <formidable-field-option [value]="value" />
       }
     </formidable-checkbox-group-field>
   `
 })
-class LoopedCheckboxHostComponent {
-  readonly field = viewChild.required(CheckboxGroupFieldComponent);
-
-  loopedValues: string[] = ['a', 'b'];
+class LoopedCheckboxHost {
+  readonly loopedValues = signal(['a', 'b']);
   noOptionsText = 'Nothing here.';
 }
 
-// deliberately without ngModel: NgModel writes its own (empty) model back on every change detection,
-// which would clear the selection this suite is about
 @Component({
-  imports: [AutocompleteFieldComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FormsModule, AutocompleteField],
   template: `
     <formidable-autocomplete-field
       name="filtered"
-      [options]="options"
+      [(ngModel)]="model"
+      [options]="options()"
       [defaultOption]="defaultOption"
-      [defaultOptionMode]="defaultOptionMode" />
+      [defaultOptionMode]="defaultOptionMode()" />
   `
 })
-class FilteredAutocompleteHostComponent {
-  readonly field = viewChild.required(AutocompleteFieldComponent);
-
-  options: IFormidableOption[] = [{ value: 'cat', label: 'Cat' }];
-  defaultOption: IFormidableOption = { value: 'add-new', label: 'Add a new one…' };
-  defaultOptionMode: 'always' | 'fallback' = 'fallback';
+class FilteredAutocompleteHost {
+  readonly model = signal<string | null>(null);
+  readonly options = signal<FormidableOption[]>([{ value: 'cat', label: 'Cat' }]);
+  defaultOption: FormidableOption = { value: 'add-new', label: 'Add a new one…' };
+  readonly defaultOptionMode = signal<'always' | 'fallback'>('fallback');
 }
 
 @Component({
-  imports: [FormsModule, RadioGroupFieldComponent, FieldOptionComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FormsModule, RadioGroupField, FieldOption],
   template: `
     <formidable-radio-group-field
       name="projected"
-      ngModel>
+      [(ngModel)]="model">
       <formidable-field-option value="a">Apple</formidable-field-option>
       <formidable-field-option
         value="b"
@@ -118,40 +110,38 @@ class FilteredAutocompleteHostComponent {
     </formidable-radio-group-field>
   `
 })
-class ProjectedContentHostComponent {
-  readonly field = viewChild.required(RadioGroupFieldComponent);
+class ProjectedContentHost {
+  readonly model = signal<string | null>(null);
 }
 
 // One direct and one looped option, because the looped one is bound later than the field's effect first runs.
 @Component({
-  imports: [FormsModule, RadioGroupFieldComponent, FieldOptionComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FormsModule, RadioGroupField, FieldOption],
   template: `
     <formidable-radio-group-field
       name="changing"
       ngModel>
       <formidable-field-option
         value="direct"
-        [label]="directLabel"
-        [disabled]="disabledValue === 'direct'" />
-      @for (value of loopedValues; track value) {
+        [label]="directLabel()"
+        [disabled]="disabledValue() === 'direct'" />
+      @for (value of loopedValues(); track value) {
         <formidable-field-option
           [value]="value"
-          [disabled]="disabledValue === value" />
+          [disabled]="disabledValue() === value" />
       }
     </formidable-radio-group-field>
   `
 })
-class ChangingOptionHostComponent {
-  directLabel = 'Direct';
-  disabledValue = '';
-  loopedValues = ['looped'];
+class ChangingOptionHost {
+  readonly directLabel = signal('Direct');
+  readonly disabledValue = signal('');
+  readonly loopedValues = signal(['looped']);
 }
 
-// The select field watches its options with an effect of its own, not the one on `BaseOptionFieldDirective`.
+// The select field watches its options with an effect of its own, not the one on `BaseOptionField`.
 @Component({
-  imports: [FormsModule, SelectFieldComponent, FieldOptionComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [FormsModule, SelectField, FieldOption],
   template: `
     <formidable-select-field
       name="changing-select"
@@ -159,21 +149,20 @@ class ChangingOptionHostComponent {
       @for (value of loopedValues; track value) {
         <formidable-field-option
           [value]="value"
-          [disabled]="disabledValue === value" />
+          [disabled]="disabledValue() === value" />
       }
     </formidable-select-field>
   `
 })
-class ChangingSelectOptionHostComponent {
-  disabledValue = '';
+class ChangingSelectOptionHost {
+  readonly disabledValue = signal('');
   loopedValues = ['a', 'b'];
 }
 
-// An autocomplete, because its filter is what reads the label off the option — a group only displays it,
-// and a displayed label comes from the projected template rather than from the option.
+// An autocomplete, because its filter is what reads the label off the option: a group only displays it, and a
+// displayed label comes from the projected template rather than from the option.
 @Component({
-  imports: [AutocompleteFieldComponent, FieldOptionComponent],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  imports: [AutocompleteField, FieldOption],
   template: `
     <formidable-autocomplete-field name="projected-filter">
       <formidable-field-option value="a">Apple</formidable-field-option>
@@ -181,298 +170,221 @@ class ChangingSelectOptionHostComponent {
     </formidable-autocomplete-field>
   `
 })
-class ProjectedFilterHostComponent {}
+class ProjectedFilterHost {}
 
-// The options are collected in a microtask, so a plain detectChanges() is not enough to see them.
-async function settle(fixture: ComponentFixture<unknown>): Promise<void> {
-  fixture.detectChanges();
-  await fixture.whenStable();
-  fixture.detectChanges();
+/** The names of the options of `role` on show, in order. */
+function names(role: 'radio' | 'checkbox' | 'option', filter: { disabled?: boolean } = {}): string[] {
+  return page
+    .getByRole(role, filter)
+    .elements()
+    .map((option) => option.textContent!.trim());
 }
 
-function renderedOptionValues(fixture: ComponentFixture<unknown>): string[] {
-  return Array.from(fixture.nativeElement.querySelectorAll('formidable-field-option')).map((el) =>
-    (el as HTMLElement).textContent?.trim()
-  ) as string[];
+/** Renders `host` and lets its options be collected. */
+async function render<T>(host: Type<T>): Promise<ComponentFixture<T>> {
+  configureFormidableTestBed({ imports: [host] });
+
+  const fixture = TestBed.createComponent(host);
+  await settle(fixture);
+
+  return fixture;
+}
+
+/** Replaces the autocomplete's text, as a user does, and lets its filter through. */
+async function filterBy(fixture: ComponentFixture<unknown>, text: string): Promise<void> {
+  await userEvent.fill(page.getByRole('combobox'), text);
+  await settle(fixture, 300); // clears the 200ms filter debounce
 }
 
 describe('option projection', () => {
+  beforeEach(() => (document.activeElement as HTMLElement | null)?.blur());
+
   describe('content query', () => {
-    let fixture: ComponentFixture<WrappedOptionsHostComponent>;
-    let host: WrappedOptionsHostComponent;
+    let fixture: ComponentFixture<WrappedOptionsHost>;
 
-    beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [WrappedOptionsHostComponent] }).compileComponents();
-
-      fixture = TestBed.createComponent(WrappedOptionsHostComponent);
-      host = fixture.componentInstance;
-      await settle(fixture);
-    });
+    beforeEach(async () => (fixture = await render(WrappedOptionsHost)));
 
     it('collects options from every template construct, not just direct children', () => {
-      expect(renderedOptionValues(fixture)).toEqual([
-        'direct',
-        'conditional',
-        'looped-a',
-        'looped-b',
-        'templated',
-        'nested'
-      ]);
+      expect(names('radio')).toEqual(['direct', 'conditional', 'looped-a', 'looped-b', 'templated', 'nested']);
     });
 
-    it('reacts to options appearing and disappearing inside embedded views', async () => {
-      host.showConditional = false;
-      host.loopedValues = ['looped-a'];
+    it('follows options appearing and disappearing inside embedded views', async () => {
+      fixture.componentInstance.showConditional.set(false);
+      fixture.componentInstance.loopedValues.set(['looped-a']);
       await settle(fixture);
 
-      expect(renderedOptionValues(fixture)).toEqual(['direct', 'looped-a', 'templated', 'nested']);
+      expect(names('radio')).toEqual(['direct', 'looped-a', 'templated', 'nested']);
     });
   });
 
   /**
-   * The option a field reads off a projected component is `FieldOptionComponent.option` — one plain
-   * `IFormidableOption` folded out of its signal inputs and its projected content. These two claims are the
-   * whole boundary: the label falls back to the projected text, and clicking the rendered option commits
-   * that plain option to the field that owns it.
+   * An option is folded out of its inputs and its projected content into one plain `FormidableOption`. The
+   * label falls back to the projected text, and clicking the rendered option commits that plain option to the
+   * field that owns it.
    */
   describe('the option a component hands over', () => {
-    let fixture: ComponentFixture<ProjectedContentHostComponent>;
-    let host: ProjectedContentHostComponent;
+    it('renders the projected content, and the bound label where there is no content', async () => {
+      await render(ProjectedContentHost);
 
-    beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [ProjectedContentHostComponent] }).compileComponents();
-
-      fixture = TestBed.createComponent(ProjectedContentHostComponent);
-      host = fixture.componentInstance;
-      await settle(fixture);
-    });
-
-    it('renders the projected content, and the bound label where there is no content', () => {
-      expect(renderedOptionValues(fixture)).toEqual(['Apple', 'Bound Banana']);
+      expect(names('radio')).toEqual(['Apple', 'Bound Banana']);
     });
 
     it('commits to the owning field when the rendered option is clicked', async () => {
-      const option = fixture.nativeElement.querySelectorAll('formidable-field-option')[0] as HTMLElement;
+      const fixture = await render(ProjectedContentHost);
 
-      // The `(click)` sits on the option's inner div, which is what the field renders.
-      option.querySelector('div')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      await settle(fixture);
+      await userEvent.click(page.getByRole('radio', { name: 'Apple' }));
 
-      expect(host.field().value).toBe('a');
+      await expect.poll(() => fixture.componentInstance.model()).toBe('a');
     });
 
-    // The default `match` reads the option's own label, which for a projected option is the text taken
-    // off its content. Lose that and every content-only option stops matching its own name.
-    it('filters on the label taken from the projected content', fakeAsync(() => {
-      const filterFixture = TestBed.createComponent(ProjectedFilterHostComponent);
-      filterFixture.detectChanges();
-      tick();
-      filterFixture.detectChanges();
+    // The default `match` reads the option's own label, which for a projected option is the text taken off its
+    // content. Lose that and every content-only option stops matching its own name.
+    it('filters on the label taken from the projected content', async () => {
+      const fixture = await render(ProjectedFilterHost);
 
-      const filterInput = filterFixture.nativeElement.querySelector('input') as HTMLInputElement;
-      filterInput.dispatchEvent(new Event('focus'));
-      filterInput.value = 'app';
-      filterInput.dispatchEvent(new Event('input'));
-      tick(300); // clears the 200ms filter debounce
-      filterFixture.detectChanges();
+      await filterBy(fixture, 'app');
 
-      expect(renderedOptionValues(filterFixture)).toEqual(['Apple']);
-
-      discardPeriodicTasks();
-      filterFixture.destroy();
-    }));
+      expect(names('option')).toEqual(['Apple']);
+    });
   });
 
-  // A projected option whose inputs change in place stays the same query entry, so the field must follow
-  // the option itself, not only the query.
+  // A projected option whose inputs change in place stays the same query entry, so the field must follow the
+  // option itself, not only the query.
   describe('an option changing in place', () => {
-    let fixture: ComponentFixture<ChangingOptionHostComponent>;
-    let host: ChangingOptionHostComponent;
+    let fixture: ComponentFixture<ChangingOptionHost>;
 
-    const disabledValues = () =>
-      Array.from(fixture.nativeElement.querySelectorAll('input[type="radio"][disabled]')).map((el) =>
-        (el as HTMLInputElement).nextElementSibling?.textContent?.trim()
-      );
-
-    beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [ChangingOptionHostComponent] }).compileComponents();
-
-      fixture = TestBed.createComponent(ChangingOptionHostComponent);
-      host = fixture.componentInstance;
-      await settle(fixture);
-    });
+    beforeEach(async () => (fixture = await render(ChangingOptionHost)));
 
     it('follows a changed disabled flag, on a direct and on a looped option', async () => {
-      host.disabledValue = 'looped';
+      fixture.componentInstance.disabledValue.set('looped');
       await settle(fixture);
-      expect(disabledValues()).toEqual(['looped']);
+      expect(names('radio', { disabled: true })).toEqual(['looped']);
 
-      host.disabledValue = 'direct';
+      fixture.componentInstance.disabledValue.set('direct');
       await settle(fixture);
-      expect(disabledValues()).toEqual(['Direct']);
+      expect(names('radio', { disabled: true })).toEqual(['Direct']);
     });
 
     it('follows a changed label', async () => {
-      host.directLabel = 'Renamed';
+      fixture.componentInstance.directLabel.set('Renamed');
       await settle(fixture);
 
-      expect(renderedOptionValues(fixture)).toEqual(['Renamed', 'looped']);
+      expect(names('radio')).toEqual(['Renamed', 'looped']);
     });
 
     it('collects an option added to the loop later', async () => {
-      host.loopedValues = ['looped', 'added'];
+      fixture.componentInstance.loopedValues.set(['looped', 'added']);
       await settle(fixture);
 
-      expect(renderedOptionValues(fixture)).toEqual(['Direct', 'looped', 'added']);
+      expect(names('radio')).toEqual(['Direct', 'looped', 'added']);
     });
+  });
 
-    it('follows a changed disabled flag in a select field', async () => {
-      const selectFixture = TestBed.createComponent(ChangingSelectOptionHostComponent);
-      await settle(selectFixture);
+  describe('a select option changing in place', () => {
+    it('follows a changed disabled flag', async () => {
+      const fixture = await render(ChangingSelectOptionHost);
 
-      selectFixture.componentInstance.disabledValue = 'b';
-      await settle(selectFixture);
+      fixture.componentInstance.disabledValue.set('b');
+      await settle(fixture);
 
-      const disabled = Array.from(selectFixture.nativeElement.querySelectorAll('option:disabled')).map(
-        (el) => (el as HTMLOptionElement).value
-      );
-      expect(disabled).toEqual(['b']);
+      // The no-selection option, which carries no value, is disabled too.
+      const select = page.getByRole('combobox').element() as HTMLSelectElement;
+      const disabled = Array.from(select.options).filter((option) => option.disabled && option.value);
+
+      expect(disabled.map((option) => option.value)).toEqual(['b']);
     });
   });
 
   describe('defaultOption', () => {
-    let fixture: ComponentFixture<WrappedOptionsHostComponent>;
-    let host: WrappedOptionsHostComponent;
+    let fixture: ComponentFixture<WrappedOptionsHost>;
 
-    beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [WrappedOptionsHostComponent] }).compileComponents();
-
-      fixture = TestBed.createComponent(WrappedOptionsHostComponent);
-      host = fixture.componentInstance;
-    });
+    beforeEach(async () => (fixture = await render(WrappedOptionsHost)));
 
     it('is pinned first, ahead of the sortFn', async () => {
-      host.defaultOption = { value: 'zzz-default' };
-      host.sortFn = (a, b) => a.value.localeCompare(b.value);
+      fixture.componentInstance.defaultOption.set({ value: 'zzz-default' });
+      fixture.componentInstance.sortFn.set((a, b) => a.value.localeCompare(b.value));
       await settle(fixture);
 
-      expect(renderedOptionValues(fixture)[0]).toBe('zzz-default');
+      expect(names('radio')[0]).toBe('zzz-default');
     });
 
-    it('is selectable and becomes the field value', async () => {
-      host.defaultOption = { value: 'chosen-default' };
+    it('is picked like any option, and becomes the model value', async () => {
+      fixture.componentInstance.defaultOption.set({ value: 'chosen-default' });
       await settle(fixture);
 
-      host.field().selectOption(host.defaultOption);
-      await settle(fixture);
+      await userEvent.click(page.getByRole('radio', { name: 'chosen-default' }));
 
-      expect(host.field().value).toBe('chosen-default');
+      await expect.poll(() => fixture.componentInstance.model()).toBe('chosen-default');
     });
 
     it('stays out of the list in the fallback mode while other options exist', async () => {
-      host.defaultOption = { value: 'only-when-empty' };
-      host.defaultOptionMode = 'fallback';
+      fixture.componentInstance.defaultOption.set({ value: 'only-when-empty' });
+      fixture.componentInstance.defaultOptionMode.set('fallback');
       await settle(fixture);
 
-      expect(renderedOptionValues(fixture)).not.toContain('only-when-empty');
+      expect(names('radio')).not.toContain('only-when-empty');
     });
   });
 
-  // the autocomplete pins its default after filtering, so it has its own path worth covering
+  // The autocomplete pins its default after filtering, so it has its own path worth covering.
   describe('defaultOption on the autocomplete', () => {
-    let fixture: ComponentFixture<FilteredAutocompleteHostComponent>;
-    let host: FilteredAutocompleteHostComponent;
+    let fixture: ComponentFixture<FilteredAutocompleteHost>;
 
-    const type = (text: string) => {
-      const input = fixture.nativeElement.querySelector('input') as HTMLInputElement;
-      input.dispatchEvent(new Event('focus'));
-      input.value = text;
-      input.dispatchEvent(new Event('input'));
-      tick(300); // clears the 200ms filter debounce
-      fixture.detectChanges();
-    };
+    beforeEach(async () => (fixture = await render(FilteredAutocompleteHost)));
 
-    beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [FilteredAutocompleteHostComponent] }).compileComponents();
+    it('shows a fallback default only once the filter matches nothing', async () => {
+      await filterBy(fixture, 'cat');
+      expect(names('option')).toEqual(['Cat']);
 
-      fixture = TestBed.createComponent(FilteredAutocompleteHostComponent);
-      host = fixture.componentInstance;
-      await settle(fixture);
+      await filterBy(fixture, 'zzz');
+      expect(names('option')).toEqual(['Add a new one…']);
     });
 
-    it('shows a fallback default only once the filter matches nothing', fakeAsync(() => {
-      type('cat');
-      expect(renderedOptionValues(fixture)).toEqual(['Cat']);
+    it('keeps an always default visible through a non-matching filter', async () => {
+      fixture.componentInstance.defaultOptionMode.set('always');
+      await settle(fixture);
 
-      type('zzz');
-      expect(renderedOptionValues(fixture)).toEqual(['Add a new one…']);
+      await filterBy(fixture, 'zzz');
 
-      discardPeriodicTasks();
-    }));
+      expect(names('option')).toEqual(['Add a new one…']);
+    });
 
-    it('keeps an always default visible through a non-matching filter', fakeAsync(() => {
-      host.defaultOptionMode = 'always';
-      fixture.detectChanges();
-      tick();
+    it('does not deselect a picked fallback default when the option list changes', async () => {
+      await filterBy(fixture, 'zzz');
+      await userEvent.click(page.getByRole('option', { name: 'Add a new one…' }));
+      await expect.poll(() => fixture.componentInstance.model()).toBe('add-new');
 
-      type('zzz');
+      // An options change takes the selection back off any value it cannot find an option for.
+      fixture.componentInstance.options.set([{ value: 'dog', label: 'Dog' }]);
+      await settle(fixture, 300);
 
-      expect(renderedOptionValues(fixture)).toEqual(['Add a new one…']);
+      expect(fixture.componentInstance.model()).toBe('add-new');
+    });
 
-      discardPeriodicTasks();
-    }));
+    it('displays an externally written default value', async () => {
+      fixture.componentInstance.model.set('add-new');
+      await settle(fixture);
 
-    it('does not deselect a chosen fallback default when the option list changes', fakeAsync(() => {
-      type('zzz');
-      host.field().selectOption(host.defaultOption);
-
-      // an options change runs the reconcile pass, which drops any selection it cannot find
-      host.options = [{ value: 'dog', label: 'Dog' }];
-      fixture.detectChanges();
-      tick(300);
-      fixture.detectChanges();
-
-      expect(host.field().value).toBe('add-new');
-
-      discardPeriodicTasks();
-    }));
-
-    it('displays an externally written default value', fakeAsync(() => {
-      host.field().writeValue('add-new');
-      tick();
-      fixture.detectChanges();
-
-      expect((fixture.nativeElement.querySelector('input') as HTMLInputElement).value).toBe('Add a new one…');
-
-      discardPeriodicTasks();
-    }));
+      await expect.element(page.getByRole('combobox')).toHaveValue('Add a new one…');
+    });
   });
 
   describe('empty group', () => {
-    let fixture: ComponentFixture<LoopedCheckboxHostComponent>;
-    let host: LoopedCheckboxHostComponent;
+    let fixture: ComponentFixture<LoopedCheckboxHost>;
 
-    beforeEach(async () => {
-      await TestBed.configureTestingModule({ imports: [LoopedCheckboxHostComponent] }).compileComponents();
-
-      fixture = TestBed.createComponent(LoopedCheckboxHostComponent);
-      host = fixture.componentInstance;
-      await settle(fixture);
-    });
+    beforeEach(async () => (fixture = await render(LoopedCheckboxHost)));
 
     it('collects @for options in a checkbox group', () => {
-      expect(renderedOptionValues(fixture)).toEqual(['a', 'b']);
+      expect(names('checkbox')).toEqual(['a', 'b']);
     });
 
     it('renders the empty state as plain text rather than as an option', async () => {
-      host.loopedValues = [];
+      fixture.componentInstance.loopedValues.set([]);
       await settle(fixture);
 
-      const field = fixture.nativeElement.querySelector('.field') as HTMLElement;
-
-      expect(field.querySelectorAll('formidable-field-option').length).toBe(0);
-      expect(field.querySelectorAll('input').length).toBe(0);
-      expect(field.querySelector('.no-option')?.textContent?.trim()).toBe('Nothing here.');
+      // Hidden too, which takes in the native checkboxes behind the options.
+      expect(page.getByRole('checkbox', { includeHidden: true }).elements()).toEqual([]);
+      await expect.element(page.getByRole('group').getByText('Nothing here.')).toBeVisible();
     });
   });
 });
