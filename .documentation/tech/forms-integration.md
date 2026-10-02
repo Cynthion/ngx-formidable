@@ -147,8 +147,8 @@ Each is pinned by a spec, so an Angular update that changes it fails one.
 | A classic error reaches a custom control as `{ kind, context }`, with no `message`                                                                     | `error-message.spec.ts`                              |
 | `transformedValue` reports parse errors to all three APIs. `ngModel` and `[formControl]` hand one to the field only on the host's next check           | `date-time-field.spec.ts`, `forms-api-state.spec.ts` |
 | Signal Forms' `submit()` touches every field, and a classic `ngSubmit` touches no control                                                              | `reveal.spec.ts`                                     |
-| A Vest suite is a Standard Schema, and an async Vest test does not surface through it                                                                  | `vest-integration.spec.ts`                           |
-| A Standard Schema issue whose path names no field reports on the root, and one whose path runs through a key the model lacks throws                    | `vest-integration.spec.ts`                           |
+| A Vest suite is a Standard Schema, and an async Vest test holds back the suite's every message until it settles                                        | `vest-integration.spec.ts`                           |
+| A Standard Schema issue with no path reports on the root, and one whose path runs through a key the model lacks throws                                 | `vest-integration.spec.ts`                           |
 | A Zod schema is a Standard Schema, and a refinement reports on the path it names                                                                       | `zod-integration.spec.ts`                            |
 
 The last three are portal specs in `src/app/validation/`; the rest are library specs.

@@ -122,9 +122,9 @@ export const signupSchema = schema<SignupModel>((path) => {
 ```
 
 - **A Suite Per Form**: a suite made by `create` keeps state across every form it runs for, and grows slower with each. Call the factory inside `schema()`, which runs once per `form()`.
-- **Every Failing Test**: without `mode(Modes.ALL)`, Vest reports only a field's first failing test.
-- **A Target Is A Path**: `'payment.method'` reports on that field and `'payment'` on its group. A target naming no key of the model, such as `'wholeForm'`, reports on the whole form; one running through a key the model lacks throws.
-- **Async Tests Do Not Surface**: an async Vest test never reaches the form through Standard Schema; the form stays valid and never pending. Write that check as `validateAsync()` or `validateHttp()` beside the suite.
+- **Every Failing Test**: without `mode(Modes.ALL)`, Vest reports only a field's first failing test, and skips an empty target once any test before it failed.
+- **A Target Is A Path**: `'payment.method'` reports on that field and `'payment'` on its group. An empty target reports on the whole form; one running through a key the model lacks throws.
+- **An Async Test Holds The Suite**: while an async Vest test runs, the form is `pending` and shows none of the suite's messages, its sync tests' included; they all arrive once it settles. A check that must not hold the others back belongs in `validateAsync()` or `validateHttp()` beside the suite.
 - **Marking Required**: a Standard Schema cannot tell Signal Forms a field is required, so `metadata(path, REQUIRED, () => true)` marks it. `required()` would mark it as well, and report a second message for the same failure.
 
 ---

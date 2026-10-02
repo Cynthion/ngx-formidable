@@ -1,6 +1,6 @@
 import { emptyValueOf, FIELD_KIND_VALUE_TYPES, PortalValueType } from '../model/field-capabilities';
 import { PortalFieldSpec, PortalFormDefinition, PortalValidatorKind } from '../model/field-spec.model';
-import { fieldsOf, PortalRule, rulesOn, WHOLE_FORM } from '../model/preview-form.validation';
+import { fieldsOf, PortalRule, rulesOn } from '../model/preview-form.validation';
 import { pathOf } from '../helpers/model-path.helpers';
 import { ALL_FIELD_ATTRIBUTES } from './markup-attributes';
 import { accessOf, isIdentifier } from './markup-serializer';
@@ -189,7 +189,7 @@ function angularChecks(rules: readonly PortalRule[]): string[] {
 /** One rule as a Vest test, reading the suite's `model`. */
 function vestTest({ target, message, check }: PortalRule): string[] {
   const value = accessOf('model', target);
-  const open = `test(${literal(target || WHOLE_FORM)}, ${literal(message)}, () => {`;
+  const open = `test(${literal(target)}, ${literal(message)}, () => {`;
 
   switch (check.kind) {
     case 'required':
@@ -206,7 +206,7 @@ function vestTest({ target, message, check }: PortalRule): string[] {
       return [open, `  enforce(${value}).shorterThanOrEquals(${check.max});`, '});'];
     case 'cross':
       return [
-        ...(target ? [] : ['// A target naming no field reports on the whole form.']),
+        ...(target ? [] : ['// An empty target reports on the whole form.']),
         open,
         `  enforce(${check.source}).isTruthy();`,
         '});'

@@ -177,9 +177,7 @@ describe('schema serializer', () => {
         '    });'
       ].join('\n')
     );
-    expect(vest).toContain(
-      "    test('wholeForm', 'Pineapple on a BBQ base is a combination this kitchen refuses.', () => {"
-    );
+    expect(vest).toContain("    test('', 'Pineapple on a BBQ base is a combination this kitchen refuses.', () => {");
     expect(vest).toContain('  metadata(path.orderName, REQUIRED, () => true);');
     expect(vest).toContain('  validateStandardSchema(path, createMyFormSuite());');
     expect(vest).not.toContain('required(');

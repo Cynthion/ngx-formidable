@@ -4,12 +4,12 @@ import { form, FormField, validateStandardSchema } from '@angular/forms/signals'
 import { FieldDecorator, FieldLabel, InputField } from '@cynthion/ngx-formidable';
 import { page, userEvent } from 'vitest/browser';
 import { create, enforce, mode, Modes, test } from 'vest';
-import { openPage, settle } from '../portal/testing/studio';
+import { openPage } from '../portal/testing/studio';
 
 /**
  * A Vest suite is a Standard Schema, and `validateStandardSchema` is all it takes to run one under Signal
- * Forms. Pinned here because two of the ways it reports are not what a Vest user expects: the whole form is a
- * target that names no field, and an async test never surfaces at all.
+ * Forms. Pinned here because two of the ways it reports are not what a Vest user expects: an empty target
+ * needs `Modes.ALL`, and an async test holds back every message of the suite until it settles.
  */
 
 interface Order {
@@ -39,10 +39,8 @@ function orderSuite() {
       enforce(order.payment.method === 'cash' && order.payment.card !== '').isFalsy();
     });
 
-    // A path into a key the model does not have resolves to no field, so the error falls back to the path
-    // the schema is validating — here the root. An empty target, which Vest gives no path at all, would
-    // land there too, but breaks Vest's check that the tests run in the same order on every run.
-    test('wholeForm', 'Nobody delivers today.', () => {
+    // An empty target gives the issue no path, so it reports on the path the schema validates: the root.
+    test('', 'Nobody delivers today.', () => {
       enforce(order.name === 'Closed').isFalsy();
     });
   });
@@ -68,32 +66,6 @@ function orderSuite() {
 class OrderHost {
   readonly model = signal<Order>(EMPTY_ORDER);
   readonly form = form(this.model, (path) => validateStandardSchema(path, orderSuite()));
-}
-
-@Component({
-  imports: [FormField, FieldDecorator, FieldLabel, InputField],
-  template: `
-    <formidable-field-decorator>
-      <formidable-input-field
-        revealOn="always"
-        [formField]="form.name" />
-      <div formidableFieldLabel>Name</div>
-    </formidable-field-decorator>
-  `
-})
-class AsyncHost {
-  readonly model = signal({ name: '' });
-  readonly form = form(this.model, (path) =>
-    validateStandardSchema(
-      path,
-      create(() => {
-        test('name', 'The name is taken.', async () => {
-          await Promise.resolve();
-          throw new Error('taken');
-        });
-      })
-    )
-  );
 }
 
 describe('Vest through Standard Schema', () => {
@@ -122,7 +94,7 @@ describe('Vest through Standard Schema', () => {
     expect(host.form.payment.method().errors()).toEqual([]);
   });
 
-  it('reports a test whose target names no field on the whole form', async () => {
+  it('reports a test whose target is empty on the whole form, on every later run as well', async () => {
     const { componentInstance: host } = await openPage(OrderHost);
 
     host.model.set({ name: 'Closed', payment: { method: 'card', card: '4242' } });
@@ -143,29 +115,20 @@ describe('Vest through Standard Schema', () => {
     expect(host.model().name).toBe('Anna');
   });
 
-  // Vest's own defect, pinned so it is noticed once fixed: https://github.com/ealush/vest/issues/1346.
-  it('fails Vest’s order check on every later run of a test whose target is empty', async ({ onTestFinished }) => {
-    let thrown = '';
-    // A listener of the spec's own keeps the runner from failing the run on the throw it is here to catch.
-    const onError = (event: ErrorEvent) => {
-      thrown = event.message;
-      event.preventDefault();
-    };
-
-    window.addEventListener('error', onError);
-    onTestFinished(() => window.removeEventListener('error', onError));
-
+  // Vest's own defect, pinned so it is noticed once fixed: the default mode looks up a field's earlier failures,
+  // and Vest reads an empty name there as every field.
+  it('skips a test whose target is empty, under Vest’s default mode, once any test before it failed', () => {
     const suite = create(() => {
+      test('name', 'We need a name.', () => {
+        enforce('').isNotBlank();
+      });
+
       test('', 'Nobody delivers today.', () => {
         enforce(false).isTruthy();
       });
     });
 
-    suite['~standard'].validate({});
-    suite['~standard'].validate({});
-
-    // Vest defers the throw to a timer of its own.
-    await expect.poll(() => thrown).toContain('Tests called in different order');
+    expect(suite['~standard'].validate({})).toEqual({ issues: [{ message: 'We need a name.', path: ['name'] }] });
   });
 
   // Angular's own defect, pinned so it is noticed once fixed: https://github.com/angular/angular/issues/71128.
@@ -186,17 +149,44 @@ describe('Vest through Standard Schema', () => {
     expect(() => tree().errors()).toThrowError(TypeError);
   });
 
-  it('never surfaces an async test, and holds the form valid while it fails', async () => {
-    const fixture = await openPage(AsyncHost);
-    const host = fixture.componentInstance;
+  it('holds back every message while an async test runs, and reports them all once it settles', async () => {
+    let answer!: () => void;
+    const answered = new Promise<void>((resolve) => (answer = resolve));
+    const tree = TestBed.runInInjectionContext(() =>
+      form(signal({ name: '' }), (path) =>
+        validateStandardSchema(
+          path,
+          create(() => {
+            mode(Modes.ALL);
 
-    await userEvent.type(field('Name'), 'Anna');
-    await expect.poll(() => host.model().name).toBe('Anna');
-    await settle(fixture, 50);
+            test('name', 'We need a name.', () => {
+              enforce('').isNotBlank();
+            });
 
-    await expect.element(field('Name')).toHaveAccessibleDescription('');
-    expect(host.form.name().errors()).toEqual([]);
-    expect(host.form().pending()).toBe(false);
-    expect(host.form().valid()).toBe(true);
+            test('name', 'The name is taken.', async () => {
+              await answered;
+              throw new Error('taken');
+            });
+          })
+        )
+      )
+    );
+    const messages = () => {
+      TestBed.tick();
+      return tree
+        .name()
+        .errors()
+        .map((error) => error.message);
+    };
+
+    expect(messages()).toEqual([]);
+    expect(tree().pending()).toBe(true);
+    expect(tree().valid()).toBe(false);
+
+    answer();
+
+    await expect.poll(messages).toEqual(['We need a name.', 'The name is taken.']);
+    expect(tree().pending()).toBe(false);
+    expect(tree().invalid()).toBe(true);
   });
 });

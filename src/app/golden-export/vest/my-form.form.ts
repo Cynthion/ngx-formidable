@@ -144,8 +144,8 @@ export function createMyFormSuite() {
       enforce(model.when.date?.getDay() !== 1).isTruthy();
     });
 
-    // A target naming no field reports on the whole form.
-    test('wholeForm', 'Pineapple on a BBQ base is a combination this kitchen refuses.', () => {
+    // An empty target reports on the whole form.
+    test('', 'Pineapple on a BBQ base is a combination this kitchen refuses.', () => {
       enforce(!(model.sauce === 'bbq' && model.toppings.includes('pineapple'))).isTruthy();
     });
   });

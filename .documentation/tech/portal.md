@@ -314,9 +314,9 @@ A chip is the portal's annotation rather than part of the form, so the `Field Ty
 
 **How A Vest Test Reaches Signal Forms.** A test's target becomes its issue's path, and `vest-integration.spec.ts` pins what follows from that:
 
-- **Whole Form**: a target naming no field of the model reports on the root. An empty target would too, but breaks Vest's check that tests run in the same order on every run.
+- **Whole Form**: an empty target reports on the root, under `mode(Modes.ALL)`, which the suite and the export both set. Vest's default mode skips it once any test before it failed.
 - **Unknown Path**: Signal Forms throws on an issue whose path runs through a key the model lacks.
-- **Async Tests**: they never surface; the form stays valid and never pending.
+- **Async Tests**: while one runs, the form is pending and holds back every message of the suite.
 - **Conditions**: a rule reads no condition, because a hidden field is left out of validation.
 
 **How A Zod Schema Reaches Signal Forms.** A Zod schema holds no state, so one per tree is only for the rules that tree has. Its keys are the fields the rules read, typed from `FIELD_KIND_VALUE_TYPES`, and `zod-integration.spec.ts` pins how a check across fields reaches the form:

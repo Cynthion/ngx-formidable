@@ -135,11 +135,6 @@ export function rulesOn(fields: ReadonlyMap<string, PortalValueType>): readonly 
   return PREVIEW_RULES.filter((rule) => fieldsOf(rule).every((path) => fields.get(path) === SAMPLE_TYPES.get(path)));
 }
 
-// The whole form, as a target naming no field of the model: Signal Forms resolves it to no field and reports
-// the error on the path the schema validates, which is the root. An empty target would say so more plainly,
-// and breaks Vest's check that the tests run in the same order on every run.
-export const WHOLE_FORM = 'wholeForm';
-
 /**
  * The rules as a Vest suite, which the schema runs through `validateStandardSchema`.
  *
@@ -173,7 +168,7 @@ export function createPreviewSuite(rules: readonly PortalRule[]) {
           });
           break;
         case 'cross':
-          test(target || WHOLE_FORM, message, () => {
+          test(target, message, () => {
             enforce(check.test(model as unknown as SampleModel)).isTruthy();
           });
       }
