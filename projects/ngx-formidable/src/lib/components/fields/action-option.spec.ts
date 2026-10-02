@@ -1,25 +1,20 @@
-import { Component, signal, viewChild } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { FieldDefaultOptionMode, FormidableActionOption, FormidableOption } from '../../models/formidable.model';
-import { fill, press } from '../../testing/dom';
+import type { Mock } from 'vitest';
+import { page, userEvent } from 'vitest/browser';
+import { FieldDefaultOptionMode, FormidableOption } from '../../models/formidable.model';
+import { bindField, BoundField } from '../../testing/bind-field';
+import { referenced } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
-import { AutocompleteField } from './autocomplete-field/autocomplete-field';
-import { DropdownField } from './dropdown-field/dropdown-field';
 
 /**
- * Contract of the `actionOption` the two panel fields take: an entry that runs an action instead of becoming
- * a value — "Add A New Address…" at the end of a list.
+ * The `actionOption` the two panel fields take, per **An Action Row Is Not A Value** in `user/fields.md`: an
+ * entry at the end of the list that runs an action instead of becoming a value, "Add A New Address…".
  *
- * It renders as an option and the keyboard walks it as one, because that is what `aria-activedescendant`
- * requires and what every highlight helper — all of them indices into `activeOptions` — already does. What
- * separates it from an option is the value paths, and those are the claims here: picking it commits nothing,
- * a model written to its value finds no option, the autocomplete never auto-selects it off an exact label,
- * and the dropdown's type-ahead walks past it.
+ * It renders as an option and the keyboard walks it as one. What separates it from an option is the value:
+ * picking it commits nothing, a model written to its value finds no option, the autocomplete never picks it
+ * off its typed label, and the dropdown's type-ahead walks past it. It never stands in for a result either: a
+ * list showing the action still says that nothing matched.
  *
- * It also never stands in for a result. The empty state is a status — "nothing matched" — and the action is
- * a control; a panel showing the action still says the list is empty, which is why `noOptionsText` hangs off
- * the selectable options rather than off `@empty`.
+ * Every spec opens the panel and picks from it as a user does, with trusted clicks and keys.
  */
 
 const OPTIONS: FormidableOption[] = [
@@ -27,221 +22,164 @@ const OPTIONS: FormidableOption[] = [
   { value: 'blue', label: 'Blue' }
 ];
 
-@Component({
-  imports: [FormsModule, DropdownField, AutocompleteField],
-  template: `
-    <form>
-      <formidable-dropdown-field
-        name="branch"
-        [(ngModel)]="branch"
-        [options]="options()"
-        [actionOption]="actionOption"
-        [actionOptionMode]="mode()" />
-      <formidable-autocomplete-field
-        name="address"
-        [(ngModel)]="address"
-        [options]="options()"
-        [actionOption]="actionOption"
-        [actionOptionMode]="mode()" />
-    </form>
-  `
-})
-class TestHost {
-  readonly dropdown = viewChild.required(DropdownField);
+const ACTION = 'Add A New One…';
 
-  readonly options = signal<FormidableOption[]>([...OPTIONS]);
-  readonly mode = signal<FieldDefaultOptionMode>('always');
-  readonly branch = signal<string | null>(null);
-  readonly address = signal<string | null>(null);
+const combobox = () => page.getByRole('combobox', { name: 'Colour' });
 
-  runs = 0;
-  readonly actionOption: FormidableActionOption = {
-    value: '__add__',
-    label: 'Add A New One…',
-    action: () => this.runs++
-  };
-}
+/** The labels of the options the open panel shows, in order. */
+const labels = () =>
+  page
+    .getByRole('option')
+    .elements()
+    .map((option) => option.textContent!.trim());
+
+/** The label of the option the field highlights, or `null` for none. */
+const highlighted = () => referenced(combobox().element(), 'aria-activedescendant')[0]?.textContent?.trim() ?? null;
 
 describe('action option', () => {
-  let fixture: ComponentFixture<TestHost>;
-  let host: TestHost;
+  let runs: Mock<() => void>;
 
   beforeEach(() => {
-    configureFormidableTestBed({ imports: [TestHost] });
-
-    fixture = TestBed.createComponent(TestHost);
-    host = fixture.componentInstance;
+    configureFormidableTestBed();
+    (document.activeElement as HTMLElement | null)?.blur();
+    runs = vi.fn();
   });
 
-  afterEach(() => fixture.destroy());
-
-  function fieldElement(selector: 'dropdown' | 'autocomplete'): HTMLElement {
-    return fixture.nativeElement.querySelector(`formidable-${selector}-field`) as HTMLElement;
-  }
-
-  function optionLabels(selector: 'dropdown' | 'autocomplete'): string[] {
-    return Array.from(fieldElement(selector).querySelectorAll('formidable-field-option')).map((el) =>
-      (el as HTMLElement).textContent!.trim()
-    );
-  }
-
-  function emptyStateText(selector: 'dropdown' | 'autocomplete'): string | null {
-    return fieldElement(selector).querySelector('.no-option')?.textContent?.trim() ?? null;
-  }
-
-  /** The option the field marks as holding its value. */
-  function selectedOption(selector: 'dropdown' | 'autocomplete'): Element | null {
-    return fieldElement(selector).querySelector('formidable-field-option[aria-selected="true"]');
-  }
-
-  function isPanelOpen(selector: 'dropdown' | 'autocomplete'): boolean {
-    return fieldElement(selector).querySelector('.panel')!.classList.contains('open');
-  }
-
-  function clickOption(selector: 'dropdown' | 'autocomplete', label: string): void {
-    const option = Array.from(fieldElement(selector).querySelectorAll('formidable-field-option')).find(
-      (el) => (el as HTMLElement).textContent!.trim() === label
-    ) as HTMLElement;
-
-    option.querySelector('div')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-  }
-
-  /** Types into the autocomplete's own input and lets its debounce through. */
-  async function search(text: string): Promise<void> {
-    const input = fieldElement('autocomplete').querySelector('input') as HTMLInputElement;
-
-    input.focus();
-    fill(input, text);
-
-    await settle(fixture, 200);
+  /** Binds the field under a label, with an action entry. */
+  function bind(
+    kind: 'dropdown' | 'autocomplete',
+    { options = OPTIONS, mode = 'always' }: { options?: FormidableOption[]; mode?: FieldDefaultOptionMode } = {}
+  ): Promise<BoundField> {
+    return bindField(kind, 'signal', {
+      inputs: { options, actionOption: { value: '__add__', label: ACTION, action: runs }, actionOptionMode: mode },
+      decorated: true,
+      decoration: '<div formidableFieldLabel>Colour</div>'
+    });
   }
 
   describe('dropdown', () => {
-    it('renders last, after the options', async () => {
-      await settle(fixture);
-      host.dropdown().togglePanel(true);
-      await settle(fixture);
+    /** Opens the panel with a click, as a user does. The display input takes no pointer events, so it lands on the field around it. */
+    async function open(): Promise<void> {
+      await userEvent.click(combobox(), { force: true });
+      await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+    }
 
-      expect(optionLabels('dropdown')).toEqual(['Red', 'Blue', 'Add A New One…']);
+    it('renders last, after the options', async () => {
+      await bind('dropdown');
+      await open();
+
+      expect(labels()).toEqual(['Red', 'Blue', ACTION]);
     });
 
     it('stays out of the list in the fallback mode while options exist', async () => {
-      host.mode.set('fallback');
-      await settle(fixture);
-      host.dropdown().togglePanel(true);
-      await settle(fixture);
+      await bind('dropdown', { mode: 'fallback' });
+      await open();
 
-      expect(optionLabels('dropdown')).toEqual(['Red', 'Blue']);
+      expect(labels()).toEqual(['Red', 'Blue']);
     });
 
     it('renders beside the empty-state text, not instead of it', async () => {
-      host.mode.set('fallback');
-      host.options.set([]);
-      await settle(fixture);
-      host.dropdown().togglePanel(true);
-      await settle(fixture);
+      await bind('dropdown', { options: [], mode: 'fallback' });
+      await open();
 
-      expect(optionLabels('dropdown')).toEqual(['Add A New One…']);
-      expect(emptyStateText('dropdown')).toBe('No options available.');
+      expect(labels()).toEqual([ACTION]);
+      await expect.element(page.getByRole('listbox').getByText('No options available.')).toBeVisible();
     });
 
     it('runs its action on a click, commits nothing and closes the panel', async () => {
-      await settle(fixture);
-      host.dropdown().togglePanel(true);
-      await settle(fixture);
+      const field = await bind('dropdown');
+      await open();
 
-      clickOption('dropdown', 'Add A New One…');
-      await settle(fixture);
+      await userEvent.click(page.getByRole('option', { name: ACTION }));
 
-      expect(host.runs).toBe(1);
-      expect(host.branch()).toBeNull();
-      expect(selectedOption('dropdown')).toBeNull();
-      expect(isPanelOpen('dropdown')).toBe(false);
+      await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+      expect(runs).toHaveBeenCalledOnce();
+      expect(field.value()).toBeNull();
+      await expect.element(combobox()).toHaveValue('');
     });
 
     it('is reached by the keyboard and runs its action on Enter', async () => {
-      await settle(fixture);
-      const input = fieldElement('dropdown').querySelector('input') as HTMLInputElement;
-      input.focus();
-      await settle(fixture);
+      const field = await bind('dropdown');
+      await userEvent.tab();
 
-      // Keydowns are listened for on the field wrapper, and only while the field is focused.
-      press(input, 'ArrowDown'); // opens the panel
-      press(input, 'ArrowDown'); // Red
-      press(input, 'ArrowDown'); // Blue
-      press(input, 'ArrowDown'); // Add A New One…
-      await settle(fixture);
+      await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}{ArrowDown}');
+      await expect.poll(highlighted).toBe(ACTION);
 
-      expect(fieldElement('dropdown').querySelector('.is-highlighted')!.textContent!.trim()).toBe('Add A New One…');
+      await userEvent.keyboard('{Enter}');
 
-      press(input, 'Enter');
-      await settle(fixture);
-
-      expect(host.runs).toBe(1);
-      expect(host.branch()).toBeNull();
+      await expect.poll(() => runs.mock.calls.length).toBe(1);
+      expect(field.value()).toBeNull();
     });
 
+    // "a" starts no option's label, but it does start the action entry's.
     it('is skipped by the type-ahead', async () => {
-      await settle(fixture);
-      const input = fieldElement('dropdown').querySelector('input') as HTMLInputElement;
-      input.focus();
-      await settle(fixture);
+      const field = await bind('dropdown');
+      await userEvent.tab();
 
-      // "a" starts no option's label but does start the action entry's.
-      press(input, 'a');
-      await settle(fixture, 200);
+      await userEvent.keyboard('a');
+      await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+      await settle(field.fixture, 200);
 
-      expect(fieldElement('dropdown').querySelector('.is-highlighted')).toBeNull();
+      expect(highlighted()).toBeNull();
     });
 
     it('is not selected by a model written to its value', async () => {
-      host.branch.set('__add__');
-      await settle(fixture);
+      const field = await bind('dropdown');
 
-      expect(selectedOption('dropdown')).toBeNull();
-      expect((fieldElement('dropdown').querySelector('input') as HTMLInputElement).value).toBe('');
+      await field.write('__add__');
+      await open();
+
+      await expect.element(combobox()).toHaveValue('');
+      expect(page.getByRole('option', { selected: true }).elements()).toEqual([]);
     });
   });
 
   describe('autocomplete', () => {
-    it('survives a filter that matches nothing, beside the empty-state text', async () => {
-      await settle(fixture);
-      await search('zzz');
+    /** Types into the field and lets its filter through. */
+    async function search(field: BoundField, text: string): Promise<void> {
+      await userEvent.click(combobox());
+      await userEvent.keyboard(text);
+      await settle(field.fixture, 300); // clears the 200ms filter debounce
+    }
 
-      expect(optionLabels('autocomplete')).toEqual(['Add A New One…']);
-      expect(emptyStateText('autocomplete')).toBe('No options available.');
+    it('survives a filter that matches nothing, beside the empty-state text', async () => {
+      const field = await bind('autocomplete');
+
+      await search(field, 'zzz');
+
+      expect(labels()).toEqual([ACTION]);
+      await expect.element(page.getByRole('listbox').getByText('No options available.')).toBeVisible();
     });
 
     it('runs its action on a click, commits nothing and closes the panel', async () => {
-      await settle(fixture);
-      await search('zzz');
+      const field = await bind('autocomplete');
+      await search(field, 'zzz');
 
-      clickOption('autocomplete', 'Add A New One…');
-      await settle(fixture);
+      await userEvent.click(page.getByRole('option', { name: ACTION }));
 
-      expect(host.runs).toBe(1);
-      expect(host.address()).toBeNull();
-      expect(selectedOption('autocomplete')).toBeNull();
-      expect(isPanelOpen('autocomplete')).toBe(false);
+      await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+      expect(runs).toHaveBeenCalledOnce();
+      expect(field.value()).toBeNull();
     });
 
     it('leaves the typed filter alone, so the action can read it', async () => {
-      await settle(fixture);
-      await search('Wiesenstrasse 5');
+      const field = await bind('autocomplete');
+      await search(field, 'Wiesenstrasse 5');
 
-      clickOption('autocomplete', 'Add A New One…');
-      await settle(fixture);
+      await userEvent.click(page.getByRole('option', { name: ACTION }));
 
-      expect((fieldElement('autocomplete').querySelector('input') as HTMLInputElement).value).toBe('Wiesenstrasse 5');
+      await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+      await expect.element(combobox()).toHaveValue('Wiesenstrasse 5');
     });
 
-    it('is not auto-selected by typing its label exactly', async () => {
-      await settle(fixture);
-      await search('Add A New One…');
+    it('is not picked by typing its label exactly', async () => {
+      const field = await bind('autocomplete');
 
-      expect(host.runs).toBe(0);
-      expect(host.address()).toBeNull();
-      expect(selectedOption('autocomplete')).toBeNull();
+      await search(field, ACTION);
+
+      expect(runs).not.toHaveBeenCalled();
+      expect(field.value()).toBeNull();
+      await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
     });
   });
 });

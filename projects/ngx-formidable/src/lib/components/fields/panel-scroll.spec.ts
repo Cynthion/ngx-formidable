@@ -1,4 +1,3 @@
-import type { MockInstance } from 'vitest';
 import { Component, viewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -6,69 +5,63 @@ import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { DateField } from './date-field/date-field';
 
 /**
- * Contract of the scroll a panel field performs: it brings a field its opening panel would overflow back
- * into view, and it does nothing else.
+ * The scroll a panel field makes, per **Panels** in `user/fields.md`: opening a panel brings the field back
+ * into view where the viewport cuts it off, and nothing else moves the page, neither a value written into the
+ * field nor the panel closing again.
  *
- * The regression this pins: the date field routes every value write through `selectDate`, which closes an
- * already-closed panel — so while the scroll also ran on close, seeding an initial value scrolled the page.
- * A form with a date below the fold moved on load, with nothing focused.
- *
- * The spacer is what makes the first claim testable: an in-view field is never scrolled either way.
+ * The field sits below the fold, so a scroll that should not happen shows. Its consumer opens and closes it
+ * through `togglePanel`: a user's own focus would already have brought it into view.
  */
 
 @Component({
   imports: [ReactiveFormsModule, DateField],
   template: `
     <div style="height: 200vh"></div>
-    <formidable-date-field
-      name="when"
-      [formControl]="when" />
+    <formidable-date-field [formControl]="when" />
   `
 })
 class TestHost {
-  public readonly when = new FormControl<Date | null>(null);
-  public readonly field = viewChild.required(DateField);
+  readonly when = new FormControl<Date | null>(null);
+  readonly field = viewChild.required(DateField);
 }
 
 describe('panel field scrolling', () => {
   let fixture: ComponentFixture<TestHost>;
-  let field: DateField;
-  let scrolled: MockInstance<Element['scrollIntoView']>;
+  let host: TestHost;
+
+  const input = () => (fixture.nativeElement as HTMLElement).querySelector('input')!;
 
   beforeEach(async () => {
     configureFormidableTestBed();
 
-    // Stubbed rather than spied through: a real scroll would leave the test page scrolled for the specs
-    // that hit-test after this one.
-    scrolled = vi.spyOn(Element.prototype, 'scrollIntoView').mockReturnValue(undefined);
-
     fixture = TestBed.createComponent(TestHost);
-    await settle(fixture); // ngAfterViewInit builds the calendar
-    field = fixture.componentInstance.field();
+    host = fixture.componentInstance;
+    await settle(fixture);
   });
 
   it('does not scroll when a value is written into an off-screen field', async () => {
-    fixture.componentInstance.when.setValue(new Date(2026, 8, 25));
+    host.when.setValue(new Date(2026, 8, 25));
     await settle(fixture, 50);
 
-    expect(scrolled).not.toHaveBeenCalled();
+    expect(window.scrollY).toBe(0);
   });
 
   it('scrolls the off-screen field into view when its panel opens', async () => {
-    field.togglePanel(true);
-    await settle(fixture, 50);
+    host.field().togglePanel(true);
 
-    expect(scrolled).toHaveBeenCalled();
+    await expect.poll(() => input().getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight);
   });
 
   it('does not scroll when the panel closes again', async () => {
-    field.togglePanel(true);
+    // Opened in view, so opening has nothing to scroll; then the page is scrolled away from it.
+    input().scrollIntoView({ block: 'center' });
+    host.field().togglePanel(true);
     await settle(fixture, 50);
-    scrolled.mockClear();
+    window.scrollTo(0, 0);
 
-    field.togglePanel(false);
+    host.field().togglePanel(false);
     await settle(fixture, 50);
 
-    expect(scrolled).not.toHaveBeenCalled();
+    expect(window.scrollY).toBe(0);
   });
 });

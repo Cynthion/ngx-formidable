@@ -30,6 +30,7 @@ Two things behave differently in a zoneless `TestBed`, and both mislead if they 
 
 - **Behaviour, Not Mechanism**: a spec names the documented rule it pins, such as **Keyboard** in [`user/fields.md`](../user/fields.md), and asserts on the DOM, ARIA, focus and the model. A doc comment that explains the implementation's internal order describes the code, not the behaviour.
 - **Real Input**: a spec drives a field with `userEvent` from `vitest/browser`. Playwright dispatches trusted clicks, `Tab`, keys and typing, so the browser's own default actions happen: focus moves, a click places the caret, a keyboard focus entry selects the text.
+- **Forced Clicks**: Playwright refuses two clicks a user can make: on a dropdown's display input, which takes no pointer events, and on an option marked `aria-disabled`. `{ force: true }` still clicks at the element's place, so the field around it takes the click.
 - **Find By Role And Label**: a spec finds a field the way assistive technology does, `page.getByRole('combobox', { name: 'Colour' })`. A decorated field takes its accessible name from its `formidableFieldLabel`. A CSS selector is for what has no role.
 - **Retrying Assertions**: after real input, `await expect.element(locator)` or `await expect.poll(read)` waits for the repaint without calling `detectChanges()`. A poll proves a change; to prove that something stayed as it was, `settle()` first and assert once.
 - **Properties For Rules**: a rule of a pure helper is a property over generated inputs, `fc.assert(fc.property(...))`. Examples stay for the documented special cases. A failing property prints its counterexample, shrunk to the smallest one, and the seed that reproduces it with `fc.assert(property, { seed, path })`. It is a defect, not a flake.
@@ -56,11 +57,12 @@ Every library spec is built on the helpers in `lib/testing/`. `public-api.ts` do
 | `clickAt(editor, index)`        | A trusted click where the caret before `index` sits, so the browser places it; `Shift` extends the selection                           |
 | `DATE_FORMATS`, `TIME_FORMATS`  | fast-check arbitraries of every `unicodeTokenFormat` a date or time field accepts, and `DATES` of any date its mask holds              |
 | `referenced()`                  | What an id-reference attribute such as `aria-activedescendant` resolves to                                                             |
+| `keptKeys()`                    | Records the `keydown`s that reach the window, and whether the field kept each one from the browser                                     |
 | `theme()`, `rem()`, `corners()` | A `:root` override, a rem length in px, the four resolved corner radii                                                                 |
 | `fill()`, `type()`, `press()`   | Synthetic input for specs not yet rewritten: a whole value, keystrokes at the caret, a bubbling cancelable `keydown`                   |
 | `click()`                       | A synthetic pointer click for specs not yet rewritten, which moves focus as the browser would                                          |
 
-`bindField` with `decorated: true` and `decoration: '<div formidableFieldLabel>Colour</div>'` gives a field the accessible name `page.getByRole` finds it by. With `after: '<button type="button">Next</button>'` focus has somewhere to leave to by `Tab` and come back from by `Shift` + `Tab`: a field alone in the test frame would hand focus to the page around it, which does not reliably hand it back.
+`bindField` with `decorated: true` and `decoration: '<div formidableFieldLabel>Colour</div>'` gives a field the accessible name `page.getByRole` finds it by. With `after: '<button type="button">Next</button>'` focus has somewhere to leave to by `Tab` and come back from by `Shift` + `Tab`: a field alone in the test frame would hand focus to the page around it, which does not reliably hand it back. `before` puts markup ahead of the field, such as a spacer that moves it to the fold.
 
 ---
 
@@ -74,7 +76,7 @@ The `helpers/` modules are pure functions and the cheapest place to find an edge
 | Masking            | `mask.helpers.ts`     | Over any mask of the built-in tokens: its display length range, and that the default placeholder is never taken for content   |
 | Caret              | `input.helpers.ts`    | Over any mask filled from the front: where its value ends; and that writing the text already shown keeps the selection        |
 | Options            | `option.helpers.ts`   | Over any list of options: the arrows land only on options a user can pick, visit all of them in order, and wrap at both ends  |
-| Panel placement    | `position.helpers.ts` | The side chosen from the available space, the flip it marks the panel with, and that a sheet is exempt                        |
+| Panel placement    | `position.helpers.ts` | Over any field, panel height and clipping panes: the side it opens on, the field left alone, no sheet ever flipped            |
 
 Behaviour that carries real risk is tested through a minimal host rather than the framework around it:
 
