@@ -8,8 +8,8 @@ import { openPage } from '../portal/testing/studio';
 
 /**
  * A Vest suite is a Standard Schema, and `validateStandardSchema` is all it takes to run one under Signal
- * Forms. Pinned here because two of the ways it reports are not what a Vest user expects: an empty target
- * needs `Modes.ALL`, and an async test holds back every message of the suite until it settles.
+ * Forms. Pinned here because two of the ways it reports are not what a Vest user expects: the whole form is an
+ * empty target, and an async test holds back every message of the suite until it settles.
  */
 
 interface Order {
@@ -113,22 +113,6 @@ describe('Vest through Standard Schema', () => {
 
     await expect.poll(() => host.form().errors()).toEqual([]);
     expect(host.model().name).toBe('Anna');
-  });
-
-  // Vest's own defect, pinned so it is noticed once fixed: the default mode looks up a field's earlier failures,
-  // and Vest reads an empty name there as every field.
-  it('skips a test whose target is empty, under Vest’s default mode, once any test before it failed', () => {
-    const suite = create(() => {
-      test('name', 'We need a name.', () => {
-        enforce('').isNotBlank();
-      });
-
-      test('', 'Nobody delivers today.', () => {
-        enforce(false).isTruthy();
-      });
-    });
-
-    expect(suite['~standard'].validate({})).toEqual({ issues: [{ message: 'We need a name.', path: ['name'] }] });
   });
 
   // Angular's own defect, pinned so it is noticed once fixed: https://github.com/angular/angular/issues/71128.

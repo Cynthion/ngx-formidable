@@ -314,7 +314,7 @@ A chip is the portal's annotation rather than part of the form, so the `Field Ty
 
 **How A Vest Test Reaches Signal Forms.** A test's target becomes its issue's path, and `vest-integration.spec.ts` pins what follows from that:
 
-- **Whole Form**: an empty target reports on the root, under `mode(Modes.ALL)`, which the suite and the export both set. Vest's default mode skips it once any test before it failed.
+- **Whole Form**: an empty target reports on the root.
 - **Unknown Path**: Signal Forms throws on an issue whose path runs through a key the model lacks.
 - **Async Tests**: while one runs, the form is pending and holds back every message of the suite.
 - **Conditions**: a rule reads no condition, because a hidden field is left out of validation.
