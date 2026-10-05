@@ -4,12 +4,36 @@ Dependency updates arrive as pull requests from the Renovate GitHub App.
 
 ## Setup
 
-- **App**: the Renovate GitHub App must be installed on the repository. Without it the configuration does nothing.
 - **Schedule**: the whole first day of each month, UTC. Security pull requests ignore it, see [Dependabot](#dependabot).
 - **Release Age**: an npm release is proposed only once it is three days old, so a release that is unpublished or turns out malicious never reaches a pull request.
 - **Dependency Dashboard**: an issue Renovate keeps current, listing every pending, gated and open update.
 - **Validation**: `npx --package renovate -- renovate-config-validator --strict`, from the repository root.
 - **MCP Servers**: a regex manager reads the `npx` pins in `.mcp.json`. `angular-cli` runs the workspace CLI and moves with `@angular/cli`.
+
+---
+
+## GitHub Configuration
+
+Settings that live outside the repository, made once by the repository owner. Without them `renovate.json` opens nothing.
+
+### Renovate App
+
+- **Installation**: avatar menu, `Settings`, `Applications`, `Installed GitHub Apps`, `Renovate`, `Configure`. `Repository access` includes this repository.
+- **Permissions**: the same page lists `Read access to Dependabot alerts`. A permission Mend adds later waits there as a request until it is accepted.
+- **Mode**: the repository runs in `Interactive` mode in the [Mend Developer Portal](https://developer.mend.io/github/Cynthion/ngx-formidable). `Silent` mode opens no pull requests and no issues, and is the default when the app is installed on all repositories.
+
+### Dependabot
+
+Renovate opens every dependency pull request. Of GitHub's Dependabot features only the alerts are on, as the vulnerability feed Renovate reads. The settings are under the repository's `Settings`, `Advanced Security`.
+
+| Feature                     | State | Reason                                                                        |
+| :-------------------------- | :---: | :---------------------------------------------------------------------------- |
+| Dependency Graph            |  On   | Required by Dependabot alerts                                                 |
+| Dependabot Alerts           |  On   | Renovate turns each alert into a security pull request                        |
+| Dependabot Security Updates |  Off  | Duplicates Renovate's security pull requests                                  |
+| Dependabot Version Updates  |  Off  | Duplicates every Renovate pull request, so no `.github/dependabot.yml` exists |
+
+- **Security Pull Requests**: one per vulnerable package, suffixed `[SECURITY]`, outside any group and ignoring schedule, gates and release age.
 
 ---
 
@@ -63,22 +87,6 @@ CI tests only the newest version, so an older major in a widened range is proven
 
 - **TypeScript**: capped by `@angular/compiler-cli` and `ng-packagr`, which both peer a single TypeScript minor, so the next TypeScript major is unavailable while the current Angular major is the floor.
 - **Vitest**: `@angular/build` peers the Vitest majors its `unit-test` builder supports, so the next Vitest major waits for the Angular release that adds it. Raise the ceiling together with that `@angular/build`.
-
----
-
-## Dependabot
-
-Renovate opens every dependency pull request. Of GitHub's Dependabot features only the alerts are on, as the vulnerability feed Renovate reads. Their settings are under the repository's `Settings`, `Advanced Security`.
-
-| Feature                     | State | Reason                                                                        |
-| :-------------------------- | :---: | :---------------------------------------------------------------------------- |
-| Dependency Graph            |  On   | Required by Dependabot alerts                                                 |
-| Dependabot Alerts           |  On   | Renovate turns each alert into a security pull request                        |
-| Dependabot Security Updates |  Off  | Duplicates Renovate's security pull requests                                  |
-| Dependabot Version Updates  |  Off  | Duplicates every Renovate pull request, so no `.github/dependabot.yml` exists |
-
-- **Security Pull Requests**: one per vulnerable package, suffixed `[SECURITY]`, outside any group and ignoring schedule, gates and release age.
-- **App Permission**: the Renovate app needs `read` access to Dependabot alerts.
 
 ---
 
