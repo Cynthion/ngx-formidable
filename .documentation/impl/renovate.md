@@ -1,14 +1,15 @@
 # Renovate
 
-Dependency updates arrive as pull requests from the Renovate GitHub App. `renovate.json` at the repository root is the configuration; this document is its rationale.
+Dependency updates arrive as pull requests from the Renovate GitHub App.
 
 ## Setup
 
 - **App**: the Renovate GitHub App must be installed on the repository. Without it the configuration does nothing.
-- **Schedule**: the whole first day of each month, UTC. Security fixes ignore the schedule.
+- **Schedule**: the whole first day of each month, UTC. Security pull requests ignore it, see [Dependabot](#dependabot).
 - **Release Age**: an npm release is proposed only once it is three days old, so a release that is unpublished or turns out malicious never reaches a pull request.
 - **Dependency Dashboard**: an issue Renovate keeps current, listing every pending, gated and open update.
 - **Validation**: `npx --package renovate -- renovate-config-validator --strict`, from the repository root.
+- **MCP Servers**: a regex manager reads the `npx` pins in `.mcp.json`. `angular-cli` runs the workspace CLI and moves with `@angular/cli`.
 
 ---
 
@@ -18,7 +19,7 @@ Packages share a pull request when one peers the other's major. A pull request c
 
 | Pull Request                 | Holds                                                                         |
 | :--------------------------- | :---------------------------------------------------------------------------- |
-| `all non-major dependencies` | Every minor and patch update, including Angular, Node and GitHub Actions      |
+| `all non-major dependencies` | Every minor and patch update, including Angular, Node, GitHub Actions and MCP |
 | `Angular (major)`            | Gated: `@angular/*`, `angular-eslint`, `ng-packagr`, `ngx-mask`, `typescript` |
 | `ESLint (major)`             | `eslint`, `@eslint/js`, `typescript-eslint`, `eslint-plugin-rxjs-x`           |
 | `Stylelint (major)`          | `stylelint`, `stylelint-config-standard-scss`                                 |
@@ -65,7 +66,24 @@ CI tests only the newest version, so an older major in a widened range is proven
 
 ---
 
+## Dependabot
+
+Renovate opens every dependency pull request. Of GitHub's Dependabot features only the alerts are on, as the vulnerability feed Renovate reads. Their settings are under the repository's `Settings`, `Advanced Security`.
+
+| Feature                     | State | Reason                                                                        |
+| :-------------------------- | :---: | :---------------------------------------------------------------------------- |
+| Dependency Graph            |  On   | Required by Dependabot alerts                                                 |
+| Dependabot Alerts           |  On   | Renovate turns each alert into a security pull request                        |
+| Dependabot Security Updates |  Off  | Duplicates Renovate's security pull requests                                  |
+| Dependabot Version Updates  |  Off  | Duplicates every Renovate pull request, so no `.github/dependabot.yml` exists |
+
+- **Security Pull Requests**: one per vulnerable package, suffixed `[SECURITY]`, outside any group and ignoring schedule, gates and release age.
+- **App Permission**: the Renovate app needs `read` access to Dependabot alerts.
+
+---
+
 ## Limits
 
 - **No Scripts**: the hosted app runs no project scripts, so an update that needs a code change (a reformat after a `prettier` release, a migration) fails CI and needs a fix-up commit on its branch.
 - **Deploy Workflow**: `deploy.yml` runs only on `main`, so no pull request proves an update to the GitHub Pages actions.
+- **MCP Servers**: no CI starts an MCP server. A `@playwright/mcp` bump also needs its Chromium build installed, see [`impl/developer-onboarding.md`](developer-onboarding.md).

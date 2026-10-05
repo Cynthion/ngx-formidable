@@ -3,6 +3,15 @@
   "description": "Grouping, ceilings and the Angular procedure are explained in .documentation/impl/renovate.md",
   "extends": ["config:recommended", "group:allNonMajor", "security:minimumReleaseAgeNpm"],
   "schedule": ["* * 1 * *"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "MCP servers that npx runs at the version pinned in .mcp.json",
+      "managerFilePatterns": ["/^\\.mcp\\.json$/"],
+      "matchStrings": ["\"(?<depName>(?:@[\\w.-]+/)?[\\w.-]+)@(?<currentValue>\\d[\\w.-]*)\""],
+      "datasourceTemplate": "npm"
+    }
+  ],
   "packageRules": [
     {
       "description": "Angular majors move with ng update, whose migrations Renovate cannot run",
