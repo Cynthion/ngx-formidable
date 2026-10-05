@@ -15,16 +15,6 @@ The source of truth for outstanding work. [`impl/backlog.md`](backlog.md) is the
 
 ## Library Phases
 
-### Phase 38: Small Fixes
-
-Five independent defects with no decision open. Each lands with its tripwire skip removed.
-
-- **Readonly Slider Takes No Click**: the `.is-readonly .slider-input` rule in `styles/mixins/_forms.scss` sets `pointer-events: none`, so no press reaches `preventPointerDown` and a click leaves the slider unfocused, against **What Every Field Shares** in [`user/fields.md`](../user/fields.md). Delete the declaration. The `READONLY_SLIDER_UNCLICKABLE` skip in `focus.spec.ts` passes, and `blocked-edits.spec.ts` stays green.
-- **Value-Top Adornment Above The First Line**: `field-prefix-suffix-value-top` in `styles/mixins/_forms.scss` offsets a textarea's prefix and suffix by its top padding from the field's outer edge, one field border short. Add the border: `top: calc(#{field-border-thickness()} + max(...))`. The `VALUE_TOP_ABOVE_FIRST_LINE` skip in `field-decorator.spec.ts` passes.
-- **Mask Length Trims Its Alternatives**: `analyzeMaskDisplayLength` in `mask.helpers.ts` trims a mask and each of its `||` alternatives, which ngx-mask does not, so a mask opening or closing on a space counts short for the `minlength` and `maxlength` warnings. Drop the `trim()`. `mask.helpers.spec.ts` drops its `UNTRIMMED` filter and generates such masks too, plus one example such as `' 000 ||00'`.
-- **Unreachable Focus Guard**: `AutocompleteField.setFilterText` emits `filterChange` only while the field is not focused, but its one caller, the render effect, already returns while the field is focused. Delete the check in `setFilterText`, and move its explaining comment beside the effect's check, which also keeps the typed text from being overwritten. `autocomplete-filter-sync.spec.ts` stays green.
-- **Tab Out Of An Open Calendar**: with the date field's calendar open, `Tab` closes the panel through a signal, but `.open` leaves only once change detection runs, after the browser has moved focus to the calendar's Previous Month button, which then hides and drops it. Set `inert` on the panel synchronously in `DateField.togglePanel`. A closed panel is already `visibility: hidden`, so no template binding is needed, and the calendar has no keyboard navigation (`keyboardInput: false`), so nothing becomes unreachable. The `TAB_INTO_CLOSING_CALENDAR` skip in `panel.spec.ts` passes, and `date-panel.spec.ts` stays green.
-
 ### Phase 39: ngx-mask Owns The Masked Value
 
 The masked editor bypasses `NgxMaskDirective`'s value channel. `BaseTextField` and `BaseDateTimeField` write the editor's text themselves, past ngx-mask, and read it back on `input`, so ngx-mask's own state stays empty and its own reports reach nobody. Lands before the release, because it changes the value a masked field writes.

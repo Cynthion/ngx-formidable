@@ -68,7 +68,9 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     // Renders a model the user did not type: the option's label, or nothing while no option carries it —
     // which clears the filter, so a consumer who supplies the options can put that option back. Never while
     // focused: there the typed text is the filter, and the options a consumer fetches for it on every
-    // keystroke would otherwise put the old label back over it. A pick renders its own label.
+    // keystroke would otherwise put the old label back over it, and the field's own narrowing — a deselect,
+    // or a written value re-applied because the list moved — would pull the list out from under the user. A
+    // pick renders its own label.
     afterRenderEffect(() => {
       this.value();
       const selected = this.selectedOption();
@@ -143,15 +145,10 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   // drift: the field holds a value whose option the consumer has filtered out, and has nothing left to
   // display it with. That is the second lap of an `actionOption` round trip, where the created option
   // carries a label the text typed to find it does not match.
-  //
-  // Reported only while the field is not the user's. A focused field is one being typed into, where the
-  // typed text is the filter and the field's own narrowing — a deselect, or a written value re-applied
-  // because the list moved — must not pull the list out from under them.
   private setFilterText(value: string): void {
     this.filterChangeSubject$.next(value);
     this.filterText.set(value);
-
-    if (!this.isFieldFocused()) this.filterChange.emit(value);
+    this.filterChange.emit(value);
   }
 
   // #endregion

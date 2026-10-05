@@ -110,7 +110,7 @@ export function analyzeMaskDisplayLength(mask: string, opts?: { prefix?: string;
     return { min: 0, max: Infinity, variable: true };
   }
 
-  const variants = mask.split('||').map((v) => expandRepeats(v.trim()));
+  const variants = mask.split('||').map(expandRepeats);
 
   let globalMin = Number.POSITIVE_INFINITY;
   let globalMax = 0;

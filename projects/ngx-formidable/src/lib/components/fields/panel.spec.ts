@@ -20,9 +20,6 @@ const OPTIONS = [
   { value: 'c', label: 'Gamma', disabled: true }
 ];
 
-/** **Tab Out Of An Open Calendar** in `impl/backlog.md`. */
-const TAB_INTO_CLOSING_CALENDAR = "Tab moves focus into the calendar's first button as the panel closes over it";
-
 const combobox = () => page.getByRole('combobox', { name: 'Choice' });
 const calendar = () => page.getByRole('dialog', { name: 'Choice' });
 const next = () => page.getByRole('button', { name: 'Next' });
@@ -155,9 +152,7 @@ describe('panel', () => {
         expect(touched()).toBe(true);
       });
 
-      it('closes on Tab, and focus moves on', async ({ skip }) => {
-        if (panelCase.kind === 'date') skip(TAB_INTO_CLOSING_CALENDAR);
-
+      it('closes on Tab, and focus moves on', async () => {
         await openPanel(panelCase);
 
         await userEvent.tab();

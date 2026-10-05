@@ -429,6 +429,7 @@ export class DateField extends BaseDateTimeField implements AfterViewInit, OnDes
   /** Opens or closes the calendar. */
   public togglePanel(isOpen: boolean): void {
     this.isPanelOpen.set(isOpen);
+    this.panelRef()!.nativeElement.inert = !isOpen;
     this.onPanelToggle(isOpen);
   }
 

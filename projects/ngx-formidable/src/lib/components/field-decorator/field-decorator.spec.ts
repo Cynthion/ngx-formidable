@@ -17,9 +17,6 @@ import { FieldDecorator } from './field-decorator';
  * pushes the label in as a suffix does. The messages render below the field, never inside its box.
  */
 
-/** **Value-Top Adornment Above The First Line** in `impl/backlog.md`. */
-const VALUE_TOP_ABOVE_FIRST_LINE = 'a textarea prefix sits one field border above the first line';
-
 /** A prefix that comes and goes, the way a consumer's own `@if` moves it. */
 @Component({
   imports: [FieldDecorator, InputField, FieldLabel, FieldPrefix],
@@ -116,9 +113,7 @@ describe('formidable-field-decorator layout', () => {
   });
 
   describe('in a field that top-aligns its value', () => {
-    it('sits on the first line', async ({ skip }) => {
-      skip(VALUE_TOP_ABOVE_FIRST_LINE);
-
+    it('sits on the first line', async () => {
       await bind('textarea', '<div formidableFieldPrefix>Prefix</div>');
 
       expect(rect(text('Prefix')).top).toBeCloseTo(contentTop(textbox()), 0);

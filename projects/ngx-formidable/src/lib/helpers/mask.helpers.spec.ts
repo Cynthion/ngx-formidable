@@ -80,12 +80,9 @@ describe('mask helpers', () => {
   });
 
   describe('analyzeMaskDisplayLength', () => {
-    // It trims a mask, which ngx-mask does not, so one opening or closing on a space is left to `impl/backlog.md`.
-    const UNTRIMMED = MASKS.filter((mask) => mask === mask.trim());
-
     it('shows a mask as long as it is written, or that less its optional tokens', () => {
       fc.assert(
-        fc.property(UNTRIMMED, (mask) => {
+        fc.property(MASKS, (mask) => {
           expect(analyzeMaskDisplayLength(mask)).toEqual({
             min: mask.length - optionals(mask),
             max: mask.length,
@@ -98,7 +95,7 @@ describe('mask helpers', () => {
     it('counts a repeat as its token written out', () => {
       fc.assert(
         fc.property(
-          UNTRIMMED,
+          MASKS,
           fc.constantFrom(...Object.keys(DEFAULT_PATTERNS)),
           fc.integer({ min: 1, max: 12 }),
           (mask, token, times) => {
@@ -112,7 +109,7 @@ describe('mask helpers', () => {
 
     it('spans alternatives from the shortest to the longest', () => {
       fc.assert(
-        fc.property(UNTRIMMED, UNTRIMMED, (first, second) => {
+        fc.property(MASKS, MASKS, (first, second) => {
           const [one, other] = [analyzeMaskDisplayLength(first), analyzeMaskDisplayLength(second)];
 
           expect(analyzeMaskDisplayLength(`${first}||${second}`)).toEqual({
@@ -126,7 +123,7 @@ describe('mask helpers', () => {
 
     it('adds a prefix and a suffix to both bounds', () => {
       fc.assert(
-        fc.property(UNTRIMMED, fc.string(), fc.string(), (mask, prefix, suffix) => {
+        fc.property(MASKS, fc.string(), fc.string(), (mask, prefix, suffix) => {
           const bare = analyzeMaskDisplayLength(mask);
 
           expect(analyzeMaskDisplayLength(mask, { prefix, suffix })).toEqual({
@@ -136,6 +133,11 @@ describe('mask helpers', () => {
           });
         })
       );
+    });
+
+    // ngx-mask keeps the spaces around a mask and its alternatives, and renders them.
+    it('counts the spaces a mask or an alternative opens or closes on', () => {
+      expect(analyzeMaskDisplayLength(' 000 ||00')).toEqual({ min: 2, max: 5, variable: true });
     });
 
     it('reports an unbounded mask as variable', () => {
