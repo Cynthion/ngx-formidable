@@ -16,10 +16,6 @@ Portal:
 - **Panel Overflows At Its Narrowest**: dragged to `INSPECTOR_WIDTH_MIN` in the two-column layout, the editor panel paints past its gutter twice. The last of the form export's four file tabs is cut off, and under `Shape The Corners One At A Time` the corner labels overlap and the unit selects are clipped. The `NARROWEST_OVERFLOWS` skip in `inspector-layout.spec.ts` passes once it is fixed.
 - **A Following Variable States Its Default**: a derived variable nobody pinned states the library's default, while the value in force is its base's. Under the starting preset `--formidable-border-radius` is `12px`, and the field radius, the panel radius and the four corners that follow it all paint `12px`, yet their controls on `Variables` state `0.5rem`. `ThemeStore.valueOf` falls back to `defaultOf`, which reads the library's block, not the theme on screen. The `FOLLOWER_STATES_DEFAULT` skip in `portal.spec.ts` passes once it is fixed.
 
-Feedback from consumer:
-
-- Sass resolution: Vite resolves @use '@cynthion/ngx-formidable/styles/...' through the package's exports, which list no styles, so the build failed. I added an alias in viteFinal. The proper fix belongs in your ngx-formidable repo: export ./styles/*, then the alias can go.
-
 ## Features
 
 - **Renovate & Dependabot**: document the distinction and what is what, both probably need to be set up. The goal is to bump dependencies that change and belong together in the same PRs. Less PRs are appreciated.

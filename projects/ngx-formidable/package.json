@@ -40,6 +40,11 @@
     "lint": "ng lint ngx-formidable"
   },
   "sideEffects": false,
+  "exports": {
+    "./styles/ngx-formidable": {
+      "sass": "./styles/_ngx-formidable.scss"
+    }
+  },
   "dependencies": {
     "tslib": "^2.3.0"
   },
