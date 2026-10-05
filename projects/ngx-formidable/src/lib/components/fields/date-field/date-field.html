@@ -35,7 +35,7 @@
       (mousedown)="onEditorMouseDown()"
       (mouseup)="rememberClickedCaret(inputRef)"
       (click)="restoreClickedCaret(inputRef)"
-      (input)="onInput()" />
+      (valueChange)="onTextChange($event)" />
 
     <!-- Toggle -->
     @if (canEdit()) {

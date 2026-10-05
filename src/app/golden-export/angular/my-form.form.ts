@@ -72,10 +72,10 @@ export const myFormSchema = schema<MyFormModel>((path) => {
   required(path.branch, { message: 'Pick a branch to collect from.' });
   required(path.payment.method, { message: 'Choose how to pay.' });
   required(path.payment.cardNumber, { message: 'A card number is required.' });
-  pattern(path.payment.cardNumber, /^\d{4} \d{4} \d{4} \d{4}$/, { message: 'A card number is sixteen digits.' });
+  pattern(path.payment.cardNumber, /^\d{16}$/, { message: 'A card number is sixteen digits.' });
   required(path.orderName, { message: 'We need a name for the order.' });
   required(path.phone, { message: 'A phone number is required.' });
-  pattern(path.phone, /^\d{3} \d{3} \d{2} \d{2}$/, { message: 'A phone number reads 079 123 45 67.' });
+  pattern(path.phone, /^\d{10}$/, { message: 'A phone number is ten digits.' });
   required(path.email, { message: 'An email address is required.' });
   pattern(path.email, /^[^@\s]+@[^@\s.]+\.[^@\s]+$/, { message: 'That does not look like an email address.' });
   validate(path.when, (context) => {

@@ -250,7 +250,7 @@ export class DateField extends BaseDateTimeField implements AfterViewInit, OnDes
     if (!this.picker || !date) return;
 
     this.picker.setDate(addDays(date, days), true); // silent: moving is not a pick
-    this.inputRef().nativeElement.value = format(this.picker.getDate()!, this.tokenFormat());
+    this.render(format(this.picker.getDate()!, this.tokenFormat()));
   }
 
   protected normalize(value: Date): Date {

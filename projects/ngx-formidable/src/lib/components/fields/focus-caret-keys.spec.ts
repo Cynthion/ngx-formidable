@@ -5,7 +5,7 @@ import { page, userEvent } from 'vitest/browser';
 import { FormidableOption } from '../../models/formidable.model';
 import { bindField, BoundField } from '../../testing/bind-field';
 import { clickAt, Editor } from '../../testing/dom';
-import { BACKSPACE_UNREPORTED, configureFormidableTestBed, MASK_STATE_BEHIND, settle } from '../../testing/test-bed';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldDecorator } from '../field-decorator/field-decorator';
 import { FieldLabel } from '../../directives/field-label';
 import { AutocompleteField } from './autocomplete-field/autocomplete-field';
@@ -116,9 +116,7 @@ describe('caret from the first keystroke', () => {
       expect(value()).toBe('');
     });
 
-    it('Backspace does too', async ({ skip }) => {
-      skip(BACKSPACE_UNREPORTED);
-
+    it('Backspace does too', async () => {
       const { editor, value } = await render('input', '0791234567', SLOTS);
 
       await userEvent.tab();
@@ -204,9 +202,7 @@ describe('caret from the first keystroke', () => {
       expect(editor.selectionStart).toBe(0);
     });
 
-    it('covers a value the form wrote into a mask', async ({ skip }) => {
-      skip(MASK_STATE_BEHIND);
-
+    it('covers a value the form wrote into a mask', async () => {
       const { editor } = await render('input', '0791234567', SLOTS);
 
       await clickAt(editor, 2);

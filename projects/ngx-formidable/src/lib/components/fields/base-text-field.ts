@@ -10,7 +10,7 @@ import {
   untracked,
   viewChild
 } from '@angular/core';
-import { NgxMaskConfig, NgxMaskPipe } from 'ngx-mask';
+import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import { replaceText } from '../../helpers/input.helpers';
 import {
   analyzeMaskDisplayLength,
@@ -45,7 +45,6 @@ const LIBRARY_MASK_DEFAULTS: Required<MaskConfigSubset> = {
  */
 @Directive()
 export abstract class BaseTextField extends BaseField<string> {
-  private readonly maskPipe = inject(NgxMaskPipe);
   private readonly maskDefaults = inject<Partial<NgxMaskConfig>>(FORMIDABLE_MASK_DEFAULTS, { optional: true });
 
   // Names an unnamed field in a warning after its element, `formidable-input-field` say.
@@ -53,6 +52,9 @@ export abstract class BaseTextField extends BaseField<string> {
 
   // The `input` or `textarea`, from whichever of the template's two branches renders: masked or not.
   readonly editorRef = viewChild.required<ElementRef<HTMLInputElement | HTMLTextAreaElement>>('editorRef');
+
+  // ngx-mask, while a mask is set. It reports a masked editor's value through `valueChange`.
+  private readonly maskDirective = viewChild(NgxMaskDirective);
 
   protected keyboardCallback = null;
   protected registeredKeys: string[] = [];
@@ -62,60 +64,37 @@ export abstract class BaseTextField extends BaseField<string> {
 
     effect(() => this.warnAboutMaskConfig());
 
-    // Renders the model, and renders it again under a changed mask — a changed mask also swaps the element.
-    // What the element already stands for is left alone, so typing keeps its caret.
+    // Renders the model, and renders it again into the editor a changed mask swaps in. What the editor
+    // already stands for is left alone, so typing keeps its caret.
     afterRenderEffect(() => {
       const value = this.value() ?? '';
+      const maskDirective = this.maskDirective();
 
-      this.mask();
-      this.mergedMaskConfig();
-
-      untracked(() => this.render(value));
+      untracked(() => this.render(value, maskDirective));
     });
   }
 
-  // The model, as the user edits it: what the element shows, with the mask's characters taken out.
+  // The model, as the user edits an unmasked editor.
   protected onInput(): void {
-    this.setValue(this.editorValue);
+    if (!this.maskDirective()) this.setValue(this.editorRef().nativeElement.value);
     this.onTextChanged();
   }
 
-  // Runs after every change to the editor's text, the user's or the field's own. A masked render lands in
-  // a timer no render owns, so this is the one point that sees it.
+  // Runs after every change to the editor's text, the user's or the field's own.
   protected onTextChanged(): void {
     // Nothing by default.
   }
 
-  private render(value: string): void {
-    if (this.editorValue === value) return;
+  private render(value: string, maskDirective: NgxMaskDirective | undefined): void {
+    if (maskDirective) this.writeMaskedValue(maskDirective, value);
+    else replaceText(this.editorRef().nativeElement, value);
 
-    if (!this.mask()) {
-      this.replaceText(value);
-      return;
-    }
-
-    // Waits for the ngxMask directive to initialize on the control, which it does across a full task — a
-    // microtask would land before it and the value would be written unmasked.
-    setTimeout(() => this.replaceText(this.maskPipe.transform(value, this.mask()!, this.mergedMaskConfig())));
-  }
-
-  private replaceText(text: string): void {
-    replaceText(this.editorRef().nativeElement, text);
     this.onTextChanged();
-  }
-
-  protected get editorValue(): string {
-    const text = this.editorRef().nativeElement.value;
-
-    if (!this.mask()) return text;
-
-    // remove mask characters if mask is applied
-    return this.maskPipe.transform(text, this.mask()!, { ...this.mergedMaskConfig(), showMaskTyped: false });
   }
 
   // #region FormidableField
 
-  /** The text, unmasked. Empty for no text; a mask decides what else reaches it — see `dropSpecialCharacters`. */
+  /** The text, empty for none. Under a `mask`, without its literals unless `dropSpecialCharacters` is `false`. */
   public readonly value = model('');
 
   get fieldRef(): ElementRef<HTMLElement> {

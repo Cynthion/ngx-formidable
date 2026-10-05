@@ -8,7 +8,7 @@ import { FormidableEmptyHint } from '../../models/formidable.model';
 import { DATE_FORMATS, DATES, TIME_FORMATS } from '../../testing/arbitraries';
 import { bindField, BindFieldOptions, BoundField, FORMS_APIS, FormsApi } from '../../testing/bind-field';
 import { clickAt } from '../../testing/dom';
-import { BACKSPACE_UNREPORTED, configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
  * Contract of the masked date/time fields, per **Dates And Times** and **Stepping A Date Or Time Segment** in
@@ -27,9 +27,6 @@ import { BACKSPACE_UNREPORTED, configureFormidableTestBed, settle } from '../../
  */
 
 type MaskedField = BoundField & { input: HTMLInputElement };
-
-/** **A Step Still In Flight** in `impl/backlog.md`. */
-const STEP_IN_FLIGHT = 'a step renders its text from a timer, and a press before it steps the text it replaces';
 
 /** Result of one keystroke: what the field shows and where the caret sits. */
 function state(input: HTMLInputElement): string {
@@ -375,9 +372,7 @@ describe('masked date/time field', () => {
       expect(input).toHaveFocus();
     });
 
-    it('and as soon as Backspace does', async ({ skip }) => {
-      skip(BACKSPACE_UNREPORTED);
-
+    it('and as soon as Backspace does', async () => {
       const { input, value, dirty } = await setup(
         'date',
         'dd . MM . yyyy',
@@ -488,9 +483,7 @@ describe('masked date/time field', () => {
       await expect.element(input).toHaveValue('12 . 05 . 2023');
     });
 
-    it('steps once per press however fast the presses come', async ({ skip }) => {
-      skip(STEP_IN_FLIGHT);
-
+    it('steps once per press however fast the presses come', async () => {
       const { input } = await focusedAt(10); // year
 
       await userEvent.keyboard('{ArrowDown}{ArrowDown}');

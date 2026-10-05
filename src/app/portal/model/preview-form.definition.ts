@@ -442,10 +442,10 @@ export const PREVIEW_INITIAL_MODEL: Readonly<Record<string, unknown>> = {
   address: 'langstrasse',
   branch: null,
   when: { date: new Date(2026, 8, 25), time: new Date(2000, 0, 1, 19, 30) },
-  payment: { method: 'card', cardNumber: '4242 4242 4242 4242' },
+  payment: { method: 'card', cardNumber: '4242424242424242' },
   orderName: 'Alex Moser',
   email: 'alex.moser@example.com',
-  phone: '079 123 45 67',
+  phone: '0791234567',
   quantity: 2,
   notes: 'Ring twice, the bell is broken.'
 };

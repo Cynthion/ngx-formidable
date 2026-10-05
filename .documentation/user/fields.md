@@ -237,6 +237,10 @@ The toggle centres what is projected; its size, colour and hover feedback are yo
 
 `input-field` and `textarea-field` mask through ngx-mask, and take almost all of its options. Config resolves in three layers: a per-field `maskConfig` overrides the app-wide defaults, which override the library's own. A masked field writes the model on every keystroke, as an unmasked one does.
 
+**The Model Is What ngx-mask Reports**: the mask's literals stay out of the model unless `dropSpecialCharacters` is `false`. Typing `0791234567` into `000 000 00 00` writes `0791234567`, and `079 123 45 67` under `{ dropSpecialCharacters: false }`. A value written into the field renders through the mask either way.
+
+**Two Lengths**: a rule such as `pattern()` or `minLength()` reads the model. The native `minlength` and `maxlength` count the text the editor shows, literals included, and `[formField]` writes a `minLength()` or `maxLength()` rule into them. On a masked field the two count different texts, so state a length with `pattern()`.
+
 ### Per Field
 
 ```html
@@ -259,7 +263,7 @@ export const appConfig: ApplicationConfig = {
 
 It lands on the `FORMIDABLE_MASK_DEFAULTS` token.
 
-**The Slot Character Is The Field's, Not The App's**: a field reads its value back out of what the mask renders, by looking for the character drawn in a position nobody has filled. So every masked field binds `placeHolderCharacter` itself, and an `ngx-mask` setting made globally, through `provideNgxMask`, does not reach it. Set it per field through `maskConfig`, or app-wide through `globalMaskConfig`, and the display and the caret move together.
+**The Slot Character Is The Field's, Not The App's**: a field finds where its value ends in what the mask renders, by looking for the character drawn in a position nobody has filled. So every masked field binds `placeHolderCharacter` itself, and an `ngx-mask` setting made globally, through `provideNgxMask`, does not reach it. Set it per field through `maskConfig`, or app-wide through `globalMaskConfig`, and the display and the caret move together.
 
 Pick one the mask cannot produce on its own. Where a token pattern accepts it, or the mask draws it as a literal, a filled position and an empty one look identical and the field cannot tell them apart. It logs a warning naming the field when it spots the collision. The default `_` is safe for every built-in pattern; a mask like `000_000`, or a custom pattern such as `/\w/` that accepts `_`, needs a different character.
 

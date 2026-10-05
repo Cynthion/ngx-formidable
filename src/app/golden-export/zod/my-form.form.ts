@@ -83,12 +83,12 @@ export const myFormZodSchema = z
       method: z.string().nullable().refine((value) => !!value, 'Choose how to pay.'),
       cardNumber: z.string()
         .min(1, 'A card number is required.')
-        .refine((value) => !value || /^\d{4} \d{4} \d{4} \d{4}$/.test(value), 'A card number is sixteen digits.')
+        .refine((value) => !value || /^\d{16}$/.test(value), 'A card number is sixteen digits.')
     }),
     orderName: z.string().min(1, 'We need a name for the order.'),
     phone: z.string()
       .min(1, 'A phone number is required.')
-      .refine((value) => !value || /^\d{3} \d{3} \d{2} \d{2}$/.test(value), 'A phone number reads 079 123 45 67.'),
+      .refine((value) => !value || /^\d{10}$/.test(value), 'A phone number is ten digits.'),
     email: z.string()
       .min(1, 'An email address is required.')
       .refine((value) => !value || /^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(value), 'That does not look like an email address.')

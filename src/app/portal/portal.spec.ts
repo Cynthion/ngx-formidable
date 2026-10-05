@@ -254,13 +254,13 @@ describe('portal', () => {
   it('nests the payment group and resolves its conditional field through it', async () => {
     await openStudio();
 
-    expect((await model())['payment']).toMatchObject({ method: 'card', cardNumber: '4242 4242 4242 4242' });
+    expect((await model())['payment']).toMatchObject({ method: 'card', cardNumber: '4242424242424242' });
     await expect.element(page.getByRole('textbox', { name: 'Card Number' })).toBeVisible();
 
     await userEvent.click(page.getByRole('radio', { name: 'Twint' }));
 
     await expect.element(page.getByRole('textbox', { name: 'Card Number' })).not.toBeInTheDocument();
-    expect((await model())['payment']).toMatchObject({ method: 'twint', cardNumber: '4242 4242 4242 4242' });
+    expect((await model())['payment']).toMatchObject({ method: 'twint', cardNumber: '4242424242424242' });
   });
 
   // #endregion

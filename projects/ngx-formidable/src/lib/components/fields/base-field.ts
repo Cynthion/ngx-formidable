@@ -17,6 +17,7 @@ import {
   Signal
 } from '@angular/core';
 import { FormValueControl, ValidationError } from '@angular/forms/signals';
+import { NgxMaskDirective } from 'ngx-mask';
 import { debounceTime, filter, fromEvent, merge, Subject, takeUntil } from 'rxjs';
 import { endOfMaskedValue } from '../../helpers/input.helpers';
 import { DEFAULT_PLACEHOLDER_CHARACTER } from '../../helpers/mask.helpers';
@@ -173,6 +174,14 @@ export abstract class BaseField<T = string | null>
     const end = endOfMaskedValue(element, this.maskPlaceholderCharacter);
 
     element.setSelectionRange(Math.min(clicked[0], end), Math.min(clicked[1], end));
+  }
+
+  // Writes a value the user did not type into a masked editor through ngx-mask, whose select-all, click clamp
+  // and `Backspace` read its own state rather than the text, and keeps its `value` model in step, which it
+  // reports a change against. Why not a `[value]` binding: **Writing Through The Mask** in `tech/caret.md`.
+  protected writeMaskedValue(maskDirective: NgxMaskDirective, value: string): void {
+    maskDirective.writeValue(value);
+    maskDirective.value.set(value);
   }
 
   // #endregion

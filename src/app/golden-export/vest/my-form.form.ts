@@ -108,7 +108,7 @@ export function createMyFormSuite() {
 
     omitWhen(!model.payment.cardNumber, () => {
       test('payment.cardNumber', 'A card number is sixteen digits.', () => {
-        enforce(model.payment.cardNumber).matches(/^\d{4} \d{4} \d{4} \d{4}$/);
+        enforce(model.payment.cardNumber).matches(/^\d{16}$/);
       });
     });
 
@@ -121,8 +121,8 @@ export function createMyFormSuite() {
     });
 
     omitWhen(!model.phone, () => {
-      test('phone', 'A phone number reads 079 123 45 67.', () => {
-        enforce(model.phone).matches(/^\d{3} \d{3} \d{2} \d{2}$/);
+      test('phone', 'A phone number is ten digits.', () => {
+        enforce(model.phone).matches(/^\d{10}$/);
       });
     });
 

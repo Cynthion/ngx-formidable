@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
+import { NgxMaskDirective } from 'ngx-mask';
 import { FORMIDABLE_FIELD } from '../../../models/formidable.model';
 import { BaseTextField } from '../base-text-field';
 
@@ -20,8 +20,7 @@ import { BaseTextField } from '../base-text-field';
     {
       provide: FORMIDABLE_FIELD,
       useExisting: InputField
-    },
-    NgxMaskPipe
+    }
   ]
 })
 export class InputField extends BaseTextField {
