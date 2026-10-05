@@ -8,10 +8,11 @@ import { configureFormidableTestBed } from '../../testing/test-bed';
  * A dropdown's value is a label the field draws, not text the user owns. The input showing it is `readonly`
  * and takes no pointer events, so no mouse gesture selects it, and CSS cannot stop the key that would: Chrome
  * honours `user-select: none` for a drag and ignores it for the editing command behind `Cmd/Ctrl+A`. So the
- * field keeps a select-all from the browser, and leaves every other key where it was going. A native
- * `<select>` has no selectable text either.
+ * field keeps a select-all from the browser, and leaves every other key where it was going. Nor does a `Tab`
+ * entry leave Chrome's select-all on the label. A native `<select>` has no selectable text either.
  *
- * The field is focused by a click, which, unlike a keyboard entry, selects nothing of its own.
+ * The field is focused by a click, which, unlike a keyboard entry, selects nothing of its own, except where a
+ * case brings focus back by `Tab`.
  */
 
 const options: FormidableOption[] = [
@@ -70,6 +71,14 @@ describe('display-only value selection', () => {
 
     await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
     await expect.poll(() => referenced(combobox().element(), 'aria-activedescendant')[0]).toHaveTextContent('Blue');
+  });
+
+  it('selects nothing as Tab brings focus in, as a keyboard entry into an input would', async () => {
+    (document.activeElement as HTMLElement).blur();
+    await userEvent.tab();
+    await expect.element(combobox()).toHaveFocus();
+
+    expect(selected()).toBe('');
   });
 
   it('leaves other modifier combos alone, so a copy still reaches the browser', async () => {

@@ -52,13 +52,14 @@ Every field has a `focus()` method. `autoFocus` calls it once the view is ready,
 
 ### The Caret On Focus
 
-| Field Holds     |     Focused By     | Caret Lands                                                    |
-| :-------------- | :----------------: | :------------------------------------------------------------- |
-| Nothing         | Keyboard / Pointer | At the front, wherever the pointer aimed                       |
-| Text or a value |      Keyboard      | Selecting the content, so the next character typed replaces it |
-| Text or a value |      Pointer       | Where the click landed, and never behind the value             |
+| Field Holds          |     Focused By     | Caret Lands                                                    |
+| :------------------- | :----------------: | :------------------------------------------------------------- |
+| Nothing              | Keyboard / Pointer | At the front, wherever the pointer aimed                       |
+| Text or a value      |      Keyboard      | Selecting the content, so the next character typed replaces it |
+| Text or a value      |      Pointer       | Where the click landed, and never behind the value             |
+| A display-only label | Keyboard / Pointer | Nowhere: nothing is selected                                   |
 
-`focus()` and `autoFocus` count as the keyboard. `textarea-field` is the exception and keeps the browser's own behaviour (a caret, no selection), because a paragraph should not be one keystroke from being wiped, and no browser does it either.
+`focus()` and `autoFocus` count as the keyboard. A display-only label is the value `dropdown-field` shows: typing there searches the options and never replaces the label, so there is nothing to select it for. `textarea-field` is the exception and keeps the browser's own behaviour (a caret, no selection), because a paragraph should not be one keystroke from being wiped, and no browser does it either.
 
 The rules run on the way in and then stop. Clicking again, moving the caret, typing or a repaint never re-runs them, so a field is never locked to one caret position; leaving the field and coming back reads the rules again against whatever it holds by then. Focusing a field never changes its value.
 
@@ -184,7 +185,7 @@ Every control is operable from the keyboard. Disabled and readonly fields ignore
 | `Arrow Left`         |                    |                                                     |                         | If panel open: previous day; else move caret       | Move caret                |
 | `Arrow Right`        |                    |                                                     |                         | If panel open: next day; else move caret           | Move caret                |
 
-An empty cell is a key the field does not act on, and it keeps its native effect: `Enter` on a dropdown or autocomplete with its panel closed submits the form, and `Esc` with no panel open reaches the dialog around the field. Picking a highlighted option in a checkbox group toggles it. Arrows skip disabled and readonly options.
+An empty cell is a key the field does not act on, and it keeps its native effect: `Enter` on a dropdown or autocomplete with its panel closed submits the form, and `Esc` with no panel open reaches the dialog around the field. Picking a highlighted option in a checkbox group toggles it. Arrows skip disabled and readonly options, and the highlight never rests on one: when the list changes, a highlight whose option can no longer be picked, the selected one included, moves to the next option that can.
 
 The rest keep the platform's keys: `select-field` is a native `<select>` and `slider-field` a native range input. `toggle-field` flips on `Space` and `Enter`.
 

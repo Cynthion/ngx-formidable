@@ -428,7 +428,7 @@ Extend `BaseOptionListField`, or `BaseOptionField` to walk the list with a highl
 | `highlightedOptionIndex`                  | Highlight | The highlighted index, `-1` for none                                                                            |
 | `setHighlightedIndex(index)`              | Highlight | Moves the highlight                                                                                             |
 | `highlightSelectedOption()`               | Highlight | Moves the highlight onto the selection                                                                          |
-| `reconcileHighlightAfterOptionsChanged()` | Highlight | After the list changes: the selection, else the highlighted value, else the nearest index that can be picked    |
+| `reconcileHighlightAfterOptionsChanged()` | Highlight | After the list changes: the first of the selection, highlighted value and nearest index that can be picked      |
 | `optionId(index)`                         | Highlight | `{fieldId}-option-{index}`, or `null` for a negative index                                                      |
 | `optionRefs`                              | Highlight | `viewChildren()` of the rendered `#optionRef` options, which the highlight scrolls into view                    |
 

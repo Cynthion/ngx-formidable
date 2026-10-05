@@ -15,15 +15,6 @@ The source of truth for outstanding work. [`impl/backlog.md`](backlog.md) is the
 
 ## Library Phases
 
-### Phase 41: Option Field Rules
-
-Two rules for the option fields, each stated in [`user/fields.md`](../user/fields.md). No dependencies.
-
-- **Highlight On A Disabled Option**: when the list changes, `BaseOptionField` places the highlight on the selected option, or else on the one highlighted before, without checking that either can be picked; only the clamp skips disabled and readonly options. The highlight can then rest where `Enter` picks nothing.
-- **Rule**: the highlight never rests on an option that cannot be picked, the selected one included, as the arrows and the clamp already do. Both branches fall through to the clamp when their option cannot be picked. `option-highlight.spec.ts` proves it: rebind the list with the highlighted option disabled, then with the selected one disabled, and each time the highlight moves to the next pickable option and `Enter` picks it.
-- **Display Label Selected On Tab**: `Tab` into a dropdown holding a value leaves Chrome's select-all on its label, painted in the selection colour, though the dropdown keeps `Cmd`/`Ctrl` + `A` from the browser so that no highlight appears on a label it draws. The portal's Pizza shows it.
-- **Rule**: a display-only label is never selected. Typing in a dropdown searches its options and never replaces the label, so the reason **The Caret On Focus** in [`user/fields.md`](../user/fields.md) gives for selecting a keyboard entry's content does not apply. `DropdownField.doOnFocusChange` collapses the selection on focus, and the select-all guard stays. That section gains the display-only row. `display-only-selection.spec.ts` gains a `Tab` focus case.
-
 ### Phase 42: Release
 
 - **Version**: `1.0.0` in `projects/ngx-formidable/package.json`. The Angular peer floor is the minor CI tests, per [`impl/renovate.md`](renovate.md).

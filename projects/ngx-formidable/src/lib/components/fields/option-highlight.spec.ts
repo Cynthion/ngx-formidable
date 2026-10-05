@@ -8,7 +8,8 @@ import { configureFormidableTestBed } from '../../testing/test-bed';
  * Where the keyboard highlight goes in a field that walks an option list, per **Keyboard** in
  * `user/fields.md`: the arrows step through the options a user can pick, skipping disabled and readonly ones
  * and wrapping at both ends; `Enter` picks the highlighted option, and a group's `Space` does too. When the
- * list changes, the highlight stays on the option it was on, unless the selection claims it.
+ * list changes, the highlight stays on the option it was on, unless the selection claims it, and never rests on
+ * an option that cannot be picked.
  *
  * Every spec reaches the field the way a keyboard user does: by its label and role, with real keys.
  */
@@ -97,6 +98,19 @@ describe('option field highlight', () => {
 
         expect(highlighted()).toBe('Red');
       });
+
+      it('moves the highlight to the next option it can pick when its own option is disabled', async () => {
+        const field = await tabInto(kind, role);
+
+        await userEvent.keyboard('{ArrowDown}');
+        await expect.poll(highlighted).toBe('Green');
+
+        await field.set('options', [RED, BLUE, { ...GREEN, disabled: true }, GREY, TEAL]);
+
+        expect(highlighted()).toBe('Teal');
+        await userEvent.keyboard('{Enter}');
+        await expect.poll(field.value).toEqual(kind === 'radio-group' ? 'teal' : ['teal']);
+      });
     });
   }
 
@@ -120,6 +134,19 @@ describe('option field highlight', () => {
       await field.set('options', [...OPTIONS]);
 
       expect(highlighted()).toBe('Red');
+    });
+
+    it('moves the highlight off the selection to the next option it can pick when the selection is disabled', async () => {
+      const field = await tabInto('radio-group', 'radiogroup');
+
+      await userEvent.keyboard('{Enter}');
+      await expect.poll(field.value).toBe('red');
+
+      await field.set('options', [{ ...RED, disabled: true }, BLUE, GREEN, GREY, TEAL]);
+
+      expect(highlighted()).toBe('Green');
+      await userEvent.keyboard('{Enter}');
+      await expect.poll(field.value).toBe('green');
     });
   });
 
@@ -193,6 +220,33 @@ describe('option field highlight', () => {
 
         await expect.poll(field.value).toBe('teal');
         await expect.element(page.getByRole('combobox', { name: 'Colour' })).toHaveAttribute('aria-expanded', 'false');
+      });
+
+      it('moves the highlight to the next option it can pick when its own option is disabled', async () => {
+        const field = await openPanel();
+
+        await userEvent.keyboard('{ArrowDown}{ArrowDown}');
+        await expect.poll(highlighted).toBe('Green');
+
+        await field.set('options', [RED, BLUE, { ...GREEN, disabled: true }, GREY, TEAL]);
+
+        expect(highlighted()).toBe('Teal');
+        await userEvent.keyboard('{Enter}');
+        await expect.poll(field.value).toBe('teal');
+      });
+
+      it('moves the highlight off the selection to the next option it can pick when the selection is disabled', async () => {
+        const field = await openPanel();
+
+        await userEvent.keyboard('{ArrowDown}{Enter}{ArrowDown}');
+        await expect.poll(highlighted).toBe('Red');
+        expect(field.value()).toBe('red');
+
+        await field.set('options', [{ ...RED, disabled: true }, BLUE, GREEN, GREY, TEAL]);
+
+        expect(highlighted()).toBe('Green');
+        await userEvent.keyboard('{Enter}');
+        await expect.poll(field.value).toBe('green');
       });
     });
   }
