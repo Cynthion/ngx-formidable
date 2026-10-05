@@ -133,9 +133,11 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
     return value ? format(value, this.tokenFormat()) : '';
   }
 
-  // Commits what the input shows, as a blur or `Enter` does.
+  // Commits what the input shows, as a blur or `Enter` does. Text that parses renders as the model's own, so
+  // `dec` typed shows `Dec`.
   protected commitText(): void {
     this.text.set(this.inputRef().nativeElement.value);
+    if (this.text.parseErrors().length === 0) this.text.set(this.formatValue(this.value()));
     this.render(this.text());
   }
 

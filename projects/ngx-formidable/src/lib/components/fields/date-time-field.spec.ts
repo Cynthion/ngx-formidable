@@ -602,27 +602,15 @@ describe('masked date/time field', () => {
     });
   });
 
-  // `parseUnicodeDateTime` takes the parts a format leaves out from today, so today is pinned; why that
-  // matters is in `impl/backlog.md`.
   describe('typing a whole value', () => {
-    beforeEach(() => {
-      vi.useFakeTimers({ toFake: ['Date'] });
-      vi.setSystemTime(new Date(2024, 5, 15, 12));
-    });
-
-    afterEach(() => void vi.useRealTimers());
-
-    it('reaches the model as it was typed, in any format the field accepts', async () => {
+    it('reaches the model as it was typed, in any format the field accepts and in any case', async () => {
       const fields = fc.oneof(
         DATE_FORMATS.map((unicode) => ({ kind: 'date' as const, unicode })),
         TIME_FORMATS.map((unicode) => ({ kind: 'time' as const, unicode }))
       );
 
       await fc.assert(
-        fc.asyncProperty(fields, DATES, async ({ kind, unicode }, date) => {
-          // A day is only a day within its month and year; a format leaving them to today is in `impl/backlog.md`.
-          fc.pre(!unicode.includes('dd') || (unicode.includes('M') && unicode.includes('y')));
-
+        fc.asyncProperty(fields, DATES, fc.boolean(), async ({ kind, unicode }, date, lowerCase) => {
           TestBed.resetTestingModule();
           configureFormidableTestBed();
           const field = await setup(kind, unicode, 'underscores');
@@ -632,10 +620,11 @@ describe('masked date/time field', () => {
           const keys = [...shown].filter((_, index) => mask[index]! in DEFAULT_PATTERNS).join('');
 
           await userEvent.tab();
-          await userEvent.keyboard(keys);
+          await userEvent.keyboard(lowerCase ? keys.toLowerCase() : keys);
           await userEvent.tab();
           await settle(field.fixture);
 
+          // The commit renders the format's own case.
           expect(field.input.value).toBe(shown);
           expect(format(field.value() as Date, unicode)).toBe(shown);
         }),

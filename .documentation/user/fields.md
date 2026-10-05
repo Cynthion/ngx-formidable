@@ -218,6 +218,9 @@ A focused empty field always shows underscore slots, because the mask's caret ar
 - **Typed Text Commits On Blur**: a half-typed date is not a date, so what is typed reaches the model on blur or on `Enter`. The arrow keys and the calendar commit at once.
 - **Text That Does Not Parse Stays As Typed**: the model keeps its value, and the field reports a `parse` error to whichever forms API binds it, which the decorator renders once revealed. Text that parses again drops it.
 - **Emptying The Text Commits `null`**: at once, with no error.
+- **Names Are Read In Any Case**: `15 dec 2024` parses against `dd MMM yyyy`, and `02:30 pm` against `hh:mm a`. The commit shows the format's own case, `15 Dec 2024` and `02:30 PM`.
+- **A Date Format Without A Year Takes 2000**: a leap year, so `29.02` parses against `dd.MM`. One without a month takes January.
+- **A Two-Digit Year**: `yy` reads `00` to `49` as 20xx, and `50` to `99` as 19xx. Any other year takes `yyyy`.
 
 The date field passes a set of options straight through to Pikaday: `minDate`, `maxDate`, `firstDay`, `i18n`, `yearRange`, `disableWeekends`, `disableDayFn` and the rest, listed in [Components](components.md). Each is applied to the calendar when it changes at runtime.
 

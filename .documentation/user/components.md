@@ -131,7 +131,7 @@ Taken by `date-field` and `time-field`.
 | `unicodeTokenFormat` | `string`              | `'yyyy-MM-dd'`, time `'HH.mm'` | The date-fns token string the field masks, parses and formats with |
 | `emptyHint`          | `FormidableEmptyHint` | `'underscores'`                | What an empty, unfocused field shows                               |
 
-A date format takes the fixed-width tokens `yy`, `yyyy`, `MM`, `MMM` and `dd`, a time format `HH`, `hh`, `mm`, `ss`, `a` and `aa`, with any separators or none, such as `dd.MM.yyyy` or `yyyyMMdd`. The mask has one slot per character, so a variable-width token such as `d` or `MMMM`, quoted text, and a format with no token at all log a warning and fall back to the default. Committing, parse errors and the arrow keys are in **Dates And Times** in [Fields](fields.md).
+A date format takes the fixed-width tokens `yy`, `yyyy`, `MM`, `MMM` and `dd`, a time format `HH`, `hh`, `mm`, `ss`, `a` and `aa`, with any separators or none, such as `dd.MM.yyyy` or `yyyyMMdd`. The mask has one slot per character, so a variable-width token such as `d` or `MMMM`, quoted text, and a format with no token at all log a warning and fall back to the default. So does `a` or `aa` right before a dot, which date-fns reads as part of the AM/PM. Committing, parse errors and the arrow keys are in **Dates And Times** in [Fields](fields.md).
 
 ### Panel Inputs
 
