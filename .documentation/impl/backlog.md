@@ -16,10 +16,6 @@ External:
 
 ## Features
 
-- **Release**:
-  - **Version**: `1.0.0` in `projects/ngx-formidable/package.json`. The Angular peer floor is the minor CI tests, per [`impl/renovate.md`](renovate.md).
-  - **Publish**: `npm run screenshots` for the README images, then [`impl/releasing.md`](releasing.md).
-  - **Tag**: tag the release commit. Final step.
 - **Storybook**:
   - **Set It Up**: Storybook is not installed. Copy the setup from the EnerQi repository, taking conventions from its `storybook.md` and its `.storybook` configuration.
   - **Stories**: every field, directive and the decorator, with their properties and the layout options.
