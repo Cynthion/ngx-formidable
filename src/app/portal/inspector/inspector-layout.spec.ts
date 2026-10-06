@@ -4,9 +4,6 @@ import { INSPECTOR_WIDTH_DEFAULT, INSPECTOR_WIDTH_MIN } from '../state/layout.st
 import { ComponentFixture } from '@angular/core/testing';
 import { editField, openPanel, openStudio, settle, tab, WIDE } from '../testing/studio';
 
-/** **Panel Overflows At Its Narrowest** in `impl/backlog.md`. */
-const NARROWEST_OVERFLOWS = 'the export’s file tabs and the corner grid overflow a panel at its narrowest';
-
 /**
  * Nothing in the panel is painted outside its own gutter, at either end of the width the divider allows.
  *
@@ -100,9 +97,7 @@ describe('inspector layout', () => {
     expect(await sweep()).toEqual([]);
   });
 
-  it('paints nothing outside the gutter at the narrowest width the divider allows', async ({ skip }) => {
-    skip(NARROWEST_OVERFLOWS);
-
+  it('paints nothing outside the gutter at the narrowest width the divider allows', async () => {
     fixture = await openStudio();
     await narrowest();
 

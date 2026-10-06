@@ -66,7 +66,7 @@ export const FIELD_CAPABILITIES: Readonly<Record<PortalFieldKind, PortalFieldCap
   'date': { ...HORIZONTAL, ...OFF, placeholder: true, panel: 'right', locale: true, toggleIcon: true },
   'time': { ...HORIZONTAL, ...OFF, placeholder: true, locale: true },
   'toggle': { ...INLINE, ...OFF },
-  'slider': { ...INLINE, ...OFF, range: true },
+  'slider': { ...VERTICAL, ...OFF, range: true },
   'radio-group': { ...VERTICAL, ...OFF, options: true },
   'checkbox-group': { ...VERTICAL, ...OFF, options: true },
   'counter': { ...HORIZONTAL, ...OFF, range: true }

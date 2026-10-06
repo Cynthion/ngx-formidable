@@ -318,9 +318,14 @@ export class ThemeStore {
     return Object.entries(vars).filter(([name, value]) => this.differsFromDefault(name, value)).length;
   }
 
-  /** The value in force for a variable: the user's, the scheme's, or the library's own token default. */
+  /**
+   * The value in force for a variable: the user's, the scheme's, or what the library's block makes of the
+   * theme. A variable nobody set follows its base under the theme, not under the library's defaults.
+   */
   public valueOf(name: string): string {
-    return this.resolved()[name] ?? this.defaultOf(name);
+    const vars = this.resolved();
+
+    return vars[name] ?? this.inForceOn(getComputedStyle(this.ensureThemedProbe(vars)), name);
   }
 
   /**

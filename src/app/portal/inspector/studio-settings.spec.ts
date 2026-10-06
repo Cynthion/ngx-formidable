@@ -6,9 +6,6 @@ import { PREVIEW_FIELDS } from '../model/preview-form.definition';
 import { FormDefinitionStore } from '../state/form-definition.store';
 import { editField, openPanel, openStudio } from '../testing/studio';
 
-/** **Slider Declared Inline** in `impl/backlog.md`. */
-const SLIDER_DECLARED_INLINE = 'the Studio offers a slider adornments its vertical layout never renders';
-
 /**
  * Every control in the Studio writes something, and the app defaults reach the preview through the library.
  *
@@ -328,9 +325,7 @@ describe('studio settings', () => {
     });
 
     // The editor offers a prefix wherever the capability table says the field renders one.
-    it('offers an adornment only where the field renders one', async ({ skip }) => {
-      skip(SLIDER_DECLARED_INLINE);
-
+    it('offers an adornment only where the field renders one', async () => {
       expect(await applyButtons()).toEqual(labelsOf((field) => FIELD_CAPABILITIES[field.kind].adornments));
     });
 
