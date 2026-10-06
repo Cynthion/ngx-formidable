@@ -29,12 +29,12 @@ Every command runs from the repository root.
 | Portal Tests       | `npx ng test ngx-formidable-portal --watch=false` |  CI   |
 | Portal Build       | `npm run build`                                   |  CI   |
 | Visual Proof       | The served portal, `npm start`                    | Local |
-| README Hero        | `npm run screenshots`                             | Local |
+| README Images      | `npm run screenshots`                             | Local |
 
 - **Chain**: `ci.yml` runs the CI gates in this order on every push to `main` and every pull request, and stops at the first failing step. The workflow is described in [`tech/architecture.md`](../tech/architecture.md).
 - **No Typecheck Script**: `build:lib` is the type and template check.
 - **Visual Proof**: A user-visible change is proven against the served portal (the Studio's preview form for a field, the Specimen for a theme), not only against a passing test. Reuse a running dev server, never start or stop one that is already running.
-- **README Hero**: `npm run screenshots` regenerates `assets/ladder.png` from the served portal after a visual change, see [`impl/documentation.md`](documentation.md).
+- **README Images**: `npm run screenshots` regenerates the images in `assets/` from the served portal after a visual change, see [`impl/documentation.md`](documentation.md).
 - **No Commit Hooks**: There is no Husky, lint-staged or commit hook. Every gate is run deliberately.
 - **Narrowest Scope First**: Run the narrowest scope first. Widen to the full suite once the narrow scope passes.
 

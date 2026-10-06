@@ -6,7 +6,7 @@ Always in effect. Area conventions load automatically for the files they apply t
 
 - Never commit an npm token or any other credential.
 - Never hand-edit build output: `dist/`, and the `README.md` and `LICENSE` that `prebuild:lib` copies into `projects/ngx-formidable/`.
-- Never hand-edit `assets/ladder.png`. It is regenerated with `npm run screenshots`.
+- Never hand-edit the images in `assets/`. They are regenerated with `npm run screenshots`.
 
 ## Running Servers
 

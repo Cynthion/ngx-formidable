@@ -142,7 +142,7 @@ A nested `projects/ngx-formidable/node_modules` shadows the root install with a 
 | `npm run prettier:check` | Formatting check across the repository                                                      |
 | `npm run docs:check`     | The portal's token manifest against [`user/theme-reference.md`](../user/theme-reference.md) |
 | `npm run docs:lint`      | Markdown style, relative links and heading anchors                                          |
-| `npm run screenshots`    | Regenerate the README's animated hero from the served portal                                |
+| `npm run screenshots`    | Regenerate the README's images in `assets/` from the served portal                          |
 
 When each one runs as a gate is in [`impl/definition-of-done.md`](definition-of-done.md).
 

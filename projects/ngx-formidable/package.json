@@ -1,7 +1,7 @@
 {
   "name": "@cynthion/ngx-formidable",
   "version": "0.9.2",
-  "description": "A powerful Angular component library for building rich, themeable forms.",
+  "description": "Themeable Angular form fields for Signal Forms, reactive and template-driven forms. Style them from CSS variables, validate with Angular, Vest or Zod, and build the form live in the Studio.",
   "license": "MIT",
   "author": "Christian Lüthold",
   "repository": {
@@ -9,27 +9,30 @@
     "url": "git+https://github.com/Cynthion/ngx-formidable.git",
     "directory": "projects/ngx-formidable"
   },
-  "homepage": "https://github.com/Cynthion/ngx-formidable#readme",
+  "homepage": "https://cynthion.github.io/ngx-formidable/",
   "bugs": {
     "url": "https://github.com/Cynthion/ngx-formidable/issues"
   },
   "keywords": [
     "angular",
+    "angular-forms",
+    "signal-forms",
+    "reactive-forms",
     "forms",
-    "fields",
-    "mask",
-    "keyboard",
-    "styling",
-    "input",
-    "textarea",
-    "select",
-    "dropdown",
+    "form-builder",
+    "validation",
+    "vest",
+    "zod",
+    "theming",
+    "css-variables",
+    "accessibility",
+    "input-mask",
+    "datepicker",
+    "timepicker",
     "autocomplete",
-    "radio",
-    "checkbox",
-    "date",
-    "time",
-    "theming"
+    "dropdown",
+    "select",
+    "angular-library"
   ],
   "publishConfig": {
     "access": "public"
