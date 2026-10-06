@@ -229,8 +229,10 @@ describe('panel', () => {
       expect(events()).toEqual([]);
     });
 
+    // Focused without a press: on Linux a press opens the select's popup, which takes the key from the page.
     it('keeps the field focused through a step of the calendar', async () => {
-      const { fixture, isFocused, events } = await focusMonthSelect();
+      const { fixture, isFocused, events } = await openPanel(dateCase!);
+      (calendar().getByRole('combobox', { name: 'Month' }).element() as HTMLSelectElement).focus();
 
       await userEvent.keyboard('{ArrowDown}');
       await expect.element(combobox()).toHaveFocus();
