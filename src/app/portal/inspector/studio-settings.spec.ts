@@ -103,6 +103,7 @@ describe('studio settings', () => {
     await sweep('portal-app-defaults', 'App Defaults');
   });
 
+  // A sweep over every kind of field outlasts the 15 s default on a CI runner.
   it('writes something from every control of the field editor, for every kind of field', async () => {
     await openStudio();
     await openPanel('Form', 'Settings', 'This Field');
@@ -114,7 +115,7 @@ describe('studio settings', () => {
       await editField(field!.label);
       await sweep('portal-field-editor', FIELD_KIND_LABELS[kind]);
     }
-  });
+  }, 60_000);
 
   // #endregion
 
