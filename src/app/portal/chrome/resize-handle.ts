@@ -10,6 +10,8 @@ type ResizeAxis = 'x' | 'y';
  *
  * Pointer capture is what makes the drag survive the pointer leaving the handle, which it does immediately:
  * the handle is a few pixels wide and the panel moves out from under it.
+ *
+ * Its look is one global rule on the class it puts on its host, in `_chrome.scss`; a panel only places it.
  */
 @Directive({
   selector: '[portalResizeHandle]',

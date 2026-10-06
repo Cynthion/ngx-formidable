@@ -10,6 +10,7 @@ import {
   PortalOptionSpec,
   PortalSectionSpec
 } from '../model/field-spec.model';
+import { pathOf } from '../helpers/model-path.helpers';
 import { slugify } from '../helpers/slug.helpers';
 import { ATTRIBUTES_BY_LOWER_NAME, unquote } from './markup-attributes';
 
@@ -39,28 +40,107 @@ const FALLBACK_SECTION: PortalSectionSpec = { id: 'imported', title: 'Imported' 
 const STEP = /\.[A-Za-z_$][\w$]*|\['[^']*'\]/g;
 
 /** The `@if` the serializer writes around a conditional field. Its condition is a `hidden()` rule. */
-const HIDDEN_GATE = /^!form(?:\.[A-Za-z_$][\w$]*|\['[^']*'\])+\(\)\.hidden\(\)$/;
+const HIDDEN_GATE = /^!form((?:\.[A-Za-z_$][\w$]*|\['[^']*'\])+)\(\)\.hidden\(\)$/;
+
+/** A field as the schema names it, `path.when.date`. The bare `path` is the form's own, and no field's. */
+const TARGET = String.raw`path((?:${STEP.source})+)`;
+
+/**
+ * The rules `schema-serializer.ts` writes for one field, one statement to a line: its state, its required
+ * marker, a limit and its condition. A required check marks the field it checks, which is why the export
+ * leaves the marker off such a field. A limit takes exactly two arguments, so a check with a message is none.
+ */
+const STATE_RULE = new RegExp(String.raw`^(readonly|disabled)\(${TARGET}\);$`);
+const REQUIRED_RULE = new RegExp(
+  String.raw`^(?:metadata|required)\(${TARGET}, (?:REQUIRED, \(\) => true|\{ message: .*\})\);$`
+);
+const LIMIT_RULE = new RegExp(String.raw`^(\w+)\(${TARGET}, (-?\d+(?:\.\d+)?)\);$`);
+const CONDITION_RULE = new RegExp(
+  String.raw`^hidden\(${TARGET}, \(context\) => context\.valueOf\(${TARGET}\) !== ('(?:[^'\\]|\\.)*'|-?\d+(?:\.\d+)?|true|false)\);$`
+);
+
+/** What one of the schema's rules sets on its field: some of the field's own members, state or decoration. */
+type FieldRule = Partial<Omit<PortalFieldSpec, 'state' | 'decoration'>> & {
+  readonly state?: Partial<PortalFieldState>;
+  readonly decoration?: Partial<PortalFieldDecoration>;
+};
 
 function slugOf(title: string): string {
   return slugify(title) || 'imported';
 }
 
+/** The keys a run of steps names: `.when.date` is `when`, then `date`. */
+function keysOf(steps: string): readonly string[] {
+  return (steps.match(STEP) ?? []).map((step) => (step.startsWith('.') ? step.slice(1) : step.slice(2, -2)));
+}
+
 /** The keys of a `[formField]` path off the field tree, `form.when.date`, or `null` for any other expression. */
 function fieldPathOf(expression: string): readonly string[] | null {
   const match = /^form((?:\.[A-Za-z_$][\w$]*|\['[^']*'\])+)$/.exec(expression.trim());
-  if (!match) return null;
 
-  return (match[1]!.match(STEP) ?? []).map((step) => (step.startsWith('.') ? step.slice(1) : step.slice(2, -2)));
+  return match ? keysOf(match[1]!) : null;
+}
+
+/** A condition's value as the serializer's `literal()` writes it: a quoted string, a number or a boolean. */
+function literalValue(literal: string): string | number | boolean {
+  if (literal.startsWith("'")) return literal.slice(1, -1).replace(/\\'/g, "'");
+  if (literal === 'true' || literal === 'false') return literal === 'true';
+
+  return Number(literal);
 }
 
 /**
- * Takes out every `@if` gating a field on its `hidden()` state, noting each: the condition behind it is a rule
- * in the schema, which the import does not read, so the field comes back without one.
+ * Each field's rules in the schema, keyed by its model path. Only the grammar the serializer writes for a field
+ * is read: the checks are the validator's, which writes them again, and a rule on the root is a form setting.
+ */
+function readSchema(source: string): ReadonlyMap<string, readonly FieldRule[]> {
+  const rules = new Map<string, FieldRule[]>();
+
+  const add = (steps: string, rule: FieldRule): void => {
+    const path = keysOf(steps).join('.');
+
+    rules.set(path, [...(rules.get(path) ?? []), rule]);
+  };
+
+  for (const line of source.split('\n').map((text) => text.trim())) {
+    const state = STATE_RULE.exec(line);
+    const required = REQUIRED_RULE.exec(line);
+    const limit = LIMIT_RULE.exec(line);
+    const condition = CONDITION_RULE.exec(line);
+    // The attribute table marks the inputs `[formField]` owns, which are the limits the schema states.
+    const attribute = limit ? ATTRIBUTES_BY_LOWER_NAME.get(limit[1]!.toLowerCase()) : undefined;
+
+    if (state) add(state[2]!, state[1] === 'readonly' ? { state: { readonly: true } } : { state: { disabled: true } });
+    else if (required) add(required[1]!, { decoration: { markRequired: true } });
+    else if (limit && attribute?.rule) add(limit[2]!, attribute.write(limit[3]!));
+    else if (condition) {
+      const field = keysOf(condition[2]!).at(-1)!;
+
+      add(condition[1]!, { visibleWhen: { field, equals: literalValue(condition[3]!) } });
+    }
+  }
+
+  return rules;
+}
+
+function withRule(field: PortalFieldSpec, rule: FieldRule): PortalFieldSpec {
+  return {
+    ...field,
+    ...rule,
+    state: { ...field.state, ...rule.state },
+    decoration: { ...field.decoration, ...rule.decoration }
+  };
+}
+
+/**
+ * Takes out every `@if` gating a field on its `hidden()` state. The condition behind it is a rule in the
+ * schema, so a gate is noted unless the schema pasted beside the template states it: without one the field
+ * comes back unconditional.
  *
  * A line pass before the `DOMParser`, because `@if` is Angular's own syntax and not markup: the parser reads
  * the braces as text. Any other `@if` is left exactly where it is, so it still reaches the control-flow note.
  */
-function stripHiddenGates(source: string, notes: MarkupParseNote[]): string {
+function stripHiddenGates(source: string, notes: MarkupParseNote[], conditioned: (path: string) => boolean): string {
   const output: string[] = [];
   // One frame per `@if`, holding whether this pass took it out, so the matching `}` goes the same way.
   const frames: boolean[] = [];
@@ -70,11 +150,13 @@ function stripHiddenGates(source: string, notes: MarkupParseNote[]): string {
 
     if (opened) {
       const expression = opened[1]!.trim();
-      const gate = HIDDEN_GATE.test(expression);
-      frames.push(gate);
+      const gate = HIDDEN_GATE.exec(expression);
+      frames.push(!!gate);
 
-      if (gate) notes.push({ text: `@if (${expression})`, reason: 'in-the-schema' });
-      else output.push(line);
+      if (!gate) output.push(line);
+      else if (!conditioned(keysOf(gate[1]!).join('.'))) {
+        notes.push({ text: `@if (${expression})`, reason: 'in-the-schema' });
+      }
 
       continue;
     }
@@ -102,15 +184,19 @@ function stripHiddenGates(source: string, notes: MarkupParseNote[]): string {
  * Sections come from the comments the serializer writes above each run of fields, which is what lets the
  * whole form round-trip rather than landing in one undifferentiated list. A section's group comes from the
  * `[formField]` paths of its fields.
+ *
+ * The schema exported beside it, `schema`, gives back what `[formField]` owns and the template therefore
+ * cannot state: each field's readonly and disabled state, its required marker, its limits and its condition.
  */
-export function parseMarkup(source: string): MarkupParseResult {
+export function parseMarkup(source: string, schema = ''): MarkupParseResult {
   const notes: MarkupParseNote[] = [];
   const fields: PortalFieldSpec[] = [];
   const sections: PortalSectionSpec[] = [];
+  const rules = readSchema(schema);
 
   // The gates the serializer writes come out first, so what is left under the control-flow test is only what
   // really was dropped.
-  const stripped = stripHiddenGates(source, notes);
+  const stripped = stripHiddenGates(source, notes, (path) => !!rules.get(path)?.some((rule) => rule.visibleWhen));
 
   if (/@(if|for|switch)\b|\*ngIf|\*ngFor/.test(stripped)) {
     notes.push({ text: 'Control flow', reason: 'control-flow' });
@@ -149,10 +235,12 @@ export function parseMarkup(source: string): MarkupParseResult {
       index += 1;
 
       if (parsedField) {
-        fields.push(parsedField.field);
+        const { field, groupName } = parsedField;
+
+        fields.push((rules.get(pathOf(field.name, groupName)) ?? []).reduce(withRule, field));
 
         // A group belongs to the section, which is where the portal keeps it.
-        if (parsedField.groupName) setCurrent({ ...current!, groupName: parsedField.groupName });
+        if (groupName) setCurrent({ ...current!, groupName });
       }
 
       return;
@@ -325,5 +413,5 @@ export const MARKUP_NOTE_LABELS: Readonly<Record<MarkupParseNote['reason'], stri
   'dynamic-binding': 'A binding to an expression, not a literal',
   'control-flow': 'Control flow is out of scope for the import',
   'in-the-component': 'Behaviour that lives in the component, which the import does not read',
-  'in-the-schema': 'A rule that lives in the schema, which the import does not read'
+  'in-the-schema': 'A rule that lives in the schema: paste the schema beside the template to keep it'
 };

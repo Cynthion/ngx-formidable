@@ -43,13 +43,37 @@
   }
 </div>
 } } @case ('template') {
-<textarea
-  rows="4"
-  spellcheck="false"
-  placeholder='<form [formRoot]="form"> … </form>'
-  class="pc-textarea"
-  [value]="templateText()"
-  (input)="templateText.set($any($event.target).value)"></textarea>
+<div class="pc-field">
+  <label
+    for="import-template"
+    class="pc-label">
+    <span class="pc-label-name">Template</span>
+  </label>
+  <textarea
+    rows="4"
+    spellcheck="false"
+    placeholder='<form [formRoot]="form"> … </form>'
+    id="import-template"
+    class="pc-textarea"
+    [value]="templateText()"
+    (input)="templateText.set($any($event.target).value)"></textarea>
+</div>
+
+<div class="pc-field">
+  <label
+    for="import-schema"
+    class="pc-label">
+    <span class="pc-label-name">Schema</span>
+  </label>
+  <textarea
+    rows="4"
+    spellcheck="false"
+    placeholder="export const myFormSchema = schema<MyFormModel>((path) => &#123; … &#125;);"
+    id="import-schema"
+    class="pc-textarea"
+    [value]="schemaText()"
+    (input)="schemaText.set($any($event.target).value)"></textarea>
+</div>
 
 <div class="pc-buttons">
   <button

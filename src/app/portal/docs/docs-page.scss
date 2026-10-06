@@ -18,34 +18,6 @@
 }
 
 // Each sits on its rail's border, overhanging it, so the hit area does not eat into the rail or the document.
-.divider {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 7px;
-  cursor: col-resize;
-  touch-action: none;
-  z-index: 1;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0 3px;
-    background: transparent;
-    transition: background var(--portal-hover-duration, 120ms) ease;
-  }
-
-  &:hover::after,
-  &.is-dragging::after,
-  &:focus-visible::after {
-    background: var(--portal-accent);
-  }
-
-  &:focus-visible {
-    outline: none;
-  }
-}
-
 .nav-divider {
   left: calc(var(--docs-nav-width) - 4px);
 }

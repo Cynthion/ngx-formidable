@@ -1,7 +1,8 @@
-import { PortalFormDefinition } from '../model/field-spec.model';
+import { PortalFieldSpec, PortalFormDefinition } from '../model/field-spec.model';
 import { PREVIEW_FORM_DEFINITION } from '../model/preview-form.definition';
 import { parseMarkup } from './markup-parser';
 import { serializeDefinition } from './markup-serializer';
+import { serializeSchema } from './schema-serializer';
 
 function only(ids: readonly string[]): PortalFormDefinition {
   return {
@@ -288,5 +289,75 @@ describe('markup import', () => {
 
     expect(result.fields).toEqual([]);
     expect(result.notes.some((note) => note.reason === 'unknown-element')).toBe(true);
+  });
+});
+
+describe('schema import', () => {
+  /** What the schema holds for a field: what `[formField]` owns, which the template cannot state. */
+  const ruled = (field: PortalFieldSpec) => ({
+    name: field.name,
+    readonly: field.state.readonly,
+    disabled: field.state.disabled,
+    markRequired: field.decoration.markRequired,
+    minLength: field.minLength,
+    maxLength: field.maxLength,
+    min: field.min,
+    max: field.max,
+    visibleWhen: field.visibleWhen
+  });
+
+  const withSchema = (definition: PortalFormDefinition) =>
+    parseMarkup(serializeDefinition(definition), serializeSchema(definition));
+
+  // Each validator states the marker its own way: `required()` marks the field it checks, and the others state
+  // `REQUIRED` metadata. A check with a message, `maxLength(path.toppings, 5, …)`, is not a limit.
+  it.each(['angular', 'vest', 'zod', 'none'] as const)(
+    'round-trips every field’s rules in the preview form under %s',
+    (validator) => {
+      const definition = { ...PREVIEW_FORM_DEFINITION, options: { ...PREVIEW_FORM_DEFINITION.options, validator } };
+
+      expect(withSchema(definition).fields.map(ruled)).toEqual(definition.fields.map(ruled));
+    }
+  );
+
+  it('round-trips readonly, disabled, and a condition on a string, a number and a bracketed key', () => {
+    const definition = only(['orderName', 'quantity', 'notes', 'method']);
+    const fields = definition.fields.map((field): PortalFieldSpec => {
+      switch (field.name) {
+        case 'orderName':
+          return { ...field, name: 'order-name', state: { ...field.state, readonly: true } };
+        case 'quantity':
+          return { ...field, state: { ...field.state, disabled: true } };
+        case 'notes':
+          return { ...field, visibleWhen: { field: 'order-name', equals: "it's" } };
+        default:
+          return { ...field, visibleWhen: { field: 'quantity', equals: 2 } };
+      }
+    });
+
+    expect(withSchema({ ...definition, fields }).fields.map(ruled)).toEqual(fields.map(ruled));
+  });
+
+  // The root's rules are the form's settings, which stay as the Studio has them.
+  it('applies no rule on the root to a field', () => {
+    const definition = only(['orderName']);
+    const options = { ...definition.options, readonly: true, disabled: true, debounce: 300 } as const;
+
+    expect(withSchema({ ...definition, options }).fields[0]?.state).toEqual(definition.fields[0]!.state);
+  });
+
+  // A condition the schema states comes back, so its gate needs no note; the preset still lives in the component.
+  it('notes no gate whose condition the schema states', () => {
+    expect(withSchema(PREVIEW_FORM_DEFINITION).notes).toEqual([
+      { text: '(valuechange)="applyPizzaPreset($event)"', reason: 'in-the-component' }
+    ]);
+  });
+
+  it('still notes a gate the schema states no condition for', () => {
+    const empty = 'export const myFormSchema = schema<MyFormModel>((path) => {\n});';
+
+    expect(parseMarkup(serializeDefinition(only(['pickup', 'address'])), empty).notes).toEqual([
+      { text: '@if (!form.address().hidden())', reason: 'in-the-schema' }
+    ]);
   });
 });
