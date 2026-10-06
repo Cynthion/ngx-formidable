@@ -61,12 +61,12 @@ MCP servers are not invoked. Their tools are model-invoked, so there is nothing 
 
 ## Agents
 
-| Agent          | Input                                                                                                   | Effort  | Output                                     |
-| :------------- | :------------------------------------------------------------------------------------------------------ | :-----: | :----------------------------------------- |
-| `fd-research`  | Requirement, repository, [`impl/implementation.md`](implementation.md), [`impl/backlog.md`](backlog.md) | Inherit | `.research/<slug>.md`                      |
-| `fd-plan`      | `.research/<slug>.md`                                                                                   | Inherit | `.plan/<slug>.md`                          |
-| `fd-implement` | `.plan/<slug>.md`                                                                                       | Inherit | Source code, progress appended to the plan |
-| `fd-review`    | Diff, [`impl/definition-of-done.md`](definition-of-done.md)                                             |  High   | Findings                                   |
+| Agent          | Input                                                       | Effort  | Output                                     |
+| :------------- | :---------------------------------------------------------- | :-----: | :----------------------------------------- |
+| `fd-research`  | Requirement, repository, [`impl/backlog.md`](backlog.md)    | Inherit | `.research/<slug>.md`                      |
+| `fd-plan`      | `.research/<slug>.md`                                       | Inherit | `.plan/<slug>.md`                          |
+| `fd-implement` | `.plan/<slug>.md`                                           | Inherit | Source code, progress appended to the plan |
+| `fd-review`    | Diff, [`impl/definition-of-done.md`](definition-of-done.md) |  High   | Findings                                   |
 
 An agent body stands alone and never assumes who invoked it.
 
@@ -79,7 +79,7 @@ An agent body stands alone and never assumes who invoked it.
 | `fd-create-component`    |    Auto    | Inherit | Place, wire and showcase a library or portal component       |
 | `fd-create-handoff`      |    Auto    |   Low   | Compress a plan for a fresh context                          |
 | `fd-grill-plan`          |    Auto    |  High   | Interrogate a plan for gaps                                  |
-| `fd-research-issue`      |    Auto    | Inherit | Research a roadmap item and emit an external research prompt |
+| `fd-research-issue`      |    Auto    | Inherit | Research a backlog item and emit an external research prompt |
 | `fd-review-change`       |    Auto    |  High   | Review a diff against the Definition of Done and run gates   |
 | `fd-write-documentation` |    Auto    | Inherit | Apply the documentation guidelines                           |
 | `fd-drive-sdd`           |   Manual   | Inherit | Own the SDD templates and drive the phases                   |
@@ -93,19 +93,19 @@ An agent body stands alone and never assumes who invoked it.
 
 The harness supports Spec Driven Development. Each phase reads the previous phase's artifact from disk rather than from the conversation, so any phase can be resumed in a fresh session.
 
-There is no issue tracker. [`impl/implementation.md`](implementation.md) is the source of truth for outstanding work. Check it before starting. [`impl/backlog.md`](backlog.md) is the intake buffer for ideas that have not been triaged into a phase yet.
+There is no issue tracker. [`impl/backlog.md`](backlog.md) is the single source of truth for work items.
 
 ### Planning
 
 ```mermaid
 flowchart LR
   Idea[Feature, Idea Or Bug] --> Backlog[Backlog Item]
-  Backlog --> Triage[Triage]
-  Triage --> Phase[Roadmap Phase]
-  Phase --> Branch[Branch]
+  Backlog --> Refinement[Refinement]
+  Refinement --> Refined[Refined Backlog Item]
+  Refined --> Branch[Branch]
 ```
 
-Triage orders an item into a phase of the roadmap, with its dependencies stated, following the ordering strategy in [`impl/implementation.md`](implementation.md).
+Refinement improves the item before development begins: missing context is added, the decision is recorded on the item, and the item takes its place in the backlog's priority order.
 
 ### Development
 
@@ -124,8 +124,8 @@ flowchart LR
 
 | Step             | Input                 | Output                         | Tooling                                             |
 | :--------------- | :-------------------- | :----------------------------- | :-------------------------------------------------- |
-| Branch           | Roadmap phase         | `feature/*` branch             | `git switch -c`                                     |
-| Research         | Roadmap phase         | `.research/<slug>.md`          | `/fd-drive-sdd`, `fd-research`, `fd-research-issue` |
+| Branch           | Refined backlog item  | `feature/*` branch             | `git switch -c`                                     |
+| Research         | Backlog item          | `.research/<slug>.md`          | `/fd-drive-sdd`, `fd-research`, `fd-research-issue` |
 | Plan             | `.research/<slug>.md` | `.plan/<slug>.md`              | `fd-plan`, `fd-grill-plan`, `fd-create-handoff`     |
 | Develop And Test | `.plan/<slug>.md`     | Source code, appended progress | `fd-implement`, `fd-create-component`               |
 | Documentation    | Source code           | Documentation                  | `fd-write-documentation`                            |
@@ -143,7 +143,7 @@ flowchart LR
   Backlog --> Branch[Branch]
 ```
 
-A defect reported by a consumer becomes a backlog item and then follows the development flow; bugs lead the roadmap. Dependency updates arrive as Renovate pull requests, see [`impl/renovate.md`](renovate.md). There is no separate hotfix path: `main` is the only release branch.
+A defect reported by a consumer becomes a backlog item and then follows the development flow; bugs lead the backlog. Dependency updates arrive as Renovate pull requests, see [`impl/renovate.md`](renovate.md). There is no separate hotfix path: `main` is the only release branch.
 
 ---
 

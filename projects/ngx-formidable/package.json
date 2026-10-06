@@ -1,6 +1,6 @@
 {
   "name": "@cynthion/ngx-formidable",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "Themeable Angular form fields for Signal Forms, reactive and template-driven forms. Style them from CSS variables, validate with Angular, Vest or Zod, and build the form live in the Studio.",
   "license": "MIT",
   "author": "Christian Lüthold",
@@ -52,11 +52,11 @@
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
-    "@angular/common": "^22.0.0",
-    "@angular/core": "^22.0.0",
-    "@angular/forms": "^22.0.0",
+    "@angular/common": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/forms": "^22.2.0",
     "date-fns": "^3.0.1 || ^4.0.0",
-    "ngx-mask": "^22.0.0",
+    "ngx-mask": "^22.1.0",
     "pikaday": "^1.8.0",
     "rxjs": "^7.8.0"
   },

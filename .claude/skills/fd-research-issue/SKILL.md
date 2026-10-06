@@ -1,6 +1,6 @@
 ---
 name: fd-research-issue
-description: Research a roadmap phase or backlog item against the repository and emit a prompt for external deep research. Use when a work item needs investigating before a plan exists, or when a research artifact is requested.
+description: Research a backlog item against the repository and emit a prompt for external deep research. Use when a work item needs investigating before a plan exists, or when a research artifact is requested.
 argument-hint: <slug>
 ---
 
@@ -12,7 +12,7 @@ Template: [`.claude/skills/fd-drive-sdd/research.template.md`](../fd-drive-sdd/r
 
 ## Workflow
 
-1. Read the matching phase in [`.documentation/impl/implementation.md`](../../../.documentation/impl/implementation.md) or item in [`.documentation/impl/backlog.md`](../../../.documentation/impl/backlog.md). Ask which one when the slug does not resolve. There might be no item yet, in which case ask what should be researched.
+1. Read the matching item in [`.documentation/impl/backlog.md`](../../../.documentation/impl/backlog.md). Ask which item when the slug does not resolve. There might be no item yet, in which case ask what should be researched.
 2. Investigate the repository and `.documentation/`. Fill every section of the template except `External Research`.
 3. Decide what external research would actually add. Only questions the repository cannot answer qualify: upstream library behavior (Angular, ngx-mask, Pikaday, Vest), framework migration detail, specification and accessibility detail, and prior art in other form libraries.
 4. Emit the external prompt below in the response, ready to paste. Do not write it into the artifact.

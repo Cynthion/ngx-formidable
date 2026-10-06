@@ -9,7 +9,7 @@ A change is done when every applicable item below holds. Stating that something 
 - **Build Output**: `dist/`, and the `README.md` and `LICENSE` that `prebuild:lib` copies into `projects/ngx-formidable/`, are never hand-edited.
 - **Scope**: The diff is limited to the area the task touches. No unrelated renames, moves, or refactors.
 - **Secrets**: No npm token or other credential is committed.
-- **Roadmap**: A shipped phase is removed from [`impl/implementation.md`](implementation.md) per its rules. Anything found on the way that is not part of the phase goes to [`impl/backlog.md`](backlog.md).
+- **Backlog**: A shipped item is removed from [`impl/backlog.md`](backlog.md). Anything found on the way that is not part of the item goes to it.
 
 ---
 

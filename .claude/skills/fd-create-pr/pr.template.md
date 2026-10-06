@@ -11,7 +11,7 @@
 
 ## Why
 
-<The driving need. Link the roadmap phase in .documentation/impl/implementation.md when there is one.>
+<The driving need. Link the backlog item in .documentation/impl/backlog.md when there is one.>
 
 ## Notes
 
