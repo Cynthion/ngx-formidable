@@ -6,9 +6,6 @@ import { THEME_PRESETS } from './model/presets';
 import { THEME_TOKENS_BY_NAME } from './model/token-manifest';
 import { editField, errors, model, openPanel, openSection, openStudio, tab } from './testing/studio';
 
-/** **A Following Variable States Its Default** in `impl/backlog.md`. */
-const FOLLOWER_STATES_DEFAULT = 'a following variable states the library default rather than the value in force';
-
 /**
  * The Studio as a visitor uses it: every act goes through the page's own controls, and every claim is read
  * off what the page shows — the stage, the editor panel, the model drawer, the top bar's count.
@@ -497,9 +494,7 @@ describe('portal', () => {
 
   // The starting preset rounds the field through `border-radius`, which the field's own radius and its four
   // corners follow. Unpinned, each still has to state the value in force: what the field paints.
-  it('states the value a following variable paints', async ({ skip }) => {
-    skip(FOLLOWER_STATES_DEFAULT);
-
+  it('states the value a following variable paints', async () => {
     await openStudio();
 
     const corner = '--formidable-field-border-start-start-radius';

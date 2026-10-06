@@ -7,9 +7,10 @@
 }
 
 // Which file is showing. Underlined rather than boxed like the sub-tab strip above, so the two levels do not
-// read as one broken strip.
+// read as one broken strip. Wraps rather than scrolls, so a narrow panel still shows every file.
 .files {
   display: flex;
+  flex-wrap: wrap;
   gap: 2px;
   margin-bottom: 10px;
   border-bottom: 1px solid var(--portal-border);
