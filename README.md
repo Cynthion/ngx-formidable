@@ -16,9 +16,6 @@ Angular form fields you can actually theme, configure and customize. Validated b
   <a href="https://github.com/Cynthion/ngx-formidable/actions/workflows/deploy.yml">
     <img src="https://github.com/Cynthion/ngx-formidable/actions/workflows/deploy.yml/badge.svg?branch=main" alt="Deploy">
   </a>
-  <a href="https://cynthion.github.io/ngx-formidable/">
-    <img src="https://img.shields.io/badge/studio-live-4f46e5" alt="Live Studio">
-  </a>
   <a href="https://angular.dev">
     <img src="https://img.shields.io/badge/Angular-%5E22-dd0031" alt="Angular ^22">
   </a>
@@ -30,11 +27,21 @@ Angular form fields you can actually theme, configure and customize. Validated b
   </a>
 </p>
 
-<!-- An absolute URL: this file is also the npm package's README, where a repository-relative path does not resolve. -->
+<!-- Absolute URLs: this file is also the npm package's README, where a repository-relative path does not resolve. -->
 <p align="center">
-  <a href="https://cynthion.github.io/ngx-formidable/#/specimen">
-    <img src="https://raw.githubusercontent.com/Cynthion/ngx-formidable/main/assets/ladder.png" alt="Demonstration of how to style the ngx-formidable fields.">
+  <a href="https://cynthion.github.io/ngx-formidable/">
+    <img src="https://raw.githubusercontent.com/Cynthion/ngx-formidable/main/assets/studio.png" alt="A recording of the ngx-formidable Studio: one form repainted from the default theme through Midnight, tabbed through, its labels moved and prefixed, one field opened from its chip, Zod rejecting an email, then the CSS, template and schema it exports.">
   </a>
+</p>
+
+<p align="center">
+  <a href="https://cynthion.github.io/ngx-formidable/">
+    <img src="https://img.shields.io/badge/Open_the_Studio-4f46e5?style=for-the-badge" alt="Open the Studio">
+  </a>
+</p>
+
+<p align="center">
+  Theme it, shape the form, copy the CSS and the Signal Forms component. No install, no account.
 </p>
 <!-- markdownlint-enable no-inline-html -->
 
@@ -121,6 +128,10 @@ That is the whole default theme. Redeclare whatever you want to change in your o
   --formidable-field-height: 50px;
 }
 ```
+
+Each step below adds one variable, from the library's defaults to the Midnight preset. The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) steps through it live.
+
+[![The ngx-formidable fields restyled one CSS variable at a time.](https://raw.githubusercontent.com/Cynthion/ngx-formidable/main/assets/ladder.png)](https://cynthion.github.io/ngx-formidable/#/specimen)
 
 ## Your First Form
 

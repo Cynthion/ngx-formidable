@@ -12,32 +12,7 @@
 
 // Sits on the drawer's own top edge, overhanging it, so the hit area does not eat into the bar below.
 .divider {
-  position: absolute;
   top: -3px;
-  right: 0;
-  left: 0;
-  height: 7px;
-  cursor: row-resize;
-  touch-action: none;
-  z-index: 1;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 3px 0;
-    background: transparent;
-    transition: background var(--portal-hover-duration, 120ms) ease;
-  }
-
-  &:hover::after,
-  &.is-dragging::after,
-  &:focus-visible::after {
-    background: var(--portal-accent);
-  }
-
-  &:focus-visible {
-    outline: none;
-  }
 }
 
 .bar {

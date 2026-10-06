@@ -159,7 +159,7 @@ Automatic format and lint hooks were deliberately rejected: they are noisy and l
 - **Existing Commands**: Prefer the existing formatter and linter commands over ad-hoc invocations.
 - **Touched Files Only**: Prefer touched-file formatting. If a check fails, fix only the relevant files.
 - **Before Done**: Run the format and lint checks before claiming done when code changed.
-- **Never Edit Generated**: `dist/`, the `README.md` and `LICENSE` copies under `projects/ngx-formidable/`, and `assets/ladder.png` are never hand-edited.
+- **Never Edit Generated**: `dist/`, the `README.md` and `LICENSE` copies under `projects/ngx-formidable/`, and the images in `assets/` are never hand-edited.
 
 ## Permissions
 

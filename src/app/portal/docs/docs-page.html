@@ -32,7 +32,7 @@
     portalResizeHandle
     axis="x"
     handleLabel="Resize the navigation"
-    class="divider nav-divider"
+    class="nav-divider"
     (moved)="layout.setDocsNavWidth($event)"
     (nudged)="layout.setDocsNavWidth(layout.docsNavWidth() + $event)"
     (resetRequested)="layout.resetDocsNavWidth()"></div>
@@ -54,7 +54,7 @@
     portalResizeHandle
     axis="x"
     handleLabel="Resize the contents"
-    class="divider contents-divider"
+    class="contents-divider"
     (moved)="onContentsDividerMoved($event)"
     (nudged)="layout.setDocsContentsWidth(layout.docsContentsWidth() - $event)"
     (resetRequested)="layout.resetDocsContentsWidth()"></div>

@@ -18,7 +18,7 @@ The source of truth for outstanding work. [`impl/backlog.md`](backlog.md) is the
 ### Phase 42: Release
 
 - **Version**: `1.0.0` in `projects/ngx-formidable/package.json`. The Angular peer floor is the minor CI tests, per [`impl/renovate.md`](renovate.md).
-- **Publish**: `npm run screenshots` for the README hero, then [`impl/releasing.md`](releasing.md).
+- **Publish**: `npm run screenshots` for the README images, then [`impl/releasing.md`](releasing.md).
 - **Tag**: tag the release commit. Final step.
 
 ### Phase 43: Storybook

@@ -92,3 +92,51 @@
   visibility: hidden;
   pointer-events: none;
 }
+
+// The divider `ResizeHandle` puts on a panel's edge: a 7px grab area that paints a 1px accent line down its
+// middle while it is hovered, dragged or focused. Global, so the three panels that own one only place it on
+// their own edge; its orientation is the handle's axis.
+.portal-resize-handle {
+  position: absolute;
+  touch-action: none;
+  z-index: 1;
+
+  &::after {
+    content: '';
+    position: absolute;
+    background: transparent;
+    transition: background var(--portal-hover-duration, 120ms) ease;
+  }
+
+  &:hover::after,
+  &.is-dragging::after,
+  &:focus-visible::after {
+    background: var(--portal-accent);
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &[aria-orientation='vertical'] {
+    top: 0;
+    bottom: 0;
+    width: 7px;
+    cursor: col-resize;
+
+    &::after {
+      inset: 0 3px;
+    }
+  }
+
+  &[aria-orientation='horizontal'] {
+    right: 0;
+    left: 0;
+    height: 7px;
+    cursor: row-resize;
+
+    &::after {
+      inset: 3px 0;
+    }
+  }
+}

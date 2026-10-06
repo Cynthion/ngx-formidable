@@ -7,11 +7,10 @@ import { ThemeStore } from '../../state/theme.store';
 import type { FileTab } from './export-tab';
 
 /**
- * A file exported here, read back in: the theme's block, or the form's template.
+ * A file exported here, read back in: the theme's block, or the form's template with its schema beside it.
  *
- * Only the template is read back — what the component and the schema hold is reported as left behind, and
- * the app config is the app's rather than the form's. Each file keeps its own box and report, so switching
- * between the two loses neither.
+ * What the component holds is reported as left behind, and the app config is the app's rather than the
+ * form's. Each file keeps its own boxes and report, so switching between the two loses neither.
  */
 @Component({
   selector: 'portal-import-panel',
@@ -37,15 +36,20 @@ export class ImportPanel {
   protected readonly applyDefaults = signal(true);
 
   protected readonly templateText = signal('');
+  /** Optional: without it, each field comes back without what `[formField]` owns. */
+  protected readonly schemaText = signal('');
   protected readonly templateResult = signal<MarkupParseResult | null>(null);
 
   protected importTheme(): void {
     this.themeResult.set(this.theme.importFrom(this.themeText(), this.applyDefaults()));
   }
 
-  /** Replaces the whole form. Sections come from the comments the serializer writes above each run. */
+  /**
+   * Replaces the whole form. Sections come from the comments the serializer writes above each run, and each
+   * field's state, limits, required marker and condition from the schema.
+   */
   protected importTemplate(): void {
-    const result = parseMarkup(this.templateText());
+    const result = parseMarkup(this.templateText(), this.schemaText());
 
     this.templateResult.set(result);
 

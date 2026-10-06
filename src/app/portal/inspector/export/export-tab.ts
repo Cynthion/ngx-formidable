@@ -57,7 +57,7 @@ const IMPORT_FILES: readonly FileTab<ImportFile>[] = [
   {
     id: 'template',
     label: 'Template',
-    help: 'A template exported here, read back in. It replaces the form on the stage, sections included. The schema is not read, so each field’s state, limits and required marker stay at their defaults. What else the Studio cannot read — bindings to expressions, control flow, conditions, presets — is listed, not silently dropped.'
+    help: 'A template exported here, read back in. It replaces the form on the stage, sections included. Paste the schema exported with it too, and each field keeps its state, limits, required marker and condition; without it they stay at their defaults. The form’s settings and its checks stay as the Studio has them. What else the Studio cannot read — bindings to expressions, control flow, presets — is listed, not silently dropped.'
   }
 ];
 
