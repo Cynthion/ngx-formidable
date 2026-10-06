@@ -50,6 +50,8 @@ flowchart LR
 
 **Errors Differ In Shape**: `[formField]` writes its rules' own `ValidationError`s, `message` included. The classic APIs write each key of `control.errors` as `{ kind, context }`, with no `message`.
 
+**No `hidden` Input**: the field leaves `FormUiControl`'s optional `hidden` undeclared, so a hidden field is the consumer's `@if`, see **Conditional Fields** in [`user/forms.md`](../user/forms.md#conditional-fields). Neither the field nor the decorator can stand in for it: `[formField]` warns `NG01916` in development for a hidden field that is still rendered, whatever hides it.
+
 Every field keeps to four rules, and each API relies on them:
 
 - **Touch Last**: `touch` is the last act of a blur. `BaseField.onFocusChange` calls `doOnFocusChange` first, so a field that commits on blur, as `date-field` and `time-field` do, has written its value before the touch, which is what Signal Forms' `debounce(path, 'blur')` releases it on.

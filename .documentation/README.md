@@ -1,6 +1,6 @@
 # Documentation Index
 
-How to write documents: [`impl/documentation.md`](impl/documentation.md). Source of truth for outstanding work: [`impl/implementation.md`](impl/implementation.md).
+How to write documents: [`impl/documentation.md`](impl/documentation.md).
 
 Three buckets, one per audience. The root [`README.md`](../README.md) is the entry point for consumers and links in here; [`CONTRIBUTING.md`](../CONTRIBUTING.md) beside it is the entry point for contributors. Introduce directory hierarchy only if necessary.
 
@@ -58,7 +58,6 @@ For whoever works the repository. Contains technical documentation of the setup 
 
 Work items:
 
-| File                                               | Purpose                                                  |
-| :------------------------------------------------- | :------------------------------------------------------- |
-| [`impl/backlog.md`](impl/backlog.md)               | Raw intake buffer for new, untriaged ideas               |
-| [`impl/implementation.md`](impl/implementation.md) | Phased roadmap, the source of truth for outstanding work |
+| File                                 | Purpose                                                                 |
+| :----------------------------------- | :---------------------------------------------------------------------- |
+| [`impl/backlog.md`](impl/backlog.md) | Project backlog, bugs and features, the single source of truth for work |
