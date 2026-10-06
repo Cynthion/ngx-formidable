@@ -104,9 +104,12 @@ export abstract class BaseOptionField<T = string | null> extends BaseOptionListF
       return;
     }
 
+    // The highlight never rests where `Enter` picks nothing, the selection included.
+    const canPick = (option?: FormidableOption) => !!option && !option.disabled && !option.readonly;
+
     // selection wins
     const selectedIndex = this.selectedOptionIndex;
-    if (selectedIndex >= 0) {
+    if (canPick(options[selectedIndex])) {
       this.setHighlightedIndex(selectedIndex);
       return;
     }
@@ -114,7 +117,7 @@ export abstract class BaseOptionField<T = string | null> extends BaseOptionListF
     // try keep previously highlighted value
     if (this.highlightedOptionValue) {
       const keepIndex = options.findIndex((o) => o.value === this.highlightedOptionValue);
-      if (keepIndex >= 0) {
+      if (canPick(options[keepIndex])) {
         this.setHighlightedIndex(keepIndex);
         return;
       }
@@ -126,7 +129,7 @@ export abstract class BaseOptionField<T = string | null> extends BaseOptionListF
     if (nextIndex >= count) nextIndex = count - 1;
 
     // skip what cannot be picked
-    if (options[nextIndex]?.disabled || options[nextIndex]?.readonly) {
+    if (!canPick(options[nextIndex])) {
       const fixed = getNextAvailableOptionIndex(nextIndex, options, 'down');
       nextIndex = fixed >= 0 ? fixed : getNextAvailableOptionIndex(nextIndex, options, 'up');
     }

@@ -17,9 +17,8 @@ function formats(parts: string[][]): fc.Arbitrary<string> {
 /** Any `unicodeTokenFormat` a date field accepts. */
 export const DATE_FORMATS = formats([['yy', 'yyyy'], ['MM', 'MMM'], ['dd']]);
 
-// A twelve-hour clock tells 2 PM from 2 AM only by its meridiem, so `hh` never comes without one. date-fns
-// reads a dot right after the meridiem as part of it, `AM.` as `a.m.`, so that one shape is left to
-// `impl/backlog.md`.
+// A twelve-hour clock tells 2 PM from 2 AM only by its meridiem, so `hh` never comes without one. A field
+// rejects a meridiem right before a dot, which date-fns reads as part of it, `AM.` as `a.m.`.
 /** Any `unicodeTokenFormat` a time field accepts. */
 export const TIME_FORMATS = formats([['HH', 'hh a', 'hhaa'], ['mm'], ['ss']]).filter((unicode) => !/a\./.test(unicode));
 

@@ -60,7 +60,7 @@ describe('one rule set in every validator', () => {
       'toppings': ['Five toppings is the limit.'],
       'when': ['We are open from 11:00 to 23:00.', 'We are closed on Mondays.'],
       'payment.cardNumber': ['A card number is sixteen digits.'],
-      'phone': ['A phone number reads 079 123 45 67.'],
+      'phone': ['A phone number is ten digits.'],
       'email': ['That does not look like an email address.'],
       '': ['Pineapple on a BBQ base is a combination this kitchen refuses.']
     });

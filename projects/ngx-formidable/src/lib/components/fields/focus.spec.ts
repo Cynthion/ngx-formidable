@@ -10,9 +10,6 @@ import { BaseField } from './base-field';
  * one still does, and from a click too.
  */
 
-/** **Readonly Slider Takes No Click** in `impl/backlog.md`. */
-const READONLY_SLIDER_UNCLICKABLE = 'a readonly slider lets no press reach its range, so a click does not focus it';
-
 const options = [
   { value: 'a', label: 'Alpha' },
   { value: 'b', label: 'Beta' }
@@ -125,9 +122,7 @@ describe('field focus', () => {
   });
 
   for (const kind of Object.keys(ROLES) as FieldKind[]) {
-    it(`still takes focus from a click while readonly: ${kind}-field`, async ({ skip }) => {
-      if (kind === 'slider') skip(READONLY_SLIDER_UNCLICKABLE);
-
+    it(`still takes focus from a click while readonly: ${kind}-field`, async () => {
       await bind(kind, false, { state: { readonly: true } });
 
       // Forced, because Playwright refuses to click a readonly control, which a user still can.

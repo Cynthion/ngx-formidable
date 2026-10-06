@@ -32,6 +32,7 @@
     [leadZeroDateTime]="mergedMaskConfig().leadZeroDateTime"
     [patterns]="mergedMaskConfig().patterns"
     [clearIfNotMatch]="mergedMaskConfig().clearIfNotMatch"
+    (valueChange)="setValue($event)"
     (mouseup)="rememberClickedCaret(editorRef)"
     (click)="restoreClickedCaret(editorRef)"
     (input)="onInput()"

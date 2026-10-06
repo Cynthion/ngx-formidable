@@ -56,13 +56,24 @@ Angular registers a directive's host listeners before a template's on the same e
 
 ---
 
+## Writing Through The Mask
+
+ngx-mask's select all, its click clamp and its `Backspace` over the whole text read its own state, not the editor's text. A value the user did not type therefore goes into a masked editor through `NgxMaskDirective.writeValue`, never straight into the element, or ngx-mask goes on taking the field for empty. `BaseField.writeMaskedValue` makes that write, synchronously, and sets the directive's `value` model to match, because ngx-mask reports a change only against that model.
+
+- **Edits**: a masked editor reports the user's edits through ngx-mask's `valueChange`, which also carries the `Backspace` clear that fires no `input` event. `input-field` and `textarea-field` take it as the model; `date-field` and `time-field` take it as text and parse it on commit.
+- **Echo**: a write of the value ngx-mask just reported is skipped by ngx-mask itself, and a write of the text already shown moves no caret.
+- **No Template Binding**: binding the model as `[value]` would do the same, but under `showMaskTyped` the binding's own `ngOnChanges` re-renders the old value first and reports it back, so the write is lost. The upstream defect is in [`impl/backlog.md`](../impl/backlog.md).
+- **Empty Date Or Time**: ngx-mask renders an empty value as its slots, again from a microtask of its own, so the `emptyHint` a resting field shows is written in a microtask after it.
+
+---
+
 ## Where The Value Ends
 
 `endOfMaskedValue` in `helpers/input.helpers.ts` is the only rule with any arithmetic in it, and both jobs use it: the keyboard selection stops there, and a click is clamped to it.
 
 A display with no placeholder left is all content, trailing literals included. One with placeholders left ends after the last filled position, and the separator drawn between that position and the first empty slot belongs to the unused area, so `079 123 __ __` ends at 7, not 8 or 13.
 
-Which character marks an empty slot is ngx-mask's `placeHolderCharacter`, and it is settable. Every masked field therefore **binds** it rather than inheriting it, so a global `provideNgxMask` cannot change what the library reads its values out of while the library carries on looking for `_`. `BaseField.maskPlaceholderCharacter` is what the caret rules ask; `BaseTextField` overrides it for `input-field` and `textarea-field` from their merged config, and the date and time fields pin it.
+Which character marks an empty slot is ngx-mask's `placeHolderCharacter`, and it is settable. Every masked field therefore **binds** it rather than inheriting it, so a global `provideNgxMask` cannot change what the caret rules read while they carry on looking for `_`. `BaseField.maskPlaceholderCharacter` is what the caret rules ask; `BaseTextField` overrides it for `input-field` and `textarea-field` from their merged config, and the date and time fields pin it.
 
 One combination cannot be made to work: a placeholder the mask can also produce as content, through a token pattern that accepts it or a literal in the mask. The rendered text is then genuinely ambiguous, and no reading of it can be right. `isPlaceholderAmbiguous` detects exactly that and the two mask fields warn, naming the field and the character.
 
@@ -73,4 +84,4 @@ One combination cannot be made to work: a placeholder the mask can also produce 
 - The rules run on focus entry and never again. Nothing re-applies them on a repaint, a value change or a second click.
 - A caret never lands behind the value. A click aimed into the unused slots collapses at the end of what is filled.
 - Focusing a field does not change its value. `date-field` hands its display to ngx-mask only while nothing has been typed, because a half-typed date survives focus moving onto the field's own calendar and back.
-- `dropdown-field` and `select-field` are out of scope: their editors are `readonly`, so there is no caret to place.
+- `dropdown-field` and `select-field` are out of scope: their editors are `readonly`, so there is no caret to place. `dropdown-field` collapses the selection on focus instead, because Chrome's `Tab` select-all would paint its display-only label.

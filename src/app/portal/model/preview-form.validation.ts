@@ -68,10 +68,10 @@ const PREVIEW_RULES: readonly PortalRule[] = [
   requiredRule('branch', 'Pick a branch to collect from.'),
   requiredRule('payment.method', 'Choose how to pay.'),
   requiredRule('payment.cardNumber', 'A card number is required.'),
-  patternRule('payment.cardNumber', 'A card number is sixteen digits.', /^\d{4} \d{4} \d{4} \d{4}$/),
+  patternRule('payment.cardNumber', 'A card number is sixteen digits.', /^\d{16}$/),
   requiredRule('orderName', 'We need a name for the order.'),
   requiredRule('phone', 'A phone number is required.'),
-  patternRule('phone', 'A phone number reads 079 123 45 67.', /^\d{3} \d{3} \d{2} \d{2}$/),
+  patternRule('phone', 'A phone number is ten digits.', /^\d{10}$/),
   requiredRule('email', 'An email address is required.'),
   patternRule('email', 'That does not look like an email address.', /^[^@\s]+@[^@\s.]+\.[^@\s]+$/),
   // Two group rules. Each reads a member of `when` and reports on the group, because neither the date nor the

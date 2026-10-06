@@ -57,7 +57,12 @@ export class DropdownField extends BaseOptionField<string | null> implements OnI
   protected doOnFocusChange(isFocused: boolean): void {
     if (!isFocused) {
       this.resetTypeahead();
+      return;
     }
+
+    // The label is drawn, not typed: typing searches the options and never replaces it, so nothing selects
+    // it, not even the select-all Chrome leaves on a `Tab` entry.
+    this.inputRef().nativeElement.setSelectionRange(0, 0);
   }
 
   // #region FormidableField

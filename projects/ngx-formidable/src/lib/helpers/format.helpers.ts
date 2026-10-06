@@ -9,30 +9,39 @@ export function isValidDateObject(value: unknown): boolean {
  * Parses a masked date/time string against a Unicode format, strictly.
  *
  * date-fns `parse` fills tokens it cannot read from the reference date, so a
- * partial/empty/ambiguous string can yield a bogus (often "today") date. To
- * reject those, we require the parsed date to round-trip back to the exact
- * input. Returns null unless the input is a complete, unambiguous match.
+ * partial/empty/ambiguous string can yield a bogus date. To reject those, we
+ * require the parsed date to round-trip back to the input, case aside. Returns
+ * null unless the input is a complete, unambiguous match.
+ *
+ * What a format leaves out comes from 2000-01-01, so `dd.MM` takes 29 February,
+ * and `yy` reads `00`–`49` as 20xx and `50`–`99` as 19xx.
  */
 export function parseUnicodeDateTime(input: string, unicodeTokenFormat: string): Date | null {
   const trimmed = input.trim();
   if (trimmed.length === 0) return null;
 
-  const parsed = parse(trimmed, unicodeTokenFormat, new Date());
+  // Not today: a leap year, a 31-day month, and no daylight-saving switch to shift a time into another hour.
+  const parsed = parse(trimmed, unicodeTokenFormat, new Date(2000, 0, 1));
   if (!isValidDateObject(parsed)) return null;
-  if (format(parsed, unicodeTokenFormat) !== trimmed) return null;
+  if (format(parsed, unicodeTokenFormat).toLowerCase() !== trimmed.toLowerCase()) return null;
 
   return parsed;
 }
 
 /**
  * Whether a Unicode format string is one a masked field can be typed into: at least one token, every token
- * one of `tokens` — `UNICODE_DATE_TOKENS` or `UNICODE_TIME_TOKENS` — and no quoted text, which the mask
- * cannot type.
+ * one of `tokens` — `UNICODE_DATE_TOKENS` or `UNICODE_TIME_TOKENS` — no quoted text, which the mask cannot
+ * type, and no meridiem right before a dot, which date-fns reads as part of it.
  */
 export function validateUnicodeTokenFormat(format: string, tokens: readonly string[]): boolean {
   const formatTokens = tokenizeFormat(format).filter((token) => /^[a-zA-Z]+$/.test(token));
 
-  return !format.includes("'") && formatTokens.length > 0 && formatTokens.every((token) => tokens.includes(token));
+  return (
+    !format.includes("'") &&
+    !/a\./.test(format) &&
+    formatTokens.length > 0 &&
+    formatTokens.every((token) => tokens.includes(token))
+  );
 }
 
 /**

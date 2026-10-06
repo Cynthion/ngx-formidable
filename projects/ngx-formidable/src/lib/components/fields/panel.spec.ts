@@ -20,9 +20,6 @@ const OPTIONS = [
   { value: 'c', label: 'Gamma', disabled: true }
 ];
 
-/** **Tab Out Of An Open Calendar** in `impl/backlog.md`. */
-const TAB_INTO_CLOSING_CALENDAR = "Tab moves focus into the calendar's first button as the panel closes over it";
-
 const combobox = () => page.getByRole('combobox', { name: 'Choice' });
 const calendar = () => page.getByRole('dialog', { name: 'Choice' });
 const next = () => page.getByRole('button', { name: 'Next' });
@@ -155,9 +152,7 @@ describe('panel', () => {
         expect(touched()).toBe(true);
       });
 
-      it('closes on Tab, and focus moves on', async ({ skip }) => {
-        if (panelCase.kind === 'date') skip(TAB_INTO_CLOSING_CALENDAR);
-
+      it('closes on Tab, and focus moves on', async () => {
         await openPanel(panelCase);
 
         await userEvent.tab();
@@ -234,8 +229,10 @@ describe('panel', () => {
       expect(events()).toEqual([]);
     });
 
+    // Focused without a press: on Linux a press opens the select's popup, which takes the key from the page.
     it('keeps the field focused through a step of the calendar', async () => {
-      const { fixture, isFocused, events } = await focusMonthSelect();
+      const { fixture, isFocused, events } = await openPanel(dateCase!);
+      (calendar().getByRole('combobox', { name: 'Month' }).element() as HTMLSelectElement).focus();
 
       await userEvent.keyboard('{ArrowDown}');
       await expect.element(combobox()).toHaveFocus();

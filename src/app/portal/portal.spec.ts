@@ -254,13 +254,13 @@ describe('portal', () => {
   it('nests the payment group and resolves its conditional field through it', async () => {
     await openStudio();
 
-    expect((await model())['payment']).toMatchObject({ method: 'card', cardNumber: '4242 4242 4242 4242' });
+    expect((await model())['payment']).toMatchObject({ method: 'card', cardNumber: '4242424242424242' });
     await expect.element(page.getByRole('textbox', { name: 'Card Number' })).toBeVisible();
 
     await userEvent.click(page.getByRole('radio', { name: 'Twint' }));
 
     await expect.element(page.getByRole('textbox', { name: 'Card Number' })).not.toBeInTheDocument();
-    expect((await model())['payment']).toMatchObject({ method: 'twint', cardNumber: '4242 4242 4242 4242' });
+    expect((await model())['payment']).toMatchObject({ method: 'twint', cardNumber: '4242424242424242' });
   });
 
   // #endregion
@@ -431,6 +431,7 @@ describe('portal', () => {
   // The other half of the pair: a block that states the defaults outright needs no help on the way in. Every
   // preset, because the hazard is per-variable — a scheme states a base and leaves what follows it unsaid,
   // and a default written over that base would contradict it.
+  // A sweep over every preset outlasts the 15 s default on a CI runner.
   it('reproduces every preset when the block states the defaults and is merged in', async () => {
     await openStudio();
 
@@ -449,7 +450,7 @@ describe('portal', () => {
 
       await expect.poll(() => ({ preset: preset.key, ...painted() })).toEqual({ preset: preset.key, ...before });
     }
-  });
+  }, 60_000);
 
   // The counter is the page's primary claim: eight to twelve variables are enough. It has to start at the
   // bottom, or it says the opposite the moment the page paints.

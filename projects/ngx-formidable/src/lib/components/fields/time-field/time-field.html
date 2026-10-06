@@ -29,7 +29,7 @@
       (mousedown)="onEditorMouseDown()"
       (mouseup)="rememberClickedCaret(inputRef)"
       (click)="restoreClickedCaret(inputRef)"
-      (input)="onInput()"
+      (valueChange)="onTextChange($event)"
       (focus)="onFocusChange(true)"
       (blur)="onFocusChange(false)" />
   </div>

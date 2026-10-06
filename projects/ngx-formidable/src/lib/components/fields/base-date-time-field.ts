@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { ParseResult, transformedValue } from '@angular/forms/signals';
 import { format, isEqual } from 'date-fns';
-import { NgxMaskConfig } from 'ngx-mask';
+import { NgxMaskConfig, NgxMaskDirective } from 'ngx-mask';
 import {
   findSegmentAtCaret,
   formatToTokenMask,
@@ -42,6 +42,9 @@ import { BaseField } from './base-field';
 @Directive()
 export abstract class BaseDateTimeField extends BaseField<Date | null> {
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
+
+  // ngx-mask on the input. It reports the text as the user edits it through `valueChange`.
+  private readonly maskDirective = viewChild.required(NgxMaskDirective);
 
   /**
    * A Unicode format. Decides the mask, the display, and which segment the arrow keys step. An unsupported
@@ -130,9 +133,11 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
     return value ? format(value, this.tokenFormat()) : '';
   }
 
-  // Commits what the input shows, as a blur or `Enter` does.
+  // Commits what the input shows, as a blur or `Enter` does. Text that parses renders as the model's own, so
+  // `dec` typed shows `Dec`.
   protected commitText(): void {
     this.text.set(this.inputRef().nativeElement.value);
+    if (this.text.parseErrors().length === 0) this.text.set(this.formatValue(this.value()));
     this.render(this.text());
   }
 
@@ -145,9 +150,10 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
   }
 
   // Typing commits on blur, but wiping the text commits at once, or the cleared value would stay the model's
-  // and `stepSegment` would keep stepping from it.
-  protected onInput(): void {
-    if (this.isEmptyText(this.inputRef().nativeElement.value)) this.text.set('');
+  // and `stepSegment` would keep stepping from it. ngx-mask reports a wipe no `input` event announces too, as
+  // `Backspace` over the whole text is.
+  protected onTextChange(text: string): void {
+    if (this.isEmptyText(text)) this.text.set('');
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
@@ -164,20 +170,13 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
     this.commitText();
   }
 
-  private render(text: string): void {
-    // Waits for the ngxMask directive to initialize on the input, which it does across a full task —
-    // a microtask would land before it. `stepSegment` restores the caret from a timer queued behind
-    // this one, so this must stay a macrotask.
-    setTimeout(() => {
-      // ngxMask leaves an empty input untouched, so render the empty state ourselves
-      if (this.isEmptyText(text)) {
-        this.renderEmpty();
-        return;
-      }
+  // Shows text in the input without committing it. ngx-mask renders empty text as its slots, again from a
+  // microtask of its own, so the field's empty state follows that.
+  protected render(text: string): void {
+    const isEmpty = this.isEmptyText(text);
 
-      const input = this.inputRef().nativeElement;
-      if (input.value !== text) input.value = text;
-    });
+    this.writeMaskedValue(this.maskDirective(), isEmpty ? '' : text);
+    if (isEmpty) queueMicrotask(() => this.renderEmpty());
   }
 
   // #endregion
@@ -199,9 +198,7 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
     if (this.isOutOfRange(next)) return;
 
     this.commit(next);
-
-    // commit re-renders the input from a setTimeout of its own; ours has to land after it
-    setTimeout(() => input.setSelectionRange(segment.start, segment.end));
+    input.setSelectionRange(segment.start, segment.end);
   }
 
   // A step is refused rather than clamped. Nothing is out of range unless the field has a range.

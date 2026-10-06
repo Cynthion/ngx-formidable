@@ -131,7 +131,7 @@ Taken by `date-field` and `time-field`.
 | `unicodeTokenFormat` | `string`              | `'yyyy-MM-dd'`, time `'HH.mm'` | The date-fns token string the field masks, parses and formats with |
 | `emptyHint`          | `FormidableEmptyHint` | `'underscores'`                | What an empty, unfocused field shows                               |
 
-A date format takes the fixed-width tokens `yy`, `yyyy`, `MM`, `MMM` and `dd`, a time format `HH`, `hh`, `mm`, `ss`, `a` and `aa`, with any separators or none, such as `dd.MM.yyyy` or `yyyyMMdd`. The mask has one slot per character, so a variable-width token such as `d` or `MMMM`, quoted text, and a format with no token at all log a warning and fall back to the default. Committing, parse errors and the arrow keys are in **Dates And Times** in [Fields](fields.md).
+A date format takes the fixed-width tokens `yy`, `yyyy`, `MM`, `MMM` and `dd`, a time format `HH`, `hh`, `mm`, `ss`, `a` and `aa`, with any separators or none, such as `dd.MM.yyyy` or `yyyyMMdd`. The mask has one slot per character, so a variable-width token such as `d` or `MMMM`, quoted text, and a format with no token at all log a warning and fall back to the default. So does `a` or `aa` right before a dot, which date-fns reads as part of the AM/PM. Committing, parse errors and the arrow keys are in **Dates And Times** in [Fields](fields.md).
 
 ### Panel Inputs
 
@@ -428,7 +428,7 @@ Extend `BaseOptionListField`, or `BaseOptionField` to walk the list with a highl
 | `highlightedOptionIndex`                  | Highlight | The highlighted index, `-1` for none                                                                            |
 | `setHighlightedIndex(index)`              | Highlight | Moves the highlight                                                                                             |
 | `highlightSelectedOption()`               | Highlight | Moves the highlight onto the selection                                                                          |
-| `reconcileHighlightAfterOptionsChanged()` | Highlight | After the list changes: the selection, else the highlighted value, else the nearest index that can be picked    |
+| `reconcileHighlightAfterOptionsChanged()` | Highlight | After the list changes: the first of the selection, highlighted value and nearest index that can be picked      |
 | `optionId(index)`                         | Highlight | `{fieldId}-option-{index}`, or `null` for a negative index                                                      |
 | `optionRefs`                              | Highlight | `viewChildren()` of the rendered `#optionRef` options, which the highlight scrolls into view                    |
 

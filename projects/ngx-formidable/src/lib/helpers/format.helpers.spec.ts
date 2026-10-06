@@ -35,15 +35,6 @@ function fits(text: string, mask: string): boolean {
 }
 
 describe('format.helpers', () => {
-  // `parseUnicodeDateTime` takes the parts a format leaves out from today. One ordinary day keeps what the
-  // properties generate independent of the day they run on; why that matters is in `impl/backlog.md`.
-  beforeEach(() => {
-    vi.useFakeTimers({ toFake: ['Date'] });
-    vi.setSystemTime(new Date(2024, 5, 15, 12));
-  });
-
-  afterEach(() => void vi.useRealTimers());
-
   describe('validateUnicodeTokenFormat', () => {
     it('accepts every format built from a field’s own tokens, with or without separators', () => {
       fc.assert(fc.property(DATE_FORMATS, (unicode) => validateUnicodeTokenFormat(unicode, UNICODE_DATE_TOKENS)));
@@ -72,6 +63,16 @@ describe('format.helpers', () => {
       expect(validateUnicodeTokenFormat("HH 'Uhr' mm", UNICODE_TIME_TOKENS)).toBe(false);
     });
 
+    // date-fns reads a dot right after the meridiem as part of it, `PM.` as `p.m.`.
+    it('rejects a meridiem right before a dot, which never parses what it shows', () => {
+      fc.assert(
+        fc.property(
+          TIME_FORMATS.filter((unicode) => unicode.includes('a')),
+          (unicode) => !validateUnicodeTokenFormat(unicode.replace(/a+/, '$&.'), UNICODE_TIME_TOKENS)
+        )
+      );
+    });
+
     it('rejects a format with nothing to type', () => {
       expect(validateUnicodeTokenFormat('', UNICODE_DATE_TOKENS)).toBe(false);
       expect(validateUnicodeTokenFormat('--/--', UNICODE_DATE_TOKENS)).toBe(false);
@@ -87,17 +88,29 @@ describe('format.helpers', () => {
   });
 
   describe('parseUnicodeDateTime', () => {
-    // A day is only a day within its month and year; a format leaving them to today is in `impl/backlog.md`.
-    it('parses whatever a format shows back into the same text', () => {
+    it('parses whatever a format shows, typed in any case, back into the same text', () => {
       fc.assert(
         fc.property(ANY_FORMAT, DATES, (unicode, date) => {
-          fc.pre(!unicode.includes('dd') || (unicode.includes('M') && unicode.includes('y')));
+          const shown = format(date, unicode);
 
-          const parsed = parseUnicodeDateTime(format(date, unicode), unicode);
+          for (const typed of [shown, shown.toLowerCase(), shown.toUpperCase()]) {
+            const parsed = parseUnicodeDateTime(typed, unicode);
 
-          expect(parsed && format(parsed, unicode)).toBe(format(date, unicode));
+            expect(parsed && format(parsed, unicode)).toBe(shown);
+          }
         })
       );
+    });
+
+    it('takes what a format leaves out from 2000-01-01, a leap year', () => {
+      expect(parseUnicodeDateTime('29.02', 'dd.MM')).toEqual(new Date(2000, 1, 29));
+      expect(parseUnicodeDateTime('31', 'dd')).toEqual(new Date(2000, 0, 31));
+      expect(parseUnicodeDateTime('14:30', 'HH:mm')).toEqual(new Date(2000, 0, 1, 14, 30));
+    });
+
+    it('reads a two-digit year 00 to 49 as 20xx, and 50 to 99 as 19xx', () => {
+      expect(parseUnicodeDateTime('49', 'yy')).toEqual(new Date(2049, 0, 1));
+      expect(parseUnicodeDateTime('50', 'yy')).toEqual(new Date(1950, 0, 1));
     });
 
     it('parses a date naming its year, month and day back into that day', () => {

@@ -8,7 +8,7 @@ import { FormidableEmptyHint } from '../../models/formidable.model';
 import { DATE_FORMATS, DATES, TIME_FORMATS } from '../../testing/arbitraries';
 import { bindField, BindFieldOptions, BoundField, FORMS_APIS, FormsApi } from '../../testing/bind-field';
 import { clickAt } from '../../testing/dom';
-import { BACKSPACE_UNREPORTED, configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
  * Contract of the masked date/time fields, per **Dates And Times** and **Stepping A Date Or Time Segment** in
@@ -27,9 +27,6 @@ import { BACKSPACE_UNREPORTED, configureFormidableTestBed, settle } from '../../
  */
 
 type MaskedField = BoundField & { input: HTMLInputElement };
-
-/** **A Step Still In Flight** in `impl/backlog.md`. */
-const STEP_IN_FLIGHT = 'a step renders its text from a timer, and a press before it steps the text it replaces';
 
 /** Result of one keystroke: what the field shows and where the caret sits. */
 function state(input: HTMLInputElement): string {
@@ -375,9 +372,7 @@ describe('masked date/time field', () => {
       expect(input).toHaveFocus();
     });
 
-    it('and as soon as Backspace does', async ({ skip }) => {
-      skip(BACKSPACE_UNREPORTED);
-
+    it('and as soon as Backspace does', async () => {
       const { input, value, dirty } = await setup(
         'date',
         'dd . MM . yyyy',
@@ -488,9 +483,7 @@ describe('masked date/time field', () => {
       await expect.element(input).toHaveValue('12 . 05 . 2023');
     });
 
-    it('steps once per press however fast the presses come', async ({ skip }) => {
-      skip(STEP_IN_FLIGHT);
-
+    it('steps once per press however fast the presses come', async () => {
       const { input } = await focusedAt(10); // year
 
       await userEvent.keyboard('{ArrowDown}{ArrowDown}');
@@ -609,27 +602,15 @@ describe('masked date/time field', () => {
     });
   });
 
-  // `parseUnicodeDateTime` takes the parts a format leaves out from today, so today is pinned; why that
-  // matters is in `impl/backlog.md`.
   describe('typing a whole value', () => {
-    beforeEach(() => {
-      vi.useFakeTimers({ toFake: ['Date'] });
-      vi.setSystemTime(new Date(2024, 5, 15, 12));
-    });
-
-    afterEach(() => void vi.useRealTimers());
-
-    it('reaches the model as it was typed, in any format the field accepts', async () => {
+    it('reaches the model as it was typed, in any format the field accepts and in any case', async () => {
       const fields = fc.oneof(
         DATE_FORMATS.map((unicode) => ({ kind: 'date' as const, unicode })),
         TIME_FORMATS.map((unicode) => ({ kind: 'time' as const, unicode }))
       );
 
       await fc.assert(
-        fc.asyncProperty(fields, DATES, async ({ kind, unicode }, date) => {
-          // A day is only a day within its month and year; a format leaving them to today is in `impl/backlog.md`.
-          fc.pre(!unicode.includes('dd') || (unicode.includes('M') && unicode.includes('y')));
-
+        fc.asyncProperty(fields, DATES, fc.boolean(), async ({ kind, unicode }, date, lowerCase) => {
           TestBed.resetTestingModule();
           configureFormidableTestBed();
           const field = await setup(kind, unicode, 'underscores');
@@ -639,10 +620,11 @@ describe('masked date/time field', () => {
           const keys = [...shown].filter((_, index) => mask[index]! in DEFAULT_PATTERNS).join('');
 
           await userEvent.tab();
-          await userEvent.keyboard(keys);
+          await userEvent.keyboard(lowerCase ? keys.toLowerCase() : keys);
           await userEvent.tab();
           await settle(field.fixture);
 
+          // The commit renders the format's own case.
           expect(field.input.value).toBe(shown);
           expect(format(field.value() as Date, unicode)).toBe(shown);
         }),

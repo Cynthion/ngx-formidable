@@ -8,7 +8,7 @@ import { configureFormidableTestBed } from '../../testing/test-bed';
  * replaced is not what the user was editing — but a write of the text the field already shows replaces
  * nothing. Two writes do exactly that: the field's own, coming back from the model on every keystroke, and
  * a consumer's that echoes the model back in another form, such as a `valueChanges` subscription patching
- * in a phone number's digits without the spaces its mask draws. Moving the caret there drags it out from
+ * in a phone number with the spaces its mask draws. Moving the caret there drags it out from
  * under a click or a selection the user has just made.
  *
  * Written through a `FormControl`; the caret is placed with trusted clicks and keys.
@@ -51,13 +51,13 @@ describe('caret', () => {
     });
   }
 
-  describe('a consumer writing back the digits of a masked number', () => {
+  describe('a consumer writing back a masked number as it shows', () => {
     async function typed(): Promise<BoundField & { editor: Editor }> {
       const field = await showing('input', '', { mask: '000 000 00 00' });
 
       await userEvent.tab();
       await userEvent.keyboard('0791234567');
-      await expect.poll(field.value).toBe('079 123 45 67');
+      await expect.poll(field.value).toBe('0791234567');
 
       return field;
     }
@@ -67,7 +67,7 @@ describe('caret', () => {
       await clickAt(editor, 4);
       await expect.poll(() => selection(editor)).toEqual([4, 4]);
 
-      await write('0791234567');
+      await write('079 123 45 67');
 
       expect(editor.value).toBe('079 123 45 67');
       expect(selection(editor)).toEqual([4, 4]);
@@ -79,7 +79,7 @@ describe('caret', () => {
       await userEvent.keyboard('{Shift>}{ArrowRight}{ArrowRight}{ArrowRight}{/Shift}');
       await expect.poll(() => selection(editor)).toEqual([4, 7]);
 
-      await write('0791234567');
+      await write('079 123 45 67');
 
       expect(selection(editor)).toEqual([4, 7]);
     });

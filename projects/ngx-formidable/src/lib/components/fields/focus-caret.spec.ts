@@ -1,7 +1,7 @@
 import { page, userEvent } from 'vitest/browser';
 import { bindField, BoundField, FieldKind } from '../../testing/bind-field';
 import { clickAt, Editor } from '../../testing/dom';
-import { configureFormidableTestBed, MASK_STATE_BEHIND, settle } from '../../testing/test-bed';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
  * What a field does with the caret on the way in, per **The Caret On Focus** and **The Caret In A Masked
@@ -171,9 +171,7 @@ describe('caret on focus entry', () => {
       await expect.poll(() => selection(editor)).toEqual([4, 4]);
     });
 
-    it('does the same in a value the form wrote', async ({ skip }) => {
-      skip(MASK_STATE_BEHIND);
-
+    it('does the same in a value the form wrote', async () => {
       const { editor } = await render('slots', FULL, '079 123 45 67');
       await userEvent.tab();
       await expect.poll(() => selection(editor)).toEqual([0, 13]);

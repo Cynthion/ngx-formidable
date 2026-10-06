@@ -76,6 +76,7 @@ The scripts are listed in [`impl/developer-onboarding.md`](../impl/developer-onb
 ng-packagr config:
 
 - `ng-package.json` sets the entry file to `public-api.ts`, outputs to `dist/ngx-formidable`, and ships the library SCSS as assets under `dist/ngx-formidable/styles/`.
+- `package.json` adds `./styles/ngx-formidable` to the `exports` that ng-packagr generates, under the `sass` condition, so a resolver that honours `exports` finds the public stylesheet.
 - The package is published as `@cynthion/ngx-formidable` to npm, public through `publishConfig.access`.
 
 ## Continuous Integration

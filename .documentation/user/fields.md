@@ -52,13 +52,14 @@ Every field has a `focus()` method. `autoFocus` calls it once the view is ready,
 
 ### The Caret On Focus
 
-| Field Holds     |     Focused By     | Caret Lands                                                    |
-| :-------------- | :----------------: | :------------------------------------------------------------- |
-| Nothing         | Keyboard / Pointer | At the front, wherever the pointer aimed                       |
-| Text or a value |      Keyboard      | Selecting the content, so the next character typed replaces it |
-| Text or a value |      Pointer       | Where the click landed, and never behind the value             |
+| Field Holds          |     Focused By     | Caret Lands                                                    |
+| :------------------- | :----------------: | :------------------------------------------------------------- |
+| Nothing              | Keyboard / Pointer | At the front, wherever the pointer aimed                       |
+| Text or a value      |      Keyboard      | Selecting the content, so the next character typed replaces it |
+| Text or a value      |      Pointer       | Where the click landed, and never behind the value             |
+| A display-only label | Keyboard / Pointer | Nowhere: nothing is selected                                   |
 
-`focus()` and `autoFocus` count as the keyboard. `textarea-field` is the exception and keeps the browser's own behaviour (a caret, no selection), because a paragraph should not be one keystroke from being wiped, and no browser does it either.
+`focus()` and `autoFocus` count as the keyboard. A display-only label is the value `dropdown-field` shows: typing there searches the options and never replaces the label, so there is nothing to select it for. `textarea-field` is the exception and keeps the browser's own behaviour (a caret, no selection), because a paragraph should not be one keystroke from being wiped, and no browser does it either.
 
 The rules run on the way in and then stop. Clicking again, moving the caret, typing or a repaint never re-runs them, so a field is never locked to one caret position; leaving the field and coming back reads the rules again against whatever it holds by then. Focusing a field never changes its value.
 
@@ -184,7 +185,7 @@ Every control is operable from the keyboard. Disabled and readonly fields ignore
 | `Arrow Left`         |                    |                                                     |                         | If panel open: previous day; else move caret       | Move caret                |
 | `Arrow Right`        |                    |                                                     |                         | If panel open: next day; else move caret           | Move caret                |
 
-An empty cell is a key the field does not act on, and it keeps its native effect: `Enter` on a dropdown or autocomplete with its panel closed submits the form, and `Esc` with no panel open reaches the dialog around the field. Picking a highlighted option in a checkbox group toggles it. Arrows skip disabled and readonly options.
+An empty cell is a key the field does not act on, and it keeps its native effect: `Enter` on a dropdown or autocomplete with its panel closed submits the form, and `Esc` with no panel open reaches the dialog around the field. Picking a highlighted option in a checkbox group toggles it. Arrows skip disabled and readonly options, and the highlight never rests on one: when the list changes, a highlight whose option can no longer be picked, the selected one included, moves to the next option that can.
 
 The rest keep the platform's keys: `select-field` is a native `<select>` and `slider-field` a native range input. `toggle-field` flips on `Space` and `Enter`.
 
@@ -218,6 +219,9 @@ A focused empty field always shows underscore slots, because the mask's caret ar
 - **Typed Text Commits On Blur**: a half-typed date is not a date, so what is typed reaches the model on blur or on `Enter`. The arrow keys and the calendar commit at once.
 - **Text That Does Not Parse Stays As Typed**: the model keeps its value, and the field reports a `parse` error to whichever forms API binds it, which the decorator renders once revealed. Text that parses again drops it.
 - **Emptying The Text Commits `null`**: at once, with no error.
+- **Names Are Read In Any Case**: `15 dec 2024` parses against `dd MMM yyyy`, and `02:30 pm` against `hh:mm a`. The commit shows the format's own case, `15 Dec 2024` and `02:30 PM`.
+- **A Date Format Without A Year Takes 2000**: a leap year, so `29.02` parses against `dd.MM`. One without a month takes January.
+- **A Two-Digit Year**: `yy` reads `00` to `49` as 20xx, and `50` to `99` as 19xx. Any other year takes `yyyy`.
 
 The date field passes a set of options straight through to Pikaday: `minDate`, `maxDate`, `firstDay`, `i18n`, `yearRange`, `disableWeekends`, `disableDayFn` and the rest, listed in [Components](components.md). Each is applied to the calendar when it changes at runtime.
 
@@ -236,6 +240,10 @@ The toggle centres what is projected; its size, colour and hover feedback are yo
 ## Masking
 
 `input-field` and `textarea-field` mask through ngx-mask, and take almost all of its options. Config resolves in three layers: a per-field `maskConfig` overrides the app-wide defaults, which override the library's own. A masked field writes the model on every keystroke, as an unmasked one does.
+
+**The Model Is What ngx-mask Reports**: the mask's literals stay out of the model unless `dropSpecialCharacters` is `false`. Typing `0791234567` into `000 000 00 00` writes `0791234567`, and `079 123 45 67` under `{ dropSpecialCharacters: false }`. A value written into the field renders through the mask either way.
+
+**Two Lengths**: a rule such as `pattern()` or `minLength()` reads the model. The native `minlength` and `maxlength` count the text the editor shows, literals included, and `[formField]` writes a `minLength()` or `maxLength()` rule into them. On a masked field the two count different texts, so state a length with `pattern()`.
 
 ### Per Field
 
@@ -259,7 +267,7 @@ export const appConfig: ApplicationConfig = {
 
 It lands on the `FORMIDABLE_MASK_DEFAULTS` token.
 
-**The Slot Character Is The Field's, Not The App's**: a field reads its value back out of what the mask renders, by looking for the character drawn in a position nobody has filled. So every masked field binds `placeHolderCharacter` itself, and an `ngx-mask` setting made globally, through `provideNgxMask`, does not reach it. Set it per field through `maskConfig`, or app-wide through `globalMaskConfig`, and the display and the caret move together.
+**The Slot Character Is The Field's, Not The App's**: a field finds where its value ends in what the mask renders, by looking for the character drawn in a position nobody has filled. So every masked field binds `placeHolderCharacter` itself, and an `ngx-mask` setting made globally, through `provideNgxMask`, does not reach it. Set it per field through `maskConfig`, or app-wide through `globalMaskConfig`, and the display and the caret move together.
 
 Pick one the mask cannot produce on its own. Where a token pattern accepts it, or the mask draws it as a literal, a filled position and an empty one look identical and the field cannot tell them apart. It logs a warning naming the field when it spots the collision. The default `_` is safe for every built-in pattern; a mask like `000_000`, or a custom pattern such as `/\w/` that accepts `_`, needs a different character.
 

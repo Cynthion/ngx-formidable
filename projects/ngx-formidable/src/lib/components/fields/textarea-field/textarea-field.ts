@@ -1,5 +1,5 @@
 import { Component, input, signal } from '@angular/core';
-import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
+import { NgxMaskDirective } from 'ngx-mask';
 import { FieldValueAlignment, FORMIDABLE_FIELD } from '../../../models/formidable.model';
 import { BaseTextField } from '../base-text-field';
 
@@ -20,8 +20,7 @@ import { BaseTextField } from '../base-text-field';
     {
       provide: FORMIDABLE_FIELD,
       useExisting: TextareaField
-    },
-    NgxMaskPipe
+    }
   ]
 })
 export class TextareaField extends BaseTextField {
@@ -31,12 +30,12 @@ export class TextareaField extends BaseTextField {
     // No additional actions needed
   }
 
-  // What the length indicator counts: the characters shown, which `maxLength` caps — a mask's included. A
-  // signal, because a masked render lands in a timer no render owns.
+  // What the length indicator counts: the editor's text, which `maxLength` caps, a mask's characters
+  // included. A signal, because ngx-mask writes that text and no template binding reads it.
   protected readonly valueLength = signal(0);
 
   protected override onTextChanged(): void {
-    this.valueLength.set(this.editorValue.length);
+    this.valueLength.set(this.editorRef().nativeElement.value.length);
     this.autoResize();
   }
 

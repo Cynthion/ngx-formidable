@@ -116,7 +116,7 @@ describe('schema serializer', () => {
       "  maxLength(path.toppings, 5, { message: 'Five toppings is the limit.' });",
       "  required(path.orderName, { message: 'We need a name for the order.' });",
       "  required(path.phone, { message: 'A phone number is required.' });",
-      "  pattern(path.phone, /^\\d{3} \\d{3} \\d{2} \\d{2}$/, { message: 'A phone number reads 079 123 45 67.' });"
+      "  pattern(path.phone, /^\\d{10}$/, { message: 'A phone number is ten digits.' });"
     ]);
     expect(source).toContain('  maxLength(path.notes, 200);\n\n  maxLength(path.toppings');
     expect(source).not.toContain('REQUIRED');

@@ -885,12 +885,15 @@
 }
 
 // A multi-line field top-aligns its value and grows downwards, so centring would drift its prefix/suffix
-// away from the text. They sit on the value's first line instead — the same `padding-top` the textarea
-// gives itself, so the two line-boxes start together.
+// away from the text. They sit on the value's first line instead — the field's border plus the same
+// `padding-top` the textarea gives itself, so the two line-boxes start together.
 @mixin field-prefix-suffix-value-top {
-  top: max(
-    var(--formidable-textarea-padding-top, #{tokens.$formidable-textarea-padding-top}),
-    var(--formidable-field-value-top, 0rem)
+  top: calc(
+    #{field-border-thickness()} +
+      max(
+        var(--formidable-textarea-padding-top, #{tokens.$formidable-textarea-padding-top}),
+        var(--formidable-field-value-top, 0rem)
+      )
   );
   transform: none;
 }
@@ -1278,7 +1281,6 @@
   &.is-readonly {
     .slider-input {
       cursor: default;
-      pointer-events: none;
 
       // WebKit thumb
       &::-webkit-slider-thumb {
