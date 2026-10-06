@@ -36,8 +36,10 @@
   margin-top: 14px;
 }
 
+// A column of zero minimum, or a long variable name widens it past the panel instead of ending in an ellipsis.
 .pc-field {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 5px;
   margin-bottom: 14px;
   min-width: 0;
