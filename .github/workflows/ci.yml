@@ -63,3 +63,6 @@ jobs:
 
       - name: Build Portal
         run: npm run build
+
+      - name: Build Storybook
+        run: npm run build-storybook

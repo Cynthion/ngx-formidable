@@ -37,6 +37,7 @@ Rules are pointers, not content. Each one names the document to read and nothing
 | [`.claude/rules/public-api.md`](../../.claude/rules/public-api.md)     | Library `components/`, `directives/`, `public-api.ts`                              | [`user/components.md`](../user/components.md), `Library Obligations` of [`impl/definition-of-done.md`](definition-of-done.md)         |
 | [`.claude/rules/repository.md`](../../.claude/rules/repository.md)     | Everything                                                                         | Invariants, stated inline                                                                                                             |
 | [`.claude/rules/styling.md`](../../.claude/rules/styling.md)           | `**/*.scss`                                                                        | [`impl/styling.md`](styling.md)                                                                                                       |
+| [`.claude/rules/storybook.md`](../../.claude/rules/storybook.md)       | `**/*.stories.ts`                                                                  | [`impl/storybook.md`](storybook.md)                                                                                                   |
 | [`.claude/rules/testing.md`](../../.claude/rules/testing.md)           | `**/*.spec.ts`                                                                     | [`impl/testing.md`](testing.md)                                                                                                       |
 | [`.claude/rules/theme-tokens.md`](../../.claude/rules/theme-tokens.md) | `_formidable-vars.scss`, `_tokens.scss`, `token-manifest.ts`, `theme-reference.md` | `Theme Tokens` of [`impl/definition-of-done.md`](definition-of-done.md)                                                               |
 
@@ -188,10 +189,13 @@ The recommended baseline denies what must stay manual. `deny` outranks `allow`, 
 | :------------ | :-------: | :------------------------------------------------------------ | :----------------- |
 | `angular-cli` |  `stdio`  | Angular workspace introspection, documentation and migrations | Nothing            |
 | `context7`    |  `stdio`  | Library documentation for a named dependency                  | API Key            |
-| `playwright`  |  `stdio`  | Browser automation against the served portal                  | Nothing            |
+| `playwright`  |  `stdio`  | Browser automation against a running Storybook or the portal  | Nothing            |
+| `storybook`   |  `http`   | Stories and component docs of the running Storybook           | Nothing            |
 | `ux-patterns` |  `http`   | UX pattern guidance and accessibility review for fields       | Nothing            |
 
-`playwright` runs headless and isolated, so it never touches a real browser profile. It is a client and never starts or stops a server: reuse whatever is already listening on the portal's port, and ask rather than starting one. That contract is stated in [`.claude/rules/repository.md`](../../.claude/rules/repository.md), because the risk applies to every task and not only to portal files. The portal routes on the hash, so a deep link is `http://localhost:4200/#/docs`, not `/docs`.
+`playwright` runs headless and isolated, so it never touches a real browser profile. It is a client and never starts or stops a server: reuse whatever is already listening on the Storybook or portal port, and ask rather than starting one. That contract is stated in [`.claude/rules/repository.md`](../../.claude/rules/repository.md), because the risk applies to every task and not only to portal files. The portal routes on the hash, so a deep link is `http://localhost:4200/#/docs`, not `/docs`.
+
+`storybook` is served by `@storybook/addon-mcp` inside the Storybook dev server on port `6006`, so it is connected only while `npm run storybook` runs. It follows the same Running Servers contract as `playwright`. Its `dev` toolset is off, see [`impl/storybook.md`](storybook.md).
 
 The `npx` servers run the exact version pinned in `.mcp.json`, never `@latest`, so a server only changes when its pin is bumped. Renovate proposes those bumps, see [`impl/renovate.md`](renovate.md). `playwright` drives the Chromium build of the Playwright it brings, separate from any installed Google Chrome, so bumping its pin also means installing the new version's build.
 

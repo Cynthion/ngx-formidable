@@ -52,6 +52,7 @@ For whoever works the repository. Contains technical documentation of the setup 
 | [`impl/releasing.md`](impl/releasing.md)                       | Publishing the library to npm                           |
 | [`impl/renovate.md`](impl/renovate.md)                         | Dependency updates: groups, Angular majors, peer ranges |
 | [`impl/styling.md`](impl/styling.md)                           | Style layers, theming, where styles live                |
+| [`impl/storybook.md`](impl/storybook.md)                       | Storybook setup, story files, titles, coverage          |
 | [`impl/testing.md`](impl/testing.md)                           | Testing strategy, helpers first                         |
 | [`impl/typescript.md`](impl/typescript.md)                     | Compiler strictness, immutability, code comments        |
 | [`impl/ubiquitous-language.md`](impl/ubiquitous-language.md)   | One name per concept                                    |

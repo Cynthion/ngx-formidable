@@ -119,4 +119,7 @@ When each run is a gate is in [`impl/definition-of-done.md`](definition-of-done.
 
 ## Visual Testing
 
-There is no Storybook or visual-regression layer yet, see **Storybook** in [`impl/backlog.md`](backlog.md). Until then, the portal is the manual visual check: run `npm start` and exercise the changed field in its preview form, by hand or through the `playwright` MCP server described in [`impl/ai-harness.md`](ai-harness.md). Turning the `Field Types` switch off leaves that form without the portal's own annotations.
+There is no visual-regression layer yet, see **Storybook Visual Regression** in [`impl/backlog.md`](backlog.md). Until then, two manual visual checks:
+
+- **Storybook**: `npm run storybook` shows every state of every component in isolation, see [`impl/storybook.md`](storybook.md).
+- **Portal**: `npm start`, then exercise the changed field in its preview form, by hand or through the `playwright` MCP server described in [`impl/ai-harness.md`](ai-harness.md). Turning the `Field Types` switch off leaves that form without the portal's own annotations.

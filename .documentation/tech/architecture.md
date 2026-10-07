@@ -26,6 +26,7 @@ The library ships one entry point. Its source lives under `projects/ngx-formidab
 
 ```txt
 projects/ngx-formidable/
+├── .storybook/                           # Storybook configuration
 └── src/                                  # → @cynthion/ngx-formidable
     └── lib/
         ├── components/
@@ -37,6 +38,7 @@ projects/ngx-formidable/
         ├── helpers/                      # pure functions: mask, input, format, position, option, utility
         ├── models/                       # formidable.model.ts (UI), validation.model.ts (reveal, message text)
         ├── styles/                       # SCSS tokens, the :root CSS-variable block, field mixins
+        ├── storybook/                    # the story helpers, unreachable from public-api.ts
         ├── testing/                      # the spec helpers, unreachable from public-api.ts
         └── provide-ngx-formidable.ts     # provideNgxFormidable()
 ```
@@ -83,10 +85,10 @@ ng-packagr config:
 
 Two workflows in `.github/workflows/`. Both take the Node version from `.nvmrc` and install with `npm ci`, so a run resolves exactly the committed lockfile.
 
-| Workflow     | Trigger                              | Does                                                                                                        |
-| :----------- | :----------------------------------- | :---------------------------------------------------------------------------------------------------------- |
-| `ci.yml`     | Push to `main`, pull request, manual | `prettier:check`, `lint`, `style-lint`, `docs:check`, `docs:lint`, `build:lib`, both test projects, `build` |
-| `deploy.yml` | Push to `main`, manual               | Builds the portal and deploys `dist/ngx-formidable-portal/browser` to GitHub Pages                          |
+| Workflow     | Trigger                              | Does                                                                                                                           |
+| :----------- | :----------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`     | Push to `main`, pull request, manual | `prettier:check`, `lint`, `style-lint`, `docs:check`, `docs:lint`, `build:lib`, both test projects, `build`, `build-storybook` |
+| `deploy.yml` | Push to `main`, manual               | Builds the portal and deploys `dist/ngx-formidable-portal/browser` to GitHub Pages                                             |
 
 - **Checks Mirror The Scripts**: `ci.yml` runs the same scripts a contributor runs locally, in the order of the Verification table in [`impl/definition-of-done.md`](../impl/definition-of-done.md). `build:lib` is in it because it is also the type and template check; there is no standalone typecheck script.
 - **Tests**: the two projects are separate steps, because `ng test` takes one project at a time. Both run in Playwright's headless Chromium with `--watch=false`, which a step installs first.

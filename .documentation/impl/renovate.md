@@ -6,7 +6,7 @@ Dependency updates arrive as pull requests from the Renovate GitHub App.
 
 - **Schedule**: the whole first day of each month, UTC. Security pull requests ignore it, see [Dependabot](#dependabot).
 - **Release Age**: an npm release is proposed only once it is three days old, so a release that is unpublished or turns out malicious never reaches a pull request.
-- **Dependency Dashboard**: an issue Renovate keeps current, listing every pending, gated and open update.
+- **Dependency Dashboard**: an issue Renovate keeps current, listing every pending, gated and open update. Ticking a pending update opens its pull request before the schedule.
 - **Validation**: `npx --package renovate -- renovate-config-validator --strict`, from the repository root.
 - **MCP Servers**: a regex manager reads the `npx` pins in `.mcp.json`. `angular-cli` runs the workspace CLI and moves with `@angular/cli`.
 
@@ -49,6 +49,7 @@ Packages share a pull request when one peers the other's major. A pull request c
 | `Stylelint (major)`          | `stylelint`, `stylelint-config-standard-scss`                                 |
 | `Prettier (major)`           | `prettier`, `prettier-plugin-organize-attributes`                             |
 | `Vitest (major)`             | `vitest`, `@vitest/*`                                                         |
+| `Storybook (major)`          | Gated: `storybook`, `@storybook/*`, `eslint-plugin-storybook`                 |
 | `GitHub Actions (major)`     | Every action in `.github/workflows/`                                          |
 | One per package              | Any other major, such as `marked`, `date-fns` or `vest`                       |
 
@@ -57,14 +58,16 @@ Packages share a pull request when one peers the other's major. A pull request c
 
 ---
 
-## Angular Majors
+## Gated Updates
 
-An Angular major moves with `ng update`, whose migrations Renovate cannot run. The `Angular (major)` update therefore waits on the Dependency Dashboard instead of opening a pull request.
+A gated update waits on the Dependency Dashboard instead of opening a pull request, because it needs work Renovate cannot do. Leave its checkbox unticked: ticking it opens a pull request without that work. Do the work on a feature branch, one major at a time.
 
-1. Leave the dashboard checkbox unticked: ticking it opens a pull request without the migrations.
-2. On a feature branch, run `ng update @angular/core @angular/cli angular-eslint`, one major at a time.
-3. Raise the `typescript` ceiling in `renovate.json` if the new major lifts the peer that caps it.
-4. Move the library's Angular and `ngx-mask` peers to the new major.
+| Group       | Work                                                                                                                                                                                          |
+| :---------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Angular`   | `ng update @angular/core @angular/cli angular-eslint`, then raise the `typescript` ceiling if the new major lifts the peer that caps it, then move the library's Angular and `ngx-mask` peers |
+| `Storybook` | `npx storybook@latest upgrade`, which runs the automigrations                                                                                                                                 |
+
+- **Angular Peers**: `@storybook/angular-vite` and `@analogjs/vite-plugin-angular` peer the current Angular major, so each needs a release supporting the new one first.
 
 ---
 

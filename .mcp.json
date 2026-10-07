@@ -18,6 +18,10 @@
       "command": "npx",
       "args": ["-y", "@playwright/mcp@0.0.83", "--headless", "--isolated", "--browser=chromium"]
     },
+    "storybook": {
+      "type": "http",
+      "url": "http://localhost:6006/mcp"
+    },
     "ux-patterns": {
       "type": "http",
       "url": "https://mcp.uxpatterns.dev"

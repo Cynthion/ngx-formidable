@@ -1,0 +1,7 @@
+// The shipped theme, as `test-styles.scss` loads it for the specs.
+@use 'ngx-formidable';
+
+// A field takes the page's font family, and a consumer's page always sets one. Storybook's canvas sets none.
+body {
+  font-family: system-ui, sans-serif;
+}
