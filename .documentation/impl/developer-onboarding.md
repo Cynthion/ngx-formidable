@@ -99,6 +99,7 @@ Permissions are personal. Create `.claude/settings.local.json` with at least the
 | Installation | `angular-cli`   | Run `npm install`; it runs the workspace's own CLI        |
 | Installation | `playwright`    | Install its browser with the command below                |
 | Environment  | `context7`      | Export the variable below from your shell profile         |
+| Runtime      | `storybook`     | Run `npm run storybook`; the server lives in Storybook    |
 | Approval     | Every server    | None: the committed `.claude/settings.json` approves them |
 | Verification | Every server    | `claude mcp list`: only `Connected` means tools work      |
 
@@ -108,7 +109,7 @@ A server started before its variables were exported inherits an empty environmen
 export CONTEXT7_API_KEY="<context7 api key>"
 ```
 
-Without an account, set the value in `.mcp.json` to `${CONTEXT7_API_KEY:-}` instead. Claude Code expands that to empty, which suppresses the unset-variable warning; `context7` then serves at a lower rate limit. `angular-cli`, `playwright` and `ux-patterns` read no environment variables.
+Without an account, set the value in `.mcp.json` to `${CONTEXT7_API_KEY:-}` instead. Claude Code expands that to empty, which suppresses the unset-variable warning; `context7` then serves at a lower rate limit. `angular-cli`, `playwright`, `storybook` and `ux-patterns` read no environment variables.
 
 `playwright` brings its own Playwright, so it needs the Chromium build of that version, separate from the test browser above. Install it with the version pinned in `.mcp.json`, once per machine and again whenever the pin changes:
 
@@ -129,20 +130,22 @@ A nested `projects/ngx-formidable/node_modules` shadows the root install with a 
 
 ### Scripts
 
-| Script                   | Does                                                                                        |
-| :----------------------- | :------------------------------------------------------------------------------------------ |
-| `npm start`              | Serve the portal                                                                            |
-| `npm run build`          | Build the portal                                                                            |
-| `npm run build:lib`      | Build the library into `dist/ngx-formidable`, which is also the type check                  |
-| `npm run prebuild:lib`   | Copy `README.md` and `LICENSE` into the library; runs before `build:lib`                    |
-| `npm run publish:lib`    | Publish the built library                                                                   |
-| `npm test`               | Run the library tests, see [`impl/testing.md`](testing.md)                                  |
-| `npm run lint`           | ESLint over the library and the portal                                                      |
-| `npm run style-lint`     | Stylelint over the library and portal SCSS                                                  |
-| `npm run prettier:check` | Formatting check across the repository                                                      |
-| `npm run docs:check`     | The portal's token manifest against [`user/theme-reference.md`](../user/theme-reference.md) |
-| `npm run docs:lint`      | Markdown style, relative links and heading anchors                                          |
-| `npm run screenshots`    | Regenerate the README's images in `assets/` from the served portal                          |
+| Script                    | Does                                                                                        |
+| :------------------------ | :------------------------------------------------------------------------------------------ |
+| `npm start`               | Serve the portal                                                                            |
+| `npm run build`           | Build the portal                                                                            |
+| `npm run storybook`       | Serve Storybook at `http://localhost:6006`, see [`impl/storybook.md`](storybook.md)         |
+| `npm run build-storybook` | Type-check the stories and build Storybook into `dist/storybook`                            |
+| `npm run build:lib`       | Build the library into `dist/ngx-formidable`, which is also the type check                  |
+| `npm run prebuild:lib`    | Copy `README.md` and `LICENSE` into the library; runs before `build:lib`                    |
+| `npm run publish:lib`     | Publish the built library                                                                   |
+| `npm test`                | Run the library tests, see [`impl/testing.md`](testing.md)                                  |
+| `npm run lint`            | ESLint over the library, its stories and the portal                                         |
+| `npm run style-lint`      | Stylelint over the library and portal SCSS                                                  |
+| `npm run prettier:check`  | Formatting check across the repository                                                      |
+| `npm run docs:check`      | The portal's token manifest against [`user/theme-reference.md`](../user/theme-reference.md) |
+| `npm run docs:lint`       | Markdown style, relative links and heading anchors                                          |
+| `npm run screenshots`     | Regenerate the README's images in `assets/` from the served portal                          |
 
 When each one runs as a gate is in [`impl/definition-of-done.md`](definition-of-done.md).
 

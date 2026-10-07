@@ -132,6 +132,31 @@
             },
             "styles": ["projects/ngx-formidable/src/test-styles.scss"]
           }
+        },
+        "storybook": {
+          "builder": "@storybook/angular-vite:start-storybook",
+          "options": {
+            "configDir": "projects/ngx-formidable/.storybook",
+            "tsConfig": "projects/ngx-formidable/.storybook/tsconfig.json",
+            "styles": ["projects/ngx-formidable/.storybook/preview.scss"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["projects/ngx-formidable/src/lib/styles"]
+            },
+            "port": 6006,
+            "open": false
+          }
+        },
+        "build-storybook": {
+          "builder": "@storybook/angular-vite:build-storybook",
+          "options": {
+            "configDir": "projects/ngx-formidable/.storybook",
+            "tsConfig": "projects/ngx-formidable/.storybook/tsconfig.json",
+            "styles": ["projects/ngx-formidable/.storybook/preview.scss"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["projects/ngx-formidable/src/lib/styles"]
+            },
+            "outputDir": "dist/storybook"
+          }
         }
       }
     }

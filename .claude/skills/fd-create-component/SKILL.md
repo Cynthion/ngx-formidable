@@ -19,6 +19,7 @@ Mirror the nearest sibling rather than starting from nothing: copy its folder, r
 2. For a field: extend `BaseField<T>` (or `BaseOptionField` for a highlighted option list) and register the `FORMIDABLE_FIELD` provider per the field contract. Implement the abstract members (`fieldRef`, `decoratorLayout`, a `value` `model()`, `doOnFocusChange`, the keyboard, click and resize callbacks and `registeredKeys`), render from `value()`, and write it only through `setValue()` on a user's edit. `example-counter-field` is the reference implementation; `field-contract.spec.ts` is where a new field proves the contract.
 3. Add or update its entry in [`user/components.md`](../../../.documentation/user/components.md).
 4. A new `--formidable-*` variable goes into `src/app/portal/model/token-manifest.ts` and [`user/theme-reference.md`](../../../.documentation/user/theme-reference.md) with the same description.
+5. Add or update its `<name>.stories.ts` per **Coverage** in [`impl/storybook.md`](../../../.documentation/impl/storybook.md). A decoration directive is a story of the component it decorates.
 
 ## 3. Showcase It In The Portal
 

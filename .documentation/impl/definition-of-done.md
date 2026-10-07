@@ -28,6 +28,7 @@ Every command runs from the repository root.
 | Library Tests      | `npx ng test ngx-formidable --watch=false`        |  CI   |
 | Portal Tests       | `npx ng test ngx-formidable-portal --watch=false` |  CI   |
 | Portal Build       | `npm run build`                                   |  CI   |
+| Storybook Build    | `npm run build-storybook`                         |  CI   |
 | Visual Proof       | The served portal, `npm start`                    | Local |
 | README Images      | `npm run screenshots`                             | Local |
 

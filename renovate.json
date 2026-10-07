@@ -47,6 +47,13 @@
       "groupName": "Vitest"
     },
     {
+      "description": "Storybook majors move with storybook upgrade, whose automigrations Renovate cannot run",
+      "matchPackageNames": ["storybook", "@storybook/*", "eslint-plugin-storybook"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "Storybook",
+      "dependencyDashboardApproval": true
+    },
+    {
       "matchManagers": ["github-actions"],
       "matchUpdateTypes": ["major"],
       "groupName": "GitHub Actions"

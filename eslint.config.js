@@ -2,6 +2,7 @@ const eslint = require('@eslint/js');
 const tseslint = require('typescript-eslint');
 const angulareslint = require('angular-eslint');
 const rxjsX = require('eslint-plugin-rxjs-x').default;
+const storybook = require('eslint-plugin-storybook');
 
 module.exports = tseslint.config(
   {
@@ -14,7 +15,12 @@ module.exports = tseslint.config(
       parserOptions: {
         // Type-aware linting. `tsconfig.spec.json` is here for the sources only a spec reaches — the specs
         // themselves are ignored above, but the modules they import still have to belong to a project.
-        project: ['./tsconfig.app.json', './tsconfig.spec.json', './projects/ngx-formidable/tsconfig.lib.json']
+        project: [
+          './tsconfig.app.json',
+          './tsconfig.spec.json',
+          './projects/ngx-formidable/tsconfig.lib.json',
+          './projects/ngx-formidable/.storybook/tsconfig.json'
+        ]
       }
     },
     plugins: {
@@ -92,6 +98,8 @@ module.exports = tseslint.config(
       '@angular-eslint/template/prefer-style-binding': 'error'
     }
   },
+  // CSF and play function rules for `*.stories.ts`
+  ...storybook.configs['flat/recommended'],
   {
     files: ['projects/ngx-formidable/src/lib/**/*.ts'],
     rules: {
