@@ -208,6 +208,7 @@ Every field is bound by `[formField]` and wrapped in a decorator, which renders 
 | :--------------------------------------------------------- | :-------------------------------- |
 | Bind the fields through reactive or template-driven forms  | [Forms](forms.md)                 |
 | Validate with Vest, Zod, Angular's rules or none           | [Validation](validation.md)       |
+| Decide when the submit button can be pressed               | [Submit Gates](submit-gates.md)   |
 | Pick a field, work its keyboard, mask it, place its panel  | [Fields](fields.md)               |
 | Label it, prefix it, hint it, mark it required             | [Decoration](decoration.md)       |
 | Repaint and reshape it                                     | [Theming](theming.md)             |

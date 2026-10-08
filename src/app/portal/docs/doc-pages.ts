@@ -6,6 +6,7 @@ import forms from '../../../../.documentation/user/forms.md';
 import gettingStarted from '../../../../.documentation/user/getting-started.md';
 import themeReference from '../../../../.documentation/user/theme-reference.md';
 import studio from '../../../../.documentation/user/studio.md';
+import submitGates from '../../../../.documentation/user/submit-gates.md';
 import theming from '../../../../.documentation/user/theming.md';
 import validation from '../../../../.documentation/user/validation.md';
 
@@ -63,6 +64,13 @@ export const DOC_PAGES: readonly DocPage[] = [
     kind: 'Guide',
     purpose: "Angular's rules, Vest, Zod or none; messages and their reveal",
     markdown: validation
+  },
+  {
+    slug: 'submit-gates',
+    title: 'Submit Gates',
+    kind: 'Guide',
+    purpose: 'Valid, dirty, changed or none; when the submit button opens',
+    markdown: submitGates
   },
   {
     slug: 'theming',

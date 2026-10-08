@@ -15,6 +15,7 @@ For consumers of the library. A **guide** teaches a topic; a **reference** lists
 | [`user/fields.md`](user/fields.md)                   |   Guide   | Options, panels, keyboard, dates and times, masking, focus                 |
 | [`user/decoration.md`](user/decoration.md)           |   Guide   | Labels, adornments, prefixes, suffixes, hints, required marker             |
 | [`user/validation.md`](user/validation.md)           |   Guide   | Angular's rules, Vest, Zod or none; messages and their reveal              |
+| [`user/submit-gates.md`](user/submit-gates.md)       |   Guide   | Valid, dirty, changed or none; when the submit button opens                |
 | [`user/theming.md`](user/theming.md)                 |   Guide   | The default theme, how theming works, and how to find your own             |
 | [`user/studio.md`](user/studio.md)                   |   Guide   | The Studio: build a theme and a form, and take both away                   |
 | [`user/custom-fields.md`](user/custom-fields.md)     |   Guide   | Building a field or an option of your own                                  |

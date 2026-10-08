@@ -296,6 +296,7 @@ readonly form = form(this.model, userSchema, {
 - **A Submit Touches Every Field**: `submit()` marks the whole form touched, so under the default `touched` reveal a submit reveals every message at once.
 - **An Invalid Form Runs No Action**: it runs `onInvalid` instead, when one is given. A rule still pending does not hold the action back, unless `ignoreValidators` is `'none'`.
 - **The Action May Answer With Errors**: errors it returns land on the fields they name, as a rule's would.
+- **The Button Is Always Open**: when it can be pressed is yours to decide, see [Submit Gates](submit-gates.md).
 
 ### Reactive Forms
 
@@ -327,5 +328,6 @@ onSubmit(): void {
 
 - [Getting Started](getting-started.md): install, wiring, the stylesheet, a first form
 - [Validation](validation.md): Angular's rules, Vest, Zod or none; messages and their reveal
+- [Submit Gates](submit-gates.md): valid, dirty, changed or none; when the submit button opens
 - [Fields](fields.md): options, panels, keyboard, dates and times, masking, focus
 - [Components](components.md): every public component, directive, token and type
