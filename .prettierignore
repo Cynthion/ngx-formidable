@@ -16,4 +16,5 @@ out-tsc
 
 
 # The Studio's export of the sample form, pinned byte for byte by its spec
-src/app/golden-export/*/my-form.*
+src/app/golden-export/*/example.form.ts
+src/app/golden-export/*/example-form.*

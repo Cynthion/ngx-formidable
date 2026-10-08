@@ -9,25 +9,25 @@ import { PREVIEW_FORM_DEFINITION } from '../portal/model/preview-form.definition
 import { FormDefinitionStore } from '../portal/state/form-definition.store';
 import { FormValueStore } from '../portal/state/form-value.store';
 import { openPage } from '../portal/testing/studio';
-import { MyForm as AngularForm } from './angular/my-form';
-import { MyForm as VestForm } from './vest/my-form';
-import { MyForm as ZodForm } from './zod/my-form';
+import { ExampleForm as AngularForm } from './angular/example-form';
+import { ExampleForm as VestForm } from './vest/example-form';
+import { ExampleForm as ZodForm } from './zod/example-form';
 // TypeScript types a `.ts` file imported as text as the module it is, so these expect an error.
 // @ts-expect-error: the text of the module, not the module
-import angularComponent from './angular/my-form' with { loader: 'text' };
+import angularComponent from './angular/example-form' with { loader: 'text' };
 // @ts-expect-error: the text of the module, not the module
-import angularSchema from './angular/my-form.form' with { loader: 'text' };
-import angularTemplate from './angular/my-form.html' with { loader: 'text' };
+import angularSchema from './angular/example.form' with { loader: 'text' };
+import angularTemplate from './angular/example-form.html' with { loader: 'text' };
 // @ts-expect-error: the text of the module, not the module
-import vestComponent from './vest/my-form' with { loader: 'text' };
+import vestComponent from './vest/example-form' with { loader: 'text' };
 // @ts-expect-error: the text of the module, not the module
-import vestSchema from './vest/my-form.form' with { loader: 'text' };
-import vestTemplate from './vest/my-form.html' with { loader: 'text' };
+import vestSchema from './vest/example.form' with { loader: 'text' };
+import vestTemplate from './vest/example-form.html' with { loader: 'text' };
 // @ts-expect-error: the text of the module, not the module
-import zodComponent from './zod/my-form' with { loader: 'text' };
+import zodComponent from './zod/example-form' with { loader: 'text' };
 // @ts-expect-error: the text of the module, not the module
-import zodSchema from './zod/my-form.form' with { loader: 'text' };
-import zodTemplate from './zod/my-form.html' with { loader: 'text' };
+import zodSchema from './zod/example.form' with { loader: 'text' };
+import zodTemplate from './zod/example-form.html' with { loader: 'text' };
 
 /** One validator's export: the component, and the text of its three files. */
 interface Golden {

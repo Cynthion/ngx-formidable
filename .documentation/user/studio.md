@@ -166,22 +166,22 @@ The page surface is the page's rather than the library's, so `Onto The Defaults`
 
 **The Form Is Signal Forms**: the three files are one form, laid out the way the library's convention has it:
 
-| File              | Tab         | Holds                                                                                              |
-| :---------------- | :---------- | :------------------------------------------------------------------------------------------------- |
-| `my-form.html`    | `Template`  | `<form [formRoot]="form">`, and every field decorated and bound by `[formField]`                   |
-| `my-form.ts`      | `Component` | The model `signal`, the `form()` over it, the components the template uses, the preset handlers    |
-| `my-form.form.ts` | `Schema`    | The model's type, an initial model defining every key, the `schema()`, and a suite or a Zod schema |
+| File                | Tab         | Holds                                                                                              |
+| :------------------ | :---------- | :------------------------------------------------------------------------------------------------- |
+| `example-form.html` | `Template`  | `<form [formRoot]="form">`, and every field decorated and bound by `[formField]`                   |
+| `example-form.ts`   | `Component` | The model `signal`, the `form()` over it, the components the template uses, the preset handlers    |
+| `example.form.ts`   | `Schema`    | The model's type, an initial model defining every key, the `schema()`, and a suite or a Zod schema |
 
 **The Schema Holds A Field's State**: `[formField]` hands a field its readonly and disabled state, its required marker and its limits, and rejects a binding to any of them beside it. So the schema states them as rules, such as `readonly()`, `min()` and `maxLength()`, and a required marker with no rule behind it as `REQUIRED` metadata. The template import reads these rules back from the schema pasted beside it; the component is not read back in.
 
-**The Validator Writes The Checks**: `my-form.form.ts` always holds the form's rules, and the validator decides who writes the checks. The sample's rules are the same under every validator: the same messages on the same fields, groups and whole form, on the stage and in the export alike. `Validator` on `The Form` picks who writes them:
+**The Validator Writes The Checks**: `example.form.ts` always holds the form's rules, and the validator decides who writes the checks. The sample's rules are the same under every validator: the same messages on the same fields, groups and whole form, on the stage and in the export alike. `Validator` on `The Form` picks who writes them:
 
-| Validator                  | Writes The Checks As                                                          | Marks A Field Required        |
-| :------------------------- | :---------------------------------------------------------------------------- | :---------------------------- |
-| `Angular's built-in rules` | `required()`, `pattern()`, `maxLength()` and `validate()` in the `schema()`   | `required()` itself           |
-| `Vest suite`               | `createMyFormSuite()`, a suite per form, run through `validateStandardSchema` | `REQUIRED` metadata beside it |
-| `Zod schema`               | `myFormZodSchema`, run through `validateStandardSchema`                       | `REQUIRED` metadata beside it |
-| `None`                     | Nothing: only the fields' own limits apply                                    | The marker alone              |
+| Validator                  | Writes The Checks As                                                           | Marks A Field Required        |
+| :------------------------- | :----------------------------------------------------------------------------- | :---------------------------- |
+| `Angular's built-in rules` | `required()`, `pattern()`, `maxLength()` and `validate()` in the `schema()`    | `required()` itself           |
+| `Vest suite`               | `createExampleSuite()`, a suite per form, run through `validateStandardSchema` | `REQUIRED` metadata beside it |
+| `Zod schema`               | `exampleZodSchema`, run through `validateStandardSchema`                       | `REQUIRED` metadata beside it |
+| `None`                     | Nothing: only the fields' own limits apply                                     | The marker alone              |
 
 The file imports `vest` or `zod` only under its own validator. A rule is left out unless every field it reads is on the form and writes the same type as in the sample, so a form built from the sample exports only the rules it can run.
 

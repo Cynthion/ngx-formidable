@@ -862,9 +862,9 @@ describe('portal', () => {
 
     const expected: [file: string, name: string, text: string][] = [
       ['Theme', 'styles.css', ':root'],
-      ['Template', 'my-form.html', '<form [formRoot]="form">'],
-      ['Component', 'my-form.ts', 'export class MyForm {'],
-      ['Schema', 'my-form.form.ts', 'export const myFormSchema = schema<MyFormModel>'],
+      ['Template', 'example-form.html', '<form [formRoot]="form">'],
+      ['Component', 'example-form.ts', 'export class ExampleForm {'],
+      ['Schema', 'example.form.ts', 'export const exampleSchema = schema<ExampleFormModel>'],
       ['App Config', 'app.config.ts', 'provideNgxFormidable']
     ];
 

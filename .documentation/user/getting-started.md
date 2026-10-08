@@ -107,20 +107,20 @@ One `*.form.ts` per form holds the model's type, its initial model and its `sche
 // user.form.ts
 import { required, schema } from '@angular/forms/signals';
 
-export interface UserModel {
+export interface UserFormModel {
   name: string;
   hobby: string | null;
   birthdate: Date | null;
 }
 
 /** Every key defined: Signal Forms binds a field only to a key its model holds. */
-export const initialUserModel: UserModel = {
+export const initialUserFormModel: UserFormModel = {
   name: '',
   hobby: null,
   birthdate: null
 };
 
-export const userSchema = schema<UserModel>((path) => {
+export const userSchema = schema<UserFormModel>((path) => {
   required(path.name, { message: 'Name is required.' });
   required(path.birthdate, { message: 'When were you born?' });
 });
@@ -137,7 +137,7 @@ The component holds the model as a `signal`, and the form over it:
 import { Component, signal } from '@angular/core';
 import { form, FormField, FormRoot } from '@angular/forms/signals';
 import { DateField, DropdownField, FieldDecorator, FieldHint, FieldLabel, FormidableOption, InputField } from '@cynthion/ngx-formidable';
-import { initialUserModel, UserModel, userSchema } from './user.form';
+import { initialUserFormModel, UserFormModel, userSchema } from './user.form';
 
 @Component({
   selector: 'app-user-form',
@@ -145,7 +145,7 @@ import { initialUserModel, UserModel, userSchema } from './user.form';
   imports: [FormRoot, FormField, DateField, DropdownField, FieldDecorator, FieldHint, FieldLabel, InputField]
 })
 export class UserForm {
-  readonly model = signal<UserModel>(initialUserModel);
+  readonly model = signal<UserFormModel>(initialUserFormModel);
   readonly form = form(this.model, userSchema, {
     submission: { action: async () => this.save(this.model()) }
   });
@@ -158,7 +158,7 @@ export class UserForm {
     { value: 'swimming', label: 'Swimming' }
   ];
 
-  private async save(user: UserModel): Promise<void> {
+  private async save(user: UserFormModel): Promise<void> {
     await fetch('/api/users', { method: 'POST', body: JSON.stringify(user) });
   }
 }

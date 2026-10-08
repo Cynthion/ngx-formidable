@@ -11,7 +11,7 @@ import {
 import { create, enforce, mode, Modes, omitWhen, test } from 'vest';
 
 /** What the form edits: one key per field, and a grouped section nested under its group name. */
-export interface MyFormModel {
+export interface ExampleFormModel {
   pizza: string | null;
   size: string | null;
   crust: string | null;
@@ -37,7 +37,7 @@ export interface MyFormModel {
 }
 
 /** Every key defined, because Signal Forms drops an `undefined` one and binds a field only to a key. */
-export const myFormInitialModel: MyFormModel = {
+export const initialExampleFormModel: ExampleFormModel = {
   pizza: null,
   size: null,
   crust: null,
@@ -66,8 +66,8 @@ export const myFormInitialModel: MyFormModel = {
  * The form's checks, as a Vest suite run through Standard Schema. A suite carries state across every form
  * it has run for, so each form creates its own.
  */
-export function createMyFormSuite() {
-  return create((model: MyFormModel) => {
+export function createExampleSuite() {
+  return create((model: ExampleFormModel) => {
     mode(Modes.ALL); // every failing rule, not only a field's first
 
     test('pizza', 'Pick a pizza to start from.', () => {
@@ -152,7 +152,7 @@ export function createMyFormSuite() {
 }
 
 /** Each field's state, limits, condition and rules, which `[formField]` hands to the field. */
-export const myFormSchema = schema<MyFormModel>((path) => {
+export const exampleSchema = schema<ExampleFormModel>((path) => {
   min(path.spice, 0);
   max(path.spice, 4);
   hidden(path.address, (context) => context.valueOf(path.pickup) !== false);
@@ -173,5 +173,5 @@ export const myFormSchema = schema<MyFormModel>((path) => {
   metadata(path.orderName, REQUIRED, () => true);
   metadata(path.phone, REQUIRED, () => true);
   metadata(path.email, REQUIRED, () => true);
-  validateStandardSchema(path, createMyFormSuite());
+  validateStandardSchema(path, createExampleSuite());
 });

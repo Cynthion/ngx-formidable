@@ -39,14 +39,14 @@ The first three are Signal Forms and live in one `*.form.ts` per form, beside th
 
 ```text
 signup.form.ts
-  SignupModel           the model's type
-  initialSignupModel    the initial model, every key defined
-  createSignupSuite()   Vest only: a factory, called once per form
-  signupZodSchema       Zod only
-  signupSchema          the schema(): each field's state, limits, conditions and rules
+  SignupFormModel           the model's type
+  initialSignupFormModel    the initial model, every key defined
+  createSignupSuite()       Vest only: a factory, called once per form
+  signupZodSchema           Zod only
+  signupSchema              the schema(): each field's state, limits, conditions and rules
 ```
 
-The Studio exports a form in exactly this layout, under any of the three. See [Studio](studio.md).
+The model is named `<Name>FormModel`, so it reads apart from the domain type it maps to, such as `User` beside `UserFormModel`. The Studio exports a form in exactly this layout, under any of the three. See [Studio](studio.md).
 
 ---
 
@@ -58,16 +58,16 @@ The default, and the only validator that needs nothing installed. Every rule is 
 // signup.form.ts
 import { email, minLength, required, schema, validate } from '@angular/forms/signals';
 
-export interface SignupModel {
+export interface SignupFormModel {
   email: string;
   password: string;
   confirmPassword: string;
   terms: boolean;
 }
 
-export const initialSignupModel: SignupModel = { email: '', password: '', confirmPassword: '', terms: false };
+export const initialSignupFormModel: SignupFormModel = { email: '', password: '', confirmPassword: '', terms: false };
 
-export const signupSchema = schema<SignupModel>((path) => {
+export const signupSchema = schema<SignupFormModel>((path) => {
   required(path.email, { message: 'An email address is required.' });
   email(path.email, { message: 'That does not look like an email address.' });
   required(path.password, { message: 'Choose a password.' });
@@ -92,11 +92,11 @@ A Vest suite is a Standard Schema, so `validateStandardSchema()` runs it in the 
 import { metadata, REQUIRED, schema, validateStandardSchema } from '@angular/forms/signals';
 import { create, enforce, mode, Modes, omitWhen, test } from 'vest';
 
-// SignupModel and initialSignupModel as above.
+// SignupFormModel and initialSignupFormModel as above.
 
 /** A suite carries state across every run, so each form creates its own. */
 export function createSignupSuite() {
-  return create((model: SignupModel) => {
+  return create((model: SignupFormModel) => {
     mode(Modes.ALL); // every failing test, not only a field's first
 
     test('email', 'An email address is required.', () => {
@@ -115,7 +115,7 @@ export function createSignupSuite() {
   });
 }
 
-export const signupSchema = schema<SignupModel>((path) => {
+export const signupSchema = schema<SignupFormModel>((path) => {
   metadata(path.email, REQUIRED, () => true);
   validateStandardSchema(path, createSignupSuite());
 });
@@ -138,7 +138,7 @@ A Zod schema is a Standard Schema too, and holds no state, so one serves every f
 import { metadata, REQUIRED, schema, validateStandardSchema } from '@angular/forms/signals';
 import * as z from 'zod';
 
-// SignupModel and initialSignupModel as above.
+// SignupFormModel and initialSignupFormModel as above.
 
 export const signupZodSchema = z
   .object({
@@ -154,7 +154,7 @@ export const signupZodSchema = z
     path: ['confirmPassword']
   });
 
-export const signupSchema = schema<SignupModel>((path) => {
+export const signupSchema = schema<SignupFormModel>((path) => {
   metadata(path.email, REQUIRED, () => true);
   validateStandardSchema(path, signupZodSchema);
 });
@@ -173,7 +173,7 @@ export const signupSchema = schema<SignupModel>((path) => {
 More validators combine as more rules in one `schema()`. Here Zod checks the shape, and Angular's `validateHttp()` asks a server whether the address is taken:
 
 ```ts
-export const signupSchema = schema<SignupModel>((path) => {
+export const signupSchema = schema<SignupFormModel>((path) => {
   metadata(path.email, REQUIRED, () => true);
   validateStandardSchema(path, signupZodSchema);
   validateHttp(path.email, {

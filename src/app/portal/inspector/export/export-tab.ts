@@ -29,17 +29,17 @@ const EXPORT_FILES: readonly FileTab<ExportFile>[] = [
   {
     id: 'template',
     label: 'Template',
-    help: 'my-form.html. Every field, bound by [formField] to the form that Component holds.'
+    help: 'example-form.html. Every field, bound by [formField] to the form that Component holds.'
   },
   {
     id: 'component',
     label: 'Component',
-    help: 'my-form.ts. The model, the form over it, and the handlers the template binds.'
+    help: 'example-form.ts. The model, the form over it, and the handlers the template binds.'
   },
   {
     id: 'schema',
     label: 'Schema',
-    help: 'my-form.form.ts. The model’s type, its initial value, and the form’s rules, always: each field’s state, limits and condition, then the checks, written by the validator chosen on Form ▸ Settings ▸ The Form.'
+    help: 'example.form.ts. The model’s type, its initial value, and the form’s rules, always: each field’s state, limits and condition, then the checks, written by the validator chosen on Form ▸ Settings ▸ The Form.'
   },
   {
     id: 'config',

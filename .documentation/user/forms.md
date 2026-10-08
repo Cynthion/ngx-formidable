@@ -69,13 +69,13 @@ The model, its initial value and its rules sit in one `*.form.ts`:
 // user.form.ts
 import { email, required, schema } from '@angular/forms/signals';
 
-export interface UserModel {
+export interface UserFormModel {
   email: string;
 }
 
-export const initialUserModel: UserModel = { email: '' };
+export const initialUserFormModel: UserFormModel = { email: '' };
 
-export const userSchema = schema<UserModel>((path) => {
+export const userSchema = schema<UserFormModel>((path) => {
   required(path.email, { message: 'An email address is required.' });
   email(path.email, { message: 'That does not look like an email address.' });
 });
@@ -88,7 +88,7 @@ The component holds the model and the form over it:
 import { Component, signal } from '@angular/core';
 import { form, FormField, FormRoot } from '@angular/forms/signals';
 import { FieldDecorator, FieldLabel, InputField } from '@cynthion/ngx-formidable';
-import { initialUserModel, UserModel, userSchema } from './user.form';
+import { initialUserFormModel, UserFormModel, userSchema } from './user.form';
 
 @Component({
   selector: 'app-user-form',
@@ -96,7 +96,7 @@ import { initialUserModel, UserModel, userSchema } from './user.form';
   imports: [FormRoot, FormField, FieldDecorator, FieldLabel, InputField]
 })
 export class UserForm {
-  readonly model = signal<UserModel>(initialUserModel);
+  readonly model = signal<UserFormModel>(initialUserFormModel);
   readonly form = form(this.model, userSchema);
 }
 ```

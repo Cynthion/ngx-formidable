@@ -35,7 +35,7 @@ function presetMembers(definition: PortalFormDefinition): string[] {
       return [
         '',
         `  /** What each option of \`${field.name}\` writes into the rest of the model. */`,
-        `  readonly ${map}: Record<string, Partial<MyFormModel>> = {`,
+        `  readonly ${map}: Record<string, Partial<ExampleFormModel>> = {`,
         ...presetEntries(field.presets!),
         '  };',
         '',
@@ -93,7 +93,7 @@ function formDefaults(definition: PortalFormDefinition): string[] {
 }
 
 /**
- * The component, `my-form.ts`: the model, the form over it, and the handlers the template binds.
+ * The component, `example-form.ts`: the model, the form over it, and the handlers the template binds.
  *
  * It imports exactly what the template uses, read off the template itself, so the two cannot disagree.
  */
@@ -125,19 +125,19 @@ export function serializeComponent(definition: PortalFormDefinition): string {
           `import { ${FIELD_KIND_CLASSES.counter} } from '../example-counter-field/example-counter-field';`
         ]
       : []),
-    "import { myFormInitialModel, MyFormModel, myFormSchema } from './my-form.form';",
+    "import { initialExampleFormModel, ExampleFormModel, exampleSchema } from './example.form';",
     '',
     '@Component({',
-    "  selector: 'app-my-form',",
-    "  templateUrl: './my-form.html',",
+    "  selector: 'app-example-form',",
+    "  templateUrl: './example-form.html',",
     '  imports: [',
     ...imports.map((name, index) => `    ${name}${index < imports.length - 1 ? ',' : ''}`),
     `  ]${defaults.length ? ',' : ''}`,
     ...defaults,
     '})',
-    'export class MyForm {',
-    '  readonly model = signal<MyFormModel>(myFormInitialModel);',
-    '  readonly form = form(this.model, myFormSchema);',
+    'export class ExampleForm {',
+    '  readonly model = signal<ExampleFormModel>(initialExampleFormModel);',
+    '  readonly form = form(this.model, exampleSchema);',
     ...presetMembers(definition),
     '}',
     ''
