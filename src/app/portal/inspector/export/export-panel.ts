@@ -15,9 +15,9 @@ import type { FileTab } from './export-tab';
 
 /** What each file is called in the consumer's project, as the help under its tab names it. */
 const FILE_NAMES: Readonly<Record<Exclude<ExportFile, 'theme'>, string>> = {
-  template: 'my-form.html',
-  component: 'my-form.ts',
-  schema: 'my-form.form.ts',
+  template: 'example-form.html',
+  component: 'example-form.ts',
+  schema: 'example.form.ts',
   config: 'app.config.ts'
 };
 

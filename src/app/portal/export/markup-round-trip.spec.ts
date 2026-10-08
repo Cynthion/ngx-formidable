@@ -354,7 +354,7 @@ describe('schema import', () => {
   });
 
   it('still notes a gate the schema states no condition for', () => {
-    const empty = 'export const myFormSchema = schema<MyFormModel>((path) => {\n});';
+    const empty = 'export const exampleSchema = schema<ExampleFormModel>((path) => {\n});';
 
     expect(parseMarkup(serializeDefinition(only(['pickup', 'address'])), empty).notes).toEqual([
       { text: '@if (!form.address().hidden())', reason: 'in-the-schema' }

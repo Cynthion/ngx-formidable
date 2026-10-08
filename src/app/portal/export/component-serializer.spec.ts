@@ -17,9 +17,9 @@ describe('component serializer', () => {
     expect(serializeDefinition(definition)).toContain('<form [formRoot]="form">');
     expect(serializeComponent(definition)).toContain(
       [
-        'export class MyForm {',
-        '  readonly model = signal<MyFormModel>(myFormInitialModel);',
-        '  readonly form = form(this.model, myFormSchema);',
+        'export class ExampleForm {',
+        '  readonly model = signal<ExampleFormModel>(initialExampleFormModel);',
+        '  readonly form = form(this.model, exampleSchema);',
         '}'
       ].join('\n')
     );
@@ -53,7 +53,7 @@ describe('component serializer', () => {
   it('declares the preset map and the handler the template binds to', () => {
     const source = serializeComponent(only(['pizza', 'sauce', 'toppings']));
 
-    expect(source).toContain('  readonly pizzaPresets: Record<string, Partial<MyFormModel>> = {');
+    expect(source).toContain('  readonly pizzaPresets: Record<string, Partial<ExampleFormModel>> = {');
     expect(source).toContain("    margherita: { sauce: 'tomato', toppings: ['mozzarella', 'basil'] },");
     expect(source).toContain("    'quattro-formaggi': { sauce: 'gorgonzola', toppings: ['mozzarella'] }");
     expect(source).toContain('  applyPizzaPreset(value: string | null): void {');
@@ -99,6 +99,6 @@ describe('component serializer', () => {
 
     expect(source).toContain("import { form, FormRoot } from '@angular/forms/signals';");
     expect(source).not.toContain('@cynthion/ngx-formidable');
-    expect(source).toContain('export class MyForm {');
+    expect(source).toContain('export class ExampleForm {');
   });
 });

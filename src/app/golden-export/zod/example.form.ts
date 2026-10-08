@@ -11,7 +11,7 @@ import {
 import * as z from 'zod';
 
 /** What the form edits: one key per field, and a grouped section nested under its group name. */
-export interface MyFormModel {
+export interface ExampleFormModel {
   pizza: string | null;
   size: string | null;
   crust: string | null;
@@ -37,7 +37,7 @@ export interface MyFormModel {
 }
 
 /** Every key defined, because Signal Forms drops an `undefined` one and binds a field only to a key. */
-export const myFormInitialModel: MyFormModel = {
+export const initialExampleFormModel: ExampleFormModel = {
   pizza: null,
   size: null,
   crust: null,
@@ -66,7 +66,7 @@ export const myFormInitialModel: MyFormModel = {
  * The form's checks, as a Zod schema run through Standard Schema. It holds no state, so one serves every
  * form. A check across fields refines the whole, and reports on the path it names.
  */
-export const myFormZodSchema = z
+export const exampleZodSchema = z
   .object({
     pizza: z.string().nullable().refine((value) => !!value, 'Pick a pizza to start from.'),
     size: z.string().nullable().refine((value) => !!value, 'Pick a size.'),
@@ -106,7 +106,7 @@ export const myFormZodSchema = z
   });
 
 /** Each field's state, limits, condition and rules, which `[formField]` hands to the field. */
-export const myFormSchema = schema<MyFormModel>((path) => {
+export const exampleSchema = schema<ExampleFormModel>((path) => {
   min(path.spice, 0);
   max(path.spice, 4);
   hidden(path.address, (context) => context.valueOf(path.pickup) !== false);
@@ -127,5 +127,5 @@ export const myFormSchema = schema<MyFormModel>((path) => {
   metadata(path.orderName, REQUIRED, () => true);
   metadata(path.phone, REQUIRED, () => true);
   metadata(path.email, REQUIRED, () => true);
-  validateStandardSchema(path, myFormZodSchema);
+  validateStandardSchema(path, exampleZodSchema);
 });

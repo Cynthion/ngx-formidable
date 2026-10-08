@@ -19,11 +19,11 @@ import {
 } from '@cynthion/ngx-formidable';
 // The Studio's own custom field: import yours instead, see user/custom-fields.md
 import { ExampleCounterField } from '../example-counter-field/example-counter-field';
-import { myFormInitialModel, MyFormModel, myFormSchema } from './my-form.form';
+import { initialExampleFormModel, ExampleFormModel, exampleSchema } from './example.form';
 
 @Component({
-  selector: 'app-my-form',
-  templateUrl: './my-form.html',
+  selector: 'app-example-form',
+  templateUrl: './example-form.html',
   imports: [
     FormRoot,
     FormField,
@@ -45,12 +45,12 @@ import { myFormInitialModel, MyFormModel, myFormSchema } from './my-form.form';
     ExampleCounterField
   ]
 })
-export class MyForm {
-  readonly model = signal<MyFormModel>(myFormInitialModel);
-  readonly form = form(this.model, myFormSchema);
+export class ExampleForm {
+  readonly model = signal<ExampleFormModel>(initialExampleFormModel);
+  readonly form = form(this.model, exampleSchema);
 
   /** What each option of `pizza` writes into the rest of the model. */
-  readonly pizzaPresets: Record<string, Partial<MyFormModel>> = {
+  readonly pizzaPresets: Record<string, Partial<ExampleFormModel>> = {
     margherita: { sauce: 'tomato', toppings: ['mozzarella', 'basil'] },
     marinara: { sauce: 'tomato', toppings: [] },
     funghi: { sauce: 'tomato', toppings: ['mozzarella', 'mushrooms'] },

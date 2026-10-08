@@ -13,7 +13,7 @@ function only(ids: readonly string[], options: Partial<PortalFormOptions> = {}):
 /** The schema's body, one rule per line. */
 function rules(definition: PortalFormDefinition): string[] {
   const source = serializeSchema(definition);
-  const open = 'schema<MyFormModel>((path) => {\n';
+  const open = 'schema<ExampleFormModel>((path) => {\n';
   const body = source.slice(source.indexOf(open) + open.length, source.lastIndexOf('});'));
 
   return body.split('\n').filter(Boolean);
@@ -27,7 +27,7 @@ describe('schema serializer', () => {
 
     expect(source).toContain(
       [
-        'export interface MyFormModel {',
+        'export interface ExampleFormModel {',
         '  size: string | null;',
         '  toppings: string[];',
         '  spice: number;',
@@ -40,7 +40,7 @@ describe('schema serializer', () => {
     // A number starts at its field's `min`, so the form does not open outside its own limits.
     expect(source).toContain(
       [
-        'export const myFormInitialModel: MyFormModel = {',
+        'export const initialExampleFormModel: ExampleFormModel = {',
         '  size: null,',
         '  toppings: [],',
         '  spice: 0,',
@@ -163,7 +163,7 @@ describe('schema serializer', () => {
     const vest = serializeSchema(only(['orderName', 'email', 'sauce', 'toppings'], { validator: 'vest' }));
 
     expect(vest).toContain("import { create, enforce, mode, Modes, omitWhen, test } from 'vest';");
-    expect(vest).toContain('export function createMyFormSuite() {\n  return create((model: MyFormModel) => {');
+    expect(vest).toContain('export function createExampleSuite() {\n  return create((model: ExampleFormModel) => {');
     expect(vest).toContain(
       [
         "    test('email', 'An email address is required.', () => {",
@@ -179,7 +179,7 @@ describe('schema serializer', () => {
     );
     expect(vest).toContain("    test('', 'Pineapple on a BBQ base is a combination this kitchen refuses.', () => {");
     expect(vest).toContain('  metadata(path.orderName, REQUIRED, () => true);');
-    expect(vest).toContain('  validateStandardSchema(path, createMyFormSuite());');
+    expect(vest).toContain('  validateStandardSchema(path, createExampleSuite());');
     expect(vest).not.toContain('required(');
     expect(vest).not.toContain('zod');
   });
@@ -190,7 +190,7 @@ describe('schema serializer', () => {
     expect(zod).toContain("import * as z from 'zod';");
     expect(zod).toContain(
       [
-        'export const myFormZodSchema = z',
+        'export const exampleZodSchema = z',
         '  .object({',
         "    sauce: z.string().nullable().refine((value) => !!value, 'Pick a sauce.'),",
         '    when: z.object({',
@@ -210,7 +210,7 @@ describe('schema serializer', () => {
       ].join('\n')
     );
     expect(zod).toContain('  metadata(path.sauce, REQUIRED, () => true);');
-    expect(zod).toContain('  validateStandardSchema(path, myFormZodSchema);');
+    expect(zod).toContain('  validateStandardSchema(path, exampleZodSchema);');
     expect(zod).not.toContain('vest');
   });
 
@@ -238,7 +238,7 @@ describe('schema serializer', () => {
     const source = serializeSchema(only([], { validator: 'none' }));
 
     expect(source).toContain("import { schema } from '@angular/forms/signals';");
-    expect(source).toContain('export interface MyFormModel {\n}');
-    expect(source).toContain('export const myFormSchema = schema<MyFormModel>((path) => {\n});');
+    expect(source).toContain('export interface ExampleFormModel {\n}');
+    expect(source).toContain('export const exampleSchema = schema<ExampleFormModel>((path) => {\n});');
   });
 });

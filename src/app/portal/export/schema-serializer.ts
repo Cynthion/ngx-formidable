@@ -221,8 +221,8 @@ function vestSuite(rules: readonly PortalRule[]): string[] {
     " * The form's checks, as a Vest suite run through Standard Schema. A suite carries state across every form",
     ' * it has run for, so each form creates its own.',
     ' */',
-    'export function createMyFormSuite() {',
-    `  return create((${rules.length ? 'model: MyFormModel' : ''}) => {`,
+    'export function createExampleSuite() {',
+    `  return create((${rules.length ? 'model: ExampleFormModel' : ''}) => {`,
     "    mode(Modes.ALL); // every failing rule, not only a field's first",
     ...indent(
       rules.flatMap((rule) => ['', ...vestTest(rule)]),
@@ -320,8 +320,8 @@ function zodSchema(rules: readonly PortalRule[], fields: readonly PlacedField[])
     ' * form. A check across fields refines the whole, and reports on the path it names.',
     ' */',
     ...(refinements.length
-      ? ['export const myFormZodSchema = z', ...indent([`.${object[0]}`, ...object.slice(1), ...refinements], 1)]
-      : [`export const myFormZodSchema = z.${object[0]}`, ...object.slice(1)]
+      ? ['export const exampleZodSchema = z', ...indent([`.${object[0]}`, ...object.slice(1), ...refinements], 1)]
+      : [`export const exampleZodSchema = z.${object[0]}`, ...object.slice(1)]
     ).map((line, index, lines) => (index === lines.length - 1 ? `${line};` : line))
   ];
 }
@@ -345,12 +345,12 @@ function validatorRules(validator: PortalValidatorKind, rules: readonly PortalRu
     ...rules
       .filter((rule) => rule.check.kind === 'required')
       .map((rule) => `metadata(${accessOf('path', rule.target)}, REQUIRED, () => true);`),
-    `validateStandardSchema(path, ${validator === 'vest' ? 'createMyFormSuite()' : 'myFormZodSchema'});`
+    `validateStandardSchema(path, ${validator === 'vest' ? 'createExampleSuite()' : 'exampleZodSchema'});`
   ];
 }
 
 /**
- * The form file, `my-form.form.ts`: the model, the initial model and the schema over it.
+ * The form file, `example.form.ts`: the model, the initial model and the schema over it.
  *
  * Everything the stage runs as a rule is here, because `[formField]` hands a field its state from the schema
  * and rejects a binding to it beside it — readonly, disabled, required and the limits alike. The sample's
@@ -391,19 +391,19 @@ export function serializeSchema(definition: PortalFormDefinition): string {
     ...(validator === 'zod' ? ["import * as z from 'zod';"] : []),
     '',
     '/** What the form edits: one key per field, and a grouped section nested under its group name. */',
-    'export interface MyFormModel {',
+    'export interface ExampleFormModel {',
     ...memberLines(nodes, 0, false),
     '}',
     '',
     '/** Every key defined, because Signal Forms drops an `undefined` one and binds a field only to a key. */',
-    'export const myFormInitialModel: MyFormModel = {',
+    'export const initialExampleFormModel: ExampleFormModel = {',
     ...memberLines(nodes, 0, true),
     '};',
     ...(validator === 'vest' ? ['', ...vestSuite(checks)] : []),
     ...(validator === 'zod' ? ['', ...zodSchema(checks, fields)] : []),
     '',
     "/** Each field's state, limits, condition and rules, which `[formField]` hands to the field. */",
-    'export const myFormSchema = schema<MyFormModel>((path) => {',
+    'export const exampleSchema = schema<ExampleFormModel>((path) => {',
     ...indent([...settings, ...(settings.length && written.length ? [''] : []), ...written], 1),
     '});',
     ''
