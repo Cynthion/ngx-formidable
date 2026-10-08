@@ -16,14 +16,14 @@ External:
 
 ## Features
 
-- **Storybook Visual Regression**: `@storybook/addon-vitest` runs every story of [`impl/storybook.md`](storybook.md) in Vitest browser mode, and a preview `afterEach` asserts `toMatchScreenshot()`. Baselines are committed and generated on Linux in CI, since font rendering differs per platform. Prove first that the addon runs beside `@angular/build:unit-test`, which has no Vitest configuration file today. Then **Visual Testing** in [`impl/testing.md`](testing.md) is rewritten.
+- **AI Support**: help developers use this library through AI. Open question: an MCP server, or other ways.
 - **Date Range Field**: the largest item here. Split it before starting.
   - **The Calendar Is Not The Problem**: Pikaday renders ranges, with `startRange` / `endRange` options and `is-inrange` / `is-startrange` / `is-endrange` classes. What it does not do is manage range _selection_; that is driven from `onSelect`, or with two instances.
   - **The Value Contract Is**: `date-field` is single-valued end to end: `Date | null`, one picker, one masked input with one `unicodeTokenFormat`, arrow-stepping over that one date, and `isFilled`. A range mode means a tuple value, a two-segment mask, parse and format path, per-segment arrow-stepping and clear semantics, and range styling that `_pikaday.scss` does not have.
-- **AI Support**: help developers use this library through AI. Open question: an MCP server, or other ways.
 - **Blog Post**:
   - **Where**: [The Dev Exchange](https://thedevexchange.com/), the company dev blog.
   - **What**: the library, its features, and how it is used to build beautiful, functional Angular forms. Code examples, screenshots, links to the portal and the GitHub repository. Why it beats other form libraries, and a call to action to try it.
   - **Interview First**: interview me before writing, to get my perspective on the library, its development process and where it goes next. The narrative comes out of that, not out of the code.
   - **Tone**: humorous and light, informative and professional. Conversational, so the reader feels part of the journey.
   - **Include A Lessons-Learned Section**: the challenges hit during development and how they shaped the library's design. That is what gives readers the thinking behind the features.
+- **Storybook Visual Regression**: `@storybook/addon-vitest` runs every story of [`impl/storybook.md`](storybook.md) in Vitest browser mode, and a preview `afterEach` asserts `toMatchScreenshot()`. Baselines are committed and generated on Linux in CI, since font rendering differs per platform. Prove first that the addon runs beside `@angular/build:unit-test`, which has no Vitest configuration file today. Then **Visual Testing** in [`impl/testing.md`](testing.md) is rewritten.

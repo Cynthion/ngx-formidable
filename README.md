@@ -238,6 +238,7 @@ Guides teach a topic; references list what it accepts.
 | [Fields](https://cynthion.github.io/ngx-formidable/#/docs/fields)                   | Options, panels, keyboard, dates and times, masking, focus                 |
 | [Decoration](https://cynthion.github.io/ngx-formidable/#/docs/decoration)           | Labels, adornments, prefixes, suffixes, hints, required marker             |
 | [Validation](https://cynthion.github.io/ngx-formidable/#/docs/validation)           | Angular's rules, Vest, Zod or none; messages and their reveal              |
+| [Submit Gates](https://cynthion.github.io/ngx-formidable/#/docs/submit-gates)       | Valid, dirty, changed or none; when the submit button opens                |
 | [Theming](https://cynthion.github.io/ngx-formidable/#/docs/theming)                 | The default theme, what to override, worked examples                       |
 | [Studio](https://cynthion.github.io/ngx-formidable/#/docs/studio)                   | Building a theme and a form in the browser, and exporting both             |
 | [Custom Fields](https://cynthion.github.io/ngx-formidable/#/docs/custom-fields)     | Building a field or an option of your own                                  |
