@@ -5,8 +5,8 @@
  *
  * - `ladder.png`: the Specimen's ladder, shot once per step with the dropdown beside it open, as a looping APNG.
  * - `studio.png`: a recording of the Studio, pointer and keys included: presets from the library's defaults on,
- *   keyboard focus, label positions and prefixes, a field opened from its chip, Zod catching an email, and the
- *   export, as a looping APNG.
+ *   keyboard focus, a date picked from its calendar, an address found despite a typo, label positions and prefixes,
+ *   a field opened from its chip, Zod catching an email, and the export, as a looping APNG.
  * - `social-preview.png`: the Studio on the library's defaults at the 1280×640 GitHub asks for, uploaded by hand
  *   under Settings > Social preview.
  *
@@ -41,7 +41,7 @@ const TABS = '[role="tab"]';
  * The library's defaults, then the looks furthest from it, in the gallery's order so the panel scrolls one way and
  * back. The last has a visible field border, so the labels the tour then moves onto it read as such.
  */
-const TOUR_PRESETS = ['Enterprise', 'Editorial', 'Brutalist', 'Midnight', 'Consumer'];
+const TOUR_PRESETS = ['Enterprise', 'Midnight', 'Consumer'];
 
 /**
  * How long each frame is held. The pointer glides in short frames and rests where it clicks; what a click changed
@@ -286,9 +286,9 @@ async function locate(page, selector, text = '') {
 }
 
 /**
- * Presets from the library's defaults to Consumer, keyboard focus through the first fields, edits to the form, a
- * field opened from its chip, the validator swapped and caught out, then the export. Every step is a real pointer
- * or key event, filmed as it happens.
+ * Presets from the library's defaults to Consumer, keyboard focus through the first fields, a date picked and an
+ * address searched, edits to the form, a field opened from its chip, the validator swapped and caught out, then the
+ * export. Every step is a real pointer or key event, filmed as it happens.
  */
 async function shootStudioTour(page) {
   const frames = [];
@@ -323,6 +323,16 @@ async function shootStudioTour(page) {
     await clickOn(select, '', STUDIO_HOLD_MS.open);
     await clickOn(`${select} option`, option, holdMs);
   };
+  /** Clicks into a text field and replaces its value, one frame per chunk typed. */
+  const type = async (input, chunks) => {
+    await clickOn(input, '', STUDIO_HOLD_MS.step);
+    await page.evaluate(`document.querySelector('${input}').select()`);
+    for (const text of chunks) {
+      await page.send('Input.insertText', { text });
+      await sleep(200);
+      await shoot(STUDIO_HOLD_MS.step);
+    }
+  };
   const tab = async (holdMs) => {
     await page.evaluate(`shot.key('Tab ⇥')`);
     await pressKey(page, 'Tab', 'Tab', 9);
@@ -348,6 +358,15 @@ async function shootStudioTour(page) {
 
   await clickOn('formidable-dropdown-field .input-wrapper', '', STUDIO_HOLD_MS.result);
   for (const _ of ['Size', 'Crust', 'Sauce', 'Toppings']) await tab(STUDIO_HOLD_MS.step);
+
+  // October, because every later day in September sits too low to click without scrolling the open calendar.
+  await clickOn('formidable-date-field .toggle', '', STUDIO_HOLD_MS.open);
+  await clickOn('formidable-date-field .pika-next', '', STUDIO_HOLD_MS.step);
+  await clickOn('formidable-date-field td:not(.is-outside-current-month) .pika-button', '17', STUDIO_HOLD_MS.result);
+
+  // A typo, which only the fuzzy filter still finds.
+  await type('input[name$=".address"]', ['see', 'fled']);
+  await clickOn('formidable-autocomplete-field formidable-field-option', 'Seefeldstrasse', STUDIO_HOLD_MS.result);
   await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: at.x, y: at.y, deltaX: 0, deltaY: -5000 });
 
   await clickOn(TABS, 'Form', STUDIO_HOLD_MS.step);
@@ -366,13 +385,7 @@ async function shootStudioTour(page) {
 
   await clickOn('button', 'The Form', STUDIO_HOLD_MS.step);
   await pick('#fs-validator', 'Zod', STUDIO_HOLD_MS.step);
-  await clickOn('input[name$=".email"]', '', STUDIO_HOLD_MS.step);
-  await page.evaluate(`document.querySelector('input[name$=".email"]').select()`);
-  for (const text of ['alex.', 'moser@']) {
-    await page.send('Input.insertText', { text });
-    await sleep(200);
-    await shoot(STUDIO_HOLD_MS.step);
-  }
+  await type('input[name$=".email"]', ['alex.', 'moser@']);
   await tab(STUDIO_HOLD_MS.result);
 
   await clickOn(TABS, 'Export & Import', STUDIO_HOLD_MS.result);
