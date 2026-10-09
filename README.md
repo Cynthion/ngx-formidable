@@ -30,7 +30,7 @@ Angular form fields you can actually theme, configure and customize. Validated b
 <!-- Absolute URLs: this file is also the npm package's README, where a repository-relative path does not resolve. -->
 <p align="center">
   <a href="https://cynthion.github.io/ngx-formidable/">
-    <img src="https://raw.githubusercontent.com/Cynthion/ngx-formidable/main/assets/studio.png" alt="A recording of the ngx-formidable Studio: one form repainted from the default theme through Midnight, tabbed through, its labels moved and prefixed, one field opened from its chip, Zod rejecting an email, then the CSS, template and schema it exports.">
+    <img src="https://raw.githubusercontent.com/Cynthion/ngx-formidable/main/assets/studio.png" alt="A recording of the ngx-formidable Studio: one form repainted from the default theme through Midnight, tabbed through, a date picked from its calendar, an address found despite a typo, its labels moved and prefixed, one field opened from its chip, Zod rejecting an email, then the CSS, template and schema it exports.">
   </a>
 </p>
 
