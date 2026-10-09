@@ -14,8 +14,16 @@ External:
 | **Standard Schema Path Through A Missing Key**: `validateStandardSchema` throws a `TypeError` for an issue whose path runs through a key the model lacks, instead of falling back to the validated path                                                         | [angular/angular#71128](https://github.com/angular/angular/issues/71128)                                                      | `vest-integration.spec.ts`              | The portal's `rulesOn` keeps a rule off the form until every field it reads exists                                | Restate the throw as the fallback in [`user/validation.md`](../user/validation.md), [`tech/portal.md`](../tech/portal.md), [`tech/forms-integration.md`](../tech/forms-integration.md)                                                                             |
 | **ngx-mask Loses A Bound Value**: with `showMaskTyped`, a `[value]` change on `NgxMaskDirective` fires `ngOnChanges`, whose `_applyMask()` re-renders the stale `_inputValue` and emits it through `valueChange`, emptying the model                            | [NepipenkoIgor/ngx-mask#1671](https://github.com/NepipenkoIgor/ngx-mask/issues/1671), fix proposed                            | `value-round-trip.spec.ts`              | Masked fields write through `writeValue`, see **Writing Through The Mask** in [`tech/caret.md`](../tech/caret.md) | `writeMaskedValue` may become a `[value]` binding                                                                                                                                                                                                                  |
 
+Internal:
+
+- Library edge case (ngx-formidable, not fixed): if a user clears the autocomplete and leaves it within 200 ms, the old value stays in the model behind an empty input. That's because the deselect only runs while the field is focused. Normal typing speed is fine.
+
 ## Features
 
+- **Autocomplete Arrow**: add an arrow to autocomplete field to open panel and show all options; or allow dropdown to enter text? (e.g. Country field); also open panel with keyboard shortcut like datefield
+- **Panel Resize**: allow the panel to be resized to show more/less options; it's probably best to keep the size "stored" per field in a form and not generalize it
+- **Panel Jumps**: add a delay between panel orientation switches; it currently happens that it switches sides on every value change (results change for displayed options) and the panel jumps up and down
+- **Typeahead UX**: type-ahead feels unnatural and intransparent, improve UX
 - **AI Support**: help developers use this library through AI. Open question: an MCP server, or other ways.
 - **Date Range Field**: the largest item here. Split it before starting.
   - **The Calendar Is Not The Problem**: Pikaday renders ranges, with `startRange` / `endRange` options and `is-inrange` / `is-startrange` / `is-endrange` classes. What it does not do is manage range _selection_; that is driven from `onSelect`, or with two instances.
