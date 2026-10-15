@@ -17,9 +17,13 @@ External:
 Internal:
 
 - Library edge case (ngx-formidable, not fixed): if a user clears the autocomplete and leaves it within 200 ms, the old value stays in the model behind an empty input. That's because the deselect only runs while the field is focused. Normal typing speed is fine.
+- In empty date and time fields, using an arrow up/down for the first time should set current date or time, respectively.
 
 ## Features
 
+- [ ] Modernize Flyout and Backdrop Layering:
+  - [MDN `::backdrop`](https://developer.mozilla.org/en-US/docs/Web/CSS/::backdrop)
+  - [CSS Anchor Positioning](https://developer.chrome.com/blog/tether-elements-to-each-other-with-css-anchor-positioning?hl=de)
 - **Autocomplete Arrow**: add an arrow to autocomplete field to open panel and show all options; or allow dropdown to enter text? (e.g. Country field); also open panel with keyboard shortcut like datefield
 - **Panel Resize**: allow the panel to be resized to show more/less options; it's probably best to keep the size "stored" per field in a form and not generalize it
 - **Panel Jumps**: add a delay between panel orientation switches; it currently happens that it switches sides on every value change (results change for displayed options) and the panel jumps up and down
