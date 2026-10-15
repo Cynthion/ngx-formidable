@@ -48,7 +48,7 @@ For whoever works the repository. Contains technical documentation of the setup 
 | [`impl/ai-harness.md`](impl/ai-harness.md)                     | AI setup of this repository                             |
 | [`impl/components.md`](impl/components.md)                     | Placement, selectors, field contract, signal API        |
 | [`impl/definition-of-done.md`](impl/definition-of-done.md)     | Definition of Done                                      |
-| [`impl/developer-onboarding.md`](impl/developer-onboarding.md) | Toolchain, credentials, install, scripts                |
+| [`impl/developer-onboarding.md`](impl/developer-onboarding.md) | Toolchain, credentials, install, scripts, worktrees     |
 | [`impl/documentation.md`](impl/documentation.md)               | Documentation style and authoring guide                 |
 | [`impl/releasing.md`](impl/releasing.md)                       | Publishing the library to npm                           |
 | [`impl/renovate.md`](impl/renovate.md)                         | Dependency updates: groups, Angular majors, peer ranges |

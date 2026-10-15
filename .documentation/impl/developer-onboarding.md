@@ -146,6 +146,7 @@ A nested `projects/ngx-formidable/node_modules` shadows the root install with a 
 | `npm run docs:check`      | The portal's token manifest against [`user/theme-reference.md`](../user/theme-reference.md) |
 | `npm run docs:lint`       | Markdown style, relative links and heading anchors                                          |
 | `npm run screenshots`     | Regenerate the README's images in `assets/` from the served portal                          |
+| `npm run worktree:add`    | Create a worktree for a new branch, see [Worktrees](#worktrees)                             |
 
 When each one runs as a gate is in [`impl/definition-of-done.md`](definition-of-done.md).
 
@@ -171,3 +172,57 @@ When each one runs as a gate is in [`impl/definition-of-done.md`](definition-of-
 - **Stylelint**: `stylelint-config-standard-scss` only, over `projects/ngx-formidable/src` and `src`.
 - **Prettier**: single quotes, no trailing commas, `bracketSameLine`, one attribute per line; HTML attribute order via `prettier-plugin-organize-attributes`.
 - **Token Descriptions**: `docs:check` asserts that every token description in the portal's manifest still matches [`user/theme-reference.md`](../user/theme-reference.md), which owns them.
+
+---
+
+## Worktrees
+
+A worktree is an additional working directory of the same repository, for work on several branches in parallel. It has its own branch, `node_modules` and build output, and shares commits, branches and stashes with the main checkout. A branch is checked out in at most one worktree.
+
+| Path                               | Holds                   |
+| :--------------------------------- | :---------------------- |
+| `ngx-formidable/`                  | Main checkout           |
+| `ngx-formidable.worktrees/<slug>/` | One worktree per branch |
+
+Worktrees live beside the main checkout, not inside it, so its search, file watchers and lint globs never see a second copy of the code.
+
+### Create
+
+From any checkout of the repository:
+
+```zsh
+npm run worktree:add -- <slug>
+```
+
+`scripts/worktree-add.sh` creates the worktree on a new branch `feature/<slug>` from `origin/main`, runs `npm ci` in it and opens it in a new VS Code window. Without `<slug>`, it asks for one.
+
+- **Terminal**: The script cannot change the directory of the terminal that ran it. The terminal of the new VS Code window starts in the worktree.
+- **No Upstream**: The branch is created with `--no-track`, so `origin/main` is not its upstream. The first `git push` creates `origin/feature/<slug>` through `push.autoSetupRemote`, see [Git](#git).
+- **Existing Branch**: `git worktree add ../ngx-formidable.worktrees/<slug> feature/<slug>`, then `npm ci` in it, checks out a branch that already exists.
+- **Gitignored Files**: A worktree holds tracked files only, and none of the gitignored files is needed to build, test or serve. Claude Code reads `.claude/settings.local.json` from the main checkout in every worktree, and its auto memory is shared by all worktrees. `.research/` and `.plan/` are per worktree and are deleted with it.
+
+### Run In Parallel
+
+Ports are fixed. A second instance overrides its port with a command-line flag, never a file change.
+
+| Process   | Port   | Second Instance                    |
+| :-------- | :----- | :--------------------------------- |
+| Portal    | `4200` | `npm start -- --port=4201`         |
+| Storybook | `6006` | `npm run storybook -- --port=6007` |
+
+- **Storybook MCP**: `.mcp.json` points the `storybook` server at port `6006`. A Storybook on another port is not reachable through it.
+- **Screenshots**: `npm run screenshots` reads the portal at `http://localhost:4200/`. `PORTAL_URL=http://localhost:4201/` points it at the second instance.
+
+### Remove
+
+After the pull request is merged, from the main checkout:
+
+```zsh
+git worktree remove ../ngx-formidable.worktrees/<slug>
+git branch -D feature/<slug>
+git worktree prune
+```
+
+- **Uncommitted Changes**: `git worktree remove` refuses a worktree with modified or untracked files. `--force` discards them.
+- **Force Delete**: Pull requests are squash-merged, so the branch is never an ancestor of `main` and `git branch -d` refuses it.
+- **Prune**: `git worktree prune` drops the records of worktree directories that were deleted without `git worktree remove`.
