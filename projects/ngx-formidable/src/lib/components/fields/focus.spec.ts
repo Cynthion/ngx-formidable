@@ -89,7 +89,8 @@ describe('field focus', () => {
       await expect.element(control(kind)).toHaveFocus();
 
       focus(bound, kind);
-      await settle(bound.fixture);
+      // Past the autocomplete's 200 ms filter debounce, which opens the panel for typing.
+      await settle(bound.fixture, 200);
 
       expect(control(kind).element().getAttribute('aria-expanded')).toBe('false');
     });

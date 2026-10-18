@@ -95,7 +95,7 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 **The Autocomplete Filters, And Reports The Filter**: typing narrows the list to the options whose `match` accepts the text, by default a case-insensitive substring of the label. It also emits the text as `filterChange`, so the options can be fetched or ranked for it instead (fuzzy, a server call). Give an option a `match` of your own where your matching keeps more than a substring would.
 
-**`filterChange` Reports More Than Typing**: a value written from outside takes the filter with it: to its option's label, or to nothing while no option carries the value. Those moves are reported too, so the list you supply can follow the value the field was given. Without them, a value written from outside names an option your filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under whoever is typing.
+**`filterChange` Reports More Than Typing**: a value written from outside, focused or not, takes the text and the filter with it: to its option's label, or to nothing while no option carries the value. Those moves are reported too, so the list you supply can follow the value the field was given. Without them, a value written from outside names an option your filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under whoever is typing.
 
 **An Action Row Is Not A Value**: `dropdown-field` and `autocomplete-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. What the action does is entirely yours; the field closes its panel, runs it and touches nothing else. The following is an example.
 
@@ -193,7 +193,7 @@ The rest keep the platform's keys: `select-field` is a native `<select>` and `sl
 
 Typing into a dropdown builds a short buffer and highlights the first option whose label starts with it. Backspace edits the buffer, the first character opens a closed panel, and the buffer clears itself after a pause.
 
-The autocomplete has no buffer: what is typed is its filter, and typing an option's exact label picks it.
+The autocomplete has no buffer: what is typed is its filter, and typing an option's exact label picks it. Typing anything else lets the pick go at once.
 
 ### Stepping A Date Or Time Segment
 

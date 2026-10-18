@@ -114,6 +114,22 @@ describe('option field highlight', () => {
     });
   }
 
+  // Per **Type-Ahead** in `user/fields.md`: the buffer clears itself after a pause, so the same letter typed
+  // again goes back to the first option it starts.
+  describe('dropdown', () => {
+    it('takes the same letter again after a pause', async () => {
+      await tabInto('dropdown', 'combobox');
+
+      await userEvent.keyboard('g');
+      await expect.poll(highlighted).toBe('Green');
+      await userEvent.keyboard('{ArrowDown}');
+      await expect.poll(highlighted).toBe('Teal');
+
+      await userEvent.keyboard('g');
+      await expect.poll(highlighted).toBe('Green');
+    });
+  });
+
   describe('radio-group', () => {
     it('picks the highlighted option on Enter and on Space', async () => {
       const field = await tabInto('radio-group', 'radiogroup');

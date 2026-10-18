@@ -21,6 +21,9 @@ import { AutocompleteField } from './autocomplete-field/autocomplete-field';
  * That is exactly the round trip an `actionOption` makes, create an option and then point the model at it, so
  * it breaks on the second lap, where a created label does not match what was typed to find it.
  *
+ * A write from outside lands whether the field is focused or not: a clear button that keeps focus on the field,
+ * per **Actions** in `user/decoration.md`, writes while the field is the user's.
+ *
  * The user types for real, and leaves by `Tab` for the button after the field.
  */
 
@@ -37,7 +40,7 @@ const ADDRESSES: FormidableOption[] = [
         <formidable-autocomplete-field
           name="address"
           [options]="visibleOptions()"
-          [ngModel]="address()"
+          [(ngModel)]="address"
           (filterChange)="filter.set($event)" />
         <div formidableFieldLabel>Address</div>
       </formidable-field-decorator>
@@ -131,5 +134,70 @@ describe('autocomplete filter sync', () => {
     await expect.element(combobox()).toHaveFocus();
     await expect.element(combobox()).toHaveValue('Seefeldstrasse 40 B');
     expect(host.filter()).toBe('Seefeldstrasse 40 B');
+    // Though the filter has dropped the option it named, so the list no longer carries the pick.
+    expect(host.address()).toBeNull();
+  });
+
+  it('lets go of a value no option carries once it is typed over', async () => {
+    host.address.set('nowhere');
+    await settle(fixture);
+
+    await search('Lang');
+
+    expect(host.address()).toBeNull();
+  });
+
+  it('lets the pick go when the text is cleared and the field left at once', async () => {
+    await search('Seefeldstrasse 40');
+    expect(host.address()).toBe('seefeld');
+
+    await userEvent.keyboard('{ControlOrMeta>}a{/ControlOrMeta}{Backspace}');
+    await leave();
+    await settle(fixture, 200);
+
+    await expect.element(combobox()).toHaveValue('');
+    expect(host.address()).toBeNull();
+  });
+
+  it('renders a value written from outside while focused, once its option arrives', async () => {
+    await search('Lang');
+
+    // Names an option the current filter excludes, so the label only arrives with the list.
+    host.address.set('seefeld');
+    await settle(fixture, 200);
+
+    await expect.element(combobox()).toHaveFocus();
+    await expect.element(combobox()).toHaveValue('Seefeldstrasse 40');
+    expect(host.filter()).toBe('Seefeldstrasse 40');
+  });
+
+  /** Picks an option by typing its label, closes the panel, and clears the model from outside, focus kept. */
+  async function pickThenClear(): Promise<void> {
+    await search('Seefeldstrasse 40');
+    expect(host.address()).toBe('seefeld');
+    await userEvent.keyboard('{Escape}');
+
+    host.address.set(null);
+    await settle(fixture, 200);
+  }
+
+  it('renders an outside clear while the field is focused', async () => {
+    await pickThenClear();
+
+    await expect.element(combobox()).toHaveFocus();
+    await expect.element(combobox()).toHaveValue('');
+    expect(host.filter()).toBe('');
+    // A write from outside is not typing, so it opens no panel.
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('takes the same text again after an outside clear', async () => {
+    await pickThenClear();
+
+    await userEvent.keyboard('Seefeldstrasse 40');
+    await settle(fixture, 200);
+
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+    expect(host.address()).toBe('seefeld');
   });
 });

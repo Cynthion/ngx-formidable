@@ -16,11 +16,14 @@ External:
 
 Internal:
 
-- Library edge case (ngx-formidable, not fixed): if a user clears the autocomplete and leaves it within 200 ms, the old value stays in the model behind an empty input. That's because the deselect only runs while the field is focused. Normal typing speed is fine.
-- In empty date and time fields, using an arrow up/down for the first time should set current date or time, respectively.
+- **Suffix Outside The Panel Toggle**:
+  - **Context**: EnerQi added `cmp-ui-field-clear`, a `formidableFieldSuffix` button on every `horizontal` field (input, textarea, date, time, dropdown, autocomplete), built after the **Clear** example under **Actions** in [`user/decoration.md`](../user/decoration.md): rendered by `@if` while the field holds a value, `(click)` writes the empty value through the forms API. On a dropdown or date field the button lands right of the chevron, and when it vanishes after the click the chevron jumps right by the button's width. Visible in EnerQi's branch `feature/form-field-suffixes`, story `View Modules / Patients / Customer Edit Form / Edit Existing Customer`, Gender and Date of Birth.
+  - **Defect**: `field-suffix-horizontal` pins the suffix wrapper at `right: 0`, and the toggle mixin in `_forms.scss` pushes the dropdown and date toggle inward by `field-padding-right()`, the measured suffix inset. So a suffix always sits outside the toggle, and a suffix whose width changes moves the toggle. MUI, PrimeNG, Fluent and Chrome's date input anchor the toggle at the edge and render a clear control inside it; Ant Design swaps the chevron for the clear icon on hover; only Angular Material with a `matSuffix` clear ends up like this, and that is a known wart.
+  - **Proposal**: the toggle keeps `margin-right: calc(border + field-padding-x())`, the suffix wrapper moves to `right: field-toggle-inset()`, and `field-value-inset('right')` stays as it is, since it already adds the suffix inset and the toggle inset. The wrapper's own right padding then becomes the gap to the toggle. Update the **Layouts** sketch and **Actions** in [`user/decoration.md`](../user/decoration.md) and the Specimen. EnerQi reserves the button's width meanwhile so nothing jumps.
 
 ## Features
 
+- In empty date and time fields, using an arrow up/down for the first time should set current date or time, respectively.
 - [ ] Modernize Flyout and Backdrop Layering:
   - [MDN `::backdrop`](https://developer.mozilla.org/en-US/docs/Web/CSS/::backdrop)
   - [CSS Anchor Positioning](https://developer.chrome.com/blog/tether-elements-to-each-other-with-css-anchor-positioning?hl=de)

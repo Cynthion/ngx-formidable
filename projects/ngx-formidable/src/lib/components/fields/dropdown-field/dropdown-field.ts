@@ -1,5 +1,5 @@
 import { Component, computed, ElementRef, inject, input, model, OnInit, signal, viewChild } from '@angular/core';
-import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
+import { debounceTime, filter, Subject, takeUntil } from 'rxjs';
 import { isPrintableCharacter } from '../../../helpers/input.helpers';
 import { applyActionOption, applyDefaultOption } from '../../../helpers/option.helpers';
 import {
@@ -96,7 +96,7 @@ export class DropdownField extends BaseOptionField<string | null> implements OnI
   public readonly actionOptionMode = input<FieldDefaultOptionMode>('always');
 
   protected readonly activeOptions = signal<FormidableOption[]>([]);
-  private readonly typeahead$ = new BehaviorSubject<string>('');
+  private readonly typeahead$ = new Subject<string>();
 
   protected readonly hasSelectableOptions = computed(() =>
     this.activeOptions().some((option) => !this.isActionOption(option))
@@ -187,11 +187,12 @@ export class DropdownField extends BaseOptionField<string | null> implements OnI
 
   // #endregion
 
+  // Every pause in typing counts, even on the term the last one ended on: after a walk with the arrows, the
+  // same letter typed again goes back to its first option.
   private registerTypeahead(): void {
     this.typeahead$
       .pipe(
         debounceTime(200),
-        distinctUntilChanged(),
         filter(() => this.isFieldFocused()),
         takeUntil(this.destroy$)
       )
