@@ -41,6 +41,14 @@ horizontal: input, textarea, select, dropdown, autocomplete, date, time
    Hints
    Messages
 
+horizontal, with a panel toggle (select, dropdown, date)
+
+  ┌────────────────────────────────────┐     the toggle keeps the edge, and the
+  │ Prefix     value       Suffix  ▾   │     suffix sits between it and the value
+  └────────────────────────────────────┘
+   Hints
+   Messages
+
 horizontal, with the label over the field (inside, inside-placeholder, inside-floating, border, border-prefix)
 
   ┌────────────────────────────────────┐     the label moves into the field, and
@@ -139,7 +147,7 @@ required(path.firstName, { message: 'We need a first name.' });
 
 ## Prefixes And Suffixes
 
-A prefix sits at the field's leading edge and a suffix at its trailing edge, both insetting the value so it never runs under them. Available in the `horizontal` and `inline` layouts.
+A prefix sits at the field's leading edge and a suffix at its trailing edge, both insetting the value so it never runs under them. A panel toggle keeps the trailing edge, and a suffix sits between it and the value, `--formidable-field-suffix-toggle-gap` away from it. Available in the `horizontal` and `inline` layouts.
 
 ### Alignment
 
@@ -169,7 +177,7 @@ Two things every action needs:
 - **`type="button"`**: otherwise it submits the form it sits in.
 - **`(mousedown)="$event.preventDefault()"`**: keeps focus on the field. A click on it still closes an open panel, as any click outside the field's own box does.
 
-The decorator re-measures its slots whenever their width changes, so an action that appears, disappears or swaps its content re-insets the field on its own. There is no refresh call, because none is needed.
+The decorator re-measures its slots whenever their width changes, so an action that appears, disappears or swaps its content re-insets the field on its own, and a panel toggle stays where it is. A slot whose content renders nothing insets nothing, so the `@if` can sit inside it, or inside a component of your own. There is no refresh call, because none is needed.
 
 **Clear**: the button only exists while there is something to clear.
 

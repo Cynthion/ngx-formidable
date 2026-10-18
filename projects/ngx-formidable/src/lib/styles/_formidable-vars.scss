@@ -104,6 +104,9 @@
   --formidable-field-toggle-size: #{tokens.$formidable-field-toggle-size};
   --formidable-field-toggle-inset: 0rem;
 
+  // The space between that toggle and a projected suffix, which sits between it and the value.
+  --formidable-field-suffix-toggle-gap: #{tokens.$formidable-field-suffix-toggle-gap};
+
   // Line-box heights of the two things that share the field's inner height when the label is inside.
   --formidable-field-inner-height: calc(
     var(--formidable-field-height, #{tokens.$formidable-field-height}) - 2 *

@@ -4,6 +4,7 @@ import { page, userEvent } from 'vitest/browser';
 import { FieldLabel } from '../../directives/field-label';
 import { FieldPrefix } from '../../directives/field-prefix';
 import { bindField, BindFieldOptions, BoundField, FieldKind } from '../../testing/bind-field';
+import { theme } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { InputField } from '../fields/input-field/input-field';
 import { FieldDecorator } from './field-decorator';
@@ -155,6 +156,20 @@ describe('formidable-field-decorator layout', () => {
       await expect.element(page.getByRole('button', { name: 'Clear' })).toHaveFocus();
     });
 
+    // Per **Actions**: the Clear example keeps its slot, and renders the button in it only while there is a value.
+    for (const slot of ['Prefix', 'Suffix']) {
+      it(`insets nothing for a ${slot.toLowerCase()} that renders nothing`, async () => {
+        const bound = await bind(
+          'input',
+          `<div formidableField${slot}><button type="button" hidden>Clear</button></div>`
+        );
+        await settle(bound.fixture);
+        const padding = getComputedStyle(textbox());
+
+        expect(padding.paddingLeft).toBe(padding.paddingRight);
+      });
+    }
+
     // Forced, so the click lands where the prefix is drawn, whatever takes it.
     it('keeps a text prefix click-through, so the field takes the click', async () => {
       await bind('input', '<div formidableFieldPrefix>Prefix</div>');
@@ -250,11 +265,38 @@ describe('formidable-field-decorator layout', () => {
       expect(label().right).toBeCloseTo(rect(combobox()).right, 1);
     });
 
-    it('stacks a projected suffix beside the toggle, with the label clear of both', async () => {
-      const bound = await bindPanel('dropdown', '<div formidableFieldSuffix>Suffix</div>');
+    it('reserves only the toggle for a suffix that renders nothing', async () => {
+      const bound = await bindPanel(
+        'dropdown',
+        '<div formidableFieldSuffix><button type="button" hidden>Clear</button></div>'
+      );
+      await settle(bound.fixture);
 
-      expect(rect(text('Suffix')).left).toBeGreaterThanOrEqual(rect(toggle(bound)!).right - 0.5);
-      expect(label().right).toBeLessThanOrEqual(rect(toggle(bound)!).left + 0.5);
+      expect(reserved(bound, combobox())).toBeCloseTo(rect(toggle(bound)!).width, 1);
     });
+
+    // Per **Actions**: a clear button comes and goes with the value, so it sits between the value and the toggle.
+    for (const kind of ['select', 'dropdown', 'date'] as FieldKind[]) {
+      it(`keeps the ${kind} toggle at the edge, and the theme's gap from a suffix that comes and goes`, async () => {
+        // Not the default, so the gap is shown to come from the variable.
+        theme('--formidable-field-suffix-toggle-gap', '12px');
+        const bound = await bindPanel(
+          kind,
+          '<div formidableFieldSuffix><button type="button" hidden>Clear</button></div>'
+        );
+        const clear = bound.element
+          .closest('formidable-field-decorator')!
+          .querySelector<HTMLButtonElement>('[formidableFieldSuffix] button')!;
+        const toggleEdge = () => rect(bound.element).right - rect(toggle(bound)!).right;
+        const before = { toggleEdge: toggleEdge(), labelRight: label().right };
+
+        clear.hidden = false;
+
+        await expect.poll(() => label().right).toBeLessThan(before.labelRight);
+        expect(toggleEdge()).toBeCloseTo(before.toggleEdge, 1);
+        expect(rect(toggle(bound)!).left - rect(clear).right).toBeCloseTo(12, 0);
+        expect(label().right).toBeLessThanOrEqual(rect(clear).left + 0.5);
+      });
+    }
   });
 });
