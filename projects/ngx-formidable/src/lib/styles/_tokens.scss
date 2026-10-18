@@ -82,6 +82,9 @@ $formidable-field-padding-x: utils.rem(16);
 // inner right edge.
 $formidable-field-toggle-size: utils.rem(32);
 
+// The space between that toggle and a projected suffix, which sits between it and the value.
+$formidable-field-suffix-toggle-gap: utils.rem(8);
+
 // Line-box heights of the two things that share the field's inner height when the label is inside.
 $formidable-field-inner-height: $formidable-field-height - 2 * $formidable-field-border-thickness;
 $formidable-field-value-height: $formidable-field-line-height * $formidable-field-font-size;

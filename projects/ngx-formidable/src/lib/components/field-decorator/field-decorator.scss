@@ -22,6 +22,10 @@
 
 :host(.has-in-field-toggle) {
   @include field-toggle-inset-host;
+
+  .suffix-wrapper-horizontal {
+    @include field-suffix-horizontal-toggle;
+  }
 }
 
 // The label lives here rather than in the field, so its state colours are remapped here too — from the

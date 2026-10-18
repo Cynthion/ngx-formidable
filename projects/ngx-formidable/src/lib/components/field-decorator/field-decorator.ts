@@ -308,8 +308,18 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
 
   // Moves the value clear of a prefix/suffix — and an inside label with it, so the two stay aligned.
   private insetValue(): void {
-    this.setInset('prefix', this.prefixWrapper()?.nativeElement.offsetWidth ?? 0);
-    this.setInset('suffix', this.suffixWrapper()?.nativeElement.offsetWidth ?? 0);
+    this.setInset('prefix', this.insetOf(this.prefixWrapper()?.nativeElement));
+    this.setInset('suffix', this.insetOf(this.suffixWrapper()?.nativeElement));
+  }
+
+  // The wrapper's width, its padding included, while anything projected into it renders. A slot whose content
+  // renders nothing, such as an action behind an `@if` inside it, insets nothing: its padding alone is no reason.
+  private insetOf(wrapper: HTMLDivElement | undefined): number {
+    if (!wrapper) return 0;
+
+    const renders = Array.from(wrapper.children).some((child) => child.getBoundingClientRect().width > 0);
+
+    return renders ? wrapper.offsetWidth : 0;
   }
 
   // Removing the property, rather than writing a zero, is what restores the field's own padding.

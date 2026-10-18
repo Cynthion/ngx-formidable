@@ -30,6 +30,11 @@
   @return var(--formidable-field-toggle-size, #{tokens.$formidable-field-toggle-size});
 }
 
+// The space between an in-field panel toggle and a suffix beside it.
+@function field-suffix-toggle-gap() {
+  @return var(--formidable-field-suffix-toggle-gap, #{tokens.$formidable-field-suffix-toggle-gap});
+}
+
 // Internal: one field border. The toggle overlays that measure from a field's border-box need it, for the
 // same reason `field-value-inset` does.
 @function field-border-thickness() {
@@ -537,9 +542,16 @@
 }
 
 // A wrapper `<div>` around a value plus a toggle: the value padding belongs to `.wrapped-input`, so
-// the toggle stays centered in the field's full height.
+// the toggle stays centered in the field's full height. The toggle keeps the field's own padding, and the
+// value stops short of a suffix instead, which `field-suffix-horizontal` places between the two.
 @mixin panel-field {
   @include field-box;
+
+  padding-right: field-padding-x();
+
+  .wrapped-input {
+    margin-right: calc(#{field-padding-right()} - #{field-padding-x()});
+  }
 }
 
 // The flex row inside a wrapper field, hosting `.wrapped-input`.
@@ -619,7 +631,7 @@
   // Centred by the grid, so `.arrow-down`'s own nudge still reads as an offset from the field's middle.
   align-self: center;
   // The grid cell is the host's box; the toggle belongs inside the select's border and padding.
-  margin-right: calc(#{field-border-thickness()} + #{field-padding-right()});
+  margin-right: calc(#{field-border-thickness()} + #{field-padding-x()});
   pointer-events: none;
 }
 
@@ -874,14 +886,20 @@
   z-index: tokens.$formidable-layer-label;
 }
 
-// A suffix and an in-field panel toggle both sit at the field's right edge without colliding: the suffix
-// is measured into the field's own `padding-right`, and the toggle is a flex item inside that padding, so
-// reserving the suffix's width is what moves the toggle left of it. Only the value inset adds the toggle.
+// An in-field panel toggle keeps the field's right edge, and a suffix sits between the value and the
+// toggle: the wrapper moves in by the toggle's inset, which is zero without one. So a suffix that comes,
+// goes or changes width never moves the toggle. The value inset already adds both.
 @mixin field-suffix-horizontal {
   @include field-prefix-horizontal;
 
   left: unset;
-  right: 0;
+  right: field-toggle-inset();
+}
+
+// A suffix beside an in-field panel toggle. Its right padding spans the border and padding the toggle keeps,
+// plus the gap, so the measured suffix inset carries the gap and the value clears it.
+@mixin field-suffix-horizontal-toggle {
+  padding-right: calc(#{field-border-thickness()} + #{field-padding-x()} + #{field-suffix-toggle-gap()});
 }
 
 // A multi-line field top-aligns its value and grows downwards, so centring would drift its prefix/suffix

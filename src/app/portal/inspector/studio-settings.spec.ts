@@ -4,7 +4,7 @@ import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../model/field-capabiliti
 import { PortalFieldKind } from '../model/field-spec.model';
 import { PREVIEW_FIELDS } from '../model/preview-form.definition';
 import { FormDefinitionStore } from '../state/form-definition.store';
-import { editField, openPanel, openStudio } from '../testing/studio';
+import { editField, openPanel, openStudio, settle } from '../testing/studio';
 
 /**
  * Every control in the Studio writes something, and the app defaults reach the preview through the library.
@@ -347,6 +347,46 @@ describe('studio settings', () => {
       await userEvent.click(page.getByRole('button', { name: /^This Field/ }));
       await editField('Pizza');
       await expect.element(prefix()).toHaveValue('none');
+    });
+  });
+
+  // #endregion
+
+  // #region The adornments switch
+
+  /** A prefix or suffix the form hides renders nothing, and the Studio never offers a control that does nothing. */
+  describe('the adornments switch', () => {
+    const adornments = () => page.getByRole('checkbox', { name: 'Adornments' });
+    const suffix = () => page.getByRole('combobox', { name: 'Suffix', exact: true });
+
+    it('turns on once a suffix is picked for every field, and stays off for none', async () => {
+      const fixture = await openStudio();
+      await openPanel('Form', 'Settings', 'The Form');
+
+      await expect.element(adornments()).not.toBeChecked();
+      await userEvent.selectOptions(suffix(), 'button');
+
+      await expect.element(adornments()).toBeChecked();
+      await expect.element(page.getByRole('button', { name: 'Clear', exact: true }).first()).toBeVisible();
+
+      // Hiding them again is the switch's to do, so picking none leaves it alone.
+      await userEvent.click(adornments());
+      await userEvent.selectOptions(suffix(), 'none');
+      await settle(fixture);
+
+      expect(adornments().element()).not.toBeChecked();
+    });
+
+    it('turns on once a suffix is picked for one field', async () => {
+      await openStudio();
+      await openPanel('Form', 'Settings', 'This Field');
+
+      await editField('Pizza');
+      await userEvent.selectOptions(suffix(), 'text');
+
+      await expect
+        .element(page.elementLocator(document.querySelector('portal-stage')!).getByText('Suffix', { exact: true }))
+        .toBeVisible();
     });
   });
 });

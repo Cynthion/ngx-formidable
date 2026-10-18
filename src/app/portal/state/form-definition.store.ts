@@ -15,6 +15,16 @@ import { localeOf } from '../model/locales';
 import { PREVIEW_FORM_DEFINITION } from '../model/preview-form.definition';
 
 /**
+ * The form's options once a decoration patch lands: a prefix or suffix picked while the form hides them would
+ * render nothing, so picking one shows them. A label adornment renders either way.
+ */
+function showingPicked(options: PortalFormOptions, patch: Partial<PortalFieldSpec['decoration']>): PortalFormOptions {
+  const picked = [patch.prefix, patch.suffix].some((slot) => slot !== undefined && slot !== 'none');
+
+  return picked ? { ...options, showAdornments: true } : options;
+}
+
+/**
  * One immutable field-specification tree, plus the form-level options.
  *
  * One signal over the whole tree, not one per input: the renderer tracks by field identity and each field
@@ -133,6 +143,7 @@ export class FormDefinitionStore {
   public setDecorationOnAllFields(patch: Partial<PortalFieldSpec['decoration']>): void {
     this.definition.update((definition) => ({
       ...definition,
+      options: showingPicked(definition.options, patch),
       fields: definition.fields.map((field) => ({ ...field, decoration: { ...field.decoration, ...patch } }))
     }));
   }
@@ -140,6 +151,7 @@ export class FormDefinitionStore {
   public updateDecoration(id: string, patch: Partial<PortalFieldSpec['decoration']>): void {
     this.definition.update((definition) => ({
       ...definition,
+      options: showingPicked(definition.options, patch),
       fields: definition.fields.map((field) =>
         field.id === id ? { ...field, decoration: { ...field.decoration, ...patch } } : field
       )

@@ -359,7 +359,7 @@ One editor, under an `Applies to` switch. The three positions are the three kind
 
 **Every Option Changeable** means: every input in [`user/components.md`](../user/components.md) has a control, states its default and carries its one-line description. Function-typed inputs are offered as named presets rather than a code editor, because their purpose is to demonstrate what the input is for. Object-typed inputs are offered as preset sets.
 
-**Adornments** are content projection rather than inputs, so no app default can supply one. They live in a field's decoration group and, as adornment examples, on `The Form`, each slot offering none, an icon, text or a button.
+**Adornments** are content projection rather than inputs, so no app default can supply one. They live in a field's decoration group and, as adornment examples, on `The Form`, each slot offering none, an icon, text or a button. Picking a prefix or suffix in either place turns the form's `Adornments` switch on, since a slot the form hides would make the picker a control that does nothing.
 
 **App Defaults Are Given To The Preview.** `App Defaults` holds values of its own, because the library renders from them: `AppDefaultsProvider` provides `FORMIDABLE_DEFAULTS` on the preview `<form>` from `FormDefinitionStore.previewDefaults`, so the stage runs the library's resolution rather than a copy of it, and the chrome keeps the library's own. The form's own `revealOn` and `hideRequiredMarkers` are defaults the form scopes over its fields, so they sit over the app defaults there. A field reads its defaults once, when it is created, so a change rebuilds the preview's fields; the field tree survives it.
 

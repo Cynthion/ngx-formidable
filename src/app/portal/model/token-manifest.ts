@@ -282,6 +282,13 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
       "How much of a field's right edge that toggle claims. Raised by the decorator for the fields that have one."
   },
   {
+    name: '--formidable-field-suffix-toggle-gap',
+    group: 'Field Dimensions',
+    control: 'length',
+    class: 'declared',
+    description: 'Space between that toggle and a suffix, which sits between it and the value.'
+  },
+  {
     name: '--formidable-field-inner-height',
     group: 'Field Dimensions',
     control: 'length',

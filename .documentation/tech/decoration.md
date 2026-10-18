@@ -117,20 +117,22 @@ The derived host classes and flags:
 
 A projected prefix or suffix takes horizontal space from inside the field's box. The field's padding and the bounds of a label rendered over its value both have to clear it, and neither is a length the library can know.
 
-The measurement is the wrapper, not the content. Each wrapper shrink-wraps what is projected into it, so the wrapper's own width, its padding included, is the whole inset, and it collapses to zero the moment nothing is projected.
+The measurement is the wrapper, not the content. Each wrapper shrink-wraps what is projected into it, so the wrapper's own width, its padding included, is the whole inset. It is zero while nothing projected into it has a width: nothing projected, or an element that renders nothing, such as the **Clear** action with its `@if` inside the slot. Its padding alone would otherwise inset the value. The empty wrapper stays in place, invisible and click-through, so the `ResizeObserver` sees the content come back.
 
 | Step    | Detail                                                                                        |
 | :------ | :-------------------------------------------------------------------------------------------- |
 | Observe | A `ResizeObserver` on both wrappers, `horizontal` layout only                                 |
 | Run     | Writes custom properties only, so it needs no change-detection pass of its own                |
 | Write   | `--formidable-field-prefix-inset` and `--formidable-field-suffix-inset` on the decorator host |
-| Clear   | `removeProperty` at zero width, not a `0px` write                                             |
+| Clear   | `removeProperty` at zero inset, not a `0px` write                                             |
 
 **`removeProperty` and not `0px`.** Removing the property is what lets the field's own padding apply again; writing a zero would override it with nothing.
 
 `ResizeObserver` covers every way the width moves (content added or removed, a font finishing loading, the wrapper hidden), which a one-off measurement in a lifecycle hook does not.
 
 **The in-field toggle is a class, not a measurement.** An in-field toggle is a fixed-size square at the field's inner trailing edge, so `.has-in-field-toggle` becomes an inset in the stylesheet instead. That also spares a re-measure every time `readonly` or `disabled` adds or removes the toggle. The inset says how much room the field's trailing edge claims, not how the field lays the toggle out: `select-field` overlays its arrow on a native `<select>` rather than placing it beside the value, and declares the same class.
+
+**A suffix sits between the value and the toggle.** The suffix wrapper moves in from the field's edge by the toggle's inset, which is zero without one, and the toggle keeps the field's own padding. So a suffix that comes, goes or changes width, a clear button above all, never moves the toggle: the order MUI, PrimeNG and Chrome's date input use. Beside a toggle, the wrapper's right padding spans the border and padding the toggle keeps plus `--formidable-field-suffix-toggle-gap`, so the measured inset carries the gap and the value clears it with no formula of its own.
 
 ---
 
