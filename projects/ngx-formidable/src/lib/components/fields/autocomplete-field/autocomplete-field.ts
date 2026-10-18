@@ -12,7 +12,7 @@ import {
   untracked,
   viewChild
 } from '@angular/core';
-import { BehaviorSubject, debounceTime, distinctUntilChanged, filter, takeUntil } from 'rxjs';
+import { debounceTime, filter, Subject, takeUntil } from 'rxjs';
 import { replaceText } from '../../../helpers/input.helpers';
 import { applyActionOption, applyDefaultOption } from '../../../helpers/option.helpers';
 import {
@@ -60,26 +60,34 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   protected keyboardCallback = (event: KeyboardEvent) => this.navigatePanelOptions(event, this);
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'Enter'];
 
-  protected filterChangeSubject$ = new BehaviorSubject<string>('');
+  // The user's typing, and nothing else: it opens the panel and picks an exact match.
+  private readonly filterChangeSubject$ = new Subject<string>();
+
+  // The value the input's text follows: the field's own pick or deselect, or the render below. `undefined`
+  // while no option carries the value, so its label is still owed.
+  private syncedValue?: string | null;
 
   constructor() {
     super();
 
     // Renders a model the user did not type: the option's label, or nothing while no option carries it —
-    // which clears the filter, so a consumer who supplies the options can put that option back. Never while
-    // focused: there the typed text is the filter, and the options a consumer fetches for it on every
-    // keystroke would otherwise put the old label back over it, and the field's own narrowing — a deselect,
-    // or a written value re-applied because the list moved — would pull the list out from under the user. A
-    // pick renders its own label.
+    // which clears the filter, so a consumer who supplies the options can put that option back, and the label
+    // follows once they do. While focused, only for a value written from outside, such as a clear button that
+    // keeps focus on the field, and for the label such a value still owes: otherwise the typed text is the
+    // filter, and the options a consumer fetches for it on every keystroke would put the old label back over
+    // it, and the field's own narrowing — a deselect, or a written value re-applied because the list moved —
+    // would pull the list out from under the user. A pick renders its own label.
     afterRenderEffect(() => {
-      this.value();
+      const value = this.value();
       const selected = this.selectedOption();
 
       untracked(() => {
         const input = this.inputRef().nativeElement;
-        const text = selected ? selected.label || selected.value : '';
+        const text = this.selectedLabel();
+        const isOwed = value !== this.syncedValue;
 
-        if (this.isFieldFocused() || input.value === text) return;
+        this.syncedValue = selected ? value : undefined;
+        if ((this.isFieldFocused() && !isOwed) || input.value === text) return;
 
         input.value = text;
         this.setFilterText(text);
@@ -94,6 +102,10 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
 
   protected onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value ?? '';
+
+    // Typed past the picked label, it lets the pick go at once: a field left within the debounce would keep
+    // it, and so would one whose list has already dropped its option.
+    if (value !== this.selectedLabel()) this.deselectOption();
 
     // The user's own typing, which always reports — it is the filter.
     this.filterChangeSubject$.next(value);
@@ -145,8 +157,9 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   // drift: the field holds a value whose option the consumer has filtered out, and has nothing left to
   // display it with. That is the second lap of an `actionOption` round trip, where the created option
   // carries a label the text typed to find it does not match.
+  //
+  // Not typing, so it neither opens the panel nor picks.
   private setFilterText(value: string): void {
-    this.filterChangeSubject$.next(value);
     this.filterText.set(value);
     this.filterChange.emit(value);
   }
@@ -172,6 +185,13 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   protected readonly selectedOption = computed(() =>
     this.computeSelectableOptions(this.allOptions()).find((option) => option.value === this.value())
   );
+
+  // The text the selection renders: its label, else its value, and nothing while no option carries it.
+  private readonly selectedLabel = computed(() => {
+    const selected = this.selectedOption();
+
+    return selected ? selected.label || selected.value : '';
+  });
 
   protected readonly hasSelectableOptions = computed(() =>
     this.activeOptions().some((option) => !this.isActionOption(option))
@@ -217,9 +237,14 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     this.togglePanel(false);
   }
 
+  protected override setValue(value: string | null): void {
+    this.syncedValue = value;
+    super.setValue(value);
+  }
+
   private deselectOption(): void {
-    // only do work if there actually was a selection
-    if (!this.selectedOption()) return;
+    // only do work if there actually was a selection, carried by the list or not
+    if (this.value() === null) return;
 
     this.setHighlightedIndex(-1);
     this.setValue(null);
@@ -247,7 +272,7 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   }
 
   private updateFilteredOptions(allOptions: FormidableOption[]): void {
-    const filterValue = this.filterChangeSubject$.value;
+    const filterValue = this.filterText();
 
     const filteredOptions = filterValue
       ? allOptions.filter((opt) =>
@@ -304,23 +329,16 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
 
   // #endregion
 
+  // Every pause in typing counts, even on the text the last one ended on: after an outside clear, the same
+  // word typed again is new to the field.
   private registerAutocomplete(): void {
     this.filterChangeSubject$
       .pipe(
         debounceTime(200),
-        distinctUntilChanged(),
         filter(() => this.isFieldFocused()),
         takeUntil(this.destroy$)
       )
       .subscribe(() => {
-        const typed = this.inputRef().nativeElement.value ?? '';
-        const selectedLabel = this.selectedOption()?.label ?? '';
-
-        // only deselect if the user actually diverged from the selected label
-        if (this.selectedOption() && typed !== selectedLabel) {
-          this.deselectOption(); // no clearInput
-        }
-
         const allOptions = this.computeAllOptions();
 
         this.updateFilteredOptions(allOptions);
