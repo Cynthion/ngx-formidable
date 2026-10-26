@@ -3,7 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { page, userEvent } from 'vitest/browser';
 import { FieldLabel } from '../../directives/field-label';
+import { FieldSuffix } from '../../directives/field-suffix';
 import { FormidableOption } from '../../models/formidable.model';
+import { bindField } from '../../testing/bind-field';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldDecorator } from '../field-decorator/field-decorator';
 import { AutocompleteField } from './autocomplete-field/autocomplete-field';
@@ -24,6 +26,10 @@ import { AutocompleteField } from './autocomplete-field/autocomplete-field';
  * A write from outside lands whether the field is focused or not: a clear button that keeps focus on the field,
  * per **Actions** in `user/decoration.md`, writes while the field is the user's.
  *
+ * The filter is a model of its own, bound two-way here, so a write reaches the field just as the value's does.
+ * That is the only way to empty text typed without a pick, per **The Filter Is Writable** in `user/fields.md`:
+ * the value is `null` already, and writing it again changes nothing.
+ *
  * The user types for real, and leaves by `Tab` for the button after the field.
  */
 
@@ -33,7 +39,7 @@ const ADDRESSES: FormidableOption[] = [
 ];
 
 @Component({
-  imports: [FormsModule, AutocompleteField, FieldDecorator, FieldLabel],
+  imports: [FormsModule, AutocompleteField, FieldDecorator, FieldLabel, FieldSuffix],
   template: `
     <form>
       <formidable-field-decorator>
@@ -41,8 +47,18 @@ const ADDRESSES: FormidableOption[] = [
           name="address"
           [options]="visibleOptions()"
           [(ngModel)]="address"
-          (filterChange)="filter.set($event)" />
+          [(filter)]="filter" />
         <div formidableFieldLabel>Address</div>
+        <div formidableFieldSuffix>
+          <!-- Out of the tab order, so Tab leaves the field for Next. -->
+          <button
+            type="button"
+            tabindex="-1"
+            (mousedown)="$event.preventDefault()"
+            (click)="clear()">
+            Clear
+          </button>
+        </div>
       </formidable-field-decorator>
       <button type="button">Next</button>
     </form>
@@ -59,13 +75,19 @@ class FilteringHost {
 
     return filter ? this.all().filter((option) => option.label!.toLowerCase().includes(filter)) : this.all();
   });
+
+  /** A search box's clear: the pick and the text typed to find it, as **Actions** in `user/decoration.md` writes it. */
+  clear(): void {
+    this.address.set(null);
+    this.filter.set('');
+  }
 }
+
+const combobox = () => page.getByRole('combobox', { name: 'Address' });
 
 describe('autocomplete filter sync', () => {
   let fixture: ComponentFixture<FilteringHost>;
   let host: FilteringHost;
-
-  const combobox = () => page.getByRole('combobox', { name: 'Address' });
 
   /** The option the field marks as holding its value, though its panel is closed. */
   const selected = () => page.getByRole('option', { selected: true, includeHidden: true });
@@ -199,5 +221,65 @@ describe('autocomplete filter sync', () => {
 
     await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
     expect(host.address()).toBe('seefeld');
+  });
+
+  it('empties text typed without a pick when cleared, focus kept', async () => {
+    await search('xyz');
+    expect(host.address()).toBeNull();
+
+    await userEvent.click(page.getByRole('button', { name: 'Clear' }));
+    await settle(fixture, 200);
+
+    await expect.element(combobox()).toHaveFocus();
+    await expect.element(combobox()).toHaveValue('');
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('opens no panel for a pause in typing that a clear has overtaken', async () => {
+    await userEvent.click(combobox());
+    await userEvent.keyboard('xy');
+    // Inside the pause the field waits for, which a trusted click cannot be relied on to land in.
+    host.filter.set('');
+    await settle(fixture, 200);
+
+    await expect.element(combobox()).toHaveValue('');
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('leaves the pick in the model when only the filter is written', async () => {
+    await search('Seefeldstrasse 40');
+    expect(host.address()).toBe('seefeld');
+    await userEvent.keyboard('{Escape}');
+
+    host.filter.set('');
+    await settle(fixture, 200);
+
+    await expect.element(combobox()).toHaveValue('');
+    expect(host.address()).toBe('seefeld');
+  });
+});
+
+// The field's own filtering, with no consumer narrowing the list for it.
+describe('autocomplete filter written before the user types', () => {
+  beforeEach(() => {
+    configureFormidableTestBed();
+    (document.activeElement as HTMLElement | null)?.blur();
+  });
+
+  it('shows the filter and narrows the list by it', async () => {
+    const field = await bindField('autocomplete', 'signal', {
+      inputs: { options: ADDRESSES, filter: '' },
+      decorated: true,
+      decoration: '<div formidableFieldLabel>Address</div>'
+    });
+
+    await field.set('filter', 'Lang');
+    await expect.element(combobox()).toHaveValue('Lang');
+
+    await userEvent.click(combobox());
+    await userEvent.keyboard('{ArrowDown}');
+
+    await expect.element(page.getByRole('option', { name: 'Langstrasse 84' })).toBeVisible();
+    await expect.element(page.getByRole('option', { name: 'Seefeldstrasse 40' })).not.toBeInTheDocument();
   });
 });

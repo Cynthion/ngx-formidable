@@ -187,14 +187,15 @@ Typing highlights the first option whose label starts with what was typed, see *
 
 | Input              | Type                     | Default     | Description                                                                        |
 | :----------------- | :----------------------- | :---------- | :--------------------------------------------------------------------------------- |
+| `filter`           | `string`                 | `''`        | The filter text the list is narrowed by, bound two-way as `[(filter)]`             |
 | `actionOption`     | `FormidableActionOption` | `undefined` | An entry at the end of the list that runs its `action` instead of becoming a value |
 | `actionOptionMode` | `FieldDefaultOptionMode` | `'always'`  | `'always'`, or `'fallback'`: only while the list would be empty                    |
 
-| Output         | Emits    | When                                                          |
-| :------------- | :------- | :------------------------------------------------------------ |
-| `filterChange` | `string` | The user types, or the field moves its filter while unfocused |
+| Output         | Emits    | When                                                                                                             |
+| :------------- | :------- | :--------------------------------------------------------------------------------------------------------------- |
+| `filterChange` | `string` | The filter changes: the user types, or a value written from outside moves it. Not for a write through `[filter]` |
 
-Typing filters the list by each option's `match`, by default a case-insensitive substring of its label. Only an option can be committed: free text is not a value. The default option and the action entry are applied after filtering, so both stay visible when nothing matches. What `filterChange` reports is in **Options** in [Fields](fields.md).
+Typing filters the list by each option's `match`, by default a case-insensitive substring of its label. Only an option can be committed: free text is not a value. The default option and the action entry are applied after filtering, so both stay visible when nothing matches. `filter` is writable, which is how a clear button empties text typed without a pick. What `filterChange` reports, and what a write to `filter` does, is in **Options** in [Fields](fields.md).
 
 ### Date Field
 

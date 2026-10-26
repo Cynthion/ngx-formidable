@@ -56,17 +56,6 @@
   "markdownlint.lintWorkspaceGlobs": ["**/*.md", "!**/node_modules/**", "!.plan/**", "!.research/**"],
 
   // Peacock
-  "peacock.color": "#dd0531",
-  "peacock.affectActivityBar": false,
-  "peacock.affectStatusBar": false,
-  "peacock.affectDebuggingStatusBar": true,
-  "peacock.affectTitleBar": true,
-  "peacock.affectEditorGroupBorder": false,
-  "peacock.affectPanelBorder": false,
-  "peacock.affectSideBarBorder": false,
-  "peacock.affectSashHover": false,
-  "peacock.affectStatusAndTitleBorders": false,
-  "peacock.affectTabActiveBorder": false,
   "workbench.colorCustomizations": {
     "commandCenter.border": "#e7e7e799",
     "titleBar.activeBackground": "#dd0531",

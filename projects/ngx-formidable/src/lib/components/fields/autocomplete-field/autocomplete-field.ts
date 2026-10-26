@@ -7,7 +7,6 @@ import {
   input,
   model,
   OnInit,
-  output,
   signal,
   untracked,
   viewChild
@@ -93,6 +92,21 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
         this.setFilterText(text);
       });
     });
+
+    // Renders a filter written from outside, such as a clear button's. The field's own writes leave the input
+    // holding the filter already. Trap: not part of the render above, which a pick re-runs: a pick leaves the
+    // input on the label and the filter on what was typed, and must keep the label.
+    afterRenderEffect(() => {
+      const text = this.filter();
+
+      untracked(() => {
+        const input = this.inputRef().nativeElement;
+        if (input.value === text) return;
+
+        input.value = text;
+        this.updateFilteredOptions(this.allOptions());
+      });
+    });
   }
 
   override ngOnInit(): void {
@@ -107,10 +121,9 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     // it, and so would one whose list has already dropped its option.
     if (value !== this.selectedLabel()) this.deselectOption();
 
-    // The user's own typing, which always reports — it is the filter.
+    // The user's own typing is the filter, reported whenever it changes.
     this.filterChangeSubject$.next(value);
-    this.filterText.set(value);
-    this.filterChange.emit(value);
+    this.filter.set(value);
   }
 
   protected doOnFocusChange(isFocused: boolean): void {
@@ -128,7 +141,7 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   public readonly value = model<string | null>(null);
 
   // Whatever the input shows counts — the filter being typed as much as a picked label.
-  protected override readonly isFieldFilled = computed(() => this.filterText().length > 0);
+  protected override readonly isFieldFilled = computed(() => this.filter().length > 0);
 
   get fieldRef(): ElementRef<HTMLElement> {
     return this.autocompleteRef() as ElementRef<HTMLElement>;
@@ -144,10 +157,13 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
 
   // #region Autocomplete
 
-  /** The filter text, so options can be fetched for it rather than filtered out of a list already bound. */
-  public readonly filterChange = output<string>();
-
-  private readonly filterText = signal('');
+  /**
+   * The filter text the list is narrowed by: what the user types, or what a value written from outside moves it
+   * to. After a pick the input shows the label and the filter keeps what was typed. `filterChange` reports each
+   * change, so options can be fetched for it. Write it to seed or empty the text: a write opens no panel and
+   * picks nothing, so a clear button writes the value too.
+   */
+  public readonly filter = model('');
 
   // The filter text the field moved on its own, rather than the user typing it.
   //
@@ -160,8 +176,7 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   //
   // Not typing, so it neither opens the panel nor picks.
   private setFilterText(value: string): void {
-    this.filterText.set(value);
-    this.filterChange.emit(value);
+    this.filter.set(value);
   }
 
   // #endregion
@@ -272,7 +287,7 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   }
 
   private updateFilteredOptions(allOptions: FormidableOption[]): void {
-    const filterValue = this.filterText();
+    const filterValue = this.filter();
 
     const filteredOptions = filterValue
       ? allOptions.filter((opt) =>
@@ -330,12 +345,13 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   // #endregion
 
   // Every pause in typing counts, even on the text the last one ended on: after an outside clear, the same
-  // word typed again is new to the field.
+  // word typed again is new to the field. A pause whose text a write from outside has since replaced does not,
+  // or a clear inside the debounce would open the panel over the emptied field.
   private registerAutocomplete(): void {
     this.filterChangeSubject$
       .pipe(
         debounceTime(200),
-        filter(() => this.isFieldFocused()),
+        filter((typed) => typed === this.filter() && this.isFieldFocused()),
         takeUntil(this.destroy$)
       )
       .subscribe(() => {

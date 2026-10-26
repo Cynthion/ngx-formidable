@@ -212,6 +212,31 @@ describe('portal', () => {
     }
   });
 
+  // Text typed without a pick is not the value, which is `null` already, so the button empties the filter too.
+  it('clears a field from its suffix button, a pick and text typed without one alike', async () => {
+    await openStudio();
+    await openPanel('Form', 'Settings', 'The Form');
+    await userEvent.selectOptions(page.getByRole('combobox', { name: 'Suffix', exact: true }), 'button');
+
+    const address = page.getByRole('combobox', { name: 'Delivery Address' });
+    // By position: a locator scoped to the field's decorator would match on its text, which the clear changes.
+    const clears = page.getByRole('button', { name: 'Clear', exact: true });
+    const own = address.element().closest('formidable-field-decorator')!.querySelector('button')!;
+    const clear = clears.nth(clears.elements().indexOf(own));
+
+    await userEvent.click(clear);
+    await expect.element(address).toHaveValue('');
+    await expect.poll(async () => (await model())['address']).toBeNull();
+
+    await userEvent.click(address);
+    await userEvent.keyboard('xy');
+    await expect.element(address).toHaveValue('xy');
+    await userEvent.click(clear);
+
+    await expect.element(address).toHaveValue('');
+    await expect.element(address).toHaveFocus();
+  });
+
   // The template picker: choosing a pizza writes the two fields it stands for and leaves every other alone,
   // and a later edit to one of those fields is not undone — a pizza is a starting point, not a lock.
   it('applies a pizza’s preset when the user picks it, and does not re-apply it afterwards', async () => {

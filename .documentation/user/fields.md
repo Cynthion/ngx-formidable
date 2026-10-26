@@ -97,6 +97,8 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 **`filterChange` Reports More Than Typing**: a value written from outside, focused or not, takes the text and the filter with it: to its option's label, or to nothing while no option carries the value. Those moves are reported too, so the list you supply can follow the value the field was given. Without them, a value written from outside names an option your filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under whoever is typing.
 
+**The Filter Is Writable**: `filter` is a model, so `[(filter)]` keeps a signal of yours in step with it, and your write reaches the field. Seed it, or empty it. A write is not typing: it opens no panel and picks nothing. Nor is the filter the input's text: after a pick the input shows the label, and the filter keeps what was typed to find it. So a clear button writes both, the value to empty a pick and the filter to empty text typed without one. While nothing is picked the value is `null` already, and writing it alone changes nothing. The button is **Clear** under **Actions** in [Decoration](decoration.md).
+
 **An Action Row Is Not A Value**: `dropdown-field` and `autocomplete-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. What the action does is entirely yours; the field closes its panel, runs it and touches nothing else. The following is an example.
 
 ```ts

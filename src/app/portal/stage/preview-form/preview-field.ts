@@ -32,7 +32,7 @@ import { describeFieldSettings } from '../../helpers/field-summary';
 import { filterOptions } from '../../helpers/fuzzy.helpers';
 import { AccessibilityReadout } from '../accessibility/accessibility-readout';
 import { CALENDAR_SVG, MARKER_SVG, SPARK_SVG } from './preview-icons';
-import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabilities';
+import { emptyValueOf, FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabilities';
 import { PortalFieldSpec, PortalFormOptions, PortalOptionSpec } from '../../model/field-spec.model';
 import { localeOf } from '../../model/locales';
 
@@ -201,8 +201,15 @@ export class PreviewField {
   protected readonly thumbLabelFn = computed(() => this.formatter(this.spec().thumbLabelFormat));
   protected readonly tickLabelFn = computed(() => this.formatter(this.spec().tickLabelFormat));
 
-  /** An autocomplete emits its filter text and the consumer supplies the filtered list. */
+  /** An autocomplete's filter text, bound two-way: the consumer supplies the filtered list, and its clear empties it. */
   protected readonly filterText = signal('');
+
+  /** A clear writes nothing the user could not: none for a readonly or disabled field. */
+  protected readonly canClear = computed(() => {
+    const state = this.fieldTree()();
+
+    return !state.readonly() && !state.disabled();
+  });
 
   /**
    * The narrowed list the autocomplete renders, with the match runs its projected option marks.
@@ -218,6 +225,12 @@ export class PreviewField {
   // Each option's `match`. The list is already the strategy's result, and the field's default substring test
   // would drop whatever it found beyond a substring of the label: a typo, a subtitle.
   protected readonly matchesEveryFilter = (): boolean => true;
+
+  /** The suffix's clear button: the value back to its empty value, and an autocomplete's typed text with it. */
+  protected clear(): void {
+    this.fieldTree()().value.set(emptyValueOf(this.spec()));
+    this.filterText.set('');
+  }
 
   protected onFocus(): void {
     this.focused.emit(this.spec().id);

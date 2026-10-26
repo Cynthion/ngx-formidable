@@ -74,8 +74,8 @@
     [sortFn]="sortFn()"
     [panelPosition]="panelPosition()"
     [formField]="$any(fieldTree())"
+    [(filter)]="filterText"
     (valueChange)="picked.emit($event)"
-    (filterChange)="filterText.set($event)"
     (focusin)="onFocus()">
     <!-- A custom option component: the field reads the plain option it provides and renders its template. -->
     @for (match of fuzzyMatches(); track match.option.value) {
@@ -223,7 +223,13 @@
       [svg]="sparkSvg"
       [size]="16" />
     } @case ('button') {
-    <button type="button">Clear</button>
+    <button
+      type="button"
+      [disabled]="!canClear()"
+      (mousedown)="$event.preventDefault()"
+      (click)="clear()">
+      Clear
+    </button>
     } @default { Suffix } }
   </div>
   } @if (showHint()) {

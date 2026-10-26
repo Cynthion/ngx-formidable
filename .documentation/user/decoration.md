@@ -194,6 +194,27 @@ The decorator re-measures its slots whenever their width changes, so an action t
 </div>
 ```
 
+**Clear A Search**: an autocomplete also holds text typed without a pick, which only its `filter` empties. The button writes both, see **The Filter Is Writable** in [Fields](fields.md).
+
+```html
+<formidable-field-decorator>
+  <formidable-autocomplete-field
+    #search
+    [options]="addresses"
+    [formField]="form.address" />
+  <div formidableFieldSuffix>
+    @if (form.address().value() || search.filter()) {
+    <button
+      type="button"
+      (mousedown)="$event.preventDefault()"
+      (click)="form.address().value.set(null); search.filter.set('')">
+      &times;
+    </button>
+    }
+  </div>
+</formidable-field-decorator>
+```
+
 **Copy**:
 
 ```html
