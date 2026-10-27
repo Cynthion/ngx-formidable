@@ -16,7 +16,6 @@ External:
 
 Internal:
 
-- **Label Rests Over A Keyboard Pick**: an autocomplete picked by `ArrowDown`, `ArrowDown`, `Enter` with nothing typed keeps its `filter` at `''`. Its `isFieldFilled` reads only the filter, so once the field is left an `inside` label rests over the picked label. Probed with trusted keys in a decorated field. A pick by click with nothing typed is not probed. `isFieldFilled` should also count a selected option, proven first by a spec in `autocomplete-filter-sync.spec.ts`.
 - **Toggle Icon On The Date Field Only**: the README lists `formidableFieldToggleIcon` with the decoration directives, but only `date-field` projects it. `dropdown-field` has no `ng-content`, so a projected toggle icon is dropped without a warning, and `select-field` draws its arrow unconditionally. A consumer with its own icon set cannot replace a dropdown's chevron. Project `[formidableFieldToggleIcon]` in `dropdown-field` the way `date-field` does, and in `select-field` if its overlaid arrow allows it, or state in the README which fields take it. The comment on the `dropdown-toggle` mixin in `_forms.scss` also names the autocomplete field, which has no toggle.
 
 ## Features

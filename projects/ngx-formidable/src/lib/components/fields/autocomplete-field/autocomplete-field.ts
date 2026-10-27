@@ -140,8 +140,9 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   /** The picked option's value, or `null` for none. Free text is not a value. */
   public readonly value = model<string | null>(null);
 
-  // Whatever the input shows counts — the filter being typed as much as a picked label.
-  protected override readonly isFieldFilled = computed(() => this.filter().length > 0);
+  // Whatever the input shows counts: the filter being typed, or a picked label, which a pick from the list
+  // renders with nothing typed.
+  protected override readonly isFieldFilled = computed(() => this.filter().length > 0 || !!this.selectedOption());
 
   get fieldRef(): ElementRef<HTMLElement> {
     return this.autocompleteRef() as ElementRef<HTMLElement>;
