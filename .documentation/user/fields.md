@@ -97,6 +97,8 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 **`filterChange` Reports More Than Typing**: a value written from outside, focused or not, takes the text and the filter with it: to its option's label, or to nothing while no option carries the value. Those moves are reported too, so the list you supply can follow the value the field was given. Without them, a value written from outside names an option your filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under whoever is typing.
 
+**The Filter Is Writable**: `filter` is a model, so `[(filter)]` keeps a signal of yours in step with it, and your write reaches the field. Seed it, or empty it. A write is not typing: it opens no panel and picks nothing. Nor is the filter the input's text: after a pick the input shows the label, and the filter keeps what was typed to find it. So a clear button writes both, the value to empty a pick and the filter to empty text typed without one. While nothing is picked the value is `null` already, and writing it alone changes nothing. The button is **Clear** under **Actions** in [Decoration](decoration.md).
+
 **An Action Row Is Not A Value**: `dropdown-field` and `autocomplete-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. What the action does is entirely yours; the field closes its panel, runs it and touches nothing else. The following is an example.
 
 ```ts
@@ -199,7 +201,7 @@ The autocomplete has no buffer: what is typed is its filter, and typing an optio
 
 `ArrowUp` and `ArrowDown` step the segment under the caret and leave it selected, so repeated arrows stay on it and the next digit typed replaces it.
 
-- **An Empty Field Is Seeded First**: a date with `defaultDate`, else today, kept within `minDate` and `maxDate`; a time with midnight. So the arrows alone can fill one.
+- **The First Arrow Fills An Empty Field**: `ArrowUp` and `ArrowDown` alike, a date with `defaultDate`, else today, kept within `minDate` and `maxDate`; a time with the current time, to the format's precision. The arrows step from there.
 - **A Date Step Past A Limit Is Refused**: a step that would leave `minDate` or `maxDate` is refused rather than clamped.
 - **A Plain `ArrowDown` Does Not Open The Date Panel**: `Alt` plus the arrows works the panel, per the ARIA combobox pattern.
 
@@ -219,6 +221,7 @@ A focused empty field always shows underscore slots, because the mask's caret ar
 - **Typed Text Commits On Blur**: a half-typed date is not a date, so what is typed reaches the model on blur or on `Enter`. The arrow keys and the calendar commit at once.
 - **Text That Does Not Parse Stays As Typed**: the model keeps its value, and the field reports a `parse` error to whichever forms API binds it, which the decorator renders once revealed. Text that parses again drops it.
 - **Emptying The Text Commits `null`**: at once, with no error.
+- **A Clear Button Calls `clear()`**: text typed but not committed is not the value, so while the model is `null` already, writing `null` changes nothing, and the text commits on the next blur. `clear()` commits `null` as the user's edit and drops that text with its `parse` error. The button is **Clear** under **Actions** in [Decoration](decoration.md).
 - **A Commit Writes One Part**: a date field writes its day at local midnight, a time field its time on 1 January 1970. A value your code writes keeps its other part until the user commits.
 - **Names Are Read In Any Case**: `15 dec 2024` parses against `dd MMM yyyy`, and `02:30 pm` against `hh:mm a`. The commit shows the format's own case, `15 Dec 2024` and `02:30 PM`.
 - **A Date Format Without A Year Takes 2000**: a leap year, so `29.02` parses against `dd.MM`. One without a month takes January.

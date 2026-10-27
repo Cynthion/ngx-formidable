@@ -33,6 +33,11 @@ export const Filled: Story = {
   args: { value: 'blue' }
 };
 
+/** Text typed without a pick: the filter, which is not a value. */
+export const FilterTyped: Story = {
+  args: { filter: 'bl' }
+};
+
 export const StateDisabled: Story = {
   args: { value: 'blue', disabled: true }
 };

@@ -194,6 +194,45 @@ The decorator re-measures its slots whenever their width changes, so an action t
 </div>
 ```
 
+**Clear A Search**: an autocomplete also holds text typed without a pick, which only its `filter` empties. The button writes both, see **The Filter Is Writable** in [Fields](fields.md).
+
+```html
+<formidable-field-decorator>
+  <formidable-autocomplete-field
+    #search
+    [options]="addresses"
+    [formField]="form.address" />
+  <div formidableFieldSuffix>
+    @if (form.address().value() || search.filter()) {
+    <button
+      type="button"
+      (mousedown)="$event.preventDefault()"
+      (click)="form.address().value.set(null); search.filter.set('')">
+      &times;
+    </button>
+    }
+  </div>
+</formidable-field-decorator>
+```
+
+**Clear A Date Or Time**: a date or time field also holds text typed but not committed, which writing `null` misses while the model is `null` already. Its `clear()` drops both, see **Dates And Times** in [Fields](fields.md). That text is not visible from outside, so the button stays.
+
+```html
+<formidable-field-decorator>
+  <formidable-date-field
+    #when
+    [formField]="form.when" />
+  <div formidableFieldSuffix>
+    <button
+      type="button"
+      (mousedown)="$event.preventDefault()"
+      (click)="when.clear()">
+      &times;
+    </button>
+  </div>
+</formidable-field-decorator>
+```
+
 **Copy**:
 
 ```html

@@ -235,6 +235,27 @@ describe('formidableFieldLabel [position]', () => {
 
       expect(floats()).toBe(false);
     });
+
+    // Nothing typed: the picked label is all the value area holds.
+    it('keeps floating over an autocomplete picked from the keyboard and left', async () => {
+      const field = await bind('inside', {
+        kind: 'autocomplete',
+        inputs: { options: [{ value: 'a', label: 'Alpha' }] }
+      });
+      const combobox = page.getByRole('combobox', { name: 'Name' });
+
+      await userEvent.click(combobox);
+      await userEvent.keyboard('{ArrowDown}');
+      await expect.element(combobox).toHaveAttribute('aria-expanded', 'true');
+      await userEvent.keyboard('{ArrowDown}');
+      await userEvent.keyboard('{Enter}');
+      await expect.element(combobox).toHaveValue('Alpha');
+      await userEvent.tab();
+      await expect.element(page.getByRole('button', { name: 'Next' })).toHaveFocus();
+      await settle(field.fixture);
+
+      expect(floats(combobox.element() as HTMLInputElement)).toBe(true);
+    });
   });
 
   // The one position that does not yield the value area to the placeholder: the label takes its place

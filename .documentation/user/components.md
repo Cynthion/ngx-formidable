@@ -3,14 +3,14 @@
 Every public component, directive, token and type, and what each accepts. How the fields behave is taught in the guides linked from each entry.
 
 - **Standalone And `OnPush`**: every component, with no exception.
-- **Signal Inputs And Outputs**: every input is a signal `input()` and every output an `output()`. A template binds them as usual (`[readonly]="…"`, `(touch)="…"`), so the tables list the value a binding takes.
+- **Signal Inputs And Outputs**: every input is a signal `input()` and every output an `output()`, except `value` and the autocomplete's `filter`, which are a `model()` whose output is `valueChange` and `filterChange`. A template binds them as usual (`[readonly]="…"`, `(touch)="…"`), so the tables list the value a binding takes.
 - **Shared Inputs Are Listed Once**: a field's entry lists only its own inputs, and names the shared groups it takes.
 
-| From Code           | How                                                                                                      |
-| :------------------ | :------------------------------------------------------------------------------------------------------- |
-| Read an input       | Call it: `field.readonly()`                                                                              |
-| Write an input      | `componentRef.setInput('readonly', true)`. `value` is a `model()`, so `field.value.set(…)` works as well |
-| Listen to an output | `output.subscribe(callback)`, or `outputToObservable(output)` from `@angular/core/rxjs-interop` for RxJS |
+| From Code           | How                                                                                                                                                                                    |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Read an input       | Call it: `field.readonly()`                                                                                                                                                            |
+| Write an input      | `componentRef.setInput('readonly', true)`. A `model()` is set directly: `field.value.set(…)`, `field.filter.set('')`                                                                   |
+| Listen to an output | `output.subscribe(callback)`, or `outputToObservable(output)` from `@angular/core/rxjs-interop` for RxJS. A `model()`'s output is the model itself: `field.filter.subscribe(callback)` |
 
 ---
 
@@ -131,6 +131,8 @@ Taken by `date-field` and `time-field`.
 | `unicodeTokenFormat` | `string`              | `'yyyy-MM-dd'`, time `'HH.mm'` | The date-fns token string the field masks, parses and formats with |
 | `emptyHint`          | `FormidableEmptyHint` | `'underscores'`                | What an empty, unfocused field shows                               |
 
+`clear()` empties the field as the user's edit, text typed but not committed included.
+
 A date format takes the fixed-width tokens `yy`, `yyyy`, `MM`, `MMM` and `dd`, a time format `HH`, `hh`, `mm`, `ss`, `a` and `aa`, with any separators or none, such as `dd.MM.yyyy` or `yyyyMMdd`. The mask has one slot per character, so a variable-width token such as `d` or `MMMM`, quoted text, and a format with no token at all log a warning and fall back to the default. So does `a` or `aa` right before a dot, which date-fns reads as part of the AM/PM. Committing, parse errors and the arrow keys are in **Dates And Times** in [Fields](fields.md).
 
 ### Panel Inputs
@@ -187,14 +189,15 @@ Typing highlights the first option whose label starts with what was typed, see *
 
 | Input              | Type                     | Default     | Description                                                                        |
 | :----------------- | :----------------------- | :---------- | :--------------------------------------------------------------------------------- |
+| `filter`           | `string`                 | `''`        | The filter text the list is narrowed by, bound two-way as `[(filter)]`             |
 | `actionOption`     | `FormidableActionOption` | `undefined` | An entry at the end of the list that runs its `action` instead of becoming a value |
 | `actionOptionMode` | `FieldDefaultOptionMode` | `'always'`  | `'always'`, or `'fallback'`: only while the list would be empty                    |
 
-| Output         | Emits    | When                                                          |
-| :------------- | :------- | :------------------------------------------------------------ |
-| `filterChange` | `string` | The user types, or the field moves its filter while unfocused |
+| Output         | Emits    | When                                                                                                             |
+| :------------- | :------- | :--------------------------------------------------------------------------------------------------------------- |
+| `filterChange` | `string` | The filter changes: the user types, or a value written from outside moves it. Not for a write through `[filter]` |
 
-Typing filters the list by each option's `match`, by default a case-insensitive substring of its label. Only an option can be committed: free text is not a value. The default option and the action entry are applied after filtering, so both stay visible when nothing matches. What `filterChange` reports is in **Options** in [Fields](fields.md).
+Typing filters the list by each option's `match`, by default a case-insensitive substring of its label. Only an option can be committed: free text is not a value. The default option and the action entry are applied after filtering, so both stay visible when nothing matches. `filter` is writable, which is how a clear button empties text typed without a pick. What `filterChange` reports, and what a write to `filter` does, is in **Options** in [Fields](fields.md).
 
 ### Date Field
 
@@ -206,7 +209,7 @@ The calendar is Pikaday. These inputs are passed to it under the same names, and
 | :------------------------------------------- | :------------------------ | :--------------------------------- | :----------------------------------------------------------------------------- |
 | `minDate`                                    | `Date`                    | `undefined`                        | Earliest selectable date. An arrow step past it is refused                     |
 | `maxDate`                                    | `Date`                    | `undefined`                        | Latest selectable date. An arrow step past it is refused                       |
-| `defaultDate`                                | `Date`                    | Today, within `minDate`, `maxDate` | Where the calendar opens and an arrow key steps from while empty               |
+| `defaultDate`                                | `Date`                    | Today, within `minDate`, `maxDate` | Where the calendar opens and what the first arrow key fills while empty        |
 | `setDefaultDate`                             | `boolean`                 | `true`                             | Pikaday's `setDefaultDate`                                                     |
 | `firstDay`                                   | `number`                  | `1`                                | First day of the week, `0` for Sunday                                          |
 | `disableWeekends`                            | `boolean`                 | `false`                            | Makes Saturdays and Sundays unselectable                                       |

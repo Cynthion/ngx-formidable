@@ -37,7 +37,7 @@ import { BaseField } from './base-field';
  *
  * Typing commits on blur, because a half-typed date is not a date. Text that does not parse stays as typed,
  * reports a `parse` error to whichever forms API binds the field, and leaves the model alone. Emptying the text
- * commits `null` at once, so the arrows step from the default again.
+ * commits `null` at once, so the first arrow fills the field from its seed again.
  */
 @Directive()
 export abstract class BaseDateTimeField extends BaseField<Date | null> {
@@ -59,7 +59,7 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
   // Drops the part of a `Date` the field does not edit: the time of a date, the date of a time.
   protected abstract normalize(value: Date): Date;
 
-  // What an arrow key steps from while the field is empty.
+  // What the first arrow key fills an empty field with.
   protected abstract stepSeed(): Date;
 
   // The field's own pick: `selectDate` or `selectTime`.
@@ -149,6 +149,15 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
     this.render(this.text());
   }
 
+  /**
+   * Empties the field as the user's edit: commits `null`, and drops text typed but not committed along with its
+   * `parse` error. What a clear button calls: while the model is `null` already, writing `null` changes
+   * nothing, and the text would commit on the next blur. No-op while readonly or disabled.
+   */
+  public clear(): void {
+    if (this.canEdit()) this.commit(null);
+  }
+
   // Typing commits on blur, but wiping the text commits at once, or the cleared value would stay the model's
   // and `stepSegment` would keep stepping from it. ngx-mask reports a wipe no `input` event announces too, as
   // `Backspace` over the whole text is.
@@ -187,14 +196,14 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
   // so the next digit typed replaces it.
   //
   // The input text is what gets stepped, not the model: it also carries what was typed but not yet
-  // committed. An empty field is seeded first, so arrows alone can fill it.
+  // committed. An empty field takes its seed instead, so the first arrow fills it and the next ones step.
   protected stepSegment(direction: 1 | -1): void {
     const input = this.inputRef().nativeElement;
     const segment = findSegmentAtCaret(this.tokenFormat(), input.selectionStart ?? 0);
     if (!segment) return;
 
-    const base = parseUnicodeDateTime(input.value, this.tokenFormat()) ?? this.value() ?? this.stepSeed();
-    const next = this.normalize(stepDateTimeUnit(base, segment.unit, direction));
+    const base = parseUnicodeDateTime(input.value, this.tokenFormat()) ?? this.value();
+    const next = this.normalize(base ? stepDateTimeUnit(base, segment.unit, direction) : this.stepSeed());
     if (this.isOutOfRange(next)) return;
 
     this.commit(next);
