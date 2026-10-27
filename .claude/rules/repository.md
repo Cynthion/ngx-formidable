@@ -11,7 +11,8 @@ Always in effect. Area conventions load automatically for the files they apply t
 ## Running Servers
 
 - Reuse a server that is already listening. The portal is served on port 4200, Storybook on port 6006.
-- Never kill or restart a server you did not start. If nothing is listening, ask rather than starting one.
+- Never kill or restart a server you did not start.
+- If the portal is not listening, start it with `npm start` in the background for the visual proof, and stop it when done. For Storybook, ask rather than starting one.
 - Clean up only your own headless browser instance.
 
 ## Change Shape

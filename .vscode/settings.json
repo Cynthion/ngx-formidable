@@ -55,7 +55,6 @@
   /* Rules in .markdownlint.json, exclusions in .markdownlint-cli2.jsonc */
   "markdownlint.lintWorkspaceGlobs": ["**/*.md", "!**/node_modules/**", "!.plan/**", "!.research/**"],
 
-  // Peacock
   "workbench.colorCustomizations": {
     "commandCenter.border": "#e7e7e799",
     "titleBar.activeBackground": "#dd0531",
