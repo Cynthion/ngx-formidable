@@ -215,6 +215,24 @@ The decorator re-measures its slots whenever their width changes, so an action t
 </formidable-field-decorator>
 ```
 
+**Clear A Date Or Time**: a date or time field also holds text typed but not committed, which writing `null` misses while the model is `null` already. Its `clear()` drops both, see **Dates And Times** in [Fields](fields.md). That text is not visible from outside, so the button stays.
+
+```html
+<formidable-field-decorator>
+  <formidable-date-field
+    #when
+    [formField]="form.when" />
+  <div formidableFieldSuffix>
+    <button
+      type="button"
+      (mousedown)="$event.preventDefault()"
+      (click)="when.clear()">
+      &times;
+    </button>
+  </div>
+</formidable-field-decorator>
+```
+
 **Copy**:
 
 ```html

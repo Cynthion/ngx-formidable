@@ -1,6 +1,7 @@
 import { Component, ElementRef, input, viewChild } from '@angular/core';
+import { format } from 'date-fns';
 import { NgxMaskDirective } from 'ngx-mask';
-import { normalizeDatePart, UNICODE_TIME_TOKENS } from '../../../helpers/format.helpers';
+import { normalizeDatePart, parseUnicodeDateTime, UNICODE_TIME_TOKENS } from '../../../helpers/format.helpers';
 import { FORMIDABLE_FIELD } from '../../../models/formidable.model';
 import { BaseDateTimeField } from '../base-date-time-field';
 
@@ -54,8 +55,9 @@ export class TimeField extends BaseDateTimeField {
     return normalizeDatePart(value);
   }
 
+  // Now, to the format's precision: the time typing what the field shows would give.
   protected stepSeed(): Date {
-    return new Date(1970, 0, 1);
+    return parseUnicodeDateTime(format(new Date(), this.tokenFormat()), this.tokenFormat())!;
   }
 
   protected select(value: Date | null): void {

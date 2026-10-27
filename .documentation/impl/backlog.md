@@ -20,8 +20,6 @@ Internal:
 
 ## Features
 
-- **Clear Typed Date Or Time Text From Outside**: on an empty field, `value` is `null` while typed text is on screen, so a clear writing `null` is no change. Text that does not parse keeps its `parse` error. Text that parses but is not yet committed survives the clear, because the button keeps focus, and commits on the next blur. Unproven: a tripwire spec in `date-time-field.spec.ts` first. A fix belongs on `BaseDateTimeField`, not `BaseField`.
-- In empty date and time fields, using an arrow up/down for the first time should set current date or time, respectively.
 - [ ] Modernize Flyout and Backdrop Layering:
   - [MDN `::backdrop`](https://developer.mozilla.org/en-US/docs/Web/CSS/::backdrop)
   - [CSS Anchor Positioning](https://developer.chrome.com/blog/tether-elements-to-each-other-with-css-anchor-positioning?hl=de)

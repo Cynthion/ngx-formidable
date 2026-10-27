@@ -237,6 +237,33 @@ describe('portal', () => {
     await expect.element(address).toHaveFocus();
   });
 
+  // Typed but not committed, the text is not the value either, so only the field's own clear drops it.
+  it('clears a date from its suffix button, text typed but not committed included', async () => {
+    await openStudio();
+    await openPanel('Form', 'Settings', 'The Form');
+    await userEvent.selectOptions(page.getByRole('combobox', { name: 'Suffix', exact: true }), 'button');
+
+    const date = page.getByRole('combobox', { name: 'Date' });
+    // By position, as above. The decorator's first button would be the calendar's.
+    const clears = page.getByRole('button', { name: 'Clear', exact: true });
+    const decorator = date.element().closest('formidable-field-decorator');
+    const clear = clears.nth(
+      clears.elements().findIndex((button) => button.closest('formidable-field-decorator') === decorator)
+    );
+
+    await userEvent.click(clear);
+    await expect.poll(async () => ((await model())['when'] as Record<string, unknown>)['date']).toBeNull();
+
+    await userEvent.click(date);
+    await userEvent.keyboard('12052026');
+    await userEvent.click(clear);
+    await expect.element(date).toHaveFocus();
+    await userEvent.tab();
+
+    await expect.element(date).toHaveValue('dd . MM . yyyy');
+    expect(((await model())['when'] as Record<string, unknown>)['date']).toBeNull();
+  });
+
   // The template picker: choosing a pizza writes the two fields it stands for and leaves every other alone,
   // and a later edit to one of those fields is not undone — a pizza is a starting point, not a lock.
   it('applies a pizza’s preset when the user picks it, and does not re-apply it afterwards', async () => {

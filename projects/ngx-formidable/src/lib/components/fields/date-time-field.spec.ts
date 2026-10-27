@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { format } from 'date-fns';
 import fc from 'fast-check';
 import { page, userEvent } from 'vitest/browser';
@@ -9,6 +10,7 @@ import { DATE_FORMATS, DATES, TIME_FORMATS } from '../../testing/arbitraries';
 import { bindField, BindFieldOptions, BoundField, FORMS_APIS, FormsApi } from '../../testing/bind-field';
 import { clickAt } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { BaseDateTimeField } from './base-date-time-field';
 
 /**
  * Contract of the masked date/time fields, per **Dates And Times** and **Stepping A Date Or Time Segment** in
@@ -355,6 +357,8 @@ describe('masked date/time field', () => {
   });
 
   describe('clearing the text', () => {
+    afterEach(() => void vi.useRealTimers());
+
     it('commits null as soon as Delete wipes a date, without waiting for the blur', async () => {
       const { input, value, dirty } = await setup(
         'date',
@@ -389,7 +393,7 @@ describe('masked date/time field', () => {
       expect(input).toHaveFocus();
     });
 
-    it('steps from the default date once the text is wiped, not from the date that was there', async () => {
+    it('fills the default date once the text is wiped, not the date that was there', async () => {
       const { input } = await setup(
         'date',
         'dd . MM . yyyy',
@@ -402,7 +406,7 @@ describe('masked date/time field', () => {
       await userEvent.tab();
       await userEvent.keyboard('{Delete}{ArrowUp}');
 
-      await expect.element(input).toHaveValue('16 . 01 . 2020');
+      await expect.element(input).toHaveValue('15 . 01 . 2020');
     });
 
     it('commits null as soon as a time is wiped', async () => {
@@ -421,14 +425,79 @@ describe('masked date/time field', () => {
       expect(dirty()).toBe(true);
     });
 
-    it('steps from midnight once the time is wiped', async () => {
+    it('fills the current time once the time is wiped, not the time that was there', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(2024, 5, 15, 9, 5));
       const { input } = await setup('time', 'HH : mm', 'underscores', {}, { value: new Date(2024, 0, 1, 14, 30) });
 
       // the wipe leaves the caret at the front, on the hour
       await userEvent.tab();
       await userEvent.keyboard('{Delete}{ArrowUp}');
 
-      await expect.element(input).toHaveValue('01 : 00');
+      await expect.element(input).toHaveValue('09 : 05');
+    });
+  });
+
+  describe('clearing from outside', () => {
+    const cases = [
+      { kind: 'date', format: 'dd . MM . yyyy', typed: '12052024', empty: '__ . __ . ____' },
+      { kind: 'time', format: 'HH : mm', typed: '1430', empty: '__ : __' }
+    ] as const;
+
+    /** The field's `clear()`, as a consumer's clear button calls it through a template reference. */
+    async function clear(field: MaskedField): Promise<void> {
+      (
+        field.fixture.debugElement.query(By.css(field.element.localName)).componentInstance as BaseDateTimeField
+      ).clear();
+      await settle(field.fixture);
+    }
+
+    for (const { kind, format, typed, empty } of cases) {
+      it(`drops ${kind} text typed but not committed, focus kept, so the blur commits nothing`, async () => {
+        const field = await setup(kind, format, 'underscores');
+
+        await userEvent.tab();
+        await userEvent.keyboard(typed);
+        await clear(field);
+
+        await expect.element(field.input).toHaveFocus();
+        expect(field.input.value).toBe(empty);
+
+        await userEvent.tab();
+        await settle(field.fixture);
+
+        expect(field.value()).toBeNull();
+        expect(field.input.value).toBe(empty);
+      });
+    }
+
+    for (const api of FORMS_APIS) {
+      for (const { kind, format, empty } of cases) {
+        it(`drops ${kind} text that does not parse, and its parse error, bound ${api}`, async () => {
+          const field = await setup(kind, format, 'underscores', {}, { api });
+
+          await userEvent.tab();
+          await userEvent.keyboard('1');
+          await userEvent.tab();
+          await settle(field.fixture);
+          expect(messages(field)).toEqual(['parse']);
+
+          await clear(field);
+
+          expect(field.input.value).toBe(empty);
+          expect(messages(field)).toEqual([]);
+        });
+      }
+    }
+
+    it("commits null over a value as the user's edit", async () => {
+      const field = await setup('date', 'dd . MM . yyyy', 'underscores', {}, { value: new Date(2024, 4, 12) });
+
+      await clear(field);
+
+      expect(field.value()).toBeNull();
+      expect(field.dirty()).toBe(true);
+      expect(field.input.value).toBe('__ . __ . ____');
     });
   });
 
@@ -574,30 +643,51 @@ describe('masked date/time field', () => {
       await expect.element(input).toHaveValue('00 : 00');
     });
 
-    it('seeds an empty time field with midnight before stepping it', async () => {
-      const { input } = await setup('time', 'HH : mm', 'underscores');
-
-      await userEvent.tab(); // the caret sits at 0, the hour
-      await userEvent.keyboard('{ArrowUp}');
-
-      await expect.element(input).toHaveValue('01 : 00');
-    });
-
-    describe('with today pinned', () => {
+    describe('with now pinned', () => {
       beforeEach(() => {
         vi.useFakeTimers({ toFake: ['Date'] });
-        vi.setSystemTime(new Date(2024, 5, 15, 12));
+        vi.setSystemTime(new Date(2024, 5, 15, 14, 37, 52, 123));
       });
 
       afterEach(() => void vi.useRealTimers());
 
-      it('seeds an empty date field with today before stepping it', async () => {
-        const { input } = await setup('date', 'dd . MM . yyyy', 'format');
+      it('fills an empty date field with today on the first arrow, and steps on the next', async () => {
+        const { input, value } = await setup('date', 'dd . MM . yyyy', 'format');
 
         await userEvent.tab(); // the caret sits at 0, the day
+        await userEvent.keyboard('{ArrowDown}');
+
+        await expect.element(input).toHaveValue('15 . 06 . 2024');
+        expect(value()).toEqual(new Date(2024, 5, 15));
+        expect(selection(input)).toEqual([0, 2]);
+
+        await userEvent.keyboard('{ArrowDown}');
+
+        await expect.element(input).toHaveValue('14 . 06 . 2024');
+      });
+
+      it('fills an empty time field with the current time to the minute, and steps on the next arrow', async () => {
+        const { input, value } = await setup('time', 'HH : mm', 'underscores');
+
+        await userEvent.tab(); // the caret sits at 0, the hour
         await userEvent.keyboard('{ArrowUp}');
 
-        await expect.element(input).toHaveValue('16 . 06 . 2024');
+        await expect.element(input).toHaveValue('14 : 37');
+        expect(value()).toEqual(new Date(1970, 0, 1, 14, 37));
+
+        await userEvent.keyboard('{ArrowUp}');
+
+        await expect.element(input).toHaveValue('15 : 37');
+      });
+
+      it('fills a time format with seconds to the second', async () => {
+        const { input, value } = await setup('time', 'hh:mm:ss a', 'underscores');
+
+        await userEvent.tab();
+        await userEvent.keyboard('{ArrowUp}');
+
+        await expect.element(input).toHaveValue('02:37:52 PM');
+        expect(value()).toEqual(new Date(1970, 0, 1, 14, 37, 52));
       });
     });
   });

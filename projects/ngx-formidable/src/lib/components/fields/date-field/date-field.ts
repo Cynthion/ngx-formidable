@@ -32,7 +32,7 @@ import { BaseDateTimeField } from '../base-date-time-field';
  * Pikaday calendar in the panel, or stepped with the arrow keys on the segment under the caret.
  *
  * Typing commits on blur, because a half-typed date is not a date — the exception is clearing the field,
- * which commits at once so the arrows step from the default again. The calendar and the arrows commit
+ * which commits at once so the first arrow fills the default again. The calendar and the arrows commit
  * immediately. A step outside `minDate`/`maxDate` is refused rather than clamped.
  *
  * Project `[formidableFieldToggleIcon]` content to replace the calendar toggle's default icon. The inputs
@@ -314,7 +314,7 @@ export class DateField extends BaseDateTimeField implements AfterViewInit, OnDes
   /** Accessible name for the calendar itself, which is a `dialog` and so needs one of its own. */
   public readonly ariaLabel = input<string | undefined>(undefined);
 
-  /** Where the calendar opens, and what an arrow key steps from, when the field is empty. */
+  /** Where the calendar opens, and what the first arrow key fills, when the field is empty. */
   public readonly defaultDate = input<Date | undefined>(undefined);
 
   /** Whether `defaultDate` is also selected on open, rather than only shown. */

@@ -1,4 +1,4 @@
-import { Component, computed, ElementRef, inject, input, output, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import {
   AutocompleteField,
@@ -204,6 +204,10 @@ export class PreviewField {
   /** An autocomplete's filter text, bound two-way: the consumer supplies the filtered list, and its clear empties it. */
   protected readonly filterText = signal('');
 
+  // A date or time field's own clear, which also drops text typed but not committed.
+  private readonly dateField = viewChild(DateField);
+  private readonly timeField = viewChild(TimeField);
+
   /** A clear writes nothing the user could not: none for a readonly or disabled field. */
   protected readonly canClear = computed(() => {
     const state = this.fieldTree()();
@@ -226,9 +230,15 @@ export class PreviewField {
   // would drop whatever it found beyond a substring of the label: a typo, a subtitle.
   protected readonly matchesEveryFilter = (): boolean => true;
 
-  /** The suffix's clear button: the value back to its empty value, and an autocomplete's typed text with it. */
+  /**
+   * The suffix's clear button: the value back to its empty value, and an autocomplete's typed text with it. A
+   * date or time field clears itself, typed text included.
+   */
   protected clear(): void {
-    this.fieldTree()().value.set(emptyValueOf(this.spec()));
+    const dateTimeField = this.dateField() ?? this.timeField();
+
+    if (dateTimeField) dateTimeField.clear();
+    else this.fieldTree()().value.set(emptyValueOf(this.spec()));
     this.filterText.set('');
   }
 

@@ -201,7 +201,7 @@ The autocomplete has no buffer: what is typed is its filter, and typing an optio
 
 `ArrowUp` and `ArrowDown` step the segment under the caret and leave it selected, so repeated arrows stay on it and the next digit typed replaces it.
 
-- **An Empty Field Is Seeded First**: a date with `defaultDate`, else today, kept within `minDate` and `maxDate`; a time with midnight. So the arrows alone can fill one.
+- **The First Arrow Fills An Empty Field**: `ArrowUp` and `ArrowDown` alike, a date with `defaultDate`, else today, kept within `minDate` and `maxDate`; a time with the current time, to the format's precision. The arrows step from there.
 - **A Date Step Past A Limit Is Refused**: a step that would leave `minDate` or `maxDate` is refused rather than clamped.
 - **A Plain `ArrowDown` Does Not Open The Date Panel**: `Alt` plus the arrows works the panel, per the ARIA combobox pattern.
 
@@ -221,6 +221,7 @@ A focused empty field always shows underscore slots, because the mask's caret ar
 - **Typed Text Commits On Blur**: a half-typed date is not a date, so what is typed reaches the model on blur or on `Enter`. The arrow keys and the calendar commit at once.
 - **Text That Does Not Parse Stays As Typed**: the model keeps its value, and the field reports a `parse` error to whichever forms API binds it, which the decorator renders once revealed. Text that parses again drops it.
 - **Emptying The Text Commits `null`**: at once, with no error.
+- **A Clear Button Calls `clear()`**: text typed but not committed is not the value, so while the model is `null` already, writing `null` changes nothing, and the text commits on the next blur. `clear()` commits `null` as the user's edit and drops that text with its `parse` error. The button is **Clear** under **Actions** in [Decoration](decoration.md).
 - **A Commit Writes One Part**: a date field writes its day at local midnight, a time field its time on 1 January 1970. A value your code writes keeps its other part until the user commits.
 - **Names Are Read In Any Case**: `15 dec 2024` parses against `dd MMM yyyy`, and `02:30 pm` against `hh:mm a`. The commit shows the format's own case, `15 Dec 2024` and `02:30 PM`.
 - **A Date Format Without A Year Takes 2000**: a leap year, so `29.02` parses against `dd.MM`. One without a month takes January.
