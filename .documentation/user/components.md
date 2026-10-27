@@ -3,14 +3,14 @@
 Every public component, directive, token and type, and what each accepts. How the fields behave is taught in the guides linked from each entry.
 
 - **Standalone And `OnPush`**: every component, with no exception.
-- **Signal Inputs And Outputs**: every input is a signal `input()` and every output an `output()`. A template binds them as usual (`[readonly]="…"`, `(touch)="…"`), so the tables list the value a binding takes.
+- **Signal Inputs And Outputs**: every input is a signal `input()` and every output an `output()`, except `value` and the autocomplete's `filter`, which are a `model()` whose output is `valueChange` and `filterChange`. A template binds them as usual (`[readonly]="…"`, `(touch)="…"`), so the tables list the value a binding takes.
 - **Shared Inputs Are Listed Once**: a field's entry lists only its own inputs, and names the shared groups it takes.
 
-| From Code           | How                                                                                                      |
-| :------------------ | :------------------------------------------------------------------------------------------------------- |
-| Read an input       | Call it: `field.readonly()`                                                                              |
-| Write an input      | `componentRef.setInput('readonly', true)`. `value` is a `model()`, so `field.value.set(…)` works as well |
-| Listen to an output | `output.subscribe(callback)`, or `outputToObservable(output)` from `@angular/core/rxjs-interop` for RxJS |
+| From Code           | How                                                                                                                                                                                    |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Read an input       | Call it: `field.readonly()`                                                                                                                                                            |
+| Write an input      | `componentRef.setInput('readonly', true)`. A `model()` is set directly: `field.value.set(…)`, `field.filter.set('')`                                                                   |
+| Listen to an output | `output.subscribe(callback)`, or `outputToObservable(output)` from `@angular/core/rxjs-interop` for RxJS. A `model()`'s output is the model itself: `field.filter.subscribe(callback)` |
 
 ---
 
