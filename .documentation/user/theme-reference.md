@@ -322,6 +322,20 @@ Weigh it first: a header that wins covers an open dropdown scrolled underneath i
 
 ---
 
+## Icons
+
+Every icon is drawn at the same size, as a mask: set a `url()` to an SVG on the 24-unit grid most icon sets use, and it renders at the scale of the defaults. See **Icons** in [Fields](fields.md).
+
+| Variable                                      | Description                                                                                                                      |
+| :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
+| `--formidable-icon-size`                      | Size of every icon the library draws: the select, dropdown and date field toggles and the calendar's month arrows.               |
+| `--formidable-field-toggle-icon`              | Icon of the toggle a select, dropdown or date field draws, as a `url()`. Only its shape counts: it is painted in the text color. |
+| `--formidable-field-toggle-icon-open`         | That toggle's icon while the field's panel is open.                                                                              |
+| `--formidable-date-field-panel-previous-icon` | Icon of the calendar's previous-month button, as a `url()`.                                                                      |
+| `--formidable-date-field-panel-next-icon`     | Icon of the calendar's next-month button, as a `url()`.                                                                          |
+
+---
+
 ## Variables The Library Sets Itself
 
 The library sets these itself, from script or from its stylesheet as a field's state changes, on the element where each applies. They appear in the browser's inspector, but overriding one does nothing useful.

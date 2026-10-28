@@ -78,7 +78,7 @@ export const Masked: Story = {
 | `lib/components/<name>/`        | `Structural Components / <Name>` |
 
 - **Name**: the class name, words separated by spaces. `RadioGroupField` becomes `Radio Group Field`.
-- **Directives**: the decoration directives have no story file of their own. Each is a story of the component it decorates: label position, prefix and suffix alignment, hint alignment and the label adornment on `Field Decorator`, the toggle icon on `Date Field`.
+- **Directives**: the decoration directives have no story file of their own. Each is a story of the component it decorates: label position, prefix and suffix alignment, hint alignment and the label adornment on `Field Decorator`, the toggle icon on `Select Field`, `Dropdown Field` and `Date Field`.
 - **Sidebar Order**: `storySort` in `preview.ts` puts `Fields` before `Structural Components`, each alphabetical.
 
 ---

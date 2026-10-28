@@ -1,6 +1,6 @@
 import { Directive, ElementRef, inject } from '@angular/core';
 
-/** Marks projected content as a field's panel-toggle icon (e.g. the date field's calendar toggle). */
+/** Marks content projected into a select, dropdown or date field as its toggle icon, replacing the themed one. */
 @Directive({ selector: '[formidableFieldToggleIcon]' })
 export class FieldToggleIcon {
   elementRef = inject(ElementRef);

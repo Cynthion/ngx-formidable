@@ -2,8 +2,6 @@ import {
   afterRenderEffect,
   AfterViewInit,
   Component,
-  computed,
-  contentChild,
   ElementRef,
   inject,
   input,
@@ -16,7 +14,6 @@ import { addDays, format } from 'date-fns';
 import { NgxMaskDirective } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { filter, fromEvent, merge, takeUntil } from 'rxjs';
-import { FieldToggleIcon } from '../../../directives/field-toggle-icon';
 import { normalizeTimePart, UNICODE_DATE_TOKENS } from '../../../helpers/format.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
@@ -56,11 +53,6 @@ import { BaseDateTimeField } from '../base-date-time-field';
 export class DateField extends BaseDateTimeField implements AfterViewInit, OnDestroy {
   readonly dateRef = viewChild.required<ElementRef<HTMLDivElement>>('dateRef');
   readonly pickerRef = viewChild<ElementRef<HTMLDivElement>>('pickerRef');
-
-  private readonly projectedToggleIcon = contentChild(FieldToggleIcon);
-
-  // False while no `[formidableFieldToggleIcon]` is projected, which is when the default CSS arrow is drawn.
-  protected readonly hasToggleIcon = computed(() => !!this.projectedToggleIcon());
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'];

@@ -692,6 +692,16 @@
   --formidable-option-prefix-border-thickness: #{tokens.$formidable-option-prefix-border-thickness};
 
   // #endregion
+
+  // #region Icons
+
+  --formidable-icon-size: #{tokens.$formidable-icon-size};
+  --formidable-field-toggle-icon: #{tokens.$formidable-field-toggle-icon};
+  --formidable-field-toggle-icon-open: #{tokens.$formidable-field-toggle-icon-open};
+  --formidable-date-field-panel-previous-icon: #{tokens.$formidable-date-field-panel-previous-icon};
+  --formidable-date-field-panel-next-icon: #{tokens.$formidable-date-field-panel-next-icon};
+
+  // #endregion
 }
 
 :root {

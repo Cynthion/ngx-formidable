@@ -166,6 +166,44 @@ Whatever the placement, the calendar scales to the width its panel has: `--formi
 
 ---
 
+## Icons
+
+`select-field`, `dropdown-field` and `date-field` draw a toggle at their right edge, and the date field's calendar draws its month arrows. The defaults are chevrons. Replace them app-wide with variables, or per field by projecting your own.
+
+**App-Wide**: set the icons in your own `:root`. A selector narrows one to a field type or a single field.
+
+```css
+:root {
+  --formidable-field-toggle-icon: url('/icons/expand.svg');
+  --formidable-field-toggle-icon-open: url('/icons/collapse.svg');
+  --formidable-date-field-panel-previous-icon: url('/icons/chevron-left.svg');
+  --formidable-date-field-panel-next-icon: url('/icons/chevron-right.svg');
+}
+
+formidable-date-field {
+  --formidable-field-toggle-icon: url('/icons/calendar.svg');
+  --formidable-field-toggle-icon-open: url('/icons/calendar.svg');
+}
+```
+
+- **Shape Only**: an icon is painted as a mask in the text color, so only its shape counts and it follows the field's state colors.
+- **One Size**: `--formidable-icon-size` sizes every icon. The defaults are drawn on the 24-unit grid most icon sets use, so an icon from such a set renders at their scale.
+- **Open And Closed**: the toggle shows the `-open` icon while the panel is open. A chevron flips; a calendar sets both to the same icon. The select never shows it, because a page cannot ask whether a native list is open.
+- **URLs**: root-relative and `data:` URLs resolve the same whichever stylesheet sets the variable.
+- **Content Security Policy**: the defaults are `data:` URLs. A policy that restricts `img-src` must allow `data:`, or the defaults are not drawn.
+
+**Per Field**: project `[formidableFieldToggleIcon]` content, such as an icon component, into the field. It replaces the toggle's icon; its size, color and hover feedback are yours.
+
+```html
+<formidable-date-field [formField]="form.birthdate">
+  <span formidableFieldToggleIcon>📅</span>
+</formidable-date-field>
+```
+
+The select's toggle overlays the native control, so a click on a projected icon still opens its list.
+
+---
+
 ## Keyboard
 
 Every control is operable from the keyboard. Disabled and readonly fields ignore navigation.
@@ -228,16 +266,6 @@ A focused empty field always shows underscore slots, because the mask's caret ar
 - **A Two-Digit Year**: `yy` reads `00` to `49` as 20xx, and `50` to `99` as 19xx. Any other year takes `yyyy`.
 
 The date field passes a set of options straight through to Pikaday: `minDate`, `maxDate`, `firstDay`, `i18n`, `yearRange`, `disableWeekends`, `disableDayFn` and the rest, listed in [Components](components.md). Each is applied to the calendar when it changes at runtime.
-
-**The Toggle Icon**: the date field's panel toggle draws a CSS arrow by default. The library ships no icons, so to replace it, project your own:
-
-```html
-<formidable-date-field [formField]="form.birthdate">
-  <span formidableFieldToggleIcon>📅</span>
-</formidable-date-field>
-```
-
-The toggle centres what is projected; its size, colour and hover feedback are yours.
 
 ---
 

@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/angular-vite';
+import { moduleMetadata } from '@storybook/angular-vite';
+import { FieldToggleIcon } from '../../../directives/field-toggle-icon';
 import { decorated, decoratedImports, mockColourOptions, mockRequiredError } from '../../../storybook/story.helpers';
 import { SelectField } from './select-field';
 
@@ -35,4 +37,10 @@ export const StateRequired: Story = {
 
 export const StateInvalid: Story = {
   args: { required: true, touched: true, invalid: true, errors: mockRequiredError }
+};
+
+/** `formidableFieldToggleIcon` replaces the toggle's icon. */
+export const ToggleIcon: Story = {
+  decorators: [moduleMetadata({ imports: [FieldToggleIcon] })],
+  render: decorated('formidable-select-field', 'Colour', '<span formidableFieldToggleIcon>🎨</span>')
 };

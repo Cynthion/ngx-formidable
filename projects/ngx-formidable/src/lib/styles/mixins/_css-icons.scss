@@ -1,32 +1,22 @@
-@use 'sass:math';
+@use '../tokens' as tokens;
 
-@mixin css-icon($name, $size: 12px, $stroke: 2px) {
+// Draws `$image`, a `url()` or a `var()` holding one, on `::before`, centred in the host at the one size every
+// icon shares. The image is a mask over a `currentColor` fill, so only its shape counts and the icon takes the
+// colour of the text around it.
+@mixin mask-icon($image) {
   position: relative;
 
-  @if $name == 'arrow-up' or $name == 'arrow-right' or $name == 'arrow-down' or $name == 'arrow-left' {
-    $rotation: 0deg;
-    @if $name == 'arrow-up' {
-      $rotation: 45deg;
-    } @else if $name == 'arrow-right' {
-      $rotation: 135deg;
-    } @else if $name == 'arrow-down' {
-      $rotation: 225deg;
-    } @else if $name == 'arrow-left' {
-      $rotation: -45deg;
-    }
-
-    &::before {
-      content: '';
-      display: block;
-      width: $size;
-      height: $size;
-      position: absolute;
-      z-index: 1;
-      top: 50%;
-      left: 50%;
-      border-left: #{$stroke} solid;
-      border-top: #{$stroke} solid;
-      transform: translate(-50%, -50%) rotate(#{$rotation});
-    }
+  &::before {
+    content: '';
+    display: block;
+    width: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
+    height: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: currentcolor;
+    mask: $image center / contain no-repeat;
   }
 }

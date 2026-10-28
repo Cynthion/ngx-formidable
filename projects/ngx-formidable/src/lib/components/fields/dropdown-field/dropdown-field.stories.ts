@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/angular-vite';
+import { moduleMetadata } from '@storybook/angular-vite';
+import { FieldToggleIcon } from '../../../directives/field-toggle-icon';
 import { action } from 'storybook/actions';
 import {
   decorated,
@@ -91,4 +93,10 @@ export const NoOptions: Story = {
   parameters: framed,
   args: { options: [] },
   play: openPanel()
+};
+
+/** `formidableFieldToggleIcon` replaces the toggle's icon. */
+export const ToggleIcon: Story = {
+  decorators: [moduleMetadata({ imports: [FieldToggleIcon] })],
+  render: decorated('formidable-dropdown-field', 'Colour', '<span formidableFieldToggleIcon>🎨</span>')
 };

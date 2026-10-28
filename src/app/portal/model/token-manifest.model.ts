@@ -21,7 +21,8 @@ type ThemeTokenControl =
   | 'duration'
   | 'easing'
   | 'shadow'
-  | 'quoted-string';
+  | 'quoted-string'
+  | 'image';
 
 /** One editable `--formidable-*` custom property. */
 export interface ThemeToken {

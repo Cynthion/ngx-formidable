@@ -43,8 +43,6 @@
       #toggleRef
       class="toggle"
       [class.open]="isPanelOpen()"
-      [class.arrow-down]="!hasToggleIcon() && !isPanelOpen()"
-      [class.arrow-up]="!hasToggleIcon() && isPanelOpen()"
       (mousedown)="onPanelToggleMouseDown($event)">
       <ng-content select="[formidableFieldToggleIcon]" />
     </span>

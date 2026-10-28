@@ -593,11 +593,13 @@
 
 // #region In-Field Panel Toggle
 
-// Panel toggle for dropdown, autocomplete and date fields. Centers projected icon content;
-// draws a css-icon arrow instead when `.arrow-up` / `.arrow-down` is set.
+// The in-field toggle of the select, dropdown and date fields. Centers projected icon content; with nothing
+// projected it draws the themed icon instead, and its `-open` variant while `.open` is set.
 @mixin dropdown-toggle {
   cursor: pointer;
   user-select: none;
+  // Positioned, so projected content paints over the select, which is positioned and comes first.
+  position: relative;
   // The value inset reserves exactly this width, so the toggle must not be flex-shrunk out of it.
   flex: none;
   width: field-toggle-size();
@@ -606,14 +608,12 @@
   align-items: center;
   justify-content: center;
 
-  &.arrow-up {
-    top: calc(utils.rem(2));
-    @include icons.css-icon('arrow-up', utils.rem(10), utils.rem(2));
+  &:empty {
+    @include icons.mask-icon(var(--formidable-field-toggle-icon, #{tokens.$formidable-field-toggle-icon}));
   }
 
-  &.arrow-down {
-    top: calc(utils.rem(2) * -1);
-    @include icons.css-icon('arrow-down', utils.rem(10), utils.rem(2));
+  &.open:empty::before {
+    mask-image: var(--formidable-field-toggle-icon-open, #{tokens.$formidable-field-toggle-icon-open});
   }
 }
 
@@ -621,14 +621,13 @@
 // same icon, token and box as every other in-field toggle. It overlays the field rather than sitting beside
 // the value, because a native `<select>` opens its list from anywhere in its box and a toggle in flow would
 // carve a dead strip out of it. `pointer-events: none` is what keeps that true — the arrow is a picture, and
-// the control underneath it stays the whole box. It never flips to `arrow-up`: the platform owns that list,
+// the control underneath it stays the whole box. It never takes the `-open` icon: the platform owns that list,
 // and a page cannot ask whether it is open.
 @mixin select-toggle {
   @include dropdown-toggle;
 
   grid-area: 1 / 1;
   justify-self: end;
-  // Centred by the grid, so `.arrow-down`'s own nudge still reads as an offset from the field's middle.
   align-self: center;
   // The grid cell is the host's box; the toggle belongs inside the select's border and padding.
   margin-right: calc(#{field-border-thickness()} + #{field-padding-x()});

@@ -12,7 +12,7 @@ For consumers of the library. A **guide** teaches a topic; a **reference** lists
 | :--------------------------------------------------- | :-------: | :------------------------------------------------------------------------- |
 | [`user/getting-started.md`](user/getting-started.md) |   Guide   | Install, wiring, the stylesheet, a first form                              |
 | [`user/forms.md`](user/forms.md)                     |   Guide   | How the fields meet Signal Forms, reactive forms and template-driven forms |
-| [`user/fields.md`](user/fields.md)                   |   Guide   | Options, panels, keyboard, dates and times, masking, focus                 |
+| [`user/fields.md`](user/fields.md)                   |   Guide   | Options, panels, icons, keyboard, dates and times, masking, focus          |
 | [`user/decoration.md`](user/decoration.md)           |   Guide   | Labels, adornments, prefixes, suffixes, hints, required marker             |
 | [`user/validation.md`](user/validation.md)           |   Guide   | Angular's rules, Vest, Zod or none; messages and their reveal              |
 | [`user/submit-gates.md`](user/submit-gates.md)       |   Guide   | Valid, dirty, changed or none; when the submit button opens                |

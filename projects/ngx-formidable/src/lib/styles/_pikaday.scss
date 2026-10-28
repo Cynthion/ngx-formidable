@@ -131,17 +131,19 @@
   }
 }
 
-.pika-prev,
-.is-rtl .pika-next {
-  @include icons.css-icon(arrow-left, 8px);
+.pika-prev {
+  @include icons.mask-icon(
+    var(--formidable-date-field-panel-previous-icon, #{tokens.$formidable-date-field-panel-previous-icon})
+  );
 
   order: -1; // flex position
   margin-right: auto;
 }
 
-.pika-next,
-.is-rtl .pika-prev {
-  @include icons.css-icon(arrow-right, 8px);
+.pika-next {
+  @include icons.mask-icon(
+    var(--formidable-date-field-panel-next-icon, #{tokens.$formidable-date-field-panel-next-icon})
+  );
 
   margin-left: auto;
 }

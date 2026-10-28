@@ -27,7 +27,7 @@ interface PortalFieldCapabilities {
   readonly range: boolean;
   /** Whether the field hands its filter text to the consumer, who supplies the narrowed list back. */
   readonly filter: boolean;
-  /** Whether the field draws a panel toggle inside its own box, which a projected icon replaces. */
+  /** Whether the preview projects a calendar icon into the field's toggle. */
   readonly toggleIcon: boolean;
 }
 

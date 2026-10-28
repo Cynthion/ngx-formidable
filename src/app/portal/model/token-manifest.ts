@@ -1404,6 +1404,43 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     description: 'Border thickness of the outer circle/box for radio/checkbox prefixes.'
   },
   {
+    name: '--formidable-icon-size',
+    group: 'Icons',
+    control: 'length',
+    class: 'declared',
+    description:
+      "Size of every icon the library draws: the select, dropdown and date field toggles and the calendar's month arrows."
+  },
+  {
+    name: '--formidable-field-toggle-icon',
+    group: 'Icons',
+    control: 'image',
+    class: 'declared',
+    description:
+      'Icon of the toggle a select, dropdown or date field draws, as a `url()`. Only its shape counts: it is painted in the text color.'
+  },
+  {
+    name: '--formidable-field-toggle-icon-open',
+    group: 'Icons',
+    control: 'image',
+    class: 'declared',
+    description: "That toggle's icon while the field's panel is open."
+  },
+  {
+    name: '--formidable-date-field-panel-previous-icon',
+    group: 'Icons',
+    control: 'image',
+    class: 'declared',
+    description: "Icon of the calendar's previous-month button, as a `url()`."
+  },
+  {
+    name: '--formidable-date-field-panel-next-icon',
+    group: 'Icons',
+    control: 'image',
+    class: 'declared',
+    description: "Icon of the calendar's next-month button, as a `url()`."
+  },
+  {
     name: '--formidable-field-border-start-start-radius',
     group: 'Field Dimensions',
     control: 'length',
@@ -1484,7 +1521,8 @@ export const THEME_TOKEN_GROUPS: readonly ThemeTokenGroup[] = [
   'Animations',
   'Layering',
   'Date Field Panel',
-  'Option Prefix Dimensions'
+  'Option Prefix Dimensions',
+  'Icons'
 ];
 
 /** Indexed by name, for the per-token lookups the editor and the importer both do. */

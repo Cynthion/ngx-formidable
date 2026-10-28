@@ -30,17 +30,17 @@ Every public component, directive, token and type, and what each accepts. How th
 | [`RadioGroupField`](#radio-group-field)       | `formidable-radio-group-field`    | `string \| null` | One choice, with every option visible             |
 | [`CheckboxGroupField`](#checkbox-group-field) | `formidable-checkbox-group-field` | `string[]`       | Several choices, with every option visible        |
 
-| Component Or Directive               | Selector                          | Purpose                                                   |
-| :----------------------------------- | :-------------------------------- | :-------------------------------------------------------- |
-| [`FieldDecorator`](#field-decorator) | `formidable-field-decorator`      | Wraps a field with its label, adornments, hints, messages |
-| [`FieldOption`](#field-option)       | `formidable-field-option`         | One option, projected into an option field                |
-| [`FieldErrors`](#field-errors)       | `formidable-field-errors`         | Renders a list of errors as messages                      |
-| [`FieldLabel`](#directives)          | `[formidableFieldLabel]`          | The field's label                                         |
-| [`FieldLabelAdornment`](#directives) | `[formidableFieldLabelAdornment]` | Content beside the label                                  |
-| [`FieldPrefix`](#directives)         | `[formidableFieldPrefix]`         | Content at the field's leading edge                       |
-| [`FieldSuffix`](#directives)         | `[formidableFieldSuffix]`         | Content at the field's trailing edge                      |
-| [`FieldHint`](#directives)           | `[formidableFieldHint]`           | Support text below the field                              |
-| [`FieldToggleIcon`](#directives)     | `[formidableFieldToggleIcon]`     | Replaces the date field's panel toggle icon               |
+| Component Or Directive               | Selector                          | Purpose                                                      |
+| :----------------------------------- | :-------------------------------- | :----------------------------------------------------------- |
+| [`FieldDecorator`](#field-decorator) | `formidable-field-decorator`      | Wraps a field with its label, adornments, hints, messages    |
+| [`FieldOption`](#field-option)       | `formidable-field-option`         | One option, projected into an option field                   |
+| [`FieldErrors`](#field-errors)       | `formidable-field-errors`         | Renders a list of errors as messages                         |
+| [`FieldLabel`](#directives)          | `[formidableFieldLabel]`          | The field's label                                            |
+| [`FieldLabelAdornment`](#directives) | `[formidableFieldLabelAdornment]` | Content beside the label                                     |
+| [`FieldPrefix`](#directives)         | `[formidableFieldPrefix]`         | Content at the field's leading edge                          |
+| [`FieldSuffix`](#directives)         | `[formidableFieldSuffix]`         | Content at the field's trailing edge                         |
+| [`FieldHint`](#directives)           | `[formidableFieldHint]`           | Support text below the field                                 |
+| [`FieldToggleIcon`](#directives)     | `[formidableFieldToggleIcon]`     | Replaces the toggle icon of a select, dropdown or date field |
 
 ---
 
@@ -223,7 +223,7 @@ The calendar is Pikaday. These inputs are passed to it under the same names, and
 | `numberOfMonths`                             | `number`                  | `1`                                | How many months show side by side                                              |
 | `ariaLabel`                                  | `string`                  | Pikaday's own                      | Pikaday's `ariaLabel` for the calendar                                         |
 
-`selectDate(date)` commits a date as a pick does. Project `[formidableFieldToggleIcon]` content to replace the toggle's default arrow, see **The Toggle Icon** in [Fields](fields.md).
+`selectDate(date)` commits a date as a pick does.
 
 ### Time Field
 
@@ -331,7 +331,7 @@ Projected into a [`formidable-field-decorator`](#field-decorator), beside the fi
 | `FieldHint`           | `[formidableFieldHint]`           | `align`    | `FieldHintAlignment`      | `'start'`                                            |
 | `FieldToggleIcon`     | `[formidableFieldToggleIcon]`     |            |                           |                                                      |
 
-`FieldToggleIcon` is projected into the `date-field` itself, not into the decorator. What each slot does is in [Decoration](decoration.md).
+`FieldToggleIcon` is projected into a `select-field`, `dropdown-field` or `date-field` itself, not into the decorator, and replaces its toggle's icon, see **Icons** in [Fields](fields.md). What each slot does is in [Decoration](decoration.md).
 
 ---
 
