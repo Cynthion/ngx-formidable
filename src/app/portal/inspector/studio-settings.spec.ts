@@ -3,6 +3,7 @@ import { page, userEvent } from 'vitest/browser';
 import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../model/field-capabilities';
 import { PortalFieldKind } from '../model/field-spec.model';
 import { PREVIEW_FIELDS } from '../model/preview-form.definition';
+import { CALENDAR_MINUS_SVG, CALENDAR_PLUS_SVG } from '../stage/preview-form/preview-icons';
 import { FormDefinitionStore } from '../state/form-definition.store';
 import { editField, openPanel, openStudio, settle } from '../testing/studio';
 
@@ -296,6 +297,28 @@ describe('studio settings', () => {
       await userEvent.click(page.getByRole('checkbox', { name: 'Projected Toggle Icon' }));
 
       await expect.poll(drawsOwnIcon).toBe(true);
+    });
+
+    // The preview's date field projects its own calendar, so the provided date toggles show once it stops.
+    it('gives a date field without a projected icon the provided date toggles', async () => {
+      await openStudio();
+      await openPanel('Form', 'Settings', 'App Defaults');
+      await userEvent.selectOptions(page.getByRole('combobox', { name: 'Toggles And Month Arrows' }), 'custom');
+      await openPanel('Form', 'Settings', 'This Field');
+      await editField('Date');
+      await userEvent.click(page.getByRole('checkbox', { name: 'Projected Toggle Icon' }));
+      const date = page.getByRole('combobox', { name: 'Date' });
+      const toggle = () => date.element().closest('formidable-date-field')!.querySelector<HTMLElement>('.toggle')!;
+      const pathsOf = (root: ParentNode) => [...root.querySelectorAll('path')].map((path) => path.getAttribute('d'));
+      const pathsIn = (svg: string) => pathsOf(new DOMParser().parseFromString(svg, 'image/svg+xml'));
+
+      await expect.poll(() => toggle().querySelector('[formidableFieldToggleIcon]')).toBeNull();
+      await expect.poll(() => pathsOf(toggle())).toEqual(pathsIn(CALENDAR_PLUS_SVG));
+
+      await userEvent.click(toggle());
+
+      await expect.element(date).toHaveAttribute('aria-expanded', 'true');
+      await expect.poll(() => pathsOf(toggle())).toEqual(pathsIn(CALENDAR_MINUS_SVG));
     });
 
     it('counts the fields that state their own, and clears them back to inheriting', async () => {

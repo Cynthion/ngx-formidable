@@ -15,6 +15,8 @@ const ICONS = [
   '      icons: {',
   '        fieldToggle: { component: PlusIcon },',
   '        fieldToggleOpen: { component: MinusIcon },',
+  '        dateFieldToggle: { component: CalendarPlusIcon },',
+  '        dateFieldToggleOpen: { component: CalendarMinusIcon },',
   '        dateFieldPanelPrevious: { component: ArrowLeftIcon },',
   '        dateFieldPanelNext: { component: ArrowRightIcon }',
   '      }'
@@ -56,8 +58,8 @@ export function serializeAppConfig(defaults: FormidableDefaults, customIcons: bo
     "import { provideNgxFormidable } from '@cynthion/ngx-formidable';",
     ...(customIcons
       ? [
-          '// Stand-ins for your own icon components; the Studio draws a plus, a minus and two arrows.',
-          "import { ArrowLeftIcon, ArrowRightIcon, MinusIcon, PlusIcon } from './icons';"
+          '// Stand-ins for your own icon components; the Studio draws a plus, a minus, two calendars and two arrows.',
+          "import { ArrowLeftIcon, ArrowRightIcon, CalendarMinusIcon, CalendarPlusIcon, MinusIcon, PlusIcon } from './icons';"
         ]
       : []),
     '',

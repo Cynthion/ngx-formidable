@@ -177,6 +177,7 @@ provideNgxFormidable({
   icons: {
     fieldToggle: { component: AppIcon, inputs: { name: 'expand' } },
     fieldToggleOpen: { component: AppIcon, inputs: { name: 'collapse' } },
+    dateFieldToggle: { component: AppIcon, inputs: { name: 'calendar' } },
     dateFieldPanelPrevious: { component: AppIcon, inputs: { name: 'chevron-left' } },
     dateFieldPanelNext: { component: AppIcon, inputs: { name: 'chevron-right' } }
   }
@@ -185,6 +186,7 @@ provideNgxFormidable({
 
 - **Unset Stays The Library's**: an icon left out keeps the library's chevron.
 - **Open And Closed**: `fieldToggleOpen` shows while the panel is open; unset, `fieldToggle` stays. The select never shows it, because a page cannot ask whether a native list is open.
+- **The Date Field's Own**: `dateFieldToggle` and `dateFieldToggleOpen` replace the toggle on the date field only, so a calendar can open from a calendar icon while a list opens from a chevron. Unset, `dateFieldToggleOpen` keeps `dateFieldToggle`; without either, the date field takes `fieldToggle` and `fieldToggleOpen`.
 - **One Size**: every icon sits centred in a box of `--formidable-icon-size`, which is also its `1em`, so an icon sized in `em`, as most icon components are, fills it. The chevrons fill it too, drawn on the 24-unit grid most icon sets use, so an icon from such a set matches their scale.
 - **Text Color**: the chevrons are stroked in the text color, so they follow the field's state colors. Draw yours in `currentColor` to do the same.
 - **Month Arrows Are Copies**: the calendar rebuilds its buttons on every draw, opening included, so each draw copies the icon in. An icon that renders its content later, such as one that fetches its SVG, shows from the next draw, and nothing inside the copy reacts to input.

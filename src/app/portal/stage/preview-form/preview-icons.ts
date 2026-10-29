@@ -53,6 +53,25 @@ export const MINUS_SVG = `
   <path d="M5 12h14" />
 </svg>`;
 
+export const CALENDAR_PLUS_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${STROKE}>
+  <path d="M8 2v4" />
+  <path d="M16 2v4" />
+  <path d="M3 10h18" />
+  <path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8" />
+  <path d="M16 19h6" />
+  <path d="M19 16v6" />
+</svg>`;
+
+export const CALENDAR_MINUS_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${STROKE}>
+  <path d="M8 2v4" />
+  <path d="M16 2v4" />
+  <path d="M3 10h18" />
+  <path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8" />
+  <path d="M16 19h6" />
+</svg>`;
+
 export const ARROW_LEFT_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${STROKE}>
   <path d="M19 12H5" />
@@ -71,6 +90,8 @@ const icon = (svg: string) => ({ component: ExampleIcon, inputs: { svg, size: 20
 export const STUDIO_ICONS: FormidableIcons = {
   fieldToggle: icon(PLUS_SVG),
   fieldToggleOpen: icon(MINUS_SVG),
+  dateFieldToggle: icon(CALENDAR_PLUS_SVG),
+  dateFieldToggleOpen: icon(CALENDAR_MINUS_SVG),
   dateFieldPanelPrevious: icon(ARROW_LEFT_SVG),
   dateFieldPanelNext: icon(ARROW_RIGHT_SVG)
 };
