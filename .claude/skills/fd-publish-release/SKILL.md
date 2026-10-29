@@ -48,7 +48,7 @@ When `version` equals the last tag, nothing is released yet. The notes come firs
 - **Install**: The exact version, then `Same peer dependencies as <last>.` or a table of the changed ranges.
 - **Not A Change**: The version pull request, a dependency update that leaves the peer ranges, repository tooling.
 - **Reviewed Before Handed Over**: Show the draft. Edits land in the file, and the file is what **Release** publishes.
-- **Style**: Follow [`.documentation/impl/documentation.md`](../../../.documentation/impl/documentation.md). Run `npx prettier --write` on the file so its tables align.
+- **Style**: Follow [`.documentation/impl/documentation.md`](../../../.documentation/impl/documentation.md). Run `npx prettier --write --ignore-path /dev/null` on the file so its tables align: Prettier reads `.gitignore`, which lists `.release/`, and skips the file without the flag.
 
 ## Rules
 
