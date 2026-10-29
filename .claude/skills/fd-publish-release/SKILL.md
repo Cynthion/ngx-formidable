@@ -24,7 +24,7 @@ Determine the state from what exists, report it, then continue from there. Every
 
 | State                                    | Next                                                            |
 | :--------------------------------------- | :-------------------------------------------------------------- |
-| `version` equals the last tag            | Draft the notes and propose the version, see below              |
+| `version` is not above the last release  | Draft the notes and propose the version, see below              |
 | `version` is new and not on the registry | **Check** through **Publish**                                   |
 | On the registry, no tag on the remote    | **Verify The Registry**, then **Tag**                           |
 | Tag on the remote, no GitHub release     | **Release**                                                     |
@@ -32,9 +32,9 @@ Determine the state from what exists, report it, then continue from there. Every
 
 ## Proposing The Version
 
-When `version` equals the last tag, nothing is released yet. The notes come first, because their sections are what the **Version** table of [`impl/releasing.md`](../../../.documentation/impl/releasing.md) reads:
+When `version` is not above the last release, the registry's `latest`, the bump is still to come. The notes come first, because their sections are what the **Version** table of [`impl/releasing.md`](../../../.documentation/impl/releasing.md) reads:
 
-1. Collect the pull request bodies since the last tag, the diff of `user/components.md`, `user/theme-reference.md` and the library `package.json` against the last tag, and the `user/` documents that changed.
+1. Collect the pull request bodies since the last release, the diff of `user/components.md`, `user/theme-reference.md` and the library `package.json` against its tag, and the `user/` documents that changed.
 2. Draft the notes from the template and show them.
 3. Propose the version from the table: the bump, the entries it rests on and whether **Early Adoption** applied. Ask for confirmation. Write the notes to `.release/v<x.y.z>.md`.
 4. On a `feature/*` branch, set `version` in `projects/ngx-formidable/package.json` and hand over to `/fd-create-pr`. On `main`, stop: the bump reaches `main` through a pull request.
