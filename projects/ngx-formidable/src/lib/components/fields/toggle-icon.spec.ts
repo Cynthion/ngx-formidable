@@ -1,5 +1,6 @@
 import { Component, input, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { page, userEvent } from 'vitest/browser';
 import { FormidableIcons } from '../../models/formidable.model';
 import { provideNgxFormidable } from '../../provide-ngx-formidable';
@@ -28,6 +29,17 @@ const RIGHT = '7.75 4.25 15.5 12 7.75 19.75';
 @Component({ template: '<i class="test-icon" style="display: block; width: 1em; height: 1em">{{ glyph() }}</i>' })
 class TestIcon {
   readonly glyph = input('');
+}
+
+/** A consumer's icon that draws its glyph a task late, as an icon library that loads its SVG does. */
+@Component({ template: '<i class="test-icon" style="display: block; width: 1em; height: 1em">{{ shown() }}</i>' })
+class LateIcon {
+  readonly glyph = input('');
+  protected readonly shown = signal('');
+
+  constructor() {
+    setTimeout(() => this.shown.set(this.glyph()));
+  }
 }
 
 /** A toggle icon projected under a condition, as a consumer's template may switch it. */
@@ -222,11 +234,13 @@ describe('calendar month arrows', () => {
   const next = () => document.querySelector<HTMLElement>('.pika-next')!;
   const month = () => document.querySelector<HTMLSelectElement>('.pika-select-month')!.value;
 
-  async function openCalendar(): Promise<void> {
+  async function openCalendar(): Promise<BoundField> {
     const field = await bind('date');
 
     await userEvent.click(toggleOf(field));
     await expect.element(page.getByRole('dialog', { name: 'Choice' })).toBeVisible();
+
+    return field;
   }
 
   it("draw the library's chevrons, sized from the theme", async () => {
@@ -248,6 +262,47 @@ describe('calendar month arrows', () => {
     expect(glyphsOf(next())).toEqual(['▶']);
     expect(sizeOf(previous())).toEqual([20, 20]);
     expect(sizeOf(next())).toEqual([20, 20]);
+  });
+
+  // The calendar draws once as the field is created, before such an icon has drawn anything.
+  it('draw a provided icon that draws late on the first open', async () => {
+    provideIcons({
+      dateFieldPanelPrevious: { component: LateIcon, inputs: { glyph: '◀' } },
+      dateFieldPanelNext: { component: LateIcon, inputs: { glyph: '▶' } }
+    });
+    const field = await bind('date');
+    await settle(field.fixture);
+
+    await userEvent.click(toggleOf(field));
+    await expect.element(page.getByRole('dialog', { name: 'Choice' })).toBeVisible();
+
+    expect(glyphsOf(previous())).toEqual(['◀']);
+    expect(glyphsOf(next())).toEqual(['▶']);
+  });
+
+  it('keep one icon each through closing and opening again', async () => {
+    const field = await openCalendar();
+
+    await userEvent.click(toggleOf(field));
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(toggleOf(field));
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+
+    expect(previous().querySelectorAll('formidable-field-icon')).toHaveLength(1);
+    expect(next().querySelectorAll('formidable-field-icon')).toHaveLength(1);
+  });
+
+  // A draw replaces the month select too, so one while open would drop the focus it holds.
+  it('stay as drawn when the open calendar is opened again', async () => {
+    const { fixture } = await openCalendar();
+    const date = fixture.debugElement.query(By.directive(DateField)).componentInstance as DateField;
+    const select = page.getByRole('combobox', { name: 'Month' });
+
+    await userEvent.click(select);
+    await expect.element(select).toHaveFocus();
+    date.togglePanel(true);
+
+    await expect.element(select).toHaveFocus();
   });
 
   // Pikaday turns the month only when the press lands on the button itself, and rebuilds both buttons as it

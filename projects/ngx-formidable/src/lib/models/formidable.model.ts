@@ -144,8 +144,8 @@ export interface FormidableIcons {
   /** That toggle while the field's panel is open. Unset, `fieldToggle` stays. */
   fieldToggleOpen?: FormidableIcon;
   /**
-   * The calendar's previous-month button. It shows a static copy, taken each time the calendar draws, so what
-   * the icon renders later shows from the next draw and nothing in it reacts to input.
+   * The calendar's previous-month button. It shows a static copy, taken each time the calendar draws, as it
+   * does on opening, so what the icon renders later shows from the next draw and nothing in it reacts to input.
    */
   dateFieldPanelPrevious?: FormidableIcon;
   /** The calendar's next-month button, a static copy like the previous. */

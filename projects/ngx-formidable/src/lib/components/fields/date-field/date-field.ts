@@ -423,6 +423,9 @@ export class DateField extends BaseDateTimeField implements AfterViewInit, OnDes
 
   /** Opens or closes the calendar. */
   public togglePanel(isOpen: boolean): void {
+    // Drawn again on opening, so the month buttons copy an icon that drew after the last draw. Not while open:
+    // the draw would replace a focused select.
+    if (isOpen && !this.isPanelOpen()) this.picker?.draw(true);
     this.isPanelOpen.set(isOpen);
     this.panelRef()!.nativeElement.inert = !isOpen;
     this.onPanelToggle(isOpen);
@@ -459,7 +462,7 @@ export class DateField extends BaseDateTimeField implements AfterViewInit, OnDes
   //
   // The same rebuild is why the month buttons carry a copy of their icon rather than a live one: Pikaday writes
   // them as an HTML string, which no Angular view can live in, so each draw appends a fresh copy of the icon the
-  // template renders hidden.
+  // template renders hidden. Opening the calendar draws too, which takes a copy of an icon that drew late.
   private decoratePikadayControls(): void {
     const host = this.pickerRef()?.nativeElement;
     if (!host) return;
