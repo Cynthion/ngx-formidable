@@ -44,7 +44,7 @@ Every command runs from the repository root.
 - **One Command**: `npm run docs:lint` runs `markdownlint-cli2` over the repository. It checks style, and through `markdownlint-rule-relative-links` it checks that every relative link and heading anchor resolves.
 - **Repository Wide**: Always the whole repository, because a link breaks when its target moves rather than when its source changes.
 - **Rules**: `.markdownlint.json` holds the rule configuration and is read by both the command and the editor extension.
-- **Exclusions**: `.markdownlint-cli2.jsonc` lists the paths that must not be linted: build output, the prebuild copy of `README.md`, and the untracked `.research/` and `.plan/` artifacts.
+- **Exclusions**: `.markdownlint-cli2.jsonc` lists the paths that must not be linted: build output, the prebuild copy of `README.md`, and the untracked `.research/`, `.plan/` and `.release/` artifacts.
 - **Link Notation**: Autolinks, `<https://example.com>`, fail the gate. Every link carries descriptive text, see [`impl/documentation.md`](documentation.md).
 - **Inline HTML**: Only `br` and `img` are allowed. [`README.md`](../../README.md) opts out around its centred hero and badges with an inline `markdownlint-disable` comment, because npm renders that markup.
 - **Editor**: The `davidanson.vscode-markdownlint` extension reports violations while editing. A clean editor is the fastest way to arrive at a green gate.

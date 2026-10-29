@@ -74,7 +74,7 @@ The portal lives in `src/app/portal/` and is routed with hash location, because 
 
 ## Build And Publish
 
-The scripts are listed in [`impl/developer-onboarding.md`](../impl/developer-onboarding.md) and the release steps in [`impl/definition-of-done.md`](../impl/definition-of-done.md). `build:lib` builds the library with ng-packagr into `dist/ngx-formidable`; `prebuild:lib` copies `README.md` and `LICENSE` into the library first.
+The scripts are listed in [`impl/developer-onboarding.md`](../impl/developer-onboarding.md) and the release steps in [`impl/releasing.md`](../impl/releasing.md). `build:lib` builds the library with ng-packagr into `dist/ngx-formidable`; `prebuild:lib` copies `README.md` and `LICENSE` into the library first.
 
 ng-packagr config:
 

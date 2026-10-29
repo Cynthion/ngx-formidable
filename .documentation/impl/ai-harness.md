@@ -51,12 +51,13 @@ Conventions are split per area for the same reason. One file per rule means an S
 
 Only the manual tooling needs instruction. The automatic skills and the agents are selected from their `description`, so documenting when to trigger them would duplicate the frontmatter.
 
-| Invoke          | When                           | Produces                             |
-| :-------------- | :----------------------------- | :----------------------------------- |
-| `/fd-drive-sdd` | Development begins on a branch | `.research/` then `.plan/` artifacts |
-| `/fd-create-pr` | The Definition of Done is met  | One pull request                     |
+| Invoke                | When                           | Produces                                           |
+| :-------------------- | :----------------------------- | :------------------------------------------------- |
+| `/fd-drive-sdd`       | Development begins on a branch | `.research/` then `.plan/` artifacts               |
+| `/fd-create-pr`       | The Definition of Done is met  | One pull request                                   |
+| `/fd-publish-release` | `main` holds the release       | Release notes, npm package, tag and GitHub release |
 
-Each of these has an outward-facing effect, so each is marked `disable-model-invocation` and runs only when invoked. An agent does not decide to open a pull request.
+Each of these has an outward-facing effect, so each is marked `disable-model-invocation` and runs only when invoked. An agent does not decide to open a pull request or to publish a release.
 
 MCP servers are not invoked. Their tools are model-invoked, so there is nothing manual about them beyond the configuration below.
 
@@ -85,6 +86,7 @@ An agent body stands alone and never assumes who invoked it.
 | `fd-write-documentation` |    Auto    | Inherit | Apply the documentation guidelines                           |
 | `fd-drive-sdd`           |   Manual   | Inherit | Own the SDD templates and drive the phases                   |
 | `fd-create-pr`           |   Manual   |   Low   | Open a pull request from a template                          |
+| `fd-publish-release`     |   Manual   | Inherit | Drive a release, hand over publish, tag and GitHub release   |
 
 `effort` overrides the session's reasoning effort for the skill's own turn only, resuming the session value on the next prompt. `Low` marks mechanical, template-driven skills; `High` marks skills whose entire purpose is finding gaps or defects.
 
@@ -123,16 +125,16 @@ flowchart LR
   Main --> Publish[Manual Publish]
 ```
 
-| Step             | Input                 | Output                         | Tooling                                             |
-| :--------------- | :-------------------- | :----------------------------- | :-------------------------------------------------- |
-| Branch           | Refined backlog item  | `feature/*` branch             | `git switch -c`                                     |
-| Research         | Backlog item          | `.research/<slug>.md`          | `/fd-drive-sdd`, `fd-research`, `fd-research-issue` |
-| Plan             | `.research/<slug>.md` | `.plan/<slug>.md`              | `fd-plan`, `fd-grill-plan`, `fd-create-handoff`     |
-| Develop And Test | `.plan/<slug>.md`     | Source code, appended progress | `fd-implement`, `fd-create-component`               |
-| Documentation    | Source code           | Documentation                  | `fd-write-documentation`                            |
-| Review           | Diff                  | Findings                       | `fd-review`, `fd-review-change`                     |
-| Pull Request     | Verified change       | Pull request                   | `/fd-create-pr`                                     |
-| Release          | Merge to `main`       | Deployed portal, npm package   | `deploy.yml`, then `publish:lib` by hand            |
+| Step             | Input                 | Output                                            | Tooling                                             |
+| :--------------- | :-------------------- | :------------------------------------------------ | :-------------------------------------------------- |
+| Branch           | Refined backlog item  | `feature/*` branch                                | `git switch -c`                                     |
+| Research         | Backlog item          | `.research/<slug>.md`                             | `/fd-drive-sdd`, `fd-research`, `fd-research-issue` |
+| Plan             | `.research/<slug>.md` | `.plan/<slug>.md`                                 | `fd-plan`, `fd-grill-plan`, `fd-create-handoff`     |
+| Develop And Test | `.plan/<slug>.md`     | Source code, appended progress                    | `fd-implement`, `fd-create-component`               |
+| Documentation    | Source code           | Documentation                                     | `fd-write-documentation`                            |
+| Review           | Diff                  | Findings                                          | `fd-review`, `fd-review-change`                     |
+| Pull Request     | Verified change       | Pull request                                      | `/fd-create-pr`                                     |
+| Release          | Merge to `main`       | Deployed portal, npm package, tag, GitHub release | `deploy.yml`, then `/fd-publish-release`            |
 
 `.research/` and `.plan/` are untracked. Implementation progress is appended to the plan file rather than written to a third artifact, so a work item has exactly two files. Templates live in `.claude/skills/fd-drive-sdd/`. For a small task, skip SDD: edit directly and run `fd-review-change`.
 
@@ -178,6 +180,7 @@ The recommended baseline denies what must stay manual. `deny` outranks `allow`, 
 - **Match On The Command String**: a `Bash` rule matches what is typed, not what runs. `npm run publish:lib` calls `npm publish` inside a script, so `npm publish` alone does not deny it.
 - **Allow Rules Are Personal**: anything not allowed prompts. The allow list is a guardrail against routine mistakes, not a sandbox.
 - **Pull Requests**: `fd-create-pr` never pushes, whatever the local rules say. It drafts and shows the request, then stops and asks for the push.
+- **Releases**: `fd-publish-release` never publishes, tags, pushes or creates the release. It hands each over, then verifies the registry, the remote tag and the release before continuing.
 
 ---
 

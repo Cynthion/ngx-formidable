@@ -55,4 +55,5 @@ projects/ngx-formidable/README.md
 .claude/settings.local.json
 .research/
 .plan/
+.release/
 .playwright-mcp/
