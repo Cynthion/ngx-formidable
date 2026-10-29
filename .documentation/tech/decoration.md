@@ -142,7 +142,7 @@ What a consumer sets is under **Icons** in [`user/fields.md`](../user/fields.md)
 
 **Projected content wins by what renders.** Each field renders its `FieldIcon` beside the `[formidableFieldToggleIcon]` slot, and the stylesheet hides it while the slot holds an element (`:has()`). An `<ng-content>` fallback would not do: Angular settles it once, when the field is created, and counts a projected `@if` as content even while it renders nothing. Nor would `contentChild(FieldToggleIcon)`: content projects by its attribute alone, so a consumer who never imports the directive would get both icons.
 
-**The month arrows are copies.** Pikaday writes its header as an HTML string on every draw, so no Angular view can live in its buttons. The date field renders a hidden `FieldIcon` for each, and `decoratePikadayControls` appends a `cloneNode` of it to the button after every draw. The copy takes no pointer events, because Pikaday turns the month only for a press on the button itself, and it resets the font size the buttons zero to hide their label.
+**The month arrows are copies.** Pikaday writes its header as an HTML string on every draw, so no Angular view can live in its buttons. The date field renders a hidden `FieldIcon` for each, and `decoratePikadayControls` appends a `cloneNode` of it to the button after every draw. Opening the calendar forces a draw, because Pikaday draws once as the field is created, before an icon that loads its SVG has drawn anything. The copy takes no pointer events, because Pikaday turns the month only for a press on the button itself, and it resets the font size the buttons zero to hide their label.
 
 ---
 
