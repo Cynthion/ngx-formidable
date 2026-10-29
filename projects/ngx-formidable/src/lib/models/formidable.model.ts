@@ -1,4 +1,4 @@
-import { ElementRef, InjectionToken, Signal, TemplateRef } from '@angular/core';
+import { ElementRef, InjectionToken, Signal, TemplateRef, Type } from '@angular/core';
 import { ValidationError } from '@angular/forms/signals';
 import { NgxMaskConfig } from 'ngx-mask';
 import { FormidableReveal } from './validation.model';
@@ -122,6 +122,38 @@ export interface FormidableDefaults {
 
 /** The app-wide defaults. Empty unless `provideNgxFormidable({ defaults })` or a component provides it. */
 export const FORMIDABLE_DEFAULTS = new InjectionToken<FormidableDefaults>('FORMIDABLE_DEFAULTS', {
+  providedIn: 'root',
+  factory: () => ({})
+});
+
+/** One icon: a component and the inputs to render it with, as `NgComponentOutlet` takes them. */
+export interface FormidableIcon {
+  component: Type<unknown>;
+  inputs?: Record<string, unknown>;
+}
+
+/**
+ * App-wide replacements for the icons the library draws, each rendered in a box of `--formidable-icon-size`,
+ * which is also its `1em`, and taking the text colour. An unset one stays the library's chevron. Set via `provideNgxFormidable`, or
+ * provide `FORMIDABLE_ICONS` in a component's `providers` to scope them to that subtree. Content projected
+ * as `[formidableFieldToggleIcon]` still wins on its field.
+ */
+export interface FormidableIcons {
+  /** The toggle of the select, dropdown and date fields. */
+  fieldToggle?: FormidableIcon;
+  /** That toggle while the field's panel is open. Unset, `fieldToggle` stays. */
+  fieldToggleOpen?: FormidableIcon;
+  /**
+   * The calendar's previous-month button. It shows a static copy, taken each time the calendar draws, so what
+   * the icon renders later shows from the next draw and nothing in it reacts to input.
+   */
+  dateFieldPanelPrevious?: FormidableIcon;
+  /** The calendar's next-month button, a static copy like the previous. */
+  dateFieldPanelNext?: FormidableIcon;
+}
+
+/** The app-wide icons. Empty unless `provideNgxFormidable({ icons })` or a component provides it. */
+export const FORMIDABLE_ICONS = new InjectionToken<FormidableIcons>('FORMIDABLE_ICONS', {
   providedIn: 'root',
   factory: () => ({})
 });

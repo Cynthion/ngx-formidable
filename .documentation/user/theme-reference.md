@@ -322,6 +322,16 @@ Weigh it first: a header that wins covers an open dropdown scrolled underneath i
 
 ---
 
+## Icons
+
+The icons are inline SVG painted in the text color, so a theme sets only their size. Replacing one is a provider rather than a variable, see **Icons** in [Fields](fields.md).
+
+| Variable                 | Description                                                                                                                                                        |
+| :----------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--formidable-icon-size` | Size of the box every icon sits in, the library's chevrons and a provided icon alike: the select, dropdown and date field toggles and the calendar's month arrows. |
+
+---
+
 ## Variables The Library Sets Itself
 
 The library sets these itself, from script or from its stylesheet as a field's state changes, on the element where each applies. They appear in the browser's inspector, but overriding one does nothing useful.

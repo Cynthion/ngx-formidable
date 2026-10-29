@@ -42,7 +42,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-An NgModule app lists the same call in its root module's `providers`. It takes an optional `NgxFormidableConfig`: `globalMaskConfig`, the app-wide ngx-mask settings described in [Fields](fields.md), and `defaults`, below.
+An NgModule app lists the same call in its root module's `providers`. It takes an optional `NgxFormidableConfig`: `globalMaskConfig`, the app-wide ngx-mask settings described in [Fields](fields.md), `icons`, the app-wide icons described there too, and `defaults`, below.
 
 ### App-Wide Defaults
 

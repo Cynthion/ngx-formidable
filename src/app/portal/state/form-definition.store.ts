@@ -41,6 +41,12 @@ export class FormDefinitionStore {
    */
   public readonly appDefaults = signal<FormidableDefaults>({});
 
+  /** Whether the consumer's `provideNgxFormidable({ icons })` would replace the library's. The app's too. */
+  public readonly customIcons = signal(false);
+
+  /** How many app settings are set: the defaults, and the icons. */
+  public readonly appSetCount = computed(() => Object.keys(this.appDefaults()).length + Number(this.customIcons()));
+
   private readonly formRevealOn = computed(() => this.options().revealOn);
   private readonly formHidesRequiredMarkers = computed(() => this.options().hideRequiredMarkers);
 

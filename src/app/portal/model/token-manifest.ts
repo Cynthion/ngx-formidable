@@ -1404,6 +1404,14 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     description: 'Border thickness of the outer circle/box for radio/checkbox prefixes.'
   },
   {
+    name: '--formidable-icon-size',
+    group: 'Icons',
+    control: 'length',
+    class: 'declared',
+    description:
+      "Size of the box every icon sits in, the library's chevrons and a provided icon alike: the select, dropdown and date field toggles and the calendar's month arrows."
+  },
+  {
     name: '--formidable-field-border-start-start-radius',
     group: 'Field Dimensions',
     control: 'length',
@@ -1484,7 +1492,8 @@ export const THEME_TOKEN_GROUPS: readonly ThemeTokenGroup[] = [
   'Animations',
   'Layering',
   'Date Field Panel',
-  'Option Prefix Dimensions'
+  'Option Prefix Dimensions',
+  'Icons'
 ];
 
 /** Indexed by name, for the per-token lookups the editor and the importer both do. */

@@ -113,7 +113,8 @@ export class AppDefaults {
   protected readonly formControls = FORM_CONTROLS;
 
   protected readonly defaults = computed(() => this.store.appDefaults());
-  protected readonly setCount = computed(() => Object.keys(this.defaults()).length);
+  protected readonly customIcons = this.store.customIcons;
+  protected readonly setCount = this.store.appSetCount;
   protected readonly justCopied = signal(false);
 
   protected valueOf(key: FieldKey | FormKey): string {
@@ -152,6 +153,6 @@ export class AppDefaults {
   }
 
   protected copy(): Promise<void> {
-    return copyText(serializeAppConfig(this.defaults()), this.justCopied);
+    return copyText(serializeAppConfig(this.defaults(), this.customIcons()), this.justCopied);
   }
 }

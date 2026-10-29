@@ -56,7 +56,7 @@ export class ExportPanel {
       case 'schema':
         return serializeSchema(this.store.definition());
       case 'config':
-        return serializeAppConfig(this.store.appDefaults());
+        return serializeAppConfig(this.store.appDefaults(), this.store.customIcons());
       default:
         return serializeDefinition(this.store.definition());
     }

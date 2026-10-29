@@ -366,6 +366,9 @@ function parseDecorator(
   if (decorator.querySelector('[formidablefieldlabeladornment]')) {
     decoration = { ...decoration, labelAdornment: 'text' };
   }
+  if (capabilities.toggleIcon && fieldElement.querySelector('[formidablefieldtoggleicon]')) {
+    decoration = { ...decoration, toggleIcon: true };
+  }
 
   // The first key of a two-key path is the group, which is as deep as a section nests.
   const name = path[path.length - 1] ?? spec.name;

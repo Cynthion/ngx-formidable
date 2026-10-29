@@ -2,8 +2,6 @@ import {
   afterRenderEffect,
   AfterViewInit,
   Component,
-  computed,
-  contentChild,
   ElementRef,
   inject,
   input,
@@ -16,7 +14,6 @@ import { addDays, format } from 'date-fns';
 import { NgxMaskDirective } from 'ngx-mask';
 import Pikaday, { PikadayI18nConfig, PikadayOptions } from 'pikaday';
 import { filter, fromEvent, merge, takeUntil } from 'rxjs';
-import { FieldToggleIcon } from '../../../directives/field-toggle-icon';
 import { normalizeTimePart, UNICODE_DATE_TOKENS } from '../../../helpers/format.helpers';
 import { onSignalChange } from '../../../helpers/utility.helpers';
 import {
@@ -25,6 +22,7 @@ import {
   FormidablePanelField,
   FormidablePanelPosition
 } from '../../../models/formidable.model';
+import { FieldIcon } from '../../field-icon/field-icon';
 import { BaseDateTimeField } from '../base-date-time-field';
 
 /**
@@ -44,7 +42,7 @@ import { BaseDateTimeField } from '../base-date-time-field';
   selector: 'formidable-date-field',
   templateUrl: './date-field.html',
   styleUrls: ['./date-field.scss'],
-  imports: [NgxMaskDirective],
+  imports: [FieldIcon, NgxMaskDirective],
   providers: [
     // required to provide this component as FormidableField
     {
@@ -56,11 +54,8 @@ import { BaseDateTimeField } from '../base-date-time-field';
 export class DateField extends BaseDateTimeField implements AfterViewInit, OnDestroy {
   readonly dateRef = viewChild.required<ElementRef<HTMLDivElement>>('dateRef');
   readonly pickerRef = viewChild<ElementRef<HTMLDivElement>>('pickerRef');
-
-  private readonly projectedToggleIcon = contentChild(FieldToggleIcon);
-
-  // False while no `[formidableFieldToggleIcon]` is projected, which is when the default CSS arrow is drawn.
-  protected readonly hasToggleIcon = computed(() => !!this.projectedToggleIcon());
+  private readonly previousIcon = viewChild.required('previousIcon', { read: ElementRef<HTMLElement> });
+  private readonly nextIcon = viewChild.required('nextIcon', { read: ElementRef<HTMLElement> });
 
   protected keyboardCallback = (event: KeyboardEvent) => this.handleKeydown(event);
   protected registeredKeys = ['Escape', 'Tab', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Enter'];
@@ -461,9 +456,16 @@ export class DateField extends BaseDateTimeField implements AfterViewInit, OnDes
   // both `id` and `name` from the field's `name`/`fieldId`.
   //
   // This is a cosmetic/accessibility fix — it does not affect Pikaday’s behavior.
+  //
+  // The same rebuild is why the month buttons carry a copy of their icon rather than a live one: Pikaday writes
+  // them as an HTML string, which no Angular view can live in, so each draw appends a fresh copy of the icon the
+  // template renders hidden.
   private decoratePikadayControls(): void {
     const host = this.pickerRef()?.nativeElement;
     if (!host) return;
+
+    host.querySelector('.pika-prev')?.append(this.previousIcon().nativeElement.cloneNode(true));
+    host.querySelector('.pika-next')?.append(this.nextIcon().nativeElement.cloneNode(true));
 
     const monthSelects = Array.from(host.querySelectorAll<HTMLSelectElement>('select.pika-select-month'));
     const yearSelects = Array.from(host.querySelectorAll<HTMLSelectElement>('select.pika-select-year'));

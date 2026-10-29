@@ -39,9 +39,9 @@
     <span
       #toggleRef
       class="dropdown-toggle"
-      [class.open]="isPanelOpen()"
-      [class.arrow-down]="!isPanelOpen()"
-      [class.arrow-up]="isPanelOpen()">
+      [class.open]="isPanelOpen()">
+      <ng-content select="[formidableFieldToggleIcon]" />
+      <formidable-field-icon [name]="isPanelOpen() ? 'fieldToggleOpen' : 'fieldToggle'" />
     </span>
     }
   </div>

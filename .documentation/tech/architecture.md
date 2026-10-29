@@ -32,6 +32,7 @@ projects/ngx-formidable/
         ├── components/
         │   ├── field-decorator/          # wraps a field with label, adornment, prefix, suffix, hints, errors
         │   ├── field-errors/             # renders messages
+        │   ├── field-icon/               # draws a toggle or month-arrow icon, internal
         │   ├── field-option/             # a single option inside option-based fields
         │   └── fields/                   # field components, base directives
         ├── directives/                   # field-decoration directives

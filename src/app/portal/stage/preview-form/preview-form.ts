@@ -41,7 +41,8 @@ export class PreviewForm {
   /** A new object whenever the form has to be rebuilt, which is what the template tracks. */
   protected readonly build = computed(() => ({
     form: this.valueStore.form(),
-    defaults: this.definitionStore.previewDefaults()
+    defaults: this.definitionStore.previewDefaults(),
+    icons: this.definitionStore.customIcons()
   }));
 
   /** The field at a model path: `group.name` for a field in a grouped section, the group's name for the group. */

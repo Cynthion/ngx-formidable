@@ -39,6 +39,14 @@
       [readonly]="option.readonly ?? false"
       [disabled]="option.disabled ?? false" />
     }
+    <!-- A projected icon is the page's own: its size and colour too. -->
+    @if (field.decoration.toggleIcon) {
+    <example-icon
+      formidableFieldToggleIcon
+      class="toggle-icon"
+      [svg]="chevronsSvg"
+      [size]="20" />
+    }
   </formidable-select-field>
   } @case ('dropdown') {
   <formidable-dropdown-field
@@ -60,6 +68,14 @@
       [label]="option.label"
       [readonly]="option.readonly ?? false"
       [disabled]="option.disabled ?? false" />
+    }
+    <!-- A projected icon is the page's own: its size and colour too. -->
+    @if (field.decoration.toggleIcon) {
+    <example-icon
+      formidableFieldToggleIcon
+      class="toggle-icon"
+      [svg]="chevronsSvg"
+      [size]="20" />
     }
   </formidable-dropdown-field>
   } @case ('autocomplete') {
@@ -100,8 +116,8 @@
     [firstDay]="locale().firstDay"
     [formField]="$any(fieldTree())"
     (focusin)="onFocus()">
-    <!-- The library ships no SVG, so everything about the projected icon is the page's: size and colour. -->
-    @if (capabilities().toggleIcon) {
+    <!-- A projected icon is the page's own: its size and colour too. -->
+    @if (field.decoration.toggleIcon) {
     <example-icon
       formidableFieldToggleIcon
       class="toggle-icon"

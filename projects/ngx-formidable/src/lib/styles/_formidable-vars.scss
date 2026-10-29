@@ -692,6 +692,12 @@
   --formidable-option-prefix-border-thickness: #{tokens.$formidable-option-prefix-border-thickness};
 
   // #endregion
+
+  // #region Icons
+
+  --formidable-icon-size: #{tokens.$formidable-icon-size};
+
+  // #endregion
 }
 
 :root {

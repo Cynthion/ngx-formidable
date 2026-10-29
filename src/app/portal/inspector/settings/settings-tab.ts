@@ -56,9 +56,9 @@ export class SettingsTab {
     () => SCOPES.find((scope) => scope.id === this.inspector.fieldScope())?.lede ?? ''
   );
 
-  /** The count each scope reaches — for the app, how many defaults it sets — so a scope states it up front. */
+  /** The count each scope reaches — for the app, how many settings it sets — so a scope states it up front. */
   protected reach(scope: FieldScope): string {
-    if (scope === 'app') return `${Object.keys(this.store.appDefaults()).length}`;
+    if (scope === 'app') return `${this.store.appSetCount()}`;
     if (scope === 'field') return this.store.selectedField() ? '1' : '0';
 
     return '';

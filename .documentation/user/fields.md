@@ -166,6 +166,43 @@ Whatever the placement, the calendar scales to the width its panel has: `--formi
 
 ---
 
+## Icons
+
+`select-field`, `dropdown-field` and `date-field` draw a toggle at their right edge, and the date field's calendar draws its month arrows. The library's own are chevrons. Replace them app-wide with a provider, or per field by projecting your own.
+
+**App-Wide**: give `provideNgxFormidable` an `icons` object. Each icon is a component and the inputs to render it with, so an icon library's component goes in as it is:
+
+```ts
+provideNgxFormidable({
+  icons: {
+    fieldToggle: { component: AppIcon, inputs: { name: 'expand' } },
+    fieldToggleOpen: { component: AppIcon, inputs: { name: 'collapse' } },
+    dateFieldPanelPrevious: { component: AppIcon, inputs: { name: 'chevron-left' } },
+    dateFieldPanelNext: { component: AppIcon, inputs: { name: 'chevron-right' } }
+  }
+});
+```
+
+- **Unset Stays The Library's**: an icon left out keeps the library's chevron.
+- **Open And Closed**: `fieldToggleOpen` shows while the panel is open; unset, `fieldToggle` stays. The select never shows it, because a page cannot ask whether a native list is open.
+- **One Size**: every icon sits centred in a box of `--formidable-icon-size`, which is also its `1em`, so an icon sized in `em`, as most icon components are, fills it. The chevrons fill it too, drawn on the 24-unit grid most icon sets use, so an icon from such a set matches their scale.
+- **Text Color**: the chevrons are stroked in the text color, so they follow the field's state colors. Draw yours in `currentColor` to do the same.
+- **Month Arrows Are Copies**: the calendar rebuilds its buttons on every draw, so each draw copies the icon in. An icon that renders its content later, such as one that fetches its SVG, shows from the next draw, and nothing inside the copy reacts to input.
+- **Scoped By Providing**: provide `FORMIDABLE_ICONS` in a component's `providers` to give the fields it renders icons of their own, the way `FORMIDABLE_DEFAULTS` is scoped in [Getting Started](getting-started.md).
+- **No Policy Rule**: the chevrons are inline SVG, so a Content Security Policy needs no `img-src` rule for them.
+
+**Per Field**: project `[formidableFieldToggleIcon]` content, such as an icon component, into the field. It replaces the toggle's icon, the provided one included, for as long as it renders, so an `@if` around it can switch between the two. Its size, color and hover feedback are yours.
+
+```html
+<formidable-date-field [formField]="form.birthdate">
+  <span formidableFieldToggleIcon>📅</span>
+</formidable-date-field>
+```
+
+The select's toggle overlays the native control, so a click on a projected icon still opens its list.
+
+---
+
 ## Keyboard
 
 Every control is operable from the keyboard. Disabled and readonly fields ignore navigation.
@@ -228,16 +265,6 @@ A focused empty field always shows underscore slots, because the mask's caret ar
 - **A Two-Digit Year**: `yy` reads `00` to `49` as 20xx, and `50` to `99` as 19xx. Any other year takes `yyyy`.
 
 The date field passes a set of options straight through to Pikaday: `minDate`, `maxDate`, `firstDay`, `i18n`, `yearRange`, `disableWeekends`, `disableDayFn` and the rest, listed in [Components](components.md). Each is applied to the calendar when it changes at runtime.
-
-**The Toggle Icon**: the date field's panel toggle draws a CSS arrow by default. The library ships no icons, so to replace it, project your own:
-
-```html
-<formidable-date-field [formField]="form.birthdate">
-  <span formidableFieldToggleIcon>📅</span>
-</formidable-date-field>
-```
-
-The toggle centres what is projected; its size, colour and hover feedback are yours.
 
 ---
 

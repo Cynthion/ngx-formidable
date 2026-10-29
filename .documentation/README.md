@@ -12,7 +12,7 @@ For consumers of the library. A **guide** teaches a topic; a **reference** lists
 | :--------------------------------------------------- | :-------: | :------------------------------------------------------------------------- |
 | [`user/getting-started.md`](user/getting-started.md) |   Guide   | Install, wiring, the stylesheet, a first form                              |
 | [`user/forms.md`](user/forms.md)                     |   Guide   | How the fields meet Signal Forms, reactive forms and template-driven forms |
-| [`user/fields.md`](user/fields.md)                   |   Guide   | Options, panels, keyboard, dates and times, masking, focus                 |
+| [`user/fields.md`](user/fields.md)                   |   Guide   | Options, panels, icons, keyboard, dates and times, masking, focus          |
 | [`user/decoration.md`](user/decoration.md)           |   Guide   | Labels, adornments, prefixes, suffixes, hints, required marker             |
 | [`user/validation.md`](user/validation.md)           |   Guide   | Angular's rules, Vest, Zod or none; messages and their reveal              |
 | [`user/submit-gates.md`](user/submit-gates.md)       |   Guide   | Valid, dirty, changed or none; when the submit button opens                |
@@ -28,14 +28,14 @@ For consumers of the library. A **guide** teaches a topic; a **reference** lists
 
 For maintainers of the library and the portal. Contains technical documentation of features, configurations, patterns and architecture.
 
-| File                                                     | Purpose                                                            |
-| :------------------------------------------------------- | :----------------------------------------------------------------- |
-| [`tech/architecture.md`](tech/architecture.md)           | Workspace structure, library and portal roles, build and publish   |
-| [`tech/caret.md`](tech/caret.md)                         | Caret placement on focus entry, and the ngx-mask timing around it  |
-| [`tech/decoration.md`](tech/decoration.md)               | The decorator, field and errors wiring: slot, ids, repaint, insets |
-| [`tech/forms-integration.md`](tech/forms-integration.md) | The field contract under each forms API, validators, reveal        |
-| [`tech/layering.md`](tech/layering.md)                   | Stacking contexts, the layer ordinals and the two public z-indices |
-| [`tech/portal.md`](tech/portal.md)                       | Portal design: page structure, theming, preview form, state        |
+| File                                                     | Purpose                                                                         |
+| :------------------------------------------------------- | :------------------------------------------------------------------------------ |
+| [`tech/architecture.md`](tech/architecture.md)           | Workspace structure, library and portal roles, build and publish                |
+| [`tech/caret.md`](tech/caret.md)                         | Caret placement on focus entry, and the ngx-mask timing around it               |
+| [`tech/decoration.md`](tech/decoration.md)               | The decorator, field and errors wiring: slot, ids, repaint, insets, toggle icon |
+| [`tech/forms-integration.md`](tech/forms-integration.md) | The field contract under each forms API, validators, reveal                     |
+| [`tech/layering.md`](tech/layering.md)                   | Stacking contexts, the layer ordinals and the two public z-indices              |
+| [`tech/portal.md`](tech/portal.md)                       | Portal design: page structure, theming, preview form, state                     |
 
 ---
 

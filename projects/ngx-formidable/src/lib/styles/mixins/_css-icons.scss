@@ -1,32 +1,23 @@
-@use 'sass:math';
+@use '../tokens' as tokens;
 
-@mixin css-icon($name, $size: 12px, $stroke: 2px) {
-  position: relative;
+// The box every icon the library draws shares, at the one size `--formidable-icon-size` sets. A provided icon
+// is centred in it; the library's own chevron fills it, stroked in the text colour on the 24-unit grid.
+@mixin field-icon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
+  height: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
+  // `1em` is the box too, so an icon sized in `em`, as most icon components are, fills it. It also overrides
+  // the zero font size of the calendar's month buttons, which hides their label and would hide the icon.
+  font-size: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
 
-  @if $name == 'arrow-up' or $name == 'arrow-right' or $name == 'arrow-down' or $name == 'arrow-left' {
-    $rotation: 0deg;
-    @if $name == 'arrow-up' {
-      $rotation: 45deg;
-    } @else if $name == 'arrow-right' {
-      $rotation: 135deg;
-    } @else if $name == 'arrow-down' {
-      $rotation: 225deg;
-    } @else if $name == 'arrow-left' {
-      $rotation: -45deg;
-    }
-
-    &::before {
-      content: '';
-      display: block;
-      width: $size;
-      height: $size;
-      position: absolute;
-      z-index: 1;
-      top: 50%;
-      left: 50%;
-      border-left: #{$stroke} solid;
-      border-top: #{$stroke} solid;
-      transform: translate(-50%, -50%) rotate(#{$rotation});
-    }
+  svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2;
   }
 }

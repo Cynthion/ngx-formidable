@@ -43,10 +43,9 @@
       #toggleRef
       class="toggle"
       [class.open]="isPanelOpen()"
-      [class.arrow-down]="!hasToggleIcon() && !isPanelOpen()"
-      [class.arrow-up]="!hasToggleIcon() && isPanelOpen()"
       (mousedown)="onPanelToggleMouseDown($event)">
       <ng-content select="[formidableFieldToggleIcon]" />
+      <formidable-field-icon [name]="isPanelOpen() ? 'fieldToggleOpen' : 'fieldToggle'" />
     </span>
     }
   </div>
@@ -70,6 +69,15 @@
         <div
           #pickerRef
           class="picker"></div>
+        <!-- What the month buttons get a copy of on every draw, since Pikaday writes them as HTML. -->
+        <span hidden>
+          <formidable-field-icon
+            #previousIcon
+            name="dateFieldPanelPrevious" />
+          <formidable-field-icon
+            #nextIcon
+            name="dateFieldPanelNext" />
+        </span>
       </div>
     </div>
   </div>

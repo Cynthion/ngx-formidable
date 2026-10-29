@@ -415,3 +415,10 @@ $formidable-option-prefix-gap: utils.rem(16);
 $formidable-option-prefix-border-thickness: utils.rem(2);
 
 // #endregion
+
+// #region Icons
+
+// The 24-unit grid most icon sets draw on, so an icon from such a set renders at the chevrons' scale.
+$formidable-icon-size: utils.rem(24);
+
+// #endregion

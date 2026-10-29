@@ -193,7 +193,7 @@ The recommended baseline denies what must stay manual. `deny` outranks `allow`, 
 | `storybook`   |  `http`   | Stories and component docs of the running Storybook           | Nothing            |
 | `ux-patterns` |  `http`   | UX pattern guidance and accessibility review for fields       | Nothing            |
 
-`playwright` runs headless and isolated, so it never touches a real browser profile. It is a client and never starts or stops a server: reuse whatever is already listening on the Storybook or portal port, and ask rather than starting one. That contract is stated in [`.claude/rules/repository.md`](../../.claude/rules/repository.md), because the risk applies to every task and not only to portal files. The portal routes on the hash, so a deep link is `http://localhost:4200/#/docs`, not `/docs`.
+`playwright` runs headless and isolated, so it never touches a real browser profile. It is a client and never starts or stops a server: reuse whatever is already listening on the Storybook or portal port. When the portal is not listening, the agent starts it with `npm start` for the visual proof and stops it afterwards; for Storybook it asks. That contract is stated in [`.claude/rules/repository.md`](../../.claude/rules/repository.md), because the risk applies to every task and not only to portal files. The portal routes on the hash, so a deep link is `http://localhost:4200/#/docs`, not `/docs`.
 
 `storybook` is served by `@storybook/addon-mcp` inside the Storybook dev server on port `6006`, so it is connected only while `npm run storybook` runs. It follows the same Running Servers contract as `playwright`. Its `dev` toolset is off, see [`impl/storybook.md`](storybook.md).
 

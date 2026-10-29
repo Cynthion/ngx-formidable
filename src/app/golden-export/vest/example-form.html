@@ -268,7 +268,9 @@
     <formidable-date-field
       [unicodeTokenFormat]="'dd . MM . yyyy'"
       [emptyHint]="'format'"
-      [formField]="form.when.date" />
+      [formField]="form.when.date">
+      <span formidableFieldToggleIcon><!-- your icon component --></span>
+    </formidable-date-field>
     <div formidableFieldLabel>
       Date
     </div>

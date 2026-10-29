@@ -30,17 +30,17 @@ Every public component, directive, token and type, and what each accepts. How th
 | [`RadioGroupField`](#radio-group-field)       | `formidable-radio-group-field`    | `string \| null` | One choice, with every option visible             |
 | [`CheckboxGroupField`](#checkbox-group-field) | `formidable-checkbox-group-field` | `string[]`       | Several choices, with every option visible        |
 
-| Component Or Directive               | Selector                          | Purpose                                                   |
-| :----------------------------------- | :-------------------------------- | :-------------------------------------------------------- |
-| [`FieldDecorator`](#field-decorator) | `formidable-field-decorator`      | Wraps a field with its label, adornments, hints, messages |
-| [`FieldOption`](#field-option)       | `formidable-field-option`         | One option, projected into an option field                |
-| [`FieldErrors`](#field-errors)       | `formidable-field-errors`         | Renders a list of errors as messages                      |
-| [`FieldLabel`](#directives)          | `[formidableFieldLabel]`          | The field's label                                         |
-| [`FieldLabelAdornment`](#directives) | `[formidableFieldLabelAdornment]` | Content beside the label                                  |
-| [`FieldPrefix`](#directives)         | `[formidableFieldPrefix]`         | Content at the field's leading edge                       |
-| [`FieldSuffix`](#directives)         | `[formidableFieldSuffix]`         | Content at the field's trailing edge                      |
-| [`FieldHint`](#directives)           | `[formidableFieldHint]`           | Support text below the field                              |
-| [`FieldToggleIcon`](#directives)     | `[formidableFieldToggleIcon]`     | Replaces the date field's panel toggle icon               |
+| Component Or Directive               | Selector                          | Purpose                                                      |
+| :----------------------------------- | :-------------------------------- | :----------------------------------------------------------- |
+| [`FieldDecorator`](#field-decorator) | `formidable-field-decorator`      | Wraps a field with its label, adornments, hints, messages    |
+| [`FieldOption`](#field-option)       | `formidable-field-option`         | One option, projected into an option field                   |
+| [`FieldErrors`](#field-errors)       | `formidable-field-errors`         | Renders a list of errors as messages                         |
+| [`FieldLabel`](#directives)          | `[formidableFieldLabel]`          | The field's label                                            |
+| [`FieldLabelAdornment`](#directives) | `[formidableFieldLabelAdornment]` | Content beside the label                                     |
+| [`FieldPrefix`](#directives)         | `[formidableFieldPrefix]`         | Content at the field's leading edge                          |
+| [`FieldSuffix`](#directives)         | `[formidableFieldSuffix]`         | Content at the field's trailing edge                         |
+| [`FieldHint`](#directives)           | `[formidableFieldHint]`           | Support text below the field                                 |
+| [`FieldToggleIcon`](#directives)     | `[formidableFieldToggleIcon]`     | Replaces the toggle icon of a select, dropdown or date field |
 
 ---
 
@@ -49,10 +49,12 @@ Every public component, directive, token and type, and what each accepts. How th
 | Symbol                          | Kind      | Purpose                                                                                                               |
 | :------------------------------ | :-------- | :-------------------------------------------------------------------------------------------------------------------- |
 | `provideNgxFormidable(config?)` | function  | Registers ngx-mask and the library's tokens. Goes in the `app.config.ts` providers, or an NgModule's root `providers` |
-| `NgxFormidableConfig`           | interface | Its argument: `{ globalMaskConfig?: Partial<NgxMaskConfig>; defaults?: FormidableDefaults }`                          |
+| `NgxFormidableConfig`           | interface | Its argument: `{ globalMaskConfig?: Partial<NgxMaskConfig>; defaults?: FormidableDefaults; icons?: FormidableIcons }` |
 | `FormidableDefaults`            | interface | `labelPosition`, `prefixAlign`, `suffixAlign`, `panelPosition`, `revealOn`, `hideRequiredMarkers`, all optional       |
+| `FormidableIcons`               | interface | `fieldToggle`, `fieldToggleOpen`, `dateFieldPanelPrevious`, `dateFieldPanelNext`, each an optional `FormidableIcon`   |
+| `FormidableIcon`                | interface | `{ component: Type<unknown>; inputs?: Record<string, unknown> }`, rendered as `NgComponentOutlet` renders it          |
 
-`globalMaskConfig` lands on `FORMIDABLE_MASK_DEFAULTS` and `defaults` on `FORMIDABLE_DEFAULTS`. What each default sets, and how a component scopes them, is in [Getting Started](getting-started.md). So is the stylesheet import.
+`globalMaskConfig` lands on `FORMIDABLE_MASK_DEFAULTS`, `defaults` on `FORMIDABLE_DEFAULTS` and `icons` on `FORMIDABLE_ICONS`. What each default sets, and how a component scopes them, is in [Getting Started](getting-started.md). So is the stylesheet import. What each icon replaces is under **Icons** in [Fields](fields.md).
 
 ---
 
@@ -223,7 +225,7 @@ The calendar is Pikaday. These inputs are passed to it under the same names, and
 | `numberOfMonths`                             | `number`                  | `1`                                | How many months show side by side                                              |
 | `ariaLabel`                                  | `string`                  | Pikaday's own                      | Pikaday's `ariaLabel` for the calendar                                         |
 
-`selectDate(date)` commits a date as a pick does. Project `[formidableFieldToggleIcon]` content to replace the toggle's default arrow, see **The Toggle Icon** in [Fields](fields.md).
+`selectDate(date)` commits a date as a pick does.
 
 ### Time Field
 
@@ -331,7 +333,7 @@ Projected into a [`formidable-field-decorator`](#field-decorator), beside the fi
 | `FieldHint`           | `[formidableFieldHint]`           | `align`    | `FieldHintAlignment`      | `'start'`                                            |
 | `FieldToggleIcon`     | `[formidableFieldToggleIcon]`     |            |                           |                                                      |
 
-`FieldToggleIcon` is projected into the `date-field` itself, not into the decorator. What each slot does is in [Decoration](decoration.md).
+`FieldToggleIcon` is projected into a `select-field`, `dropdown-field` or `date-field` itself, not into the decorator, and replaces its toggle's icon, a provided one included, see **Icons** in [Fields](fields.md). What each slot does is in [Decoration](decoration.md).
 
 ---
 
@@ -365,6 +367,7 @@ Projected into a [`formidable-field-decorator`](#field-decorator), beside the fi
 | `FORMIDABLE_OPTION`        | Identifies an option to its field. A custom option provides it                                      |
 | `FORMIDABLE_MASK_DEFAULTS` | App-wide ngx-mask options, set by `provideNgxFormidable`                                            |
 | `FORMIDABLE_DEFAULTS`      | App-wide `FormidableDefaults`, set by `provideNgxFormidable` or scoped by a component's `providers` |
+| `FORMIDABLE_ICONS`         | App-wide `FormidableIcons`, set by `provideNgxFormidable` or scoped by a component's `providers`    |
 | `FORMIDABLE_ERROR_MESSAGE` | Turns an error into its message text. Default: its `message`, else its `kind`                       |
 | `NO_OPTIONS_TEXT`          | The default `noOptionsText`: `'No options available.'`                                              |
 

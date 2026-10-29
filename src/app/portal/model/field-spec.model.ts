@@ -145,6 +145,8 @@ export interface PortalFieldDecoration {
   readonly suffixAlign?: FieldAdornmentAlignment;
   readonly hint: string;
   readonly hintAlign: FieldHintAlignment;
+  /** Whether an icon is projected into the field's toggle, in place of the library's or the provided one. */
+  readonly toggleIcon: boolean;
 }
 
 /** The state flags a field carries regardless of its kind. */
@@ -168,7 +170,8 @@ export const DEFAULT_DECORATION: PortalFieldDecoration = {
   prefix: 'none',
   suffix: 'none',
   hint: '',
-  hintAlign: 'start'
+  hintAlign: 'start',
+  toggleIcon: false
 };
 
 export const DEFAULT_STATE: PortalFieldState = { readonly: false, disabled: false, autoFocus: false };

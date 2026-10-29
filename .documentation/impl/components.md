@@ -8,6 +8,7 @@ Placement, naming, selectors, the field contract and the signal API of component
 | :--------------------------- | :---------------------------------------------------------- | :------------------ | :-------: |
 | Library field                | `projects/ngx-formidable/src/lib/components/fields/<name>/` | `formidable-<name>` |    Yes    |
 | Library structural component | `projects/ngx-formidable/src/lib/components/<name>/`        | `formidable-<name>` |    Yes    |
+| Library internal component   | `projects/ngx-formidable/src/lib/components/<name>/`        | `formidable-<name>` |    No     |
 | Portal example               | `src/app/example-<name>/`                                   | `example-<name>`    |    No     |
 | Portal component             | `src/app/portal/<area>/<name>/`                             | `portal-<name>`     |    No     |
 
