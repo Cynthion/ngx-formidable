@@ -9,6 +9,9 @@
   justify-content: center;
   width: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
   height: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
+  // `1em` is the box too, so an icon sized in `em`, as most icon components are, fills it. It also overrides
+  // the zero font size of the calendar's month buttons, which hides their label and would hide the icon.
+  font-size: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
 
   svg {
     width: 100%;

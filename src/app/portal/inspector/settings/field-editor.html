@@ -99,6 +99,15 @@
       (change)="setDecoration('markRequired', $any($event.target).checked)" />
     Required Marker
   </label>
+  @if (caps.toggleIcon) {
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="f.decoration.toggleIcon"
+      (change)="setDecoration('toggleIcon', $any($event.target).checked)" />
+    Projected Toggle Icon
+  </label>
+  }
 </div>
 
 <div class="pc-field">

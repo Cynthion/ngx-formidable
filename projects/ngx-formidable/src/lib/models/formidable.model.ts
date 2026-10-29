@@ -133,8 +133,8 @@ export interface FormidableIcon {
 }
 
 /**
- * App-wide replacements for the icons the library draws, each rendered in a box of `--formidable-icon-size`
- * and taking the text colour. An unset one stays the library's chevron. Set via `provideNgxFormidable`, or
+ * App-wide replacements for the icons the library draws, each rendered in a box of `--formidable-icon-size`,
+ * which is also its `1em`, and taking the text colour. An unset one stays the library's chevron. Set via `provideNgxFormidable`, or
  * provide `FORMIDABLE_ICONS` in a component's `providers` to scope them to that subtree. Content projected
  * as `[formidableFieldToggleIcon]` still wins on its field.
  */
@@ -143,9 +143,12 @@ export interface FormidableIcons {
   fieldToggle?: FormidableIcon;
   /** That toggle while the field's panel is open. Unset, `fieldToggle` stays. */
   fieldToggleOpen?: FormidableIcon;
-  /** The calendar's previous-month button. Pikaday rebuilds its buttons on every draw, so it gets a copy. */
+  /**
+   * The calendar's previous-month button. It shows a static copy, taken each time the calendar draws, so what
+   * the icon renders later shows from the next draw and nothing in it reacts to input.
+   */
   dateFieldPanelPrevious?: FormidableIcon;
-  /** The calendar's next-month button, a copy like the previous. */
+  /** The calendar's next-month button, a static copy like the previous. */
   dateFieldPanelNext?: FormidableIcon;
 }
 

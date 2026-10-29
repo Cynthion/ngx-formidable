@@ -104,6 +104,10 @@ function serializeField(spec: PortalFieldSpec, definition: PortalFormDefinition,
     children.push(...serializeOption(option));
   }
 
+  if (capabilities.toggleIcon && spec.decoration.toggleIcon) {
+    children.push(`<span formidableFieldToggleIcon>${slotContent('icon', '')}</span>`);
+  }
+
   if (children.length) {
     lines[lines.length - 1] += '>';
     lines.push(...children.map((line) => `    ${line}`), `  </${selector}>`);

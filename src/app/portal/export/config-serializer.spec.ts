@@ -35,7 +35,6 @@ describe('app config serializer', () => {
         "        revealOn: 'dirty'",
         '      },',
         '      icons: {',
-        '        // Stand-ins for your own icon components; the Studio draws a plus, a minus and two arrows.',
         '        fieldToggle: { component: PlusIcon },',
         '        fieldToggleOpen: { component: MinusIcon },',
         '        dateFieldPanelPrevious: { component: ArrowLeftIcon },',
@@ -50,6 +49,7 @@ describe('app config serializer', () => {
     const config = serializeAppConfig({}, true);
 
     expect(config).toContain('    ...provideNgxFormidable({\n      icons: {');
+    expect(config).toContain("import { ArrowLeftIcon, ArrowRightIcon, MinusIcon, PlusIcon } from './icons';");
     expect(config).not.toContain('defaults:');
     expect(config).not.toContain('No defaults set');
   });
@@ -67,5 +67,6 @@ describe('app config serializer', () => {
     expect(config).toContain("import { ApplicationConfig } from '@angular/core';");
     expect(config).toContain("import { provideNgxFormidable } from '@cynthion/ngx-formidable';");
     expect(config).toContain('export const appConfig: ApplicationConfig = {');
+    expect(config).not.toContain("from './icons'");
   });
 });

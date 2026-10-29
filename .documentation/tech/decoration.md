@@ -134,6 +134,16 @@ The measurement is the wrapper, not the content. Each wrapper shrink-wraps what 
 
 **A suffix sits between the value and the toggle.** The suffix wrapper moves in from the field's edge by the toggle's inset, which is zero without one, and the toggle keeps the field's own padding. So a suffix that comes, goes or changes width, a clear button above all, never moves the toggle: the order MUI, PrimeNG and Chrome's date input use. Beside a toggle, the wrapper's right padding spans the border and padding the toggle keeps plus `--formidable-field-suffix-toggle-gap`, so the measured inset carries the gap and the value clears it with no formula of its own.
 
+## The Toggle Icon
+
+What a consumer sets is under **Icons** in [`user/fields.md`](../user/fields.md).
+
+**Icons are components, not CSS images.** A `url()` default falls under the Content Security Policy's `img-src`, so a policy without `data:`, or a bare `default-src 'self'`, hides it without a word. CSS cannot tell a set variable from an unset one either, so an inline default and a variable that overrides it do not combine. `FieldIcon` draws the library's chevron as inline SVG, or renders the component `FORMIDABLE_ICONS` provides through `NgComponentOutlet`. `--formidable-icon-size` is its box and its `1em`.
+
+**Projected content wins by what renders.** Each field renders its `FieldIcon` beside the `[formidableFieldToggleIcon]` slot, and the stylesheet hides it while the slot holds an element (`:has()`). An `<ng-content>` fallback would not do: Angular settles it once, when the field is created, and counts a projected `@if` as content even while it renders nothing. Nor would `contentChild(FieldToggleIcon)`: content projects by its attribute alone, so a consumer who never imports the directive would get both icons.
+
+**The month arrows are copies.** Pikaday writes its header as an HTML string on every draw, so no Angular view can live in its buttons. The date field renders a hidden `FieldIcon` for each, and `decoratePikadayControls` appends a `cloneNode` of it to the button after every draw. The copy takes no pointer events, because Pikaday turns the month only for a press on the button itself, and it resets the font size the buttons zero to hide their label.
+
 ---
 
 ## Invariants

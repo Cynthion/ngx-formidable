@@ -23,6 +23,12 @@ export const MARKER_SVG = `
   <circle cx="12" cy="10" r="2.5" />
 </svg>`;
 
+export const CHEVRONS_UP_DOWN_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${STROKE}>
+  <path d="m7 15 5 5 5-5" />
+  <path d="m7 9 5-5 5 5" />
+</svg>`;
+
 export const SPARK_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${STROKE}>
   <path d="M12 3v4" />

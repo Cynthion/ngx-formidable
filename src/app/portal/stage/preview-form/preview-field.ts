@@ -31,7 +31,7 @@ import { ExampleTooltip } from '../../../example-tooltip/example-tooltip';
 import { describeFieldSettings } from '../../helpers/field-summary';
 import { filterOptions } from '../../helpers/fuzzy.helpers';
 import { AccessibilityReadout } from '../accessibility/accessibility-readout';
-import { CALENDAR_SVG, MARKER_SVG, SPARK_SVG } from './preview-icons';
+import { CALENDAR_SVG, CHEVRONS_UP_DOWN_SVG, MARKER_SVG, SPARK_SVG } from './preview-icons';
 import { emptyValueOf, FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabilities';
 import { PortalFieldSpec, PortalFormOptions, PortalOptionSpec } from '../../model/field-spec.model';
 import { localeOf } from '../../model/locales';
@@ -116,6 +116,7 @@ export class PreviewField {
   protected readonly host = this.elementRef.nativeElement;
 
   protected readonly calendarSvg = CALENDAR_SVG;
+  protected readonly chevronsSvg = CHEVRONS_UP_DOWN_SVG;
   protected readonly markerSvg = MARKER_SVG;
   protected readonly sparkSvg = SPARK_SVG;
 

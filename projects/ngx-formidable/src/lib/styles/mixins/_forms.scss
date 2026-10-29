@@ -592,8 +592,8 @@
 
 // #region In-Field Panel Toggle
 
-// The in-field toggle of the select, dropdown and date fields. Centers its icon: projected content, or the
-// `FieldIcon` the template falls back to.
+// The in-field toggle of the select, dropdown and date fields. Centers its icon: projected content, or else
+// the `FieldIcon` beside the slot.
 @mixin dropdown-toggle {
   cursor: pointer;
   user-select: none;
@@ -606,6 +606,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  // Decided by what is rendered, not by an `<ng-content>` fallback: Angular settles a fallback once, when the
+  // field is created, and counts a projected `@if` as content even while it renders nothing.
+  &:has(> [formidableFieldToggleIcon]) > formidable-field-icon {
+    display: none;
+  }
 }
 
 // The select's dropdown arrow: the affordance `appearance: none` took off the native control, drawn from the

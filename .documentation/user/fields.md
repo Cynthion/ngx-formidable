@@ -185,13 +185,13 @@ provideNgxFormidable({
 
 - **Unset Stays The Library's**: an icon left out keeps the library's chevron.
 - **Open And Closed**: `fieldToggleOpen` shows while the panel is open; unset, `fieldToggle` stays. The select never shows it, because a page cannot ask whether a native list is open.
-- **One Size**: every icon sits centred in a box of `--formidable-icon-size`. The chevrons fill it, drawn on the 24-unit grid most icon sets use, so an icon from such a set matches their scale.
+- **One Size**: every icon sits centred in a box of `--formidable-icon-size`, which is also its `1em`, so an icon sized in `em`, as most icon components are, fills it. The chevrons fill it too, drawn on the 24-unit grid most icon sets use, so an icon from such a set matches their scale.
 - **Text Color**: the chevrons are stroked in the text color, so they follow the field's state colors. Draw yours in `currentColor` to do the same.
 - **Month Arrows Are Copies**: the calendar rebuilds its buttons on every draw, so each draw copies the icon in. An icon that renders its content later, such as one that fetches its SVG, shows from the next draw, and nothing inside the copy reacts to input.
 - **Scoped By Providing**: provide `FORMIDABLE_ICONS` in a component's `providers` to give the fields it renders icons of their own, the way `FORMIDABLE_DEFAULTS` is scoped in [Getting Started](getting-started.md).
 - **No Policy Rule**: the chevrons are inline SVG, so a Content Security Policy needs no `img-src` rule for them.
 
-**Per Field**: project `[formidableFieldToggleIcon]` content, such as an icon component, into the field. It replaces the toggle's icon, the provided one included; its size, color and hover feedback are yours.
+**Per Field**: project `[formidableFieldToggleIcon]` content, such as an icon component, into the field. It replaces the toggle's icon, the provided one included, for as long as it renders, so an `@if` around it can switch between the two. Its size, color and hover feedback are yours.
 
 ```html
 <formidable-date-field [formField]="form.birthdate">

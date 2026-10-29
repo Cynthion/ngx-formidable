@@ -1,17 +1,20 @@
-import { Component, input } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { page, userEvent } from 'vitest/browser';
 import { FormidableIcons } from '../../models/formidable.model';
 import { provideNgxFormidable } from '../../provide-ngx-formidable';
 import { bindField, BoundField, FieldKind } from '../../testing/bind-field';
 import { theme } from '../../testing/dom';
-import { configureFormidableTestBed } from '../../testing/test-bed';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { DateField } from './date-field/date-field';
+import { DropdownField } from './dropdown-field/dropdown-field';
+import { SelectField } from './select-field/select-field';
 
 /**
  * The icons the fields draw, per **Icons** in `user/fields.md`: the toggle of the select, dropdown and date
  * fields, and the calendar's month arrows. Each is the library's inline-SVG chevron unless
  * `provideNgxFormidable({ icons })` provides one, and projected `[formidableFieldToggleIcon]` content replaces
- * the toggle's either way. The test host does not import `FieldToggleIcon`, so a consumer who forgets to is
+ * the toggle's either way, for as long as it renders. The test host does not import `FieldToggleIcon`, so a consumer who forgets to is
  * covered too.
  */
 
@@ -21,10 +24,35 @@ const UP = '4.25 16.25 12 8.5 19.75 16.25';
 const LEFT = '16.25 4.25 8.5 12 16.25 19.75';
 const RIGHT = '7.75 4.25 15.5 12 7.75 19.75';
 
-/** A consumer's icon component, configured through an input as an icon library's is. */
-@Component({ template: '<i class="test-icon">{{ glyph() }}</i>' })
+/** A consumer's icon component, configured through an input and sized in `em`, as an icon library's is. */
+@Component({ template: '<i class="test-icon" style="display: block; width: 1em; height: 1em">{{ glyph() }}</i>' })
 class TestIcon {
   readonly glyph = input('');
+}
+
+/** A toggle icon projected under a condition, as a consumer's template may switch it. */
+@Component({
+  imports: [DateField, DropdownField, SelectField],
+  template: `
+    <formidable-select-field>
+      @if (custom()) {
+        <span formidableFieldToggleIcon>★</span>
+      }
+    </formidable-select-field>
+    <formidable-dropdown-field>
+      @if (custom()) {
+        <span formidableFieldToggleIcon>★</span>
+      }
+    </formidable-dropdown-field>
+    <formidable-date-field>
+      @if (custom()) {
+        <span formidableFieldToggleIcon>★</span>
+      }
+    </formidable-date-field>
+  `
+})
+class ConditionalIconHost {
+  readonly custom = signal(false);
 }
 
 const iconOf = (glyph: string) => ({ component: TestIcon, inputs: { glyph } });
@@ -37,6 +65,13 @@ const combobox = () => page.getByRole('combobox', { name: 'Choice' });
 const toggleOf = (field: BoundField) => field.element.querySelector<HTMLElement>('.toggle, .dropdown-toggle')!;
 const chevronOf = (element: Element) => element.querySelector('formidable-field-icon polyline')?.getAttribute('points');
 const glyphsOf = (element: Element) => [...element.querySelectorAll('.test-icon')].map((icon) => icon.textContent);
+const sizeOf = (element: Element) => {
+  const rect = element.querySelector('.test-icon')!.getBoundingClientRect();
+
+  return [rect.width, rect.height];
+};
+/** Whether the toggle draws its own icon, the library's or a provided one, rather than projected content. */
+const drawsIcon = (toggle: Element) => toggle.querySelector('formidable-field-icon')!.checkVisibility();
 
 interface ToggleCase {
   kind: FieldKind;
@@ -83,11 +118,13 @@ describe('toggle icon', () => {
         expect(icon.height).toBe(20);
       });
 
-      it('draws a provided icon with its inputs', async () => {
+      it('draws a provided icon with its inputs, `1em` being the icon size', async () => {
         provideIcons({ fieldToggle: iconOf('▼') });
+        theme('--formidable-icon-size', '20px');
         const toggle = toggleOf(await bind(kind));
 
         expect(glyphsOf(toggle)).toEqual(['▼']);
+        expect(sizeOf(toggle)).toEqual([20, 20]);
         expect(chevronOf(toggle)).toBeUndefined();
       });
 
@@ -125,11 +162,32 @@ describe('toggle icon', () => {
         provideIcons({ fieldToggle: iconOf('▼') });
         const toggle = toggleOf(await bind(kind, '<span formidableFieldToggleIcon>★</span>'));
 
-        expect(toggle).toHaveTextContent('★');
-        expect(toggle.querySelector('formidable-field-icon')).toBeNull();
+        expect(toggle.querySelector('[formidableFieldToggleIcon]')).toHaveTextContent('★');
+        expect(drawsIcon(toggle)).toBe(false);
       });
     });
   }
+
+  // Angular settles an `<ng-content>` fallback once, and counts an `@if` as content even while it renders
+  // nothing, so a fallback would leave all three toggles empty here.
+  it('draws its icon while a projected @if renders nothing, and gives way while it renders', async () => {
+    const fixture = TestBed.createComponent(ConditionalIconHost);
+    await settle(fixture);
+    const toggles = (): HTMLElement[] => [...fixture.nativeElement.querySelectorAll('.toggle, .dropdown-toggle')];
+
+    expect(toggles().map(drawsIcon)).toEqual([true, true, true]);
+
+    fixture.componentInstance.custom.set(true);
+    await settle(fixture);
+
+    expect(toggles().map(drawsIcon)).toEqual([false, false, false]);
+    expect(toggles().map((toggle) => toggle.textContent?.trim())).toEqual(['★', '★', '★']);
+
+    fixture.componentInstance.custom.set(false);
+    await settle(fixture);
+
+    expect(toggles().map(drawsIcon)).toEqual([true, true, true]);
+  });
 
   // The select's toggle overlays the control, which is positioned, so the toggle has to paint above it. A hit
   // test is the one occlusion check the DOM offers, so the icon takes pointer events back for it.
@@ -180,12 +238,16 @@ describe('calendar month arrows', () => {
     expect(next().querySelector('formidable-field-icon')!.getBoundingClientRect().width).toBe(20);
   });
 
-  it('draw the provided icons', async () => {
+  // The buttons zero their font size to hide their label, which an icon sized in `em` must not inherit.
+  it('draw the provided icons, `1em` being the icon size', async () => {
     provideIcons({ dateFieldPanelPrevious: iconOf('◀'), dateFieldPanelNext: iconOf('▶') });
+    theme('--formidable-icon-size', '20px');
     await openCalendar();
 
     expect(glyphsOf(previous())).toEqual(['◀']);
     expect(glyphsOf(next())).toEqual(['▶']);
+    expect(sizeOf(previous())).toEqual([20, 20]);
+    expect(sizeOf(next())).toEqual([20, 20]);
   });
 
   // Pikaday turns the month only when the press lands on the button itself, and rebuilds both buttons as it

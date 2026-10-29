@@ -44,9 +44,8 @@
       class="toggle"
       [class.open]="isPanelOpen()"
       (mousedown)="onPanelToggleMouseDown($event)">
-      <ng-content select="[formidableFieldToggleIcon]">
-        <formidable-field-icon [name]="isPanelOpen() ? 'fieldToggleOpen' : 'fieldToggle'" />
-      </ng-content>
+      <ng-content select="[formidableFieldToggleIcon]" />
+      <formidable-field-icon [name]="isPanelOpen() ? 'fieldToggleOpen' : 'fieldToggle'" />
     </span>
     }
   </div>

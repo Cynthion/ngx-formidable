@@ -271,6 +271,33 @@ describe('studio settings', () => {
       await expect.poll(() => sizeToggle().querySelector('polyline')).not.toBeNull();
     });
 
+    // A field's projected icon is decoration, and wins over the app's icons for as long as it is projected.
+    it('lets a field project its own toggle icon over the provided ones', async () => {
+      await openStudio();
+      await openPanel('Form', 'Settings', 'App Defaults');
+      await userEvent.selectOptions(page.getByRole('combobox', { name: 'Toggles And Month Arrows' }), 'custom');
+      await openPanel('Form', 'Settings', 'This Field');
+      await editField('Size');
+      const toggle = () =>
+        page
+          .getByRole('combobox', { name: 'Size' })
+          .element()
+          .closest('formidable-select-field')!
+          .querySelector('.toggle')!;
+      const drawsOwnIcon = () => toggle().querySelector('formidable-field-icon')!.checkVisibility();
+
+      expect(drawsOwnIcon()).toBe(true);
+
+      await userEvent.click(page.getByRole('checkbox', { name: 'Projected Toggle Icon' }));
+
+      await expect.poll(() => toggle().querySelector('[formidableFieldToggleIcon]')).not.toBeNull();
+      expect(drawsOwnIcon()).toBe(false);
+
+      await userEvent.click(page.getByRole('checkbox', { name: 'Projected Toggle Icon' }));
+
+      await expect.poll(drawsOwnIcon).toBe(true);
+    });
+
     it('counts the fields that state their own, and clears them back to inheriting', async () => {
       await openStudio();
       await openPanel('Form', 'Settings', 'App Defaults');

@@ -13,7 +13,6 @@ const ORDER: readonly (keyof FormidableDefaults)[] = [
 /** What the Studio's `Custom` icons say, with stand-ins where a consumer names their own components. */
 const ICONS = [
   '      icons: {',
-  '        // Stand-ins for your own icon components; the Studio draws a plus, a minus and two arrows.',
   '        fieldToggle: { component: PlusIcon },',
   '        fieldToggleOpen: { component: MinusIcon },',
   '        dateFieldPanelPrevious: { component: ArrowLeftIcon },',
@@ -55,6 +54,12 @@ export function serializeAppConfig(defaults: FormidableDefaults, customIcons: bo
     '// app.config.ts — an NgModule app lists the same providers in its root module.',
     "import { ApplicationConfig } from '@angular/core';",
     "import { provideNgxFormidable } from '@cynthion/ngx-formidable';",
+    ...(customIcons
+      ? [
+          '// Stand-ins for your own icon components; the Studio draws a plus, a minus and two arrows.',
+          "import { ArrowLeftIcon, ArrowRightIcon, MinusIcon, PlusIcon } from './icons';"
+        ]
+      : []),
     '',
     'export const appConfig: ApplicationConfig = {',
     '  providers: [',

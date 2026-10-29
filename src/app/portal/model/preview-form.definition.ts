@@ -294,7 +294,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     unicodeTokenFormat: 'dd . MM . yyyy',
     emptyHint: 'format',
     locale: 'en-GB',
-    decoration: { ...DECORATION, hint: 'Open 11:00 to 23:00, closed on Mondays.', hintAlign: 'start' }
+    decoration: { ...DECORATION, hint: 'Open 11:00 to 23:00, closed on Mondays.', hintAlign: 'start', toggleIcon: true }
   }),
   field({
     id: 'time',

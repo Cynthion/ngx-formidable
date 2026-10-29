@@ -154,6 +154,11 @@ describe('markup import', () => {
     expect(roundTrip(['orderName']).result.fields[0]?.decoration.labelPosition).toBeUndefined();
   });
 
+  it('round-trips a projected toggle icon, and its absence', () => {
+    expect(roundTrip(['date']).result.fields[0]?.decoration.toggleIcon).toBe(true);
+    expect(roundTrip(['size']).result.fields[0]?.decoration.toggleIcon).toBe(false);
+  });
+
   it('round-trips an adornment’s stated alignment, and an unstated one as unstated', () => {
     const definition = only(['orderName']);
     const field = definition.fields[0]!;
