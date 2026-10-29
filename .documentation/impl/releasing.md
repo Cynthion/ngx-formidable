@@ -6,11 +6,11 @@ A release is published from `main` only, never from a `feature/*` branch. A publ
 
 ## Version
 
-The release notes decide the version, so they are drafted first. Squash commits on `main` carry the pull request bodies, which list what changed since the last release:
+The release notes decide the version, so they are drafted first. The registry names the last release, `<last>`, including one tagged off `main` that `git describe` does not see. Squash commits on `main` carry the pull request bodies, which list what changed since then:
 
 ```zsh
 git fetch origin
-git describe --tags --abbrev=0 origin/main
+npm view @cynthion/ngx-formidable version --prefer-online
 git log v<last>..origin/main --format='----- %h %s%n%b'
 ```
 
