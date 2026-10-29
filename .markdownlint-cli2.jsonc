@@ -8,6 +8,7 @@
     "**/node_modules/**",
     ".angular/**",
     ".plan/**",
+    ".release/**",
     ".research/**",
     "dist/**",
     "projects/ngx-formidable/README.md"
