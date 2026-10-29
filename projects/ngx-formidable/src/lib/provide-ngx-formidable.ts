@@ -1,6 +1,12 @@
 import { Provider } from '@angular/core';
 import { NgxMaskConfig, provideNgxMask } from 'ngx-mask';
-import { FORMIDABLE_DEFAULTS, FORMIDABLE_MASK_DEFAULTS, FormidableDefaults } from './models/formidable.model';
+import {
+  FORMIDABLE_DEFAULTS,
+  FORMIDABLE_ICONS,
+  FORMIDABLE_MASK_DEFAULTS,
+  FormidableDefaults,
+  FormidableIcons
+} from './models/formidable.model';
 
 /** Library-wide setup, all of it optional. */
 export interface NgxFormidableConfig {
@@ -8,6 +14,8 @@ export interface NgxFormidableConfig {
   globalMaskConfig?: Partial<NgxMaskConfig>;
   /** App-wide defaults for label position, adornment alignment, panel position, reveal and required marker. */
   defaults?: FormidableDefaults;
+  /** App-wide replacements for the toggle and calendar icons. */
+  icons?: FormidableIcons;
 }
 
 /**
@@ -22,6 +30,7 @@ export function provideNgxFormidable(config: NgxFormidableConfig = {}): Provider
     provideNgxMask(),
     // library-wide defaults/tokens
     { provide: FORMIDABLE_MASK_DEFAULTS, useValue: config.globalMaskConfig ?? {} },
-    { provide: FORMIDABLE_DEFAULTS, useValue: config.defaults ?? {} }
+    { provide: FORMIDABLE_DEFAULTS, useValue: config.defaults ?? {} },
+    { provide: FORMIDABLE_ICONS, useValue: config.icons ?? {} }
   ];
 }

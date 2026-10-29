@@ -1,5 +1,4 @@
 @use 'sass:math';
-@use './mixins/css-icons' as icons;
 @use './mixins/utils' as utils;
 @use './tokens' as tokens;
 
@@ -93,20 +92,29 @@
 .pika-next {
   @include button-normalize;
 
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 30px;
   height: 30px;
   font-size: 0;
+  color: var(--formidable-color-date-field-panel-select, #{tokens.$formidable-color-date-field-panel-select});
 
   &.is-disabled {
     cursor: not-allowed;
     opacity: 0.2;
   }
 
-  // hover
-  &::before {
-    color: var(--formidable-color-date-field-panel-select, #{tokens.$formidable-color-date-field-panel-select});
+  // The icon the date field copies in on every draw, over the hover wash. It takes no pointer events, because
+  // Pikaday turns the month only when the press lands on the button itself.
+  formidable-field-icon {
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
   }
 
+  // hover
   &::after {
     @include utils.absolute-cover;
 
@@ -132,19 +140,11 @@
 }
 
 .pika-prev {
-  @include icons.mask-icon(
-    var(--formidable-date-field-panel-previous-icon, #{tokens.$formidable-date-field-panel-previous-icon})
-  );
-
   order: -1; // flex position
   margin-right: auto;
 }
 
 .pika-next {
-  @include icons.mask-icon(
-    var(--formidable-date-field-panel-next-icon, #{tokens.$formidable-date-field-panel-next-icon})
-  );
-
   margin-left: auto;
 }
 

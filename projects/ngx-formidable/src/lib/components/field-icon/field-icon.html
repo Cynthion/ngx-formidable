@@ -1,0 +1,9 @@
+@if (icon(); as icon) {
+<ng-container
+  [ngComponentOutlet]="icon.component"
+  [ngComponentOutletInputs]="icon.inputs" />
+} @else {
+<svg viewBox="0 0 24 24">
+  <polyline [attr.points]="points()" />
+</svg>
+}

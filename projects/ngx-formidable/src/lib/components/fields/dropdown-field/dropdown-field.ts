@@ -14,6 +14,7 @@ import {
   FormidablePanelField,
   FormidablePanelPosition
 } from '../../../models/formidable.model';
+import { FieldIcon } from '../../field-icon/field-icon';
 import { FieldOption } from '../../field-option/field-option';
 import { BaseOptionField } from '../base-option-field';
 
@@ -26,7 +27,7 @@ import { BaseOptionField } from '../base-option-field';
   selector: 'formidable-dropdown-field',
   templateUrl: './dropdown-field.html',
   styleUrls: ['./dropdown-field.scss'],
-  imports: [FieldOption],
+  imports: [FieldIcon, FieldOption],
   providers: [
     // required to provide this component as FormidableField
     {

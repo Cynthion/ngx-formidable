@@ -225,7 +225,7 @@ The full API (every input, output, type and token) is in the [Component Catalogu
 | Category          | Directives And Tokens                                                                                                                                         |
 | :---------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Decoration**    | `formidableFieldLabel`, `formidableFieldLabelAdornment`, `formidableFieldPrefix`, `formidableFieldSuffix`, `formidableFieldHint`, `formidableFieldToggleIcon` |
-| **Configuration** | `provideNgxFormidable()`, `FORMIDABLE_DEFAULTS`, `FORMIDABLE_ERROR_MESSAGE`                                                                                   |
+| **Configuration** | `provideNgxFormidable()`, `FORMIDABLE_DEFAULTS`, `FORMIDABLE_ICONS`, `FORMIDABLE_ERROR_MESSAGE`                                                               |
 
 ## Documentation
 

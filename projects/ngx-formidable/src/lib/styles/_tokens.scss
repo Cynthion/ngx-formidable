@@ -418,16 +418,7 @@ $formidable-option-prefix-border-thickness: utils.rem(2);
 
 // #region Icons
 
-// One chevron along `$points` on the 24-unit grid most icon sets draw on, so an icon from such a set renders at
-// the defaults' scale. Drawn as a mask, so only its alpha counts.
-@function chevron-icon($points) {
-  @return url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpolyline points='#{$points}' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
-}
-
+// The 24-unit grid most icon sets draw on, so an icon from such a set renders at the chevrons' scale.
 $formidable-icon-size: utils.rem(24);
-$formidable-field-toggle-icon: chevron-icon('4.25 7.75 12 15.5 19.75 7.75');
-$formidable-field-toggle-icon-open: chevron-icon('4.25 16.25 12 8.5 19.75 16.25');
-$formidable-date-field-panel-previous-icon: chevron-icon('16.25 4.25 8.5 12 16.25 19.75');
-$formidable-date-field-panel-next-icon: chevron-icon('7.75 4.25 15.5 12 7.75 19.75');
 
 // #endregion

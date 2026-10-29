@@ -1,6 +1,10 @@
+import { FormidableIcons } from '@cynthion/ngx-formidable';
+import { ExampleIcon } from '../../../example-icon/example-icon';
+
 /**
- * The SVGs the preview projects into the library's slots. The library ships no icons, so everything about
- * projected markup — size, colour, hover feedback — belongs to the page that projects it.
+ * The SVGs the preview projects into the library's slots, and the icons the App Defaults provide in place of
+ * the library's chevrons. Everything about projected markup — size, colour, hover feedback — belongs to the
+ * page that projects it.
  */
 
 const STROKE = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
@@ -30,3 +34,37 @@ export const SPARK_SVG = `
   <path d="M18 6l-2.5 2.5" />
   <path d="M8.5 15.5 6 18" />
 </svg>`;
+
+// Deliberately not chevrons, so switching the App Defaults' icons shows on every toggle and month arrow.
+export const PLUS_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${STROKE}>
+  <path d="M5 12h14" />
+  <path d="M12 5v14" />
+</svg>`;
+
+export const MINUS_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${STROKE}>
+  <path d="M5 12h14" />
+</svg>`;
+
+export const ARROW_LEFT_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${STROKE}>
+  <path d="M19 12H5" />
+  <path d="m12 19-7-7 7-7" />
+</svg>`;
+
+export const ARROW_RIGHT_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${STROKE}>
+  <path d="M5 12h14" />
+  <path d="m12 5 7 7-7 7" />
+</svg>`;
+
+const icon = (svg: string) => ({ component: ExampleIcon, inputs: { svg, size: 20 } });
+
+/** What the App Defaults' `Custom` icons provide, the way a consumer's `provideNgxFormidable({ icons })` does. */
+export const STUDIO_ICONS: FormidableIcons = {
+  fieldToggle: icon(PLUS_SVG),
+  fieldToggleOpen: icon(MINUS_SVG),
+  dateFieldPanelPrevious: icon(ARROW_LEFT_SVG),
+  dateFieldPanelNext: icon(ARROW_RIGHT_SVG)
+};

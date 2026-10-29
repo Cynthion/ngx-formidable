@@ -51,6 +51,8 @@
      list. Same markup as the wrapper fields' toggle, minus the open state, which a `<select>` never reports. -->
 @if (canEdit()) {
 <span class="toggle">
-  <ng-content select="[formidableFieldToggleIcon]" />
+  <ng-content select="[formidableFieldToggleIcon]">
+    <formidable-field-icon name="fieldToggle" />
+  </ng-content>
 </span>
 }

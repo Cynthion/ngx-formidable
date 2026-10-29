@@ -1,26 +1,42 @@
+import { Component, input } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { page, userEvent } from 'vitest/browser';
+import { FormidableIcons } from '../../models/formidable.model';
+import { provideNgxFormidable } from '../../provide-ngx-formidable';
 import { bindField, BoundField, FieldKind } from '../../testing/bind-field';
 import { theme } from '../../testing/dom';
 import { configureFormidableTestBed } from '../../testing/test-bed';
 
 /**
- * The icons the fields draw, per **Icons** in `user/fields.md`: the toggle of the select, dropdown and date fields,
- * and the calendar's month arrows. Each is a mask on `::before`, taken from a theme variable and sized by
- * `--formidable-icon-size`. Projected `[formidableFieldToggleIcon]` content replaces the toggle's; the test host
- * does not import `FieldToggleIcon`, so a consumer who forgets to is covered too.
+ * The icons the fields draw, per **Icons** in `user/fields.md`: the toggle of the select, dropdown and date
+ * fields, and the calendar's month arrows. Each is the library's inline-SVG chevron unless
+ * `provideNgxFormidable({ icons })` provides one, and projected `[formidableFieldToggleIcon]` content replaces
+ * the toggle's either way. The test host does not import `FieldToggleIcon`, so a consumer who forgets to is
+ * covered too.
  */
 
-// Icons no default is, told apart by their viewBox, so a match can only come from the variable.
-const svg = (viewBox: string) =>
-  `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='${viewBox}'%3E%3Crect width='1' height='1'/%3E%3C/svg%3E")`;
-const SQUARE = svg('0 0 1 1');
-const WIDE = svg('0 0 2 1');
-const TALL = svg('0 0 1 2');
-const viewBoxOf = (mask: string) => /viewBox='([^']*)'/.exec(mask)?.[1];
+// The library's chevrons, told apart by their points.
+const DOWN = '4.25 7.75 12 15.5 19.75 7.75';
+const UP = '4.25 16.25 12 8.5 19.75 16.25';
+const LEFT = '16.25 4.25 8.5 12 16.25 19.75';
+const RIGHT = '7.75 4.25 15.5 12 7.75 19.75';
+
+/** A consumer's icon component, configured through an input as an icon library's is. */
+@Component({ template: '<i class="test-icon">{{ glyph() }}</i>' })
+class TestIcon {
+  readonly glyph = input('');
+}
+
+const iconOf = (glyph: string) => ({ component: TestIcon, inputs: { glyph } });
+
+/** Adds the icons to the test bed `configureFormidableTestBed` set up, as a consumer's app config would. */
+const provideIcons = (icons: FormidableIcons) =>
+  TestBed.configureTestingModule({ providers: provideNgxFormidable({ icons }) });
 
 const combobox = () => page.getByRole('combobox', { name: 'Choice' });
 const toggleOf = (field: BoundField) => field.element.querySelector<HTMLElement>('.toggle, .dropdown-toggle')!;
-const icon = (element: Element) => getComputedStyle(element, '::before');
+const chevronOf = (element: Element) => element.querySelector('formidable-field-icon polyline')?.getAttribute('points');
+const glyphsOf = (element: Element) => [...element.querySelectorAll('.test-icon')].map((icon) => icon.textContent);
 
 interface ToggleCase {
   kind: FieldKind;
@@ -49,47 +65,68 @@ describe('toggle icon', () => {
 
   for (const { kind, open } of cases) {
     describe(`on the ${kind} field`, () => {
-      it('draws the default chevron', async () => {
+      it("draws the library's chevron in the text color", async () => {
         const toggle = toggleOf(await bind(kind));
+        const chevron = toggle.querySelector('polyline')!;
 
-        expect(icon(toggle).maskImage).toContain("viewBox='0 0 24 24'");
+        expect(chevronOf(toggle)).toBe(DOWN);
+        expect(getComputedStyle(chevron).stroke).toBe(getComputedStyle(toggle).color);
       });
 
-      it('takes its icon and size from the theme', async () => {
-        theme('--formidable-field-toggle-icon', SQUARE);
+      it('sizes its icon from the theme', async () => {
         theme('--formidable-icon-size', '20px');
-        const toggle = toggleOf(await bind(kind));
+        const icon = toggleOf(await bind(kind))
+          .querySelector('formidable-field-icon')!
+          .getBoundingClientRect();
 
-        expect(viewBoxOf(icon(toggle).maskImage)).toBe('0 0 1 1');
-        expect(icon(toggle).width).toBe('20px');
-        expect(icon(toggle).height).toBe('20px');
+        expect(icon.width).toBe(20);
+        expect(icon.height).toBe(20);
       });
 
-      it('takes a field-scoped icon over the root one', async () => {
-        theme('--formidable-field-toggle-icon', SQUARE);
-        const field = await bind(kind);
-        field.element.style.setProperty('--formidable-field-toggle-icon', WIDE);
+      it('draws a provided icon with its inputs', async () => {
+        provideIcons({ fieldToggle: iconOf('▼') });
+        const toggle = toggleOf(await bind(kind));
 
-        expect(viewBoxOf(icon(toggleOf(field)).maskImage)).toBe('0 0 2 1');
+        expect(glyphsOf(toggle)).toEqual(['▼']);
+        expect(chevronOf(toggle)).toBeUndefined();
       });
 
       if (open) {
-        it('takes the open icon while the panel is open', async () => {
-          theme('--formidable-field-toggle-icon', SQUARE);
-          theme('--formidable-field-toggle-icon-open', TALL);
+        it('flips its chevron while the panel is open', async () => {
           const field = await bind(kind);
 
           await open(field);
 
-          await expect.poll(() => viewBoxOf(icon(toggleOf(field)).maskImage)).toBe('0 0 1 2');
+          await expect.poll(() => chevronOf(toggleOf(field))).toBe(UP);
+        });
+
+        it('takes the provided open icon while the panel is open', async () => {
+          provideIcons({ fieldToggle: iconOf('▼'), fieldToggleOpen: iconOf('▲') });
+          const field = await bind(kind);
+
+          await open(field);
+
+          await expect.poll(() => glyphsOf(toggleOf(field))).toEqual(['▲']);
+        });
+
+        it('keeps the provided icon open when no open one is provided', async () => {
+          provideIcons({ fieldToggle: iconOf('▼') });
+          const field = await bind(kind);
+
+          await open(field);
+
+          await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+          expect(glyphsOf(toggleOf(field))).toEqual(['▼']);
+          expect(chevronOf(toggleOf(field))).toBeUndefined();
         });
       }
 
-      it('draws projected content instead of its own icon', async () => {
+      it('draws projected content instead of any icon', async () => {
+        provideIcons({ fieldToggle: iconOf('▼') });
         const toggle = toggleOf(await bind(kind, '<span formidableFieldToggleIcon>★</span>'));
 
-        expect(toggle.querySelector('[formidableFieldToggleIcon]')).toHaveTextContent('★');
-        expect(icon(toggle).content).toBe('none');
+        expect(toggle).toHaveTextContent('★');
+        expect(toggle.querySelector('formidable-field-icon')).toBeNull();
       });
     });
   }
@@ -123,21 +160,44 @@ describe('toggle icon', () => {
 describe('calendar month arrows', () => {
   beforeEach(() => configureFormidableTestBed());
 
-  it('take their icons and size from the theme', async () => {
-    theme('--formidable-date-field-panel-previous-icon', WIDE);
-    theme('--formidable-date-field-panel-next-icon', TALL);
-    theme('--formidable-icon-size', '20px');
+  const previous = () => document.querySelector<HTMLElement>('.pika-prev')!;
+  const next = () => document.querySelector<HTMLElement>('.pika-next')!;
+  const month = () => document.querySelector<HTMLSelectElement>('.pika-select-month')!.value;
+
+  async function openCalendar(): Promise<void> {
     const field = await bind('date');
 
     await userEvent.click(toggleOf(field));
     await expect.element(page.getByRole('dialog', { name: 'Choice' })).toBeVisible();
+  }
 
-    const previous = icon(document.querySelector('.pika-prev')!);
-    const next = icon(document.querySelector('.pika-next')!);
+  it("draw the library's chevrons, sized from the theme", async () => {
+    theme('--formidable-icon-size', '20px');
+    await openCalendar();
 
-    expect(viewBoxOf(previous.maskImage)).toBe('0 0 2 1');
-    expect(viewBoxOf(next.maskImage)).toBe('0 0 1 2');
-    expect(previous.width).toBe('20px');
-    expect(next.height).toBe('20px');
+    expect(chevronOf(previous())).toBe(LEFT);
+    expect(chevronOf(next())).toBe(RIGHT);
+    expect(next().querySelector('formidable-field-icon')!.getBoundingClientRect().width).toBe(20);
+  });
+
+  it('draw the provided icons', async () => {
+    provideIcons({ dateFieldPanelPrevious: iconOf('◀'), dateFieldPanelNext: iconOf('▶') });
+    await openCalendar();
+
+    expect(glyphsOf(previous())).toEqual(['◀']);
+    expect(glyphsOf(next())).toEqual(['▶']);
+  });
+
+  // Pikaday turns the month only when the press lands on the button itself, and rebuilds both buttons as it
+  // does, so the icon must let the press through and come back exactly once.
+  it('turn the month on a click on the icon, and keep one icon each through the redraw', async () => {
+    await openCalendar();
+    const before = month();
+
+    await userEvent.click(next());
+
+    await expect.poll(month).not.toBe(before);
+    expect(previous().querySelectorAll('formidable-field-icon')).toHaveLength(1);
+    expect(next().querySelectorAll('formidable-field-icon')).toHaveLength(1);
   });
 });

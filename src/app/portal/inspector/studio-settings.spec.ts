@@ -68,7 +68,7 @@ describe('studio settings', () => {
    */
   async function sweep(editor: string, context: string): Promise<void> {
     const store = TestBed.inject(FormDefinitionStore);
-    const snapshot = () => JSON.stringify([store.definition(), store.appDefaults()]);
+    const snapshot = () => JSON.stringify([store.definition(), store.appDefaults(), store.customIcons()]);
     const controls = () => Array.from(document.querySelectorAll<Control>(`${editor} select, ${editor} input`));
 
     expect(controls().length, context).toBeGreaterThan(0);
@@ -233,6 +233,42 @@ describe('studio settings', () => {
       await userEvent.selectOptions(page.getByRole('combobox', { name: 'Panel Position' }), '');
 
       expect(await panelPositionOf('Date')).toBe('right');
+    });
+
+    // The preview is provided the icons, as a consumer's app config provides them, and a projected icon wins.
+    it('swaps the library’s chevrons for the provided icons, and back', async () => {
+      await openStudio();
+      await openPanel('Form', 'Settings', 'App Defaults');
+      const icons = page.getByRole('combobox', { name: 'Toggles And Month Arrows' });
+      const sizeToggle = () =>
+        page
+          .getByRole('combobox', { name: 'Size' })
+          .element()
+          .closest('formidable-select-field')!
+          .querySelector('.toggle')!;
+      const date = page.getByRole('combobox', { name: 'Date' });
+
+      expect(sizeToggle().querySelector('polyline')).not.toBeNull();
+
+      await userEvent.selectOptions(icons, 'custom');
+
+      await expect.poll(() => sizeToggle().querySelector('example-icon')).not.toBeNull();
+      expect(sizeToggle().querySelector('polyline')).toBeNull();
+      // The date projects its calendar into the toggle, and that still wins; its month arrows take the icons.
+      expect(date.element().closest('formidable-date-field')!.querySelector('.toggle example-icon')).not.toBeNull();
+      await userEvent.click(date, { force: true });
+      if (date.element().getAttribute('aria-expanded') !== 'true') {
+        await userEvent.keyboard('{Alt>}{ArrowDown}{/Alt}');
+      }
+      await expect.element(date).toHaveAttribute('aria-expanded', 'true');
+      const panel = document.getElementById(date.element().getAttribute('aria-controls')!)!;
+      expect(panel.querySelector('.pika-prev example-icon')).not.toBeNull();
+      expect(panel.querySelector('.pika-next example-icon')).not.toBeNull();
+      await userEvent.keyboard('{Escape}');
+
+      await userEvent.selectOptions(icons, '');
+
+      await expect.poll(() => sizeToggle().querySelector('polyline')).not.toBeNull();
     });
 
     it('counts the fields that state their own, and clears them back to inheriting', async () => {

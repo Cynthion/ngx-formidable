@@ -168,31 +168,30 @@ Whatever the placement, the calendar scales to the width its panel has: `--formi
 
 ## Icons
 
-`select-field`, `dropdown-field` and `date-field` draw a toggle at their right edge, and the date field's calendar draws its month arrows. The defaults are chevrons. Replace them app-wide with variables, or per field by projecting your own.
+`select-field`, `dropdown-field` and `date-field` draw a toggle at their right edge, and the date field's calendar draws its month arrows. The library's own are chevrons. Replace them app-wide with a provider, or per field by projecting your own.
 
-**App-Wide**: set the icons in your own `:root`. A selector narrows one to a field type or a single field.
+**App-Wide**: give `provideNgxFormidable` an `icons` object. Each icon is a component and the inputs to render it with, so an icon library's component goes in as it is:
 
-```css
-:root {
-  --formidable-field-toggle-icon: url('/icons/expand.svg');
-  --formidable-field-toggle-icon-open: url('/icons/collapse.svg');
-  --formidable-date-field-panel-previous-icon: url('/icons/chevron-left.svg');
-  --formidable-date-field-panel-next-icon: url('/icons/chevron-right.svg');
-}
-
-formidable-date-field {
-  --formidable-field-toggle-icon: url('/icons/calendar.svg');
-  --formidable-field-toggle-icon-open: url('/icons/calendar.svg');
-}
+```ts
+provideNgxFormidable({
+  icons: {
+    fieldToggle: { component: AppIcon, inputs: { name: 'expand' } },
+    fieldToggleOpen: { component: AppIcon, inputs: { name: 'collapse' } },
+    dateFieldPanelPrevious: { component: AppIcon, inputs: { name: 'chevron-left' } },
+    dateFieldPanelNext: { component: AppIcon, inputs: { name: 'chevron-right' } }
+  }
+});
 ```
 
-- **Shape Only**: an icon is painted as a mask in the text color, so only its shape counts and it follows the field's state colors.
-- **One Size**: `--formidable-icon-size` sizes every icon. The defaults are drawn on the 24-unit grid most icon sets use, so an icon from such a set renders at their scale.
-- **Open And Closed**: the toggle shows the `-open` icon while the panel is open. A chevron flips; a calendar sets both to the same icon. The select never shows it, because a page cannot ask whether a native list is open.
-- **URLs**: root-relative and `data:` URLs resolve the same whichever stylesheet sets the variable.
-- **Content Security Policy**: the defaults are `data:` URLs. A policy that restricts `img-src` must allow `data:`, or the defaults are not drawn.
+- **Unset Stays The Library's**: an icon left out keeps the library's chevron.
+- **Open And Closed**: `fieldToggleOpen` shows while the panel is open; unset, `fieldToggle` stays. The select never shows it, because a page cannot ask whether a native list is open.
+- **One Size**: every icon sits centred in a box of `--formidable-icon-size`. The chevrons fill it, drawn on the 24-unit grid most icon sets use, so an icon from such a set matches their scale.
+- **Text Color**: the chevrons are stroked in the text color, so they follow the field's state colors. Draw yours in `currentColor` to do the same.
+- **Month Arrows Are Copies**: the calendar rebuilds its buttons on every draw, so each draw copies the icon in. An icon that renders its content later, such as one that fetches its SVG, shows from the next draw, and nothing inside the copy reacts to input.
+- **Scoped By Providing**: provide `FORMIDABLE_ICONS` in a component's `providers` to give the fields it renders icons of their own, the way `FORMIDABLE_DEFAULTS` is scoped in [Getting Started](getting-started.md).
+- **No Policy Rule**: the chevrons are inline SVG, so a Content Security Policy needs no `img-src` rule for them.
 
-**Per Field**: project `[formidableFieldToggleIcon]` content, such as an icon component, into the field. It replaces the toggle's icon; its size, color and hover feedback are yours.
+**Per Field**: project `[formidableFieldToggleIcon]` content, such as an icon component, into the field. It replaces the toggle's icon, the provided one included; its size, color and hover feedback are yours.
 
 ```html
 <formidable-date-field [formField]="form.birthdate">

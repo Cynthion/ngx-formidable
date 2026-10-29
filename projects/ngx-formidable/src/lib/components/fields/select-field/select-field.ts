@@ -6,6 +6,7 @@ import {
   FORMIDABLE_OPTION_FIELD,
   FormidableOption
 } from '../../../models/formidable.model';
+import { FieldIcon } from '../../field-icon/field-icon';
 import { BaseOptionListField } from '../base-option-list-field';
 
 /**
@@ -17,6 +18,7 @@ import { BaseOptionListField } from '../base-option-list-field';
   selector: 'formidable-select-field',
   templateUrl: './select-field.html',
   styleUrls: ['./select-field.scss'],
+  imports: [FieldIcon],
   providers: [
     // required to provide this component as FormidableField
     {

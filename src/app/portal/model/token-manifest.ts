@@ -1409,36 +1409,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     control: 'length',
     class: 'declared',
     description:
-      "Size of every icon the library draws: the select, dropdown and date field toggles and the calendar's month arrows."
-  },
-  {
-    name: '--formidable-field-toggle-icon',
-    group: 'Icons',
-    control: 'image',
-    class: 'declared',
-    description:
-      'Icon of the toggle a select, dropdown or date field draws, as a `url()`. Only its shape counts: it is painted in the text color.'
-  },
-  {
-    name: '--formidable-field-toggle-icon-open',
-    group: 'Icons',
-    control: 'image',
-    class: 'declared',
-    description: "That toggle's icon while the field's panel is open."
-  },
-  {
-    name: '--formidable-date-field-panel-previous-icon',
-    group: 'Icons',
-    control: 'image',
-    class: 'declared',
-    description: "Icon of the calendar's previous-month button, as a `url()`."
-  },
-  {
-    name: '--formidable-date-field-panel-next-icon',
-    group: 'Icons',
-    control: 'image',
-    class: 'declared',
-    description: "Icon of the calendar's next-month button, as a `url()`."
+      "Size of the box every icon sits in, the library's chevrons and a provided icon alike: the select, dropdown and date field toggles and the calendar's month arrows."
   },
   {
     name: '--formidable-field-border-start-start-radius',

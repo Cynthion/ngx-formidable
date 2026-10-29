@@ -49,10 +49,12 @@ Every public component, directive, token and type, and what each accepts. How th
 | Symbol                          | Kind      | Purpose                                                                                                               |
 | :------------------------------ | :-------- | :-------------------------------------------------------------------------------------------------------------------- |
 | `provideNgxFormidable(config?)` | function  | Registers ngx-mask and the library's tokens. Goes in the `app.config.ts` providers, or an NgModule's root `providers` |
-| `NgxFormidableConfig`           | interface | Its argument: `{ globalMaskConfig?: Partial<NgxMaskConfig>; defaults?: FormidableDefaults }`                          |
+| `NgxFormidableConfig`           | interface | Its argument: `{ globalMaskConfig?: Partial<NgxMaskConfig>; defaults?: FormidableDefaults; icons?: FormidableIcons }` |
 | `FormidableDefaults`            | interface | `labelPosition`, `prefixAlign`, `suffixAlign`, `panelPosition`, `revealOn`, `hideRequiredMarkers`, all optional       |
+| `FormidableIcons`               | interface | `fieldToggle`, `fieldToggleOpen`, `dateFieldPanelPrevious`, `dateFieldPanelNext`, each an optional `FormidableIcon`   |
+| `FormidableIcon`                | interface | `{ component: Type<unknown>; inputs?: Record<string, unknown> }`, rendered as `NgComponentOutlet` renders it          |
 
-`globalMaskConfig` lands on `FORMIDABLE_MASK_DEFAULTS` and `defaults` on `FORMIDABLE_DEFAULTS`. What each default sets, and how a component scopes them, is in [Getting Started](getting-started.md). So is the stylesheet import.
+`globalMaskConfig` lands on `FORMIDABLE_MASK_DEFAULTS`, `defaults` on `FORMIDABLE_DEFAULTS` and `icons` on `FORMIDABLE_ICONS`. What each default sets, and how a component scopes them, is in [Getting Started](getting-started.md). So is the stylesheet import. What each icon replaces is under **Icons** in [Fields](fields.md).
 
 ---
 
@@ -331,7 +333,7 @@ Projected into a [`formidable-field-decorator`](#field-decorator), beside the fi
 | `FieldHint`           | `[formidableFieldHint]`           | `align`    | `FieldHintAlignment`      | `'start'`                                            |
 | `FieldToggleIcon`     | `[formidableFieldToggleIcon]`     |            |                           |                                                      |
 
-`FieldToggleIcon` is projected into a `select-field`, `dropdown-field` or `date-field` itself, not into the decorator, and replaces its toggle's icon, see **Icons** in [Fields](fields.md). What each slot does is in [Decoration](decoration.md).
+`FieldToggleIcon` is projected into a `select-field`, `dropdown-field` or `date-field` itself, not into the decorator, and replaces its toggle's icon, a provided one included, see **Icons** in [Fields](fields.md). What each slot does is in [Decoration](decoration.md).
 
 ---
 
@@ -365,6 +367,7 @@ Projected into a [`formidable-field-decorator`](#field-decorator), beside the fi
 | `FORMIDABLE_OPTION`        | Identifies an option to its field. A custom option provides it                                      |
 | `FORMIDABLE_MASK_DEFAULTS` | App-wide ngx-mask options, set by `provideNgxFormidable`                                            |
 | `FORMIDABLE_DEFAULTS`      | App-wide `FormidableDefaults`, set by `provideNgxFormidable` or scoped by a component's `providers` |
+| `FORMIDABLE_ICONS`         | App-wide `FormidableIcons`, set by `provideNgxFormidable` or scoped by a component's `providers`    |
 | `FORMIDABLE_ERROR_MESSAGE` | Turns an error into its message text. Default: its `message`, else its `kind`                       |
 | `NO_OPTIONS_TEXT`          | The default `noOptionsText`: `'No options available.'`                                              |
 

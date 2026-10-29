@@ -1,4 +1,3 @@
-@use 'css-icons' as icons;
 @use 'utils' as utils;
 @use '../tokens' as tokens;
 
@@ -593,12 +592,12 @@
 
 // #region In-Field Panel Toggle
 
-// The in-field toggle of the select, dropdown and date fields. Centers projected icon content; with nothing
-// projected it draws the themed icon instead, and its `-open` variant while `.open` is set.
+// The in-field toggle of the select, dropdown and date fields. Centers its icon: projected content, or the
+// `FieldIcon` the template falls back to.
 @mixin dropdown-toggle {
   cursor: pointer;
   user-select: none;
-  // Positioned, so projected content paints over the select, which is positioned and comes first.
+  // Positioned, so the icon paints over the select, which is positioned and comes first.
   position: relative;
   // The value inset reserves exactly this width, so the toggle must not be flex-shrunk out of it.
   flex: none;
@@ -607,21 +606,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
-  &:empty {
-    @include icons.mask-icon(var(--formidable-field-toggle-icon, #{tokens.$formidable-field-toggle-icon}));
-  }
-
-  &.open:empty::before {
-    mask-image: var(--formidable-field-toggle-icon-open, #{tokens.$formidable-field-toggle-icon-open});
-  }
 }
 
 // The select's dropdown arrow: the affordance `appearance: none` took off the native control, drawn from the
 // same icon, token and box as every other in-field toggle. It overlays the field rather than sitting beside
 // the value, because a native `<select>` opens its list from anywhere in its box and a toggle in flow would
 // carve a dead strip out of it. `pointer-events: none` is what keeps that true — the arrow is a picture, and
-// the control underneath it stays the whole box. It never takes the `-open` icon: the platform owns that list,
+// the control underneath it stays the whole box. It never takes `fieldToggleOpen`: the platform owns that list,
 // and a page cannot ask whether it is open.
 @mixin select-toggle {
   @include dropdown-toggle;

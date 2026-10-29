@@ -71,6 +71,27 @@
 </div>
 }
 
+<h3 class="pc-group-title">Icons</h3>
+
+<div class="pc-field">
+  <label
+    for="ad-icons"
+    class="pc-label">
+    <span class="pc-label-name">Toggles And Month Arrows</span>
+  </label>
+  <select
+    id="ad-icons"
+    class="pc-select"
+    [portalSelectedValue]="customIcons() ? 'custom' : ''"
+    (change)="customIcons.set($any($event.target).value === 'custom')">
+    <option value="">Library Default (Chevrons)</option>
+    <option value="custom">Custom</option>
+  </select>
+  <p class="pc-help">
+    Stand-in components, given to provideNgxFormidable() as its icons. A field's projected icon, such as the date field's calendar, still wins.
+  </p>
+</div>
+
 <h3 class="pc-group-title">Take It Away</h3>
 
 <div class="pc-buttons">

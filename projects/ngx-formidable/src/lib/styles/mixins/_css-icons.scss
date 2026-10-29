@@ -1,22 +1,20 @@
 @use '../tokens' as tokens;
 
-// Draws `$image`, a `url()` or a `var()` holding one, on `::before`, centred in the host at the one size every
-// icon shares. The image is a mask over a `currentColor` fill, so only its shape counts and the icon takes the
-// colour of the text around it.
-@mixin mask-icon($image) {
-  position: relative;
+// The box every icon the library draws shares, at the one size `--formidable-icon-size` sets. A provided icon
+// is centred in it; the library's own chevron fills it, stroked in the text colour on the 24-unit grid.
+@mixin field-icon {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
+  height: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
 
-  &::before {
-    content: '';
-    display: block;
-    width: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
-    height: var(--formidable-icon-size, #{tokens.$formidable-icon-size});
-    position: absolute;
-    z-index: 1;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: currentcolor;
-    mask: $image center / contain no-repeat;
+  svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2;
   }
 }
