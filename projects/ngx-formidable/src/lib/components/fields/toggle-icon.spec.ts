@@ -227,6 +227,78 @@ describe('toggle icon', () => {
   });
 });
 
+// A calendar opens from a calendar icon where a list opens from a chevron, so the date field has its own pair.
+describe('date field toggle icon', () => {
+  beforeEach(() => configureFormidableTestBed());
+
+  const openCalendar = (field: BoundField) => userEvent.click(toggleOf(field));
+
+  it('draws the provided date toggle instead of the field toggle', async () => {
+    provideIcons({ fieldToggle: iconOf('▼'), dateFieldToggle: iconOf('📅') });
+    const toggle = toggleOf(await bind('date'));
+
+    expect(glyphsOf(toggle)).toEqual(['📅']);
+  });
+
+  it('takes the provided open date toggle while the calendar is open', async () => {
+    provideIcons({ dateFieldToggle: iconOf('📅'), dateFieldToggleOpen: iconOf('📆') });
+    const field = await bind('date');
+
+    await openCalendar(field);
+
+    await expect.poll(() => glyphsOf(toggleOf(field))).toEqual(['📆']);
+  });
+
+  it('keeps the provided date toggle open when no open one is provided, over the open field toggle', async () => {
+    provideIcons({ fieldToggleOpen: iconOf('▲'), dateFieldToggle: iconOf('📅') });
+    const field = await bind('date');
+
+    await openCalendar(field);
+
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+    expect(glyphsOf(toggleOf(field))).toEqual(['📅']);
+  });
+
+  it('takes the field toggle while closed when only the open date toggle is provided', async () => {
+    provideIcons({ fieldToggle: iconOf('▼'), dateFieldToggleOpen: iconOf('📆') });
+    const field = await bind('date');
+
+    expect(glyphsOf(toggleOf(field))).toEqual(['▼']);
+
+    await openCalendar(field);
+
+    await expect.poll(() => glyphsOf(toggleOf(field))).toEqual(['📆']);
+  });
+
+  for (const { kind, open } of cases.filter((toggleCase) => toggleCase.kind !== 'date')) {
+    it(`leaves the ${kind} field to the field toggles`, async () => {
+      provideIcons({
+        fieldToggle: iconOf('▼'),
+        fieldToggleOpen: iconOf('▲'),
+        dateFieldToggle: iconOf('📅'),
+        dateFieldToggleOpen: iconOf('📆')
+      });
+      const field = await bind(kind);
+
+      expect(glyphsOf(toggleOf(field))).toEqual(['▼']);
+
+      if (open) {
+        await open(field);
+
+        await expect.poll(() => glyphsOf(toggleOf(field))).toEqual(['▲']);
+      }
+    });
+  }
+
+  it('draws projected content instead of the date toggle', async () => {
+    provideIcons({ dateFieldToggle: iconOf('📅') });
+    const toggle = toggleOf(await bind('date', '<span formidableFieldToggleIcon>★</span>'));
+
+    expect(toggle.querySelector('[formidableFieldToggleIcon]')).toHaveTextContent('★');
+    expect(drawsIcon(toggle)).toBe(false);
+  });
+});
+
 describe('calendar month arrows', () => {
   beforeEach(() => configureFormidableTestBed());
 

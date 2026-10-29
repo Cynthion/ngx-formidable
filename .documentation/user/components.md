@@ -46,13 +46,13 @@ Every public component, directive, token and type, and what each accepts. How th
 
 ## Setup
 
-| Symbol                          | Kind      | Purpose                                                                                                               |
-| :------------------------------ | :-------- | :-------------------------------------------------------------------------------------------------------------------- |
-| `provideNgxFormidable(config?)` | function  | Registers ngx-mask and the library's tokens. Goes in the `app.config.ts` providers, or an NgModule's root `providers` |
-| `NgxFormidableConfig`           | interface | Its argument: `{ globalMaskConfig?: Partial<NgxMaskConfig>; defaults?: FormidableDefaults; icons?: FormidableIcons }` |
-| `FormidableDefaults`            | interface | `labelPosition`, `prefixAlign`, `suffixAlign`, `panelPosition`, `revealOn`, `hideRequiredMarkers`, all optional       |
-| `FormidableIcons`               | interface | `fieldToggle`, `fieldToggleOpen`, `dateFieldPanelPrevious`, `dateFieldPanelNext`, each an optional `FormidableIcon`   |
-| `FormidableIcon`                | interface | `{ component: Type<unknown>; inputs?: Record<string, unknown> }`, rendered as `NgComponentOutlet` renders it          |
+| Symbol                          | Kind      | Purpose                                                                                                                                                       |
+| :------------------------------ | :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `provideNgxFormidable(config?)` | function  | Registers ngx-mask and the library's tokens. Goes in the `app.config.ts` providers, or an NgModule's root `providers`                                         |
+| `NgxFormidableConfig`           | interface | Its argument: `{ globalMaskConfig?: Partial<NgxMaskConfig>; defaults?: FormidableDefaults; icons?: FormidableIcons }`                                         |
+| `FormidableDefaults`            | interface | `labelPosition`, `prefixAlign`, `suffixAlign`, `panelPosition`, `revealOn`, `hideRequiredMarkers`, all optional                                               |
+| `FormidableIcons`               | interface | `fieldToggle`, `fieldToggleOpen`, `dateFieldToggle`, `dateFieldToggleOpen`, `dateFieldPanelPrevious`, `dateFieldPanelNext`, each an optional `FormidableIcon` |
+| `FormidableIcon`                | interface | `{ component: Type<unknown>; inputs?: Record<string, unknown> }`, rendered as `NgComponentOutlet` renders it                                                  |
 
 `globalMaskConfig` lands on `FORMIDABLE_MASK_DEFAULTS`, `defaults` on `FORMIDABLE_DEFAULTS` and `icons` on `FORMIDABLE_ICONS`. What each default sets, and how a component scopes them, is in [Getting Started](getting-started.md). So is the stylesheet import. What each icon replaces is under **Icons** in [Fields](fields.md).
 
