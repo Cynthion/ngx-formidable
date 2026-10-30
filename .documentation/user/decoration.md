@@ -23,7 +23,7 @@
 
 The required marker and the messages have no slot: the decorator renders both from the field's own state, the marker from `required` and the messages once the field's `revealOn` has come. Which rule makes a field invalid, and when its messages appear, is in [Validation](validation.md).
 
-A field works without a decorator. It then has no label, no adornments, no hints, no marker, no invalid styling and no messages; its control still carries `aria-invalid`.
+> **Note:** A field works without a decorator. It then has no label, no adornments, no hints, no marker, no invalid styling and no messages; its control still carries `aria-invalid`.
 
 ---
 
@@ -99,7 +99,7 @@ The `vertical` layout stacks its options inside the field's box, which leaves a 
 </div>
 ```
 
-To set one position for every label in an app, see [Getting Started](getting-started.md). The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every position on every field that honours it, empty and filled.
+One position for every label in an app is an app default, see [Getting Started](getting-started.md). The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every position on every field that honours it, empty and filled.
 
 Four rules follow from the table:
 
@@ -125,7 +125,7 @@ A field whose `required` is true suffixes a marker to its label, in every label 
 
 ```ts
 // in the schema()
-required(path.firstName, { message: 'We need a first name.' });
+required(path.firstName, { message: 'A first name is required.' });
 ```
 
 ```html
@@ -170,14 +170,14 @@ The two differ only where a label sits over the value: with an `outside` or `bor
 
 ### Actions
 
-A prefix and a suffix are click-through, so a text adornment over the field's edge still focuses the field. A projected `button` or `a` is the exception: it takes the click, which is all a clear, copy, retry or loading action needs. The library ships no such components: it is your button, your icon, your label.
+A prefix and a suffix are click-through, so a text adornment over the field's edge still focuses the field. A projected `button` or `a` is the exception: it takes the click, which is all a clear, copy, retry or loading action needs. The library ships no such components; the button, icon or label is projected content.
 
-Two things every action needs:
+Every action needs two attributes:
 
 - **`type="button"`**: otherwise it submits the form it sits in.
 - **`(mousedown)="$event.preventDefault()"`**: keeps focus on the field. A click on it still closes an open panel, as any click outside the field's own box does.
 
-The decorator re-measures its slots whenever their width changes, so an action that appears, disappears or swaps its content re-insets the field on its own, and a panel toggle stays where it is. A slot whose content renders nothing insets nothing, so the `@if` can sit inside it, or inside a component of your own. There is no refresh call, because none is needed.
+The decorator re-measures its slots whenever their width changes, so an action that appears, disappears or swaps its content re-insets the field on its own, and a panel toggle stays where it is. A slot whose content renders nothing insets nothing, so the `@if` can sit inside it, or inside a consumer component. There is no refresh call, because none is needed.
 
 **Clear**: the button only exists while there is something to clear.
 
@@ -275,7 +275,7 @@ A hint is always-visible support text on a row below the field and above the mes
 <formidable-field-decorator>
   <formidable-input-field [formField]="form.firstName" />
   <div formidableFieldLabel>First Name</div>
-  <div formidableFieldHint>Your legal first name</div>
+  <div formidableFieldHint>The legal first name</div>
   <div
     formidableFieldHint
     align="end">
@@ -294,7 +294,7 @@ The limit is a `maxLength(path.firstName, 150)` rule in the schema, which `[form
 
 The decorator mirrors the field's state onto its own host as classes (`is-readonly`, `is-disabled`, `is-focused`, `is-invalid`, `label-resting`, `label-inside`, `has-in-field-toggle`, `has-open-panel`, `has-open-sheet`), so a consumer stylesheet can hang off any of them. `is-invalid` follows the field's `aria-invalid`: it shows once the field is invalid and revealed, with or without a message.
 
-Each state is also a set of colour remaps rather than a set of property declarations, which is why a theme changes the invalid or disabled look by setting colours and not by restating rules. Where states overlap, `disabled` beats `readonly`, which beats focused, which beats hovered; invalid shows through hover and focus and gives way to `readonly` and `disabled`. The full variable list is in [Theme Reference](theme-reference.md).
+A theme changes the invalid or disabled look by setting colours, not by restating rules. Where states overlap, `disabled` beats `readonly`, which beats focused, which beats hovered; invalid shows through hover and focus and gives way to `readonly` and `disabled`. The full variable list is in [Theme Reference](theme-reference.md).
 
 ---
 
@@ -302,5 +302,5 @@ Each state is also a set of colour remaps rather than a set of property declarat
 
 - [Fields](fields.md): options, panels, keyboard, dates and times, masking, focus
 - [Validation](validation.md): Angular's rules, Vest, Zod or none; messages and their reveal
-- [Theming](theming.md): the default theme, how theming works, and how to find your own
+- [Theming](theming.md): the default theme, how theming works, and how to find a theme
 - [Components](components.md): every public component, directive, token and type

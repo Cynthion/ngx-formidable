@@ -1,36 +1,43 @@
 # Getting Started
 
-Install the package, provide it, import the stylesheet, and build a form with Signal Forms and Angular's rules. Every step below is the whole step.
+Install the package, provide it, import the stylesheet, and build a form with Signal Forms and Angular's own rules.
+
+1. [Install](#install) the package and its peer dependencies.
+2. [Provide the library](#provide-the-library) in the app config.
+3. [Import the stylesheet](#import-the-stylesheet).
+4. [Build a form](#build-a-form).
 
 The API each symbol carries is in [Components](components.md). How the fields meet reactive and template-driven forms is in [Forms](forms.md).
 
 ## Install
 
-Install the package and its peer dependencies:
+1. Install the package and its peer dependencies:
 
-```bash
-npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday
-```
+   ```bash
+   npm i @cynthion/ngx-formidable date-fns ngx-mask pikaday
+   ```
 
-| Peer       | Needed For                                      |
-| :--------- | :---------------------------------------------- |
-| `date-fns` | Parsing and formatting the date and time fields |
-| `ngx-mask` | Input masking                                   |
-| `pikaday`  | The date field's calendar                       |
+2. Name `pikaday` in `angular.json`, because it ships CommonJS and the build otherwise warns `Module 'pikaday' … is not ESM`:
 
-Angular's `common`, `core` and `forms`, and `rxjs`, are peers you already have. The package is published in partial compilation mode, so your app's own compiler links it, under any Angular version its `peerDependencies` accept.
+   ```json
+   "allowedCommonJsDependencies": ["pikaday"]
+   ```
 
-No validation library is a peer. Install `vest` or `zod` only to validate with one, see [Validation](validation.md).
+The package and its peers are installed, and the build is clean.
 
-`pikaday` ships CommonJS, so a build warns `Module 'pikaday' … is not ESM` until you name it in `angular.json`:
+| Peer                                                 | Needed For                                      |
+| :--------------------------------------------------- | :---------------------------------------------- |
+| [`date-fns`](https://date-fns.org)                   | Parsing and formatting the date and time fields |
+| [`ngx-mask`](https://github.com/JsDaddy/ngx-mask)    | Input masking                                   |
+| [`pikaday`](https://github.com/Pikaday/Pikaday)      | The date field's calendar                       |
 
-```json
-"allowedCommonJsDependencies": ["pikaday"]
-```
+Angular's `common`, `core` and `forms`, and `rxjs`, are peers every Angular app already has. The package is published in partial compilation mode, so the app's own compiler links it, under any Angular version its `peerDependencies` accept.
+
+No validation library is a peer. `vest` or `zod` is installed only to validate with one, see [Validation](validation.md).
 
 ---
 
-## Provide It
+## Provide The Library
 
 ```ts
 // app.config.ts
@@ -42,7 +49,13 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-An NgModule app lists the same call in its root module's `providers`. It takes an optional `NgxFormidableConfig`: `globalMaskConfig`, the app-wide ngx-mask settings described in [Fields](fields.md), `icons`, the app-wide icons described there too, and `defaults`, below.
+An NgModule app lists the same call in its root module's `providers`. It takes an optional `NgxFormidableConfig` with three keys:
+
+| Key                | Sets                                                              |
+| :----------------- | :---------------------------------------------------------------- |
+| `globalMaskConfig` | The app-wide ngx-mask settings, see **Masking** in [Fields](fields.md) |
+| `icons`            | The app-wide icons, see **Icons** in [Fields](fields.md)         |
+| `defaults`         | The app-wide defaults, see [App-Wide Defaults](#app-wide-defaults) |
 
 ### App-Wide Defaults
 
@@ -69,7 +82,7 @@ provideNgxFormidable({
 
 - **A Binding Wins**: an input left unset, or bound to `undefined`, takes the app default, then the library's own. Binding `undefined` is how a dynamic template states nothing.
 - **Read Once**: a field reads its defaults when it is created. A default changed afterwards reaches only the fields created afterwards.
-- **Scoped By Providing**: provide `FORMIDABLE_DEFAULTS` in a component's `providers` to give the fields it renders defaults of their own. Given as a value, they replace the app's. To change one and keep the rest, spread the app's:
+- **Scoped By Providing**: `FORMIDABLE_DEFAULTS` in a component's `providers` gives the fields it renders defaults of their own. Given as a value, they replace the app's. A factory that spreads the app's defaults changes one and keeps the rest:
 
 ```ts
 providers: [
@@ -91,110 +104,106 @@ Styling is a stylesheet, not a provider, so it is imported separately:
 @use '@cynthion/ngx-formidable/styles/ngx-formidable';
 ```
 
-That is the whole default theme. To change it, redeclare the variables you want in your own `:root` after the import, see [Theming](theming.md).
+That import is the whole default theme. A theme redeclares variables in the app's own `:root` after the import, see [Theming](theming.md).
 
 ---
 
 ## Build A Form
 
-The forms API holds the model and its rules; the library renders the fields around them. The form below is Signal Forms with Angular's own rules, the layout the Studio exports. [Validation](validation.md) swaps the rules for Vest or Zod, and [Forms](forms.md) binds the same fields through reactive or template-driven forms.
+The forms API holds the model and its rules; the library renders the fields around them. The form is Signal Forms with Angular's own rules, in the layout the Studio exports. [Validation](validation.md) swaps the rules for Vest or Zod, and [Forms](forms.md) binds the same fields through reactive or template-driven forms.
 
-### 1. Declare The Model And Its Rules
+1. Declare the model and its rules in one `*.form.ts` per form, holding the model's type, its initial model and its `schema()`:
 
-One `*.form.ts` per form holds the model's type, its initial model and its `schema()`:
+   ```ts
+   // user.form.ts
+   import { required, schema } from '@angular/forms/signals';
 
-```ts
-// user.form.ts
-import { required, schema } from '@angular/forms/signals';
+   export interface UserFormModel {
+     name: string;
+     hobby: string | null;
+     birthdate: Date | null;
+   }
 
-export interface UserFormModel {
-  name: string;
-  hobby: string | null;
-  birthdate: Date | null;
-}
+   /** Every key defined: Signal Forms binds a field only to a key its model holds. */
+   export const initialUserFormModel: UserFormModel = {
+     name: '',
+     hobby: null,
+     birthdate: null
+   };
 
-/** Every key defined: Signal Forms binds a field only to a key its model holds. */
-export const initialUserFormModel: UserFormModel = {
-  name: '',
-  hobby: null,
-  birthdate: null
-};
+   export const userSchema = schema<UserFormModel>((path) => {
+     required(path.name, { message: 'Name is required.' });
+     required(path.birthdate, { message: 'When were you born?' });
+   });
+   ```
 
-export const userSchema = schema<UserFormModel>((path) => {
-  required(path.name, { message: 'Name is required.' });
-  required(path.birthdate, { message: 'When were you born?' });
-});
-```
+   Each field writes one value type into the model: `string` for the text fields, `string | null` for the single-choice fields, `Date | null` for a date. The whole list is in **The Model** in [Forms](forms.md).
 
-Each field writes one value type into the model: `string` for the text fields, `string | null` for the single-choice fields, `Date | null` for a date. The whole list is in **The Model** in [Forms](forms.md).
+2. Hold the model as a `signal` in the component, and the form over it:
 
-### 2. Hold The Form
+   ```ts
+   // user-form.ts
+   import { Component, signal } from '@angular/core';
+   import { form, FormField, FormRoot } from '@angular/forms/signals';
+   import { DateField, DropdownField, FieldDecorator, FieldHint, FieldLabel, FormidableOption, InputField } from '@cynthion/ngx-formidable';
+   import { initialUserFormModel, UserFormModel, userSchema } from './user.form';
 
-The component holds the model as a `signal`, and the form over it:
+   @Component({
+     selector: 'app-user-form',
+     templateUrl: './user-form.html',
+     imports: [FormRoot, FormField, DateField, DropdownField, FieldDecorator, FieldHint, FieldLabel, InputField]
+   })
+   export class UserForm {
+     readonly model = signal<UserFormModel>(initialUserFormModel);
+     readonly form = form(this.model, userSchema, {
+       submission: { action: async () => this.save(this.model()) }
+     });
 
-```ts
-// user-form.ts
-import { Component, signal } from '@angular/core';
-import { form, FormField, FormRoot } from '@angular/forms/signals';
-import { DateField, DropdownField, FieldDecorator, FieldHint, FieldLabel, FormidableOption, InputField } from '@cynthion/ngx-formidable';
-import { initialUserFormModel, UserFormModel, userSchema } from './user.form';
+     readonly today = new Date();
 
-@Component({
-  selector: 'app-user-form',
-  templateUrl: './user-form.html',
-  imports: [FormRoot, FormField, DateField, DropdownField, FieldDecorator, FieldHint, FieldLabel, InputField]
-})
-export class UserForm {
-  readonly model = signal<UserFormModel>(initialUserFormModel);
-  readonly form = form(this.model, userSchema, {
-    submission: { action: async () => this.save(this.model()) }
-  });
+     readonly hobbyOptions: FormidableOption[] = [
+       { value: 'reading', label: 'Reading' },
+       { value: 'gaming', label: 'Gaming' },
+       { value: 'swimming', label: 'Swimming' }
+     ];
 
-  readonly today = new Date();
+     private async save(user: UserFormModel): Promise<void> {
+       await fetch('/api/users', { method: 'POST', body: JSON.stringify(user) });
+     }
+   }
+   ```
 
-  readonly hobbyOptions: FormidableOption[] = [
-    { value: 'reading', label: 'Reading' },
-    { value: 'gaming', label: 'Gaming' },
-    { value: 'swimming', label: 'Swimming' }
-  ];
+3. Write the template. Every field is bound by `[formField]` and wrapped in a decorator, which renders its label, its hint, its required marker and its messages:
 
-  private async save(user: UserFormModel): Promise<void> {
-    await fetch('/api/users', { method: 'POST', body: JSON.stringify(user) });
-  }
-}
-```
+   ```html
+   <!-- user-form.html -->
+   <form [formRoot]="form">
+     <formidable-field-decorator>
+       <formidable-input-field [formField]="form.name" />
+       <div formidableFieldLabel>Name</div>
+       <div formidableFieldHint>As it appears on the passport</div>
+     </formidable-field-decorator>
 
-### 3. Write The Template
+     <formidable-field-decorator>
+       <formidable-dropdown-field
+         [options]="hobbyOptions"
+         [formField]="form.hobby" />
+       <div formidableFieldLabel>Hobby</div>
+     </formidable-field-decorator>
 
-Every field is bound by `[formField]` and wrapped in a decorator, which renders its label, its hint, its required marker and its messages:
+     <formidable-field-decorator>
+       <formidable-date-field
+         [maxDate]="today"
+         [unicodeTokenFormat]="'dd.MM.yyyy'"
+         [formField]="form.birthdate" />
+       <div formidableFieldLabel>Birthdate</div>
+     </formidable-field-decorator>
 
-```html
-<!-- user-form.html -->
-<form [formRoot]="form">
-  <formidable-field-decorator>
-    <formidable-input-field [formField]="form.name" />
-    <div formidableFieldLabel>Name</div>
-    <div formidableFieldHint>As it appears on your passport</div>
-  </formidable-field-decorator>
+     <button type="submit">Submit</button>
+   </form>
+   ```
 
-  <formidable-field-decorator>
-    <formidable-dropdown-field
-      [options]="hobbyOptions"
-      [formField]="form.hobby" />
-    <div formidableFieldLabel>Hobby</div>
-  </formidable-field-decorator>
-
-  <formidable-field-decorator>
-    <formidable-date-field
-      [maxDate]="today"
-      [unicodeTokenFormat]="'dd.MM.yyyy'"
-      [formField]="form.birthdate" />
-    <div formidableFieldLabel>Birthdate</div>
-  </formidable-field-decorator>
-
-  <button type="submit">Submit</button>
-</form>
-```
+The form renders three decorated fields, marks Name and Birthdate required, and submits through `[formRoot]`.
 
 - **The Rules Mark The Fields**: `required()` is what marks Name and Birthdate required. Nothing in the template states it, and nothing may: Signal Forms owns a field's `required`, `readonly`, `disabled` and limits.
 - **Messages Wait For The User**: a field's messages appear once the user has left it, `touched` being the default reveal.

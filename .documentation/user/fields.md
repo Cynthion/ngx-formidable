@@ -18,7 +18,7 @@ Every field is Angular's `FormValueControl`: `[formField]`, `[formControl]`, `fo
 | `autoFocus`   | Focuses the field once its view is ready                                                          |
 | `revealOn`    | When the field's messages appear, see [Validation](validation.md)                                 |
 
-`readonly`, `disabled` and `required` come from the forms API wherever it holds them. Bind one by hand only where it does not, as **Compatibility By Feature** in [Forms](forms.md) lists, and never beside `[formField]`, which owns all three.
+`readonly`, `disabled` and `required` come from the forms API wherever it holds them. A binding by hand is needed only where the API does not hold one, as **Compatibility By Feature** in [Forms](forms.md) lists, and never beside `[formField]`, which owns all three.
 
 | Output        | Emits                                                  |
 | :------------ | :----------------------------------------------------- |
@@ -48,7 +48,7 @@ Every field has a `focus()` method. `autoFocus` calls it once the view is ready,
 </button>
 ```
 
-**Focusing Never Opens A Panel**: the dropdown opens on click, on `ArrowDown` or on typing, the autocomplete on `ArrowDown` or on typing, and the date field from its toggle or `Alt` plus `ArrowDown`, so a focused field is ready for input without a list covering the page. A `disabled` field ignores `focus()` entirely.
+> **Note:** Focusing never opens a panel. The dropdown opens on click, on `ArrowDown` or on typing, the autocomplete on `ArrowDown` or on typing, and the date field from its toggle or `Alt` plus `ArrowDown`, so a focused field is ready for input without a list covering the page. A `disabled` field ignores `focus()` entirely.
 
 ### The Caret On Focus
 
@@ -59,11 +59,9 @@ Every field has a `focus()` method. `autoFocus` calls it once the view is ready,
 | Text or a value      |      Pointer       | Where the click landed, and never behind the value             |
 | A display-only label | Keyboard / Pointer | Nowhere: nothing is selected                                   |
 
-`focus()` and `autoFocus` count as the keyboard. A display-only label is the value `dropdown-field` shows: typing there searches the options and never replaces the label, so there is nothing to select it for. `textarea-field` is the exception and keeps the browser's own behaviour (a caret, no selection), because a paragraph should not be one keystroke from being wiped, and no browser does it either.
+`focus()` and `autoFocus` count as the keyboard. A display-only label is the value `dropdown-field` shows: typing there searches the options and never replaces the label, so there is nothing to select it for. `textarea-field` is the exception and keeps the browser's own behaviour: a caret and no selection.
 
-The rules run on the way in and then stop. Clicking again, moving the caret, typing or a repaint never re-runs them, so a field is never locked to one caret position; leaving the field and coming back reads the rules again against whatever it holds by then. Focusing a field never changes its value.
-
-Browsers disagree about the keyboard half of this (Chrome selects an input's content on `Tab`, Firefox leaves a caret), so the library settles it rather than inheriting the difference.
+The rules run on the way in and then stop. Clicking again, moving the caret, typing or a repaint never re-runs them, so a field is never locked to one caret position; leaving the field and coming back reads the rules again against whatever it holds by then. Focusing a field never changes its value, and the rules are the same in every browser.
 
 ---
 
@@ -89,17 +87,15 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 | `sortFn`            | Comparator applied to the combined list                                                        |
 | `noOptionsText`     | What an empty list says                                                                        |
 
-**Projected Options Must Be Written Inside The Field**: Angular resolves both the parent injection and the content query from where the option is _declared_, not from where it renders, so an option in a shared template outside the field cannot join it.
+> **Warning:** A projected option must be written inside the field's element. An option in a shared template declared outside the field cannot join it, wherever it renders.
 
-**An Option Owns Its Own Content**: anything projected into `formidable-field-option` becomes that option's template, which is how an option carries a subtitle, an icon or highlighted match text. Its `match` input overrides how the autocomplete filter matches it.
+- **An Option Owns Its Own Content**: anything projected into `formidable-field-option` becomes that option's template, which is how an option carries a subtitle, an icon or highlighted match text. Its `match` input overrides how the autocomplete filter matches it.
+- **The Autocomplete Filters, And Reports The Filter**: typing narrows the list to the options whose `match` accepts the text, by default a case-insensitive substring of the label. It also emits the text as `filterChange`, so the options can be fetched or ranked for it instead (fuzzy, a server call). An option's own `match` keeps what a substring would exclude.
+- **`filterChange` Reports More Than Typing**: a value written from outside, focused or not, takes the text and the filter with it: to its option's label, or to nothing while no option carries the value. Those moves are reported too, so the supplied list can follow the value the field was given. Without them, a value written from outside names an option the filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under the user.
+- **The Filter Is Writable**: `filter` is a model, so `[(filter)]` keeps a component signal in step with it, and a write reaches the field, to seed it or to empty it. A write is not typing: it opens no panel and picks nothing. Nor is the filter the input's text: after a pick the input shows the label, and the filter keeps what was typed to find it. So a clear button writes both, the value to empty a pick and the filter to empty text typed without one. While nothing is picked the value is `null` already, and writing it alone changes nothing. The button is **Clear** under **Actions** in [Decoration](decoration.md).
+- **An Action Row Is Not A Value**: `dropdown-field` and `autocomplete-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. The field closes its panel, runs the action and touches nothing else.
 
-**The Autocomplete Filters, And Reports The Filter**: typing narrows the list to the options whose `match` accepts the text, by default a case-insensitive substring of the label. It also emits the text as `filterChange`, so the options can be fetched or ranked for it instead (fuzzy, a server call). Give an option a `match` of your own where your matching keeps more than a substring would.
-
-**`filterChange` Reports More Than Typing**: a value written from outside, focused or not, takes the text and the filter with it: to its option's label, or to nothing while no option carries the value. Those moves are reported too, so the list you supply can follow the value the field was given. Without them, a value written from outside names an option your filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under whoever is typing.
-
-**The Filter Is Writable**: `filter` is a model, so `[(filter)]` keeps a signal of yours in step with it, and your write reaches the field. Seed it, or empty it. A write is not typing: it opens no panel and picks nothing. Nor is the filter the input's text: after a pick the input shows the label, and the filter keeps what was typed to find it. So a clear button writes both, the value to empty a pick and the filter to empty text typed without one. While nothing is picked the value is `null` already, and writing it alone changes nothing. The button is **Clear** under **Actions** in [Decoration](decoration.md).
-
-**An Action Row Is Not A Value**: `dropdown-field` and `autocomplete-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. What the action does is entirely yours; the field closes its panel, runs it and touches nothing else. The following is an example.
+An action entry that opens a dialog for a new address:
 
 ```ts
 readonly filter = signal('');
@@ -128,10 +124,10 @@ private async createAddress(): Promise<void> {
   (filterChange)="filter.set($event)" />
 ```
 
-Three things that recipe relies on:
+The recipe relies on three facts:
 
-- **The Typed Text Is Yours Already**: `filterChange` carries it, which is what lets the dialog open on "Wiesenstrasse 5" rather than on nothing.
-- **The Order Of Those Two Writes Does Not Matter**: a value no option carries yet stays in the model, and the field selects it once its option arrives.
+- **The Typed Text Is Available**: `filterChange` carries it, which is what lets the dialog open on "Wiesenstrasse 5" rather than on nothing.
+- **The Order Of The Two Writes Does Not Matter**: a value no option carries yet stays in the model, and the field selects it once its option arrives.
 - **The List Still Reports Itself Empty**: `noOptionsText` renders beside the action entry rather than being replaced by it: nothing matched _and_ here is what to do about it.
 
 ---
@@ -157,10 +153,9 @@ Opening a panel scrolls the field, or the panel, into view, but only the one tha
   [formField]="form.birthdate" />
 ```
 
-Two things to know before reaching for a sheet:
+> **Warning:** A sheet is `position: fixed`. Any ancestor with a `transform`, `filter` or `contain` turns it back into an ordinary absolute box, so those stay off the elements the field sits in.
 
-- **A Sheet Is `position: fixed`**: any ancestor with a `transform`, `filter` or `contain` turns it back into an ordinary absolute box. Keep those off the elements the field sits in.
-- **A Sheet Keeps Focus In The Field's Input**: as every panel does, because that is what makes the autocomplete type-ahead. A soft keyboard can therefore cover it.
+> **Note:** A sheet keeps focus in the field's input, as every panel does, because that is what makes the autocomplete type-ahead. A soft keyboard can therefore cover it.
 
 Whatever the placement, the calendar scales to the width its panel has: `--formidable-date-field-panel-width` is the width it _prefers_, not one it is fixed at.
 
@@ -168,9 +163,9 @@ Whatever the placement, the calendar scales to the width its panel has: `--formi
 
 ## Icons
 
-`select-field`, `dropdown-field` and `date-field` draw a toggle at their right edge, and the date field's calendar draws its month arrows. The library's own are chevrons. Replace them app-wide with a provider, or per field by projecting your own.
+`select-field`, `dropdown-field` and `date-field` draw a toggle at their right edge, and the date field's calendar draws its month arrows. The library's own are chevrons. A provider replaces them app-wide, a projected icon per field.
 
-**App-Wide**: give `provideNgxFormidable` an `icons` object. Each icon is a component and the inputs to render it with, so an icon library's component goes in as it is:
+**App-Wide**: `provideNgxFormidable` takes an `icons` object. Each icon is a component and the inputs to render it with, so an icon library's component goes in as it is:
 
 ```ts
 provideNgxFormidable({
@@ -188,12 +183,12 @@ provideNgxFormidable({
 - **Open And Closed**: `fieldToggleOpen` shows while the panel is open; unset, `fieldToggle` stays. The select never shows it, because a page cannot ask whether a native list is open.
 - **The Date Field's Own**: `dateFieldToggle` and `dateFieldToggleOpen` replace the toggle on the date field only, so a calendar can open from a calendar icon while a list opens from a chevron. Unset, `dateFieldToggleOpen` keeps `dateFieldToggle`; without either, the date field takes `fieldToggle` and `fieldToggleOpen`.
 - **One Size**: every icon sits centred in a box of `--formidable-icon-size`, which is also its `1em`, so an icon sized in `em`, as most icon components are, fills it. The chevrons fill it too, drawn on the 24-unit grid most icon sets use, so an icon from such a set matches their scale.
-- **Text Color**: the chevrons are stroked in the text color, so they follow the field's state colors. Draw yours in `currentColor` to do the same.
+- **Text Color**: the chevrons are stroked in the text color, so they follow the field's state colors. A provided icon drawn in `currentColor` does the same.
 - **Month Arrows Are Copies**: the calendar rebuilds its buttons on every draw, opening included, so each draw copies the icon in. An icon that renders its content later, such as one that fetches its SVG, shows from the next draw, and nothing inside the copy reacts to input.
-- **Scoped By Providing**: provide `FORMIDABLE_ICONS` in a component's `providers` to give the fields it renders icons of their own, the way `FORMIDABLE_DEFAULTS` is scoped in [Getting Started](getting-started.md).
+- **Scoped By Providing**: `FORMIDABLE_ICONS` in a component's `providers` gives the fields it renders icons of their own, the way `FORMIDABLE_DEFAULTS` is scoped in [Getting Started](getting-started.md).
 - **No Policy Rule**: the chevrons are inline SVG, so a Content Security Policy needs no `img-src` rule for them.
 
-**Per Field**: project `[formidableFieldToggleIcon]` content, such as an icon component, into the field. It replaces the toggle's icon, the provided one included, for as long as it renders, so an `@if` around it can switch between the two. Its size, color and hover feedback are yours.
+**Per Field**: content projected with `[formidableFieldToggleIcon]`, such as an icon component, replaces the toggle's icon, the provided one included, for as long as it renders, so an `@if` around it can switch between the two. Its size, color and hover feedback are the projected content's own.
 
 ```html
 <formidable-date-field [formField]="form.birthdate">
@@ -248,35 +243,34 @@ The autocomplete has no buffer: what is typed is its filter, and typing an optio
 
 ## Dates And Times
 
-Both fields parse and format through one `unicodeTokenFormat`, a date-fns token string, and both hold a `Date | null`.
+Both fields parse and format through one `unicodeTokenFormat`, a [date-fns token string](https://date-fns.org/docs/format), and both hold a `Date | null`.
 
 | Input                | Does                                                                |
 | :------------------- | :------------------------------------------------------------------ |
 | `unicodeTokenFormat` | The token string the field masks, parses and formats with           |
 | `emptyHint`          | What an empty, unfocused field shows: `'underscores'` or `'format'` |
 
-A focused empty field always shows underscore slots, because the mask's caret arithmetic only recognises its own placeholder character.
+> **Note:** A focused empty field always shows underscore slots, whatever `emptyHint` says.
 
 - **Typed Text Commits On Blur**: a half-typed date is not a date, so what is typed reaches the model on blur or on `Enter`. The arrow keys and the calendar commit at once.
 - **Text That Does Not Parse Stays As Typed**: the model keeps its value, and the field reports a `parse` error to whichever forms API binds it, which the decorator renders once revealed. Text that parses again drops it.
 - **Emptying The Text Commits `null`**: at once, with no error.
 - **A Clear Button Calls `clear()`**: text typed but not committed is not the value, so while the model is `null` already, writing `null` changes nothing, and the text commits on the next blur. `clear()` commits `null` as the user's edit and drops that text with its `parse` error. The button is **Clear** under **Actions** in [Decoration](decoration.md).
-- **A Commit Writes One Part**: a date field writes its day at local midnight, a time field its time on 1 January 1970. A value your code writes keeps its other part until the user commits.
+- **A Commit Writes One Part**: a date field writes its day at local midnight, a time field its time on 1 January 1970. A value written by application code keeps its other part until the user commits.
 - **Names Are Read In Any Case**: `15 dec 2024` parses against `dd MMM yyyy`, and `02:30 pm` against `hh:mm a`. The commit shows the format's own case, `15 Dec 2024` and `02:30 PM`.
 - **A Date Format Without A Year Takes 2000**: a leap year, so `29.02` parses against `dd.MM`. One without a month takes January.
 - **A Two-Digit Year**: `yy` reads `00` to `49` as 20xx, and `50` to `99` as 19xx. Any other year takes `yyyy`.
 
-The date field passes a set of options straight through to Pikaday: `minDate`, `maxDate`, `firstDay`, `i18n`, `yearRange`, `disableWeekends`, `disableDayFn` and the rest, listed in [Components](components.md). Each is applied to the calendar when it changes at runtime.
+The date field passes a set of options straight through to [Pikaday](https://github.com/Pikaday/Pikaday): `minDate`, `maxDate`, `firstDay`, `i18n`, `yearRange`, `disableWeekends`, `disableDayFn` and the rest, listed in [Components](components.md). Each is applied to the calendar when it changes at runtime.
 
 ---
 
 ## Masking
 
-`input-field` and `textarea-field` mask through ngx-mask, and take almost all of its options. Config resolves in three layers: a per-field `maskConfig` overrides the app-wide defaults, which override the library's own. A masked field writes the model on every keystroke, as an unmasked one does.
+`input-field` and `textarea-field` mask through [ngx-mask](https://github.com/JsDaddy/ngx-mask), and take almost all of its options. Config resolves in three layers: a per-field `maskConfig` overrides the app-wide defaults, which override the library's own. A masked field writes the model on every keystroke, as an unmasked one does.
 
-**The Model Is What ngx-mask Reports**: the mask's literals stay out of the model unless `dropSpecialCharacters` is `false`. Typing `0791234567` into `000 000 00 00` writes `0791234567`, and `079 123 45 67` under `{ dropSpecialCharacters: false }`. A value written into the field renders through the mask either way.
-
-**Two Lengths**: a rule such as `pattern()` or `minLength()` reads the model. The native `minlength` and `maxlength` count the text the editor shows, literals included, and `[formField]` writes a `minLength()` or `maxLength()` rule into them. On a masked field the two count different texts, so state a length with `pattern()`.
+- **The Model Is What ngx-mask Reports**: the mask's literals stay out of the model unless `dropSpecialCharacters` is `false`. Typing `0791234567` into `000 000 00 00` writes `0791234567`, and `079 123 45 67` under `{ dropSpecialCharacters: false }`. A value written into the field renders through the mask either way.
+- **Two Lengths**: a rule such as `pattern()` or `minLength()` reads the model. The native `minlength` and `maxlength` count the text the editor shows, literals included, and `[formField]` writes a `minLength()` or `maxLength()` rule into them. On a masked field the two count different texts, so a length is stated with `pattern()`.
 
 ### Per Field
 
@@ -287,7 +281,7 @@ The date field passes a set of options straight through to Pikaday: `minDate`, `
   [formField]="form.price" />
 ```
 
-Set `mask` when you want masking; `maskConfig` is optional on top of it.
+`mask` turns masking on; `maskConfig` is optional on top of it.
 
 ### App-Wide
 
@@ -300,9 +294,9 @@ export const appConfig: ApplicationConfig = {
 
 It lands on the `FORMIDABLE_MASK_DEFAULTS` token.
 
-**The Slot Character Is The Field's, Not The App's**: a field finds where its value ends in what the mask renders, by looking for the character drawn in a position nobody has filled. So every masked field binds `placeHolderCharacter` itself, and an `ngx-mask` setting made globally, through `provideNgxMask`, does not reach it. Set it per field through `maskConfig`, or app-wide through `globalMaskConfig`, and the display and the caret move together.
+> **Warning:** `placeHolderCharacter` set through ngx-mask's own `provideNgxMask` does not reach a field: every masked field binds it itself. It is set per field through `maskConfig`, or app-wide through `globalMaskConfig`, and the display and the caret move together.
 
-Pick one the mask cannot produce on its own. Where a token pattern accepts it, or the mask draws it as a literal, a filled position and an empty one look identical and the field cannot tell them apart. It logs a warning naming the field when it spots the collision. The default `_` is safe for every built-in pattern; a mask like `000_000`, or a custom pattern such as `/\w/` that accepts `_`, needs a different character.
+The slot character has to be one the mask cannot produce on its own. Where a token pattern accepts it, or the mask draws it as a literal, a filled position and an empty one look identical and the field cannot tell them apart. The field logs a warning naming itself when it spots the collision. The default `_` is safe for every built-in pattern; a mask like `000_000`, or a custom pattern such as `/\w/` that accepts `_`, needs a different character.
 
 ```html
 <formidable-input-field
@@ -313,7 +307,7 @@ Pick one the mask cannot produce on its own. Where a token pattern accepts it, o
 
 ### The Caret In A Masked Field
 
-A mask renders a `_` slot for every character not yet typed. Those slots are not a value, so they are not somewhere the caret goes: [The Caret On Focus](#the-caret-on-focus) above is the whole rule, and a mask only changes where the content is taken to end.
+A mask renders a `_` slot for every character not yet typed. Those slots are not a value, so they are not somewhere the caret goes: [The Caret On Focus](#the-caret-on-focus) is the whole rule, and a mask only changes where the content is taken to end.
 
 | Mask State        | Counts As | Content Ends                                                           |
 | :---------------- | :-------: | :--------------------------------------------------------------------- |
@@ -332,4 +326,4 @@ So keyboard focus on `12/3_/____` selects `12/3` and stops, and a click anywhere
 - [Components](components.md): every public component, directive, token and type
 - [Forms](forms.md): how the fields meet Signal Forms, reactive forms and template-driven forms
 - [Decoration](decoration.md): labels, adornments, prefixes, suffixes, hints, required marker
-- [Custom Fields](custom-fields.md): building a field or an option of your own
+- [Custom Fields](custom-fields.md): building a custom field or option
