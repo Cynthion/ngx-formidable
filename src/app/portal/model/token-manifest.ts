@@ -1045,7 +1045,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     group: 'Colors · Option Prefix',
     control: 'color',
     class: 'declared',
-    description: 'Overrides `--formidable-color-option-prefix-outer` when the option is highlighted.'
+    description: 'Overrides `--formidable-color-option-prefix-outer` when the option is highlighted and not selected.'
   },
   {
     name: '--formidable-color-option-prefix-inner',
@@ -1080,7 +1080,8 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     group: 'Colors · Option Prefix',
     control: 'color',
     class: 'declared',
-    description: 'Overrides `--formidable-color-option-prefix-inner` when the option is highlighted.'
+    description:
+      'Paints nothing: the inner ring/square renders only on a selected option, which takes `--formidable-color-option-prefix-inner-selected`.'
   },
   {
     name: '--formidable-color-option-prefix-background',

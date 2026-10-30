@@ -1579,6 +1579,10 @@
     &.is-highlighted {
       @include field-option-highlighted;
     }
+
+    &.is-highlighted:not(.is-selected) {
+      @include field-option-highlighted-mark;
+    }
   }
 }
 
@@ -1605,24 +1609,34 @@
 
 // Internal: the option holding the field's current value.
 @mixin field-option-selected {
-  --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-selected);
-  --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-selected);
-
   background: var(
     --formidable-color-field-option-background-selected,
     #{tokens.$formidable-color-field-option-background-selected}
   );
 }
 
+// Internal: a group's marker on the option holding the value. A value holds whether or not the group has
+// focus or a hover, so unlike the background this sits outside both gates.
+@mixin field-option-selected-mark {
+  /* stylelint-disable-next-line selector-not-notation */
+  &:not(.is-readonly):not(.is-disabled).is-selected {
+    --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-selected);
+    --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-selected);
+  }
+}
+
 // Internal: the option the keyboard is on.
 @mixin field-option-highlighted {
-  --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-highlighted);
-  --formidable-color-option-prefix-inner: var(--formidable-color-option-prefix-inner-highlighted);
-
   background: var(
     --formidable-color-field-option-background-highlighted,
     #{tokens.$formidable-color-field-option-background-highlighted}
   );
+}
+
+// Internal: a group's marker on the option the keyboard is on, unless that option is selected. The inner
+// mark renders only on a selected option, so the outer one is all this can reach.
+@mixin field-option-highlighted-mark {
+  --formidable-color-option-prefix-outer: var(--formidable-color-option-prefix-outer-highlighted);
 }
 
 // #endregion
@@ -1637,9 +1651,11 @@
   padding: utils.rem(8) utils.rem(16);
 }
 
-// An option in a radio group. Selected and highlighted only show while the group has focus.
+// An option in a radio group. Its selected mark always shows; the fills and the highlighted mark only while
+// the group has focus.
 @mixin field-option-radio-group {
   @include field-option;
+  @include field-option-selected-mark;
 
   :host-context(.field:focus) & {
     // only apply when the parent field is focused

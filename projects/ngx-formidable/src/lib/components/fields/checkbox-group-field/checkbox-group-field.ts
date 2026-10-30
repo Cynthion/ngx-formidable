@@ -78,6 +78,9 @@ export class CheckboxGroupField extends BaseOptionField<string[]> {
       : [...current, option.value];
 
     this.setValue(next);
+
+    // immediately highlight the toggled option
+    this.setHighlightedIndex(this.activeOptions().findIndex((active) => active.value === option.value));
   }
 
   protected onOptionsChanged(): void {
