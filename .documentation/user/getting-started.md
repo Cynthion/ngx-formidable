@@ -2,11 +2,6 @@
 
 Install the package, provide it, import the stylesheet, and build a form with Signal Forms and Angular's own rules.
 
-1. [Install](#install) the package and its peer dependencies.
-2. [Provide the library](#provide-the-library) in the app config.
-3. [Import the stylesheet](#import-the-stylesheet).
-4. [Build a form](#build-a-form).
-
 The API each symbol carries is in [Components](components.md). How the fields meet reactive and template-driven forms is in [Forms](forms.md).
 
 ## Install
@@ -25,11 +20,11 @@ The API each symbol carries is in [Components](components.md). How the fields me
 
 The package and its peers are installed, and the build is clean.
 
-| Peer                                                 | Needed For                                      |
-| :--------------------------------------------------- | :---------------------------------------------- |
-| [`date-fns`](https://date-fns.org)                   | Parsing and formatting the date and time fields |
-| [`ngx-mask`](https://github.com/JsDaddy/ngx-mask)    | Input masking                                   |
-| [`pikaday`](https://github.com/Pikaday/Pikaday)      | The date field's calendar                       |
+| Peer                                              | Needed For                                      |
+| :------------------------------------------------ | :---------------------------------------------- |
+| [`date-fns`](https://date-fns.org)                | Parsing and formatting the date and time fields |
+| [`ngx-mask`](https://github.com/JsDaddy/ngx-mask) | Input masking                                   |
+| [`pikaday`](https://github.com/Pikaday/Pikaday)   | The date field's calendar                       |
 
 Angular's `common`, `core` and `forms`, and `rxjs`, are peers every Angular app already has. The package is published in partial compilation mode, so the app's own compiler links it, under any Angular version its `peerDependencies` accept.
 
@@ -51,11 +46,11 @@ export const appConfig: ApplicationConfig = {
 
 An NgModule app lists the same call in its root module's `providers`. It takes an optional `NgxFormidableConfig` with three keys:
 
-| Key                | Sets                                                              |
-| :----------------- | :---------------------------------------------------------------- |
+| Key                | Sets                                                                   |
+| :----------------- | :--------------------------------------------------------------------- |
 | `globalMaskConfig` | The app-wide ngx-mask settings, see **Masking** in [Fields](fields.md) |
-| `icons`            | The app-wide icons, see **Icons** in [Fields](fields.md)         |
-| `defaults`         | The app-wide defaults, see [App-Wide Defaults](#app-wide-defaults) |
+| `icons`            | The app-wide icons, see **Icons** in [Fields](fields.md)               |
+| `defaults`         | The app-wide defaults, see [App-Wide Defaults](#app-wide-defaults)     |
 
 ### App-Wide Defaults
 

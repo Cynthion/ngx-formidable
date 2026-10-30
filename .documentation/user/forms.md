@@ -2,7 +2,7 @@
 
 Every field binds to Signal Forms, reactive forms and template-driven forms alike. The forms API holds the model, its state and its rules; the library edits, renders, decorates and themes. Which validator writes the rules is in [Validation](validation.md).
 
-Each API is documented by Angular: [Signal Forms](https://angular.dev/guide/forms/signal-forms), [reactive forms](https://angular.dev/guide/forms/reactive-forms) and [template-driven forms](https://angular.dev/guide/forms/template-driven-forms). The sections describe only how a library field meets each.
+Each API is documented by Angular: [Signal Forms](https://angular.dev/guide/forms), [reactive forms](https://angular.dev/guide/forms/reactive-forms) and [template-driven forms](https://angular.dev/guide/forms/template-driven-forms). The sections describe only how a library field meets each.
 
 ## Who Owns What
 

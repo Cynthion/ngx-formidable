@@ -1,10 +1,10 @@
 # Theming
 
-Every visual property of every field is a CSS custom property you can override. This page is how to decide which ones to set; every variable is listed in [Theme Reference](theme-reference.md). To wire the stylesheet up, see [Getting Started](getting-started.md).
+Every visual property of every field is a CSS custom property, and every one can be overridden. Theming is deciding which ones to set; every variable is listed in [Theme Reference](theme-reference.md). Wiring up the stylesheet is in [Getting Started](getting-started.md).
 
 ## The Default Theme
 
-The library ships neutral surfaces and text plus a single accent, deliberate enough to use unthemed and quiet enough not to compete with your brand. Import the stylesheet and you get this; there is no theme to select and nothing to initialise.
+The library ships neutral surfaces and text plus a single accent, deliberate enough to use unthemed and quiet enough not to compete with a brand. Importing the stylesheet applies it; there is no theme to select and nothing to initialise.
 
 | Role           | Variable                                  |   Value   | Scale       |
 | :------------- | :---------------------------------------- | :-------: | :---------- |
@@ -26,7 +26,7 @@ The library ships neutral surfaces and text plus a single accent, deliberate eno
 
 The lengths are `rem`: `56px`, `1px`, `8px` and `16px` at the browser's default root font size.
 
-Everything else in this document derives from those twelve. **To rebrand, set `--formidable-color-field-border-focus`**: it carries the focus border, the focused label, the focused underline and both focus rings. Add `--formidable-color-field-label-floating` if you want the accent on resting labels too.
+Every other variable derives from those twelve. **A rebrand sets `--formidable-color-field-border-focus`**: it carries the focus border, the focused label, the focused underline and both focus rings. `--formidable-color-field-label-floating` adds the accent to resting labels too.
 
 Alternative colour and geometry schemes (outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed, and ten palettes including a dark one) are selectable in the Studio, which pairs them into named presets. See [Studio](studio.md). The [Specimen](https://cynthion.github.io/ngx-formidable/#/specimen) shows every field under each preset, and steps through a theme one variable at a time.
 
@@ -34,30 +34,30 @@ Alternative colour and geometry schemes (outlined, underlined, soft, compact, pi
 
 ## How Theming Works
 
-- **Override In Your Own `:root`**: declare the variables you want to change after importing the library's stylesheet. There is nothing else to configure.
-- **Override The Base, Not The Derivative**: many variables default to another one, so setting the base moves everything below it. Set `--formidable-color-field-border` and the underline, the option markers, the slider track and the toggle thumb all follow. Set those overrides in `:root`: a base re-declared further down your app leaves everything derived from it as `:root` computed it. The per-corner radius variables are the exception: they work on `:root` and on a single field alike.
-- **Units Are Mandatory On Length Variables**: write `0px`, not `0`. A unitless zero silently invalidates every value derived from it, taking out label offsets and panel alignment with it.
-- **Derived Values Are Yours Too**: a variable described as _Derived_ is computed from the ones above it. Overriding it pins it, which is occasionally what you want and usually not. Prefer changing what it is computed from.
-- **Chrome And Content Are Separate**: `--formidable-color-field-border` is its own colour, not the text's. Setting `--formidable-color-field-text` recolours the text, the group text, the label and the readonly and disabled states, the disabled border included, but leaves `--formidable-color-field-border` alone. Recolour the border yourself when you want both to move.
+- **Overrides Go In The App's Own `:root`**: the variables to change are declared after the library's stylesheet is imported. There is nothing else to configure.
+- **Override The Base, Not The Derivative**: many variables default to another one, so setting the base moves everything that follows it. Setting `--formidable-color-field-border` moves the underline, the option markers, the slider track and the toggle thumb with it. Those overrides belong in `:root`: a base re-declared further down the app leaves everything derived from it as `:root` computed it. The per-corner radius variables are the exception: they work on `:root` and on a single field alike.
+- **Units Are Mandatory On Length Variables**: `0px`, not `0`. A unitless zero silently invalidates every value derived from it, taking out label offsets and panel alignment with it.
+- **Derived Values Can Be Pinned**: a variable described as _Derived_ is computed from others. Overriding it pins it, which is occasionally wanted and usually not. Changing what it is computed from is the better move.
+- **Chrome And Content Are Separate**: `--formidable-color-field-border` is its own colour, not the text's. Setting `--formidable-color-field-text` recolours the text, the group text, the label and the readonly and disabled states, the disabled border included, but leaves `--formidable-color-field-border` alone. The border is recoloured separately when both should move.
 
 ---
 
-## Finding Your Theme
+## Finding A Theme
 
-There are around two hundred variables in [Theme Reference](theme-reference.md), and you need eight to twelve of them. Work in this order and stop as soon as it looks right: each step is independent of the ones after it.
+There are around two hundred variables in [Theme Reference](theme-reference.md), and a theme needs eight to twelve of them. The steps run in this order and stop as soon as the result looks right: each is independent of the ones after it.
 
-### 1. Decide How Far You Are Going
+### 1. Decide How Far To Go
 
 | Goal              | Variables | What To Set                                                        |
 | :---------------- | --------: | :----------------------------------------------------------------- |
-| Match your brand  |         1 | `--formidable-color-field-border-focus`                            |
-| Repaint entirely  |         8 | The eight colour seeds below                                       |
+| Match a brand     |         1 | `--formidable-color-field-border-focus`                            |
+| Repaint entirely  |         8 | The eight colour seeds                                             |
 | Reshape the field |         4 | `--formidable-field-height`, the border thickness, radius, padding |
 | Both              |        12 | All of the above                                                   |
 
-### 2. The Eight Colour Seeds
+### 2. Set The Eight Colour Seeds
 
-Set these and the rest of the library follows. Do not set the derived variables: the `-hovered`, `-focus`, `-readonly` and `-disabled` variants exist so you do not have to.
+The rest of the library follows these. The derived `-hovered`, `-focus`, `-readonly` and `-disabled` variants exist so that they do not have to be set.
 
 ```scss
 :root {
@@ -72,11 +72,11 @@ Set these and the rest of the library follows. Do not set the derived variables:
 }
 ```
 
-**Check Three Of Them Against Your Fill**: the text, the placeholder and the error colour should each reach 4.5:1, and the focus border 3:1. A placeholder that fails is the usual casualty.
+> **Note:** The text, the placeholder and the error colour each need a contrast of 4.5:1 against the fill, and the focus border 3:1. A placeholder that fails is the usual casualty.
 
-### 3. Four Worked Examples
+### 3. Adapt A Worked Example
 
-**Brand Accent Only**: keep the shipped neutrals, make focus yours:
+**Brand Accent Only**: the shipped neutrals, with focus in the brand colour:
 
 ```scss
 :root {
@@ -96,7 +96,7 @@ Set these and the rest of the library follows. Do not set the derived variables:
   --formidable-field-underline-thickness: 1px;
   --formidable-field-underline-thickness-focus: 2px;
   --formidable-field-underline-thickness-invalid: 2px;
-  // Required, see Borderless Themes below
+  // Required, see Borderless Themes under Avoid Five Pitfalls
   --formidable-field-group-border-thickness: 1px;
   --formidable-field-focus-ring-width: 1px;
   --formidable-panel-border-thickness: 1px;
@@ -120,7 +120,7 @@ Set these and the rest of the library follows. Do not set the derived variables:
 
 ```scss
 :root {
-  --formidable-field-height: 44px; // do not go below this, see Sizing below
+  --formidable-field-height: 44px; // the floor, see Sizing under Avoid Five Pitfalls
   --formidable-field-padding-x: 12px;
   --formidable-field-font-size: 14px;
   --formidable-label-floating-font-size: 11px;
@@ -128,17 +128,17 @@ Set these and the rest of the library follows. Do not set the derived variables:
 }
 ```
 
-### 4. Five Things That Will Catch You Out
+### 4. Avoid Five Pitfalls
 
-- **Units Are Mandatory**: write `0px`, never `0`. A unitless zero is a `<number>` in `calc()`, not a `<length>`, and silently invalidates every label offset and the panel alignment at once.
+- **Units Are Mandatory**: `0px`, never `0`. A unitless zero is a `<number>` in `calc()`, not a `<length>`, and silently invalidates every label offset and the panel alignment at once.
 - **Sizing**: `44px` is the floor for the `inside`, `inside-placeholder` and floating label positions. Below it the label's line box and the value's no longer both fit the field's inner height, and the field overflows its own box rather than centering them. The space between them is clamped at zero, so they cannot invert into each other.
-- **Borderless Themes**: `--formidable-field-border-thickness` is the default for five lengths that are not the field's border at all (the field group's border, a panel's outline, the focus ring's width, the toggle's track and the slider's track). Setting it to `0px` erases all five, and neither a group nor a panel has an underline to fall back on: a focused radio or checkbox group loses its only focus indicator, and every dropdown, autocomplete and date panel is left with its box-shadow alone. Each has a variable of its own; restore the five shown in the underlined example above. `--formidable-field-focus-ring-width` is one width for every ring the library paints, so a group's ring cannot be restored without the fields taking one too; give a field-ring-free theme its focus through `--formidable-field-underline-thickness-focus` instead.
+- **Borderless Themes**: `--formidable-field-border-thickness` is the default for five lengths that are not the field's border at all (the field group's border, a panel's outline, the focus ring's width, the toggle's track and the slider's track). Setting it to `0px` erases all five, and neither a group nor a panel has an underline to fall back on: a focused radio or checkbox group loses its only focus indicator, and every dropdown, autocomplete and date panel is left with its box-shadow alone. Each has a variable of its own; the underlined example restores all five. `--formidable-field-focus-ring-width` is one width for every ring the library paints, so a group's ring cannot be restored without the fields taking one too; a theme without field rings shows focus through `--formidable-field-underline-thickness-focus` instead.
 - **A Gradient Cannot Be A Colour**: `--formidable-color-field-background` is fed into `color-mix()` to derive the readonly, disabled and hover fills. A `linear-gradient()` is not a `<color>` and invalidates all of them.
-- **Dark Themes Need A Dark Page**: the library styles fields, never the surface behind them; that is yours. You will also need to state `--formidable-color-field-background-readonly` and `-disabled` outright, because they are derived by mixing toward `transparent`, which lightens a dark field instead of dimming it; and the option `-selected` / `-highlighted` fills, which default to black at low alpha and vanish on a dark panel.
+- **Dark Themes Need A Dark Page**: the library styles fields, never the surface behind them, which belongs to the app. A dark theme also states `--formidable-color-field-background-readonly` and `-disabled` outright, because they are derived by mixing toward `transparent`, which lightens a dark field instead of dimming it; and the option `-selected` / `-highlighted` fills, which default to black at low alpha and vanish on a dark panel.
 
 ### 5. Start From A Scheme Instead
 
-Ten palettes and eleven field shapes (outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed) are selectable in the Studio, on two independent axes and as named presets pairing the two. Picking one and adjusting it is usually faster than starting from this page, and the Studio copies the result out as the `:root` block to paste. [Studio](studio.md) is the guide to it.
+Ten palettes and eleven field shapes (outlined, underlined, soft, compact, pill, leaf, tab, brutalist, airy, borderless, unboxed) are selectable in the Studio, on two independent axes and as named presets pairing the two. Picking one and adjusting it is usually faster than starting from the seeds, and the Studio copies the result out as the `:root` block to paste. [Studio](studio.md) is the guide to it.
 
 ---
 

@@ -155,7 +155,7 @@ Opening a panel scrolls the field, or the panel, into view, but only the one tha
 
 > **Warning:** A sheet is `position: fixed`. Any ancestor with a `transform`, `filter` or `contain` turns it back into an ordinary absolute box, so those stay off the elements the field sits in.
 
-> **Note:** A sheet keeps focus in the field's input, as every panel does, because that is what makes the autocomplete type-ahead. A soft keyboard can therefore cover it.
+A sheet keeps focus in the field's input, as every panel does, because that is what makes the autocomplete type-ahead. A soft keyboard can therefore cover it.
 
 Whatever the placement, the calendar scales to the width its panel has: `--formidable-date-field-panel-width` is the width it _prefers_, not one it is fixed at.
 

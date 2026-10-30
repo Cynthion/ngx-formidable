@@ -286,8 +286,7 @@ Provided with `useFactory` instead, it reads a translation service through `inje
 **A Group's Or The Form's Messages**: a rule on a group or on the whole form reports on no field, so no decorator renders it. A `formidable-field-errors` placed where the messages belong renders the errors it is handed, gated by whatever reveal the form wants:
 
 ```html
-<formidable-field-errors [errors]="form.when().touched() ? form.when().errors() : []" />
-<formidable-field-errors [errors]="form().errors()" />
+<formidable-field-errors [errors]="form.when().touched() ? form.when().errors() : []" /> <formidable-field-errors [errors]="form().errors()" />
 ```
 
 A group is touched once any field in it is. `formidable-field-errors` renders what it is given and decides nothing about when.
