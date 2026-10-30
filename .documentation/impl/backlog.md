@@ -4,25 +4,6 @@ The single source of truth for work items, in priority order; bugs come first. A
 
 ## Bugs
 
-Internal:
-
-- **Selected Mark Outside Focus**: a selected option of a `checkbox-group-field` or `radio-group-field` takes its `--formidable-color-option-prefix-*-selected` colours only in a focused, unhovered group, where [`user/theme-reference.md`](../user/theme-reference.md) promises them for a selected option. Everywhere else the mark and its ring fall back to the plain `-inner` and `-outer` tokens. The default theme hides this, since all of them are `$formidable-color-field-border`. A theme that sets only `-selected` does not: Aicon Studio painted the mark `#dce0e7`, its faint border colour, on an unfocused group and while hovered.
-  - **Two Gates**: `field-option-radio-group` includes `field-option-selected-highlighted-logic` inside `:host-context(.field:focus)`, and that mixin excludes `:hover`. `field-option-checkbox-group` reuses it. `field-option-inline` has no focus gate, but the same hover gate.
-  - **Keep The Hover Background**: the `:not(:hover)` is deliberate, so a hover shows through. Only the `background` of `field-option-selected` needs it; the prefix tokens do not.
-  - **Keep The Keyboard Highlight**: the focus gate fits `is-highlighted`, which only means something in a focused group, and not `is-selected`, which is a value. Split the mixin, so the selected colours hold in every state but `is-readonly` and `is-disabled`.
-  - **Workaround**: Aicon Studio sets `--formidable-color-option-prefix-inner` to its accent in `studio/src/styles.scss`, which the mark can take because it renders only on a selected option. Its ring stays on the plain `-outer` token, which unselected options share, so no theme can work around the ring.
-  - **Proof Of Fit**: after a release, Aicon Studio deletes that override, and the mark and ring of a selected option keep the `-selected` colours while unfocused and while hovered.
-- **Highlight Stays Behind A Mouse Pick**: `research` how a `checkbox-group-field` hands the highlight to the option a mouse click toggles. Focus highlights an option, and the arrows walk from it. A click on another option then toggles that one and leaves the highlight where it was, so the marked option is not the one the user just acted on. Toggling an option, on or off, must make it the active one and mark it. The result is a recommended change and answers to the open questions below, before any code.
-  - **Radio Already Does**: `selectOption` in `radio-group-field.ts` ends with `highlightSelectedOption()`. The one in `checkbox-group-field.ts` does not, and that helper cannot serve it: `selectedOptionValue` is `null` for a multi-select field, so it reads no index. The checkbox group needs the toggled option's own index through `setHighlightedIndex`.
-  - **Only The Mouse Is Affected**: Enter and Space toggle the highlighted option through the same `selectOption`, so setting the highlight there changes nothing for them.
-  - **Unaffected**: `reconcileHighlightAfterOptionsChanged` stays as it is, and `keeps the highlight where it was when a checked option moves` in `option-highlight.spec.ts` still holds. That spec is about a reordered list, not a pick.
-  - **Open Questions**:
-    - Does a click on a disabled or readonly option move the highlight? `selectOption` returns early for it today.
-    - `setHighlightedIndex` also scrolls the option into view. Is that right for an option that was clicked while partly visible?
-    - A hovered option shows no highlight, since `field-option-selected-highlighted-logic` excludes `:hover`, so the mark appears only once the pointer leaves. Is that enough, or does a click need its own feedback?
-    - The first click into an unfocused group highlights the first option as focus enters, then toggles the clicked one. Does the change cover that without a flash?
-  - **Proof**: a spec beside the `checkbox-group` cases of `option-highlight.spec.ts`: a click on an option moves the highlight and `aria-activedescendant` to it, on check and on uncheck, and the next arrow walks from there.
-
 External:
 
 | Defect                                                                                                                                                                                                                                                          | Upstream                                                                                                                      | Tripwire                                | Workaround                                                                                                        | Undo On Fix                                                                                                                                                                                                                                                        |
@@ -53,3 +34,4 @@ External:
   - **Tone**: humorous and light, informative and professional. Conversational, so the reader feels part of the journey.
   - **Include A Lessons-Learned Section**: the challenges hit during development and how they shaped the library's design. That is what gives readers the thinking behind the features.
 - **Storybook Visual Regression**: `@storybook/addon-vitest` runs every story of [`impl/storybook.md`](storybook.md) in Vitest browser mode, and a preview `afterEach` asserts `toMatchScreenshot()`. Baselines are committed and generated on Linux in CI, since font rendering differs per platform. Prove first that the addon runs beside `@angular/build:unit-test`, which has no Vitest configuration file today. Then **Visual Testing** in [`impl/testing.md`](testing.md) is rewritten.
+- **Unused Inner Highlighted Token**: `--formidable-color-option-prefix-inner-highlighted` paints nothing, since the inner ring/square renders only on a selected option, which takes `-selected`. Removing a public token is a breaking change, so it goes in the next major: `_tokens.scss`, `_formidable-vars.scss`, `token-manifest.ts` and [`user/theme-reference.md`](../user/theme-reference.md).

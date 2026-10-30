@@ -221,7 +221,7 @@ Every control is operable from the keyboard. Disabled and readonly fields ignore
 | `Arrow Left`         |                    |                                                     |                         | If panel open: previous day; else move caret       | Move caret                |
 | `Arrow Right`        |                    |                                                     |                         | If panel open: next day; else move caret           | Move caret                |
 
-An empty cell is a key the field does not act on, and it keeps its native effect: `Enter` on a dropdown or autocomplete with its panel closed submits the form, and `Esc` with no panel open reaches the dialog around the field. Picking a highlighted option in a checkbox group toggles it. Arrows skip disabled and readonly options, and the highlight never rests on one: when the list changes, a highlight whose option can no longer be picked, the selected one included, moves to the next option that can.
+An empty cell is a key the field does not act on, and it keeps its native effect: `Enter` on a dropdown or autocomplete with its panel closed submits the form, and `Esc` with no panel open reaches the dialog around the field. Picking a highlighted option in a checkbox group toggles it. A click on a group's option moves the highlight there, so the arrows walk on from it. Arrows skip disabled and readonly options, and the highlight never rests on one: when the list changes, a highlight whose option can no longer be picked, the selected one included, moves to the next option that can.
 
 The rest keep the platform's keys: `select-field` is a native `<select>` and `slider-field` a native range input. `toggle-field` flips on `Space` and `Enter`.
 

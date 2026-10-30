@@ -184,19 +184,19 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 
 ### Option Prefix
 
-| Variable                                             | Description                                                                         |
-| :--------------------------------------------------- | :---------------------------------------------------------------------------------- |
-| `--formidable-color-option-prefix-outer`             | Color of the outer ring/square border of a radio/check box group field option item. |
-| `--formidable-color-option-prefix-outer-readonly`    | Overrides `--formidable-color-option-prefix-outer` when the option is readonly.     |
-| `--formidable-color-option-prefix-outer-disabled`    | Overrides `--formidable-color-option-prefix-outer` when the option is disabled.     |
-| `--formidable-color-option-prefix-outer-selected`    | Overrides `--formidable-color-option-prefix-outer` when the option is selected.     |
-| `--formidable-color-option-prefix-outer-highlighted` | Overrides `--formidable-color-option-prefix-outer` when the option is highlighted.  |
-| `--formidable-color-option-prefix-inner`             | Color of the inner ring/square of a radio/check box group field option item.        |
-| `--formidable-color-option-prefix-inner-readonly`    | Overrides `--formidable-color-option-prefix-inner` when the option is readonly.     |
-| `--formidable-color-option-prefix-inner-disabled`    | Overrides `--formidable-color-option-prefix-inner` when the option is disabled.     |
-| `--formidable-color-option-prefix-inner-selected`    | Overrides `--formidable-color-option-prefix-inner` when the option is selected.     |
-| `--formidable-color-option-prefix-inner-highlighted` | Overrides `--formidable-color-option-prefix-inner` when the option is highlighted.  |
-| `--formidable-color-option-prefix-background`        | Background color behind option prefix elements.                                     |
+| Variable                                             | Description                                                                                                                             |
+| :--------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `--formidable-color-option-prefix-outer`             | Color of the outer ring/square border of a radio/check box group field option item.                                                     |
+| `--formidable-color-option-prefix-outer-readonly`    | Overrides `--formidable-color-option-prefix-outer` when the option is readonly.                                                         |
+| `--formidable-color-option-prefix-outer-disabled`    | Overrides `--formidable-color-option-prefix-outer` when the option is disabled.                                                         |
+| `--formidable-color-option-prefix-outer-selected`    | Overrides `--formidable-color-option-prefix-outer` when the option is selected.                                                         |
+| `--formidable-color-option-prefix-outer-highlighted` | Overrides `--formidable-color-option-prefix-outer` when the option is highlighted and not selected.                                     |
+| `--formidable-color-option-prefix-inner`             | Color of the inner ring/square of a radio/check box group field option item.                                                            |
+| `--formidable-color-option-prefix-inner-readonly`    | Overrides `--formidable-color-option-prefix-inner` when the option is readonly.                                                         |
+| `--formidable-color-option-prefix-inner-disabled`    | Overrides `--formidable-color-option-prefix-inner` when the option is disabled.                                                         |
+| `--formidable-color-option-prefix-inner-selected`    | Overrides `--formidable-color-option-prefix-inner` when the option is selected.                                                         |
+| `--formidable-color-option-prefix-inner-highlighted` | Paints nothing: the inner ring/square renders only on a selected option, which takes `--formidable-color-option-prefix-inner-selected`. |
+| `--formidable-color-option-prefix-background`        | Background color behind option prefix elements.                                                                                         |
 
 ### Hint
 

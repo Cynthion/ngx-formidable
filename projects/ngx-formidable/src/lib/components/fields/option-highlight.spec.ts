@@ -2,14 +2,14 @@ import { page, userEvent } from 'vitest/browser';
 import { FormidableOption } from '../../models/formidable.model';
 import { bindField, BoundField, FieldKind } from '../../testing/bind-field';
 import { referenced } from '../../testing/dom';
-import { configureFormidableTestBed } from '../../testing/test-bed';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 
 /**
  * Where the keyboard highlight goes in a field that walks an option list, per **Keyboard** in
  * `user/fields.md`: the arrows step through the options a user can pick, skipping disabled and readonly ones
- * and wrapping at both ends; `Enter` picks the highlighted option, and a group's `Space` does too. When the
- * list changes, the highlight stays on the option it was on, unless the selection claims it, and never rests on
- * an option that cannot be picked.
+ * and wrapping at both ends; `Enter` picks the highlighted option, and a group's `Space` does too. A click on
+ * a group's option moves the highlight there. When the list changes, the highlight stays on the option it was
+ * on, unless the selection claims it, and never rests on an option that cannot be picked.
  *
  * Every spec reaches the field the way a keyboard user does: by its label and role, with real keys.
  */
@@ -190,6 +190,45 @@ describe('option field highlight', () => {
       await field.set('options', [GREEN, RED, BLUE, GREY, TEAL]);
 
       expect(highlighted()).toBe('Green');
+    });
+
+    it('moves the highlight to the option a click toggles, on check and on uncheck', async () => {
+      const field = await tabInto('checkbox-group', 'group');
+
+      await userEvent.click(page.getByRole('checkbox', { name: 'Green' }));
+      await expect.poll(field.value).toEqual(['green']);
+      await expect.poll(highlighted).toBe('Green');
+
+      await userEvent.click(page.getByRole('checkbox', { name: 'Teal' }));
+      await expect.poll(highlighted).toBe('Teal');
+
+      await userEvent.click(page.getByRole('checkbox', { name: 'Green' }));
+      await expect.poll(field.value).toEqual(['teal']);
+      await expect.poll(highlighted).toBe('Green');
+    });
+
+    it('walks on from the option a click toggled', async () => {
+      await tabInto('checkbox-group', 'group');
+
+      await userEvent.click(page.getByRole('checkbox', { name: 'Green' }));
+      await expect.poll(highlighted).toBe('Green');
+
+      await userEvent.keyboard('{ArrowDown}');
+      await expect.poll(highlighted).toBe('Teal');
+    });
+
+    it('leaves the highlight where it was on a click at an option it cannot pick', async () => {
+      const field = await tabInto('checkbox-group', 'group');
+
+      await userEvent.keyboard('{ArrowDown}');
+      await expect.poll(highlighted).toBe('Green');
+
+      for (const name of ['Blue', 'Grey']) {
+        await userEvent.click(page.getByRole('checkbox', { name }), { force: true });
+        await settle(field.fixture);
+
+        expect(highlighted()).toBe('Green');
+      }
     });
   });
 
