@@ -147,7 +147,7 @@ Taken by `dropdown-field`, `autocomplete-field` and `date-field`.
 | `isPanelOpen`         | signal | `boolean`                 | `false`                  | Whether the panel is open                                         |
 | `togglePanel(isOpen)` | method |                           |                          | Opens or closes the panel                                         |
 
-There is no `isPanelOpen` input: the field closes its panel by itself, on a pick, an outside click or `Escape`. Reach `togglePanel` through a template reference or a `viewChild()`, as `focus()` is reached. Placement is in **Panels** in [Fields](fields.md).
+There is no `isPanelOpen` input: the field closes its panel by itself, on a pick, an outside click or `Escape`. `togglePanel` is reached through a template reference or a `viewChild()`, as `focus()` is. Placement is in **Panels** in [Fields](fields.md).
 
 ---
 
@@ -306,7 +306,11 @@ Its host carries the field's state as classes: `is-readonly`, `is-disabled`, `is
 | `highlighted` | `boolean`             | `false`                            | Set by the field. Do not bind it                                        |
 | `content`     | `TemplateRef`         | `undefined`                        | Set by the field. Do not bind it                                        |
 
-Content projected into the option becomes what the option renders. It must be **written inside** its field's element: anywhere inside, including a `@for` or a wrapper element, but not in a template declared elsewhere. Outside an option field it throws. `option` is the plain `FormidableOption` it hands the field, and `template` its projected content, or `undefined`.
+Content projected into the option becomes what the option renders.
+
+> **Warning:** An option must be written inside its field's element: anywhere inside, including a `@for` or a wrapper element, but not in a template declared elsewhere. Outside an option field it throws.
+
+`option` is the plain `FormidableOption` it hands the field, and `template` its projected content, or `undefined`.
 
 ### Field Errors
 
@@ -316,7 +320,7 @@ Content projected into the option becomes what the option renders. It must be **
 | :------- | :--------------------------- | :------ | :--------------------------------------------- |
 | `errors` | `readonly ValidationError[]` | `[]`    | The errors to render; `undefined` renders none |
 
-Renders each error as a message through `FORMIDABLE_ERROR_MESSAGE`, in an `aria-live="polite"` region, and decides nothing about when. Every decorator renders one for its field. Place one by hand for a group's or the form's errors, see **Messages** in [Validation](validation.md).
+Renders each error as a message through `FORMIDABLE_ERROR_MESSAGE`, in an `aria-live="polite"` region, and decides nothing about when. Every decorator renders one for its field. A group's or the form's errors need one placed by hand, see **Messages** in [Validation](validation.md).
 
 ---
 
@@ -420,7 +424,12 @@ Five exported abstract `@Directive()`s, with no selector, sit behind the fields.
 
 ### An Option Field
 
-Extend `BaseOptionListField`, or `BaseOptionField` to walk the list with a highlight, provide `FORMIDABLE_OPTION_FIELD`, and set `optionRole`. The protected members:
+1. Extend `BaseOptionListField`, or `BaseOptionField` to walk the list with a highlight.
+2. Provide `FORMIDABLE_OPTION_FIELD`.
+3. Set `optionRole`.
+4. Supply the members the table marks as supplied.
+
+The field merges, sorts and renders its options, and a highlight field walks them from the keyboard. The protected members:
 
 | Member                                    | On        | Role                                                                                                            |
 | :---------------------------------------- | :-------- | :-------------------------------------------------------------------------------------------------------------- |
@@ -440,7 +449,10 @@ Extend `BaseOptionListField`, or `BaseOptionField` to walk the list with a highl
 
 ### A Panel Field
 
-Implement `FormidablePanelField` and wire the protected members below. The base then keeps focus in the field while the panel is used, closes the panel on a click outside the field, and places it on open and on every scroll or resize while it is open.
+1. Implement `FormidablePanelField`.
+2. Wire the protected members in the table.
+
+The base then keeps focus in the field while the panel is used, closes the panel on a click outside the field, and places it on open and on every scroll or resize while it is open.
 
 | Member                          | Wire It                                                    |
 | :------------------------------ | :--------------------------------------------------------- |
@@ -459,4 +471,4 @@ Implement `FormidablePanelField` and wire the protected members below. The base 
 - [Fields](fields.md): options, panels, keyboard, dates and times, masking, focus
 - [Decoration](decoration.md): labels, adornments, prefixes, suffixes, hints, required marker
 - [Validation](validation.md): Angular's rules, Vest, Zod or none; messages and their reveal
-- [Custom Fields](custom-fields.md): building a field or an option of your own
+- [Custom Fields](custom-fields.md): building a custom field or option

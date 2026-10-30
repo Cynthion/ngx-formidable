@@ -21,7 +21,7 @@ A submit gate decides when the submit button can be pressed. Neither Signal Form
 
 ## The Example
 
-Every gate below extends one form. It edits a saved user, the **baseline**, which the component receives as an input. `UserFormModel`, `initialUserFormModel` and `userSchema` are the ones from [Getting Started](getting-started.md).
+Every gate extends one form. It edits a saved user, the **baseline**, which the component receives as an input. `UserFormModel`, `initialUserFormModel` and `userSchema` are the ones from [Getting Started](getting-started.md).
 
 ```ts
 // user.form.ts, beside UserFormModel, initialUserFormModel and userSchema
@@ -66,7 +66,7 @@ export class UserForm {
 ```
 
 - **A Baseline Resets The Model**: `linkedSignal` replaces the model whenever a new `user` arrives, such as the user a save returns. Unsaved edits go with it.
-- **Compare By Value**: an equality function of your own compares every key the fields write, and an array by its items. `===` on two models compares only their identity.
+- **Compare By Value**: an equality function compares every key the fields write, and an array by its items. `===` on two models compares only their identity.
 - **Compare A Date By Its Day**: a date field writes local midnight, see **Dates And Times** in [Fields](fields.md). A saved date that carries a time of day differs by `getTime()` even after an edit and its revert. A time compares by its time of day, for the same reason.
 
 ---
@@ -77,7 +77,7 @@ Each gate is a different `canSubmit`.
 
 ### None
 
-Bind nothing. A submit touches every field, so under the default `touched` reveal every message appears at once, and the user sees what is missing.
+Nothing is bound. A submit touches every field, so under the default `touched` reveal every message appears at once, and the user sees what is missing.
 
 ### Valid
 
@@ -85,7 +85,7 @@ Bind nothing. A submit touches every field, so under the default `touched` revea
 readonly canSubmit = computed(() => this.form().valid());
 ```
 
-**Pending Closes It**: `valid()` is `false` while a rule still runs, such as `validateHttp()`. To keep the button open meanwhile, gate on `!this.form().invalid()`, which stays `true` until a rule fails.
+> **Note:** Pending closes it. `valid()` is `false` while a rule still runs, such as `validateHttp()`. A gate on `!this.form().invalid()` keeps the button open meanwhile, because `invalid()` stays `false` until a rule fails.
 
 ### Dirty
 
@@ -113,14 +113,14 @@ The gate of [The Example](#the-example). The button opens only for a valid form 
 
 ## While Submitting
 
-`submitting()` is `true` while the `action`'s promise is pending, and a submit meanwhile does nothing. Add it to a gate to show the button closed meanwhile:
+`submitting()` is `true` while the `action`'s promise is pending, and a submit meanwhile does nothing. Added to a gate, it shows the button closed meanwhile:
 
 ```ts
 readonly canSubmit = computed(() => this.form().valid() && this.hasChanges() && !this.form().submitting());
 ```
 
-- **The Action Awaits The Save**: `submitting()` spans only what the `action` awaits. An action that emits an output, as in the example, resolves at once.
-- **A Parent That Saves Says So**: when the `action` hands the model to a parent, `submitting()` ends before the save starts, and Signal Forms refuses no second submit. The parent knows when its save runs, so an input of yours carries that to the gate, which is then the only guard:
+- **The Action Awaits The Save**: `submitting()` spans only what the `action` awaits. An action that emits an output, as in [The Example](#the-example), resolves at once.
+- **A Parent That Saves Says So**: when the `action` hands the model to a parent, `submitting()` ends before the save starts, and Signal Forms refuses no second submit. The parent knows when its save runs, so an input carries that to the gate, which is then the only guard:
 
 ```ts
 readonly saving = input(false);
@@ -131,9 +131,9 @@ readonly canSubmit = computed(() => this.form().valid() && this.hasChanges() && 
 
 ## A Closed Button And Accessibility
 
-A disabled button leaves the tab order and does not say why it is closed. Pair a closed gate with a hint, such as a line beside the button, or use no gate, whose submit reveals every message.
+A disabled button leaves the tab order and does not say why it is closed. A closed gate pairs with a hint, such as a line beside the button, or gives way to no gate, whose submit reveals every message.
 
-To keep the button focusable, bind `aria-disabled` instead of `disabled`. The button stays in the tab order and is announced as unavailable, but it still submits, so the `action` checks what Signal Forms does not:
+`aria-disabled` bound instead of `disabled` keeps the button focusable. The button stays in the tab order and is announced as unavailable, but it still submits, so the `action` checks what Signal Forms does not:
 
 ```html
 <button
@@ -154,8 +154,8 @@ readonly form = form(this.model, userSchema, {
 ```
 
 - **Signal Forms Checks The Rest**: it runs no `action` on an invalid form or during a submission, and the submit still reveals every message.
-- **Check The Baseline, Not The Gate**: `submitting()` is already `true` when the `action` starts, so an `action` that checks a `canSubmit()` reading it never saves.
-- **Style It Yourself**: `:disabled` no longer matches the button. Select `[aria-disabled='true']` instead.
+- **The Action Checks The Baseline, Not The Gate**: `submitting()` is already `true` when the `action` starts, so an `action` that checks a `canSubmit()` reading it never saves.
+- **Styling**: `:disabled` no longer matches the button. The selector is `[aria-disabled='true']` instead.
 
 ---
 

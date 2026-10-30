@@ -76,7 +76,7 @@ export const DOC_PAGES: readonly DocPage[] = [
     slug: 'theming',
     title: 'Theming',
     kind: 'Guide',
-    purpose: 'The default theme, how theming works, and how to find your own',
+    purpose: 'The default theme, how theming works, and how to find a theme',
     markdown: theming
   },
   {
@@ -90,7 +90,7 @@ export const DOC_PAGES: readonly DocPage[] = [
     slug: 'custom-fields',
     title: 'Custom Fields',
     kind: 'Guide',
-    purpose: 'Building a field or an option of your own',
+    purpose: 'Building a custom field or option',
     markdown: customFields
   },
   {

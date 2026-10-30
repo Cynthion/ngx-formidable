@@ -189,7 +189,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     class: 'declared',
     seed: true,
     description:
-      'Thickness of field borders. Also the default for the group border, the panel outline, the focus ring, the toggle track and the slider track. See [Borderless Themes](theming.md#4-five-things-that-will-catch-you-out).'
+      'Thickness of field borders. Also the default for the group border, the panel outline, the focus ring, the toggle track and the slider track. See [Borderless Themes](theming.md#4-avoid-five-pitfalls).'
   },
   {
     name: '--formidable-field-focus-ring-width',

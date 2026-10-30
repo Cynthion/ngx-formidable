@@ -2,15 +2,15 @@
 
 The library's eleven fields do not cover everything, so `BaseField` is the extension point. A field built on it binds to every forms API, and is decorated, themed and made accessible exactly like a built-in one: nothing in the library knows the difference.
 
-The worked example below is `example-counter-field` in the portal, quoted as it ships.
+The worked example is `example-counter-field` in the portal, quoted as it ships.
 
-## What You Get For Free
+## What A Custom Field Inherits
 
-Extend `BaseField` and provide the component as `FORMIDABLE_FIELD`, and it gains:
+A component that extends `BaseField` and is provided as `FORMIDABLE_FIELD` gains:
 
 | Capability                              | Comes From                                                                     |
 | :-------------------------------------- | :----------------------------------------------------------------------------- |
-| Binding Under Every Forms API           | `FormValueControl`, which `BaseField` implements around your `value` model     |
+| Binding Under Every Forms API           | `FormValueControl`, which `BaseField` implements around the field's `value`    |
 | The State Each Forms API Holds          | The inputs `BaseField` declares: `disabled`, `readonly`, `required`, `errors`… |
 | Messages And Their Reveal               | `showErrors` and `shownErrors`, which the decorator renders                    |
 | Label, Adornment, Prefix, Suffix, Hints | The surrounding `formidable-field-decorator`                                   |
@@ -24,13 +24,19 @@ Extend `BaseField` and provide the component as `FORMIDABLE_FIELD`, and it gains
 
 ## The Contract
 
-Extend `BaseField<T>`, where `T` is the field's value type, and provide it as `FORMIDABLE_FIELD`, which is what lets the decorator find it. No value accessor: every forms API binds a `FormValueControl` through its `value` model.
+1. Extend `BaseField<T>`, where `T` is the field's value type.
+2. Provide the component as `FORMIDABLE_FIELD`, which is what lets the decorator find it:
 
-```ts
-providers: [{ provide: FORMIDABLE_FIELD, useExisting: MyField }];
-```
+   ```ts
+   providers: [{ provide: FORMIDABLE_FIELD, useExisting: MyField }];
+   ```
 
-Then supply the abstract members:
+3. Supply the abstract members in the first table.
+4. Override the members in the second table where they apply.
+
+The field binds under every forms API with no value accessor, because every forms API binds a `FormValueControl` through its `value` model.
+
+The abstract members:
 
 | Member                       | Supply                                                                                            |
 | :--------------------------- | :------------------------------------------------------------------------------------------------ |
@@ -41,7 +47,7 @@ Then supply the abstract members:
 | `registeredKeys`             | The keys that reach `keyboardCallback`. `[]` for none                                             |
 | `keyboardCallback`           | Handles those keys and returns whether it acted; only such a key is `preventDefault`ed. Or `null` |
 
-And override these where they apply:
+The members to override where they apply:
 
 | Member                | Override When                                                                                   |
 | :-------------------- | :---------------------------------------------------------------------------------------------- |
@@ -53,8 +59,8 @@ And override these where they apply:
 
 Three rules keep a field honest under every forms API:
 
-- **Only The User Writes The Model**: hand a user's edit to the protected `setValue(next)`, which writes nothing for an edit equal to the model. Never write `value` for any other reason, such as to clamp, to re-mask or to correct what the forms API gave you.
-- **Report Focus Through `onFocusChange`**: bind it to the focus and blur of whatever takes focus. Where focus can move between elements of the field's own, bind it to `focusin` and `focusout` on `fieldRef` and pass the event, so such a move is no blur.
+- **Only The User Writes The Model**: a user's edit goes to the protected `setValue(next)`, which writes nothing for an edit equal to the model. `value` is written for no other reason, such as to clamp, to re-mask or to correct what the forms API handed the field.
+- **Focus Is Reported Through `onFocusChange`**: it is bound to the focus and blur of whatever takes focus. Where focus can move between elements of the field's own, it is bound to `focusin` and `focusout` on `fieldRef` with the event passed, so such a move is no blur.
 - **Edit Nothing While Readonly Or Disabled**: a public method that edits returns early while the field is either. The protected `canEdit` signal is false for both.
 
 ---
@@ -258,7 +264,7 @@ A rule on `pets` reports on it like on any other field: nothing about the rule k
 
 ## Custom Options
 
-An option is a component too. Extend `FieldOption`, provide it as `FORMIDABLE_OPTION`, and project whatever content the option should render:
+An option is a component too. It extends `FieldOption`, is provided as `FORMIDABLE_OPTION`, and projects whatever content the option renders:
 
 ```ts
 @Component({
@@ -295,11 +301,11 @@ The projected content goes in an `ng-template`, which is what the parent field r
 
 Only the `ng-template` is rendered, in the option's place inside the field. The component's own host element never reaches the DOM, so nothing outside that template is drawn or clickable.
 
-What `FORMIDABLE_OPTION` provides is `FormidableOptionSource`: one `option` computed holding the plain `FormidableOption` the owning field reads off the component. `FieldOption` implements it, so extending it is all that is needed and a subclass's own inputs are for its template. Writing an option component from scratch means providing `option` yourself. Either way what a field receives is plain data: the same shape its `options` input takes.
+What `FORMIDABLE_OPTION` provides is `FormidableOptionSource`: one `option` computed holding the plain `FormidableOption` the owning field reads off the component. `FieldOption` implements it, so extending it is all that is needed and a subclass's own inputs are for its template. An option component written from scratch provides `option` itself. Either way what a field receives is plain data: the same shape its `options` input takes.
 
 The option's ARIA role is not its own to choose: it comes from the parent field, so an option inside a listbox is an `option` and one inside a radio group is a `radio`. `layout` is a look, not a role.
 
-A field that hosts options of its own implements `FormidableOptionField` and provides `FORMIDABLE_OPTION_FIELD`; if it walks its list with a highlight, extend `BaseOptionField` instead of `BaseField` and the highlight machinery comes with it. Both are catalogued in [Components](components.md).
+A field that hosts options of its own implements `FormidableOptionField` and provides `FORMIDABLE_OPTION_FIELD`; one that walks its list with a highlight extends `BaseOptionField` instead of `BaseField`, and the highlight machinery comes with it. Both are catalogued in [Components](components.md).
 
 ---
 
@@ -308,4 +314,4 @@ A field that hosts options of its own implements `FormidableOptionField` and pro
 - [Components](components.md): every public component, directive, token and type
 - [Forms](forms.md): how the fields meet Signal Forms, reactive forms and template-driven forms
 - [Fields](fields.md): options, panels, keyboard, dates and times, masking, focus
-- [Theming](theming.md): the default theme, how theming works, and how to find your own
+- [Theming](theming.md): the default theme, how theming works, and how to find a theme

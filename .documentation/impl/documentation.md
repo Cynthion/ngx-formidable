@@ -50,6 +50,12 @@ A document belongs to exactly one bucket. When two overlap, one links to the oth
 - **Content**: A **guide** teaches a topic; a **reference** lists what it accepts. Code examples compile against the published package.
 - **Related Section**: May end with a `## Related` section that links other relevant user documents.
 - **Links Between User Documents**: a `user/` document names another by its title, and links no `tech/` or `impl/` document.
+- **Use Neutral, Task-Focused Language**: Write in the present tense without directly addressing the reader. Focus on tasks, features, and system behavior.
+- **UI Labels**: Name UI elements in bold, exactly as the UI labels them. A path through the UI uses `>`.
+- **Steps**: Numbered imperative steps, one action per step, at most nine per list. The resulting state follows the last step.
+- **User Scope**: Describe what the studio UI or library API shows and what it supports. No service names or internal architecture. For a third-party tool, document only what this application sets up and link the tool's own documentation for the rest.
+- **Self-Contained Sections**: Each `##` section names its subject instead of pointing to "above" or "this page".
+- **Notes**: Use a blockquote with a bold label, `> **Note:**` or `> **Warning:**`.
 
 ## Link Notation
 

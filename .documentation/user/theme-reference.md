@@ -1,6 +1,6 @@
 # Theme Reference
 
-Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these you actually need, is in [Theming](theming.md); complete schemes to start from are in the Studio, which [Studio](studio.md) covers.
+Every overridable `--formidable-*` custom property, grouped by what it paints. How theming works, and which of these a theme needs, is in [Theming](theming.md); complete schemes to start from are in the Studio, which [Studio](studio.md) covers.
 
 ---
 
@@ -40,43 +40,43 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 
 ## Field Dimensions
 
-| Variable                                         | Description                                                                                                                                                                                                             |
-| :----------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--formidable-field-before-margin-bottom`        | Vertical margin below each field container.                                                                                                                                                                             |
-| `--formidable-border-radius`                     | The library's base corner radius. Everything rounded that is not a field box falls back to it.                                                                                                                          |
-| `--formidable-field-border-thickness`            | Thickness of field borders. Also the default for the group border, the panel outline, the focus ring, the toggle track and the slider track. See [Borderless Themes](theming.md#4-five-things-that-will-catch-you-out). |
-| `--formidable-field-focus-ring-width`            | Spread of the focus ring, on fields and on groups alike. Follows the field's border thickness unless set.                                                                                                               |
-| `--formidable-field-border-radius`               | Border-radius every corner of a field falls back to. See [Per-Corner Radius](#per-corner-radius).                                                                                                                       |
-| `--formidable-field-border-start-start-radius`   | A field's top-left corner alone. Falls back to `--formidable-field-border-radius`.                                                                                                                                      |
-| `--formidable-field-border-start-end-radius`     | Its top-right corner alone.                                                                                                                                                                                             |
-| `--formidable-field-border-end-end-radius`       | Its bottom-right corner alone.                                                                                                                                                                                          |
-| `--formidable-field-border-end-start-radius`     | Its bottom-left corner alone.                                                                                                                                                                                           |
-| `--formidable-field-underline-thickness`         | Extra line painted inside a field's bottom edge. `0` paints none. See [Underline](#underline).                                                                                                                          |
-| `--formidable-field-underline-thickness-focus`   | Underline thickness while the field is focused.                                                                                                                                                                         |
-| `--formidable-field-underline-thickness-invalid` | Underline thickness while the field is invalid. Outranks the focused thickness.                                                                                                                                         |
-| `--formidable-field-group-border-thickness`      | Thickness of field group borders.                                                                                                                                                                                       |
-| `--formidable-field-group-border-radius`         | Border-radius for field group corners.                                                                                                                                                                                  |
-| `--formidable-label-height`                      | Derived: height of the label text line box.                                                                                                                                                                             |
-| `--formidable-field-height`                      | Default height for single-line fields.                                                                                                                                                                                  |
-| `--formidable-field-padding-x`                   | Horizontal padding of a field: where its value, and a projected prefix's text, start.                                                                                                                                   |
-| `--formidable-field-toggle-size`                 | Size of the toggle a select, dropdown or date field draws inside its own box.                                                                                                                                           |
-| `--formidable-field-toggle-inset`                | How much of a field's right edge that toggle claims. Raised by the decorator for the fields that have one.                                                                                                              |
-| `--formidable-field-suffix-toggle-gap`           | Space between that toggle and a suffix, which sits between it and the value.                                                                                                                                            |
-| `--formidable-field-inner-height`                | Derived: height inside a field's borders.                                                                                                                                                                               |
-| `--formidable-field-value-height`                | Derived: height of a field value's text line box.                                                                                                                                                                       |
-| `--formidable-label-floating-height`             | Derived: height of a floating label's text line box.                                                                                                                                                                    |
-| `--formidable-label-inside-slack`                | Derived: space above and below the centered label-plus-value block of a field with an inside label. Clamped at `0px`, so a field below the `44px` floor overflows instead of inverting.                                 |
-| `--formidable-label-inside-value-top`            | Derived: offset of the value's text line box from the field's inner top, with an inside label.                                                                                                                          |
-| `--formidable-field-value-centered-top`          | Derived: offset of the value's text line box when it is centered in the field's inner height on its own.                                                                                                                |
-| `--formidable-label-floating-offset`             | Vertical offset for a floating label, at the top of the centered label-plus-value block.                                                                                                                                |
-| `--formidable-label-resting-offset`              | Vertical offset for a resting label, centered in the field's inner height like a placeholder.                                                                                                                           |
-| `--formidable-label-border-offset`               | Vertical offset for a `border` label, so its text line box straddles the field's top border.                                                                                                                            |
-| `--formidable-label-border-gap`                  | How far a `border` label's border-hiding band reaches either side of its text.                                                                                                                                          |
-| `--formidable-label-border-band-bleed`           | How far that band outgrows the border above and below, so pixel rounding leaves no hairline showing.                                                                                                                    |
-| `--formidable-label-border-band-reach`           | How much further that band reaches upwards while the field is at rest.                                                                                                                                                  |
-| `--formidable-label-border-band-reach-focus`     | What that reach becomes while the field is focused, so the band covers the ring too. Follows the ring's width unless set.                                                                                               |
-| `--formidable-label-required-marker`             | The `content` string suffixed to a required field's label: `'*'`, or a word such as `' (required)'`.                                                                                                                    |
-| `--formidable-field-group-option-padding`        | Padding of options within a field group.                                                                                                                                                                                |
+| Variable                                         | Description                                                                                                                                                                                             |
+| :----------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--formidable-field-before-margin-bottom`        | Vertical margin below each field container.                                                                                                                                                             |
+| `--formidable-border-radius`                     | The library's base corner radius. Everything rounded that is not a field box falls back to it.                                                                                                          |
+| `--formidable-field-border-thickness`            | Thickness of field borders. Also the default for the group border, the panel outline, the focus ring, the toggle track and the slider track. See [Borderless Themes](theming.md#4-avoid-five-pitfalls). |
+| `--formidable-field-focus-ring-width`            | Spread of the focus ring, on fields and on groups alike. Follows the field's border thickness unless set.                                                                                               |
+| `--formidable-field-border-radius`               | Border-radius every corner of a field falls back to. See [Per-Corner Radius](#per-corner-radius).                                                                                                       |
+| `--formidable-field-border-start-start-radius`   | A field's top-left corner alone. Falls back to `--formidable-field-border-radius`.                                                                                                                      |
+| `--formidable-field-border-start-end-radius`     | Its top-right corner alone.                                                                                                                                                                             |
+| `--formidable-field-border-end-end-radius`       | Its bottom-right corner alone.                                                                                                                                                                          |
+| `--formidable-field-border-end-start-radius`     | Its bottom-left corner alone.                                                                                                                                                                           |
+| `--formidable-field-underline-thickness`         | Extra line painted inside a field's bottom edge. `0` paints none. See [Underline](#underline).                                                                                                          |
+| `--formidable-field-underline-thickness-focus`   | Underline thickness while the field is focused.                                                                                                                                                         |
+| `--formidable-field-underline-thickness-invalid` | Underline thickness while the field is invalid. Outranks the focused thickness.                                                                                                                         |
+| `--formidable-field-group-border-thickness`      | Thickness of field group borders.                                                                                                                                                                       |
+| `--formidable-field-group-border-radius`         | Border-radius for field group corners.                                                                                                                                                                  |
+| `--formidable-label-height`                      | Derived: height of the label text line box.                                                                                                                                                             |
+| `--formidable-field-height`                      | Default height for single-line fields.                                                                                                                                                                  |
+| `--formidable-field-padding-x`                   | Horizontal padding of a field: where its value, and a projected prefix's text, start.                                                                                                                   |
+| `--formidable-field-toggle-size`                 | Size of the toggle a select, dropdown or date field draws inside its own box.                                                                                                                           |
+| `--formidable-field-toggle-inset`                | How much of a field's right edge that toggle claims. Raised by the decorator for the fields that have one.                                                                                              |
+| `--formidable-field-suffix-toggle-gap`           | Space between that toggle and a suffix, which sits between it and the value.                                                                                                                            |
+| `--formidable-field-inner-height`                | Derived: height inside a field's borders.                                                                                                                                                               |
+| `--formidable-field-value-height`                | Derived: height of a field value's text line box.                                                                                                                                                       |
+| `--formidable-label-floating-height`             | Derived: height of a floating label's text line box.                                                                                                                                                    |
+| `--formidable-label-inside-slack`                | Derived: space above and below the centered label-plus-value block of a field with an inside label. Clamped at `0px`, so a field below the `44px` floor overflows instead of inverting.                 |
+| `--formidable-label-inside-value-top`            | Derived: offset of the value's text line box from the field's inner top, with an inside label.                                                                                                          |
+| `--formidable-field-value-centered-top`          | Derived: offset of the value's text line box when it is centered in the field's inner height on its own.                                                                                                |
+| `--formidable-label-floating-offset`             | Vertical offset for a floating label, at the top of the centered label-plus-value block.                                                                                                                |
+| `--formidable-label-resting-offset`              | Vertical offset for a resting label, centered in the field's inner height like a placeholder.                                                                                                           |
+| `--formidable-label-border-offset`               | Vertical offset for a `border` label, so its text line box straddles the field's top border.                                                                                                            |
+| `--formidable-label-border-gap`                  | How far a `border` label's border-hiding band reaches either side of its text.                                                                                                                          |
+| `--formidable-label-border-band-bleed`           | How far that band outgrows the border above and below, so pixel rounding leaves no hairline showing.                                                                                                    |
+| `--formidable-label-border-band-reach`           | How much further that band reaches upwards while the field is at rest.                                                                                                                                  |
+| `--formidable-label-border-band-reach-focus`     | What that reach becomes while the field is focused, so the band covers the ring too. Follows the ring's width unless set.                                                                               |
+| `--formidable-label-required-marker`             | The `content` string suffixed to a required field's label: `'*'`, or a word such as `' (required)'`.                                                                                                    |
+| `--formidable-field-group-option-padding`        | Padding of options within a field group.                                                                                                                                                                |
 
 ---
 
@@ -289,7 +289,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-panel-z-index` | z-index a field rises to while an anchored panel is open. |
 | `--formidable-sheet-z-index` | z-index a field rises to while a `sheet` panel is open.   |
 
-**Your Own Chrome Above An Open Panel**: put it one above the higher of the two rather than picking a number, so the two cannot drift apart:
+**App Chrome Above An Open Panel**: one above the higher of the two, rather than a picked number, keeps the two from drifting apart:
 
 ```scss
 .app-header {
@@ -297,7 +297,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 }
 ```
 
-Weigh it first: a header that wins covers an open dropdown scrolled underneath it, and a footer that wins covers the bottom edge of a `sheet`. The defaults are the other way round because a panel the user just opened is usually the thing they need to see.
+> **Warning:** A header that wins covers an open dropdown scrolled underneath it, and a footer that wins covers the bottom edge of a `sheet`. The defaults are the other way round because a panel the user just opened is usually the thing the user needs to see.
 
 ---
 
@@ -361,7 +361,7 @@ Every corner of a field falls back to `--formidable-field-border-radius`, and ea
 
 They shape the field box and nothing else. Everything else that is rounded (the toggle, the slider, the panels) falls back to `--formidable-border-radius` instead, which is what to override to round the whole library at once. A field group takes its shape from `--formidable-field-group-border-radius`, which accepts the whole `border-radius` shorthand.
 
-While a dropdown, autocomplete or date panel is open, it adopts the two corners of the field it sits against: opened below, its top corners take the field's bottom ones; flipped above, its bottom corners take the field's top ones. Its far side keeps `--formidable-panel-border-radius`. The field never reshapes itself: its corners are what you declared, panel or no panel. A `sheet` is the exception: it sits against the screen, not the field, so it keeps its own radius on top and squares off where it meets the edge.
+While a dropdown, autocomplete or date panel is open, it adopts the two corners of the field it sits against: opened below, its top corners take the field's bottom ones; flipped above, its bottom corners take the field's top ones. Its far side keeps `--formidable-panel-border-radius`. The field never reshapes itself: its corners are the declared ones, panel or no panel. A `sheet` is the exception: it sits against the screen, not the field, so it keeps its own radius on top and squares off where it meets the edge.
 
 ---
 
@@ -380,13 +380,13 @@ A field can carry an extra line inside its bottom edge, thickening on focus and 
 
 The thickness is `0` by default, so nothing is painted until a theme asks for it. The color follows `--formidable-color-field-border` through every state; name `--formidable-color-field-underline` and its `-focus` / `-invalid` variants only where the two should differ. Field groups never take an underline: a group is a tall multi-row box, and a line across its bottom reads as a divider between its options.
 
-Dropping the field border to `0px` erases five other things drawn by it. See [Borderless Themes](theming.md#4-five-things-that-will-catch-you-out) for the companions to restore.
+Dropping the field border to `0px` erases five other things drawn by it. See [Borderless Themes](theming.md#4-avoid-five-pitfalls) for the companions to restore.
 
 ---
 
 ## Pikaday Overrides
 
-The date field's calendar is rendered by Pikaday, which brings its own class names. Style it by overriding those directly:
+The date field's calendar is rendered by [Pikaday](https://github.com/Pikaday/Pikaday), which brings its own class names. A stylesheet overrides those directly:
 
 ```scss
 .pika-lendar {
@@ -398,5 +398,5 @@ The date field's calendar is rendered by Pikaday, which brings its own class nam
 
 ## Related
 
-- [Theming](theming.md): the default theme, how theming works, and how to find your own
+- [Theming](theming.md): the default theme, how theming works, and how to find a theme
 - [Studio](studio.md): build a theme and a form in the browser, and take both away
