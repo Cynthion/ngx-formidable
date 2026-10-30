@@ -16,6 +16,35 @@ External:
 
 ## Features
 
+- **Clear Button**: `research` how the library can render a field's clear button itself, so a consumer no longer wires one through `formidableFieldSuffix` per **Actions** in [`user/decoration.md`](../user/decoration.md#actions). EnerQi wires it on every text, date, time and option field with its `cmp-ui-field-clear`, on the branch `feature/form-field-suffixes`, and repeats three bindings per field. The result is a recommended API and answers to the open questions below, before any code.
+  - **Why The Library**: each binding needs something only the field knows:
+    - The empty value: `''` for a text field, `null` for the others.
+    - The autocomplete's `filter`, which holds text typed without a pick.
+    - The uncommitted text of a date or time field, which is invisible from outside, so EnerQi leaves it to the keyboard.
+    - Whether the field is editable, a guard a template omits silently.
+  - **The Field Owns The Clear**: Move `clear()` from `BaseDateTimeField` to `BaseField`, so every field empties itself as the user's edit, where EnerQi writes the model from outside. Each field supplies its empty value. The autocomplete also empties `filter` and reports it through `filterChange`, which EnerQi's `cmp-ui-search` emits by hand.
+  - **The Field Says When**: Add a `canClear` signal from `canEdit()` and `isFieldFilled()`. The autocomplete already counts typed text in `isFieldFilled`, and the date and time fields add their uncommitted text.
+  - **Optional On The Contract**: `clear` and `canClear` are optional on `FormidableField`, as `hasInFieldToggle` is, so a custom field keeps compiling and renders no button. A toggle holds a boolean and a `vertical` layout renders no suffix, so neither offers one.
+  - **The Decorator Renders It**: A library internal component `formidable-field-clear`, beside `formidable-field-icon`, reads `projectedField()`. EnerQi rejected that read as a consumer, but inside the library it is the seam the decorator already uses.
+    - It sits in the suffix wrapper after the `ng-content`, so a consumer's suffix stays.
+    - `hasSuffix` reads only `projectedSuffix()` today and must count the button, or the wrapper stays hidden.
+    - The decorator's `ResizeObserver` already re-insets the value and leaves a panel toggle in place.
+  - **Opt-In**: A `clearable` key in `FormidableDefaults`, off by default, and an input that wins over it, so an existing form changes nothing.
+  - **Icon**: A `fieldClear` key in `FormidableIcons`. `CHEVRONS` in `field-icon.ts` holds one chevron's points per key, so the default cross needs that table widened.
+  - **Accessible Name**: EnerQi names the button "Clear Last Name", so each is unique on a page. The library has no translated text for it, and the label is projected content. Word order differs per language, German being `#label# leeren`, so joining two ids with `aria-labelledby` is not enough. A candidate is a function in `FormidableDefaults` that takes the label text.
+  - **Visibility**: EnerQi hides the button on a filled field at rest and shows it on hover or focus, which keeps a filled form free of crosses. Whether that is the library's default or a choice is open.
+    - `is-focused` follows the field only, and the button sits outside it, so a rule on that class hides the button when Tab reaches it. Use `:focus-within` on the decorator's host.
+    - Limit hover to `@media (hover: hover)`, so a touch device shows no stuck button.
+    - Hide by `visibility`: the slot keeps its width, so nothing shifts on focus, and a hidden button leaves the tab order, so Shift+Tab from the next field lands on the field.
+    - Tab from a field to its button blurs the field, so a date commits and `touch` fires first.
+  - **The Button**: `type="button"`, `(mousedown)="$event.preventDefault()"`, and a 24px square around the 16px icon, so the target is not the glyph alone.
+  - **Keep The Manual Pattern**: `cmp-ui-search` swaps its clear button for a spinner while loading, so **Actions** stays valid, and its sentence that the library ships no such components changes.
+  - **Open Questions**:
+    - Does clearing a required field show its error at once?
+    - Should a clear keep an open panel open? Today any click outside the field's own box closes it.
+    - Does a consumer need a `cleared` output, as `cmp-ui-search` has?
+    - What does a field without a label name its button?
+  - **Proof Of Fit**: After a release, EnerQi deletes `cmp-ui-field-clear` and its bindings, and the clear steps of its `customer.spec.ts` pass unchanged.
 - [ ] Modernize Flyout and Backdrop Layering:
   - [MDN `::backdrop`](https://developer.mozilla.org/en-US/docs/Web/CSS/::backdrop)
   - [CSS Anchor Positioning](https://developer.chrome.com/blog/tether-elements-to-each-other-with-css-anchor-positioning?hl=de)
