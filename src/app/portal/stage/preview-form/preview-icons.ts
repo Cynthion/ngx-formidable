@@ -41,7 +41,8 @@ export const SPARK_SVG = `
   <path d="M8.5 15.5 6 18" />
 </svg>`;
 
-// Deliberately not chevrons, so switching the App Defaults' icons shows on every toggle and month arrow.
+// Deliberately not the library's own, so switching the App Defaults' icons shows on every toggle, month arrow
+// and clear button.
 export const PLUS_SVG = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${STROKE}>
   <path d="M5 12h14" />
@@ -84,6 +85,13 @@ export const ARROW_RIGHT_SVG = `
   <path d="m12 5 7 7-7 7" />
 </svg>`;
 
+export const ERASER_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ${STROKE}>
+  <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21" />
+  <path d="M22 21H7" />
+  <path d="m5 11 9 9" />
+</svg>`;
+
 const icon = (svg: string) => ({ component: ExampleIcon, inputs: { svg, size: 20 } });
 
 /** What the App Defaults' `Custom` icons provide, the way a consumer's `provideNgxFormidable({ icons })` does. */
@@ -93,5 +101,6 @@ export const STUDIO_ICONS: FormidableIcons = {
   dateFieldToggle: icon(CALENDAR_PLUS_SVG),
   dateFieldToggleOpen: icon(CALENDAR_MINUS_SVG),
   dateFieldPanelPrevious: icon(ARROW_LEFT_SVG),
-  dateFieldPanelNext: icon(ARROW_RIGHT_SVG)
+  dateFieldPanelNext: icon(ARROW_RIGHT_SVG),
+  fieldClear: icon(ERASER_SVG)
 };

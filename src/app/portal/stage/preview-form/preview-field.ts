@@ -14,6 +14,7 @@ import {
   FieldPrefix,
   FieldSuffix,
   FieldToggleIcon,
+  FORMIDABLE_FIELD,
   FormidableActionOption,
   FormidableOption,
   InputField,
@@ -32,7 +33,7 @@ import { describeFieldSettings } from '../../helpers/field-summary';
 import { filterOptions } from '../../helpers/fuzzy.helpers';
 import { AccessibilityReadout } from '../accessibility/accessibility-readout';
 import { CALENDAR_SVG, CHEVRONS_UP_DOWN_SVG, MARKER_SVG, SPARK_SVG } from './preview-icons';
-import { emptyValueOf, FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabilities';
+import { FIELD_CAPABILITIES, FIELD_KIND_LABELS } from '../../model/field-capabilities';
 import { PortalFieldSpec, PortalFormOptions, PortalOptionSpec } from '../../model/field-spec.model';
 import { localeOf } from '../../model/locales';
 
@@ -202,19 +203,13 @@ export class PreviewField {
   protected readonly thumbLabelFn = computed(() => this.formatter(this.spec().thumbLabelFormat));
   protected readonly tickLabelFn = computed(() => this.formatter(this.spec().tickLabelFormat));
 
-  /** An autocomplete's filter text, bound two-way: the consumer supplies the filtered list, and its clear empties it. */
+  /** An autocomplete's filter text, bound two-way: the consumer supplies the filtered list, and a clear empties it. */
   protected readonly filterText = signal('');
 
-  // A date or time field's own clear, which also drops text typed but not committed.
-  private readonly dateField = viewChild(DateField);
-  private readonly timeField = viewChild(TimeField);
+  private readonly field = viewChild(FORMIDABLE_FIELD);
 
-  /** A clear writes nothing the user could not: none for a readonly or disabled field. */
-  protected readonly canClear = computed(() => {
-    const state = this.fieldTree()();
-
-    return !state.readonly() && !state.disabled();
-  });
+  /** The field says when there is something the user could clear. */
+  protected readonly canClear = computed(() => this.field()?.canClear?.() ?? false);
 
   /**
    * The narrowed list the autocomplete renders, with the match runs its projected option marks.
@@ -231,16 +226,9 @@ export class PreviewField {
   // would drop whatever it found beyond a substring of the label: a typo, a subtitle.
   protected readonly matchesEveryFilter = (): boolean => true;
 
-  /**
-   * The suffix's clear button: the value back to its empty value, and an autocomplete's typed text with it. A
-   * date or time field clears itself, typed text included.
-   */
+  /** The suffix's own clear button, the manual pattern: the field empties itself, typed text included. */
   protected clear(): void {
-    const dateTimeField = this.dateField() ?? this.timeField();
-
-    if (dateTimeField) dateTimeField.clear();
-    else this.fieldTree()().value.set(emptyValueOf(this.spec()));
-    this.filterText.set('');
+    this.field()?.clear?.();
   }
 
   protected onFocus(): void {

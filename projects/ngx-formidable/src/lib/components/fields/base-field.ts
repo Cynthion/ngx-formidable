@@ -73,6 +73,10 @@ export abstract class BaseField<T = string | null>
   /** Whether focus is inside the field, which the decorator's own focus state follows. */
   public readonly isFieldFocused = signal(false);
 
+  /**
+   * Whether the field shows something of the user's: its value, by default. Overridden by a field that also
+   * shows text that is not a value yet. A clear button shows only while it is true.
+   */
   protected readonly isFieldFilled = computed(() => BaseField.isFilled(this.value()));
 
   // Element injectors follow the declaring template, so a projected field really does see its decorator.
@@ -272,6 +276,16 @@ export abstract class BaseField<T = string | null>
   /** Emits as the last act of a blur — the user leaving the field — which marks it touched. */
   public readonly touch = output<void>();
 
+  private readonly defaultClearable = inject(FORMIDABLE_DEFAULTS).clearable ?? false;
+
+  /**
+   * Shows a clear button in the decorator's suffix while `canClear`. Unset or `undefined`, the app default
+   * applies. No effect on the toggle, the slider and the two groups, which have nothing to empty to.
+   */
+  public readonly clearable = input(this.defaultClearable, {
+    transform: (clearable: unknown) => (clearable === undefined ? this.defaultClearable : booleanAttribute(clearable))
+  });
+
   private readonly defaultRevealOn = inject(FORMIDABLE_DEFAULTS).revealOn ?? 'touched';
 
   // A pending validator has not reported yet, so the forms API holds none of its errors: keeping the last
@@ -303,6 +317,26 @@ export abstract class BaseField<T = string | null>
 
   /** Whether the user can edit the field: neither readonly nor disabled. Every mutator and edit guard reads it. */
   protected readonly canEdit = computed(() => !this.readonly() && !this.disabled());
+
+  /**
+   * What `clear()` empties the field to. Unset, the field cannot be cleared and offers no clear button, as
+   * the toggle, the slider and the two groups do. A custom field sets it to become clearable.
+   */
+  protected readonly emptyValue?: T;
+
+  /**
+   * Whether the user could empty the field now: it has an empty value, is editable, and holds a value or typed
+   * text. Bind a clear button of your own to it, where `clearable` is not enough.
+   */
+  public readonly canClear = computed(() => this.emptyValue !== undefined && this.canEdit() && this.isFieldFilled());
+
+  /**
+   * Empties the field as the user's edit, so a model that moves is dirtied. Moves no focus. No-op while
+   * readonly or disabled, or for a field without an empty value.
+   */
+  public clear(): void {
+    if (this.emptyValue !== undefined && this.canEdit()) this.setValue(this.emptyValue);
+  }
 
   get fieldId(): string {
     return this.id;

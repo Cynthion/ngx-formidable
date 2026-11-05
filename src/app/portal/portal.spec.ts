@@ -165,8 +165,8 @@ describe('portal', () => {
     // 02:00 is outside the opening hours the group rule states; neither field is wrong on its own. Typed over
     // the time the way the field takes typing: a keyboard focus entry selects it.
     await userEvent.click(page.getByRole('textbox', { name: 'Time' }));
-    await userEvent.tab({ shift: true });
     await userEvent.tab();
+    await userEvent.tab({ shift: true });
     await userEvent.keyboard('0200');
     await userEvent.keyboard('{Enter}');
 
@@ -632,6 +632,9 @@ describe('portal', () => {
     await openStudio();
 
     await userEvent.click(page.getByRole('textbox', { name: 'Name On The Order' }));
+    await userEvent.tab();
+    await expect.element(page.getByRole('button', { name: 'Clear Name On The Order' })).toHaveFocus();
+
     await userEvent.tab();
     await expect.element(page.getByRole('spinbutton', { name: 'How Many' })).toHaveFocus();
 

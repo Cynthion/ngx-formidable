@@ -6,11 +6,11 @@ How a field, the decorator around it and its error messages are wired together. 
 
 ## The Three Parties
 
-| Party            | Owns                                                                                    |
-| :--------------- | :-------------------------------------------------------------------------------------- |
-| `FieldDecorator` | The label, its adornment, the prefix and suffix wrappers, the hint row, the errors slot |
-| The field        | Its own box, its value, its panel, and the ARIA ids for what lives inside that box      |
-| `FieldErrors`    | The message list and its live region: what to render, never when                        |
+| Party            | Owns                                                                                                      |
+| :--------------- | :-------------------------------------------------------------------------------------------------------- |
+| `FieldDecorator` | The label, its adornment, the prefix and suffix wrappers, the hint row, the errors slot, the clear button |
+| The field        | Its own box, its value, its panel, and the ARIA ids for what lives inside that box                        |
+| `FieldErrors`    | The message list and its live region: what to render, never when                                          |
 
 None of them injects the others as a hard dependency. A field used without a decorator works; the decorator without a field renders empty; `FieldErrors` without either renders what it is given.
 
@@ -66,11 +66,13 @@ The decorator renders nothing of its own. `labelState` is a getter over the proj
 
 `OnPush` works because every value the decorator reads is a signal, and the read itself is what marks this view:
 
-| Read                                              | Source                       |
-| :------------------------------------------------ | :--------------------------- |
-| The projected field, label, adornments            | `contentChild()`             |
-| `canLabelRest`, `isPanelOpen`, `hasInFieldToggle` | signals on `FormidableField` |
-| `showErrors`, `shownErrors`                       | signals on `FormidableField` |
+| Read                                              | Source                                                 |
+| :------------------------------------------------ | :----------------------------------------------------- |
+| The projected field, label, adornments            | `contentChild()`                                       |
+| `canLabelRest`, `isPanelOpen`, `hasInFieldToggle` | signals on `FormidableField`                           |
+| `showErrors`, `shownErrors`                       | signals on `FormidableField`                           |
+| `clearable`, `canClear`                           | signals on `FormidableField`                           |
+| The label's text, the clear button's name         | `FieldLabel.text`, a signal a `MutationObserver` feeds |
 
 A getter, such as `hasLabel`, `labelState` or `valueAlignment`, is still the right shape: a signal read inside one is tracked by the caller, and unlike the field contract these are internal to one file. The projected decorations are read through getters too: a consumer adds and removes one at runtime with `@if`, and a value latched in `ngAfterContentInit` would leave its wrapper shown, or hidden, forever.
 
@@ -138,17 +140,31 @@ The measurement is the wrapper, not the content. Each wrapper shrink-wraps what 
 
 What a consumer sets is under **Icons** in [`user/fields.md`](../user/fields.md).
 
-**Icons are components, not CSS images.** A `url()` default falls under the Content Security Policy's `img-src`, so a policy without `data:`, or a bare `default-src 'self'`, hides it without a word. CSS cannot tell a set variable from an unset one either, so an inline default and a variable that overrides it do not combine. `FieldIcon` draws the library's chevron as inline SVG, or renders the component `FORMIDABLE_ICONS` provides through `NgComponentOutlet`. `--formidable-icon-size` is its box and its `1em`.
+**Icons are components, not CSS images.** A `url()` default falls under the Content Security Policy's `img-src`, so a policy without `data:`, or a bare `default-src 'self'`, hides it without a word. CSS cannot tell a set variable from an unset one either, so an inline default and a variable that overrides it do not combine. `FieldIcon` draws the library's own as inline SVG, or renders the component `FORMIDABLE_ICONS` provides through `NgComponentOutlet`. `--formidable-icon-size` is its box and its `1em`.
 
 **Projected content wins by what renders.** Each field renders its `FieldIcon` beside the `[formidableFieldToggleIcon]` slot, and the stylesheet hides it while the slot holds an element (`:has()`). An `<ng-content>` fallback would not do: Angular settles it once, when the field is created, and counts a projected `@if` as content even while it renders nothing. Nor would `contentChild(FieldToggleIcon)`: content projects by its attribute alone, so a consumer who never imports the directive would get both icons.
 
 **The month arrows are copies.** Pikaday writes its header as an HTML string on every draw, so no Angular view can live in its buttons. The date field renders a hidden `FieldIcon` for each, and `decoratePikadayControls` appends a `cloneNode` of it to the button after every draw. Opening the calendar forces a draw, because Pikaday draws once as the field is created, before an icon that loads its SVG has drawn anything. The copy takes no pointer events, because Pikaday turns the month only for a press on the button itself, and it resets the font size the buttons zero to hide their label.
 
+## The Clear Button
+
+What a consumer sets is under **Clear Button** in [`user/decoration.md`](../user/decoration.md).
+
+- **The Field Owns The Clear**: only the field knows its empty value, the autocomplete's `filter` and a date's text typed but not committed. `BaseField` declares `emptyValue`, `canClear` and `clear()`; `BaseTextField`, `BaseDateTimeField`, select, dropdown and autocomplete set `emptyValue`. Without one, `canClear` is false and `clear()` does nothing.
+- **State Versus Configuration**: `canClear` says whether the user could clear now; `clearable` says whether the decorator renders a button. The decorator shows it on both, and a manual button reads `canClear` alone.
+- **An Input On The Field**: `clearable` is declared on `BaseField` with a `FormidableDefaults` key, as `revealOn` is, so the decorator keeps zero inputs. The toggle, slider and groups ignore it, as they ignore `placeholder`.
+- **No Component Of Its Own**: a `<button>` after the suffix's `ng-content`, holding a `FieldIcon`. `hasSuffix` counts it, or the wrapper stays hidden, and the **Inset Measure** re-insets the value as it comes and goes.
+- **Hidden By `visibility`**: a hidden button keeps its width, so the inset and the value stay put on hover and focus, and it leaves the tab order. It shows on `:host(:focus-within)`, not on `.is-focused`, which follows the field only and would hide the button as `Tab` reaches it, and on hover only under `@media (hover: hover)`.
+- **Focus After The Click**: `mousedown` is prevented, so a click keeps focus where it is. The button removes itself as `canClear` turns false, so the decorator calls `focus()` after `clear()`, or a keyboard user's focus drops to the page. `clear()` moves no focus itself, so a programmatic call does not steal it.
+- **The Name Is A Signal**: the label is the consumer's projected content, so only the DOM knows its text. `FieldLabel.text` reads it after the first render and follows it with a `MutationObserver`, whitespace collapsed; a `textContent` read in a getter would go stale under `OnPush` on a language switch. `FORMIDABLE_CLEAR_LABEL` is a token, as `FORMIDABLE_ERROR_MESSAGE` is, because `FormidableDefaults` holds plain values.
+- **The Autocomplete's Clear**: `value.set(null)` and not `setValue`, which marks the value rendered, so the render effect would leave a pick's label over `null`. It widens the list itself, because the filter's render finds the input already empty and skips it.
+- **The Date's Text**: `isFieldFilled` counts `hasText`, which ngx-mask's `valueChange` sets as the text moves, the field's own render included, so a clear resets it.
+
 ---
 
 ## Invariants
 
-- **The decorator never writes to the field.** Every value it renders is read off `FormidableField`. A field that must behave differently decides that itself, through `decoratorLayout`.
+- **The decorator writes no value to the field.** Every value it renders is read off `FormidableField`; its one call in is the clear button's `clear()`, which the field runs as the user's edit, followed by `focus()`. A field that must behave differently decides that itself, through `decoratorLayout`.
 - **Both directions of the injection are optional.** The field injects the decorator optionally and the decorator queries the field as content. Either alone renders.
 - **The ids have one stem.** Everything derives from `fieldId`. An id minted any other way cannot be resolved by the party that has to name it.
 - **Form state comes in through inputs.** A field reads the forms API's state only from the inputs the API writes. Nothing in the library reads a control, so nothing has to be told when one moves.

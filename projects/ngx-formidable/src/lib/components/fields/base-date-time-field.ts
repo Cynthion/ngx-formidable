@@ -96,6 +96,11 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
    */
   public readonly value = model<Date | null>(null);
 
+  protected override readonly emptyValue = null;
+
+  // Text typed but not committed counts as filled, so a clear button can drop it.
+  protected override readonly isFieldFilled = computed(() => !!this.value() || this.hasText());
+
   // A pick builds a new `Date`, so the same day, or the same time of day, is the same value.
   protected override isSameValue(a: Date | null, b: Date | null): boolean {
     return a === b || (!!a && !!b && isEqual(this.normalize(a), this.normalize(b)));
@@ -151,17 +156,21 @@ export abstract class BaseDateTimeField extends BaseField<Date | null> {
 
   /**
    * Empties the field as the user's edit: commits `null`, and drops text typed but not committed along with its
-   * `parse` error. What a clear button calls: while the model is `null` already, writing `null` changes
-   * nothing, and the text would commit on the next blur. No-op while readonly or disabled.
+   * `parse` error. While the model is `null` already, writing `null` changes nothing, and the text would commit
+   * on the next blur. No-op while readonly or disabled.
    */
-  public clear(): void {
+  public override clear(): void {
     if (this.canEdit()) this.commit(null);
   }
+
+  // Whether the input shows anything but an empty display, committed or not.
+  private readonly hasText = signal(false);
 
   // Typing commits on blur, but wiping the text commits at once, or the cleared value would stay the model's
   // and `stepSegment` would keep stepping from it. ngx-mask reports a wipe no `input` event announces too, as
   // `Backspace` over the whole text is.
   protected onTextChange(text: string): void {
+    this.hasText.set(!this.isEmptyText(text));
     if (this.isEmptyText(text)) this.text.set('');
   }
 

@@ -1409,7 +1409,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     control: 'length',
     class: 'declared',
     description:
-      "Size of the box every icon sits in, the library's chevrons and a provided icon alike: the select, dropdown and date field toggles and the calendar's month arrows."
+      "Size of the box every icon sits in, the library's own and a provided icon alike: the select, dropdown and date field toggles, the calendar's month arrows and the clear button."
   },
   {
     name: '--formidable-field-border-start-start-radius',

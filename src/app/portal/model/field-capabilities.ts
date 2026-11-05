@@ -29,6 +29,8 @@ interface PortalFieldCapabilities {
   readonly filter: boolean;
   /** Whether the field has a toggle that takes a projected icon. */
   readonly toggleIcon: boolean;
+  /** Whether the field has an empty value to clear to, so `clearable` shows a button. */
+  readonly clear: boolean;
 }
 
 const HORIZONTAL = { layout: 'horizontal', labelPositions: true, adornments: true } as const;
@@ -45,14 +47,15 @@ const OFF = {
   locale: false,
   range: false,
   filter: false,
-  toggleIcon: false
+  toggleIcon: false,
+  clear: false
 } as const;
 
 /** The capability table, keyed by field kind. Ships with the field model, before any editor reads it. */
 export const FIELD_CAPABILITIES: Readonly<Record<PortalFieldKind, PortalFieldCapabilities>> = {
-  'input': { ...HORIZONTAL, ...OFF, placeholder: true, mask: true, textLength: true },
-  'textarea': { ...HORIZONTAL, ...OFF, placeholder: true, mask: true, textLength: true },
-  'select': { ...HORIZONTAL, ...OFF, placeholder: true, options: true, toggleIcon: true },
+  'input': { ...HORIZONTAL, ...OFF, placeholder: true, mask: true, textLength: true, clear: true },
+  'textarea': { ...HORIZONTAL, ...OFF, placeholder: true, mask: true, textLength: true, clear: true },
+  'select': { ...HORIZONTAL, ...OFF, placeholder: true, options: true, toggleIcon: true, clear: true },
   'dropdown': {
     ...HORIZONTAL,
     ...OFF,
@@ -60,7 +63,8 @@ export const FIELD_CAPABILITIES: Readonly<Record<PortalFieldKind, PortalFieldCap
     options: true,
     actionOption: true,
     panel: 'full',
-    toggleIcon: true
+    toggleIcon: true,
+    clear: true
   },
   'autocomplete': {
     ...HORIZONTAL,
@@ -69,10 +73,11 @@ export const FIELD_CAPABILITIES: Readonly<Record<PortalFieldKind, PortalFieldCap
     options: true,
     actionOption: true,
     panel: 'full',
-    filter: true
+    filter: true,
+    clear: true
   },
-  'date': { ...HORIZONTAL, ...OFF, placeholder: true, panel: 'right', locale: true, toggleIcon: true },
-  'time': { ...HORIZONTAL, ...OFF, placeholder: true, locale: true },
+  'date': { ...HORIZONTAL, ...OFF, placeholder: true, panel: 'right', locale: true, toggleIcon: true, clear: true },
+  'time': { ...HORIZONTAL, ...OFF, placeholder: true, locale: true, clear: true },
   'toggle': { ...INLINE, ...OFF },
   'slider': { ...VERTICAL, ...OFF, range: true },
   'radio-group': { ...VERTICAL, ...OFF, options: true },

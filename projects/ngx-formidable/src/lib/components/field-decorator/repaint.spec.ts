@@ -1,7 +1,12 @@
+import { Component, signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { onTestFinished } from 'vitest';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
+import { FieldLabel } from '../../directives/field-label';
 import { bindField, BindFieldOptions, BoundField, FormsApi } from '../../testing/bind-field';
-import { configureFormidableTestBed } from '../../testing/test-bed';
+import { configureFormidableTestBed, settle } from '../../testing/test-bed';
+import { InputField } from '../fields/input-field/input-field';
+import { FieldDecorator } from './field-decorator';
 
 /**
  * Per **State Repaints On Its Own** in `user/forms.md` and **A Label Rests Only While Nothing Occupies The Value
@@ -64,6 +69,24 @@ function durationWhenFloated(): () => string | undefined {
   return () => duration;
 }
 
+/** A clearable input under a label whose text the host changes, as a language switch does. */
+@Component({
+  imports: [FieldDecorator, FieldLabel, InputField],
+  template: `
+    <formidable-field-decorator>
+      <formidable-input-field
+        clearable
+        value="Cynthion" />
+      <div formidableFieldLabel>{{ label() }}</div>
+    </formidable-field-decorator>
+  `
+})
+class LabelHost {
+  readonly label = signal('Name');
+}
+
+const clearButton = () => document.querySelector('formidable-field-decorator .clear-button');
+
 describe('decorator repaint', () => {
   beforeEach(() => configureFormidableTestBed());
 
@@ -112,5 +135,31 @@ describe('decorator repaint', () => {
     await bound.write('');
 
     await expect.poll(() => runs.length).toBeGreaterThan(0);
+  });
+
+  // Per **Clear Button** in `user/decoration.md`.
+  it('shows the clear button once the user types, and drops it once the field turns readonly', async () => {
+    const bound = await bind('signal', { inputs: { clearable: true } });
+
+    expect(clearButton()).toBeNull();
+
+    await userEvent.type(page.getByRole('textbox', { name: 'Name' }), 'x');
+
+    await expect.poll(clearButton).not.toBeNull();
+
+    await bound.state({ readonly: true });
+
+    await expect.poll(clearButton).toBeNull();
+  });
+
+  it('renames the clear button as the label’s text changes', async () => {
+    const fixture = TestBed.createComponent(LabelHost);
+    await settle(fixture);
+
+    expect(clearButton()!.getAttribute('aria-label')).toBe('Clear Name');
+
+    fixture.componentInstance.label.set('Nom');
+
+    await expect.poll(() => clearButton()!.getAttribute('aria-label')).toBe('Clear Nom');
   });
 });

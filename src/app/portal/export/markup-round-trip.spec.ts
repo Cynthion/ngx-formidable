@@ -149,6 +149,22 @@ describe('markup import', () => {
     expect(roundTrip(['date']).result.fields[0]?.panelPosition).toBeUndefined();
   });
 
+  it('round-trips a stated clear button, on or off, and an unstated one as unstated', () => {
+    const definition = only(['orderName']);
+    const off = { ...definition, fields: [{ ...definition.fields[0]!, clearable: false }] };
+
+    expect(roundTrip(['date']).result.fields[0]?.clearable).toBe(true);
+    expect(parseMarkup(serializeDefinition(off)).fields[0]?.clearable).toBe(false);
+    expect(roundTrip(['phone']).result.fields[0]?.clearable).toBeUndefined();
+  });
+
+  // As `booleanAttribute` reads it.
+  it('imports a bare clearable attribute as on', () => {
+    const markup = serializeDefinition(only(['orderName'])).replace('[clearable]="true"', 'clearable');
+
+    expect(parseMarkup(markup).fields[0]?.clearable).toBe(true);
+  });
+
   it('round-trips a stated label position, and an unstated one as unstated', () => {
     expect(roundTrip(['cardNumber']).result.fields[0]?.decoration.labelPosition).toBe('outside');
     expect(roundTrip(['orderName']).result.fields[0]?.decoration.labelPosition).toBeUndefined();

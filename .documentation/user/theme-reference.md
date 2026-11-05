@@ -326,9 +326,9 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 
 The icons are inline SVG painted in the text color, so a theme sets only their size. Replacing one is a provider rather than a variable, see **Icons** in [Fields](fields.md).
 
-| Variable                 | Description                                                                                                                                                        |
-| :----------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--formidable-icon-size` | Size of the box every icon sits in, the library's chevrons and a provided icon alike: the select, dropdown and date field toggles and the calendar's month arrows. |
+| Variable                 | Description                                                                                                                                                                     |
+| :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--formidable-icon-size` | Size of the box every icon sits in, the library's own and a provided icon alike: the select, dropdown and date field toggles, the calendar's month arrows and the clear button. |
 
 ---
 

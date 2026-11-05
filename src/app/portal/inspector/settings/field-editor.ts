@@ -71,6 +71,7 @@ export class FieldEditor {
       labelPosition: LABEL_POSITION_LABELS[defaults.labelPosition ?? LIBRARY_DEFAULTS.labelPosition],
       prefixAlign: ADORNMENT_ALIGN_LABELS[defaults.prefixAlign ?? LIBRARY_DEFAULTS.prefixAlign],
       suffixAlign: ADORNMENT_ALIGN_LABELS[defaults.suffixAlign ?? LIBRARY_DEFAULTS.suffixAlign],
+      clearable: (defaults.clearable ?? LIBRARY_DEFAULTS.clearable) ? 'On' : 'Off',
       panelPosition: panel ? PANEL_POSITION_LABELS[panel] : ''
     };
   });
@@ -83,6 +84,11 @@ export class FieldEditor {
   protected setNumber(key: keyof PortalFieldSpec, raw: string): void {
     const value = Number(raw);
     if (Number.isFinite(value)) this.set(key, value as PortalFieldSpec[typeof key]);
+  }
+
+  // Blank is unset, which is what a field's own `undefined` means.
+  protected setClearable(raw: string): void {
+    this.set('clearable', raw === '' ? undefined : raw === 'true');
   }
 
   // Blank is unset, which is what a field's own `undefined` means.

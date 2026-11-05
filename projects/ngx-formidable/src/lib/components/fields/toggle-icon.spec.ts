@@ -13,7 +13,7 @@ import { SelectField } from './select-field/select-field';
 
 /**
  * The icons the fields draw, per **Icons** in `user/fields.md`: the toggle of the select, dropdown and date
- * fields, and the calendar's month arrows. Each is the library's inline-SVG chevron unless
+ * fields, the calendar's month arrows, and the clear button. Each is the library's inline SVG unless
  * `provideNgxFormidable({ icons })` provides one, and projected `[formidableFieldToggleIcon]` content replaces
  * the toggle's either way, for as long as it renders. The test host does not import `FieldToggleIcon`, so a consumer who forgets to is
  * covered too.
@@ -24,6 +24,7 @@ const DOWN = '4.25 7.75 12 15.5 19.75 7.75';
 const UP = '4.25 16.25 12 8.5 19.75 16.25';
 const LEFT = '16.25 4.25 8.5 12 16.25 19.75';
 const RIGHT = '7.75 4.25 15.5 12 7.75 19.75';
+const CROSS = '7 7 17 17 12 12 7 17 17 7';
 
 /** A consumer's icon component, configured through an input and sized in `em`, as an icon library's is. */
 @Component({ template: '<i class="test-icon" style="display: block; width: 1em; height: 1em">{{ glyph() }}</i>' })
@@ -388,5 +389,25 @@ describe('calendar month arrows', () => {
     await expect.poll(month).not.toBe(before);
     expect(previous().querySelectorAll('formidable-field-icon')).toHaveLength(1);
     expect(next().querySelectorAll('formidable-field-icon')).toHaveLength(1);
+  });
+});
+
+describe('clear button icon', () => {
+  beforeEach(() => configureFormidableTestBed());
+
+  /** The clear button of a filled, `clearable` input. */
+  const clearButton = async () =>
+    (await bindField('input', 'signal', { value: 'x', inputs: { clearable: true }, decorated: true })).element
+      .closest('formidable-field-decorator')!
+      .querySelector('.clear-button')!;
+
+  it("draws the library's cross", async () => {
+    expect(chevronOf(await clearButton())).toBe(CROSS);
+  });
+
+  it('draws the provided icon instead', async () => {
+    provideIcons({ fieldClear: iconOf('×') });
+
+    expect(glyphsOf(await clearButton())).toEqual(['×']);
   });
 });

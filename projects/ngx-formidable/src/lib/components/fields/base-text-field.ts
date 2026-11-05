@@ -97,6 +97,8 @@ export abstract class BaseTextField extends BaseField<string> {
   /** The text, empty for none. Under a `mask`, without its literals unless `dropSpecialCharacters` is `false`. */
   public readonly value = model('');
 
+  protected override readonly emptyValue = '';
+
   get fieldRef(): ElementRef<HTMLElement> {
     return this.editorRef();
   }

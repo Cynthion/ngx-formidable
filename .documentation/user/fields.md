@@ -92,7 +92,7 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 - **An Option Owns Its Own Content**: anything projected into `formidable-field-option` becomes that option's template, which is how an option carries a subtitle, an icon or highlighted match text. Its `match` input overrides how the autocomplete filter matches it.
 - **The Autocomplete Filters, And Reports The Filter**: typing narrows the list to the options whose `match` accepts the text, by default a case-insensitive substring of the label. It also emits the text as `filterChange`, so the options can be fetched or ranked for it instead (fuzzy, a server call). An option's own `match` keeps what a substring would exclude.
 - **`filterChange` Reports More Than Typing**: a value written from outside, focused or not, takes the text and the filter with it: to its option's label, or to nothing while no option carries the value. Those moves are reported too, so the supplied list can follow the value the field was given. Without them, a value written from outside names an option the filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under the user.
-- **The Filter Is Writable**: `filter` is a model, so `[(filter)]` keeps a component signal in step with it, and a write reaches the field, to seed it or to empty it. A write is not typing: it opens no panel and picks nothing. Nor is the filter the input's text: after a pick the input shows the label, and the filter keeps what was typed to find it. So a clear button writes both, the value to empty a pick and the filter to empty text typed without one. While nothing is picked the value is `null` already, and writing it alone changes nothing. The button is **Clear** under **Actions** in [Decoration](decoration.md).
+- **The Filter Is Writable**: `filter` is a model, so `[(filter)]` keeps a component signal in step with it, and a write reaches the field, to seed it or to empty it. A write is not typing: it opens no panel and picks nothing. Nor is the filter the input's text: after a pick the input shows the label, and the filter keeps what was typed to find it. So emptying the field takes both, the value to empty a pick and the filter to empty text typed without one: while nothing is picked the value is `null` already, and writing it alone changes nothing. `clear()` empties both as the user's edit, and is what the **Clear Button** in [Decoration](decoration.md) calls.
 - **An Action Row Is Not A Value**: `dropdown-field` and `autocomplete-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. The field closes its panel, runs the action and touches nothing else.
 
 An action entry that opens a dialog for a new address:
@@ -163,7 +163,7 @@ Whatever the placement, the calendar scales to the width its panel has: `--formi
 
 ## Icons
 
-`select-field`, `dropdown-field` and `date-field` draw a toggle at their right edge, and the date field's calendar draws its month arrows. The library's own are chevrons. A provider replaces them app-wide, a projected icon per field.
+`select-field`, `dropdown-field` and `date-field` draw a toggle at their right edge, the date field's calendar draws its month arrows, and a `clearable` field draws its clear button. The library's own are chevrons and a cross. A provider replaces them app-wide; a projected icon replaces a toggle's per field.
 
 **App-Wide**: `provideNgxFormidable` takes an `icons` object. Each icon is a component and the inputs to render it with, so an icon library's component goes in as it is:
 
@@ -174,19 +174,20 @@ provideNgxFormidable({
     fieldToggleOpen: { component: AppIcon, inputs: { name: 'collapse' } },
     dateFieldToggle: { component: AppIcon, inputs: { name: 'calendar' } },
     dateFieldPanelPrevious: { component: AppIcon, inputs: { name: 'chevron-left' } },
-    dateFieldPanelNext: { component: AppIcon, inputs: { name: 'chevron-right' } }
+    dateFieldPanelNext: { component: AppIcon, inputs: { name: 'chevron-right' } },
+    fieldClear: { component: AppIcon, inputs: { name: 'close' } }
   }
 });
 ```
 
-- **Unset Stays The Library's**: an icon left out keeps the library's chevron.
+- **Unset Stays The Library's**: an icon left out keeps the library's own.
 - **Open And Closed**: `fieldToggleOpen` shows while the panel is open; unset, `fieldToggle` stays. The select never shows it, because a page cannot ask whether a native list is open.
 - **The Date Field's Own**: `dateFieldToggle` and `dateFieldToggleOpen` replace the toggle on the date field only, so a calendar can open from a calendar icon while a list opens from a chevron. Unset, `dateFieldToggleOpen` keeps `dateFieldToggle`; without either, the date field takes `fieldToggle` and `fieldToggleOpen`.
-- **One Size**: every icon sits centred in a box of `--formidable-icon-size`, which is also its `1em`, so an icon sized in `em`, as most icon components are, fills it. The chevrons fill it too, drawn on the 24-unit grid most icon sets use, so an icon from such a set matches their scale.
-- **Text Color**: the chevrons are stroked in the text color, so they follow the field's state colors. A provided icon drawn in `currentColor` does the same.
+- **One Size**: every icon sits centred in a box of `--formidable-icon-size`, which is also its `1em`, so an icon sized in `em`, as most icon components are, fills it. The library's own fill it too, drawn on the 24-unit grid most icon sets use, so an icon from such a set matches their scale.
+- **Text Color**: the library's own are stroked in the text color, so they follow the field's state colors. A provided icon drawn in `currentColor` does the same.
 - **Month Arrows Are Copies**: the calendar rebuilds its buttons on every draw, opening included, so each draw copies the icon in. An icon that renders its content later, such as one that fetches its SVG, shows from the next draw, and nothing inside the copy reacts to input.
 - **Scoped By Providing**: `FORMIDABLE_ICONS` in a component's `providers` gives the fields it renders icons of their own, the way `FORMIDABLE_DEFAULTS` is scoped in [Getting Started](getting-started.md).
-- **No Policy Rule**: the chevrons are inline SVG, so a Content Security Policy needs no `img-src` rule for them.
+- **No Policy Rule**: the library's own are inline SVG, so a Content Security Policy needs no `img-src` rule for them.
 
 **Per Field**: content projected with `[formidableFieldToggleIcon]`, such as an icon component, replaces the toggle's icon, the provided one included, for as long as it renders, so an `@if` around it can switch between the two. Its size, color and hover feedback are the projected content's own.
 
@@ -255,7 +256,7 @@ Both fields parse and format through one `unicodeTokenFormat`, a [date-fns token
 - **Typed Text Commits On Blur**: a half-typed date is not a date, so what is typed reaches the model on blur or on `Enter`. The arrow keys and the calendar commit at once.
 - **Text That Does Not Parse Stays As Typed**: the model keeps its value, and the field reports a `parse` error to whichever forms API binds it, which the decorator renders once revealed. Text that parses again drops it.
 - **Emptying The Text Commits `null`**: at once, with no error.
-- **A Clear Button Calls `clear()`**: text typed but not committed is not the value, so while the model is `null` already, writing `null` changes nothing, and the text commits on the next blur. `clear()` commits `null` as the user's edit and drops that text with its `parse` error. The button is **Clear** under **Actions** in [Decoration](decoration.md).
+- **Clearing Takes `clear()`**: text typed but not committed is not the value, so while the model is `null` already, writing `null` changes nothing, and the text commits on the next blur. `clear()` commits `null` as the user's edit and drops that text with its `parse` error. The **Clear Button** in [Decoration](decoration.md) calls it.
 - **A Commit Writes One Part**: a date field writes its day at local midnight, a time field its time on 1 January 1970. A value written by application code keeps its other part until the user commits.
 - **Names Are Read In Any Case**: `15 dec 2024` parses against `dd MMM yyyy`, and `02:30 pm` against `hh:mm a`. The commit shows the format's own case, `15 Dec 2024` and `02:30 PM`.
 - **A Date Format Without A Year Takes 2000**: a leap year, so `29.02` parses against `dd.MM`. One without a month takes January.

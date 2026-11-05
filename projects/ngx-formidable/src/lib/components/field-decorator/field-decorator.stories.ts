@@ -25,6 +25,7 @@ interface DecoratorArgs {
   hintAlign: FieldHintAlignment;
   required: boolean;
   invalid: boolean;
+  clearable: boolean;
 }
 
 const options = <T extends string>(...values: T[]) => ({ control: 'inline-radio' as const, options: values });
@@ -58,7 +59,8 @@ const meta: Meta<DecoratorArgs> = {
     hint: '',
     hintAlign: 'start',
     required: false,
-    invalid: false
+    invalid: false,
+    clearable: false
   },
   render: (args) => ({
     props: { ...args, errors: mockRequiredError },
@@ -70,6 +72,7 @@ const meta: Meta<DecoratorArgs> = {
             [value]="value"
             [placeholder]="placeholderText"
             [required]="required"
+            [clearable]="clearable"
             [invalid]="invalid"
             [touched]="invalid"
             [errors]="invalid ? errors : []" />
@@ -97,6 +100,11 @@ type Story = StoryObj<DecoratorArgs>;
 
 /** The default `inside` label: resting while the field is empty, floating above the value once it is not. */
 export const Default: Story = {};
+
+/** A clear button after the suffix of the filled field, hidden until hover or focus. */
+export const Clearable: Story = {
+  args: { clearable: true, suffix: 'kg' }
+};
 
 /** Above the field, in normal flow. It never moves. */
 export const LabelPositionOutside: Story = {

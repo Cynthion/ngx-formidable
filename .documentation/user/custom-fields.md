@@ -16,6 +16,7 @@ A component that extends `BaseField` and is provided as `FORMIDABLE_FIELD` gains
 | Label, Adornment, Prefix, Suffix, Hints | The surrounding `formidable-field-decorator`                                   |
 | Required Marker                         | The `required` input, set by whichever forms API binds the field               |
 | Focus And `autoFocus`                   | `focus()`, inherited from the base                                             |
+| Clear Button                            | `clearable`, `canClear` and `clear()`, once the field sets an `emptyValue`     |
 | Accessible Names                        | `labelledBy` and `describedBy`, protected getters on the base                  |
 | Touch On Blur                           | `onFocusChange(false)`, which emits `touch` as its last act                    |
 | Keyboard Listener                       | The base, filtered on focus, readonly and disabled                             |
@@ -56,6 +57,9 @@ The members to override where they apply:
 | `focusElement`        | The element that takes focus is not `fieldRef`, as with a wrapper `div` around an inner `input` |
 | `valueAlignment`      | The value is top-aligned rather than centred, so a prefix sits on its first line                |
 | `hasInFieldToggle`    | The field draws something of its own at its inner right edge, which the value must clear        |
+| `emptyValue`          | The field can be emptied: `clear()` sets the model to it, and `clearable` shows a button        |
+| `isFieldFilled`       | The field shows text that is not a value yet, which a clear button must also offer to drop      |
+| `clear()`             | Emptying takes more than writing `emptyValue`, such as dropping text typed but not committed    |
 
 Three rules keep a field honest under every forms API:
 
