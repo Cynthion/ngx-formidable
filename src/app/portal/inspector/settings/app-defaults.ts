@@ -16,7 +16,7 @@ import { FormDefinitionStore } from '../../state/form-definition.store';
 import { InspectorStore } from '../../state/inspector.store';
 
 /** The defaults a field can state its own value for, and the one the form can. */
-type FieldKey = 'labelPosition' | 'prefixAlign' | 'suffixAlign' | 'panelPosition';
+type FieldKey = 'labelPosition' | 'prefixAlign' | 'suffixAlign' | 'panelPosition' | 'clearable';
 type FormKey = 'revealOn' | 'hideRequiredMarkers';
 
 /** One default: what it offers, and what the library falls back to without it. */
@@ -54,6 +54,16 @@ const FIELD_CONTROLS: readonly DefaultControl<FieldKey>[] = [
     choices: Object.entries(PANEL_POSITION_LABELS),
     libraryDefault: 'Per Field',
     help: 'Unset, a dropdown and an autocomplete open full width, and a date to the right.'
+  },
+  {
+    key: 'clearable',
+    label: 'Clear Button',
+    choices: [
+      ['false', 'Off'],
+      ['true', 'On']
+    ],
+    libraryDefault: 'Off',
+    help: 'A toggle, a slider and the groups have nothing to clear to.'
   }
 ];
 
@@ -83,13 +93,14 @@ function applies(field: PortalFieldSpec, key: FieldKey): boolean {
 
   if (key === 'labelPosition') return capabilities.labelPositions;
   if (key === 'panelPosition') return capabilities.panel !== null;
+  if (key === 'clearable') return capabilities.clear;
 
   return capabilities.adornments;
 }
 
 /** What a field states for a default of its own, `undefined` where it inherits. */
-function statedBy(field: PortalFieldSpec, key: FieldKey): string | undefined {
-  return key === 'panelPosition' ? field.panelPosition : field.decoration[key];
+function statedBy(field: PortalFieldSpec, key: FieldKey): string | boolean | undefined {
+  return key === 'panelPosition' || key === 'clearable' ? field[key] : field.decoration[key];
 }
 
 /**
@@ -124,7 +135,8 @@ export class AppDefaults {
   }
 
   protected set(key: FieldKey | FormKey, raw: string): void {
-    const value = raw === '' ? undefined : key === 'hideRequiredMarkers' ? raw === 'true' : raw;
+    const isBoolean = key === 'hideRequiredMarkers' || key === 'clearable';
+    const value = raw === '' ? undefined : isBoolean ? raw === 'true' : raw;
 
     this.store.updateAppDefaults({ [key]: value } as FormidableDefaults);
   }
@@ -141,8 +153,8 @@ export class AppDefaults {
   }
 
   protected clearFields(key: FieldKey): void {
-    if (key === 'panelPosition') {
-      this.store.updateAllFields({ panelPosition: undefined });
+    if (key === 'panelPosition' || key === 'clearable') {
+      this.store.updateAllFields({ [key]: undefined });
     } else {
       this.store.setDecorationOnAllFields({ [key]: undefined });
     }

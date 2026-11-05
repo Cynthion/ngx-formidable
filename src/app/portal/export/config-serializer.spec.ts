@@ -10,13 +10,17 @@ describe('app config serializer', () => {
   });
 
   it('states every default that is set, in the order the panel lists them', () => {
-    const config = serializeAppConfig({ hideRequiredMarkers: true, revealOn: 'dirty', labelPosition: 'border' }, false);
+    const config = serializeAppConfig(
+      { hideRequiredMarkers: true, revealOn: 'dirty', clearable: true, labelPosition: 'border' },
+      false
+    );
 
     expect(config).toContain(
       [
         '    ...provideNgxFormidable({',
         '      defaults: {',
         "        labelPosition: 'border',",
+        '        clearable: true,',
         "        revealOn: 'dirty',",
         '        hideRequiredMarkers: true',
         '      }',
@@ -40,7 +44,8 @@ describe('app config serializer', () => {
         '        dateFieldToggle: { component: CalendarPlusIcon },',
         '        dateFieldToggleOpen: { component: CalendarMinusIcon },',
         '        dateFieldPanelPrevious: { component: ArrowLeftIcon },',
-        '        dateFieldPanelNext: { component: ArrowRightIcon }',
+        '        dateFieldPanelNext: { component: ArrowRightIcon },',
+        '        fieldClear: { component: EraserIcon }',
         '      }',
         '    })'
       ].join('\n')
@@ -52,7 +57,7 @@ describe('app config serializer', () => {
 
     expect(config).toContain('    ...provideNgxFormidable({\n      icons: {');
     expect(config).toContain(
-      "import { ArrowLeftIcon, ArrowRightIcon, CalendarMinusIcon, CalendarPlusIcon, MinusIcon, PlusIcon } from './icons';"
+      "import { ArrowLeftIcon, ArrowRightIcon, CalendarMinusIcon, CalendarPlusIcon, EraserIcon, MinusIcon, PlusIcon } from './icons';"
     );
     expect(config).not.toContain('defaults:');
     expect(config).not.toContain('No defaults set');

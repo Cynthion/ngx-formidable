@@ -73,7 +73,8 @@ export const LIBRARY_DEFAULTS = {
   prefixAlign: 'center',
   suffixAlign: 'center',
   revealOn: 'touched',
-  hideRequiredMarkers: false
+  hideRequiredMarkers: false,
+  clearable: false
 } as const satisfies Omit<Required<FormidableDefaults>, 'panelPosition'>;
 
 /** Display names for the adornment slots, exhaustive over `PortalSlotContent` for the same reason. */
@@ -208,6 +209,8 @@ export interface PortalFieldSpec {
    * exported component does too — a preset the Studio applies and the export cannot would be a divergence.
    */
   readonly presets?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
+  /** Whether the decorator shows a clear button. Absent, the app default applies, then the library's own. */
+  readonly clearable?: boolean;
 
   // Text fields
   readonly mask?: string;

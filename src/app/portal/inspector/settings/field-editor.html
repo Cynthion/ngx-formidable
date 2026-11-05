@@ -252,6 +252,25 @@
     </select>
   </div>
 </div>
+@if (caps.clear) {
+<div class="pc-field">
+  <label
+    class="pc-label"
+    [for]="'fe-clearable-' + f.id">
+    <span class="pc-label-name">Clear Button</span>
+  </label>
+  <select
+    class="pc-select"
+    [id]="'fe-clearable-' + f.id"
+    [portalSelectedValue]="f.clearable === undefined ? '' : f.clearable ? 'true' : 'false'"
+    (change)="setClearable($any($event.target).value)">
+    <option value="">App Default ({{ inherited().clearable }})</option>
+    <option value="true">On</option>
+    <option value="false">Off</option>
+  </select>
+  <p class="pc-help">Shown after the suffix while the field holds something to clear, on hover or focus.</p>
+</div>
+}
 <p class="pc-help">
   Adornments also need the form-level switch. A vertical layout renders none at all, and following the value is a no-op wherever nothing displaces it.
 </p>

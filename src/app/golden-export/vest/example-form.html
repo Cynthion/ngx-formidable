@@ -194,6 +194,7 @@
     <formidable-field-decorator>
       <formidable-autocomplete-field
         placeholder="Start typing a street…"
+        [clearable]="true"
         [actionOptionMode]="'always'"
         [formField]="form.address">
         <!-- [actionOption]="add-address": last in the list, and runs an action -->
@@ -266,6 +267,7 @@
   <!-- When -->
   <formidable-field-decorator>
     <formidable-date-field
+      [clearable]="true"
       [unicodeTokenFormat]="'dd . MM . yyyy'"
       [emptyHint]="'format'"
       [formField]="form.when.date">
@@ -334,6 +336,7 @@
   <formidable-field-decorator>
     <formidable-input-field
       placeholder="Who is it for?"
+      [clearable]="true"
       [formField]="form.orderName" />
     <div formidableFieldLabel>
       Name On The Order

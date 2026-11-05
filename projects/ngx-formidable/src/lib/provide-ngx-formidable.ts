@@ -12,9 +12,9 @@ import {
 export interface NgxFormidableConfig {
   /** App-wide ngx-mask defaults, which any field's own `maskConfig` still overrides. */
   globalMaskConfig?: Partial<NgxMaskConfig>;
-  /** App-wide defaults for label position, adornment alignment, panel position, reveal and required marker. */
+  /** App-wide defaults for label position, adornment alignment, panel position, reveal, required marker and clear button. */
   defaults?: FormidableDefaults;
-  /** App-wide replacements for the toggle and calendar icons. */
+  /** App-wide replacements for the clear, toggle and calendar button icons. */
   icons?: FormidableIcons;
 }
 

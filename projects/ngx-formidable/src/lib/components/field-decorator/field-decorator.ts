@@ -20,10 +20,12 @@ import {
   FieldAdornmentAlignment,
   FieldDecoratorLayout,
   FieldValueAlignment,
+  FORMIDABLE_CLEAR_LABEL,
   FORMIDABLE_DEFAULTS,
   FORMIDABLE_FIELD
 } from '../../models/formidable.model';
 import { FieldErrors } from '../field-errors/field-errors';
+import { FieldIcon } from '../field-icon/field-icon';
 
 // How a label renders once its configured position is resolved against the field's own state.
 type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-prefix';
@@ -40,7 +42,7 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
   selector: 'formidable-field-decorator',
   templateUrl: './field-decorator.html',
   styleUrls: ['./field-decorator.scss'],
-  imports: [NgTemplateOutlet, FieldErrors],
+  imports: [NgTemplateOutlet, FieldErrors, FieldIcon],
   host: {
     '[class.label-inside]': 'isLabelInside',
     '[class.is-readonly]': 'isReadonly',
@@ -58,6 +60,11 @@ type FieldLabelState = 'outside' | 'resting' | 'floating' | 'border' | 'border-p
 // signal on the field, and a signal read inside a getter is tracked by whichever view called it.
 export class FieldDecorator implements AfterViewInit, OnDestroy {
   private readonly hideRequiredMarkers = inject(FORMIDABLE_DEFAULTS).hideRequiredMarkers ?? false;
+
+  // What a suffix wrapper holding only the clear button follows, with no projected suffix to say.
+  private readonly defaultSuffixAlign = inject(FORMIDABLE_DEFAULTS).suffixAlign ?? 'center';
+
+  private readonly clearLabelFn = inject(FORMIDABLE_CLEAR_LABEL);
 
   // View children are used to access the prefix and suffix wrappers
   readonly prefixWrapper = viewChild<ElementRef<HTMLDivElement>>('prefixWrapperRef');
@@ -86,7 +93,26 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
   }
 
   protected get hasSuffix(): boolean {
-    return !!this.projectedSuffix();
+    return !!this.projectedSuffix() || this.showsClear;
+  }
+
+  // The field asks for the button, and says when there is something to clear.
+  protected get showsClear(): boolean {
+    const field = this.projectedField();
+
+    return !!field?.clearable?.() && !!field.canClear?.();
+  }
+
+  protected get clearLabel(): string {
+    return this.clearLabelFn(this.projectedLabel()?.text() || this.placeholder);
+  }
+
+  // The button removes itself, so focus goes back to the field rather than dropping to the page.
+  protected clearField(): void {
+    const field = this.projectedField();
+
+    field?.clear?.();
+    field?.focus?.();
   }
 
   protected get hasHint(): boolean {
@@ -100,7 +126,7 @@ export class FieldDecorator implements AfterViewInit, OnDestroy {
   }
 
   protected get suffixAlignment(): FieldAdornmentAlignment {
-    return this.projectedSuffix()?.align() ?? 'center';
+    return this.projectedSuffix()?.align() ?? this.defaultSuffixAlign;
   }
 
   private readonly elementRef: ElementRef<HTMLElement> = inject(ElementRef);

@@ -155,6 +155,16 @@
     [class.align-value]="suffixAlignment === 'value'"
     [class.hidden]="!hasSuffix">
     <ng-content select="[formidableFieldSuffix]" />
+    @if (showsClear) {
+    <button
+      type="button"
+      class="clear-button"
+      [attr.aria-label]="clearLabel"
+      (mousedown)="$event.preventDefault()"
+      (click)="clearField()">
+      <formidable-field-icon name="fieldClear" />
+    </button>
+    }
   </div>
 </ng-template>
 

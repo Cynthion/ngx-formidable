@@ -34,7 +34,14 @@ export const unquote = (raw: string): string =>
 
 /** The attributes every field carries, whatever its kind. `[formField]` names the field, so `name` is not one. */
 const COMMON_ATTRIBUTES: readonly MarkupAttribute[] = [
-  { name: 'placeholder', binding: false, read: (s) => text(s.placeholder), write: (raw) => ({ placeholder: raw }) }
+  { name: 'placeholder', binding: false, read: (s) => text(s.placeholder), write: (raw) => ({ placeholder: raw }) },
+  {
+    name: 'clearable',
+    binding: true,
+    read: (s) => (s.clearable === undefined ? null : String(s.clearable)),
+    // As `booleanAttribute` reads it, so a bare `clearable` is on.
+    write: (raw) => ({ clearable: raw.trim() !== 'false' })
+  }
 ];
 
 /** The kind-specific inputs, keyed by the member they map to. */

@@ -2,8 +2,9 @@ import { NgComponentOutlet } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { FORMIDABLE_ICONS, FormidableIcons } from '../../models/formidable.model';
 
-/** The library's own icons: one chevron each, on the 24-unit grid most icon sets draw on. */
-const CHEVRONS: Record<keyof FormidableIcons, string> = {
+/** The library's own icons: one polyline each, on the 24-unit grid most icon sets draw on. */
+const POLYLINES: Record<keyof FormidableIcons, string> = {
+  fieldClear: '7 7 17 17 12 12 7 17 17 7',
   fieldToggle: '4.25 7.75 12 15.5 19.75 7.75',
   fieldToggleOpen: '4.25 16.25 12 8.5 19.75 16.25',
   dateFieldToggle: '4.25 7.75 12 15.5 19.75 7.75',
@@ -12,7 +13,7 @@ const CHEVRONS: Record<keyof FormidableIcons, string> = {
   dateFieldPanelNext: '7.75 4.25 15.5 12 7.75 19.75'
 };
 
-/** The provided icons an unset one falls back to, in order, before the library's chevron. */
+/** The provided icons an unset one falls back to, in order, before the library's own. */
 const FALLBACKS: Partial<Record<keyof FormidableIcons, (keyof FormidableIcons)[]>> = {
   fieldToggleOpen: ['fieldToggle'],
   dateFieldToggle: ['fieldToggle'],
@@ -21,7 +22,7 @@ const FALLBACKS: Partial<Record<keyof FormidableIcons, (keyof FormidableIcons)[]
 
 /**
  * Draws one of the library's icons: the one `FORMIDABLE_ICONS` provides under `name` or, unset, under its
- * `FALLBACKS`, else the library's chevron as inline SVG, which no Content Security Policy can block. Internal; a consumer replaces an icon
+ * `FALLBACKS`, else the library's own as inline SVG, which no Content Security Policy can block. Internal; a consumer replaces an icon
  * through `FORMIDABLE_ICONS` or by projecting `[formidableFieldToggleIcon]`.
  */
 @Component({
@@ -39,5 +40,5 @@ export class FieldIcon {
   protected readonly icon = computed(() =>
     [this.name(), ...(FALLBACKS[this.name()] ?? [])].map((name) => this.icons[name]).find((icon) => icon)
   );
-  protected readonly points = computed(() => CHEVRONS[this.name()]);
+  protected readonly points = computed(() => POLYLINES[this.name()]);
 }

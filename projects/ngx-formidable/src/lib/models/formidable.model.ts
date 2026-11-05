@@ -118,6 +118,8 @@ export interface FormidableDefaults {
   revealOn?: FormidableReveal;
   /** Hides every field's required marker, the glyph only. The library's own: `false`. */
   hideRequiredMarkers?: boolean;
+  /** A field's `clearable`. The library's own: `false`. */
+  clearable?: boolean;
 }
 
 /** The app-wide defaults. Empty unless `provideNgxFormidable({ defaults })` or a component provides it. */
@@ -134,11 +136,13 @@ export interface FormidableIcon {
 
 /**
  * App-wide replacements for the icons the library draws, each rendered in a box of `--formidable-icon-size`,
- * which is also its `1em`, and taking the text colour. An unset one stays the library's chevron. Set via `provideNgxFormidable`, or
+ * which is also its `1em`, and taking the text colour. An unset one stays the library's own. Set via `provideNgxFormidable`, or
  * provide `FORMIDABLE_ICONS` in a component's `providers` to scope them to that subtree. Content projected
  * as `[formidableFieldToggleIcon]` still wins on its field.
  */
 export interface FormidableIcons {
+  /** The clear button a `clearable` field shows in its suffix. */
+  fieldClear?: FormidableIcon;
   /** The toggle of the select, dropdown and date fields. */
   fieldToggle?: FormidableIcon;
   /** That toggle while the field's panel is open. Unset, `fieldToggle` stays. */
@@ -160,6 +164,17 @@ export interface FormidableIcons {
 export const FORMIDABLE_ICONS = new InjectionToken<FormidableIcons>('FORMIDABLE_ICONS', {
   providedIn: 'root',
   factory: () => ({})
+});
+
+/** Turns a field's label text into its clear button's accessible name. The text is empty for no label. */
+export type FormidableClearLabelFn = (label: string) => string;
+
+/**
+ * InjectionToken for the accessible name of a `clearable` field's clear button. The default is `Clear` and the
+ * label's text. Provide one to translate or change it.
+ */
+export const FORMIDABLE_CLEAR_LABEL = new InjectionToken<FormidableClearLabelFn>('FORMIDABLE_CLEAR_LABEL', {
+  factory: () => (label) => `Clear ${label}`.trim()
 });
 
 /**
@@ -189,6 +204,14 @@ export interface FormidableField<T = string | null> {
   canLabelRest: Signal<boolean>;
   /** Whether the field renders a panel toggle inside its own box, which the value and a label must clear. */
   hasInFieldToggle?: Signal<boolean>;
+  /** Whether the decorator shows a clear button while `canClear`. */
+  clearable?: Signal<boolean>;
+  /** Whether the user could empty the field now: it is editable, and holds a value or typed text. */
+  canClear?: Signal<boolean>;
+  /** Empties the field as the user's edit. No-op while readonly or disabled, or for a field it cannot empty. */
+  clear?(): void;
+  /** Focuses the field without opening its panel. */
+  focus?(): void;
   valueAlignment?: FieldValueAlignment;
   decoratorLayout: FieldDecoratorLayout;
 }

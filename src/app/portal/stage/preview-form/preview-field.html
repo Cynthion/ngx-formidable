@@ -5,6 +5,7 @@
   <formidable-input-field
     [placeholder]="field.placeholder"
     [autoFocus]="field.state.autoFocus"
+    [clearable]="field.clearable"
     [mask]="field.mask"
     [maskConfig]="field.showMaskTyped ? { showMaskTyped: true } : undefined"
     [autocomplete]="field.autocompleteHint ?? 'off'"
@@ -14,6 +15,7 @@
   <formidable-textarea-field
     [placeholder]="field.placeholder"
     [autoFocus]="field.state.autoFocus"
+    [clearable]="field.clearable"
     [enableAutosize]="field.enableAutosize ?? true"
     [showLengthIndicator]="field.showLengthIndicator ?? false"
     [mask]="field.mask"
@@ -25,6 +27,7 @@
   <formidable-select-field
     [placeholder]="field.placeholder"
     [autoFocus]="field.state.autoFocus"
+    [clearable]="field.clearable"
     [defaultOption]="defaultOption()"
     [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
     [noOptionsText]="field.noOptionsText ?? 'No options available.'"
@@ -52,6 +55,7 @@
   <formidable-dropdown-field
     [placeholder]="field.placeholder"
     [autoFocus]="field.state.autoFocus"
+    [clearable]="field.clearable"
     [defaultOption]="defaultOption()"
     [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
     [actionOption]="actionOption()"
@@ -82,6 +86,7 @@
   <formidable-autocomplete-field
     [placeholder]="field.placeholder"
     [autoFocus]="field.state.autoFocus"
+    [clearable]="field.clearable"
     [defaultOption]="defaultOption()"
     [defaultOptionMode]="field.defaultOptionMode ?? 'always'"
     [actionOption]="actionOption()"
@@ -109,6 +114,7 @@
   <formidable-date-field
     [placeholder]="field.placeholder"
     [autoFocus]="field.state.autoFocus"
+    [clearable]="field.clearable"
     [unicodeTokenFormat]="field.unicodeTokenFormat ?? 'yyyy-MM-dd'"
     [emptyHint]="field.emptyHint ?? 'underscores'"
     [panelPosition]="panelPosition()"
@@ -129,6 +135,7 @@
   <formidable-time-field
     [placeholder]="field.placeholder"
     [autoFocus]="field.state.autoFocus"
+    [clearable]="field.clearable"
     [unicodeTokenFormat]="field.unicodeTokenFormat ?? 'HH:mm'"
     [emptyHint]="field.emptyHint ?? 'underscores'"
     [formField]="$any(fieldTree())"

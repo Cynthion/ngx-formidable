@@ -179,6 +179,27 @@
   @include field-suffix-inline;
 }
 
+// Hidden at rest, so a filled form shows no crosses, but kept in layout, so the value never moves when it
+// shows. A hidden button also leaves the tab order: `Shift` + `Tab` from the next field lands on the field.
+.clear-button {
+  @include field-clear-button;
+
+  visibility: hidden;
+}
+
+// `:focus-within` and not `.is-focused`, which follows the field only and would hide the button as `Tab`
+// reaches it.
+:host(:focus-within) .clear-button {
+  visibility: visible;
+}
+
+// A touch screen has no hover to end, so the button would stick.
+@media (hover: hover) {
+  :host(:hover) .clear-button {
+    visibility: visible;
+  }
+}
+
 .hint-wrapper {
   @include field-hint;
 }

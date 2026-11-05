@@ -61,7 +61,9 @@ class ScopedHost {}
   imports: IMPORTS,
   template: `
     <formidable-field-decorator>
-      <formidable-input-field name="a" />
+      <formidable-input-field
+        name="a"
+        [clearable]="undefined" />
       <div
         formidableFieldLabel
         [position]="undefined">
@@ -91,12 +93,14 @@ class ScopedHost {}
 })
 class UndefinedHost {}
 
-/** Every defaulted input, bound to a value that is neither the app default nor the library's own. */
+/** Every defaulted input, bound to a value that is not the app default, nor the library's own where one is left. */
 @Component({
   imports: IMPORTS,
   template: `
     <formidable-field-decorator>
-      <formidable-input-field name="a" />
+      <formidable-input-field
+        name="a"
+        [clearable]="false" />
       <div
         formidableFieldLabel
         position="inside-floating">
@@ -132,7 +136,8 @@ const DEFAULTS: Required<FormidableDefaults> = {
   suffixAlign: 'value',
   panelPosition: 'sheet',
   revealOn: 'dirty',
-  hideRequiredMarkers: true
+  hideRequiredMarkers: true,
+  clearable: true
 };
 
 /** What every readable defaulted input resolved to. The reveal and the marker are asserted by what renders. */
@@ -143,6 +148,7 @@ interface Resolved {
   dropdownPanel: string;
   autocompletePanel: string;
   datePanel: string;
+  clearable: boolean;
 }
 
 describe('app defaults', () => {
@@ -172,7 +178,8 @@ describe('app defaults', () => {
       suffixAlign: get(FieldSuffix).align(),
       dropdownPanel: get(DropdownField).panelPosition(),
       autocompletePanel: get(AutocompleteField).panelPosition(),
-      datePanel: get(DateField).panelPosition()
+      datePanel: get(DateField).panelPosition(),
+      clearable: get(InputField).clearable()
     };
   }
 
@@ -182,7 +189,8 @@ describe('app defaults', () => {
     suffixAlign: 'center',
     dropdownPanel: 'full',
     autocompletePanel: 'full',
-    datePanel: 'right'
+    datePanel: 'right',
+    clearable: false
   };
 
   const APP_DEFAULTS: Resolved = {
@@ -191,7 +199,8 @@ describe('app defaults', () => {
     suffixAlign: 'value',
     dropdownPanel: 'sheet',
     autocompletePanel: 'sheet',
-    datePanel: 'sheet'
+    datePanel: 'sheet',
+    clearable: true
   };
 
   it('keeps the library’s own without a provider, each panel field its own', async () => {
@@ -232,7 +241,8 @@ describe('app defaults', () => {
       suffixAlign: 'center',
       dropdownPanel: 'left',
       autocompletePanel: 'left',
-      datePanel: 'left'
+      datePanel: 'left',
+      clearable: false
     });
   });
 

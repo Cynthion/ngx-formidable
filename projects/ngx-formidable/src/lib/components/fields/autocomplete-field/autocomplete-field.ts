@@ -140,6 +140,20 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   /** The picked option's value, or `null` for none. Free text is not a value. */
   public readonly value = model<string | null>(null);
 
+  protected override readonly emptyValue = null;
+
+  /** Empties the field as the user's edit: the value, and the text typed without a pick. */
+  public override clear(): void {
+    if (!this.canEdit()) return;
+
+    // Trap: `value.set`, not `setValue`, which marks the value as rendered: a pick made with nothing typed would
+    // keep its label over the `null`. And the list is widened here, because the filter's render sees the input
+    // already empty and skips it.
+    this.value.set(null);
+    this.filter.set('');
+    this.updateFilteredOptions(this.allOptions());
+  }
+
   // Whatever the input shows counts: the filter being typed, or a picked label, which a pick from the list
   // renders with nothing typed.
   protected override readonly isFieldFilled = computed(() => this.filter().length > 0 || !!this.selectedOption());

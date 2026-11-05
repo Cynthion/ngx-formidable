@@ -46,13 +46,13 @@ Every public component, directive, token and type, and what each accepts. How th
 
 ## Setup
 
-| Symbol                          | Kind      | Purpose                                                                                                                                                       |
-| :------------------------------ | :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `provideNgxFormidable(config?)` | function  | Registers ngx-mask and the library's tokens. Goes in the `app.config.ts` providers, or an NgModule's root `providers`                                         |
-| `NgxFormidableConfig`           | interface | Its argument: `{ globalMaskConfig?: Partial<NgxMaskConfig>; defaults?: FormidableDefaults; icons?: FormidableIcons }`                                         |
-| `FormidableDefaults`            | interface | `labelPosition`, `prefixAlign`, `suffixAlign`, `panelPosition`, `revealOn`, `hideRequiredMarkers`, all optional                                               |
-| `FormidableIcons`               | interface | `fieldToggle`, `fieldToggleOpen`, `dateFieldToggle`, `dateFieldToggleOpen`, `dateFieldPanelPrevious`, `dateFieldPanelNext`, each an optional `FormidableIcon` |
-| `FormidableIcon`                | interface | `{ component: Type<unknown>; inputs?: Record<string, unknown> }`, rendered as `NgComponentOutlet` renders it                                                  |
+| Symbol                          | Kind      | Purpose                                                                                                                                                                     |
+| :------------------------------ | :-------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `provideNgxFormidable(config?)` | function  | Registers ngx-mask and the library's tokens. Goes in the `app.config.ts` providers, or an NgModule's root `providers`                                                       |
+| `NgxFormidableConfig`           | interface | Its argument: `{ globalMaskConfig?: Partial<NgxMaskConfig>; defaults?: FormidableDefaults; icons?: FormidableIcons }`                                                       |
+| `FormidableDefaults`            | interface | `labelPosition`, `prefixAlign`, `suffixAlign`, `panelPosition`, `revealOn`, `hideRequiredMarkers`, `clearable`, all optional                                                |
+| `FormidableIcons`               | interface | `fieldToggle`, `fieldToggleOpen`, `dateFieldToggle`, `dateFieldToggleOpen`, `dateFieldPanelPrevious`, `dateFieldPanelNext`, `fieldClear`, each an optional `FormidableIcon` |
+| `FormidableIcon`                | interface | `{ component: Type<unknown>; inputs?: Record<string, unknown> }`, rendered as `NgComponentOutlet` renders it                                                                |
 
 `globalMaskConfig` lands on `FORMIDABLE_MASK_DEFAULTS`, `defaults` on `FORMIDABLE_DEFAULTS` and `icons` on `FORMIDABLE_ICONS`. What each default sets, and how a component scopes them, is in [Getting Started](getting-started.md). So is the stylesheet import. What each icon replaces is under **Icons** in [Fields](fields.md).
 
@@ -62,21 +62,22 @@ Every public component, directive, token and type, and what each accepts. How th
 
 Every field extends `BaseField` and is Angular's `FormValueControl`: `[formField]`, `[formControl]`, `formControlName` and `ngModel` all bind it through `value`, with no value accessor.
 
-| Input         | Type                         | Default     | Description                                                                           |
-| :------------ | :--------------------------- | :---------- | :------------------------------------------------------------------------------------ |
-| `value`       | The field's value type       | Per field   | The model, bound two-way by the forms API. The field writes it only for a user's edit |
-| `name`        | `string`                     | `''`        | The native `name` of the field's control                                              |
-| `placeholder` | `string`                     | `''`        | Placeholder text                                                                      |
-| `readonly`    | `boolean`                    | `false`     | Blocks edits and leaves the tab order. A click or `focus()` still focuses it          |
-| `disabled`    | `boolean`                    | `false`     | Blocks edits, leaves the tab order and ignores `focus()`                              |
-| `required`    | `boolean`                    | `false`     | Marks the label and sets `aria-required`. Validates nothing                           |
-| `autoFocus`   | `boolean`                    | `false`     | Focuses the field once its view is ready. Opens no panel                              |
-| `revealOn`    | `FormidableReveal`           | `undefined` | When the messages appear. Unset: `FORMIDABLE_DEFAULTS.revealOn`, then `'touched'`     |
-| `errors`      | `readonly ValidationError[]` | `[]`        | The errors the forms API holds                                                        |
-| `invalid`     | `boolean`                    | `false`     | Whether the forms API holds the field invalid                                         |
-| `pending`     | `boolean`                    | `false`     | Whether a validator is still running                                                  |
-| `touched`     | `boolean`                    | `false`     | Whether the user has left the field                                                   |
-| `dirty`       | `boolean`                    | `false`     | Whether the user has edited the field                                                 |
+| Input         | Type                         | Default     | Description                                                                                                                                              |
+| :------------ | :--------------------------- | :---------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `value`       | The field's value type       | Per field   | The model, bound two-way by the forms API. The field writes it only for a user's edit                                                                    |
+| `name`        | `string`                     | `''`        | The native `name` of the field's control                                                                                                                 |
+| `placeholder` | `string`                     | `''`        | Placeholder text                                                                                                                                         |
+| `readonly`    | `boolean`                    | `false`     | Blocks edits and leaves the tab order. A click or `focus()` still focuses it                                                                             |
+| `disabled`    | `boolean`                    | `false`     | Blocks edits, leaves the tab order and ignores `focus()`                                                                                                 |
+| `required`    | `boolean`                    | `false`     | Marks the label and sets `aria-required`. Validates nothing                                                                                              |
+| `autoFocus`   | `boolean`                    | `false`     | Focuses the field once its view is ready. Opens no panel                                                                                                 |
+| `revealOn`    | `FormidableReveal`           | `undefined` | When the messages appear. Unset: `FORMIDABLE_DEFAULTS.revealOn`, then `'touched'`                                                                        |
+| `clearable`   | `boolean`                    | `undefined` | Shows a clear button in the decorator's suffix. Unset: `FORMIDABLE_DEFAULTS.clearable`, then `false`. No effect on the toggle, the slider and the groups |
+| `errors`      | `readonly ValidationError[]` | `[]`        | The errors the forms API holds                                                                                                                           |
+| `invalid`     | `boolean`                    | `false`     | Whether the forms API holds the field invalid                                                                                                            |
+| `pending`     | `boolean`                    | `false`     | Whether a validator is still running                                                                                                                     |
+| `touched`     | `boolean`                    | `false`     | Whether the user has left the field                                                                                                                      |
+| `dirty`       | `boolean`                    | `false`     | Whether the user has edited the field                                                                                                                    |
 
 The forms API writes these state inputs from what it holds. Which API writes which is **Compatibility By Feature** in [Forms](forms.md): bind one by hand only where the API does not, and never beside `[formField]`.
 
@@ -85,14 +86,16 @@ The forms API writes these state inputs from what it holds. Which API writes whi
 | `valueChange` | `T`    | A user's edit, and never otherwise |
 | `touch`       | `void` | As the last act of a blur          |
 
-| Member            | Kind   | Description                                                                              |
-| :---------------- | :----- | :--------------------------------------------------------------------------------------- |
-| `focus(options?)` | method | Focuses the field, taking `FocusOptions`. Opens no panel. Does nothing while `disabled`  |
-| `fieldId`         | getter | Unique per instance. Every id around and inside the field derives from it                |
-| `isFieldFocused`  | signal | Whether focus is inside the field                                                        |
-| `showErrors`      | signal | Whether the field is invalid and its reveal has come. Drives `aria-invalid`              |
-| `shownErrors`     | signal | The errors the decorator renders: none until `showErrors`, the last ones while `pending` |
-| `canLabelRest`    | signal | Whether nothing occupies the value area, so a label may rest there                       |
+| Member            | Kind   | Description                                                                                                                                                         |
+| :---------------- | :----- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `focus(options?)` | method | Focuses the field, taking `FocusOptions`. Opens no panel. Does nothing while `disabled`                                                                             |
+| `clear()`         | method | Empties the field as the user's edit, typed text included. Moves no focus. Does nothing while `readonly` or `disabled`, or on the toggle, the slider and the groups |
+| `canClear`        | signal | Whether `clear()` has something to empty and the user can edit the field                                                                                            |
+| `fieldId`         | getter | Unique per instance. Every id around and inside the field derives from it                                                                                           |
+| `isFieldFocused`  | signal | Whether focus is inside the field                                                                                                                                   |
+| `showErrors`      | signal | Whether the field is invalid and its reveal has come. Drives `aria-invalid`                                                                                         |
+| `shownErrors`     | signal | The errors the decorator renders: none until `showErrors`, the last ones while `pending`                                                                            |
+| `canLabelRest`    | signal | Whether nothing occupies the value area, so a label may rest there                                                                                                  |
 
 Focus and the caret are in [Fields](fields.md), the reveal in [Validation](validation.md), and how the model flows in [Forms](forms.md).
 
@@ -133,7 +136,7 @@ Taken by `date-field` and `time-field`.
 | `unicodeTokenFormat` | `string`              | `'yyyy-MM-dd'`, time `'HH.mm'` | The date-fns token string the field masks, parses and formats with |
 | `emptyHint`          | `FormidableEmptyHint` | `'underscores'`                | What an empty, unfocused field shows                               |
 
-`clear()` empties the field as the user's edit, text typed but not committed included.
+Text typed but not committed counts for `canClear`, and `clear()` drops it with its `parse` error.
 
 A date format takes the fixed-width tokens `yy`, `yyyy`, `MM`, `MMM` and `dd`, a time format `HH`, `hh`, `mm`, `ss`, `a` and `aa`, with any separators or none, such as `dd.MM.yyyy` or `yyyyMMdd`. The mask has one slot per character, so a variable-width token such as `d` or `MMMM`, quoted text, and a format with no token at all log a warning and fall back to the default. So does `a` or `aa` right before a dot, which date-fns reads as part of the AM/PM. Committing, parse errors and the arrow keys are in **Dates And Times** in [Fields](fields.md).
 
@@ -199,7 +202,7 @@ Typing highlights the first option whose label starts with what was typed, see *
 | :------------- | :------- | :--------------------------------------------------------------------------------------------------------------- |
 | `filterChange` | `string` | The filter changes: the user types, or a value written from outside moves it. Not for a write through `[filter]` |
 
-Typing filters the list by each option's `match`, by default a case-insensitive substring of its label. Only an option can be committed: free text is not a value. The default option and the action entry are applied after filtering, so both stay visible when nothing matches. `filter` is writable, which is how a clear button empties text typed without a pick. What `filterChange` reports, and what a write to `filter` does, is in **Options** in [Fields](fields.md).
+Typing filters the list by each option's `match`, by default a case-insensitive substring of its label. Only an option can be committed: free text is not a value. The default option and the action entry are applied after filtering, so both stay visible when nothing matches. `filter` is writable, and `clear()` empties it with the value, which `filterChange` reports. What `filterChange` reports, and what a write to `filter` does, is in **Options** in [Fields](fields.md).
 
 ### Date Field
 
@@ -286,7 +289,7 @@ No inputs of its own. The value holds the picked options' values in the order th
 
 `formidable-field-decorator` · No inputs
 
-Wraps one projected field, which it finds through `FORMIDABLE_FIELD`, and renders the [decoration directives](#directives), the required marker and the field's messages around it. Each field picks its own layout. Slots, layouts and labels are in [Decoration](decoration.md).
+Wraps one projected field, which it finds through `FORMIDABLE_FIELD`, and renders the [decoration directives](#directives), the required marker, the field's messages and a `clearable` field's clear button around it. Each field picks its own layout. Slots, layouts and labels are in [Decoration](decoration.md).
 
 Its host carries the field's state as classes: `is-readonly`, `is-disabled`, `is-focused`, `is-invalid`, `label-resting`, `label-inside`, `has-in-field-toggle`, `has-open-panel` and `has-open-sheet`. A field used without a decorator carries `is-undecorated`, `has-open-panel` and `has-open-sheet` on its own host.
 
@@ -364,16 +367,17 @@ Projected into a [`formidable-field-decorator`](#field-decorator), beside the fi
 
 ## Tokens And Constants
 
-| Token Or Constant          | Purpose                                                                                             |
-| :------------------------- | :-------------------------------------------------------------------------------------------------- |
-| `FORMIDABLE_FIELD`         | Identifies a field to its decorator. A custom field provides it                                     |
-| `FORMIDABLE_OPTION_FIELD`  | Identifies a field that hosts options. A custom option field provides it                            |
-| `FORMIDABLE_OPTION`        | Identifies an option to its field. A custom option provides it                                      |
-| `FORMIDABLE_MASK_DEFAULTS` | App-wide ngx-mask options, set by `provideNgxFormidable`                                            |
-| `FORMIDABLE_DEFAULTS`      | App-wide `FormidableDefaults`, set by `provideNgxFormidable` or scoped by a component's `providers` |
-| `FORMIDABLE_ICONS`         | App-wide `FormidableIcons`, set by `provideNgxFormidable` or scoped by a component's `providers`    |
-| `FORMIDABLE_ERROR_MESSAGE` | Turns an error into its message text. Default: its `message`, else its `kind`                       |
-| `NO_OPTIONS_TEXT`          | The default `noOptionsText`: `'No options available.'`                                              |
+| Token Or Constant          | Purpose                                                                                                                        |
+| :------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
+| `FORMIDABLE_FIELD`         | Identifies a field to its decorator. A custom field provides it                                                                |
+| `FORMIDABLE_OPTION_FIELD`  | Identifies a field that hosts options. A custom option field provides it                                                       |
+| `FORMIDABLE_OPTION`        | Identifies an option to its field. A custom option provides it                                                                 |
+| `FORMIDABLE_MASK_DEFAULTS` | App-wide ngx-mask options, set by `provideNgxFormidable`                                                                       |
+| `FORMIDABLE_DEFAULTS`      | App-wide `FormidableDefaults`, set by `provideNgxFormidable` or scoped by a component's `providers`                            |
+| `FORMIDABLE_ICONS`         | App-wide `FormidableIcons`, set by `provideNgxFormidable` or scoped by a component's `providers`                               |
+| `FORMIDABLE_ERROR_MESSAGE` | Turns an error into its message text. Default: its `message`, else its `kind`                                                  |
+| `FORMIDABLE_CLEAR_LABEL`   | Turns a label's text into its clear button's accessible name. Default: `Clear` and the text, the `placeholder` without a label |
+| `NO_OPTIONS_TEXT`          | The default `noOptionsText`: `'No options available.'`                                                                         |
 
 ---
 
@@ -394,15 +398,16 @@ Projected into a [`formidable-field-decorator`](#field-decorator), beside the fi
 | `FormidableReveal`                   | `'touched' \| 'dirty' \| 'always'`                                                                  |
 | `FormidableToggleFieldLabelPosition` | `'before' \| 'after'`                                                                               |
 | `FormidableErrorMessageFn`           | `(error: ValidationError) => string`                                                                |
+| `FormidableClearLabelFn`             | `(label: string) => string`                                                                         |
 
-| Interface                | Implemented By               | Members                                                                                                                         |
-| :----------------------- | :--------------------------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| `FormidableOption<T>`    | Plain data                   | `value`, and optional `label`, `template`, `readonly`, `disabled`, `match(filter)`. `label` falls back to `value`               |
-| `FormidableActionOption` | Plain data                   | A `FormidableOption` plus a required `action(): void`                                                                           |
-| `FormidableField<T>`     | Every field                  | What the decorator reads off a field: `fieldRef`, `fieldId`, `value`, its state, `showErrors`, `shownErrors`, `decoratorLayout` |
-| `FormidableOptionField`  | The five option fields       | `options`, `defaultOption`, `defaultOptionMode`, `sortFn`, `selectOption`, and an optional `optionRole`                         |
-| `FormidableOptionSource` | `FieldOption`                | `option`: the plain option a component hands the field that owns it                                                             |
-| `FormidablePanelField`   | Dropdown, autocomplete, date | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                                                                       |
+| Interface                | Implemented By               | Members                                                                                                                                                                                                                |
+| :----------------------- | :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FormidableOption<T>`    | Plain data                   | `value`, and optional `label`, `template`, `readonly`, `disabled`, `match(filter)`. `label` falls back to `value`                                                                                                      |
+| `FormidableActionOption` | Plain data                   | A `FormidableOption` plus a required `action(): void`                                                                                                                                                                  |
+| `FormidableField<T>`     | Every field                  | What the decorator reads off a field: `fieldRef`, `fieldId`, `value`, its state, `showErrors`, `shownErrors`, `decoratorLayout`, and the optional `clearable`, `canClear`, `clear()` and `focus()` of its clear button |
+| `FormidableOptionField`  | The five option fields       | `options`, `defaultOption`, `defaultOptionMode`, `sortFn`, `selectOption`, and an optional `optionRole`                                                                                                                |
+| `FormidableOptionSource` | `FieldOption`                | `option`: the plain option a component hands the field that owns it                                                                                                                                                    |
+| `FormidablePanelField`   | Dropdown, autocomplete, date | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                                                                                                                                                              |
 
 Every input member of an interface is typed as the `Signal` the component declares. `FormidableOption` is the exception, because a consumer writes it by hand.
 

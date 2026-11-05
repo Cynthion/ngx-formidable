@@ -71,6 +71,8 @@ export class DropdownField extends BaseOptionField<string | null> implements OnI
   /** The picked option's value, or `null` for none. */
   public readonly value = model<string | null>(null);
 
+  protected override readonly emptyValue = null;
+
   get fieldRef(): ElementRef<HTMLElement> {
     return this.dropdownRef() as ElementRef<HTMLElement>;
   }

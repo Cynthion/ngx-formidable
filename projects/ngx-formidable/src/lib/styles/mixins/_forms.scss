@@ -888,6 +888,9 @@
 @mixin field-suffix-horizontal {
   @include field-prefix-horizontal;
 
+  display: flex;
+  align-items: center;
+  column-gap: utils.rem(4);
   left: unset;
   right: field-toggle-inset();
 }
@@ -929,6 +932,21 @@
 @mixin field-suffix-inline {
   color: var(--formidable-color-field-text, #{tokens.$formidable-color-field-text});
   margin-left: utils.rem(8);
+}
+
+// The clear button a `clearable` field shows after its suffix: the icon's own box is the target,
+// so it is as large as the icon and never smaller than 24px.
+@mixin field-clear-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: utils.rem(24);
+  min-height: utils.rem(24);
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 // #endregion

@@ -1,7 +1,7 @@
 @use '../tokens' as tokens;
 
 // The box every icon the library draws shares, at the one size `--formidable-icon-size` sets. A provided icon
-// is centred in it; the library's own chevron fills it, stroked in the text colour on the 24-unit grid.
+// is centred in it; the library's own icon fills it, stroked in the text colour on the 24-unit grid.
 @mixin field-icon {
   display: flex;
   flex: none;

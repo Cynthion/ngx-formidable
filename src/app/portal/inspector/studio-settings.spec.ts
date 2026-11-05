@@ -199,8 +199,13 @@ describe('studio settings', () => {
       await userEvent.click(page.getByRole('checkbox', { name: 'Adornments' }));
       await userEvent.selectOptions(page.getByRole('combobox', { name: 'Prefix', exact: true }), 'text');
 
+      // The prefixes: a filled `clearable` field shows a suffix wrapper too, for its clear button.
       const wrappers = (): HTMLElement[] =>
-        Array.from(document.querySelectorAll<HTMLElement>('portal-stage .adornment-wrapper:not(.hidden)'));
+        Array.from(
+          document.querySelectorAll<HTMLElement>(
+            'portal-stage .adornment-wrapper:not(.hidden):has(> [formidableFieldPrefix])'
+          )
+        );
 
       await expect.poll(() => wrappers().length).toBeGreaterThan(0);
       expect(wrappers().every((wrapper) => wrapper.classList.contains('align-value'))).toBe(false);
@@ -240,7 +245,7 @@ describe('studio settings', () => {
     it('swaps the library’s chevrons for the provided icons, and back', async () => {
       await openStudio();
       await openPanel('Form', 'Settings', 'App Defaults');
-      const icons = page.getByRole('combobox', { name: 'Toggles And Month Arrows' });
+      const icons = page.getByRole('combobox', { name: 'Toggles, Month Arrows And Clear Buttons' });
       const sizeToggle = () =>
         page
           .getByRole('combobox', { name: 'Size' })
@@ -276,7 +281,10 @@ describe('studio settings', () => {
     it('lets a field project its own toggle icon over the provided ones', async () => {
       await openStudio();
       await openPanel('Form', 'Settings', 'App Defaults');
-      await userEvent.selectOptions(page.getByRole('combobox', { name: 'Toggles And Month Arrows' }), 'custom');
+      await userEvent.selectOptions(
+        page.getByRole('combobox', { name: 'Toggles, Month Arrows And Clear Buttons' }),
+        'custom'
+      );
       await openPanel('Form', 'Settings', 'This Field');
       await editField('Size');
       const toggle = () =>
@@ -303,7 +311,10 @@ describe('studio settings', () => {
     it('gives a date field without a projected icon the provided date toggles', async () => {
       await openStudio();
       await openPanel('Form', 'Settings', 'App Defaults');
-      await userEvent.selectOptions(page.getByRole('combobox', { name: 'Toggles And Month Arrows' }), 'custom');
+      await userEvent.selectOptions(
+        page.getByRole('combobox', { name: 'Toggles, Month Arrows And Clear Buttons' }),
+        'custom'
+      );
       await openPanel('Form', 'Settings', 'This Field');
       await editField('Date');
       await userEvent.click(page.getByRole('checkbox', { name: 'Projected Toggle Icon' }));

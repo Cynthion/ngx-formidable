@@ -54,6 +54,8 @@ export class SelectField extends BaseOptionListField<string | null> {
    */
   public readonly value = model<string | null>(null);
 
+  protected override readonly emptyValue = null;
+
   get fieldRef(): ElementRef<HTMLElement> {
     return this.selectRef() as ElementRef<HTMLElement>;
   }

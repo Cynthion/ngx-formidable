@@ -168,9 +168,37 @@ Each slot picks what it follows vertically:
 
 The two differ only where a label sits over the value: with an `outside` or `border` label the value is already centred, so `value` changes nothing. A field that top-aligns its value, like the textarea, always aligns with it and ignores the setting.
 
+### Clear Button
+
+`clearable` on a field shows a button that empties the field, after any projected suffix and before the field's own toggle. It is off by default; `clearable` in the app defaults turns it on for every field, and a binding still wins. A bare `clearable` attribute is on.
+
+```html
+<formidable-field-decorator>
+  <formidable-input-field
+    clearable
+    [formField]="form.lastName" />
+  <div formidableFieldLabel>Last Name</div>
+</formidable-field-decorator>
+```
+
+- **When It Exists**: while the field holds something to clear and is neither `readonly` nor `disabled`. The date and time fields count text typed but not committed, the autocomplete text typed without a pick.
+- **When It Shows**: hidden at rest, so a filled form shows none. It shows while the pointer is over the decorator, on a device with hover, and while focus is inside the decorator. Hidden, it keeps its width, so the value never moves, and it leaves the tab order, so `Shift` + `Tab` from the next field lands on the field.
+- **A Click Is The User's Edit**: the field empties to `''` for the input and the textarea, to `null` for the others, and focus returns to the field. The date and time fields drop text typed but not committed with its `parse` error; the autocomplete drops text typed without a pick, and `filterChange` reports the empty filter. An open panel closes, as on any click outside the field's own box.
+- **Dirty Only Where The Model Moves**: text typed into an empty date, or into an autocomplete without a pick, leaves the model `null`, so its clear dirties nothing. The messages follow `revealOn`: a click touches nothing, while `Tab` to the button has already left the field.
+- **Alignment**: it shares the suffix's slot, so it follows the projected suffix's `align`, or `suffixAlign` in the app defaults where none is projected.
+- **Keyboard**: `Tab` from the field reaches the button, `Enter` or `Space` clears.
+- **Accessible Name**: `Clear` and the label's text, such as `Clear Last Name`; the `placeholder` without a label; `Clear` with neither. `FORMIDABLE_CLEAR_LABEL` replaces the wording, for a translation or another word order:
+
+```ts
+providers: [{ provide: FORMIDABLE_CLEAR_LABEL, useValue: (label: string) => `Clear ${label} now!` }];
+```
+
+- **Icon**: `fieldClear` replaces the cross, see **Icons** in [Fields](fields.md).
+- **No Effect**: on the toggle, the slider and the two groups, which have nothing to empty to.
+
 ### Actions
 
-A prefix and a suffix are click-through, so a text adornment over the field's edge still focuses the field. A projected `button` or `a` is the exception: it takes the click, which is all a clear, copy, retry or loading action needs. The library ships no such components; the button, icon or label is projected content.
+A prefix and a suffix are click-through, so a text adornment over the field's edge still focuses the field. A projected `button` or `a` is the exception: it takes the click, which is all a clear, copy, retry or loading action needs. Apart from the **Clear Button**, the library renders no such action; the button, icon or label is projected content.
 
 Every action needs two attributes:
 
@@ -179,22 +207,7 @@ Every action needs two attributes:
 
 The decorator re-measures its slots whenever their width changes, so an action that appears, disappears or swaps its content re-insets the field on its own, and a panel toggle stays where it is. A slot whose content renders nothing insets nothing, so the `@if` can sit inside it, or inside a consumer component. There is no refresh call, because none is needed.
 
-**Clear**: the button only exists while there is something to clear.
-
-```html
-<div formidableFieldSuffix>
-  @if (form.firstName().value()) {
-  <button
-    type="button"
-    (mousedown)="$event.preventDefault()"
-    (click)="form.firstName().value.set('')">
-    &times;
-  </button>
-  }
-</div>
-```
-
-**Clear A Search**: an autocomplete also holds text typed without a pick, which only its `filter` empties. The button writes both, see **The Filter Is Writable** in [Fields](fields.md).
+**Clear**: a button of one's own, where `clearable` is not enough, such as one that gives way to a spinner while a search loads. The field's `clear()` empties it as the **Clear Button** does, typed text included, and `canClear()` says when there is something to clear. Writing the model instead misses text typed without a pick, and a date's text typed but not committed.
 
 ```html
 <formidable-field-decorator>
@@ -203,32 +216,14 @@ The decorator re-measures its slots whenever their width changes, so an action t
     [options]="addresses"
     [formField]="form.address" />
   <div formidableFieldSuffix>
-    @if (form.address().value() || search.filter()) {
+    @if (search.canClear()) {
     <button
       type="button"
       (mousedown)="$event.preventDefault()"
-      (click)="form.address().value.set(null); search.filter.set('')">
+      (click)="search.clear()">
       &times;
     </button>
     }
-  </div>
-</formidable-field-decorator>
-```
-
-**Clear A Date Or Time**: a date or time field also holds text typed but not committed, which writing `null` misses while the model is `null` already. Its `clear()` drops both, see **Dates And Times** in [Fields](fields.md). That text is not visible from outside, so the button stays.
-
-```html
-<formidable-field-decorator>
-  <formidable-date-field
-    #when
-    [formField]="form.when" />
-  <div formidableFieldSuffix>
-    <button
-      type="button"
-      (mousedown)="$event.preventDefault()"
-      (click)="when.clear()">
-      &times;
-    </button>
   </div>
 </formidable-field-decorator>
 ```

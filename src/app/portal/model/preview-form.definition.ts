@@ -253,6 +253,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     label: 'Delivery Address',
     placeholder: 'Start typing a street…',
     span: 2,
+    clearable: true,
     options: ADDRESSES,
     // Last in the list and exempt from the filter, so it is there precisely when nothing matched. It runs
     // the page's own create process instead of committing a value — see `user/fields.md`.
@@ -291,6 +292,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     kind: 'date',
     sectionId: 'when',
     label: 'Date',
+    clearable: true,
     unicodeTokenFormat: 'dd . MM . yyyy',
     emptyHint: 'format',
     locale: 'en-GB',
@@ -346,6 +348,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
     sectionId: 'order',
     label: 'Name On The Order',
     placeholder: 'Who is it for?',
+    clearable: true,
     decoration: { ...DECORATION, markRequired: true }
   }),
   // The custom field sits late: a cart quantity belongs beside the order, not at the top of the pizza, and

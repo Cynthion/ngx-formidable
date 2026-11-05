@@ -77,14 +77,14 @@
   <label
     for="ad-icons"
     class="pc-label">
-    <span class="pc-label-name">Toggles And Month Arrows</span>
+    <span class="pc-label-name">Toggles, Month Arrows And Clear Buttons</span>
   </label>
   <select
     id="ad-icons"
     class="pc-select"
     [portalSelectedValue]="customIcons() ? 'custom' : ''"
     (change)="customIcons.set($any($event.target).value === 'custom')">
-    <option value="">Library Default (Chevrons)</option>
+    <option value="">Library Default (Chevrons And A Cross)</option>
     <option value="custom">Custom</option>
   </select>
   <p class="pc-help">
