@@ -27,6 +27,10 @@
   @include panel-scrollcontainer;
 }
 
+.panel-resize-handle {
+  @include panel-resize-handle;
+}
+
 .no-option {
   @include panel-no-option;
 }

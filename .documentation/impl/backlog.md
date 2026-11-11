@@ -19,8 +19,6 @@ External:
 - [ ] Modernize Flyout and Backdrop Layering:
   - [MDN `::backdrop`](https://developer.mozilla.org/en-US/docs/Web/CSS/::backdrop)
   - [CSS Anchor Positioning](https://developer.chrome.com/blog/tether-elements-to-each-other-with-css-anchor-positioning?hl=de)
-- **Panel Resize**: allow the panel to be resized to show more/less options; it's probably best to keep the size "stored" per field in a form and not generalize it
-- **Panel Jumps**: add a delay between panel orientation switches; it currently happens that it switches sides on every value change (results change for displayed options) and the panel jumps up and down
 - **Typeahead UX**: type-ahead feels unnatural and intransparent, improve UX
 - **AI Support**: help developers use this library through AI. Open question: an MCP server, or other ways.
 - **Date Range Field**: the largest item here. Split it before starting.

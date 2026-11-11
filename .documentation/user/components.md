@@ -150,7 +150,7 @@ Taken by `dropdown-field`, `combobox-field` and `date-field`.
 | `isPanelOpen`         | signal | `boolean`                 | `false`                  | Whether the panel is open                                         |
 | `togglePanel(isOpen)` | method |                           |                          | Opens or closes the panel                                         |
 
-There is no `isPanelOpen` input: the field closes its panel by itself, on a pick, an outside click or `Escape`. `togglePanel` is reached through a template reference or a `viewChild()`, as `focus()` is. Placement is in **Panels** in [Fields](fields.md).
+There is no `isPanelOpen` input: the field closes its panel by itself, on a pick, an outside click or `Escape`. `togglePanel` is reached through a template reference or a `viewChild()`, as `focus()` is. Placement, and the handle that resizes the dropdown's and the combobox's panels, are in **Panels** in [Fields](fields.md).
 
 ---
 
@@ -460,13 +460,16 @@ The field merges, sorts and renders its options, and a highlight field walks the
 
 The base then keeps focus in the field while the panel is used, closes the panel on a click outside the field, and places it on open and on every scroll or resize while it is open.
 
-| Member                          | Wire It                                                    |
-| :------------------------------ | :--------------------------------------------------------- |
-| `panel`                         | Override the getter to return the field                    |
-| `onPanelToggleMouseDown(event)` | Bind to the toggle's `mousedown`                           |
-| `onPanelMouseDown(event)`       | Bind to the panel's `mousedown`                            |
-| `onPanelToggle(isOpen)`         | Call from `togglePanel`                                    |
-| `panelId`                       | Bind as the panel's `id` and the control's `aria-controls` |
+| Member                          | Wire It                                                           |
+| :------------------------------ | :---------------------------------------------------------------- |
+| `panel`                         | Override the getter to return the field                           |
+| `onPanelToggleMouseDown(event)` | Bind to the toggle's `mousedown`                                  |
+| `onPanelMouseDown(event)`       | Bind to the panel's `mousedown`                                   |
+| `onPanelToggle(isOpen)`         | Call from `togglePanel`                                           |
+| `panelId`                       | Bind as the panel's `id` and the control's `aria-controls`        |
+| `onPanelResizeStart(event)`     | Bind to a resize handle's `pointerdown`, for a panel that has one |
+| `onPanelResize(event)`          | Bind to that handle's `pointermove`                               |
+| `onPanelResizeReset()`          | Bind to that handle's `dblclick`                                  |
 
 ---
 

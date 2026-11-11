@@ -241,6 +241,10 @@ $formidable-color-field-option-background-selected: rgb(0 0 0 / 2.5%);
 $formidable-color-field-option-background-highlighted: rgb(0 0 0 / 5%);
 $formidable-color-field-option-background-hovered: rgb($formidable-color-field-placeholder, 25%);
 
+// The grip on the handle a dropdown's or combobox's panel is resized by.
+$formidable-color-panel-resize-handle: $formidable-color-field-border;
+$formidable-color-panel-resize-handle-hovered: $formidable-color-field-border-focus;
+
 // One ring width for all three: a ring differs by colour, never by size.
 $formidable-color-field-focus-box-shadow: 0 0 0 $formidable-field-focus-ring-width $formidable-color-field-border-focus;
 $formidable-color-field-group-focus-box-shadow: 0 0 0 $formidable-field-focus-ring-width
@@ -371,6 +375,10 @@ $formidable-panel-background: $formidable-color-field-background;
 $formidable-panel-border-radius: $formidable-border-radius;
 $formidable-panel-box-shadow: utils.rem(0) utils.rem(12) utils.rem(48) calc(utils.rem(8) * -1) rgb(0 0 0 / 12%);
 $formidable-panel-max-height: 33dvh; // 1/3 of the viewport actually visible — mobile chrome collapses `vh`
+$formidable-panel-min-height: $formidable-field-height;
+$formidable-panel-resize-handle-height: utils.rem(12);
+$formidable-panel-resize-handle-grip-width: utils.rem(32); // the bar drawn centred in the strip
+$formidable-panel-resize-handle-grip-height: utils.rem(4);
 
 // #endregion
 

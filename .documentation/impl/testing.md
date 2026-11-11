@@ -91,7 +91,7 @@ The `helpers/` modules are pure functions and the cheapest place to find an edge
 | Masking            | `mask.helpers.ts`     | Over any mask of the built-in tokens: its display length range, and that the default placeholder is never taken for content   |
 | Caret              | `input.helpers.ts`    | Over any mask filled from the front: where its value ends; and that writing the text already shown keeps the selection        |
 | Options            | `option.helpers.ts`   | Over any list of options: the arrows land only on options a user can pick, visit all of them in order, and wrap at both ends  |
-| Panel placement    | `position.helpers.ts` | Over any field, panel height and clipping panes: the side it opens on, the field left alone, no sheet ever flipped            |
+| Panel placement    | `position.helpers.ts` | Over any field, panel height and clipping panes: the side it opens on and keeps, the field left alone, no sheet ever flipped  |
 
 Behaviour that carries real risk is tested through a minimal host rather than the framework around it:
 

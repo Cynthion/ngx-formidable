@@ -153,9 +153,11 @@ The recipe relies on three facts:
 | `full`  | Anchored across the field's full width                                         |
 | `sheet` | Fixed across the bottom of the viewport, full width, square at the screen edge |
 
-The three anchored values flip above the field when the panel fits there and not below, measured within the viewport and every ancestor that clips its overflow, and adopt the two field corners they sit against so the pair reads as one box. A sheet never flips.
+The three anchored values flip above the field when the panel fits there and not below, measured within the viewport and every ancestor that clips its overflow, and adopt the two field corners they sit against so the pair reads as one box. An open panel keeps its side while it still fits there, however its list changes under it, and moves only once that side has no room left and the other has. A sheet never flips.
 
 Opening a panel scrolls the field, or the panel, into view, but only the one that the viewport actually cuts off.
+
+The dropdown's and the combobox's panels are resizable. A handle along the panel's far edge, the bottom below the field and the top above it, drags the height the panel may take: away from the field for more options, towards it for fewer. A list narrowed under that height still shrinks the panel to its rows, and no drag goes below `--formidable-panel-min-height`. The height holds for as long as the field lives, through closing and reopening, and nothing persists it beyond that; a double-click on the handle returns the panel to the height its theme gives it. The handle takes a pointer only, since the panel keeps focus in the field's input. A sheet and the calendar have no handle.
 
 ```html
 <formidable-date-field
