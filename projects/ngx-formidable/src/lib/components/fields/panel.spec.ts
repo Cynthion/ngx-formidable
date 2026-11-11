@@ -193,6 +193,51 @@ describe('panel', () => {
   }
 
   /**
+   * The side a panel is on is kept while its list changes under it: a list that grows past the room below
+   * flips the panel above, and one that shrinks again leaves it there, where it still fits. Each opening starts
+   * afresh.
+   */
+  describe('of combobox-field, as its list changes', () => {
+    const FEW = OPTIONS.slice(0, 1);
+    const MANY = Array.from({ length: 30 }, (_, index) => ({ value: `o${index}`, label: `Option ${index}` }));
+    const spacer = '<div style="height: 100vh"></div>';
+
+    it('keeps its side while it still fits there, and opens afresh', async () => {
+      const field = await bindField('combobox', 'signal', {
+        inputs: { options: FEW },
+        decorated: true,
+        decoration: '<div formidableFieldLabel>Choice</div>',
+        before: spacer,
+        after: spacer
+      });
+      const panel = field.element.querySelector('.panel')!;
+      const input = () => combobox().element().getBoundingClientRect();
+      const centre = (rect: DOMRect) => rect.top + rect.height / 2;
+      const isAbove = () => centre(panel.getBoundingClientRect()) < centre(input());
+
+      // Room below the field for one row, but not for a third of the viewport.
+      window.scrollBy(0, input().bottom - innerHeight + innerHeight / 6);
+      await userEvent.click(combobox());
+      await userEvent.keyboard('{ArrowDown}');
+      await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+      await settle(field.fixture, 50);
+      expect(isAbove()).toBe(false);
+
+      await field.set('options', MANY);
+      await expect.poll(isAbove).toBe(true);
+
+      await field.set('options', FEW);
+      await settle(field.fixture, 50);
+      expect(isAbove()).toBe(true);
+
+      await userEvent.keyboard('{Escape}');
+      await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+      await userEvent.keyboard('{ArrowDown}');
+      await expect.poll(isAbove).toBe(false);
+    });
+  });
+
+  /**
    * The calendar is the one panel with controls of its own that take focus: its month and year selects, which
    * open only on a press they keep.
    */

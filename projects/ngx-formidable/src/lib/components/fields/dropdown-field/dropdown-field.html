@@ -78,5 +78,11 @@
         [highlighted]="i === highlightedOptionIndex()" />
       }
     </div>
+
+    <!-- Resize Handle -->
+    <div
+      class="panel-resize-handle"
+      (pointerdown)="onPanelResizeStart($event)"
+      (pointermove)="onPanelResize($event)"></div>
   </div>
 </div>

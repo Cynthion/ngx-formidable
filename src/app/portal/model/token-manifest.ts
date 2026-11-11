@@ -776,6 +776,22 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     description: 'Background color for option items that are hovered.'
   },
   {
+    name: '--formidable-color-panel-resize-handle',
+    group: 'Colors',
+    control: 'color',
+    class: 'declared',
+    derivedFrom: '--formidable-color-field-border',
+    description: "Color of the grip on the handle that resizes a dropdown's or combobox's panel."
+  },
+  {
+    name: '--formidable-color-panel-resize-handle-hovered',
+    group: 'Colors',
+    control: 'color',
+    class: 'declared',
+    derivedFrom: '--formidable-color-field-border-focus',
+    description: 'Color of that grip while the handle is hovered.'
+  },
+  {
     name: '--formidable-color-field-focus-box-shadow',
     group: 'Colors',
     control: 'shadow',
@@ -1310,6 +1326,21 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     control: 'length',
     class: 'declared',
     description: 'Maximum vertical height for panels (before scrolling).'
+  },
+  {
+    name: '--formidable-panel-min-height',
+    group: 'Panels',
+    control: 'length',
+    class: 'declared',
+    derivedFrom: '--formidable-field-height',
+    description: 'The least height a panel can be resized to. A panel with fewer rows is still as short as its rows.'
+  },
+  {
+    name: '--formidable-panel-resize-handle-height',
+    group: 'Panels',
+    control: 'length',
+    class: 'declared',
+    description: "Height of the strip along a dropdown's or combobox's panel edge that resizes it."
   },
   {
     name: '--formidable-animation-duration',

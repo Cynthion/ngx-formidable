@@ -133,6 +133,8 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-color-field-option-background-selected`    | Background color for option items that are selected.                                                                        |
 | `--formidable-color-field-option-background-highlighted` | Background color for option items that are highlighted.                                                                     |
 | `--formidable-color-field-option-background-hovered`     | Background color for option items that are hovered.                                                                         |
+| `--formidable-color-panel-resize-handle`                 | Color of the grip on the handle that resizes a dropdown's or combobox's panel.                                              |
+| `--formidable-color-panel-resize-handle-hovered`         | Color of that grip while the handle is hovered.                                                                             |
 | `--formidable-color-field-focus-box-shadow`              | Box shadow for fields that are focused.                                                                                     |
 | `--formidable-color-field-group-focus-box-shadow`        | Box shadow for field groups that are focused.                                                                               |
 | `--formidable-color-field-focus-box-shadow-invalid`      | Replaces both focus box shadows while the field is invalid.                                                                 |
@@ -261,13 +263,15 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 
 ## Panels
 
-| Variable                              | Description                                                                                                                           |
-| :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------ |
-| `--formidable-panel-background`       | Background color for dropdown/combobox/date panels.                                                                                   |
-| `--formidable-panel-border-thickness` | Thickness of a panel's outline. Follows the field's border thickness unless set, so a borderless theme states it to keep the outline. |
-| `--formidable-panel-border-radius`    | Border-radius for all panels. The two corners a panel sits against its field with mirror that field instead.                          |
-| `--formidable-panel-box-shadow`       | Box-shadow for all panels. The edge a panel meets its field with does not cast.                                                       |
-| `--formidable-panel-max-height`       | Maximum vertical height for panels (before scrolling).                                                                                |
+| Variable                                  | Description                                                                                                                           |
+| :---------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
+| `--formidable-panel-background`           | Background color for dropdown/combobox/date panels.                                                                                   |
+| `--formidable-panel-border-thickness`     | Thickness of a panel's outline. Follows the field's border thickness unless set, so a borderless theme states it to keep the outline. |
+| `--formidable-panel-border-radius`        | Border-radius for all panels. The two corners a panel sits against its field with mirror that field instead.                          |
+| `--formidable-panel-box-shadow`           | Box-shadow for all panels. The edge a panel meets its field with does not cast.                                                       |
+| `--formidable-panel-max-height`           | Maximum vertical height for panels (before scrolling).                                                                                |
+| `--formidable-panel-min-height`           | The least height a panel can be resized to. A panel with fewer rows is still as short as its rows.                                    |
+| `--formidable-panel-resize-handle-height` | Height of the strip along a dropdown's or combobox's panel edge that resizes it.                                                      |
 
 ---
 

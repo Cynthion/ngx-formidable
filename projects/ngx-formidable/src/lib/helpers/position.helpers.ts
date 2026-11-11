@@ -38,12 +38,18 @@ function clipBand(element: HTMLElement): { top: number; bottom: number } {
 }
 
 /**
- * Opens the panel below the field, or above it when there is no room below and there is above. The panel
- * carries the direction so its own styling can follow it — the field is never touched: its corners are its
- * own, and an open panel mirrors them rather than the other way round. A sheet is exempt: it is pinned to
- * the viewport, not to the field, so there is no side to pick.
+ * Opens the panel below the field, or above it when there is no room below and there is above. A placed
+ * panel keeps its side while it still fits there, so a list changing under it as the user types does not
+ * flip it back and forth; it moves only once its side has no room left and the other has, and `isOpening`
+ * places it afresh. The panel carries the direction so its own styling can follow it — the field is never
+ * touched: its corners are its own, and an open panel mirrors them rather than the other way round. A sheet
+ * is exempt: it is pinned to the viewport, not to the field, so there is no side to pick.
  */
-export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef?: ElementRef<HTMLElement>): void {
+export function updatePanelPosition(
+  fieldRef?: ElementRef<HTMLElement>,
+  panelRef?: ElementRef<HTMLElement>,
+  isOpening = false
+): void {
   const field = fieldRef?.nativeElement;
   const panel = panelRef?.nativeElement;
 
@@ -60,12 +66,13 @@ export function updatePanelPosition(fieldRef?: ElementRef<HTMLElement>, panelRef
   const panelHeight = panel.offsetHeight;
   const band = clipBand(field);
 
-  const spaceBelow = band.bottom - fieldRect.bottom;
-  const spaceAbove = fieldRect.top - band.top;
+  const fitsBelow = band.bottom - fieldRect.bottom >= panelHeight;
+  const fitsAbove = fieldRect.top - band.top >= panelHeight;
+  const keepsSide = !isOpening && (panel.classList.contains('above') ? fitsAbove : fitsBelow);
 
   // Below unless it does not fit there and does fit above — including when it fits neither way, so a
   // panel with nowhere to go is at least clipped predictably.
-  panel.classList.toggle('above', spaceBelow < panelHeight && spaceAbove >= panelHeight);
+  if (!keepsSide) panel.classList.toggle('above', !fitsBelow && fitsAbove);
 }
 
 /**

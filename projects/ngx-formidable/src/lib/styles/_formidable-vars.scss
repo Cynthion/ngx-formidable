@@ -381,6 +381,14 @@
     var(--formidable-color-field-placeholder, #{tokens.$formidable-color-field-placeholder}) 25%,
     transparent
   );
+  --formidable-color-panel-resize-handle: var(
+    --formidable-color-field-border,
+    #{tokens.$formidable-color-panel-resize-handle}
+  );
+  --formidable-color-panel-resize-handle-hovered: var(
+    --formidable-color-field-border-focus,
+    #{tokens.$formidable-color-panel-resize-handle-hovered}
+  );
 
   // One ring width for all three: a ring differs by colour, never by size. Change the width through
   // `--formidable-field-focus-ring-width` rather than by restating a composite.
@@ -653,6 +661,9 @@
   --formidable-panel-border-radius: var(--formidable-border-radius, #{tokens.$formidable-panel-border-radius});
   --formidable-panel-box-shadow: #{tokens.$formidable-panel-box-shadow};
   --formidable-panel-max-height: #{tokens.$formidable-panel-max-height};
+  // The least a panel can be dragged to by its resize handle, and the handle's own grab strip.
+  --formidable-panel-min-height: var(--formidable-field-height, #{tokens.$formidable-panel-min-height});
+  --formidable-panel-resize-handle-height: #{tokens.$formidable-panel-resize-handle-height};
 
   // #endregion
 

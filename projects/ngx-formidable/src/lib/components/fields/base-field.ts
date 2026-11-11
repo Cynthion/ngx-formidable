@@ -530,7 +530,7 @@ export abstract class BaseField<T = string | null>
     if (isOpen) {
       afterNextRender(
         () => {
-          this.placePanel();
+          this.placePanel(true);
           if (this.panel?.isPanelOpen()) scrollIntoView(this.fieldRef, this.panel.panelRef());
         },
         { injector: this.injector }
@@ -545,8 +545,40 @@ export abstract class BaseField<T = string | null>
     afterNextRender(() => this.placePanel(), { injector: this.injector });
   }
 
-  private placePanel(): void {
-    if (this.panel?.isPanelOpen()) updatePanelPosition(this.fieldRef, this.panel.panelRef());
+  // An opening panel is placed afresh; a placed one keeps its side while it still fits there.
+  private placePanel(isOpening = false): void {
+    if (this.panel?.isPanelOpen()) updatePanelPosition(this.fieldRef, this.panel.panelRef(), isOpening);
+  }
+
+  // The handle that drags a panel's height. The height it is dragged to is written onto the panel element
+  // itself, which lives as long as the field does: it holds across close and open, and nothing keeps it
+  // beyond that. The handle sits on the panel's far edge, the bottom below the field and the top above it,
+  // so dragging away from the field is what grows the panel on either side.
+  private panelResizeOrigin?: { y: number; height: number };
+
+  /** Bind to a panel resize handle's `pointerdown`, for a panel that has one. */
+  protected onPanelResizeStart(event: PointerEvent): void {
+    const panel = this.panel?.panelRef()?.nativeElement;
+
+    if (!panel) return;
+
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    this.panelResizeOrigin = { y: event.clientY, height: panel.offsetHeight };
+  }
+
+  /** Bind to that handle's `pointermove`. */
+  protected onPanelResize(event: PointerEvent): void {
+    const panel = this.panel?.panelRef()?.nativeElement;
+    const origin = this.panelResizeOrigin;
+
+    if (!panel || !origin || !(event.currentTarget as HTMLElement).hasPointerCapture(event.pointerId)) return;
+
+    const away = event.clientY - origin.y;
+    const height = origin.height + (panel.classList.contains('above') ? -away : away);
+
+    // A cap rather than a height, so a list narrowed under it still shrinks the panel to its rows; floored
+    // in CSS, so the theme decides the least a panel can be dragged to.
+    panel.style.maxHeight = `max(var(--formidable-panel-min-height, 0px), ${height}px)`;
   }
 
   // #endregion

@@ -1521,6 +1521,46 @@
   max-height: 100%;
 }
 
+// The strip a dropdown's or combobox's panel is resized by: a grab area along the panel's far edge with a
+// short grip bar centred in it. The far edge, so that dragging away from the field grows the panel on either
+// side: the bottom of a panel below the field, the top of one flipped above it, where `order` moves it. A
+// sheet has none. A pointer only: the panel keeps focus in the field's input, so nothing in it takes a key.
+@mixin panel-resize-handle {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--formidable-panel-resize-handle-height, #{tokens.$formidable-panel-resize-handle-height});
+  cursor: row-resize;
+  touch-action: none;
+  user-select: none;
+
+  &::before {
+    content: '';
+    width: utils.rem(32);
+    height: utils.rem(4);
+    border-radius: utils.rem(2);
+    background: var(--formidable-color-panel-resize-handle, #{tokens.$formidable-color-panel-resize-handle});
+    transition: background var(--formidable-hover-duration, #{tokens.$formidable-hover-duration})
+      var(--formidable-hover-easing, #{tokens.$formidable-hover-easing});
+  }
+
+  &:hover::before {
+    background: var(
+      --formidable-color-panel-resize-handle-hovered,
+      #{tokens.$formidable-color-panel-resize-handle-hovered}
+    );
+  }
+
+  .above > & {
+    order: -1;
+  }
+
+  .panel-sheet > & {
+    display: none;
+  }
+}
+
 // #region Per-Field Panels
 
 // A dropdown's panel.
