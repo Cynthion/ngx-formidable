@@ -17,6 +17,10 @@
   @include field-option-checkbox-group;
 }
 
+.field-option-check {
+  @include field-option-check;
+}
+
 .field-option-prefix {
   @include field-option-prefix;
 }

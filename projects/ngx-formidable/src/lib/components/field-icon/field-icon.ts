@@ -5,6 +5,7 @@ import { FORMIDABLE_ICONS, FormidableIcons } from '../../models/formidable.model
 /** The library's own icons: one polyline each, on the 24-unit grid most icon sets draw on. */
 const POLYLINES: Record<keyof FormidableIcons, string> = {
   fieldClear: '7 7 17 17 12 12 7 17 17 7',
+  fieldOptionSelected: '5 12.5 9.5 17 19 7.5',
   fieldToggle: '4.25 7.75 12 15.5 19.75 7.75',
   fieldToggleOpen: '4.25 16.25 12 8.5 19.75 16.25',
   dateFieldToggle: '4.25 7.75 12 15.5 19.75 7.75',

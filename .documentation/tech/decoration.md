@@ -150,14 +150,14 @@ What a consumer sets is under **Icons** in [`user/fields.md`](../user/fields.md)
 
 What a consumer sets is under **Clear Button** in [`user/decoration.md`](../user/decoration.md).
 
-- **The Field Owns The Clear**: only the field knows its empty value, the autocomplete's `filter` and a date's text typed but not committed. `BaseField` declares `emptyValue`, `canClear` and `clear()`; `BaseTextField`, `BaseDateTimeField`, select, dropdown and autocomplete set `emptyValue`. Without one, `canClear` is false and `clear()` does nothing.
+- **The Field Owns The Clear**: only the field knows its empty value, the combobox's `filter` and a date's text typed but not committed. `BaseField` declares `emptyValue`, `canClear` and `clear()`; `BaseTextField`, `BaseDateTimeField`, select, dropdown and combobox set `emptyValue`. Without one, `canClear` is false and `clear()` does nothing.
 - **State Versus Configuration**: `canClear` says whether the user could clear now; `clearable` says whether the decorator renders a button. The decorator shows it on both, and a manual button reads `canClear` alone.
 - **An Input On The Field**: `clearable` is declared on `BaseField` with a `FormidableDefaults` key, as `revealOn` is, so the decorator keeps zero inputs. The toggle, slider and groups ignore it, as they ignore `placeholder`.
 - **No Component Of Its Own**: a `<button>` after the suffix's `ng-content`, holding a `FieldIcon`. `hasSuffix` counts it, or the wrapper stays hidden, and the **Inset Measure** re-insets the value as it comes and goes.
 - **Hidden By `visibility`**: a hidden button keeps its width, so the inset and the value stay put on hover and focus, and it leaves the tab order. It shows on `:host(:focus-within)`, not on `.is-focused`, which follows the field only and would hide the button as `Tab` reaches it, and on hover only under `@media (hover: hover)`.
 - **Focus After The Click**: `mousedown` is prevented, so a click keeps focus where it is. The button removes itself as `canClear` turns false, so the decorator calls `focus()` after `clear()`, or a keyboard user's focus drops to the page. `clear()` moves no focus itself, so a programmatic call does not steal it.
 - **The Name Is A Signal**: the label is the consumer's projected content, so only the DOM knows its text. `FieldLabel.text` reads it after the first render and follows it with a `MutationObserver`, whitespace collapsed; a `textContent` read in a getter would go stale under `OnPush` on a language switch. `FORMIDABLE_CLEAR_LABEL` is a token, as `FORMIDABLE_ERROR_MESSAGE` is, because `FormidableDefaults` holds plain values.
-- **The Autocomplete's Clear**: `value.set(null)` and not `setValue`, which marks the value rendered, so the render effect would leave a pick's label over `null`. It widens the list itself, because the filter's render finds the input already empty and skips it.
+- **The Combobox's Clear**: `value.set(null)` and not `setValue`, which marks the value rendered, so the render effect would leave a pick's label over `null`. It widens the list itself, because the filter's render finds the input already empty and skips it.
 - **The Date's Text**: `isFieldFilled` counts `hasText`, which ngx-mask's `valueChange` sets as the text moves, the field's own render included, so a clear resets it.
 
 ---

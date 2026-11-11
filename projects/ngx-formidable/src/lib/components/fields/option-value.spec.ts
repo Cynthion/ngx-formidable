@@ -21,7 +21,7 @@ const zeta: FormidableOption = { value: 'z', label: 'Zeta' };
 
 const combobox = () => page.getByRole('combobox');
 
-/** What a user sees picked in a select, a dropdown or an autocomplete: its text. Empty for no selection. */
+/** What a user sees picked in a select, a dropdown or a combobox: its text. Empty for no selection. */
 function shown(): string[] {
   const field = combobox().element() as HTMLInputElement | HTMLSelectElement;
 
@@ -74,7 +74,7 @@ const fields: OptionFieldCase[] = [
     selection: shown
   },
   {
-    kind: 'autocomplete',
+    kind: 'combobox',
     unknown: 'z',
     picked: 'a',
     pick: async () => {

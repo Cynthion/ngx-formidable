@@ -36,7 +36,7 @@ const fields: Record<string, { kind: FieldKind; value: unknown; inputs?: Record<
       shows: text('textbox', 'ABC-1234')
     },
     'textarea': { kind: 'textarea', value: 'notes', shows: text('textbox', 'notes') },
-    'autocomplete': { kind: 'autocomplete', value: 'b', inputs: { options }, shows: text('combobox', 'Beta') },
+    'combobox': { kind: 'combobox', value: 'b', inputs: { options }, shows: text('combobox', 'Beta') },
     'dropdown': { kind: 'dropdown', value: 'b', inputs: { options }, shows: text('combobox', 'Beta') },
     'select': { kind: 'select', value: 'b', inputs: { options }, shows: text('combobox', 'b') },
     'radio group': { kind: 'radio-group', value: 'b', inputs: { options }, shows: checksBeta('radio') },

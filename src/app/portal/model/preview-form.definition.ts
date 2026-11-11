@@ -33,7 +33,7 @@ import {
  *   payment method decides whether the card number is. A hidden field keeps its key in the model, and
  *   Signal Forms leaves it out of validation.
  * - **A template picker.** `presets` on the pizza field, above.
- * - **Consumer-side filtering.** The autocomplete's `filterStrategy` is the portal's, not the field's.
+ * - **Consumer-side filtering.** The combobox's `filterStrategy` is the portal's, not the field's.
  */
 
 const DECORATION: PortalFieldDecoration = DEFAULT_DECORATION;
@@ -119,7 +119,7 @@ const TOPPINGS: readonly PortalOptionSpec[] = [
   { value: 'anchovies', label: 'Anchovies — sold out', disabled: true }
 ];
 
-// The autocomplete projects a custom option component, so these carry the second line it renders. The two
+// The combobox projects a custom option component, so these carry the second line it renders. The two
 // halves of each entry are what makes the filter strategy legible: a street number is in the label and a
 // postcode in the subtitle, and only fuzzy reaches both.
 const ADDRESSES: readonly PortalOptionSpec[] = [
@@ -248,7 +248,7 @@ export const PREVIEW_FIELDS: readonly PortalFieldSpec[] = [
   }),
   field({
     id: 'address',
-    kind: 'autocomplete',
+    kind: 'combobox',
     sectionId: 'handover',
     label: 'Delivery Address',
     placeholder: 'Start typing a street…',

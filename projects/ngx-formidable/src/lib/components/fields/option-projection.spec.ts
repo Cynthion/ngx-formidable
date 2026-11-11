@@ -6,7 +6,7 @@ import { page, userEvent } from 'vitest/browser';
 import { FormidableOption } from '../../models/formidable.model';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldOption } from '../field-option/field-option';
-import { AutocompleteField } from './autocomplete-field/autocomplete-field';
+import { ComboboxField } from './combobox-field/combobox-field';
 import { CheckboxGroupField } from './checkbox-group-field/checkbox-group-field';
 import { RadioGroupField } from './radio-group-field/radio-group-field';
 import { SelectField } from './select-field/select-field';
@@ -17,7 +17,7 @@ import { SelectField } from './select-field/select-field';
  * it changes in place. A projected option owns its content, which is also the label it is filtered by.
  *
  * Also covers `defaultOption`, which is pinned ahead of the sorted list rather than sorted into it, and which
- * an autocomplete's filter leaves alone.
+ * a combobox's filter leaves alone.
  *
  * The options are read by their role, and picked with a trusted click or real typing.
  */
@@ -80,9 +80,9 @@ class LoopedCheckboxHost {
 }
 
 @Component({
-  imports: [FormsModule, AutocompleteField],
+  imports: [FormsModule, ComboboxField],
   template: `
-    <formidable-autocomplete-field
+    <formidable-combobox-field
       name="filtered"
       [(ngModel)]="model"
       [options]="options()"
@@ -90,7 +90,7 @@ class LoopedCheckboxHost {
       [defaultOptionMode]="defaultOptionMode()" />
   `
 })
-class FilteredAutocompleteHost {
+class FilteredComboboxHost {
   readonly model = signal<string | null>(null);
   readonly options = signal<FormidableOption[]>([{ value: 'cat', label: 'Cat' }]);
   defaultOption: FormidableOption = { value: 'add-new', label: 'Add a new one…' };
@@ -159,15 +159,15 @@ class ChangingSelectOptionHost {
   loopedValues = ['a', 'b'];
 }
 
-// An autocomplete, because its filter is what reads the label off the option: a group only displays it, and a
+// A combobox, because its filter is what reads the label off the option: a group only displays it, and a
 // displayed label comes from the projected template rather than from the option.
 @Component({
-  imports: [AutocompleteField, FieldOption],
+  imports: [ComboboxField, FieldOption],
   template: `
-    <formidable-autocomplete-field name="projected-filter">
+    <formidable-combobox-field name="projected-filter">
       <formidable-field-option value="a">Apple</formidable-field-option>
       <formidable-field-option value="b">Banana</formidable-field-option>
-    </formidable-autocomplete-field>
+    </formidable-combobox-field>
   `
 })
 class ProjectedFilterHost {}
@@ -190,7 +190,7 @@ async function render<T>(host: Type<T>): Promise<ComponentFixture<T>> {
   return fixture;
 }
 
-/** Replaces the autocomplete's text, as a user does, and lets its filter through. */
+/** Replaces the combobox's text, as a user does, and lets its filter through. */
 async function filterBy(fixture: ComponentFixture<unknown>, text: string): Promise<void> {
   await userEvent.fill(page.getByRole('combobox'), text);
   await settle(fixture, 300); // clears the 200ms filter debounce
@@ -326,11 +326,11 @@ describe('option projection', () => {
     });
   });
 
-  // The autocomplete pins its default after filtering, so it has its own path worth covering.
-  describe('defaultOption on the autocomplete', () => {
-    let fixture: ComponentFixture<FilteredAutocompleteHost>;
+  // The combobox pins its default after filtering, so it has its own path worth covering.
+  describe('defaultOption on the combobox', () => {
+    let fixture: ComponentFixture<FilteredComboboxHost>;
 
-    beforeEach(async () => (fixture = await render(FilteredAutocompleteHost)));
+    beforeEach(async () => (fixture = await render(FilteredComboboxHost)));
 
     it('shows a fallback default only once the filter matches nothing', async () => {
       await filterBy(fixture, 'cat');

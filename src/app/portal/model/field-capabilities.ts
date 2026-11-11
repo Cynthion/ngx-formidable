@@ -66,7 +66,7 @@ export const FIELD_CAPABILITIES: Readonly<Record<PortalFieldKind, PortalFieldCap
     toggleIcon: true,
     clear: true
   },
-  'autocomplete': {
+  'combobox': {
     ...HORIZONTAL,
     ...OFF,
     placeholder: true,
@@ -74,6 +74,7 @@ export const FIELD_CAPABILITIES: Readonly<Record<PortalFieldKind, PortalFieldCap
     actionOption: true,
     panel: 'full',
     filter: true,
+    toggleIcon: true,
     clear: true
   },
   'date': { ...HORIZONTAL, ...OFF, placeholder: true, panel: 'right', locale: true, toggleIcon: true, clear: true },
@@ -91,7 +92,7 @@ export const FIELD_KIND_LABELS: Readonly<Record<PortalFieldKind, string>> = {
   'textarea': 'Textarea',
   'select': 'Select',
   'dropdown': 'Dropdown',
-  'autocomplete': 'Autocomplete',
+  'combobox': 'Combobox',
   'date': 'Date',
   'time': 'Time',
   'toggle': 'Toggle',
@@ -107,7 +108,7 @@ export const FIELD_KIND_SELECTORS: Readonly<Record<PortalFieldKind, string>> = {
   'textarea': 'formidable-textarea-field',
   'select': 'formidable-select-field',
   'dropdown': 'formidable-dropdown-field',
-  'autocomplete': 'formidable-autocomplete-field',
+  'combobox': 'formidable-combobox-field',
   'date': 'formidable-date-field',
   'time': 'formidable-time-field',
   'toggle': 'formidable-toggle-field',
@@ -123,7 +124,7 @@ export const FIELD_KIND_CLASSES: Readonly<Record<PortalFieldKind, string>> = {
   'textarea': 'TextareaField',
   'select': 'SelectField',
   'dropdown': 'DropdownField',
-  'autocomplete': 'AutocompleteField',
+  'combobox': 'ComboboxField',
   'date': 'DateField',
   'time': 'TimeField',
   'toggle': 'ToggleField',
@@ -142,7 +143,7 @@ export const FIELD_KIND_VALUE_TYPES: Readonly<Record<PortalFieldKind, PortalValu
   'textarea': 'string',
   'select': 'string | null',
   'dropdown': 'string | null',
-  'autocomplete': 'string | null',
+  'combobox': 'string | null',
   'date': 'Date | null',
   'time': 'Date | null',
   'toggle': 'boolean',

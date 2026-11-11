@@ -237,9 +237,9 @@ describe('formidableFieldLabel [position]', () => {
     });
 
     // Nothing typed: the picked label is all the value area holds.
-    it('keeps floating over an autocomplete picked from the keyboard and left', async () => {
+    it('keeps floating over a combobox picked from the keyboard and left', async () => {
       const field = await bind('inside', {
-        kind: 'autocomplete',
+        kind: 'combobox',
         inputs: { options: [{ value: 'a', label: 'Alpha' }] }
       });
       const combobox = page.getByRole('combobox', { name: 'Name' });
@@ -518,7 +518,7 @@ describe('a value rendered in a wrapped input', () => {
   for (const [kind, role] of [
     ['date', 'combobox'],
     ['time', 'textbox'],
-    ['autocomplete', 'combobox'],
+    ['combobox', 'combobox'],
     ['dropdown', 'combobox']
   ] as const) {
     describe(`of a ${kind} field`, () => {

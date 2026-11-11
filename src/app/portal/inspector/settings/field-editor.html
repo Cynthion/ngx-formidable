@@ -405,6 +405,15 @@
     typo to see the difference. The exported template carries the field, not this.
   </p>
 </div>
+<div class="pc-checks">
+  <label class="pc-check">
+    <input
+      type="checkbox"
+      [checked]="f.openOnClick ?? true"
+      (change)="set('openOnClick', $any($event.target).checked)" />
+    Open On Click
+  </label>
+</div>
 } @if (caps.locale) {
 <h3 class="pc-group-title">Locale And Format</h3>
 <div class="pc-row">

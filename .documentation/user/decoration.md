@@ -32,7 +32,7 @@ The required marker and the messages have no slot: the decorator renders both fr
 The field picks the layout, not the consumer, and the layout decides where the slots land.
 
 ```text
-horizontal: input, textarea, select, dropdown, autocomplete, date, time
+horizontal: input, textarea, select, dropdown, combobox, date, time
 
    Label  Adornment                          the label's own row
   ┌────────────────────────────────────┐
@@ -181,10 +181,10 @@ The two differ only where a label sits over the value: with an `outside` or `bor
 </formidable-field-decorator>
 ```
 
-- **When It Exists**: while the field holds something to clear and is neither `readonly` nor `disabled`. The date and time fields count text typed but not committed, the autocomplete text typed without a pick.
+- **When It Exists**: while the field holds something to clear and is neither `readonly` nor `disabled`. The date and time fields count text typed but not committed, the combobox text typed without a pick.
 - **When It Shows**: hidden at rest, so a filled form shows none. It shows while the pointer is over the decorator, on a device with hover, and while focus is inside the decorator. Hidden, it keeps its width, so the value never moves, and it leaves the tab order, so `Shift` + `Tab` from the next field lands on the field.
-- **A Click Is The User's Edit**: the field empties to `''` for the input and the textarea, to `null` for the others, and focus returns to the field. The date and time fields drop text typed but not committed with its `parse` error; the autocomplete drops text typed without a pick, and `filterChange` reports the empty filter. An open panel closes, as on any click outside the field's own box.
-- **Dirty Only Where The Model Moves**: text typed into an empty date, or into an autocomplete without a pick, leaves the model `null`, so its clear dirties nothing. The messages follow `revealOn`: a click touches nothing, while `Tab` to the button has already left the field.
+- **A Click Is The User's Edit**: the field empties to `''` for the input and the textarea, to `null` for the others, and focus returns to the field. The date and time fields drop text typed but not committed with its `parse` error; the combobox drops text typed without a pick, and `filterChange` reports the empty filter. An open panel closes, as on any click outside the field's own box.
+- **Dirty Only Where The Model Moves**: text typed into an empty date, or into a combobox without a pick, leaves the model `null`, so its clear dirties nothing. The messages follow `revealOn`: a click touches nothing, while `Tab` to the button has already left the field.
 - **Alignment**: it shares the suffix's slot, so it follows the projected suffix's `align`, or `suffixAlign` in the app defaults where none is projected.
 - **Keyboard**: `Tab` from the field reaches the button, `Enter` or `Space` clears.
 - **Accessible Name**: `Clear` and the label's text, such as `Clear Last Name`; the `placeholder` without a label; `Clear` with neither. `FORMIDABLE_CLEAR_LABEL` replaces the wording, for a translation or another word order:
@@ -211,7 +211,7 @@ The decorator re-measures its slots whenever their width changes, so an action t
 
 ```html
 <formidable-field-decorator>
-  <formidable-autocomplete-field
+  <formidable-combobox-field
     #search
     [options]="addresses"
     [formField]="form.address" />

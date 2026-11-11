@@ -30,6 +30,7 @@
     "datepicker",
     "timepicker",
     "autocomplete",
+    "combobox",
     "dropdown",
     "select",
     "angular-library"

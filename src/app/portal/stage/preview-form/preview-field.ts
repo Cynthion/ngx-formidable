@@ -1,7 +1,7 @@
 import { Component, computed, ElementRef, inject, input, output, signal, viewChild } from '@angular/core';
 import { FieldTree, FormField } from '@angular/forms/signals';
 import {
-  AutocompleteField,
+  ComboboxField,
   CheckboxGroupField,
   DateField,
   DropdownField,
@@ -76,7 +76,7 @@ const FORMATTERS: Readonly<Record<string, (value: number) => string>> = {
     TextareaField,
     SelectField,
     DropdownField,
-    AutocompleteField,
+    ComboboxField,
     DateField,
     TimeField,
     ToggleField,
@@ -170,7 +170,7 @@ export class PreviewField {
 
   protected readonly options = computed<PortalOptionSpec[]>(() => [...(this.spec().options ?? [])]);
 
-  /** An `always` default is pinned first, exempt from both the sort and the autocomplete filter. */
+  /** An `always` default is pinned first, exempt from both the sort and the combobox filter. */
   protected readonly defaultOption = computed(() => {
     const option = this.spec().defaultOption;
 
@@ -203,7 +203,7 @@ export class PreviewField {
   protected readonly thumbLabelFn = computed(() => this.formatter(this.spec().thumbLabelFormat));
   protected readonly tickLabelFn = computed(() => this.formatter(this.spec().tickLabelFormat));
 
-  /** An autocomplete's filter text, bound two-way: the consumer supplies the filtered list, and a clear empties it. */
+  /** A combobox's filter text, bound two-way: the consumer supplies the filtered list, and a clear empties it. */
   protected readonly filterText = signal('');
 
   private readonly field = viewChild(FORMIDABLE_FIELD);
@@ -212,7 +212,7 @@ export class PreviewField {
   protected readonly canClear = computed(() => this.field()?.canClear?.() ?? false);
 
   /**
-   * The narrowed list the autocomplete renders, with the match runs its projected option marks.
+   * The narrowed list the combobox renders, with the match runs its projected option marks.
    *
    * The strategy is the consumer's choice, not the field's — which is the point of offering it as a setting:
    * the same typed text finds a typo under `fuzzy` and nothing under the two literal strategies, with no

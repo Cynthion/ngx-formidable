@@ -8,15 +8,19 @@
 @include field-atom-undecorated;
 
 .field {
-  @include autocomplete-field;
+  @include combobox-field;
 }
 
 .input-wrapper {
   @include input-wrapper;
 }
 
+.toggle {
+  @include dropdown-toggle;
+}
+
 .panel {
-  @include autocomplete-panel;
+  @include combobox-panel;
 }
 
 .panel-scrollcontainer {

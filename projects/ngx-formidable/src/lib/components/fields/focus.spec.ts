@@ -21,7 +21,7 @@ const ROLES: Record<FieldKind, 'textbox' | 'combobox' | 'switch' | 'slider' | 'r
   'textarea': 'textbox',
   'select': 'combobox',
   'dropdown': 'combobox',
-  'autocomplete': 'combobox',
+  'combobox': 'combobox',
   'date': 'combobox',
   'time': 'textbox',
   'toggle': 'switch',
@@ -30,8 +30,8 @@ const ROLES: Record<FieldKind, 'textbox' | 'combobox' | 'switch' | 'slider' | 'r
   'checkbox-group': 'group'
 };
 
-const OPTION_FIELDS: readonly FieldKind[] = ['select', 'dropdown', 'autocomplete', 'radio-group', 'checkbox-group'];
-const PANEL_FIELDS = ['dropdown', 'autocomplete', 'date'] as const;
+const OPTION_FIELDS: readonly FieldKind[] = ['select', 'dropdown', 'combobox', 'radio-group', 'checkbox-group'];
+const PANEL_FIELDS = ['dropdown', 'combobox', 'date'] as const;
 
 const control = (kind: FieldKind) => page.getByRole(ROLES[kind], { name: 'Answer' });
 
@@ -89,7 +89,7 @@ describe('field focus', () => {
       await expect.element(control(kind)).toHaveFocus();
 
       focus(bound, kind);
-      // Past the autocomplete's 200 ms filter debounce, which opens the panel for typing.
+      // Past the combobox's 200 ms filter debounce, which opens the panel for typing.
       await settle(bound.fixture, 200);
 
       expect(control(kind).element().getAttribute('aria-expanded')).toBe('false');

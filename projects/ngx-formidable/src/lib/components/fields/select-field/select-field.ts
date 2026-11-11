@@ -12,7 +12,7 @@ import { BaseOptionListField } from '../base-option-list-field';
 /**
  * A single choice from a native `<select>`, so its list is the platform's and opens where the platform puts
  * it. Pick this one when a native picker on mobile beats a styled panel — `dropdown-field` is the styled one,
- * and `autocomplete-field` the one that filters as you type.
+ * and `combobox-field` the one that filters as you type.
  */
 @Component({
   selector: 'formidable-select-field',

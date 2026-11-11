@@ -13,7 +13,7 @@ import { disabled, form, FormField, readonly, required, validate } from '@angula
 import { By } from '@angular/platform-browser';
 import { FieldDecorator } from '../components/field-decorator/field-decorator';
 import { FieldOption } from '../components/field-option/field-option';
-import { AutocompleteField } from '../components/fields/autocomplete-field/autocomplete-field';
+import { ComboboxField } from '../components/fields/combobox-field/combobox-field';
 import { CheckboxGroupField } from '../components/fields/checkbox-group-field/checkbox-group-field';
 import { DateField } from '../components/fields/date-field/date-field';
 import { DropdownField } from '../components/fields/dropdown-field/dropdown-field';
@@ -37,7 +37,7 @@ export type FieldKind =
   | 'textarea'
   | 'select'
   | 'dropdown'
-  | 'autocomplete'
+  | 'combobox'
   | 'date'
   | 'time'
   | 'toggle'
@@ -115,7 +115,7 @@ export interface BoundField {
 type ModelValue = NonNullable<unknown> | null;
 
 const FIELDS = [
-  AutocompleteField,
+  ComboboxField,
   CheckboxGroupField,
   DateField,
   DropdownField,

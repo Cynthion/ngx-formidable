@@ -1,8 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { form, FormField, FormRoot } from '@angular/forms/signals';
 import {
-  AutocompleteField,
   CheckboxGroupField,
+  ComboboxField,
   DateField,
   DropdownField,
   FieldDecorator,
@@ -27,8 +27,8 @@ import { initialExampleFormModel, ExampleFormModel, exampleSchema } from './exam
   imports: [
     FormRoot,
     FormField,
-    AutocompleteField,
     CheckboxGroupField,
+    ComboboxField,
     DateField,
     DropdownField,
     FieldDecorator,

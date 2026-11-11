@@ -82,8 +82,8 @@
       [size]="20" />
     }
   </formidable-dropdown-field>
-  } @case ('autocomplete') {
-  <formidable-autocomplete-field
+  } @case ('combobox') {
+  <formidable-combobox-field
     [placeholder]="field.placeholder"
     [autoFocus]="field.state.autoFocus"
     [clearable]="field.clearable"
@@ -94,6 +94,7 @@
     [noOptionsText]="field.noOptionsText ?? 'No options available.'"
     [sortFn]="sortFn()"
     [panelPosition]="panelPosition()"
+    [openOnClick]="field.openOnClick ?? true"
     [formField]="$any(fieldTree())"
     [(filter)]="filterText"
     (valueChange)="picked.emit($event)"
@@ -108,8 +109,14 @@
       [match]="matchesEveryFilter"
       [readonly]="match.option.readonly ?? false"
       [disabled]="match.option.disabled ?? false" />
+    } @if (field.decoration.toggleIcon) {
+    <example-icon
+      formidableFieldToggleIcon
+      class="toggle-icon"
+      [svg]="chevronsSvg"
+      [size]="20" />
     }
-  </formidable-autocomplete-field>
+  </formidable-combobox-field>
   } @case ('date') {
   <formidable-date-field
     [placeholder]="field.placeholder"

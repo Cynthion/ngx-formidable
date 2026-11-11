@@ -1,5 +1,5 @@
 <div
-  #autocompleteRef
+  #comboboxRef
   class="field"
   [class.is-readonly]="readonly()"
   [class.is-disabled]="disabled()"
@@ -29,7 +29,20 @@
       [attr.aria-controls]="panelId"
       [attr.aria-activedescendant]="optionId(highlightedOptionIndex())"
       (mousedown)="onEditorMouseDown()"
+      (click)="onInputClick()"
       (input)="onInput($event)" />
+
+    <!-- Toggle -->
+    @if (canEdit()) {
+    <span
+      #toggleRef
+      class="toggle"
+      [class.open]="isPanelOpen()"
+      (mousedown)="onPanelToggleMouseDown($event)">
+      <ng-content select="[formidableFieldToggleIcon]" />
+      <formidable-field-icon [name]="isPanelOpen() ? 'fieldToggleOpen' : 'fieldToggle'" />
+    </span>
+    }
   </div>
 
   <!-- Panel -->

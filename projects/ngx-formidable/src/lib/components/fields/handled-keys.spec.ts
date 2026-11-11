@@ -53,7 +53,7 @@ describe('handled keys', () => {
     return kept(key);
   }
 
-  for (const kind of ['dropdown', 'autocomplete'] as const) {
+  for (const kind of ['dropdown', 'combobox'] as const) {
     describe(kind, () => {
       it('passes Enter, Escape and ArrowUp through while its panel is closed', async () => {
         const field = await tabInto(kind);
@@ -93,6 +93,18 @@ describe('handled keys', () => {
 
         expect(await keeps('Tab')).toBe(false);
         await expect.element(next()).toHaveFocus();
+        await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+      });
+
+      it('keeps Alt with ArrowDown, which opens its panel, and Alt with ArrowUp, which closes it', async () => {
+        await tabInto(kind);
+
+        await userEvent.keyboard('{Alt>}{ArrowDown}{/Alt}');
+        expect(kept('ArrowDown')).toBe(true);
+        await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+
+        await userEvent.keyboard('{Alt>}{ArrowUp}{/Alt}');
+        expect(kept('ArrowUp')).toBe(true);
         await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
       });
     });

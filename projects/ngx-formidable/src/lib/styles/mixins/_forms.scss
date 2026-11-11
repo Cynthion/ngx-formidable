@@ -396,7 +396,7 @@
   }
 
   &[readonly], // use native [readonly] and [disabled] attributes for native elements (input, textarea, select)
-  &.is-readonly // use custom .is-readonly class for non-native elements (e.g. dropdown, autocomplete, date, time)
+  &.is-readonly // use custom .is-readonly class for non-native elements (e.g. dropdown, combobox, date, time)
   {
     @include readonly-colors;
 
@@ -404,7 +404,7 @@
   }
 
   &[disabled], // use native [disabled] and [disabled] attributes for native elements (input, textarea, select)
-  &.is-disabled // use custom .is-disabled class for non-native elements (dropdown, autocomplete, date, time)
+  &.is-disabled // use custom .is-disabled class for non-native elements (dropdown, combobox, date, time)
   {
     @include disabled-colors;
 
@@ -573,8 +573,8 @@
   }
 }
 
-// An autocomplete's wrapper box.
-@mixin autocomplete-field {
+// A combobox's wrapper box.
+@mixin combobox-field {
   @include panel-field;
 }
 
@@ -592,7 +592,7 @@
 
 // #region In-Field Panel Toggle
 
-// The in-field toggle of the select, dropdown and date fields. Centers its icon: projected content, or else
+// The in-field toggle of the select, dropdown, combobox and date fields. Centers its icon: projected content, or else
 // the `FieldIcon` beside the slot.
 @mixin dropdown-toggle {
   cursor: pointer;
@@ -1528,8 +1528,8 @@
   @include panel;
 }
 
-// An autocomplete's panel.
-@mixin autocomplete-panel {
+// A combobox's panel.
+@mixin combobox-panel {
   @include panel;
 }
 
@@ -1661,12 +1661,28 @@
 
 // #region Option Variants
 
-// An option in a dropdown, autocomplete or date panel.
+// A panel row's padding. Every row keeps room at its end for the selected option's check, so a pick never
+// rewraps a label or changes a row's height.
+@mixin panel-option-padding {
+  padding: utils.rem(8) calc(#{utils.rem(24)} + var(--formidable-icon-size, #{tokens.$formidable-icon-size}))
+    utils.rem(8) utils.rem(16);
+}
+
+// An option in a dropdown, combobox or date panel.
 @mixin field-option-inline {
   @include field-option;
   @include field-option-selected-highlighted-logic;
+  @include panel-option-padding;
 
-  padding: utils.rem(8) utils.rem(16);
+  position: relative;
+}
+
+// The check on a panel's selected option, in the room every row keeps for it.
+@mixin field-option-check {
+  position: absolute;
+  inset-inline-end: utils.rem(16);
+  top: 50%;
+  translate: 0 -50%;
 }
 
 // An option in a radio group. Its selected mark always shows; the fills and the highlighted mark only while
@@ -1762,8 +1778,7 @@
 // group's. The panels render their empty state as text too, so a listbox has no fake option to offer.
 @mixin panel-no-option {
   @include no-option;
-
-  padding: utils.rem(8) utils.rem(16);
+  @include panel-option-padding;
 }
 
 // #endregion

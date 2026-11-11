@@ -5,7 +5,7 @@ import { referenced } from '../../testing/dom';
 import { configureFormidableTestBed } from '../../testing/test-bed';
 
 /**
- * The ARIA a field owns inside its own box, the mirror of the decorator's. A dropdown and an autocomplete are
+ * The ARIA a field owns inside its own box, the mirror of the decorator's. A dropdown and a combobox are
  * comboboxes that control a listbox; a date field is a combobox over a dialog, because a calendar is not a list
  * and Pikaday's cells carry no ids of ours; a radio group holds radios and a checkbox group checkboxes. The
  * active descendant names the option the highlight is on, and an option reports itself selected in a listbox
@@ -56,7 +56,7 @@ describe('panel and option field ARIA', () => {
     (document.activeElement as HTMLElement | null)?.blur();
   });
 
-  for (const kind of ['dropdown', 'autocomplete'] as const) {
+  for (const kind of ['dropdown', 'combobox'] as const) {
     describe(`${kind} as a combobox`, () => {
       it('controls a listbox', async () => {
         await tabInto(kind);
@@ -114,16 +114,16 @@ describe('panel and option field ARIA', () => {
     });
   }
 
-  describe('autocomplete', () => {
+  describe('combobox', () => {
     it('says its list is what completes the typing', async () => {
-      await tabInto('autocomplete');
+      await tabInto('combobox');
 
       await expect.element(combobox()).toHaveAttribute('aria-autocomplete', 'list');
     });
 
     // The empty state once was an option component, which announced itself as something to pick.
     it('offers no option at all when there is nothing to offer', async () => {
-      await tabInto('autocomplete', { options: [] });
+      await tabInto('combobox', { options: [] });
 
       await userEvent.keyboard('{ArrowDown}');
 
@@ -133,7 +133,7 @@ describe('panel and option field ARIA', () => {
 
     // Losing the option wrapper lost the row's padding with it, which left the text on the panel edge.
     it('insets its empty text exactly as an option row is inset', async () => {
-      const field = await tabInto('autocomplete');
+      const field = await tabInto('combobox');
       const row = page.getByRole('option', { name: 'Red', includeHidden: true }).element().firstElementChild!;
       const inset = padding(row);
 

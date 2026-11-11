@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { page, userEvent } from 'vitest/browser';
 import { FieldDecorator } from './components/field-decorator/field-decorator';
-import { AutocompleteField } from './components/fields/autocomplete-field/autocomplete-field';
+import { ComboboxField } from './components/fields/combobox-field/combobox-field';
 import { DateField } from './components/fields/date-field/date-field';
 import { DropdownField } from './components/fields/dropdown-field/dropdown-field';
 import { InputField } from './components/fields/input-field/input-field';
@@ -25,7 +25,7 @@ const IMPORTS = [
   FieldDecorator,
   InputField,
   DropdownField,
-  AutocompleteField,
+  ComboboxField,
   DateField,
   FieldLabel,
   FieldPrefix,
@@ -41,7 +41,7 @@ const UNSET = `
     <div formidableFieldSuffix>S</div>
   </formidable-field-decorator>
   <formidable-dropdown-field name="d" />
-  <formidable-autocomplete-field name="ac" />
+  <formidable-combobox-field name="ac" />
   <formidable-date-field name="dt" />
 `;
 
@@ -83,7 +83,7 @@ class ScopedHost {}
     <formidable-dropdown-field
       name="d"
       [panelPosition]="undefined" />
-    <formidable-autocomplete-field
+    <formidable-combobox-field
       name="ac"
       [panelPosition]="undefined" />
     <formidable-date-field
@@ -120,7 +120,7 @@ class UndefinedHost {}
     <formidable-dropdown-field
       name="d"
       panelPosition="left" />
-    <formidable-autocomplete-field
+    <formidable-combobox-field
       name="ac"
       panelPosition="left" />
     <formidable-date-field
@@ -146,7 +146,7 @@ interface Resolved {
   prefixAlign: string;
   suffixAlign: string;
   dropdownPanel: string;
-  autocompletePanel: string;
+  comboboxPanel: string;
   datePanel: string;
   clearable: boolean;
 }
@@ -177,7 +177,7 @@ describe('app defaults', () => {
       prefixAlign: get(FieldPrefix).align(),
       suffixAlign: get(FieldSuffix).align(),
       dropdownPanel: get(DropdownField).panelPosition(),
-      autocompletePanel: get(AutocompleteField).panelPosition(),
+      comboboxPanel: get(ComboboxField).panelPosition(),
       datePanel: get(DateField).panelPosition(),
       clearable: get(InputField).clearable()
     };
@@ -188,7 +188,7 @@ describe('app defaults', () => {
     prefixAlign: 'center',
     suffixAlign: 'center',
     dropdownPanel: 'full',
-    autocompletePanel: 'full',
+    comboboxPanel: 'full',
     datePanel: 'right',
     clearable: false
   };
@@ -198,7 +198,7 @@ describe('app defaults', () => {
     prefixAlign: 'value',
     suffixAlign: 'value',
     dropdownPanel: 'sheet',
-    autocompletePanel: 'sheet',
+    comboboxPanel: 'sheet',
     datePanel: 'sheet',
     clearable: true
   };
@@ -240,7 +240,7 @@ describe('app defaults', () => {
       prefixAlign: 'center',
       suffixAlign: 'center',
       dropdownPanel: 'left',
-      autocompletePanel: 'left',
+      comboboxPanel: 'left',
       datePanel: 'left',
       clearable: false
     });

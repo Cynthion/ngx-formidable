@@ -231,7 +231,7 @@ export class FormDefinitionStore {
       name: id,
       sectionId,
       label: `New ${kind}`,
-      // The template is an existing field of the same kind, and the sample's autocomplete is conditional —
+      // The template is an existing field of the same kind, and the sample's combobox is conditional —
       // copying that would add a field nobody can see.
       visibleWhen: undefined
     };

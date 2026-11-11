@@ -66,15 +66,15 @@ provideNgxFormidable({
 });
 ```
 
-| Key                   | Default For                                                   | Library's Own |
-| :-------------------- | :------------------------------------------------------------ | :------------ |
-| `labelPosition`       | `formidableFieldLabel`'s `position`                           | `'inside'`    |
-| `prefixAlign`         | `formidableFieldPrefix`'s `align`                             | `'center'`    |
-| `suffixAlign`         | `formidableFieldSuffix`'s `align`                             | `'center'`    |
-| `panelPosition`       | `panelPosition` on the dropdown, autocomplete and date fields | Per field     |
-| `revealOn`            | Every field's `revealOn`                                      | `'touched'`   |
-| `hideRequiredMarkers` | Whether every field hides its required marker                 | `false`       |
-| `clearable`           | Every field's `clearable`, its clear button                   | `false`       |
+| Key                   | Default For                                               | Library's Own |
+| :-------------------- | :-------------------------------------------------------- | :------------ |
+| `labelPosition`       | `formidableFieldLabel`'s `position`                       | `'inside'`    |
+| `prefixAlign`         | `formidableFieldPrefix`'s `align`                         | `'center'`    |
+| `suffixAlign`         | `formidableFieldSuffix`'s `align`                         | `'center'`    |
+| `panelPosition`       | `panelPosition` on the dropdown, combobox and date fields | Per field     |
+| `revealOn`            | Every field's `revealOn`                                  | `'touched'`   |
+| `hideRequiredMarkers` | Whether every field hides its required marker             | `false`       |
+| `clearable`           | Every field's `clearable`, its clear button               | `false`       |
 
 - **A Binding Wins**: an input left unset, or bound to `undefined`, takes the app default, then the library's own. Binding `undefined` is how a dynamic template states nothing.
 - **Read Once**: a field reads its defaults when it is created. A default changed afterwards reaches only the fields created afterwards.

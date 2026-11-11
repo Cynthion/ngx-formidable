@@ -6,7 +6,7 @@ import { provideNgxFormidable } from '../../provide-ngx-formidable';
 import { bindField, BindFieldOptions, BoundField, FieldKind, FORMS_APIS, FormsApi } from '../../testing/bind-field';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldLabel } from '../../directives/field-label';
-import { AutocompleteField } from '../fields/autocomplete-field/autocomplete-field';
+import { ComboboxField } from '../fields/combobox-field/combobox-field';
 import { FieldDecorator } from './field-decorator';
 
 /**
@@ -70,17 +70,17 @@ const cases: ClearCase[] = [
   { kind: 'textarea', role: 'textbox', value: 'notes', empty: '' },
   { kind: 'select', role: 'combobox', inputs: { options }, value: 'b', empty: null },
   { kind: 'dropdown', role: 'combobox', inputs: { options }, value: 'b', empty: null },
-  { kind: 'autocomplete', role: 'combobox', inputs: { options }, value: 'b', empty: null },
+  { kind: 'combobox', role: 'combobox', inputs: { options }, value: 'b', empty: null },
   { kind: 'date', role: 'combobox', value: new Date(2020, 0, 2), empty: null },
   { kind: 'time', role: 'textbox', value: new Date(1970, 0, 1, 13, 45), empty: null }
 ];
 
-/** An autocomplete reporting its filter, with a bare `clearable` attribute. */
+/** A combobox reporting its filter, with a bare `clearable` attribute. */
 @Component({
-  imports: [FieldDecorator, FieldLabel, AutocompleteField],
+  imports: [FieldDecorator, FieldLabel, ComboboxField],
   template: `
     <formidable-field-decorator>
-      <formidable-autocomplete-field
+      <formidable-combobox-field
         clearable
         [options]="options"
         (filterChange)="filters.push($event)" />
@@ -117,8 +117,8 @@ describe('clear button', () => {
   }
 
   describe('with the model null already', () => {
-    it('drops the autocomplete’s typed text and reports the emptied filter, dirtying nothing', async () => {
-      const bound = await bind('autocomplete', 'signal', { inputs: { options } });
+    it('drops the combobox’s typed text and reports the emptied filter, dirtying nothing', async () => {
+      const bound = await bind('combobox', 'signal', { inputs: { options } });
 
       await userEvent.type(field('combobox'), 'Al');
       await clickClear();
@@ -383,9 +383,9 @@ describe('clear button', () => {
     });
   });
 
-  describe('the autocomplete', () => {
+  describe('the combobox', () => {
     it('drops the label of a pick made with nothing typed', async () => {
-      const bound = await bind('autocomplete', 'signal', { inputs: { options } });
+      const bound = await bind('combobox', 'signal', { inputs: { options } });
 
       await userEvent.tab();
       await userEvent.keyboard('{ArrowDown}');
@@ -398,7 +398,7 @@ describe('clear button', () => {
     });
 
     it('widens the list again after a pick from a narrowed one', async () => {
-      await bind('autocomplete', 'signal', { inputs: { options } });
+      await bind('combobox', 'signal', { inputs: { options } });
 
       await userEvent.type(field('combobox'), 'Al');
       await userEvent.click(page.getByRole('option', { name: 'Alpha' }));

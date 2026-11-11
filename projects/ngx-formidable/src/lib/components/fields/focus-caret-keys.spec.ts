@@ -8,7 +8,7 @@ import { clickAt, Editor } from '../../testing/dom';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldDecorator } from '../field-decorator/field-decorator';
 import { FieldLabel } from '../../directives/field-label';
-import { AutocompleteField } from './autocomplete-field/autocomplete-field';
+import { ComboboxField } from './combobox-field/combobox-field';
 
 /**
  * What focus entry leaves for the keystroke that comes next, per **The Caret On Focus** and **The Caret In A
@@ -282,12 +282,12 @@ const ADDRESSES: FormidableOption[] = [
   { value: 'de', label: 'Wiesenstrasse 5' }
 ];
 
-/** An autocomplete whose options follow its filter, the way a consumer supplying them does. */
+/** A combobox whose options follow its filter, the way a consumer supplying them does. */
 @Component({
-  imports: [FormField, FieldDecorator, FieldLabel, AutocompleteField],
+  imports: [FormField, FieldDecorator, FieldLabel, ComboboxField],
   template: `
     <formidable-field-decorator>
-      <formidable-autocomplete-field
+      <formidable-combobox-field
         [formField]="form.address"
         [options]="visible()"
         (filterChange)="filter($event)" />
@@ -310,12 +310,12 @@ class FilteringHost {
 }
 
 /**
- * The autocomplete re-applies a written value when its options change, so a value whose option had not
+ * The combobox re-applies a written value when its options change, so a value whose option had not
  * arrived yet can still be placed. It used to do so even once placed — and a consumer filtering on
  * `filterChange` refreshes the options on every keystroke, so the first two deletions were overwritten as
  * they were made.
  */
-describe('the autocomplete editor', () => {
+describe('the combobox editor', () => {
   let fixture: ComponentFixture<FilteringHost>;
   const editor = () => page.getByRole('combobox', { name: 'Address' });
 

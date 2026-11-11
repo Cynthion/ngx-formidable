@@ -212,14 +212,14 @@ readonly form = new FormGroup({
 
 The two `required`s disagree about what is empty:
 
-| Field                                                                       | `required()` Fails On                                 | `Validators.required` Fails On             |
-| :-------------------------------------------------------------------------- | :---------------------------------------------------- | :----------------------------------------- |
-| `input-field`, `textarea-field`                                             | `''`                                                  | `''`                                       |
-| `select-field`, `dropdown-field`, `autocomplete-field`, `radio-group-field` | `null`                                                | `null`                                     |
-| `date-field`, `time-field`                                                  | `null`                                                | `null`                                     |
-| `toggle-field`                                                              | `false`                                               | Never: `Validators.requiredTrue` checks it |
-| `slider-field`                                                              | Never                                                 | Never                                      |
-| `checkbox-group-field`                                                      | Never: `[]` is not empty, so add `minLength(path, 1)` | `[]`                                       |
+| Field                                                                   | `required()` Fails On                                 | `Validators.required` Fails On             |
+| :---------------------------------------------------------------------- | :---------------------------------------------------- | :----------------------------------------- |
+| `input-field`, `textarea-field`                                         | `''`                                                  | `''`                                       |
+| `select-field`, `dropdown-field`, `combobox-field`, `radio-group-field` | `null`                                                | `null`                                     |
+| `date-field`, `time-field`                                              | `null`                                                | `null`                                     |
+| `toggle-field`                                                          | `false`                                               | Never: `Validators.requiredTrue` checks it |
+| `slider-field`                                                          | Never                                                 | Never                                      |
+| `checkbox-group-field`                                                  | Never: `[]` is not empty, so add `minLength(path, 1)` | `[]`                                       |
 
 ---
 

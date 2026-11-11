@@ -271,7 +271,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     group: 'Field Dimensions',
     control: 'length',
     class: 'declared',
-    description: 'Size of the toggle a select, dropdown or date field draws inside its own box.'
+    description: 'Size of the toggle a select, dropdown, combobox or date field draws inside its own box.'
   },
   {
     name: '--formidable-field-toggle-inset',
@@ -1286,7 +1286,7 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     control: 'length',
     class: 'declared',
     derivedFrom: '--formidable-color-field-background',
-    description: 'Background color for dropdown/autocomplete/date panels.'
+    description: 'Background color for dropdown/combobox/date panels.'
   },
   {
     name: '--formidable-panel-border-radius',

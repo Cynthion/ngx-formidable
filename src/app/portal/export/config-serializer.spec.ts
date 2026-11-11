@@ -45,7 +45,8 @@ describe('app config serializer', () => {
         '        dateFieldToggleOpen: { component: CalendarMinusIcon },',
         '        dateFieldPanelPrevious: { component: ArrowLeftIcon },',
         '        dateFieldPanelNext: { component: ArrowRightIcon },',
-        '        fieldClear: { component: EraserIcon }',
+        '        fieldClear: { component: EraserIcon },',
+        '        fieldOptionSelected: { component: CircleCheckIcon }',
         '      }',
         '    })'
       ].join('\n')
@@ -57,7 +58,7 @@ describe('app config serializer', () => {
 
     expect(config).toContain('    ...provideNgxFormidable({\n      icons: {');
     expect(config).toContain(
-      "import { ArrowLeftIcon, ArrowRightIcon, CalendarMinusIcon, CalendarPlusIcon, EraserIcon, MinusIcon, PlusIcon } from './icons';"
+      "import { ArrowLeftIcon, ArrowRightIcon, CalendarMinusIcon, CalendarPlusIcon, CircleCheckIcon, EraserIcon, MinusIcon, PlusIcon } from './icons';"
     );
     expect(config).not.toContain('defaults:');
     expect(config).not.toContain('No defaults set');
