@@ -69,7 +69,7 @@ export abstract class BaseOptionListField<T = string | null> extends BaseField<T
   protected abstract onOptionsChanged(): void;
 
   // The bound and the projected options, merged and sorted: the list before `defaultOption` is pinned, which
-  // each field does at its own point — `autocomplete-field` only after filtering.
+  // each field does at its own point — `combobox-field` only after filtering.
   protected computeAllOptions(): FormidableOption[] {
     return combineFieldOptions(
       this.options(),

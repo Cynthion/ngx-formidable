@@ -23,7 +23,7 @@ export function decorated(selector: string, label: string, content = '') {
 
 /**
  * Opens a panel field's panel the way a keyboard user does: `Tab` into the story's first field, then `keys`.
- * `type` is typed into the field first, as an autocomplete's filter.
+ * `type` is typed into the field first, as a combobox's filter.
  */
 export function openPanel(keys = '{ArrowDown}', type = '') {
   return async ({ userEvent }: StoryContext) => {

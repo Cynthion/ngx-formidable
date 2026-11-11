@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/angular-vite';
+import { moduleMetadata } from '@storybook/angular-vite';
+import { FieldToggleIcon } from '../../../directives/field-toggle-icon';
 import { action } from 'storybook/actions';
 import {
   decorated,
@@ -8,12 +10,12 @@ import {
   mockRequiredError,
   openPanel
 } from '../../../storybook/story.helpers';
-import { AutocompleteField } from './autocomplete-field';
+import { ComboboxField } from './combobox-field';
 
 /** One choice from a long or fetched list, by typing. The open-panel stories open it from the keyboard. */
-const meta: Meta<AutocompleteField> = {
-  title: 'Fields / Autocomplete Field',
-  component: AutocompleteField,
+const meta: Meta<ComboboxField> = {
+  title: 'Fields / Combobox Field',
+  component: ComboboxField,
   decorators: [decoratedImports],
   argTypes: {
     valueChange: { action: 'valueChange' },
@@ -21,11 +23,11 @@ const meta: Meta<AutocompleteField> = {
     filterChange: { action: 'filterChange' }
   },
   args: { options: mockColourOptions },
-  render: decorated('formidable-autocomplete-field', 'Colour')
+  render: decorated('formidable-combobox-field', 'Colour')
 };
 
 export default meta;
-type Story = StoryObj<AutocompleteField>;
+type Story = StoryObj<ComboboxField>;
 
 export const Default: Story = {};
 
@@ -104,4 +106,10 @@ export const ActionOption: Story = {
 export const NoOptions: Story = {
   parameters: framed,
   play: openPanel('', 'xyz')
+};
+
+/** `formidableFieldToggleIcon` replaces the toggle's icon. */
+export const ToggleIcon: Story = {
+  decorators: [moduleMetadata({ imports: [FieldToggleIcon] })],
+  render: decorated('formidable-combobox-field', 'Colour', '<span formidableFieldToggleIcon>🎨</span>')
 };

@@ -396,7 +396,7 @@
   }
 
   &[readonly], // use native [readonly] and [disabled] attributes for native elements (input, textarea, select)
-  &.is-readonly // use custom .is-readonly class for non-native elements (e.g. dropdown, autocomplete, date, time)
+  &.is-readonly // use custom .is-readonly class for non-native elements (e.g. dropdown, combobox, date, time)
   {
     @include readonly-colors;
 
@@ -404,7 +404,7 @@
   }
 
   &[disabled], // use native [disabled] and [disabled] attributes for native elements (input, textarea, select)
-  &.is-disabled // use custom .is-disabled class for non-native elements (dropdown, autocomplete, date, time)
+  &.is-disabled // use custom .is-disabled class for non-native elements (dropdown, combobox, date, time)
   {
     @include disabled-colors;
 
@@ -573,8 +573,8 @@
   }
 }
 
-// An autocomplete's wrapper box.
-@mixin autocomplete-field {
+// A combobox's wrapper box.
+@mixin combobox-field {
   @include panel-field;
 }
 
@@ -592,7 +592,7 @@
 
 // #region In-Field Panel Toggle
 
-// The in-field toggle of the select, dropdown and date fields. Centers its icon: projected content, or else
+// The in-field toggle of the select, dropdown, combobox and date fields. Centers its icon: projected content, or else
 // the `FieldIcon` beside the slot.
 @mixin dropdown-toggle {
   cursor: pointer;
@@ -1528,8 +1528,8 @@
   @include panel;
 }
 
-// An autocomplete's panel.
-@mixin autocomplete-panel {
+// A combobox's panel.
+@mixin combobox-panel {
   @include panel;
 }
 
@@ -1661,7 +1661,7 @@
 
 // #region Option Variants
 
-// An option in a dropdown, autocomplete or date panel.
+// An option in a dropdown, combobox or date panel.
 @mixin field-option-inline {
   @include field-option;
   @include field-option-selected-highlighted-logic;

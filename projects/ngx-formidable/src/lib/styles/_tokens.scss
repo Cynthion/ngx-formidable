@@ -78,7 +78,7 @@ $formidable-field-height: utils.rem(56); // even number
 // One named value because a `border-prefix` label aligns with the prefix by using it directly.
 $formidable-field-padding-x: utils.rem(16);
 
-// The square panel toggle `dropdown-field` and `date-field` render inside their own box, at the field's
+// The square panel toggle `dropdown-field`, `combobox-field` and `date-field` render inside their own box, at the field's
 // inner right edge.
 $formidable-field-toggle-size: utils.rem(32);
 

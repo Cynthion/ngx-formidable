@@ -495,7 +495,7 @@ export abstract class BaseField<T = string | null>
 
   // #region Panel
 
-  // `dropdown-field`, `autocomplete-field` and `date-field` share one panel: the base closes it on a click
+  // `dropdown-field`, `combobox-field` and `date-field` share one panel: the base closes it on a click
   // outside the field, places it again on a scroll or resize while it is open, and keeps focus in the field
   // while it is used. Each field adds only what opening and closing does to its own content.
 

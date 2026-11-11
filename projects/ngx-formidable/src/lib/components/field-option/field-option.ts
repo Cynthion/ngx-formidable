@@ -23,7 +23,7 @@ import {
 } from '../../models/formidable.model';
 
 /**
- * One option of a select, dropdown, autocomplete, radio group or checkbox group, projected into the field
+ * One option of a select, dropdown, combobox, radio group or checkbox group, projected into the field
  * that owns it. Its content is optional: with none it renders its `label`, with some it renders that instead
  * and takes the text as the label.
  *
@@ -79,7 +79,7 @@ export class FieldOption implements FormidableOptionSource, OnInit, AfterContent
    */
   readonly content = input<TemplateRef<unknown> | undefined>(undefined);
 
-  /** Whether an autocomplete's filter text matches. The default is a case-insensitive substring test. */
+  /** Whether a combobox's filter text matches. The default is a case-insensitive substring test. */
   readonly match = input<((filterValue: string) => boolean) | undefined>(undefined);
 
   /** How the option paints itself. Independent of its ARIA role, which the owning field decides. */

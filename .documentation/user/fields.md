@@ -48,7 +48,7 @@ Every field has a `focus()` method. `autoFocus` calls it once the view is ready,
 </button>
 ```
 
-> **Note:** Focusing never opens a panel. The dropdown opens on click, on `ArrowDown` or on typing, the autocomplete on `ArrowDown` or on typing, and the date field from its toggle or `Alt` plus `ArrowDown`, so a focused field is ready for input without a list covering the page. A `disabled` field ignores `focus()` entirely.
+> **Note:** Focusing never opens a panel. The dropdown and the combobox open on a click, on `ArrowDown` or on typing, the date field from its toggle, and all three on `Alt` plus `ArrowDown`, so a focused field is ready for input without a list covering the page. `openOnClick` set to `false` keeps a click into the combobox's input from opening it, so the toggle and the keys are what open it. A `disabled` field ignores `focus()` entirely.
 
 ### The Caret On Focus
 
@@ -67,7 +67,7 @@ The rules run on the way in and then stop. Clicking again, moving the caret, typ
 
 ## Options
 
-Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`, `radio-group-field` and `checkbox-group-field`. Options come from an input, from projected components, or from both at once.
+Five fields take options: `select-field`, `dropdown-field`, `combobox-field`, `radio-group-field` and `checkbox-group-field`. Options come from an input, from projected components, or from both at once.
 
 ```html
 <formidable-dropdown-field
@@ -89,11 +89,12 @@ Five fields take options: `select-field`, `dropdown-field`, `autocomplete-field`
 
 > **Warning:** A projected option must be written inside the field's element. An option in a shared template declared outside the field cannot join it, wherever it renders.
 
-- **An Option Owns Its Own Content**: anything projected into `formidable-field-option` becomes that option's template, which is how an option carries a subtitle, an icon or highlighted match text. Its `match` input overrides how the autocomplete filter matches it.
-- **The Autocomplete Filters, And Reports The Filter**: typing narrows the list to the options whose `match` accepts the text, by default a case-insensitive substring of the label. It also emits the text as `filterChange`, so the options can be fetched or ranked for it instead (fuzzy, a server call). An option's own `match` keeps what a substring would exclude.
+- **An Option Owns Its Own Content**: anything projected into `formidable-field-option` becomes that option's template, which is how an option carries a subtitle, an icon or highlighted match text. Its `match` input overrides how the combobox filter matches it.
+- **The Combobox Filters, And Reports The Filter**: typing narrows the list to the options whose `match` accepts the text, by default a case-insensitive substring of the label. It also emits the text as `filterChange`, so the options can be fetched or ranked for it instead (fuzzy, a server call). An option's own `match` keeps what a substring would exclude.
 - **`filterChange` Reports More Than Typing**: a value written from outside, focused or not, takes the text and the filter with it: to its option's label, or to nothing while no option carries the value. Those moves are reported too, so the supplied list can follow the value the field was given. Without them, a value written from outside names an option the filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under the user.
-- **The Filter Is Writable**: `filter` is a model, so `[(filter)]` keeps a component signal in step with it, and a write reaches the field, to seed it or to empty it. A write is not typing: it opens no panel and picks nothing. Nor is the filter the input's text: after a pick the input shows the label, and the filter keeps what was typed to find it. So emptying the field takes both, the value to empty a pick and the filter to empty text typed without one: while nothing is picked the value is `null` already, and writing it alone changes nothing. `clear()` empties both as the user's edit, and is what the **Clear Button** in [Decoration](decoration.md) calls.
-- **An Action Row Is Not A Value**: `dropdown-field` and `autocomplete-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. The field closes its panel, runs the action and touches nothing else.
+- **The Filter Is Writable**: `filter` is a model, so `[(filter)]` keeps a component signal in step with it, and a write reaches the field, to seed it or to empty it. A write is not typing: it opens no panel and picks nothing. Nor is the filter the input's text: after a pick the input shows the label, and the filter keeps what was typed to find it; a write never replaces a pick's label, only text typed without one. So emptying the field takes both, the value to empty a pick and the filter to empty text typed without one: while nothing is picked the value is `null` already, and writing it alone changes nothing. `clear()` empties both as the user's edit, and is what the **Clear Button** in [Decoration](decoration.md) calls.
+- **Opening Shows The Whole List Behind A Pick**: the toggle, a click into the input (unless `openOnClick` is `false`), `ArrowDown` and `Alt` plus `ArrowDown` open the panel. Opened while the input shows the pick, or nothing, the field empties its filter, which `filterChange` reports, so the whole list shows with the pick in it, scrolled to it. Opened on text typed without a pick, the list stays narrowed to it.
+- **An Action Row Is Not A Value**: `dropdown-field` and `combobox-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. The field closes its panel, runs the action and touches nothing else.
 
 An action entry that opens a dialog for a new address:
 
@@ -117,7 +118,7 @@ private async createAddress(): Promise<void> {
 ```
 
 ```html
-<formidable-autocomplete-field
+<formidable-combobox-field
   [options]="addresses()"
   [actionOption]="addAddress"
   [formField]="form.address"
@@ -134,7 +135,7 @@ The recipe relies on three facts:
 
 ## Panels
 
-`dropdown-field`, `autocomplete-field` and `date-field` render their content in a panel, placed by `panelPosition`.
+`dropdown-field`, `combobox-field` and `date-field` render their content in a panel, placed by `panelPosition`.
 
 | Value   | Places The Panel                                                               |
 | :------ | :----------------------------------------------------------------------------- |
@@ -155,7 +156,7 @@ Opening a panel scrolls the field, or the panel, into view, but only the one tha
 
 > **Warning:** A sheet is `position: fixed`. Any ancestor with a `transform`, `filter` or `contain` turns it back into an ordinary absolute box, so those stay off the elements the field sits in.
 
-A sheet keeps focus in the field's input, as every panel does, because that is what makes the autocomplete type-ahead. A soft keyboard can therefore cover it.
+A sheet keeps focus in the field's input, as every panel does, because that is what makes the combobox type-ahead. A soft keyboard can therefore cover it.
 
 Whatever the placement, the calendar scales to the width its panel has: `--formidable-date-field-panel-width` is the width it _prefers_, not one it is fixed at.
 
@@ -205,10 +206,10 @@ The select's toggle overlays the native control, so a click on a projected icon 
 
 Every control is operable from the keyboard. Disabled and readonly fields ignore navigation.
 
-- **Panel**: the dropdown, autocomplete or date overlay. A panel closes on `Esc`, on `Tab`, on a pick, and on a click outside the field.
+- **Panel**: the dropdown, combobox or date overlay. A panel closes on `Esc`, on `Tab`, on a pick, and on a click outside the field.
 - **Segment**: the part of the `unicodeTokenFormat` under the caret: the year, month or day of a date field, the hour, minute, second or AM/PM of a time field.
 
-| Key                  | Inputs / Textareas | Dropdown / Autocomplete                             | Radio / Checkbox Groups | Date Field                                         | Time Field                |
+| Key                  | Inputs / Textareas | Dropdown / Combobox                                 | Radio / Checkbox Groups | Date Field                                         | Time Field                |
 | :------------------- | :----------------- | :-------------------------------------------------- | :---------------------- | :------------------------------------------------- | :------------------------ |
 | `Tab`                | Move to next       | Close panel (if open), then move                    | Move to next            | Close panel (if open), then move                   | Move to next              |
 | `Shift` + `Tab`      | Move to previous   | Close panel (if open), then move                    | Move to previous        | Close panel (if open), then move                   | Move to previous          |
@@ -217,12 +218,12 @@ Every control is operable from the keyboard. Disabled and readonly fields ignore
 | `Space`              |                    | Typed like any character, see **Type-Ahead**        | Pick highlighted option |                                                    |                           |
 | `Arrow Up`           |                    | If open: previous option (wraps)                    | Previous option (wraps) | If panel open: previous week; else segment up      | Segment up                |
 | `Arrow Down`         |                    | If closed: open panel; if open: next option (wraps) | Next option (wraps)     | If panel open: next week; else segment down        | Segment down              |
-| `Alt` + `Arrow Up`   |                    |                                                     |                         | Close panel                                        |                           |
-| `Alt` + `Arrow Down` |                    |                                                     |                         | Open panel                                         |                           |
+| `Alt` + `Arrow Up`   |                    | If panel open: close panel                          |                         | Close panel                                        |                           |
+| `Alt` + `Arrow Down` |                    | Open panel                                          |                         | Open panel                                         |                           |
 | `Arrow Left`         |                    |                                                     |                         | If panel open: previous day; else move caret       | Move caret                |
 | `Arrow Right`        |                    |                                                     |                         | If panel open: next day; else move caret           | Move caret                |
 
-An empty cell is a key the field does not act on, and it keeps its native effect: `Enter` on a dropdown or autocomplete with its panel closed submits the form, and `Esc` with no panel open reaches the dialog around the field. Picking a highlighted option in a checkbox group toggles it. A click on a group's option moves the highlight there, so the arrows walk on from it. Arrows skip disabled and readonly options, and the highlight never rests on one: when the list changes, a highlight whose option can no longer be picked, the selected one included, moves to the next option that can.
+An empty cell is a key the field does not act on, and it keeps its native effect: `Enter` on a dropdown or combobox with its panel closed submits the form, and `Esc` with no panel open reaches the dialog around the field. Picking a highlighted option in a checkbox group toggles it. A click on a group's option moves the highlight there, so the arrows walk on from it. Arrows skip disabled and readonly options, and the highlight never rests on one: when the list changes, a highlight whose option can no longer be picked, the selected one included, moves to the next option that can.
 
 The rest keep the platform's keys: `select-field` is a native `<select>` and `slider-field` a native range input. `toggle-field` flips on `Space` and `Enter`.
 
@@ -230,7 +231,7 @@ The rest keep the platform's keys: `select-field` is a native `<select>` and `sl
 
 Typing into a dropdown builds a short buffer and highlights the first option whose label starts with it. Backspace edits the buffer, the first character opens a closed panel, and the buffer clears itself after a pause.
 
-The autocomplete has no buffer: what is typed is its filter, and typing an option's exact label picks it. Typing anything else lets the pick go at once.
+The combobox has no buffer: what is typed is its filter, and typing an option's exact label picks it. Typing anything else lets the pick go at once.
 
 ### Stepping A Date Or Time Segment
 

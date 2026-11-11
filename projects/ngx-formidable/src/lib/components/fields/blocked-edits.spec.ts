@@ -45,7 +45,7 @@ const mutated: Record<
     mutate: (field) => field.selectTime(new Date(1970, 0, 1, 8, 15))
   },
   'dropdown': { kind: 'dropdown', value: 'b', hasOptions: true, mutate: pickFirst },
-  'autocomplete': { kind: 'autocomplete', value: 'b', hasOptions: true, mutate: pickFirst },
+  'combobox': { kind: 'combobox', value: 'b', hasOptions: true, mutate: pickFirst },
   'radio group': { kind: 'radio-group', value: 'b', hasOptions: true, mutate: pickFirst },
   'checkbox group': { kind: 'checkbox-group', value: ['b'], hasOptions: true, mutate: pickFirst }
 };
@@ -166,7 +166,7 @@ describe('blocked edits', () => {
     const cases = [
       { kind: 'dropdown', role: 'option', open: () => userEvent.click(page.getByRole('combobox'), { force: true }) },
       {
-        kind: 'autocomplete',
+        kind: 'combobox',
         role: 'option',
         open: async () => {
           await userEvent.click(page.getByRole('combobox'));

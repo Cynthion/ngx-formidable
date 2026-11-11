@@ -3,7 +3,7 @@
 Every public component, directive, token and type, and what each accepts. How the fields behave is taught in the guides linked from each entry.
 
 - **Standalone And `OnPush`**: every component, with no exception.
-- **Signal Inputs And Outputs**: every input is a signal `input()` and every output an `output()`, except `value` and the autocomplete's `filter`, which are a `model()` whose output is `valueChange` and `filterChange`. A template binds them as usual (`[readonly]="…"`, `(touch)="…"`), so the tables list the value a binding takes.
+- **Signal Inputs And Outputs**: every input is a signal `input()` and every output an `output()`, except `value` and the combobox's `filter`, which are a `model()` whose output is `valueChange` and `filterChange`. A template binds them as usual (`[readonly]="…"`, `(touch)="…"`), so the tables list the value a binding takes.
 - **Shared Inputs Are Listed Once**: a field's entry lists only its own inputs, and names the shared groups it takes.
 
 | From Code           | How                                                                                                                                                                                    |
@@ -22,7 +22,7 @@ Every public component, directive, token and type, and what each accepts. How th
 | [`TextareaField`](#textarea-field)            | `formidable-textarea-field`       | `string`         | Free text over several lines                      |
 | [`SelectField`](#select-field)                | `formidable-select-field`         | `string \| null` | One choice from the platform's own picker         |
 | [`DropdownField`](#dropdown-field)            | `formidable-dropdown-field`       | `string \| null` | One choice from a styled panel                    |
-| [`AutocompleteField`](#autocomplete-field)    | `formidable-autocomplete-field`   | `string \| null` | One choice from a long or fetched list, by typing |
+| [`ComboboxField`](#combobox-field)            | `formidable-combobox-field`       | `string \| null` | One choice from a long or fetched list, by typing |
 | [`DateField`](#date-field)                    | `formidable-date-field`           | `Date \| null`   | A date, typed or picked from a calendar           |
 | [`TimeField`](#time-field)                    | `formidable-time-field`           | `Date \| null`   | A time of day                                     |
 | [`ToggleField`](#toggle-field)                | `formidable-toggle-field`         | `boolean`        | On or off                                         |
@@ -30,17 +30,17 @@ Every public component, directive, token and type, and what each accepts. How th
 | [`RadioGroupField`](#radio-group-field)       | `formidable-radio-group-field`    | `string \| null` | One choice, with every option visible             |
 | [`CheckboxGroupField`](#checkbox-group-field) | `formidable-checkbox-group-field` | `string[]`       | Several choices, with every option visible        |
 
-| Component Or Directive               | Selector                          | Purpose                                                      |
-| :----------------------------------- | :-------------------------------- | :----------------------------------------------------------- |
-| [`FieldDecorator`](#field-decorator) | `formidable-field-decorator`      | Wraps a field with its label, adornments, hints, messages    |
-| [`FieldOption`](#field-option)       | `formidable-field-option`         | One option, projected into an option field                   |
-| [`FieldErrors`](#field-errors)       | `formidable-field-errors`         | Renders a list of errors as messages                         |
-| [`FieldLabel`](#directives)          | `[formidableFieldLabel]`          | The field's label                                            |
-| [`FieldLabelAdornment`](#directives) | `[formidableFieldLabelAdornment]` | Content beside the label                                     |
-| [`FieldPrefix`](#directives)         | `[formidableFieldPrefix]`         | Content at the field's leading edge                          |
-| [`FieldSuffix`](#directives)         | `[formidableFieldSuffix]`         | Content at the field's trailing edge                         |
-| [`FieldHint`](#directives)           | `[formidableFieldHint]`           | Support text below the field                                 |
-| [`FieldToggleIcon`](#directives)     | `[formidableFieldToggleIcon]`     | Replaces the toggle icon of a select, dropdown or date field |
+| Component Or Directive               | Selector                          | Purpose                                                                |
+| :----------------------------------- | :-------------------------------- | :--------------------------------------------------------------------- |
+| [`FieldDecorator`](#field-decorator) | `formidable-field-decorator`      | Wraps a field with its label, adornments, hints, messages              |
+| [`FieldOption`](#field-option)       | `formidable-field-option`         | One option, projected into an option field                             |
+| [`FieldErrors`](#field-errors)       | `formidable-field-errors`         | Renders a list of errors as messages                                   |
+| [`FieldLabel`](#directives)          | `[formidableFieldLabel]`          | The field's label                                                      |
+| [`FieldLabelAdornment`](#directives) | `[formidableFieldLabelAdornment]` | Content beside the label                                               |
+| [`FieldPrefix`](#directives)         | `[formidableFieldPrefix]`         | Content at the field's leading edge                                    |
+| [`FieldSuffix`](#directives)         | `[formidableFieldSuffix]`         | Content at the field's trailing edge                                   |
+| [`FieldHint`](#directives)           | `[formidableFieldHint]`           | Support text below the field                                           |
+| [`FieldToggleIcon`](#directives)     | `[formidableFieldToggleIcon]`     | Replaces the toggle icon of a select, dropdown, combobox or date field |
 
 ---
 
@@ -101,7 +101,7 @@ Focus and the caret are in [Fields](fields.md), the reveal in [Validation](valid
 
 ### Option Inputs
 
-Taken by `select-field`, `dropdown-field`, `autocomplete-field`, `radio-group-field` and `checkbox-group-field`. Options come from `options`, from projected [`formidable-field-option`](#field-option) children, or from both, merged.
+Taken by `select-field`, `dropdown-field`, `combobox-field`, `radio-group-field` and `checkbox-group-field`. Options come from `options`, from projected [`formidable-field-option`](#field-option) children, or from both, merged.
 
 | Input               | Type                     | Default           | Description                                                           |
 | :------------------ | :----------------------- | :---------------- | :-------------------------------------------------------------------- |
@@ -142,7 +142,7 @@ A date format takes the fixed-width tokens `yy`, `yyyy`, `MM`, `MMM` and `dd`, a
 
 ### Panel Inputs
 
-Taken by `dropdown-field`, `autocomplete-field` and `date-field`.
+Taken by `dropdown-field`, `combobox-field` and `date-field`.
 
 | Member                | Kind   | Type                      | Default                  | Description                                                       |
 | :-------------------- | :----- | :------------------------ | :----------------------- | :---------------------------------------------------------------- |
@@ -188,21 +188,22 @@ No inputs of its own. A native `<select>`: a value no option carries, `null` inc
 
 Typing highlights the first option whose label starts with what was typed, see **Type-Ahead** in [Fields](fields.md). The action entry is **An Action Row Is Not A Value** there.
 
-### Autocomplete Field
+### Combobox Field
 
-`formidable-autocomplete-field` · Value `string | null` · Shared, [Option Inputs](#option-inputs) and [Panel Inputs](#panel-inputs)
+`formidable-combobox-field` · Value `string | null` · Shared, [Option Inputs](#option-inputs) and [Panel Inputs](#panel-inputs)
 
-| Input              | Type                     | Default     | Description                                                                        |
-| :----------------- | :----------------------- | :---------- | :--------------------------------------------------------------------------------- |
-| `filter`           | `string`                 | `''`        | The filter text the list is narrowed by, bound two-way as `[(filter)]`             |
-| `actionOption`     | `FormidableActionOption` | `undefined` | An entry at the end of the list that runs its `action` instead of becoming a value |
-| `actionOptionMode` | `FieldDefaultOptionMode` | `'always'`  | `'always'`, or `'fallback'`: only while the list would be empty                    |
+| Input              | Type                     | Default     | Description                                                                                |
+| :----------------- | :----------------------- | :---------- | :----------------------------------------------------------------------------------------- |
+| `filter`           | `string`                 | `''`        | The filter text the list is narrowed by, bound two-way as `[(filter)]`                     |
+| `openOnClick`      | `boolean`                | `true`      | Whether a click into the input opens the panel. The toggle and the keys open it regardless |
+| `actionOption`     | `FormidableActionOption` | `undefined` | An entry at the end of the list that runs its `action` instead of becoming a value         |
+| `actionOptionMode` | `FieldDefaultOptionMode` | `'always'`  | `'always'`, or `'fallback'`: only while the list would be empty                            |
 
-| Output         | Emits    | When                                                                                                             |
-| :------------- | :------- | :--------------------------------------------------------------------------------------------------------------- |
-| `filterChange` | `string` | The filter changes: the user types, or a value written from outside moves it. Not for a write through `[filter]` |
+| Output         | Emits    | When                                                                                                                                                 |
+| :------------- | :------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filterChange` | `string` | The filter changes: the user types, a value written from outside moves it, or the whole list opens behind a pick. Not for a write through `[filter]` |
 
-Typing filters the list by each option's `match`, by default a case-insensitive substring of its label. Only an option can be committed: free text is not a value. The default option and the action entry are applied after filtering, so both stay visible when nothing matches. `filter` is writable, and `clear()` empties it with the value, which `filterChange` reports. What `filterChange` reports, and what a write to `filter` does, is in **Options** in [Fields](fields.md).
+Typing filters the list by each option's `match`, by default a case-insensitive substring of its label. Only an option can be committed: free text is not a value. Its toggle, a click into the input and `ArrowDown` open the whole list behind a pick, which empties `filter`. The default option and the action entry are applied after filtering, so both stay visible when nothing matches. `filter` is writable, and `clear()` empties it with the value, which `filterChange` reports. What `filterChange` reports, and what a write to `filter` does, is in **Options** in [Fields](fields.md).
 
 ### Date Field
 
@@ -303,7 +304,7 @@ Its host carries the field's state as classes: `is-readonly`, `is-disabled`, `is
 | `label`       | `string`              | The projected content's text       | Display text                                                            |
 | `readonly`    | `boolean`             | `false`                            | Cannot be picked and is skipped by the keyboard, but reads as available |
 | `disabled`    | `boolean`             | `false`                            | Cannot be picked and is skipped by the keyboard                         |
-| `match`       | `(filter) => boolean` | Case-insensitive `label` substring | Whether the autocomplete's filter text matches the option               |
+| `match`       | `(filter) => boolean` | Case-insensitive `label` substring | Whether the combobox's filter text matches the option                   |
 | `layout`      | `FieldOptionLayout`   | `'inline'`                         | How the option paints itself. The ARIA role follows the parent field    |
 | `selected`    | `boolean`             | `false`                            | Set by the field. Do not bind it                                        |
 | `highlighted` | `boolean`             | `false`                            | Set by the field. Do not bind it                                        |
@@ -340,23 +341,23 @@ Projected into a [`formidable-field-decorator`](#field-decorator), beside the fi
 | `FieldHint`           | `[formidableFieldHint]`           | `align`    | `FieldHintAlignment`      | `'start'`                                            |
 | `FieldToggleIcon`     | `[formidableFieldToggleIcon]`     |            |                           |                                                      |
 
-`FieldToggleIcon` is projected into a `select-field`, `dropdown-field` or `date-field` itself, not into the decorator, and replaces its toggle's icon, a provided one included, see **Icons** in [Fields](fields.md). What each slot does is in [Decoration](decoration.md).
+`FieldToggleIcon` is projected into a `select-field`, `dropdown-field`, `combobox-field` or `date-field` itself, not into the decorator, and replaces its toggle's icon, a provided one included, see **Icons** in [Fields](fields.md). What each slot does is in [Decoration](decoration.md).
 
 ---
 
 ## Accessibility
 
-| Field                                  | Element Carrying The State       | Beyond `aria-required`, `aria-invalid` and `aria-describedby`                                                                                          |
-| :------------------------------------- | :------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `input-field`, `textarea-field`        | The `input` or `textarea`        | Nothing                                                                                                                                                |
-| `select-field`                         | The `select`                     | `aria-readonly`                                                                                                                                        |
-| `dropdown-field`, `autocomplete-field` | The inner `input[role=combobox]` | `aria-readonly`, `aria-expanded`, `aria-controls`, `aria-activedescendant`. The autocomplete adds `aria-autocomplete="list"`. The panel is a `listbox` |
-| `date-field`                           | The inner `input[role=combobox]` | `aria-readonly`, `aria-haspopup="dialog"`, `aria-expanded`, `aria-controls`. The panel is a `dialog`, named by the label                               |
-| `time-field`                           | The inner `input`                | `aria-readonly`                                                                                                                                        |
-| `slider-field`                         | The `input[type=range]`          | `aria-labelledby`, `aria-readonly`, and `aria-valuetext` once `transformValueToThumbLabel` is set                                                      |
-| `toggle-field`                         | The `div[role=switch]`           | `aria-labelledby`, `aria-checked`, `aria-readonly`, `aria-disabled`                                                                                    |
-| `radio-group-field`                    | The `div[role=radiogroup]`       | `aria-labelledby`, `aria-readonly`, `aria-disabled`, `aria-activedescendant`                                                                           |
-| `checkbox-group-field`                 | The `div[role=group]`            | `aria-labelledby`, `aria-readonly`, `aria-disabled`, `aria-activedescendant`                                                                           |
+| Field                              | Element Carrying The State       | Beyond `aria-required`, `aria-invalid` and `aria-describedby`                                                                                      |
+| :--------------------------------- | :------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `input-field`, `textarea-field`    | The `input` or `textarea`        | Nothing                                                                                                                                            |
+| `select-field`                     | The `select`                     | `aria-readonly`                                                                                                                                    |
+| `dropdown-field`, `combobox-field` | The inner `input[role=combobox]` | `aria-readonly`, `aria-expanded`, `aria-controls`, `aria-activedescendant`. The combobox adds `aria-autocomplete="list"`. The panel is a `listbox` |
+| `date-field`                       | The inner `input[role=combobox]` | `aria-readonly`, `aria-haspopup="dialog"`, `aria-expanded`, `aria-controls`. The panel is a `dialog`, named by the label                           |
+| `time-field`                       | The inner `input`                | `aria-readonly`                                                                                                                                    |
+| `slider-field`                     | The `input[type=range]`          | `aria-labelledby`, `aria-readonly`, and `aria-valuetext` once `transformValueToThumbLabel` is set                                                  |
+| `toggle-field`                     | The `div[role=switch]`           | `aria-labelledby`, `aria-checked`, `aria-readonly`, `aria-disabled`                                                                                |
+| `radio-group-field`                | The `div[role=radiogroup]`       | `aria-labelledby`, `aria-readonly`, `aria-disabled`, `aria-activedescendant`                                                                       |
+| `checkbox-group-field`             | The `div[role=group]`            | `aria-labelledby`, `aria-readonly`, `aria-disabled`, `aria-activedescendant`                                                                       |
 
 - **Ids**: the decorator names its label `{fieldId}-label`, its hint row `{fieldId}-hint` and its messages `{fieldId}-errors`. A field names its panel `{fieldId}-panel` and each option `{fieldId}-option-{index}`.
 - **Without A Decorator**: a field emits no `aria-labelledby` and no `aria-describedby`, rather than pointing at ids that do not exist.
@@ -400,14 +401,14 @@ Projected into a [`formidable-field-decorator`](#field-decorator), beside the fi
 | `FormidableErrorMessageFn`           | `(error: ValidationError) => string`                                                                |
 | `FormidableClearLabelFn`             | `(label: string) => string`                                                                         |
 
-| Interface                | Implemented By               | Members                                                                                                                                                                                                                |
-| :----------------------- | :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `FormidableOption<T>`    | Plain data                   | `value`, and optional `label`, `template`, `readonly`, `disabled`, `match(filter)`. `label` falls back to `value`                                                                                                      |
-| `FormidableActionOption` | Plain data                   | A `FormidableOption` plus a required `action(): void`                                                                                                                                                                  |
-| `FormidableField<T>`     | Every field                  | What the decorator reads off a field: `fieldRef`, `fieldId`, `value`, its state, `showErrors`, `shownErrors`, `decoratorLayout`, and the optional `clearable`, `canClear`, `clear()` and `focus()` of its clear button |
-| `FormidableOptionField`  | The five option fields       | `options`, `defaultOption`, `defaultOptionMode`, `sortFn`, `selectOption`, and an optional `optionRole`                                                                                                                |
-| `FormidableOptionSource` | `FieldOption`                | `option`: the plain option a component hands the field that owns it                                                                                                                                                    |
-| `FormidablePanelField`   | Dropdown, autocomplete, date | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                                                                                                                                                              |
+| Interface                | Implemented By           | Members                                                                                                                                                                                                                |
+| :----------------------- | :----------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FormidableOption<T>`    | Plain data               | `value`, and optional `label`, `template`, `readonly`, `disabled`, `match(filter)`. `label` falls back to `value`                                                                                                      |
+| `FormidableActionOption` | Plain data               | A `FormidableOption` plus a required `action(): void`                                                                                                                                                                  |
+| `FormidableField<T>`     | Every field              | What the decorator reads off a field: `fieldRef`, `fieldId`, `value`, its state, `showErrors`, `shownErrors`, `decoratorLayout`, and the optional `clearable`, `canClear`, `clear()` and `focus()` of its clear button |
+| `FormidableOptionField`  | The five option fields   | `options`, `defaultOption`, `defaultOptionMode`, `sortFn`, `selectOption`, and an optional `optionRole`                                                                                                                |
+| `FormidableOptionSource` | `FieldOption`            | `option`: the plain option a component hands the field that owns it                                                                                                                                                    |
+| `FormidablePanelField`   | Dropdown, combobox, date | `panelRef`, `isPanelOpen`, `togglePanel`, `panelPosition`                                                                                                                                                              |
 
 Every input member of an interface is typed as the `Signal` the component declares. `FormidableOption` is the exception, because a consumer writes it by hand.
 
@@ -417,13 +418,13 @@ Every input member of an interface is typed as the `Signal` the component declar
 
 Five exported abstract `@Directive()`s, with no selector, sit behind the fields. Writing a field on `BaseField` is [Custom Fields](custom-fields.md).
 
-| Class                    | Extends                   | Behind                                                                              | Adds                                                |
-| :----------------------- | :------------------------ | :---------------------------------------------------------------------------------- | :-------------------------------------------------- |
-| `BaseField<T>`           |                           | Every field                                                                         | [Shared Field Inputs](#shared-field-inputs)         |
-| `BaseTextField`          | `BaseField<string>`       | `input-field`, `textarea-field`                                                     | [Text Inputs](#text-inputs)                         |
-| `BaseDateTimeField`      | `BaseField<Date \| null>` | `date-field`, `time-field`                                                          | [Date And Time Inputs](#date-and-time-inputs)       |
-| `BaseOptionListField<T>` | `BaseField<T>`            | `select-field`, and every `BaseOptionField`                                         | [Option Inputs](#option-inputs), `optionComponents` |
-| `BaseOptionField<T>`     | `BaseOptionListField<T>`  | `dropdown-field`, `autocomplete-field`, `radio-group-field`, `checkbox-group-field` | A highlight, and the keys that move it              |
+| Class                    | Extends                   | Behind                                                                          | Adds                                                |
+| :----------------------- | :------------------------ | :------------------------------------------------------------------------------ | :-------------------------------------------------- |
+| `BaseField<T>`           |                           | Every field                                                                     | [Shared Field Inputs](#shared-field-inputs)         |
+| `BaseTextField`          | `BaseField<string>`       | `input-field`, `textarea-field`                                                 | [Text Inputs](#text-inputs)                         |
+| `BaseDateTimeField`      | `BaseField<Date \| null>` | `date-field`, `time-field`                                                      | [Date And Time Inputs](#date-and-time-inputs)       |
+| `BaseOptionListField<T>` | `BaseField<T>`            | `select-field`, and every `BaseOptionField`                                     | [Option Inputs](#option-inputs), `optionComponents` |
+| `BaseOptionField<T>`     | `BaseOptionListField<T>`  | `dropdown-field`, `combobox-field`, `radio-group-field`, `checkbox-group-field` | A highlight, and the keys that move it              |
 
 `optionComponents` is the public `contentChildren()` query of the projected options, as `FormidableOptionSource`, with `descendants: true`.
 

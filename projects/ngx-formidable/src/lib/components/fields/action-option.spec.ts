@@ -10,7 +10,7 @@ import { configureFormidableTestBed, settle } from '../../testing/test-bed';
  * entry at the end of the list that runs an action instead of becoming a value, "Add A New Address…".
  *
  * It renders as an option and the keyboard walks it as one. What separates it from an option is the value:
- * picking it commits nothing, a model written to its value finds no option, the autocomplete never picks it
+ * picking it commits nothing, a model written to its value finds no option, the combobox never picks it
  * off its typed label, and the dropdown's type-ahead walks past it. It never stands in for a result either: a
  * list showing the action still says that nothing matched.
  *
@@ -47,7 +47,7 @@ describe('action option', () => {
 
   /** Binds the field under a label, with an action entry. */
   function bind(
-    kind: 'dropdown' | 'autocomplete',
+    kind: 'dropdown' | 'combobox',
     { options = OPTIONS, mode = 'always' }: { options?: FormidableOption[]; mode?: FieldDefaultOptionMode } = {}
   ): Promise<BoundField> {
     return bindField(kind, 'signal', {
@@ -134,7 +134,7 @@ describe('action option', () => {
     });
   });
 
-  describe('autocomplete', () => {
+  describe('combobox', () => {
     /** Types into the field and lets its filter through. */
     async function search(field: BoundField, text: string): Promise<void> {
       await userEvent.click(combobox());
@@ -143,7 +143,7 @@ describe('action option', () => {
     }
 
     it('survives a filter that matches nothing, beside the empty-state text', async () => {
-      const field = await bind('autocomplete');
+      const field = await bind('combobox');
 
       await search(field, 'zzz');
 
@@ -152,7 +152,7 @@ describe('action option', () => {
     });
 
     it('runs its action on a click, commits nothing and closes the panel', async () => {
-      const field = await bind('autocomplete');
+      const field = await bind('combobox');
       await search(field, 'zzz');
 
       await userEvent.click(page.getByRole('option', { name: ACTION }));
@@ -163,7 +163,7 @@ describe('action option', () => {
     });
 
     it('leaves the typed filter alone, so the action can read it', async () => {
-      const field = await bind('autocomplete');
+      const field = await bind('combobox');
       await search(field, 'Wiesenstrasse 5');
 
       await userEvent.click(page.getByRole('option', { name: ACTION }));
@@ -173,7 +173,7 @@ describe('action option', () => {
     });
 
     it('is not picked by typing its label exactly', async () => {
-      const field = await bind('autocomplete');
+      const field = await bind('combobox');
 
       await search(field, ACTION);
 

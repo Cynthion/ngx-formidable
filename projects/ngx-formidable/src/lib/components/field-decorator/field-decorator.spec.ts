@@ -211,7 +211,7 @@ describe('formidable-field-decorator layout', () => {
   });
 
   /**
-   * A dropdown and a date field draw a panel toggle inside their own box. The label follows the value's
+   * A dropdown, a combobox and a date field draw a panel toggle inside their own box. The label follows the value's
    * insets, so the value has to stop short of the toggle, or the label runs underneath it and a suffix
    * lands on top of it.
    */
@@ -223,7 +223,7 @@ describe('formidable-field-decorator layout', () => {
     /** Binds a panel field under an inside label, with `decoration` beside it. */
     const bindPanel = (kind: FieldKind, decoration = '', options: BindFieldOptions = {}) =>
       bindField(kind, 'signal', {
-        inputs: kind === 'dropdown' || kind === 'autocomplete' ? { options: [] } : {},
+        inputs: kind === 'dropdown' || kind === 'combobox' ? { options: [] } : {},
         decorated: true,
         decoration: `<div formidableFieldLabel>Name</div>${decoration}`,
         ...options
@@ -233,7 +233,7 @@ describe('formidable-field-decorator layout', () => {
     const reserved = (bound: BoundField, value: Element) =>
       rect(bound.element).right - rect(value).right - (rect(value).left - rect(bound.element).left);
 
-    for (const kind of ['dropdown', 'date'] as FieldKind[]) {
+    for (const kind of ['dropdown', 'combobox', 'date'] as FieldKind[]) {
       it(`keeps the label clear of the ${kind} toggle`, async () => {
         const bound = await bindPanel(kind);
 
@@ -243,15 +243,13 @@ describe('formidable-field-decorator layout', () => {
     }
 
     // Reserving the width where nothing is drawn would leave a visible gap at the right edge.
-    for (const kind of ['autocomplete', 'time'] as FieldKind[]) {
-      it(`reserves nothing in the ${kind} field, which draws no toggle`, async () => {
-        const bound = await bindPanel(kind);
-        const value = page.getByRole(kind === 'time' ? 'textbox' : 'combobox', { name: 'Name' }).element();
+    it('reserves nothing in the time field, which draws no toggle', async () => {
+      const bound = await bindPanel('time');
+      const value = page.getByRole('textbox', { name: 'Name' }).element();
 
-        expect(reserved(bound, value)).toBeCloseTo(0, 1);
-        expect(rect((value as HTMLInputElement).labels![0]!).right).toBeCloseTo(rect(value).right, 1);
-      });
-    }
+      expect(reserved(bound, value)).toBeCloseTo(0, 1);
+      expect(rect((value as HTMLInputElement).labels![0]!).right).toBeCloseTo(rect(value).right, 1);
+    });
 
     it('hands the width back when readonly takes the toggle away', async () => {
       const bound = await bindPanel('dropdown');
@@ -276,7 +274,7 @@ describe('formidable-field-decorator layout', () => {
     });
 
     // Per **Actions**: a clear button comes and goes with the value, so it sits between the value and the toggle.
-    for (const kind of ['select', 'dropdown', 'date'] as FieldKind[]) {
+    for (const kind of ['select', 'dropdown', 'combobox', 'date'] as FieldKind[]) {
       it(`keeps the ${kind} toggle at the edge, and the theme's gap from a suffix that comes and goes`, async () => {
         // Not the default, so the gap is shown to come from the variable.
         theme('--formidable-field-suffix-toggle-gap', '12px');

@@ -59,7 +59,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 | `--formidable-label-height`                      | Derived: height of the label text line box.                                                                                                                                                             |
 | `--formidable-field-height`                      | Default height for single-line fields.                                                                                                                                                                  |
 | `--formidable-field-padding-x`                   | Horizontal padding of a field: where its value, and a projected prefix's text, start.                                                                                                                   |
-| `--formidable-field-toggle-size`                 | Size of the toggle a select, dropdown or date field draws inside its own box.                                                                                                                           |
+| `--formidable-field-toggle-size`                 | Size of the toggle a select, dropdown, combobox or date field draws inside its own box.                                                                                                                 |
 | `--formidable-field-toggle-inset`                | How much of a field's right edge that toggle claims. Raised by the decorator for the fields that have one.                                                                                              |
 | `--formidable-field-suffix-toggle-gap`           | Space between that toggle and a suffix, which sits between it and the value.                                                                                                                            |
 | `--formidable-field-inner-height`                | Derived: height inside a field's borders.                                                                                                                                                               |
@@ -263,7 +263,7 @@ Every overridable `--formidable-*` custom property, grouped by what it paints. H
 
 | Variable                              | Description                                                                                                                           |
 | :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------ |
-| `--formidable-panel-background`       | Background color for dropdown/autocomplete/date panels.                                                                               |
+| `--formidable-panel-background`       | Background color for dropdown/combobox/date panels.                                                                                   |
 | `--formidable-panel-border-thickness` | Thickness of a panel's outline. Follows the field's border thickness unless set, so a borderless theme states it to keep the outline. |
 | `--formidable-panel-border-radius`    | Border-radius for all panels. The two corners a panel sits against its field with mirror that field instead.                          |
 | `--formidable-panel-box-shadow`       | Box-shadow for all panels. The edge a panel meets its field with does not cast.                                                       |
@@ -361,7 +361,7 @@ Every corner of a field falls back to `--formidable-field-border-radius`, and ea
 
 They shape the field box and nothing else. Everything else that is rounded (the toggle, the slider, the panels) falls back to `--formidable-border-radius` instead, which is what to override to round the whole library at once. A field group takes its shape from `--formidable-field-group-border-radius`, which accepts the whole `border-radius` shorthand.
 
-While a dropdown, autocomplete or date panel is open, it adopts the two corners of the field it sits against: opened below, its top corners take the field's bottom ones; flipped above, its bottom corners take the field's top ones. Its far side keeps `--formidable-panel-border-radius`. The field never reshapes itself: its corners are the declared ones, panel or no panel. A `sheet` is the exception: it sits against the screen, not the field, so it keeps its own radius on top and squares off where it meets the edge.
+While a dropdown, combobox or date panel is open, it adopts the two corners of the field it sits against: opened below, its top corners take the field's bottom ones; flipped above, its bottom corners take the field's top ones. Its far side keeps `--formidable-panel-border-radius`. The field never reshapes itself: its corners are the declared ones, panel or no panel. A `sheet` is the exception: it sits against the screen, not the field, so it keeps its own radius on top and squares off where it meets the edge.
 
 ---
 

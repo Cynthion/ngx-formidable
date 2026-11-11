@@ -366,7 +366,7 @@ async function shootStudioTour(page) {
 
   // A typo, which only the fuzzy filter still finds.
   await type('input[name$=".address"]', ['see', 'fled']);
-  await clickOn('formidable-autocomplete-field formidable-field-option', 'Seefeldstrasse', STUDIO_HOLD_MS.result);
+  await clickOn('formidable-combobox-field formidable-field-option', 'Seefeldstrasse', STUDIO_HOLD_MS.result);
   await page.send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: at.x, y: at.y, deltaX: 0, deltaY: -5000 });
 
   await clickOn(TABS, 'Form', STUDIO_HOLD_MS.step);

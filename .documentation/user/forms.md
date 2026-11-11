@@ -208,14 +208,14 @@ export class UserForm {
 
 The model is the forms API's, and a field reads and writes one value in it.
 
-| Field                                                                       | Value            |
-| :-------------------------------------------------------------------------- | :--------------- |
-| `input-field`, `textarea-field`                                             | `string`         |
-| `toggle-field`                                                              | `boolean`        |
-| `slider-field`                                                              | `number`         |
-| `checkbox-group-field`                                                      | `string[]`       |
-| `select-field`, `dropdown-field`, `autocomplete-field`, `radio-group-field` | `string \| null` |
-| `date-field`, `time-field`                                                  | `Date \| null`   |
+| Field                                                                   | Value            |
+| :---------------------------------------------------------------------- | :--------------- |
+| `input-field`, `textarea-field`                                         | `string`         |
+| `toggle-field`                                                          | `boolean`        |
+| `slider-field`                                                          | `number`         |
+| `checkbox-group-field`                                                  | `string[]`       |
+| `select-field`, `dropdown-field`, `combobox-field`, `radio-group-field` | `string \| null` |
+| `date-field`, `time-field`                                              | `Date \| null`   |
 
 - **Signal Forms**: the model is a `signal` the component holds, and `form()` builds its field tree. Every key is defined in the initial model, at its value type's empty value: Signal Forms drops a key whose value is `undefined`, and binds a field only to a key its model defines. A group nests, so `form.payment.method` binds `model.payment.method`.
 - **Reactive Forms**: the model is the `FormGroup`'s value, and each control starts its field at its own initial value. A control created without one holds `null`, which a field renders as its empty state. `form.value` leaves out a disabled control; `form.getRawValue()` keeps it.
@@ -240,7 +240,7 @@ hidden(path.address, (context) => context.valueOf(path.pickup));
 ```html
 @if (!form.address().hidden()) {
 <formidable-field-decorator>
-  <formidable-autocomplete-field [formField]="form.address" />
+  <formidable-combobox-field [formField]="form.address" />
   <div formidableFieldLabel>Delivery Address</div>
 </formidable-field-decorator>
 }
@@ -264,7 +264,7 @@ constructor() {
 ```html
 @if (form.controls.address.enabled) {
 <formidable-field-decorator>
-  <formidable-autocomplete-field formControlName="address" />
+  <formidable-combobox-field formControlName="address" />
   <div formidableFieldLabel>Delivery Address</div>
 </formidable-field-decorator>
 }

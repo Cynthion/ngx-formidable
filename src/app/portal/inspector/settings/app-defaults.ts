@@ -53,7 +53,7 @@ const FIELD_CONTROLS: readonly DefaultControl<FieldKey>[] = [
     label: 'Panel Position',
     choices: Object.entries(PANEL_POSITION_LABELS),
     libraryDefault: 'Per Field',
-    help: 'Unset, a dropdown and an autocomplete open full width, and a date to the right.'
+    help: 'Unset, a dropdown and a combobox open full width, and a date to the right.'
   },
   {
     key: 'clearable',

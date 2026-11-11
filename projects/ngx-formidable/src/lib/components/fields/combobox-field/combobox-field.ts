@@ -1,5 +1,6 @@
 import {
   afterRenderEffect,
+  booleanAttribute,
   Component,
   computed,
   ElementRef,
@@ -26,34 +27,37 @@ import {
   FormidablePanelField,
   FormidablePanelPosition
 } from '../../../models/formidable.model';
+import { FieldIcon } from '../../field-icon/field-icon';
 import { FieldOption } from '../../field-option/field-option';
 import { BaseOptionField } from '../base-option-field';
 
 /**
- * A dropdown filtered by a text input inside its panel. The filter narrows the list by each option's `match`,
- * and `filterChange` also carries it out, so a consumer can fetch options for it instead of filtering a list
- * it already holds. Only a projected or bound option can be committed. Free text is not a value.
+ * One choice from a list narrowed by typing into the field. The filter narrows the list by each option's
+ * `match`, and `filterChange` also carries it out, so a consumer can fetch options for it instead of filtering
+ * a list it already holds. Its toggle, a click into the input and `ArrowDown` open the whole list behind a
+ * pick. Only a projected or bound option can be committed: free text is not a value. `dropdown-field` is the
+ * one whose value is not typed into.
  */
 @Component({
-  selector: 'formidable-autocomplete-field',
-  templateUrl: './autocomplete-field.html',
-  styleUrls: ['./autocomplete-field.scss'],
-  imports: [FieldOption],
+  selector: 'formidable-combobox-field',
+  templateUrl: './combobox-field.html',
+  styleUrls: ['./combobox-field.scss'],
+  imports: [FieldIcon, FieldOption],
   providers: [
     // required to provide this component as FormidableField
     {
       provide: FORMIDABLE_FIELD,
-      useExisting: AutocompleteField
+      useExisting: ComboboxField
     },
     // required to provide this component as FormidableOptionField
     {
       provide: FORMIDABLE_OPTION_FIELD,
-      useExisting: AutocompleteField
+      useExisting: ComboboxField
     }
   ]
 })
-export class AutocompleteField extends BaseOptionField<string | null> implements OnInit {
-  readonly autocompleteRef = viewChild.required<ElementRef<HTMLDivElement>>('autocompleteRef');
+export class ComboboxField extends BaseOptionField<string | null> implements OnInit {
+  readonly comboboxRef = viewChild.required<ElementRef<HTMLDivElement>>('comboboxRef');
   readonly inputRef = viewChild.required<ElementRef<HTMLInputElement>>('inputRef');
 
   protected keyboardCallback = (event: KeyboardEvent) => this.navigatePanelOptions(event, this);
@@ -93,9 +97,11 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
       });
     });
 
-    // Renders a filter written from outside, such as a clear button's. The field's own writes leave the input
-    // holding the filter already. Trap: not part of the render above, which a pick re-runs: a pick leaves the
-    // input on the label and the filter on what was typed, and must keep the label.
+    // Renders a filter written from outside, such as a clear button's, or emptied by the toggle. The field's
+    // own typing leaves the input holding the filter already. A pick's label stays: the value renders it, and
+    // the filter only narrows the list under it, which is what lets the whole list open behind a pick. Trap:
+    // not part of the render above, which a pick re-runs: a pick leaves the input on the label and the filter
+    // on what was typed, and must keep the label.
     afterRenderEffect(() => {
       const text = this.filter();
 
@@ -103,7 +109,7 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
         const input = this.inputRef().nativeElement;
         if (input.value === text) return;
 
-        input.value = text;
+        if (!this.selectedOption()) input.value = text;
         this.updateFilteredOptions(this.allOptions());
       });
     });
@@ -111,7 +117,7 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
 
   override ngOnInit(): void {
     super.ngOnInit();
-    this.registerAutocomplete();
+    this.registerTypedFilter();
   }
 
   protected onInput(event: Event): void {
@@ -133,6 +139,11 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     }
 
     this.selectOnKeyboardFocus(this.inputRef().nativeElement, false);
+  }
+
+  // A click into the input opens the list, as the toggle does. Into an open one it only places the caret.
+  protected onInputClick(): void {
+    if (this.openOnClick() && this.canEdit() && !this.isPanelOpen()) this.togglePanel(true);
   }
 
   // #region FormidableField
@@ -159,26 +170,33 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
   protected override readonly isFieldFilled = computed(() => this.filter().length > 0 || !!this.selectedOption());
 
   get fieldRef(): ElementRef<HTMLElement> {
-    return this.autocompleteRef() as ElementRef<HTMLElement>;
+    return this.comboboxRef() as ElementRef<HTMLElement>;
   }
 
   protected override get focusElement(): HTMLElement {
     return this.inputRef().nativeElement;
   }
 
+  // Mirrors the template: there is nothing to open once the field is readonly or disabled.
+  readonly hasInFieldToggle = this.canEdit;
+
   decoratorLayout: FieldDecoratorLayout = 'horizontal';
 
   // #endregion
 
-  // #region Autocomplete
+  // #region Combobox
 
   /**
    * The filter text the list is narrowed by: what the user types, or what a value written from outside moves it
-   * to. After a pick the input shows the label and the filter keeps what was typed. `filterChange` reports each
-   * change, so options can be fetched for it. Write it to seed or empty the text: a write opens no panel and
-   * picks nothing, so a clear button writes the value too.
+   * to. After a pick the input shows the label and the filter keeps what was typed, until the whole list is
+   * opened behind the pick, which empties it. `filterChange` reports each change, so options can be fetched
+   * for it. Write it to seed or empty the text typed without a pick: a write opens no panel, picks nothing and
+   * never replaces a pick's label, so a clear button writes the value too.
    */
   public readonly filter = model('');
+
+  /** Whether a click into the input opens the panel. The toggle, `ArrowDown` and typing open it regardless. */
+  public readonly openOnClick = input(true, { transform: booleanAttribute });
 
   // The filter text the field moved on its own, rather than the user typing it.
   //
@@ -345,8 +363,14 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     return this;
   }
 
-  /** Opens or closes the panel. */
+  /**
+   * Opens or closes the panel. Opened while the input shows the pick, or nothing, it empties the filter, which
+   * `filterChange` reports, so the whole list shows with the pick in it. Opened on text typed without a pick,
+   * the list stays narrowed to it.
+   */
   public togglePanel(isOpen: boolean): void {
+    if (isOpen) this.widenBehindPick();
+
     this.isPanelOpen.set(isOpen);
     this.onPanelToggle(isOpen);
 
@@ -357,12 +381,21 @@ export class AutocompleteField extends BaseOptionField<string | null> implements
     }
   }
 
+  // The text typed to find a pick has done its job once the pick shows: the list behind it is the whole one,
+  // scrolled to the pick. Widened before the panel opens, so the highlight lands on the pick's row in it.
+  private widenBehindPick(): void {
+    if (this.inputRef().nativeElement.value !== this.selectedLabel()) return;
+
+    this.setFilterText('');
+    this.updateFilteredOptions(this.allOptions());
+  }
+
   // #endregion
 
   // Every pause in typing counts, even on the text the last one ended on: after an outside clear, the same
   // word typed again is new to the field. A pause whose text a write from outside has since replaced does not,
   // or a clear inside the debounce would open the panel over the emptied field.
-  private registerAutocomplete(): void {
+  private registerTypedFilter(): void {
     this.filterChangeSubject$
       .pipe(
         debounceTime(200),

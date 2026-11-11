@@ -16,7 +16,7 @@ export type PortalFieldKind =
   | 'textarea'
   | 'select'
   | 'dropdown'
-  | 'autocomplete'
+  | 'combobox'
   | 'date'
   | 'time'
   | 'toggle'
@@ -92,7 +92,7 @@ type PortalFormatterId = 'none' | 'percent' | 'years' | 'currency' | 'ordinal';
 export type PortalLocaleId = 'en-GB' | 'en-US' | 'de-CH' | 'fr-FR' | 'ja-JP';
 
 /**
- * How an autocomplete's consumer narrows the list.
+ * How a combobox's consumer narrows the list.
  *
  * The field filters by each option's `match`; the portal filters on `filterChange` instead and gives its options a
  * `match` that keeps every one, so this is a property of the portal's own filtering code, not of the component. Offering it as a setting is what makes
@@ -124,7 +124,7 @@ export interface PortalVisibilitySpec {
 export interface PortalOptionSpec {
   readonly value: string;
   readonly label: string;
-  /** A second line, rendered by the custom option component the autocomplete projects. */
+  /** A second line, rendered by the custom option component the combobox projects. */
   readonly subtitle?: string;
   readonly readonly?: boolean;
   readonly disabled?: boolean;
@@ -225,6 +225,8 @@ export interface PortalFieldSpec {
   // Panel fields
   /** Absent, the app default applies, then the field's own. */
   readonly panelPosition?: FormidablePanelPosition;
+  /** Whether a click into the combobox input opens its panel. Absent, it does. */
+  readonly openOnClick?: boolean;
 
   // Option fields
   readonly options?: readonly PortalOptionSpec[];
@@ -235,7 +237,7 @@ export interface PortalFieldSpec {
   readonly actionOptionMode?: FieldDefaultOptionMode;
   readonly noOptionsText?: string;
   readonly sortAlphabetically?: boolean;
-  /** The autocomplete's filtering, which belongs to the consumer rather than to the field. */
+  /** The combobox's filtering, which belongs to the consumer rather than to the field. */
   readonly filterStrategy?: PortalFilterStrategy;
 
   // Date and time

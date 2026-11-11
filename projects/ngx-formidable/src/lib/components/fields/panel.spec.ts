@@ -5,7 +5,7 @@ import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { DateField } from './date-field/date-field';
 
 /**
- * The panel `dropdown-field`, `autocomplete-field` and `date-field` share, per **Panels** and **Keyboard** in
+ * The panel `dropdown-field`, `combobox-field` and `date-field` share, per **Panels** and **Keyboard** in
  * `user/fields.md`. Focus stays in the field's input while the panel is used: a press inside it keeps focus
  * there, so a pick is neither a blur nor a touch, and the touch comes once focus leaves the field. The panel
  * closes on a pick, on `Tab` and on a click outside the field, and an open one is placed again as the page
@@ -47,7 +47,7 @@ const cases: PanelCase[] = [
     picked: 'a'
   },
   {
-    kind: 'autocomplete',
+    kind: 'combobox',
     inputs: { options: OPTIONS },
     open: async () => {
       await userEvent.click(combobox());

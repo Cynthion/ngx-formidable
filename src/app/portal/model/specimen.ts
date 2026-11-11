@@ -185,7 +185,7 @@ const SAMPLE_IDS: Readonly<Record<PortalFieldKind, string>> = {
   'textarea': 'notes',
   'select': 'size',
   'dropdown': 'pizza',
-  'autocomplete': 'address',
+  'combobox': 'address',
   'date': 'date',
   'time': 'time',
   'toggle': 'pickup',

@@ -88,8 +88,8 @@ const fields: Record<string, FieldCase> = {
     },
     edited: 'a'
   },
-  'autocomplete': {
-    kind: 'autocomplete',
+  'combobox': {
+    kind: 'combobox',
     inputs: { options },
     value: 'b',
     shows: () => (field('combobox').element() as HTMLInputElement).value,

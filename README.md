@@ -65,7 +65,7 @@ Eleven form fields, one decorator that puts labels, prefixes, suffixes, hints an
 
 ## Features
 
-- 🧩 **Eleven Fields, One Decorator**: input, textarea, select, dropdown, autocomplete, radio and checkbox group, date, time, toggle, slider. [`<formidable-field-decorator>`](https://cynthion.github.io/ngx-formidable/#/docs/decoration) puts the label, prefixes, suffixes, hints, the required marker and the messages around any of them, in [six label positions](https://cynthion.github.io/ngx-formidable/#/docs/decoration).
+- 🧩 **Eleven Fields, One Decorator**: input, textarea, select, dropdown, combobox, radio and checkbox group, date, time, toggle, slider. [`<formidable-field-decorator>`](https://cynthion.github.io/ngx-formidable/#/docs/decoration) puts the label, prefixes, suffixes, hints, the required marker and the messages around any of them, in [six label positions](https://cynthion.github.io/ngx-formidable/#/docs/decoration).
 - 🔌 **Every Angular Forms API**: [Signal Forms, reactive forms and template-driven forms](https://cynthion.github.io/ngx-formidable/#/docs/forms), through `[formField]`, `[formControl]`, `formControlName` or `ngModel`. No value accessor, no form directive of its own, no store.
 - ✅ **Bring Your Own Validator**: [Angular's own rules, Vest or Zod through Standard Schema, or none](https://cynthion.github.io/ngx-formidable/#/docs/validation). The library renders the messages, decides when they appear, and marks what is required.
 - 🎨 **Themeable To The Corner**: [~200 CSS custom properties](https://cynthion.github.io/ngx-formidable/#/docs/theme-reference) and no design system in your bundle. Rebrand from one variable; no SCSS hooks, no theme to initialise.
@@ -211,7 +211,7 @@ The full API (every input, output, type and token) is in the [Component Catalogu
 |                   | `<formidable-textarea-field>`       | `string`         |
 | **Options**       | `<formidable-select-field>`         | `string \| null` |
 |                   | `<formidable-dropdown-field>`       | `string \| null` |
-|                   | `<formidable-autocomplete-field>`   | `string \| null` |
+|                   | `<formidable-combobox-field>`       | `string \| null` |
 | **Option Groups** | `<formidable-radio-group-field>`    | `string \| null` |
 |                   | `<formidable-checkbox-group-field>` | `string[]`       |
 | **Date & Time**   | `<formidable-date-field>`           | `Date \| null`   |

@@ -8,7 +8,7 @@ import { FormidableOption } from '../../models/formidable.model';
 import { bindField } from '../../testing/bind-field';
 import { configureFormidableTestBed, settle } from '../../testing/test-bed';
 import { FieldDecorator } from '../field-decorator/field-decorator';
-import { AutocompleteField } from './autocomplete-field/autocomplete-field';
+import { ComboboxField } from './combobox-field/combobox-field';
 
 /**
  * `filterChange` reports every move of the filter text, not only the ones the user typed, per **`filterChange`
@@ -26,6 +26,9 @@ import { AutocompleteField } from './autocomplete-field/autocomplete-field';
  * A write from outside lands whether the field is focused or not: a clear button that keeps focus on the field,
  * per **Actions** in `user/decoration.md`, writes while the field is the user's.
  *
+ * Opening the panel behind a pick empties the filter and reports that too, so the consumer supplies the whole
+ * list for the toggle to show, with the pick in it.
+ *
  * The filter is a model of its own, bound two-way here, so a write reaches the field just as the value's does.
  * That is the only way to empty text typed without a pick, per **The Filter Is Writable** in `user/fields.md`:
  * the value is `null` already, and writing it again changes nothing.
@@ -39,11 +42,11 @@ const ADDRESSES: FormidableOption[] = [
 ];
 
 @Component({
-  imports: [FormsModule, AutocompleteField, FieldDecorator, FieldLabel, FieldSuffix],
+  imports: [FormsModule, ComboboxField, FieldDecorator, FieldLabel, FieldSuffix],
   template: `
     <form>
       <formidable-field-decorator>
-        <formidable-autocomplete-field
+        <formidable-combobox-field
           name="address"
           [options]="visibleOptions()"
           [(ngModel)]="address"
@@ -85,7 +88,7 @@ class FilteringHost {
 
 const combobox = () => page.getByRole('combobox', { name: 'Address' });
 
-describe('autocomplete filter sync', () => {
+describe('combobox filter sync', () => {
   let fixture: ComponentFixture<FilteringHost>;
   let host: FilteringHost;
 
@@ -236,7 +239,9 @@ describe('autocomplete filter sync', () => {
   });
 
   it('opens no panel for a pause in typing that a clear has overtaken', async () => {
-    await userEvent.click(combobox());
+    // Entered by the keyboard: a click into the field opens its panel on its own.
+    await userEvent.tab();
+    await expect.element(combobox()).toHaveFocus();
     await userEvent.keyboard('xy');
     // Inside the pause the field waits for, which a trusted click cannot be relied on to land in.
     host.filter.set('');
@@ -246,28 +251,101 @@ describe('autocomplete filter sync', () => {
     await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('leaves the pick in the model when only the filter is written', async () => {
+  it('keeps a pick and its label when only the filter is written', async () => {
     await search('Seefeldstrasse 40');
     expect(host.address()).toBe('seefeld');
     await userEvent.keyboard('{Escape}');
 
-    host.filter.set('');
+    host.filter.set('Lang');
     await settle(fixture, 200);
 
-    await expect.element(combobox()).toHaveValue('');
+    await expect.element(combobox()).toHaveValue('Seefeldstrasse 40');
     expect(host.address()).toBe('seefeld');
+  });
+
+  // The whole list behind a pick, per **Opening Shows The Whole List Behind A Pick** in `user/fields.md`.
+
+  const toggle = () => document.querySelector<HTMLElement>('formidable-combobox-field .toggle')!;
+
+  /** Types `text`, walks to the first option and picks it, which closes the panel. */
+  async function pickFirstFor(text: string): Promise<void> {
+    await search(text);
+    await userEvent.keyboard('{ArrowDown}');
+    await userEvent.keyboard('{Enter}');
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+  }
+
+  it('opens the whole list from its toggle behind a pick, and reports the emptied filter', async () => {
+    await pickFirstFor('Lang');
+    expect(host.address()).toBe('langstrasse');
+    expect(host.filter()).toBe('Lang');
+
+    await userEvent.click(toggle());
+
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+    await expect.element(page.getByRole('option', { name: 'Seefeldstrasse 40' })).toBeVisible();
+    await expect.element(selected()).toHaveTextContent('Langstrasse 84');
+    await expect.element(combobox()).toHaveFocus();
+    await expect.element(combobox()).toHaveValue('Langstrasse 84');
+    expect(host.filter()).toBe('');
+    expect(host.address()).toBe('langstrasse');
+  });
+
+  it('opens the whole list on a click into the input behind a pick, and stays open on the next', async () => {
+    await pickFirstFor('Lang');
+
+    await userEvent.click(combobox());
+
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+    await expect.element(page.getByRole('option', { name: 'Seefeldstrasse 40' })).toBeVisible();
+    expect(host.filter()).toBe('');
+
+    await userEvent.click(combobox());
+    await settle(fixture, 200);
+
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('opens the whole list on ArrowDown behind a value written from outside', async () => {
+    host.address.set('seefeld');
+    await settle(fixture, 200);
+    expect(host.filter()).toBe('Seefeldstrasse 40');
+
+    await userEvent.tab();
+    await expect.element(combobox()).toHaveFocus();
+    await userEvent.keyboard('{ArrowDown}');
+
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+    await expect.element(page.getByRole('option', { name: 'Langstrasse 84' })).toBeVisible();
+    await expect.element(selected()).toHaveTextContent('Seefeldstrasse 40');
+    await expect.element(combobox()).toHaveValue('Seefeldstrasse 40');
+    expect(host.filter()).toBe('');
+    expect(host.address()).toBe('seefeld');
+  });
+
+  it('opens on the text typed without a pick, narrowed to it', async () => {
+    await search('Lang');
+    await userEvent.keyboard('{Escape}');
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(toggle());
+
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+    await expect.element(page.getByRole('option', { name: 'Langstrasse 84' })).toBeVisible();
+    await expect.element(page.getByRole('option', { name: 'Seefeldstrasse 40' })).not.toBeInTheDocument();
+    expect(host.filter()).toBe('Lang');
   });
 });
 
 // The field's own filtering, with no consumer narrowing the list for it.
-describe('autocomplete filter written before the user types', () => {
+describe('combobox filter written before the user types', () => {
   beforeEach(() => {
     configureFormidableTestBed();
     (document.activeElement as HTMLElement | null)?.blur();
   });
 
   it('shows the filter and narrows the list by it', async () => {
-    const field = await bindField('autocomplete', 'signal', {
+    const field = await bindField('combobox', 'signal', {
       inputs: { options: ADDRESSES, filter: '' },
       decorated: true,
       decoration: '<div formidableFieldLabel>Address</div>'
@@ -281,5 +359,23 @@ describe('autocomplete filter written before the user types', () => {
 
     await expect.element(page.getByRole('option', { name: 'Langstrasse 84' })).toBeVisible();
     await expect.element(page.getByRole('option', { name: 'Seefeldstrasse 40' })).not.toBeInTheDocument();
+  });
+
+  it('leaves the panel closed on a click into the input with openOnClick off, and opens it on ArrowDown', async () => {
+    const field = await bindField('combobox', 'signal', {
+      inputs: { options: ADDRESSES, openOnClick: false },
+      decorated: true,
+      decoration: '<div formidableFieldLabel>Address</div>'
+    });
+
+    await userEvent.click(combobox());
+    await settle(field.fixture, 200);
+
+    await expect.element(combobox()).toHaveFocus();
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.keyboard('{ArrowDown}');
+
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
   });
 });

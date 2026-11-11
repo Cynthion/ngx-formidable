@@ -121,7 +121,7 @@ Selecting a field in the preview selects it here, and a field chip opens this ta
 - **Adornment Examples Are Samples**: an adornment is markup projected per field, so no default can supply one. **The Form** fills every field's slot with a sample, states how many fields override it, and offers **Apply To All**.
 - **A Control Appears Only Where It Works**: only the horizontal layout honours a label position other than `outside`, and the vertical layout renders no prefix or suffix, so the Studio offers neither where it would do nothing. [Decoration](decoration.md) states the rule.
 - **Locale**: one control under **Across The Form**, because it moves the date field's translations, its first day and its token format together.
-- **Filtering**: **This Field** > **Filtering** > **Strategy** is the one control that is not an input on the field. The Studio filters an autocomplete's list itself, by **Fuzzy (fuse.js)**, **Contains** or **Starts With**, and gives each option a `match` that keeps it. [Fields](fields.md) states the field's own rule.
+- **Filtering**: **This Field** > **Filtering** > **Strategy** is the one control that is not an input on the field. The Studio filters a combobox's list itself, by **Fuzzy (fuse.js)**, **Contains** or **Starts With**, and gives each option a `match` that keeps it. [Fields](fields.md) states the field's own rule.
 
 ### The Sample Form
 

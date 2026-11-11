@@ -112,7 +112,7 @@ export interface FormidableDefaults {
   prefixAlign?: FieldAdornmentAlignment;
   /** `FieldSuffix.align`. The library's own: `center`. */
   suffixAlign?: FieldAdornmentAlignment;
-  /** `panelPosition` on the dropdown, autocomplete and date fields, which otherwise each keep their own. */
+  /** `panelPosition` on the dropdown, combobox and date fields, which otherwise each keep their own. */
   panelPosition?: FormidablePanelPosition;
   /** A field's `revealOn`. The library's own: `touched`. */
   revealOn?: FormidableReveal;
@@ -242,7 +242,7 @@ export interface FormidableOption<T = unknown> {
   template?: TemplateRef<T>;
   readonly?: boolean;
   disabled?: boolean;
-  /** Whether an autocomplete's filter text matches this option. Replaces the default substring test. */
+  /** Whether a combobox's filter text matches this option. Replaces the default substring test. */
   match?: (filterValue: string) => boolean;
 }
 

@@ -232,7 +232,7 @@ describe('option field highlight', () => {
     });
   });
 
-  for (const kind of ['dropdown', 'autocomplete'] as const) {
+  for (const kind of ['dropdown', 'combobox'] as const) {
     describe(kind, () => {
       /** Tabs into the field and opens its panel. */
       async function openPanel(): Promise<BoundField> {

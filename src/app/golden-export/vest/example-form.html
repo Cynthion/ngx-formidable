@@ -192,7 +192,7 @@
   </formidable-field-decorator>
   @if (!form.address().hidden()) {
     <formidable-field-decorator>
-      <formidable-autocomplete-field
+      <formidable-combobox-field
         placeholder="Start typing a street…"
         [clearable]="true"
         [actionOptionMode]="'always'"
@@ -221,7 +221,7 @@
           value="office"
           label="Office — on file"
           [readonly]="true" />
-      </formidable-autocomplete-field>
+      </formidable-combobox-field>
       <div formidableFieldLabel>
         Delivery Address
       </div>

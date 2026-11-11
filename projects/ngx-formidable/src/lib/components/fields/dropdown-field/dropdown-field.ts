@@ -20,7 +20,7 @@ import { BaseOptionField } from '../base-option-field';
 
 /**
  * A single choice from a styled panel of options, walked with the keyboard and reachable by type-ahead. The
- * value is not typed into, so the field itself is read-only to the keyboard; `autocomplete-field` is the one
+ * value is not typed into, so the field itself is read-only to the keyboard; `combobox-field` is the one
  * that filters as you type, and `select-field` the one that uses the platform's own picker.
  */
 @Component({

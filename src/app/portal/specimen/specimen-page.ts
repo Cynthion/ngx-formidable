@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
-  AutocompleteField,
+  ComboboxField,
   DateField,
   DropdownField,
   FieldDecorator,
@@ -100,7 +100,7 @@ interface LadderField {
  */
 const LADDER_FIELDS: readonly LadderField[] = [
   { kind: 'input' },
-  { kind: 'autocomplete', invalid: true },
+  { kind: 'combobox', invalid: true },
   { kind: 'date', hint: true },
   { kind: 'slider' },
   { kind: 'radio-group' },
@@ -166,7 +166,7 @@ const PARTS = [
     FieldToggleIcon,
     InputField,
     DropdownField,
-    AutocompleteField,
+    ComboboxField,
     DateField
   ]
 })
@@ -286,7 +286,7 @@ export class SpecimenPage {
   private readonly figure = viewChild.required<ElementRef<HTMLElement>>('figure');
   private readonly panelStage = viewChild.required<ElementRef<HTMLElement>>('panelStage');
   private readonly dropdown = viewChild.required(DropdownField);
-  private readonly autocomplete = viewChild.required(AutocompleteField);
+  private readonly combobox = viewChild.required(ComboboxField);
   private readonly date = viewChild.required(DateField);
 
   constructor() {
@@ -335,7 +335,7 @@ export class SpecimenPage {
    * public `togglePanel` is not one. Deferred, because the click that asked for it closes them first.
    */
   protected openPanels(): void {
-    setTimeout(() => [this.dropdown(), this.autocomplete(), this.date()].forEach((field) => field.togglePanel(true)));
+    setTimeout(() => [this.dropdown(), this.combobox(), this.date()].forEach((field) => field.togglePanel(true)));
   }
 
   private layOutCallouts(): void {

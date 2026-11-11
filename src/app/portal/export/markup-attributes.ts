@@ -74,6 +74,12 @@ const FIELD_ATTRIBUTES: readonly MarkupAttribute[] = [
     write: (raw) => ({ showLengthIndicator: parseBool(raw) })
   },
   {
+    name: 'openOnClick',
+    binding: true,
+    read: (s) => flag(s.openOnClick, true),
+    write: (raw) => ({ openOnClick: parseBool(raw) })
+  },
+  {
     name: 'panelPosition',
     binding: true,
     read: (s) => (s.panelPosition ? `'${s.panelPosition}'` : null),

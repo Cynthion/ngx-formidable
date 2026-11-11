@@ -7,7 +7,7 @@ import { BaseOptionListField } from './base-option-list-field';
 
 /**
  * The base class behind the fields that walk their list of options with a highlight — `dropdown-field`,
- * `autocomplete-field`, `radio-group-field` and `checkbox-group-field`. It adds the highlight and the keys
+ * `combobox-field`, `radio-group-field` and `checkbox-group-field`. It adds the highlight and the keys
  * that move it to everything `BaseOptionListField` already gives a field.
  */
 @Directive()
@@ -19,7 +19,7 @@ export abstract class BaseOptionField<T = string | null> extends BaseOptionListF
   // The highlighted option's value, so a reconcile can follow it across a changed list.
   protected highlightedOptionValue: string | null = null;
 
-  // The options the highlight walks — the rendered list, which `autocomplete-field` filters.
+  // The options the highlight walks — the rendered list, which `combobox-field` filters.
   protected abstract readonly activeOptions: Signal<FormidableOption[]>;
 
   /** Commits an option, as a click on it does. No-op for a readonly or disabled option, or field. */
@@ -72,6 +72,14 @@ export abstract class BaseOptionField<T = string | null> extends BaseOptionListF
   // nothing to act on, so an `Enter` meant for the list never submits the form behind it.
   protected navigatePanelOptions(event: KeyboardEvent, panel: FormidablePanelField): boolean {
     const isOpen = panel.isPanelOpen();
+
+    // `Alt` with an arrow works the panel alone, the way a native `<select>` does: down opens, up closes.
+    if (event.altKey && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      const opens = event.key === 'ArrowDown';
+
+      if (opens !== isOpen) panel.togglePanel(opens);
+      return opens || isOpen;
+    }
 
     switch (event.key) {
       case 'Tab':

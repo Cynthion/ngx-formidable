@@ -28,7 +28,7 @@ const EDITORS = {
   slots: { kind: 'input', role: 'textbox', inputs: SLOTS },
   notes: { kind: 'textarea', role: 'textbox', inputs: {} },
   maskedNotes: { kind: 'textarea', role: 'textbox', inputs: SLOTS },
-  auto: { kind: 'autocomplete', role: 'combobox', inputs: { options: OPTIONS } },
+  auto: { kind: 'combobox', role: 'combobox', inputs: { options: OPTIONS } },
   date: { kind: 'date', role: 'combobox', inputs: { unicodeTokenFormat: 'dd/MM/yyyy' } },
   time: { kind: 'time', role: 'textbox', inputs: { unicodeTokenFormat: 'HH.mm' } }
 } satisfies Record<string, { kind: FieldKind; role: 'textbox' | 'combobox'; inputs: Record<string, unknown> }>;
@@ -81,7 +81,7 @@ describe('caret on focus entry', () => {
       ['time', null, '__.__', 0, 'and collapses at the front of an empty one'],
       ['text', 'ABCDEFGH', 'ABCDEFGH', 8, 'covers an unmasked editor whole'],
       ['text', '', '', 0, 'and collapses at the front of an empty one'],
-      ['auto', 'ch', 'Switzerland', 11, 'covers the label an autocomplete shows'],
+      ['auto', 'ch', 'Switzerland', 11, 'covers the label a combobox shows'],
       ['auto', null, '', 0, 'and collapses at the front when it shows none']
     ];
 
