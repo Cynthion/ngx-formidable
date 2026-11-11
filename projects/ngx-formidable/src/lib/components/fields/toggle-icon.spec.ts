@@ -13,7 +13,7 @@ import { SelectField } from './select-field/select-field';
 
 /**
  * The icons the fields draw, per **Icons** in `user/fields.md`: the toggle of the select, dropdown and date
- * fields, the calendar's month arrows, and the clear button. Each is the library's inline SVG unless
+ * fields, the calendar's month arrows, the clear button, and the check on a panel's selected option. Each is the library's inline SVG unless
  * `provideNgxFormidable({ icons })` provides one, and projected `[formidableFieldToggleIcon]` content replaces
  * the toggle's either way, for as long as it renders. The test host does not import `FieldToggleIcon`, so a consumer who forgets to is
  * covered too.
@@ -25,6 +25,7 @@ const UP = '4.25 16.25 12 8.5 19.75 16.25';
 const LEFT = '16.25 4.25 8.5 12 16.25 19.75';
 const RIGHT = '7.75 4.25 15.5 12 7.75 19.75';
 const CROSS = '7 7 17 17 12 12 7 17 17 7';
+const CHECK = '5 12.5 9.5 17 19 7.5';
 
 /** A consumer's icon component, configured through an input and sized in `em`, as an icon library's is. */
 @Component({ template: '<i class="test-icon" style="display: block; width: 1em; height: 1em">{{ glyph() }}</i>' })
@@ -410,4 +411,76 @@ describe('clear button icon', () => {
 
     expect(glyphsOf(await clearButton())).toEqual(['×']);
   });
+});
+
+describe('selected option check', () => {
+  beforeEach(() => configureFormidableTestBed());
+
+  const options = [
+    { value: 'a', label: 'Alpha' },
+    { value: 'b', label: 'Bravo' },
+    { value: 'c', label: 'Charlie' }
+  ];
+
+  /** The panel's rows of a field holding `b`, opened as a user does. */
+  async function openOn(kind: 'dropdown' | 'combobox'): Promise<HTMLElement[]> {
+    await bindField(kind, 'signal', {
+      value: 'b',
+      inputs: { options },
+      decorated: true,
+      decoration: '<div formidableFieldLabel>Choice</div>'
+    });
+
+    await userEvent.click(combobox(), { force: true });
+    await expect.element(combobox()).toHaveAttribute('aria-expanded', 'true');
+
+    return [...document.querySelectorAll<HTMLElement>('[role="option"]')];
+  }
+
+  for (const kind of ['dropdown', 'combobox'] as const) {
+    describe(`on the ${kind} field`, () => {
+      it("draws the library's check on the selected option only, in its text color", async () => {
+        const rows = await openOn(kind);
+
+        expect(rows.map((row) => row.getAttribute('aria-selected'))).toEqual(['false', 'true', 'false']);
+        expect(rows.map(chevronOf)).toEqual([undefined, CHECK, undefined]);
+        expect(getComputedStyle(rows[1]!.querySelector('polyline')!).stroke).toBe(getComputedStyle(rows[1]!).color);
+      });
+
+      // An icon larger than the text line is what would grow, or squeeze, the selected row alone.
+      it('keeps the check clear of the label, and every row the same box', async () => {
+        theme('--formidable-icon-size', '40px');
+        const rows = await openOn(kind);
+        const contents = rows.map((row) => row.querySelector('.content')!.getBoundingClientRect());
+        const check = rows[1]!.querySelector('formidable-field-icon')!.getBoundingClientRect();
+
+        expect(new Set(rows.map((row) => row.getBoundingClientRect().height)).size).toBe(1);
+        expect(new Set(contents.map((content) => content.width)).size).toBe(1);
+        expect(check.width).toBe(40);
+        expect(check.left).toBeGreaterThanOrEqual(contents[1]!.right);
+        expect(check.right).toBeLessThanOrEqual(rows[1]!.getBoundingClientRect().right);
+      });
+
+      it('draws the provided icon instead', async () => {
+        provideIcons({ fieldOptionSelected: iconOf('✓') });
+        const rows = await openOn(kind);
+
+        expect(rows.map(glyphsOf)).toEqual([[], ['✓'], []]);
+      });
+    });
+  }
+
+  // A group marks its selected option in the prefix.
+  for (const [kind, value] of [
+    ['radio-group', 'b'],
+    ['checkbox-group', ['b']]
+  ] as const) {
+    it(`leaves the ${kind} field to its prefix mark`, async () => {
+      provideIcons({ fieldOptionSelected: iconOf('✓') });
+      const field = await bindField(kind, 'signal', { value, inputs: { options } });
+
+      expect(field.element.querySelector('[aria-checked="true"]')).not.toBeNull();
+      expect(field.element.querySelector('formidable-field-icon')).toBeNull();
+    });
+  }
 });

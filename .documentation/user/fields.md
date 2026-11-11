@@ -48,7 +48,7 @@ Every field has a `focus()` method. `autoFocus` calls it once the view is ready,
 </button>
 ```
 
-> **Note:** Focusing never opens a panel. The dropdown and the combobox open on a click, on `ArrowDown` or on typing, the date field from its toggle, and all three on `Alt` plus `ArrowDown`, so a focused field is ready for input without a list covering the page. `openOnClick` set to `false` keeps a click into the combobox's input from opening it, so the toggle and the keys are what open it. A `disabled` field ignores `focus()` entirely.
+> **Note:** Focusing never opens a panel, so a focused field is ready for input without a list covering the page. What opens one is in **Panels**. A `disabled` field ignores `focus()` entirely.
 
 ### The Caret On Focus
 
@@ -93,7 +93,8 @@ Five fields take options: `select-field`, `dropdown-field`, `combobox-field`, `r
 - **The Combobox Filters, And Reports The Filter**: typing narrows the list to the options whose `match` accepts the text, by default a case-insensitive substring of the label. It also emits the text as `filterChange`, so the options can be fetched or ranked for it instead (fuzzy, a server call). An option's own `match` keeps what a substring would exclude.
 - **`filterChange` Reports More Than Typing**: a value written from outside, focused or not, takes the text and the filter with it: to its option's label, or to nothing while no option carries the value. Those moves are reported too, so the supplied list can follow the value the field was given. Without them, a value written from outside names an option the filter has excluded, and the field has nothing to display it with. The one thing never reported is the field's own narrowing while it is **focused**: there the typed text is the filter, and reporting would pull the list out from under the user.
 - **The Filter Is Writable**: `filter` is a model, so `[(filter)]` keeps a component signal in step with it, and a write reaches the field, to seed it or to empty it. A write is not typing: it opens no panel and picks nothing. Nor is the filter the input's text: after a pick the input shows the label, and the filter keeps what was typed to find it; a write never replaces a pick's label, only text typed without one. So emptying the field takes both, the value to empty a pick and the filter to empty text typed without one: while nothing is picked the value is `null` already, and writing it alone changes nothing. `clear()` empties both as the user's edit, and is what the **Clear Button** in [Decoration](decoration.md) calls.
-- **Opening Shows The Whole List Behind A Pick**: the toggle, a click into the input (unless `openOnClick` is `false`), `ArrowDown` and `Alt` plus `ArrowDown` open the panel. Opened while the input shows the pick, or nothing, the field empties its filter, which `filterChange` reports, so the whole list shows with the pick in it, scrolled to it. Opened on text typed without a pick, the list stays narrowed to it.
+- **The Combobox Opens On The Whole List Behind A Pick**: opened while its input shows the pick, or nothing, the field empties its filter, which `filterChange` reports, so the whole list shows with the pick in it, scrolled to it. Opened on text typed without a pick, the list stays narrowed to it. What opens it is in **Panels**.
+- **A Panel Checks The Selected Option**: the dropdown and the combobox draw a check at the end of the option holding the value. Every option keeps room for it, so a pick never rewraps a label. The groups mark theirs in the option's radio or checkbox instead.
 - **An Action Row Is Not A Value**: `dropdown-field` and `combobox-field` take an `actionOption`: an entry at the end of the list that runs an action instead of committing a value. `actionOptionMode` decides whether it is always there or only when the list would otherwise be empty. The field closes its panel, runs the action and touches nothing else.
 
 An action entry that opens a dialog for a new address:
@@ -135,7 +136,15 @@ The recipe relies on three facts:
 
 ## Panels
 
-`dropdown-field`, `combobox-field` and `date-field` render their content in a panel, placed by `panelPosition`.
+`dropdown-field`, `combobox-field` and `date-field` render their content in a panel, placed by `panelPosition`. `select-field` opens the browser's own list instead, which none of this section applies to.
+
+| Field            | A Click Opens The Panel                                     | `openOnClick` |
+| :--------------- | :---------------------------------------------------------- | :-----------: |
+| `dropdown-field` | Anywhere on the field, which is one toggle                  |      No       |
+| `combobox-field` | On the toggle, and into the input                           |      Yes      |
+| `date-field`     | On the toggle only; a click into the input places the caret |      No       |
+
+`openOnClick` set to `false` on the combobox leaves a click into its input to the caret; its toggle and the keys still open the panel. Typing opens the dropdown's and the combobox's as well, and the keys are in **Keyboard**.
 
 | Value   | Places The Panel                                                               |
 | :------ | :----------------------------------------------------------------------------- |
@@ -164,7 +173,7 @@ Whatever the placement, the calendar scales to the width its panel has: `--formi
 
 ## Icons
 
-`select-field`, `dropdown-field` and `date-field` draw a toggle at their right edge, the date field's calendar draws its month arrows, and a `clearable` field draws its clear button. The library's own are chevrons and a cross. A provider replaces them app-wide; a projected icon replaces a toggle's per field.
+`select-field`, `dropdown-field`, `combobox-field` and `date-field` draw a toggle at their right edge, the date field's calendar draws its month arrows, the dropdown's and the combobox's panels check the selected option, and a `clearable` field draws its clear button. The library's own are chevrons, a check and a cross. A provider replaces them app-wide; a projected icon replaces a toggle's per field.
 
 **App-Wide**: `provideNgxFormidable` takes an `icons` object. Each icon is a component and the inputs to render it with, so an icon library's component goes in as it is:
 
@@ -183,6 +192,7 @@ provideNgxFormidable({
 
 - **Unset Stays The Library's**: an icon left out keeps the library's own.
 - **Open And Closed**: `fieldToggleOpen` shows while the panel is open; unset, `fieldToggle` stays. The select never shows it, because a page cannot ask whether a native list is open.
+- **Selected Option**: `fieldOptionSelected` replaces the check on the selected option of the dropdown's and the combobox's panels.
 - **The Date Field's Own**: `dateFieldToggle` and `dateFieldToggleOpen` replace the toggle on the date field only, so a calendar can open from a calendar icon while a list opens from a chevron. Unset, `dateFieldToggleOpen` keeps `dateFieldToggle`; without either, the date field takes `fieldToggle` and `fieldToggleOpen`.
 - **One Size**: every icon sits centred in a box of `--formidable-icon-size`, which is also its `1em`, so an icon sized in `em`, as most icon components are, fills it. The library's own fill it too, drawn on the 24-unit grid most icon sets use, so an icon from such a set matches their scale.
 - **Text Color**: the library's own are stroked in the text color, so they follow the field's state colors. A provided icon drawn in `currentColor` does the same.

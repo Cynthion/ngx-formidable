@@ -20,7 +20,8 @@ const ICONS = [
   '        dateFieldToggleOpen: { component: CalendarMinusIcon },',
   '        dateFieldPanelPrevious: { component: ArrowLeftIcon },',
   '        dateFieldPanelNext: { component: ArrowRightIcon },',
-  '        fieldClear: { component: EraserIcon }',
+  '        fieldClear: { component: EraserIcon },',
+  '        fieldOptionSelected: { component: CircleCheckIcon }',
   '      }'
 ].join('\n');
 
@@ -60,8 +61,8 @@ export function serializeAppConfig(defaults: FormidableDefaults, customIcons: bo
     "import { provideNgxFormidable } from '@cynthion/ngx-formidable';",
     ...(customIcons
       ? [
-          '// Stand-ins for your own icon components; the Studio draws a plus, a minus, two calendars, two arrows and an eraser.',
-          "import { ArrowLeftIcon, ArrowRightIcon, CalendarMinusIcon, CalendarPlusIcon, EraserIcon, MinusIcon, PlusIcon } from './icons';"
+          '// Stand-ins for your own icon components; the Studio draws a plus, a minus, two calendars, two arrows, an eraser and a circled check.',
+          "import { ArrowLeftIcon, ArrowRightIcon, CalendarMinusIcon, CalendarPlusIcon, CircleCheckIcon, EraserIcon, MinusIcon, PlusIcon } from './icons';"
         ]
       : []),
     '',

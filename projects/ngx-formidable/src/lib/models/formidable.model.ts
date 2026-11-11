@@ -143,7 +143,9 @@ export interface FormidableIcon {
 export interface FormidableIcons {
   /** The clear button a `clearable` field shows in its suffix. */
   fieldClear?: FormidableIcon;
-  /** The toggle of the select, dropdown and date fields. */
+  /** The check at the end of the selected option in the dropdown and combobox panels. */
+  fieldOptionSelected?: FormidableIcon;
+  /** The toggle of the select, dropdown, combobox and date fields. */
   fieldToggle?: FormidableIcon;
   /** That toggle while the field's panel is open. Unset, `fieldToggle` stays. */
   fieldToggleOpen?: FormidableIcon;

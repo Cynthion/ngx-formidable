@@ -33,6 +33,13 @@
     <ng-container [ngTemplateOutlet]="content" />
     } @else { {{ label() || value() }} }
   </div>
+
+  <!-- Option Check Icon -->
+  @if (layout() === 'inline' && selected()) {
+  <formidable-field-icon
+    name="fieldOptionSelected"
+    class="field-option-check" />
+  }
 </div>
 
 <!-- A projected option's content, handed to its field as `option().template` and rendered only where the

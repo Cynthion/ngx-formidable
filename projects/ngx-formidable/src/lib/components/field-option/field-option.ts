@@ -21,6 +21,7 @@ import {
   FormidableOptionField,
   FormidableOptionSource
 } from '../../models/formidable.model';
+import { FieldIcon } from '../field-icon/field-icon';
 
 /**
  * One option of a select, dropdown, combobox, radio group or checkbox group, projected into the field
@@ -34,7 +35,7 @@ import {
   selector: 'formidable-field-option',
   templateUrl: './field-option.html',
   styleUrls: ['./field-option.scss'],
-  imports: [NgTemplateOutlet],
+  imports: [NgTemplateOutlet, FieldIcon],
   host: {
     '[attr.role]': 'role',
     '[attr.aria-selected]': 'ariaSelected',

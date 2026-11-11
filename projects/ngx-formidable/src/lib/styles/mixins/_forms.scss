@@ -1661,12 +1661,28 @@
 
 // #region Option Variants
 
+// A panel row's padding. Every row keeps room at its end for the selected option's check, so a pick never
+// rewraps a label or changes a row's height.
+@mixin panel-option-padding {
+  padding: utils.rem(8) calc(#{utils.rem(24)} + var(--formidable-icon-size, #{tokens.$formidable-icon-size}))
+    utils.rem(8) utils.rem(16);
+}
+
 // An option in a dropdown, combobox or date panel.
 @mixin field-option-inline {
   @include field-option;
   @include field-option-selected-highlighted-logic;
+  @include panel-option-padding;
 
-  padding: utils.rem(8) utils.rem(16);
+  position: relative;
+}
+
+// The check on a panel's selected option, in the room every row keeps for it.
+@mixin field-option-check {
+  position: absolute;
+  inset-inline-end: utils.rem(16);
+  top: 50%;
+  translate: 0 -50%;
 }
 
 // An option in a radio group. Its selected mark always shows; the fills and the highlighted mark only while
@@ -1762,8 +1778,7 @@
 // group's. The panels render their empty state as text too, so a listbox has no fake option to offer.
 @mixin panel-no-option {
   @include no-option;
-
-  padding: utils.rem(8) utils.rem(16);
+  @include panel-option-padding;
 }
 
 // #endregion

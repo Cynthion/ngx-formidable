@@ -117,7 +117,7 @@ The preview renders the form as structured, and the **Model** drawer lists its k
 Selecting a field in the preview selects it here, and a field chip opens this tab at **This Field**.
 
 - **App Defaults Are What The Preview Is Given**: the preview runs the library's own resolution, as [Getting Started](getting-started.md) describes it. Each control offers **Library Default** to set nothing and states how many fields, or whether the form, state their own value, with **Clear** to make them inherit again. The matching controls at **The Form** and **This Field** offer **App Default**, naming the value in force. A field reads its defaults when it is created, so changing one rebuilds the preview.
-- **Icons**: **Toggles, Month Arrows And Clear Buttons** swaps the library's own icons for stand-in components, as the `icons` of `provideNgxFormidable()` would.
+- **Icons**: **Icons** set to **Custom** swaps the library's own icons for stand-in components, as the `icons` of `provideNgxFormidable()` would.
 - **Adornment Examples Are Samples**: an adornment is markup projected per field, so no default can supply one. **The Form** fills every field's slot with a sample, states how many fields override it, and offers **Apply To All**.
 - **A Control Appears Only Where It Works**: only the horizontal layout honours a label position other than `outside`, and the vertical layout renders no prefix or suffix, so the Studio offers neither where it would do nothing. [Decoration](decoration.md) states the rule.
 - **Locale**: one control under **Across The Form**, because it moves the date field's translations, its first day and its token format together.
