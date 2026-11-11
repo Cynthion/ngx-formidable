@@ -664,6 +664,8 @@
   // The least a panel can be dragged to by its resize handle, and the handle's own grab strip.
   --formidable-panel-min-height: var(--formidable-field-height, #{tokens.$formidable-panel-min-height});
   --formidable-panel-resize-handle-height: #{tokens.$formidable-panel-resize-handle-height};
+  --formidable-panel-resize-handle-grip-width: #{tokens.$formidable-panel-resize-handle-grip-width};
+  --formidable-panel-resize-handle-grip-height: #{tokens.$formidable-panel-resize-handle-grip-height};
 
   // #endregion
 

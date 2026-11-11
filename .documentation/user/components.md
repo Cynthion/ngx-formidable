@@ -469,6 +469,7 @@ The base then keeps focus in the field while the panel is used, closes the panel
 | `panelId`                       | Bind as the panel's `id` and the control's `aria-controls`        |
 | `onPanelResizeStart(event)`     | Bind to a resize handle's `pointerdown`, for a panel that has one |
 | `onPanelResize(event)`          | Bind to that handle's `pointermove`                               |
+| `onPanelResizeReset()`          | Bind to that handle's `dblclick`                                  |
 
 ---
 

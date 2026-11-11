@@ -157,7 +157,7 @@ The three anchored values flip above the field when the panel fits there and not
 
 Opening a panel scrolls the field, or the panel, into view, but only the one that the viewport actually cuts off.
 
-The dropdown's and the combobox's panels are resizable. A handle along the panel's far edge, the bottom below the field and the top above it, drags the height the panel may take: away from the field for more options, towards it for fewer. A list narrowed under that height still shrinks the panel to its rows, and no drag goes below `--formidable-panel-min-height`. The height holds for as long as the field lives, through closing and reopening, and nothing persists it beyond that. The handle takes a pointer only, since the panel keeps focus in the field's input. A sheet and the calendar have no handle.
+The dropdown's and the combobox's panels are resizable. A handle along the panel's far edge, the bottom below the field and the top above it, drags the height the panel may take: away from the field for more options, towards it for fewer. A list narrowed under that height still shrinks the panel to its rows, and no drag goes below `--formidable-panel-min-height`. The height holds for as long as the field lives, through closing and reopening, and nothing persists it beyond that; a double-click on the handle returns the panel to the height its theme gives it. The handle takes a pointer only, since the panel keeps focus in the field's input. A sheet and the calendar have no handle.
 
 ```html
 <formidable-date-field

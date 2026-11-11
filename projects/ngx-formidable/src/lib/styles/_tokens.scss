@@ -377,6 +377,8 @@ $formidable-panel-box-shadow: utils.rem(0) utils.rem(12) utils.rem(48) calc(util
 $formidable-panel-max-height: 33dvh; // 1/3 of the viewport actually visible — mobile chrome collapses `vh`
 $formidable-panel-min-height: $formidable-field-height;
 $formidable-panel-resize-handle-height: utils.rem(12);
+$formidable-panel-resize-handle-grip-width: utils.rem(32); // the bar drawn centred in the strip
+$formidable-panel-resize-handle-grip-height: utils.rem(4);
 
 // #endregion
 

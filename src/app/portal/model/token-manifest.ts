@@ -1343,6 +1343,20 @@ export const THEME_TOKENS: readonly ThemeToken[] = [
     description: "Height of the strip along a dropdown's or combobox's panel edge that resizes it."
   },
   {
+    name: '--formidable-panel-resize-handle-grip-width',
+    group: 'Panels',
+    control: 'length',
+    class: 'declared',
+    description: 'Width of the grip bar drawn centred in that strip.'
+  },
+  {
+    name: '--formidable-panel-resize-handle-grip-height',
+    group: 'Panels',
+    control: 'length',
+    class: 'declared',
+    description: 'Height of that grip bar, which is also its corner radius.'
+  },
+  {
     name: '--formidable-animation-duration',
     group: 'Animations',
     control: 'duration',

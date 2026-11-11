@@ -7,7 +7,8 @@ import { configureFormidableTestBed, settle } from '../../testing/test-bed';
  * The handle a dropdown's and a combobox's panel is resized by, per **Panels** in `user/fields.md`. It sits on
  * the panel's far edge, so dragging it away from the field grows the panel and towards the field shrinks it,
  * on either side of the field. The height it is dragged to holds across closing and opening, never goes below
- * `--formidable-panel-min-height`, and a drag leaves focus in the field's input.
+ * `--formidable-panel-min-height`, and a double-click on the handle takes it back to the theme's height. A drag
+ * leaves focus in the field's input.
  *
  * Every spec drags the handle as a user does, with a trusted pointer. The list is long enough to overflow any
  * height the panel is dragged to, so the panel follows the pointer rather than its rows.
@@ -48,6 +49,8 @@ interface ResizablePanel extends BoundField {
   isAbove: () => boolean;
   /** Drags the handle `by` pixels down the page, or up it for a negative number. */
   drag: (by: number) => Promise<void>;
+  /** Double-clicks the handle. */
+  reset: () => Promise<void>;
 }
 
 /** Binds the field under a label, with the drop target and `before` ahead of it and a button after it. */
@@ -72,7 +75,8 @@ async function bind({ kind }: ResizeCase, before = ''): Promise<ResizablePanel> 
       // The target's centre `by` below the grip's, which is where the pointer is moved to.
       target.style.top = `${centre(handle.getBoundingClientRect()) + by - 1}px`;
       await userEvent.dragAndDrop(page.elementLocator(handle), page.elementLocator(target), { force: true });
-    }
+    },
+    reset: () => userEvent.dblClick(page.elementLocator(handle))
   };
 }
 
@@ -133,6 +137,20 @@ describe('panel resize', () => {
         await open(field, resizeCase);
 
         expect(grewBy(field, before, 60)).toBe(true);
+      });
+
+      it('returns to the height its theme gives it on a double-click of its handle', async () => {
+        const field = await bind(resizeCase);
+
+        await open(field, resizeCase);
+        const before = field.height();
+
+        await field.drag(60);
+        await expect.poll(() => grewBy(field, before, 60)).toBe(true);
+
+        await field.reset();
+
+        await expect.poll(() => grewBy(field, before, 0)).toBe(true);
       });
 
       it('flipped above the field, grows by what its handle is dragged up', async () => {

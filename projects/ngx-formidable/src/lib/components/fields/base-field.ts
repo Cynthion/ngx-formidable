@@ -581,5 +581,10 @@ export abstract class BaseField<T = string | null>
     panel.style.maxHeight = `max(var(--formidable-panel-min-height, 0px), ${height}px)`;
   }
 
+  /** Bind to that handle's `dblclick`: the panel returns to the height its theme gives it. */
+  protected onPanelResizeReset(): void {
+    this.panel?.panelRef()?.nativeElement.style.removeProperty('max-height');
+  }
+
   // #endregion
 }
