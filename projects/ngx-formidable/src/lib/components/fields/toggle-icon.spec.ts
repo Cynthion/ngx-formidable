@@ -450,6 +450,9 @@ describe('selected option check', () => {
       // An icon larger than the text line is what would grow, or squeeze, the selected row alone.
       it('keeps the check clear of the label, and every row the same box', async () => {
         theme('--formidable-icon-size', '40px');
+        // The panel slides open, so a read straight after it opens would land part-way, where the rows' heights
+        // differ by float noise.
+        theme('--formidable-animation-duration', '0s');
         const rows = await openOn(kind);
         const contents = rows.map((row) => row.querySelector('.content')!.getBoundingClientRect());
         const check = rows[1]!.querySelector('formidable-field-icon')!.getBoundingClientRect();
